@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.biorhythm.app">
+
+    <!-- ================================================ -->
+    <!-- 基础网络和系统权限 -->
+    <!-- ================================================ -->
+    <!-- 网络访问权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    
+    <!-- 混合内容支持（开发环境使用） -->
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" />
+    
+    <!-- ================================================ -->
+    <!-- 存储权限 -->
+    <!-- ================================================ -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="28" />
+    
+    <!-- Android 13+ 新的存储权限 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    
+    <!-- ================================================ -->
+    <!-- 位置权限 -->
+    <!-- ================================================ -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    
+    <!-- ================================================ -->
+    <!-- 多媒体权限 -->
+    <!-- ================================================ -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    
+    <!-- ================================================ -->
+    <!-- 设备功能权限 -->
+    <!-- ================================================ -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    
+    <!-- ================================================ -->
+    <!-- 通信权限（如果应用需要） -->
+    <!-- ================================================ -->
+    <!-- <uses-permission android:name="android.permission.CALL_PHONE" /> -->
+    <!-- <uses-permission android:name="android.permission.READ_PHONE_STATE" /> -->
+    
+    <!-- ================================================ -->
+    <!-- 通知权限 -->
+    <!-- ================================================ -->
+    <!-- Android 13+ 通知权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- ================================================ -->
+    <!-- 日历权限 -->
+    <!-- ================================================ -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    
+    <!-- ================================================ -->
+    <!-- 传感器权限 -->
+    <!-- ================================================ -->
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    
+    <!-- ================================================ -->
+    <!-- 蓝牙权限（如果应用需要） -->
+    <!-- ================================================ -->
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH" /> -->
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> -->
+    <!-- Android 12+ 蓝牙权限 -->
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" /> -->
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" /> -->
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH_SCAN" /> -->
+    
+    <!-- ================================================ -->
+    <!-- 安装权限（如果应用需要更新） -->
+    <!-- ================================================ -->
+    <!-- <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" /> -->
+    
+    <!-- ================================================ -->
+    <!-- 系统要求 -->
+    <!-- ================================================ -->
+    <!-- 最低API级别 - Android 5.0 (Lollipop) -->
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="33" />
+
+    <!-- ================================================ -->
+    <!-- 硬件特性要求 -->
+    <!-- ================================================ -->
+    <!-- 相机特性（可选，表示应用可以在没有相机的设备上运行） -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+        
+    <!-- 位置特性（可选） -->
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.network"
+        android:required="false" />
+        
+    <!-- 麦克风特性（可选） -->
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+        
+    <!-- 屏幕方向支持 -->
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.screen.landscape"
+        android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:requestLegacyExternalStorage="true"
+        android:hardwareAccelerated="true">
+
+        <!-- ================================================ -->
+        <!-- 主活动配置 -->
+        <!-- ================================================ -->
+        <activity
+            android:name="com.biorhythm.app.MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:exported="true"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|screenLayout|uiMode|density"
+            android:screenOrientation="user"
+            android:windowSoftInputMode="adjustResize">
+            
+            <!-- 主启动意图 -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            
+            <!-- URL处理（深度链接） -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="biorhythm.example.com" />
+            </intent-filter>
+        </activity>
+
+        <!-- ================================================ -->
+        <!-- 文件提供者（用于共享文件） -->
+        <!-- ================================================ -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- ================================================ -->
+        <!-- Capactior相关配置 -->
+        <!-- ================================================ -->
+        <!-- 启用Chrome调试（仅开发环境） -->
+        <meta-data
+            android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
+            
+        <!-- 允许混合内容（仅开发环境） -->
+        <meta-data
+            android:name="android.webkit.MixedContentMode"
+            android:value="0" />
+            
+        <!-- ================================================ -->
+        <!-- 服务和广播接收器（如果需要） -->
+        <!-- ================================================ -->
+        <!-- 示例：位置服务（如果应用需要后台位置更新） -->
+        <!-- <service
+            android:name=".LocationService"
+            android:enabled="true"
+            android:exported="false" />
+            
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver> -->
+        
+    </application>
+</manifest>
