@@ -4,3 +4,5 @@ frontend/node_modules/
 frontend/node_modules/.bin/
 frontend/build/
 .DS_Store
+node_modules/.bin/
+node_modules/
