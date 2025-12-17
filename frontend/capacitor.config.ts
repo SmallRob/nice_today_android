@@ -15,10 +15,11 @@ const config: CapacitorConfig = {
     webContentsDebuggingEnabled: process.env.NODE_ENV === 'development',
     backgroundColor: "#ffffff",
     logLevel: process.env.NODE_ENV === 'development' ? "DEBUG" : "ERROR",
-    minWebViewVersion: 55, // 降低最低WebView版本要求，支持更多设备
+    minWebViewVersion: 50, // 进一步降低最低WebView版本要求，支持更多老旧设备
     allowFileAccess: true,
     hardwareAcceleration: true,
-    useLegacyBridge: false
+    useLegacyBridge: true, // 使用传统桥接模式提高兼容性
+    enableReporting: false // 禁用报告功能减少潜在冲突
   },
   ios: {
     contentInset: "automatic",

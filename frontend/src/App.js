@@ -47,25 +47,26 @@ function App() {
   useEffect(() => {
     const init = async () => {
       try {
+        // 使用简化配置初始化应用，提高兼容性
         await initializeApp({
           debug: process.env.NODE_ENV === 'development',
           performance: {
             enabled: true,
             autoLog: true,
             thresholds: {
-              render: 16,
-              api: 2000,
-              componentLoad: 500
+              render: 30,  // 放宽渲染时间阈值，适应低端设备
+              api: 3000,   // 放宽API响应时间阈值
+              componentLoad: 1000  // 放宽组件加载时间阈值
             }
           },
           permissions: {
             autoRequest: false,
-            required: ['notifications'],
-            optional: ['geolocation', 'camera', 'photos']
+            required: [],  // 移除启动时必需权限，避免权限拒绝导致闪退
+            optional: []   // 移除可选权限，按需申请
           },
           compatibility: {
             autoCheck: true,
-            fixProblems: false,
+            fixProblems: true,  // 启用自动修复功能
             logProblems: true
           }
         });
