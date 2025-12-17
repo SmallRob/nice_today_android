@@ -4,7 +4,7 @@
 echo "开始构建Nice Today应用..."
 
 # 设置Java环境变量（如果需要）
-# export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
 
 # 进入前端目录
 cd /Users/healer2027/AndroidStudioProjects/nice_today_android/frontend
