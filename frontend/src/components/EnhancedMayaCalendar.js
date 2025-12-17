@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import './MayaAndWuxingCards.css';
-import { fetchMayaBirthInfo, formatDateString, fetchMayaHistory } from '../services/apiService';
+import { fetchMayaBirthInfo, formatDateString, fetchMayaHistory } from '../services/apiServiceRefactored';
 import { 
   MAYA_EPOCH, 
   mayaSeals, 

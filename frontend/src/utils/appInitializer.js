@@ -1,17 +1,12 @@
-/**
- * Capacitor应用初始化脚本
- * 整合所有必要的初始化功能
- */
-
 import { Capacitor } from '@capacitor/core';
 import { initializeApp as initCapacitorApp } from './capacitor';
 import { initResponsive, getDeviceInfo } from './responsive';
-import { initializePerformanceMonitoring } from './performance';
+import performanceMonitor, { configurePerformanceMonitor } from './performanceMonitor';
 import { runCompatibilityCheck, getDeviceSpecificSolutions, applyCompatibilityFixes } from './compatibility';
-import { permissionManager } from './permissions';
+import { permissionManager } from './permissionManager';
 
 // 应用初始化配置
-const APP_CONFIG = {
+const DEFAULT_APP_CONFIG = {
   // 是否启用调试模式
   debug: process.env.NODE_ENV === 'development',
   
@@ -56,7 +51,7 @@ export const initializeApp = async (customConfig = {}) => {
   try {
     // 合并配置
     const config = {
-      ...APP_CONFIG,
+      ...DEFAULT_APP_CONFIG,
       ...customConfig
     };
     
@@ -98,7 +93,7 @@ export const initializeApp = async (customConfig = {}) => {
     
     // 4. 初始化性能监控
     if (config.performance.enabled) {
-      initializePerformanceMonitoring(config.performance);
+      configurePerformanceMonitor(config.performance);
       console.log('Performance monitoring initialized');
     }
     
@@ -209,7 +204,7 @@ const logCompatibilityIssues = (report) => {
 
 // 获取应用状态
 export const getAppState = () => {
-  return appState;
+  return { ...appState };
 };
 
 // 检查应用是否已初始化
@@ -242,23 +237,8 @@ export const getPermissionStatus = () => {
 export const requestPermission = async (permission) => {
   return await permissionManager.checkAndRequestPermission(
     permission, 
-    getPermissionExplanation(permission)
+    permissionManager.getPermissionExplanation(permission)
   );
-};
-
-// 获取权限说明
-const getPermissionExplanation = (permission) => {
-  const explanations = {
-    camera: '需要相机权限来拍摄照片和视频',
-    microphone: '需要麦克风权限来录制音频',
-    photos: '需要相册权限来访问和保存图片',
-    geolocation: '需要位置权限来提供基于位置的服务',
-    notifications: '需要通知权限来发送重要提醒',
-    calendar: '需要日历权限来读取和创建日程',
-    storage: '需要存储权限来访问设备上的文件'
-  };
-  
-  return explanations[permission] || '需要此权限来正常使用应用功能';
 };
 
 // 初始化网络状态监控
@@ -289,7 +269,7 @@ export const diagnosePerformance = () => {
   const diagnostics = {
     deviceInfo: appState.deviceInfo,
     platform: appState.platform,
-    memoryUsage: navigator.deviceMemory || 'unknown',
+    memoryUsage: performanceMonitor.memoryMonitor(),
     connection: navigator.connection ? {
       effectiveType: navigator.connection.effectiveType,
       downlink: navigator.connection.downlink,
@@ -310,4 +290,20 @@ export const resetAppState = () => {
     performanceReport: null,
     permissionStatus: null
   };
+  
+  // 重置性能监控
+  performanceMonitor.clearData();
+  
+  // 重置权限管理器缓存
+  permissionManager.clearCache();
+};
+
+// 获取性能报告
+export const getPerformanceReport = () => {
+  return performanceMonitor.generateReport();
+};
+
+// 获取性能建议
+export const getPerformanceRecommendations = () => {
+  return performanceMonitor.getRecommendations();
 };

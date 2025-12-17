@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { fetchMayaCalendarRange, fetchSpecificDateMayaInfo, formatDateString } from '../services/apiService';
+import { fetchMayaCalendarRange, fetchSpecificDateMayaInfo, formatDateString } from '../services/apiServiceRefactored';
 
 
 // 玛雅日历工具类 - 集中管理所有辅助功能

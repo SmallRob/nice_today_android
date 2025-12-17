@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { initializeApp } from './utils/capacitorInit';
+import { optimizeAppStartup } from './utils/startupOptimizer';
 import './index.css';
 
 // 懒加载页面组件
@@ -47,30 +47,16 @@ function App() {
   useEffect(() => {
     const init = async () => {
       try {
-        // 使用简化配置初始化应用，提高兼容性
-        await initializeApp({
-          debug: process.env.NODE_ENV === 'development',
-          performance: {
-            enabled: true,
-            autoLog: true,
-            thresholds: {
-              render: 30,  // 放宽渲染时间阈值，适应低端设备
-              api: 3000,   // 放宽API响应时间阈值
-              componentLoad: 1000  // 放宽组件加载时间阈值
-            }
-          },
-          permissions: {
-            autoRequest: false,
-            required: [],  // 移除启动时必需权限，避免权限拒绝导致闪退
-            optional: []   // 移除可选权限，按需申请
-          },
-          compatibility: {
-            autoCheck: true,
-            fixProblems: true,  // 启用自动修复功能
-            logProblems: true
-          }
+        // 使用优化的启动流程初始化应用
+        const result = await optimizeAppStartup({
+          // 可以在这里添加特定的启动配置
         });
-        console.log('App initialized successfully');
+        
+        if (result.success) {
+          console.log(`App initialized successfully in ${result.duration.toFixed(2)}ms`);
+        } else {
+          console.error('Error initializing app:', result.error);
+        }
       } catch (error) {
         console.error('Error initializing app:', error);
       }

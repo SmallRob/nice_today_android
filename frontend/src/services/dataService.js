@@ -29,6 +29,13 @@ export const parseCSV = (csvText) => {
   return data;
 };
 
+// API服务导入 - 统一管理API调用
+import { testApiConnection, fetchHistoryDates, fetchBiorhythmData, fetchDressInfoRange, 
+         fetchSpecificDateDressInfo, fetchMayaCalendarRange, fetchSpecificDateMayaInfo, 
+         fetchMayaHistory, fetchMayaBirthInfo } from './apiServiceRefactored';
+import { getDressInfoRange, getSpecificDateDressInfo, getTodayDressInfo, 
+         calculateBiorhythmData, getBiorhythmRange } from './localDataService';
+
 // 获取器官节律数据
 export const fetchOrganRhythmData = async () => {
   try {

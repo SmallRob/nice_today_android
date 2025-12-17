@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BiorhythmDashboard from '../components/BiorhythmDashboard';
-import { getPlatformInfo, isAppInitialized } from '../utils/capacitorInit';
+import { getPlatformInfo, isAppInitialized } from '../utils/appInitializer';
 import '../index.css';
 
 function DashboardPage() {
