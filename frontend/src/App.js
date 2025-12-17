@@ -1,6 +1,7 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { optimizeAppStartup } from './utils/startupOptimizer';
+import DataPolicyConsent from './components/DataPolicyConsent';
 import './index.css';
 
 // 懒加载页面组件
@@ -19,7 +20,16 @@ const LoadingScreen = () => (
 );
 
 // 应用布局组件
-const AppLayout = () => {
+const AppLayout = ({ dataPolicyConsent }) => {
+  // 如果用户未同意数据使用策略，不显示主要内容
+  if (!dataPolicyConsent) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900">
+        <p className="text-gray-600 dark:text-gray-400">正在等待数据使用策略确认...</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
       <div className="flex-1 overflow-hidden">
@@ -43,6 +53,16 @@ const AppLayout = () => {
 };
 
 function App() {
+  const [dataPolicyConsent, setDataPolicyConsent] = useState(false);
+  
+  // 检查用户是否已经同意数据使用策略
+  useEffect(() => {
+    const consentGiven = localStorage.getItem('dataPolicyConsent');
+    if (consentGiven === 'true') {
+      setDataPolicyConsent(true);
+    }
+  }, []);
+  
   // 初始化应用
   useEffect(() => {
     const init = async () => {
@@ -62,13 +82,19 @@ function App() {
       }
     };
 
-    init();
-  }, []);
+    // 只有在用户同意数据使用策略后才初始化应用
+    if (dataPolicyConsent) {
+      init();
+    }
+  }, [dataPolicyConsent]);
 
   return (
     <Router>
+      {/* 数据使用策略同意弹窗 */}
+      <DataPolicyConsent onConsent={() => setDataPolicyConsent(true)} />
+      
       <Suspense fallback={<LoadingScreen />}>
-        <AppLayout />
+        <AppLayout dataPolicyConsent={dataPolicyConsent} />
       </Suspense>
     </Router>
   );

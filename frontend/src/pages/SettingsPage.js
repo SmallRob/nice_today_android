@@ -12,6 +12,8 @@ function SettingsPage() {
     isAndroid: false,
     isIOS: false
   });
+  const [apiBaseUrl, setApiBaseUrl] = useState('https://nice-mcp.leansoftx.com/api');
+  const [useLocalCalculation, setUseLocalCalculation] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -29,6 +31,17 @@ function SettingsPage() {
           isAndroid: platform === 'android',
           isIOS: platform === 'ios'
         });
+        
+        // 从本地存储加载API设置
+        const savedApiUrl = localStorage.getItem('apiBaseUrl');
+        if (savedApiUrl) {
+          setApiBaseUrl(savedApiUrl);
+        }
+        
+        const savedUseLocal = localStorage.getItem('useLocalCalculation');
+        if (savedUseLocal) {
+          setUseLocalCalculation(savedUseLocal === 'true');
+        }
       } catch (error) {
         console.error('Error loading app info:', error);
       } finally {
@@ -38,6 +51,20 @@ function SettingsPage() {
 
     loadAppInfo();
   }, []);
+
+  // 保存API基础URL设置
+  const handleApiBaseUrlChange = (e) => {
+    const newUrl = e.target.value;
+    setApiBaseUrl(newUrl);
+    localStorage.setItem('apiBaseUrl', newUrl);
+  };
+
+  // 保存使用本地计算设置
+  const handleUseLocalCalculationChange = (e) => {
+    const newValue = e.target.checked;
+    setUseLocalCalculation(newValue);
+    localStorage.setItem('useLocalCalculation', newValue.toString());
+  };
 
   if (!isLoaded) {
     return (
@@ -81,6 +108,38 @@ function SettingsPage() {
                   <input type="checkbox" className="sr-only peer" defaultChecked={true} />
                   <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                 </label>
+              </div>
+            </div>
+            
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col space-y-4">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">API服务地址</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置后端服务地址</p>
+                  <input 
+                    type="text" 
+                    value={apiBaseUrl}
+                    onChange={handleApiBaseUrlChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="https://nice-mcp.leansoftx.com/api"
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between pt-2">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">使用本地计算</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">启用后将使用本地JavaScript计算代替API调用</p>
+                  </div>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={useLocalCalculation}
+                      onChange={handleUseLocalCalculationChange}
+                    />
+                    <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
               </div>
             </div>
             
