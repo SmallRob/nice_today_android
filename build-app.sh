@@ -23,6 +23,6 @@ npx cap sync android
 
 # 构建Android应用
 echo "构建Android应用..."
-npx cap build android
+# npx cap build android
 
-echo "构建完成！APK文件位于: frontend/android/app/build/outputs/apk/release/"
+echo "Web构建完成！构建产物位于: frontend/build/"
