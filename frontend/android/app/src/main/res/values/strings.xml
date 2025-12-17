@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Biorhythm App</string>
-    <string name="title_activity_main">Biorhythm App</string>
-    <string name="package_name">com.biorhythm.app</string>
-    <string name="custom_url_scheme">com.biorhythm.app</string>
+    <string name="app_name">Nice Today</string>
+    <string name="title_activity_main">Nice Today</string>
+    <string name="package_name">com.nicetoday.app</string>
+    <string name="custom_url_scheme">com.nicetoday.app</string>
 </resources>

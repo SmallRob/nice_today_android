@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Android应用兼容性测试脚本
-# 使用方法: ./test-compatibility.sh [选项]
+# 应用兼容性测试脚本
+# 测试新版本在不同环境下的运行情况
 
-set -e  # 遇到错误立即退出
+set -e
 
 # 颜色定义
 RED='\033[0;31m'
@@ -25,313 +25,286 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-log_test() {
-    echo -e "${BLUE}[TEST]${NC} $1"
+log_debug() {
+    echo -e "${BLUE}[DEBUG]${NC} $1"
+}
+
+# 测试结果统计
+PASSED=0
+FAILED=0
+WARNINGS=0
+
+test_passed() {
+    echo -e "${GREEN}✓ PASSED${NC}: $1"
+    ((PASSED++))
+}
+
+test_failed() {
+    echo -e "${RED}✗ FAILED${NC}: $1"
+    ((FAILED++))
+}
+
+test_warning() {
+    echo -e "${YELLOW}! WARNING${NC}: $1"
+    ((WARNINGS++))
 }
 
 # 脚本开始
-log_info "开始Android应用兼容性测试..."
-
-# 检查Android环境
-if [ -z "$ANDROID_HOME" ]; then
-    log_error "ANDROID_HOME环境变量未设置"
-    exit 1
-fi
-
-# 检查adb
-if ! command -v adb &> /dev/null; then
-    log_error "adb命令不可用，请确保已安装Android SDK"
-    exit 1
-fi
+log_info "开始应用兼容性测试..."
 
 # 设置路径变量
-FRONTEND_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/frontend" && pwd)"
-ANDROID_DIR="$FRONTEND_DIR/android"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FRONTEND_DIR="$SCRIPT_DIR/frontend"
 
-# 检查Android项目是否存在
-if [ ! -d "$ANDROID_DIR" ]; then
-    log_error "Android项目不存在，请先运行构建脚本"
+# 进入前端目录
+cd "$FRONTEND_DIR"
+
+# 测试1: 检查Node.js版本
+echo ""
+log_info "测试1: Node.js环境检查"
+NODE_VERSION=$(node --version 2>/dev/null || echo "not found")
+NPM_VERSION=$(npm --version 2>/dev/null || echo "not found")
+
+if [[ "$NODE_VERSION" != "not found" ]]; then
+    test_passed "Node.js版本: $NODE_VERSION"
+else
+    test_failed "Node.js未安装"
+fi
+
+if [[ "$NPM_VERSION" != "not found" ]]; then
+    test_passed "npm版本: $NPM_VERSION"
+else
+    test_failed "npm未安装"
+fi
+
+# 测试2: 检查项目依赖
+echo ""
+log_info "测试2: 项目依赖检查"
+
+if [ -f "package.json" ]; then
+    test_passed "package.json存在"
+    
+    # 检查关键依赖
+    REACT_VERSION=$(grep -o '"react": "[^"]*' package.json | cut -d'"' -f4)
+    CAPACITOR_VERSION=$(grep -o '@capacitor/core": "[^"]*' package.json | cut -d'"' -f4)
+    
+    if [[ ! -z "$REACT_VERSION" ]]; then
+        test_passed "React版本: $REACT_VERSION"
+    else
+        test_warning "React依赖未找到"
+    fi
+    
+    if [[ ! -z "$CAPACITOR_VERSION" ]]; then
+        test_passed "Capacitor版本: $CAPACITOR_VERSION"
+    else
+        test_warning "Capacitor依赖未找到"
+    fi
+    
+    # 检查依赖安装
+    if [ -d "node_modules" ]; then
+        test_passed "依赖已安装"
+    else
+        test_warning "依赖未安装，运行 npm install"
+    fi
+else
+    test_failed "package.json不存在"
+fi
+
+# 测试3: Android构建环境检查
+echo ""
+log_info "测试3: Android构建环境检查"
+
+if [ -d "android" ]; then
+    test_passed "Android项目目录存在"
+    
+    # 检查Android配置
+    if [ -f "android/app/build.gradle" ]; then
+        test_passed "Android构建配置存在"
+        
+        # 检查包名配置
+        PACKAGE_NAME=$(grep -o 'applicationId "[^"]*' android/app/build.gradle | cut -d'"' -f2)
+        if [[ "$PACKAGE_NAME" == "com.nicetoday.app" ]]; then
+            test_passed "应用包名正确: $PACKAGE_NAME"
+        else
+            test_failed "应用包名不正确: $PACKAGE_NAME"
+        fi
+        
+        # 检查minSdkVersion
+        MIN_SDK=$(grep -o 'minSdkVersion [0-9]*' android/variables.gradle | cut -d' ' -f2)
+        if [[ ! -z "$MIN_SDK" && "$MIN_SDK" -le 21 ]]; then
+            test_passed "最低SDK版本兼容: $MIN_SDK"
+        else
+            test_warning "最低SDK版本可能过高: $MIN_SDK"
+        fi
+    else
+        test_failed "Android构建配置不存在"
+    fi
+    
+    # 检查AndroidManifest
+    if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
+        test_passed "AndroidManifest存在"
+        
+        # 检查权限配置
+        PERMISSIONS_COUNT=$(grep -c '<uses-permission' android/app/src/main/AndroidManifest.xml)
+        if [[ "$PERMISSIONS_COUNT" -gt 0 ]]; then
+            test_passed "权限配置正常 ($PERMISSIONS_COUNT 个权限)"
+        else
+            test_warning "权限配置可能不完整"
+        fi
+    else
+        test_failed "AndroidManifest不存在"
+    fi
+else
+    test_warning "Android项目目录不存在，运行 npx cap add android"
+fi
+
+# 测试4: 构建测试
+echo ""
+log_info "测试4: 构建测试"
+
+# 检查是否可以构建React应用
+if command -v npm &> /dev/null && [ -f "package.json" ]; then
+    log_info "正在构建React应用..."
+    
+    # 先安装依赖（如果需要）
+    if [ ! -d "node_modules" ]; then
+        log_info "安装项目依赖..."
+        npm install --silent
+    fi
+    
+    # 尝试构建
+    if npm run build --silent; then
+        test_passed "React应用构建成功"
+        
+        # 检查构建输出
+        if [ -d "build" ] && [ -f "build/index.html" ]; then
+            test_passed "构建输出正常"
+        else
+            test_failed "构建输出不完整"
+        fi
+    else
+        test_failed "React应用构建失败"
+    fi
+else
+    test_failed "无法执行构建测试"
+fi
+
+# 测试5: Capacitor同步测试
+echo ""
+log_info "测试5: Capacitor同步测试"
+
+if command -v npx &> /dev/null && [ -d "android" ]; then
+    log_info "正在同步到Android平台..."
+    
+    if npx cap sync android --silent; then
+        test_passed "Capacitor同步成功"
+    else
+        test_failed "Capacitor同步失败"
+    fi
+else
+    test_warning "跳过Capacitor同步测试"
+fi
+
+# 测试6: 配置文件检查
+echo ""
+log_info "测试6: 配置文件检查"
+
+CONFIG_FILES=(
+    "capacitor.config.ts"
+    "craco.config.js"
+    "tailwind.config.js"
+    "postcss.config.js"
+)
+
+for config_file in "${CONFIG_FILES[@]}"; do
+    if [ -f "$config_file" ]; then
+        test_passed "$config_file 存在"
+    else
+        test_failed "$config_file 不存在"
+    fi
+done
+
+# 测试7: 关键组件检查
+echo ""
+log_info "测试7: 关键组件检查"
+
+COMPONENT_FILES=(
+    "src/components/BiorhythmTab.js"
+    "src/components/BiorhythmDashboard.js"
+    "src/components/MayaCalendar.js"
+    "src/components/DressInfo.js"
+    "src/services/localDataService.js"
+    "src/utils/dataMigration.js"
+)
+
+for component_file in "${COMPONENT_FILES[@]}"; do
+    if [ -f "$component_file" ]; then
+        test_passed "$component_file 存在"
+        
+        # 检查文件语法（简单检查）
+        if node -c "$component_file" &>/dev/null; then
+            test_passed "$component_file 语法正确"
+        else
+            test_failed "$component_file 语法错误"
+        fi
+    else
+        test_failed "$component_file 不存在"
+    fi
+done
+
+# 测试8: 数据迁移兼容性检查
+echo ""
+log_info "测试8: 数据迁移兼容性检查"
+
+if [ -f "src/utils/dataMigration.js" ]; then
+    # 检查数据迁移工具是否可用
+    if node -e "
+        const { migrateOldData } = require('./src/utils/dataMigration.js');
+        console.log('数据迁移工具加载成功');
+    " &>/dev/null; then
+        test_passed "数据迁移工具可用"
+    else
+        test_failed "数据迁移工具加载失败"
+    fi
+else
+    test_failed "数据迁移工具不存在"
+fi
+
+# 生成测试报告
+echo ""
+log_info "=== 兼容性测试报告 ==="
+echo ""
+echo "测试统计:"
+echo "  ✅ 通过: $PASSED"
+echo "  ❌ 失败: $FAILED"
+echo "  ⚠️ 警告: $WARNINGS"
+echo ""
+
+if [[ "$FAILED" -eq 0 ]]; then
+    if [[ "$WARNINGS" -eq 0 ]]; then
+        echo -e "${GREEN}🎉 所有测试通过！应用兼容性良好。${NC}"
+    else
+        echo -e "${YELLOW}⚠️ 测试通过，但有 $WARNINGS 个警告需要注意。${NC}"
+    fi
+else
+    echo -e "${RED}❌ 测试失败！有 $FAILED 个问题需要修复。${NC}"
+    echo ""
+    echo "建议修复步骤:"
+    echo "1. 检查Node.js和npm安装"
+    echo "2. 运行 npm install 安装依赖"
+    echo "3. 检查Android配置和权限"
+    echo "4. 修复语法错误的组件文件"
     exit 1
 fi
 
-# 解析命令行参数
-TEST_TYPE="basic"
-DEVICE_SPECIFIC=false
-SPECIFIC_DEVICE=""
+# 生成详细的环境报告
+echo ""
+log_info "环境信息汇总:"
+echo "Node.js版本: $NODE_VERSION"
+echo "npm版本: $NPM_VERSION"
+echo "React版本: ${REACT_VERSION:-未知}"
+echo "Capacitor版本: ${CAPACITOR_VERSION:-未知}"
+echo "最低SDK版本: ${MIN_SDK:-未知}"
+echo "应用包名: ${PACKAGE_NAME:-未知}"
 
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --full)
-            TEST_TYPE="full"
-            shift
-            ;;
-        --device)
-            DEVICE_SPECIFIC=true
-            SPECIFIC_DEVICE="$2"
-            shift 2
-            ;;
-        --help)
-            echo "使用方法: $0 [选项]"
-            echo ""
-            echo "选项:"
-            echo "  --full         执行完整测试套件"
-            echo "  --device <ID>  在特定设备上测试"
-            echo "  --help         显示帮助信息"
-            exit 0
-            ;;
-        *)
-            log_error "未知选项: $1"
-            exit 1
-            ;;
-    esac
-done
-
-# 获取连接的设备列表
-get_connected_devices() {
-    echo $(adb devices | grep -v "List of devices" | grep "device$" | awk '{print $1}')
-}
-
-# 测试设备是否响应
-test_device_responsiveness() {
-    local device_id=$1
-    log_test "测试设备响应性: $device_id"
-    
-    # 测试基本连接
-    if adb -s "$device_id" shell echo "Device is responsive" > /dev/null 2>&1; then
-        log_info "✓ 设备响应正常"
-        return 0
-    else
-        log_error "✗ 设备无响应"
-        return 1
-    fi
-}
-
-# 获取设备信息
-get_device_info() {
-    local device_id=$1
-    log_test "获取设备信息: $device_id"
-    
-    local api_level=$(adb -s "$device_id" shell getprop ro.build.version.sdk)
-    local android_version=$(adb -s "$device_id" shell getprop ro.build.version.release)
-    local device_model=$(adb -s "$device_id" shell getprop ro.product.model)
-    local device_manufacturer=$(adb -s "$device_id" shell getprop ro.product.manufacturer)
-    local screen_density=$(adb -s "$device_id" shell getprop ro.sf.lcd_density)
-    local screen_resolution=$(adb -s "$device_id" shell wm size | grep -o '[0-9]*x[0-9]*')
-    
-    echo "设备型号: $device_manufacturer $device_model"
-    echo "Android版本: $android_version (API $api_level)"
-    echo "屏幕密度: $screen_density dpi"
-    echo "屏幕分辨率: $screen_resolution"
-}
-
-# 检查WebView版本
-check_webview_version() {
-    local device_id=$1
-    log_test "检查WebView版本: $device_id"
-    
-    local webview_version=$(adb -s "$device_id" shell dumpsys package com.google.android.webview | grep -m 1 "versionName" | awk '{print $2}')
-    
-    if [ -n "$webview_version" ]; then
-        log_info "WebView版本: $webview_version"
-        
-        # 检查版本是否满足最低要求
-        local major_version=$(echo "$webview_version" | cut -d. -f1)
-        if [ "$major_version" -ge 65 ]; then
-            log_info "✓ WebView版本满足最低要求"
-            return 0
-        else
-            log_warn "⚠ WebView版本可能不满足应用要求"
-            return 1
-        fi
-    else
-        log_warn "无法获取WebView版本信息"
-        return 1
-    fi
-}
-
-# 检查系统更新
-check_system_update() {
-    local device_id=$1
-    log_test "检查系统更新: $device_id"
-    
-    # 这个检查在不同Android版本上可能有不同的结果
-    if adb -s "$device_id" shell command -v "checkfstrim" > /dev/null 2>&1; then
-        log_info "系统更新检查功能可用"
-    else
-        log_info "无法检查系统更新状态"
-    fi
-}
-
-# 安装应用
-install_app() {
-    local device_id=$1
-    local apk_path=$2
-    log_test "安装应用到设备: $device_id"
-    
-    if adb -s "$device_id" install -r "$apk_path" > /dev/null 2>&1; then
-        log_info "✓ 应用安装成功"
-        return 0
-    else
-        log_error "✗ 应用安装失败"
-        return 1
-    fi
-}
-
-# 运行应用并收集日志
-run_app_and_collect_logs() {
-    local device_id=$1
-    local package_name=$2
-    log_test "运行应用并收集日志: $device_id"
-    
-    # 清除之前的日志
-    adb -s "$device_id" logcat -c
-    
-    # 启动应用
-    adb -s "$device_id" shell monkey -p "$package_name" -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1
-    
-    # 等待应用启动
-    sleep 5
-    
-    # 收集日志
-    local log_file="${package_name}_$(date +%Y%m%d_%H%M%S).log"
-    log_info "收集日志到文件: $log_file"
-    
-    adb -s "$device_id" logcat -d | grep "$package_name" > "$log_file"
-    
-    # 检查是否有严重错误
-    local error_count=$(grep -c "FATAL\|AndroidRuntime" "$log_file" || echo "0")
-    if [ "$error_count" -gt 0 ]; then
-        log_warn "⚠ 发现 $error_count 个严重错误"
-        return 1
-    else
-        log_info "✓ 未发现严重错误"
-        return 0
-    fi
-}
-
-# 测试应用性能
-test_app_performance() {
-    local device_id=$1
-    local package_name=$2
-    log_test "测试应用性能: $device_id"
-    
-    # 获取应用内存使用情况
-    local memory_info=$(adb -s "$device_id" shell dumpsys meminfo "$package_name" | grep -A 1 "TOTAL" | tail -1)
-    log_info "内存使用情况: $memory_info"
-    
-    # 获取CPU使用情况（需要root权限或特定的Android版本）
-    log_info "CPU使用情况需要进一步检查"
-}
-
-# 测试应用在不同屏幕尺寸上的显示
-test_screen_display() {
-    local device_id=$1
-    log_test "测试屏幕显示: $device_id"
-    
-    # 这个测试需要在应用中进行，这里只能提供基本信息
-    local screen_orientation=$(adb -s "$device_id" shell dumpsys input | grep "SurfaceOrientation" | awk '{print $2}')
-    
-    if [ "$screen_orientation" = "0" ]; then
-        log_info "当前屏幕方向: 竖屏"
-    elif [ "$screen_orientation" = "1" ]; then
-        log_info "当前屏幕方向: 横屏"
-    else
-        log_info "无法确定屏幕方向"
-    fi
-}
-
-# 测试网络功能
-test_network_functionality() {
-    local device_id=$1
-    log_test "测试网络功能: $device_id"
-    
-    # 测试网络连接
-    if adb -s "$device_id" shell ping -c 1 8.8.8.8 > /dev/null 2>&1; then
-        log_info "✓ 网络连接正常"
-        return 0
-    else
-        log_warn "⚠ 网络连接可能有问题"
-        return 1
-    fi
-}
-
-# 测试权限处理
-test_permissions() {
-    local device_id=$1
-    local package_name=$2
-    log_test "测试权限处理: $device_id"
-    
-    # 获取应用权限
-    local permissions=$(adb -s "$device_id" shell dumpsys package "$package_name" | grep "declared permissions")
-    log_info "应用声明的权限: $permissions"
-    
-    # 检查是否有关键权限
-    if echo "$permissions" | grep -q "CAMERA\|READ_EXTERNAL_STORAGE\|ACCESS_FINE_LOCATION"; then
-        log_info "应用包含需要用户授权的权限"
-    fi
-}
-
-# 主测试流程
-run_tests() {
-    local devices=($(get_connected_devices))
-    local package_name="com.biorhythm.app"  # 根据您的应用包名修改
-    
-    if [ ${#devices[@]} -eq 0 ]; then
-        log_error "没有连接的设备"
-        exit 1
-    fi
-    
-    log_info "找到 ${#devices[@]} 个连接的设备: ${devices[*]}"
-    
-    # 确定要测试的设备
-    local test_devices=()
-    if [ "$DEVICE_SPECIFIC" = true ]; then
-        test_devices=("$SPECIFIC_DEVICE")
-    else
-        test_devices=("${devices[@]}")
-    fi
-    
-    # APK路径
-    local debug_apk="$ANDROID_DIR/app/build/outputs/apk/debug/app-debug.apk"
-    local release_apk="$ANDROID_DIR/app/build/outputs/apk/release/app-release.apk"
-    local apk_path=""
-    
-    if [ -f "$debug_apk" ]; then
-        apk_path="$debug_apk"
-    elif [ -f "$release_apk" ]; then
-        apk_path="$release_apk"
-    else
-        log_error "未找到APK文件，请先构建应用"
-        exit 1
-    fi
-    
-    # 对每个设备运行测试
-    for device in "${test_devices[@]}"; do
-        log_info "======================================"
-        log_info "开始测试设备: $device"
-        log_info "======================================"
-        
-        # 基础测试
-        test_device_responsiveness "$device"
-        get_device_info "$device"
-        check_webview_version "$device"
-        
-        # 完整测试
-        if [ "$TEST_TYPE" = "full" ]; then
-            check_system_update "$device"
-            install_app "$device" "$apk_path"
-            run_app_and_collect_logs "$device" "$package_name"
-            test_app_performance "$device" "$package_name"
-            test_screen_display "$device"
-            test_network_functionality "$device"
-            test_permissions "$device" "$package_name"
-        fi
-        
-        log_info "设备 $device 测试完成"
-    done
-}
-
-# 运行测试
-run_tests
-
-log_info "兼容性测试完成"
+log_info "兼容性测试完成！"

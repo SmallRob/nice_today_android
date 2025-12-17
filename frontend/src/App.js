@@ -6,6 +6,7 @@ import './index.css';
 // 懒加载页面组件
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
 const MayaPage = React.lazy(() => import('./pages/MayaPage'));
+const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
 const TabNavigation = React.lazy(() => import('./components/TabNavigation'));
 
@@ -28,6 +29,7 @@ const AppLayout = () => {
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/maya" element={<MayaPage />} />
+            <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </Suspense>

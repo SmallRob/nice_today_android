@@ -42,6 +42,21 @@ const TabNavigation = () => {
       )
     },
     {
+      id: 'dress',
+      label: '穿衣指南',
+      path: '/dress',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h16M4 8h16M4 12h16M4 16h16M4 20h16" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 4h16M4 8h16M4 12h16M4 16h16M4 20h16" />
+        </svg>
+      )
+    },
+    {
       id: 'settings',
       label: '设置',
       path: '/settings',
