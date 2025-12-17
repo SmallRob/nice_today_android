@@ -3,8 +3,9 @@
  * 用于监控和优化React应用在移动设备上的性能
  */
 
+import React, { useRef, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { Performance } from '@capacitor/performance';
+// 注意：Capacitor 8.0 中没有 Performance 插件，使用浏览器原生 Performance API
 
 // 检测是否为原生平台
 const isNative = Capacitor.isNativePlatform();
@@ -40,7 +41,9 @@ let performanceMetrics = {
 };
 
 // 获取当前时间戳
-const now = () => performance.now();
+const now = () => {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now();
+};
 
 // 记录性能指标
 const recordMetric = (type, name, duration, metadata = {}) => {
@@ -66,9 +69,9 @@ const recordMetric = (type, name, duration, metadata = {}) => {
   }
 
   // 如果启用Capacitor性能追踪，记录到原生性能工具
-  if (isNative && Performance) {
-    // 这里可以集成原生性能追踪
-    // 例如：Performance.recordMetric(metric);
+  if (isNative) {
+    // Capacitor 8.0 中没有 Performance 插件，使用控制台记录
+    console.log(`[Capacitor Performance] ${type}: ${name} - ${duration}ms`, metadata);
   }
 
   // 控制台输出
@@ -181,16 +184,7 @@ export const memoryMonitor = () => {
 
 // 启动性能追踪
 export const startTrace = async (traceName) => {
-  if (isNative && Performance) {
-    try {
-      const trace = await Performance.startTrace({ name: traceName });
-      return trace;
-    } catch (error) {
-      console.error('Error starting trace:', error);
-    }
-  }
-  
-  // Web环境下返回一个简单的追踪对象
+  // 返回一个简单的追踪对象（适用于Web和原生）
   return {
     name: traceName,
     startTime: now(),
@@ -309,12 +303,12 @@ export const getPerformanceRecommendations = () => {
   // 内存使用建议
   if (report.summary.memoryUsage) {
     const latestMemory = report.details.memoryUsage[report.details.memoryUsage.length - 1];
-    if (latestMemory && latestMetadata > 50) { // 50MB
+    if (latestMemory && latestMemory.used > 50) { // 50MB
       recommendations.push({
         category: 'memory',
         priority: 'medium',
         title: '内存使用较高',
-        description: `当前内存使用量约为${latestMetadata}MB`,
+        description: `当前内存使用量约为${latestMemory.used}MB`,
         suggestions: [
           '检查内存泄漏',
           '及时清理不再需要的对象和事件监听器',

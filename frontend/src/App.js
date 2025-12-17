@@ -1,110 +1,87 @@
-import React, { useState, useEffect } from 'react';
-import BiorhythmDashboard from './components/BiorhythmDashboard';
-import DarkModeToggle from './components/DarkModeToggle';
-import { checkSystemHealth } from './services/desktopService';
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { initializeApp } from './utils/capacitorInit';
 import './index.css';
 
-function App() {
-  const [appInfo, setAppInfo] = useState({
-    isDesktop: false,
-    version: 'v1.0.0',
-    status: 'loading'
-  });
+// 懒加载页面组件
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
+const MayaPage = React.lazy(() => import('./pages/MayaPage'));
+const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
+const TabNavigation = React.lazy(() => import('./components/TabNavigation'));
 
-  useEffect(() => {
-    // 检查应用环境
-    const checkEnvironment = async () => {
-      const isDesktop = window.electronAPI !== undefined;
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b3387138-a87a-4b03-a45b-f70781421b47',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'frontend/src/App.js:17',message:'App component checking environment',data:{isDesktop,hasElectronAPI:typeof window.electronAPI!=='undefined',apiReady:window.electronAPI?.isReady?.()||false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
+// 加载屏幕组件
+const LoadingScreen = () => (
+  <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900">
+    <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+    <p className="text-gray-600 dark:text-gray-400">正在加载应用...</p>
+  </div>
+);
+
+// 应用布局组件
+const AppLayout = () => {
+  return (
+    <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
+      <div className="flex-1 overflow-hidden">
+        <Suspense fallback={<div className="flex items-center justify-center h-full">
+          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>}>
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/maya" element={<MayaPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </Suspense>
+      </div>
       
-      if (isDesktop) {
-        try {
-          const healthResult = await checkSystemHealth();
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/b3387138-a87a-4b03-a45b-f70781421b47',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'frontend/src/App.js:22',message:'Health check result',data:{success:healthResult.success,hasData:!!healthResult.data},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-          // #endregion
-          setAppInfo({
-            isDesktop: true,
-            version: window.electronAPI?.appInfo?.version || 'v1.0.0',
-            status: healthResult.success ? 'ready' : 'error',
-            health: healthResult.data
-          });
-        } catch (error) {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/b3387138-a87a-4b03-a45b-f70781421b47',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'frontend/src/App.js:29',message:'Health check error',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-          // #endregion
-          setAppInfo({
-            isDesktop: true,
-            version: 'v1.0.0',
-            status: 'error',
-            error: error.message
-          });
-        }
-      } else {
-        setAppInfo({
-          isDesktop: false,
-          version: 'v1.0.0',
-          status: 'web',
-          message: 'Web版本功能受限，建议下载桌面应用以获得完整体验'
+      <Suspense fallback={<div className="h-16 bg-gray-100 dark:bg-gray-800"></div>}>
+        <TabNavigation />
+      </Suspense>
+    </div>
+  );
+};
+
+function App() {
+  // 初始化应用
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await initializeApp({
+          debug: process.env.NODE_ENV === 'development',
+          performance: {
+            enabled: true,
+            autoLog: true,
+            thresholds: {
+              render: 16,
+              api: 2000,
+              componentLoad: 500
+            }
+          },
+          permissions: {
+            autoRequest: false,
+            required: ['notifications'],
+            optional: ['geolocation', 'camera', 'photos']
+          },
+          compatibility: {
+            autoCheck: true,
+            fixProblems: false,
+            logProblems: true
+          }
         });
+        console.log('App initialized successfully');
+      } catch (error) {
+        console.error('Error initializing app:', error);
       }
     };
 
-    checkEnvironment();
+    init();
   }, []);
 
   return (
-    <div className="App min-h-screen bg-white dark:bg-gray-900">
-      {/* 顶部导航栏 */}
-      <nav className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Nice Today {appInfo.isDesktop && <span className="text-sm text-green-500 ml-2">桌面版</span>}
-                </h1>
-              </div>
-              {appInfo.status === 'error' && (
-                <div className="ml-4 px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">
-                  服务异常
-                </div>
-              )}
-              {appInfo.status === 'web' && (
-                <div className="ml-4 px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">
-                  Web版本
-                </div>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              <DarkModeToggle />
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* 环境提示 */}
-      {!appInfo.isDesktop && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex">
-              <div className="ml-3">
-                <p className="text-sm text-blue-700">
-                  {appInfo.message}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 主要内容 */}
-      <main>
-        <BiorhythmDashboard appInfo={appInfo} />
-      </main>
-    </div>
+    <Router>
+      <Suspense fallback={<LoadingScreen />}>
+        <AppLayout />
+      </Suspense>
+    </Router>
   );
 }
 
