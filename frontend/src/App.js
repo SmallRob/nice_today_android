@@ -1,8 +1,9 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { optimizeAppStartup } from './utils/startupOptimizer';
-import DataPolicyConsent from './components/DataPolicyConsent';
 import './index.css';
+import 'cxdialog/dist/css/cxdialog.min.css';
+import cxDialog from 'cxdialog';
 
 // 懒加载页面组件
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
@@ -91,7 +92,19 @@ function App() {
   return (
     <Router>
       {/* 数据使用策略同意弹窗 */}
-      <DataPolicyConsent onConsent={() => setDataPolicyConsent(true)} />
+      {!dataPolicyConsent && (
+        cxDialog({
+          title: '数据使用策略',
+          info: '请确认您已阅读并同意我们的数据使用策略。',
+          ok: () => {
+            localStorage.setItem('dataPolicyConsent', 'true');
+            setDataPolicyConsent(true);
+          },
+          no: () => {
+            // 用户不同意时的处理
+          }
+        })
+      )}
       
       <Suspense fallback={<LoadingScreen />}>
         <AppLayout dataPolicyConsent={dataPolicyConsent} />
