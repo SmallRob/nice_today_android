@@ -1,4 +1,4 @@
-package com.biorhythm.app;
+package com.nicetoday.app;
 
 import com.getcapacitor.BridgeActivity;
 
