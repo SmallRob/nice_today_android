@@ -138,7 +138,7 @@ const TabNavigation = () => {
 
   return (
     <div 
-      className={`bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 ${
+      className={`bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 ${
         isIOS ? 'pb-safe-bottom' : ''
       } shadow-lg`}
     >

@@ -387,14 +387,51 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
     return <EmptyState onRetry={handleRetry} />;
   }
 
+  // 优化的每日启示组件 - 从生物节律组件中提取
+  const DailyInspirationSection = useMemo(() => {
+    // 生成基于KIN数的每日启示
+    const getDailyInspiration = (kin) => {
+      const inspirations = [
+        "相信自己的直觉，它会引导你走向正确的道路。",
+        "今天的能量非常适合开始新项目或做出重要决定。",
+        "保持开放的心态，接受生活带来的惊喜。",
+        "专注于当下，珍惜每一刻的独特体验。",
+        "与他人分享你的知识和经验，这会让你感到充实。",
+        "倾听内心的声音，它知道什么对你最重要。",
+        "保持耐心，好事会在适当的时候发生。",
+        "今天是表达感激之情的绝佳时机。",
+        "信任宇宙的安排，一切都在正确的轨道上。",
+        "花点时间照顾自己，你的身心健康很重要。"
+      ];
+      
+      // 使用KIN数作为种子生成确定性的启示
+      const seed = kin % inspirations.length;
+      return inspirations[seed];
+    };
+    
+    const inspiration = mayaData ? getDailyInspiration(mayaData.kin) : "今日启示将在此显示";
+    
+    return (
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-4 text-white">
+        <h4 className="font-semibold mb-2 flex items-center">
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          今日启示
+        </h4>
+        <p className="text-sm opacity-90">{inspiration}</p>
+      </div>
+    );
+  }, [mayaData]);
+
   // 优化的日期选择按钮
   const QuickSelectButtons = useMemo(() => (
-    <div className="flex justify-center space-x-2 mt-3">
+    <div className="flex justify-center space-x-2 mt-2">
       {[-1, 0, 1].map((offset) => (
         <button
           key={offset}
           onClick={() => handleQuickSelect(offset)}
-          className={`px-3 py-1 text-xs rounded transition-colors ${
+          className={`px-2 py-1 text-xs rounded transition-colors ${
             offset === 0
               ? 'bg-purple-600 text-white'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -408,26 +445,26 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
 
   // 优化的玛雅历法核心信息组件
   const MayaCoreInfo = useMemo(() => (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       {/* KIN数 */}
-      <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
+      <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-2 text-center">
+        <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-1">
           KIN {mayaData.kin}
         </div>
         <div className="text-xs text-purple-800 dark:text-purple-300">能量编号</div>
       </div>
       
       {/* 调性 */}
-      <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-        <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-1">
+      <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-2 text-center">
+        <div className="text-base font-bold text-blue-600 dark:text-blue-400 mb-1">
           {mayaData.tone}
         </div>
         <div className="text-xs text-blue-800 dark:text-blue-300">银河音调</div>
       </div>
       
       {/* 图腾 */}
-      <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-        <div className="text-lg font-bold text-green-600 dark:text-green-400 mb-1">
+      <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-2 text-center">
+        <div className="text-base font-bold text-green-600 dark:text-green-400 mb-1">
           {mayaData.seal}
         </div>
         <div className="text-xs text-green-800 dark:text-green-300">太阳印记</div>
@@ -437,15 +474,15 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
 
   // 优化的完整名称组件
   const MayaFullName = useMemo(() => (
-    <div className="mt-3 p-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg text-center">
-      <div className="text-lg font-bold">{mayaData.fullName}</div>
-      <div className="text-sm opacity-90">今日玛雅历法能量</div>
+    <div className="mt-2 p-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg text-center">
+      <div className="text-base font-bold">{mayaData.fullName}</div>
+      <div className="text-xs opacity-90">今日玛雅历法能量</div>
     </div>
   ), [mayaData.fullName]);
 
   // 优化的能量提示组件
   const EnergyTip = useMemo(() => (
-    <div className={`${mayaData.bgColor} border-l-4 border-purple-500 dark:border-purple-400 rounded-r-lg p-3`}>
+    <div className={`${mayaData.bgColor} border-l-4 border-purple-500 dark:border-purple-400 rounded-r-lg p-2`}>
       <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
         今日能量提示
       </h4>
@@ -497,6 +534,9 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
 
       {/* 能量提示 */}
       {EnergyTip}
+
+      {/* 每日启示 */}
+      {DailyInspirationSection}
 
       {/* 玛雅历法说明 */}
       <div className="bg-gray-50 dark:bg-gray-800 border-l-4 border-gray-400 dark:border-gray-600 rounded-r-lg p-3">

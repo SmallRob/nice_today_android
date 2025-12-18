@@ -220,50 +220,39 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
       {/* 今日生物节律状态 */}
       {todayData && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
             今日生物节律状态
           </h3>
           
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-md p-2 text-center">
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-1">
                 {todayData.physical}%
               </div>
               <div className="text-xs text-blue-800 dark:text-blue-300">体力</div>
             </div>
             
-            <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400 mb-1">
+            <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded-md p-2 text-center">
+              <div className="text-lg font-bold text-red-600 dark:text-red-400 mb-1">
                 {todayData.emotional}%
               </div>
               <div className="text-xs text-red-800 dark:text-red-300">情绪</div>
             </div>
             
-            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
+            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-md p-2 text-center">
+              <div className="text-lg font-bold text-green-600 dark:text-green-400 mb-1">
                 {todayData.intellectual}%
               </div>
               <div className="text-xs text-green-800 dark:text-green-300">智力</div>
             </div>
           </div>
-          
-          {/* 今日建议 */}
-          <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-700 rounded text-xs text-gray-700 dark:text-gray-300">
-            <strong>今日建议：</strong>
-            {todayData.physical >= 80 ? ' 体力充沛，适合运动锻炼。' : 
-             todayData.physical >= 60 ? ' 体力良好，保持适度活动。' : ' 体力偏低，注意休息。'}
-            {todayData.emotional >= 80 ? ' 情绪积极，适合社交。' : 
-             todayData.emotional >= 60 ? ' 情绪稳定，保持良好心态。' : ' 情绪波动，注意调节。'}
-            {todayData.intellectual >= 80 ? ' 思维敏捷，适合学习思考。' : 
-             todayData.intellectual >= 60 ? ' 智力正常，适合日常工作。' : ' 思维迟缓，避免复杂决策。'}
-          </div>
         </div>
       )}
 
       {/* 生物节律曲线图 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3 -mt-1">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
           生物节律趋势图
         </h3>
         
@@ -272,7 +261,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             data={rhythmData}
           />
         ) : (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
             暂无图表数据
           </div>
         )}

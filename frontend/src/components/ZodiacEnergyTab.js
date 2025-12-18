@@ -427,8 +427,8 @@ const ZodiacEnergyTab = () => {
         </h3>
         
         {/* 能量匹配度圆形进度条 */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
-          <div className="relative w-40 h-40">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
+          <div className="relative w-32 h-32">
             <svg className="w-full h-full" viewBox="0 0 36 36">
               <path
                 d="M18 2.0845
@@ -436,7 +436,7 @@ const ZodiacEnergyTab = () => {
                   a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
                 stroke="#e5e7eb"
-                strokeWidth="3"
+                strokeWidth="2.5"
               />
               <path
                 d="M18 2.0845
@@ -444,21 +444,21 @@ const ZodiacEnergyTab = () => {
                   a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
                 stroke={匹配度 < 40 ? '#ef4444' : 匹配度 < 70 ? '#f59e0b' : '#10b981'}
-                strokeWidth="3"
+                strokeWidth="2.5"
                 strokeDasharray={`${匹配度}, 100`}
               />
-              <text x="18" y="20.5" textAnchor="middle" className="text-3xl font-bold fill-gray-800 dark:fill-white">
+              <text x="18" y="20.5" textAnchor="middle" className="text-2xl font-bold fill-gray-800 dark:fill-white">
                 {匹配度}%
               </text>
             </svg>
           </div>
           
           <div className="text-center md:text-left">
-            <p className={`text-3xl font-bold ${colorClass} mb-2`}>
+            <p className={`text-2xl font-bold ${colorClass} mb-2`}>
               {关系} - {匹配度}%
             </p>
-            <p className="text-gray-600 dark:text-gray-300 mb-3 text-lg">{描述}</p>
-            <div className="flex flex-col sm:flex-row gap-4 text-sm">
+            <p className="text-gray-600 dark:text-gray-300 mb-3">{描述}</p>
+            <div className="flex flex-col sm:flex-row gap-3 text-sm">
               <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
                 用户五行: <span className="font-semibold">{用户五行}</span>
               </span>
@@ -482,43 +482,43 @@ const ZodiacEnergyTab = () => {
     if (!elementData) return null;
     
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
-          <span className="text-3xl mr-3">{elementData.icon}</span>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 mb-5 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center">
+          <span className="text-2xl mr-2">{elementData.icon}</span>
           {elementData.name}元素能量提升
         </h3>
         
         {/* 快速能量提升方法 */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-4">
-            <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
+        <div className="grid md:grid-cols-2 gap-4 mb-5">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-3">
+            <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
               <span className="mr-2">⚡</span> {elementData.quickBoost.method}
             </h4>
-            <p className="text-gray-700 dark:text-gray-300">{elementData.quickBoost.description}</p>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">{elementData.quickBoost.description}</p>
           </div>
           
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-4">
-            <h4 className="text-lg font-semibold text-purple-800 dark:text-purple-300 mb-2 flex items-center">
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-3">
+            <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2 flex items-center">
               <span className="mr-2">🌟</span> {elementData.quickBoost.secondMethod}
             </h4>
-            <p className="text-gray-700 dark:text-gray-300">{elementData.quickBoost.secondDescription}</p>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">{elementData.quickBoost.secondDescription}</p>
           </div>
         </div>
         
         {/* 五行养生运动 */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-4 mb-6">
-          <h4 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-3 mb-5">
+          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">
             <span className="mr-2">🏃</span> {elementData.name}行运动
           </h4>
-          <p className="text-gray-700 dark:text-gray-300">{elementData.exercise}</p>
+          <p className="text-gray-700 dark:text-gray-300 text-sm">{elementData.exercise}</p>
         </div>
         
         {/* 呼吸调息法 */}
-        <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-4">
-          <h4 className="text-lg font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center">
+        <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-3">
+          <h4 className="font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center">
             <span className="mr-2">🫁</span> {elementData.timeSlot} 呼吸调息
           </h4>
-          <p className="text-gray-700 dark:text-gray-300">{elementData.breathingMethod}</p>
+          <p className="text-gray-700 dark:text-gray-300 text-sm">{elementData.breathingMethod}</p>
         </div>
       </div>
     );
@@ -531,17 +531,17 @@ const ZodiacEnergyTab = () => {
     const { 幸运颜色, 适合饰品, 适合行业, 幸运方位, 能量提升 } = energyGuidance.生活建议;
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
-          <span className="mr-3">💼</span> 生活习惯调整建议
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 mb-5 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center">
+          <span className="mr-2 text-lg">💼</span> 生活习惯调整建议
         </h3>
         
         <div className="space-y-4">
           <div>
-            <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2 text-lg">幸运颜色</h4>
+            <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">幸运颜色</h4>
             <div className="flex flex-wrap gap-2 mt-1">
               {幸运颜色.map((color, index) => (
-                <span key={index} className="px-4 py-2 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-gray-700 dark:text-gray-200 border border-blue-200 dark:border-blue-700">
+                <span key={index} className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900 rounded-full text-xs text-gray-700 dark:text-gray-200 border border-blue-200 dark:border-blue-700">
                   {color}
                 </span>
               ))}
@@ -549,23 +549,23 @@ const ZodiacEnergyTab = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-purple-700 dark:text-purple-300 mb-2 text-lg">适合饰品</h4>
-            <p className="text-gray-700 dark:text-gray-300">{适合饰品.join('、')}</p>
+            <h4 className="font-semibold text-purple-700 dark:text-purple-300 mb-2">适合饰品</h4>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">{适合饰品.join('、')}</p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-green-700 dark:text-green-300 mb-2 text-lg">适合行业</h4>
-            <p className="text-gray-700 dark:text-gray-300">{适合行业.join('、')}</p>
+            <h4 className="font-semibold text-green-700 dark:text-green-300 mb-2">适合行业</h4>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">{适合行业.join('、')}</p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-orange-700 dark:text-orange-300 mb-2 text-lg">幸运方位</h4>
-            <p className="text-gray-700 dark:text-gray-300">{幸运方位.join('、')}</p>
+            <h4 className="font-semibold text-orange-700 dark:text-orange-300 mb-2">幸运方位</h4>
+            <p className="text-gray-700 dark:text-gray-300 text-sm">{幸运方位.join('、')}</p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-indigo-700 dark:text-indigo-300 mb-2 text-lg">能量提升方法</h4>
-            <p className="text-gray-700 dark:text-gray-300 bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 p-3 rounded-lg">{能量提升}</p>
+            <h4 className="font-semibold text-indigo-700 dark:text-indigo-300 mb-2">能量提升方法</h4>
+            <p className="text-gray-700 dark:text-gray-300 bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 p-3 rounded-lg text-sm">{能量提升}</p>
           </div>
         </div>
       </div>

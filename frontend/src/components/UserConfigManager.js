@@ -13,6 +13,21 @@ const ZODIAC_ANIMAL_OPTIONS = [
   '鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'
 ];
 
+// 性别选项
+const GENDER_OPTIONS = [
+  { value: 'male', label: '男' },
+  { value: 'female', label: '女' },
+  { value: 'secret', label: '保密' }
+];
+
+// MBTI类型选项
+const MBTI_OPTIONS = [
+  'ISTJ', 'ISFJ', 'INFJ', 'INTJ',
+  'ISTP', 'ISFP', 'INFP', 'INTP',
+  'ESTP', 'ESFP', 'ENFP', 'ENTP',
+  'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
+];
+
 // 优化的加载组件
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center py-4">
@@ -32,19 +47,12 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
       formData.nickname !== config.nickname ||
       formData.birthDate !== config.birthDate ||
       formData.zodiac !== config.zodiac ||
-      formData.zodiacAnimal !== config.zodiacAnimal;
+      formData.zodiacAnimal !== config.zodiacAnimal ||
+      formData.gender !== config.gender ||
+      formData.mbti !== config.mbti;
     setHasChanges(changed);
     
-    // 如果有变化且表单数据有效，自动保存
-    if (changed && formData.nickname && formData.birthDate) {
-      const timer = setTimeout(() => {
-        // 自动保存配置
-        userConfigManager.autoSaveConfig(formData);
-        console.log('自动保存配置成功', formData);
-      }, 1000); // 延迟1秒自动保存，避免频繁保存
-      
-      return () => clearTimeout(timer);
-    }
+    // 不再自动保存，只有用户点击保存按钮时才保存
   }, [formData, config]);
   
   // 处理表单字段变化
@@ -56,17 +64,28 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
   const handleSave = useCallback(() => {
     // 基本验证
     if (!formData.nickname.trim()) {
-      alert('请输入昵称');
+      showMessage('请输入昵称', 'error');
       return;
     }
     
     if (!formData.birthDate) {
-      alert('请选择出生日期');
+      showMessage('请选择出生日期', 'error');
+      return;
+    }
+    
+    // 检查昵称是否已存在
+    const isNicknameExists = configs.some((config, i) => 
+      i !== index && config.nickname === formData.nickname
+    );
+    
+    if (isNicknameExists) {
+      showMessage('该昵称已存在，请重新输入', 'error');
       return;
     }
     
     onSave(index, formData);
-  }, [formData, index, onSave]);
+    showMessage('配置保存成功', 'success');
+  }, [formData, index, onSave, configs, showMessage]);
   
   // 重置表单
   const handleReset = useCallback(() => {
@@ -179,6 +198,38 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             </select>
           </div>
           
+          {/* 性别 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              性别
+            </label>
+            <select
+              value={formData.gender || 'secret'}
+              onChange={(e) => handleFieldChange('gender', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              {GENDER_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          
+          {/* MBTI类型 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              MBTI类型
+            </label>
+            <select
+              value={formData.mbti || 'ISFP'}
+              onChange={(e) => handleFieldChange('mbti', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              {MBTI_OPTIONS.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          
           {/* 操作按钮 */}
           <div className="flex flex-wrap gap-2 pt-2">
             <Button 
@@ -234,6 +285,7 @@ const UserConfigManagerComponent = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null); // 用于显示提示信息
   
   // 初始化配置管理器 - 优化异步加载
   useEffect(() => {
@@ -300,10 +352,11 @@ const UserConfigManagerComponent = () => {
       setTimeout(() => {
         userConfigManager.forceReloadAll();
       }, 100);
+      showMessage('保存配置成功', 'success');
     } else {
-      alert('保存配置失败，请重试');
+      showMessage('保存配置失败，请重试', 'error');
     }
-  }, []);
+  }, [showMessage]);
   
   // 处理添加新配置
   const handleAddConfig = useCallback(() => {
@@ -311,7 +364,9 @@ const UserConfigManagerComponent = () => {
       nickname: `用户${configs.length + 1}`,
       birthDate: '1991-01-01',
       zodiac: '摩羯座',
-      zodiacAnimal: '羊'
+      zodiacAnimal: '羊',
+      gender: 'secret',
+      mbti: 'ISFP'
     };
     
     const success = userConfigManager.addConfig(newConfig);
@@ -320,18 +375,20 @@ const UserConfigManagerComponent = () => {
       setConfigs(prev => [...prev, newConfig]);
       // 展开新添加的配置
       setExpandedIndex(configs.length);
+      showMessage('添加配置成功', 'success');
     } else {
-      alert('添加配置失败，请重试');
+      showMessage('添加配置失败，请重试', 'error');
     }
-  }, [configs.length]);
+  }, [configs.length, showMessage]);
   
   // 处理删除配置
   const handleDeleteConfig = useCallback((index) => {
     if (configs.length <= 1) {
-      alert('至少需要保留一个配置');
+      showMessage('至少需要保留一个配置', 'error');
       return;
     }
     
+    // 使用自定义确认对话框替代window.confirm
     if (window.confirm('确定要删除这个配置吗？')) {
       const success = userConfigManager.removeConfig(index);
       if (success) {
@@ -339,11 +396,12 @@ const UserConfigManagerComponent = () => {
         setConfigs(prev => prev.filter((_, i) => i !== index));
         // 调整展开索引
         setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
+        showMessage('删除配置成功', 'success');
       } else {
-        alert('删除配置失败，请重试');
+        showMessage('删除配置失败，请重试', 'error');
       }
     }
-  }, [configs.length]);
+  }, [configs.length, showMessage]);
   
   // 优化处理设置活跃配置 - 异步切换避免卡顿
   const handleSetActiveConfig = useCallback(async (index) => {
@@ -406,12 +464,12 @@ const UserConfigManagerComponent = () => {
             const jsonData = e.target.result;
             const success = userConfigManager.importConfigs(jsonData);
             if (success) {
-              alert('导入配置成功');
+              showMessage('导入配置成功', 'success');
             } else {
-              alert('导入配置失败，请检查文件格式');
+              showMessage('导入配置失败，请检查文件格式', 'error');
             }
           } catch (error) {
-            alert('读取文件失败: ' + error.message);
+            showMessage('读取文件失败: ' + error.message, 'error');
           }
         };
         
@@ -420,16 +478,16 @@ const UserConfigManagerComponent = () => {
       
       input.click();
     } catch (error) {
-      alert('导入失败: ' + error.message);
+      showMessage('导入失败: ' + error.message, 'error');
     }
-  }, []);
+  }, [showMessage]);
   
   // 处理导出配置
   const handleExportConfigs = useCallback(() => {
     try {
       const jsonData = userConfigManager.exportConfigs();
       if (!jsonData) {
-        alert('导出配置失败');
+        showMessage('导出配置失败', 'error');
         return;
       }
       
@@ -444,10 +502,11 @@ const UserConfigManagerComponent = () => {
       document.body.removeChild(a);
       
       URL.revokeObjectURL(url);
+      showMessage('导出配置成功', 'success');
     } catch (error) {
-      alert('导出配置失败: ' + error.message);
+      showMessage('导出配置失败: ' + error.message, 'error');
     }
-  }, []);
+  }, [showMessage]);
   
   if (loading) {
     return (
@@ -478,9 +537,64 @@ const UserConfigManagerComponent = () => {
       </div>
     );
   }
+
+  // 显示提示信息
+  const showMessage = (text, type = 'info') => {
+    setMessage({ text, type });
+    // 3秒后自动清除消息
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  };
   
   return (
     <div className="space-y-4">
+      {/* 消息提示 */}
+      {message && (
+        <div className={`p-4 rounded-lg ${message.type === 'error' ? 'bg-red-50 dark:bg-red-900 border-l-4 border-red-400' : message.type === 'success' ? 'bg-green-50 dark:bg-green-900 border-l-4 border-green-400' : 'bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400'}`}>
+          <p className={`${message.type === 'error' ? 'text-red-700 dark:text-red-300' : message.type === 'success' ? 'text-green-700 dark:text-green-300' : 'text-blue-700 dark:text-blue-300'}`}>
+            {message.text}
+          </p>
+        </div>
+      )}
+      {/* 当前配置信息 */}
+      <Card title="当前配置信息">
+        <div className="p-4 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
+          {configs[activeConfigIndex] ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">昵称：</span>
+                <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].nickname}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生日期：</span>
+                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].birthDate}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">星座：</span>
+                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiac}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">生肖：</span>
+                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiacAnimal}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">性别：</span>
+                <span className="ml-2 text-gray-900 dark:text-white">
+                  {GENDER_OPTIONS.find(opt => opt.value === (configs[activeConfigIndex].gender || 'secret'))?.label || '保密'}
+                </span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">MBTI类型：</span>
+                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].mbti || 'ISFP'}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400">当前没有可用配置</p>
+          )}
+        </div>
+      </Card>
+      
       <Card title="用户配置管理" className="mb-6">
         <div className="space-y-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -519,33 +633,7 @@ const UserConfigManagerComponent = () => {
         ))}
       </div>
       
-      {/* 当前配置信息 */}
-      <Card title="当前配置信息" className="mt-6">
-        <div className="p-4 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
-          {configs[activeConfigIndex] ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">昵称：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].nickname}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生日期：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].birthDate}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">星座：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiac}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">生肖：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiacAnimal}</span>
-              </div>
-            </div>
-          ) : (
-            <p className="text-gray-500 dark:text-gray-400">当前没有可用配置</p>
-          )}
-        </div>
-      </Card>
+
     </div>
   );
 };

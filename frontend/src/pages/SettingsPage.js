@@ -206,9 +206,6 @@ function SettingsPage() {
           <div className={`transition-all duration-300 ${tabTransition ? 'opacity-50' : 'opacity-100'}`}>
             {activeTab === 'app' && (
               <div className="space-y-6">
-                {/* 性能测试工具 */}
-                <PerformanceTestTool />
-                
                 {/* 应用设置部分 */}
                 <Card title="应用设置">
                   <div className="space-y-4">
@@ -349,6 +346,11 @@ function SettingsPage() {
                     <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
                       <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
+                    </div>
+                    
+                    {/* 性能测试工具 */}
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <PerformanceTestTool />
                     </div>
                   </div>
                 </Card>

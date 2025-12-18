@@ -9,7 +9,9 @@ const DEFAULT_CONFIG = {
   nickname: '叉子',
   birthDate: '1991-04-30',
   zodiac: '金牛座',
-  zodiacAnimal: '羊'
+  zodiacAnimal: '羊',
+  gender: 'male',
+  mbti: 'INFP'
 };
 
 // 空配置默认值
@@ -17,7 +19,9 @@ const EMPTY_CONFIG_DEFAULTS = {
   nickname: '新用户',
   birthDate: '1991-04-21',
   zodiac: '金牛座',
-  zodiacAnimal: '羊'
+  zodiacAnimal: '羊',
+  gender: 'male',
+  mbti: 'ISFP'
 };
 
 // 本地存储键名
@@ -134,6 +138,8 @@ class UserConfigManager {
       birthDate: config.birthDate || '1991-01-01',
       zodiac: config.zodiac || '未知',
       zodiacAnimal: config.zodiacAnimal || '未知',
+      gender: config.gender || 'male',
+      mbti: config.mbti || 'ISFP',
       ...config
     };
     
@@ -280,7 +286,8 @@ class UserConfigManager {
              existingConfig.nickname === config.nickname &&
              existingConfig.birthDate === config.birthDate &&
              existingConfig.zodiac === config.zodiac &&
-             existingConfig.zodiacAnimal === config.zodiacAnimal;
+             existingConfig.zodiacAnimal === config.zodiacAnimal &&
+             existingConfig.mbti === config.mbti;
     });
   }
 
@@ -300,7 +307,8 @@ class UserConfigManager {
       nickname: config.nickname || EMPTY_CONFIG_DEFAULTS.nickname,
       birthDate: config.birthDate || EMPTY_CONFIG_DEFAULTS.birthDate,
       zodiac: config.zodiac || EMPTY_CONFIG_DEFAULTS.zodiac,
-      zodiacAnimal: config.zodiacAnimal || EMPTY_CONFIG_DEFAULTS.zodiacAnimal
+      zodiacAnimal: config.zodiacAnimal || EMPTY_CONFIG_DEFAULTS.zodiacAnimal,
+      mbti: config.mbti || EMPTY_CONFIG_DEFAULTS.mbti
     };
     
     // 检查是否已存在相同配置

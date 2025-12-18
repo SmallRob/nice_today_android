@@ -619,9 +619,9 @@ const HoroscopeTab = () => {
   // 渲染每日运势卡片
   const renderDailyForecast = () => {
     if (!horoscopeGuidance?.dailyForecast) return null;
-
+  
     const { life, career, health, love } = horoscopeGuidance.dailyForecast;
-    
+      
     // 根据分数设置颜色
     const getScoreColor = (score) => {
       if (score >= 1) return 'text-green-500';
@@ -629,21 +629,21 @@ const HoroscopeTab = () => {
       if (score >= -1) return 'text-yellow-500';
       return 'text-red-500';
     };
-    
+      
     const getScoreBg = (score) => {
       if (score >= 1) return 'bg-green-100 dark:bg-green-900 dark:bg-opacity-30';
       if (score >= 0) return 'bg-blue-100 dark:bg-blue-900 dark:bg-opacity-30';
       if (score >= -1) return 'bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-30';
       return 'bg-red-100 dark:bg-red-900 dark:bg-opacity-30';
     };
-
+  
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
-          <span className="mr-3">🔮</span>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 mb-5 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center">
+          <span className="mr-2 text-lg">🔮</span>
           今日运势 ({formatDateLocal(selectedDate)})
         </h3>
-        
+          
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 生活运势 */}
           <div className={`${getScoreBg(life.score)} rounded-lg p-4`}>
@@ -651,7 +651,7 @@ const HoroscopeTab = () => {
               <span className="mr-2">🏠</span> 生活
             </h4>
             <div className="flex items-center justify-between">
-              <span className={`text-2xl font-bold ${getScoreColor(life.score)}`}>
+              <span className={`text-xl font-bold ${getScoreColor(life.score)`}>
                 {life.score > 0 ? `+${life.score}` : life.score}
               </span>
               <span className={`px-2 py-1 rounded text-xs ${getScoreColor(life.score)}`}>
@@ -669,7 +669,7 @@ const HoroscopeTab = () => {
               <span className="mr-2">💼</span> 事业
             </h4>
             <div className="flex items-center justify-between">
-              <span className={`text-2xl font-bold ${getScoreColor(career.score)}`}>
+              <span className={`text-xl font-bold ${getScoreColor(career.score)`}>
                 {career.score > 0 ? `+${career.score}` : career.score}
               </span>
               <span className={`px-2 py-1 rounded text-xs ${getScoreColor(career.score)}`}>
@@ -687,7 +687,7 @@ const HoroscopeTab = () => {
               <span className="mr-2">💚</span> 健康
             </h4>
             <div className="flex items-center justify-between">
-              <span className={`text-2xl font-bold ${getScoreColor(health.score)}`}>
+              <span className={`text-xl font-bold ${getScoreColor(health.score)`}>
                 {health.score > 0 ? `+${health.score}` : health.score}
               </span>
               <span className={`px-2 py-1 rounded text-xs ${getScoreColor(health.score)}`}>
@@ -705,7 +705,7 @@ const HoroscopeTab = () => {
               <span className="mr-2">❤️</span> 爱情
             </h4>
             <div className="flex items-center justify-between">
-              <span className={`text-2xl font-bold ${getScoreColor(love.score)}`}>
+              <span className={`text-xl font-bold ${getScoreColor(love.score)`}>
                 {love.score > 0 ? `+${love.score}` : love.score}
               </span>
               <span className={`px-2 py-1 rounded text-xs ${getScoreColor(love.score)}`}>
