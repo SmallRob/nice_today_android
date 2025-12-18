@@ -4,6 +4,7 @@ import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
 import { CompatibleStorage, initDataMigration } from '../utils/dataMigration';
 import { userConfigManager } from '../utils/userConfigManager';
+import { useTheme } from '../context/ThemeContext';
 
 // 实践活动数据
 const PRACTICE_ACTIVITIES = [
@@ -18,7 +19,11 @@ const PRACTICE_ACTIVITIES = [
   { id: 9, title: "能量音乐", description: "听一首提升能量的音乐", energy: "low", duration: "4分钟" }
 ];
 
+
+
 const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
+  const { theme } = useTheme();
+  
   // 初始化数据迁移
   useEffect(() => {
     initDataMigration();
@@ -105,6 +110,13 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     return shuffled.slice(0, 3);
   }, []);
 
+  // 简化的状态确定函数
+  const getSimpleStatus = (score) => {
+    if (score > 0) return { text: '良好', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900 dark:bg-opacity-30' };
+    if (score < 0) return { text: '偏低', color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-30' };
+    return { text: '平稳', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900 dark:bg-opacity-30' };
+  };
+
   // 加载生物节律数据 - 本地化版本
   const loadBiorhythmData = useCallback(async (selectedDate = null) => {
     const dateToUse = selectedDate || birthDate;
@@ -178,6 +190,46 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     setPracticeActivities(getRandomActivities());
   };
 
+  // 生成今日节律总结 - 简化版本
+  const renderTodaySummary = () => {
+    // 确保todayData存在且包含必要的数据
+    if (!todayData || todayData.physical === undefined || todayData.emotional === undefined || todayData.intellectual === undefined) {
+      return null;
+    }
+    
+    // 获取今天的节律值
+    const todayPhysical = todayData.physical;
+    const todayEmotional = todayData.emotional;
+    const todayIntellectual = todayData.intellectual;
+    
+    // 计算综合累积值
+    const totalScore = todayPhysical + todayEmotional + todayIntellectual;
+    
+    // 使用简化的状态确定函数
+    const totalStatus = getSimpleStatus(totalScore);
+    
+    return (
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 border border-blue-200 dark:border-gray-700 rounded-xl p-4 mb-4 shadow-sm">
+        {/* 今日建议 */}
+        <div className={`rounded-lg p-3 ${totalStatus.bg} border-l-2 border-blue-500 dark:border-blue-400`}>
+          <div className="flex items-start">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className={`w-4 h-4 ${totalStatus.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <div className="ml-2">
+              <h4 className="text-xs font-semibold text-gray-900 dark:text-white mb-1">今日综合状态</h4>
+              <p className={`text-xs ${totalStatus.color} font-medium`}>
+                {totalScore > 0 ? '😊 状态良好' : totalScore < 0 ? '⚠️ 状态偏低' : '😐 状态平稳'} - {totalStatus.text}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading && !rhythmData) {
     return (
       <div className="flex flex-col items-center justify-center py-8">
@@ -228,59 +280,62 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* 用户信息卡片 - 手机优化 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3">
-        <div className="flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 className="text-base font-medium text-gray-900 dark:text-white">
               {userInfo.nickname ? `${userInfo.nickname} 的生物节律` : '生物节律'}
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               {userInfo.birthDate ? `出生日期: ${userInfo.birthDate}` : '请到设置页面配置信息'}
             </p>
           </div>
           <div className="text-right">
-            <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 dark:bg-opacity-30 rounded">
+            <span className="inline-block px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 dark:bg-opacity-30 rounded-full">
               本地计算
             </span>
           </div>
         </div>
       </div>
 
+      {/* 今日节律总结 */}
+      {renderTodaySummary()}
+
       {/* 今日节律状态卡片 - 精简布局 */}
       {todayData && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
             今日状态
           </h3>
-          
-          <div className="grid grid-cols-3 gap-1.5">
-            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded p-2 text-center">
-              <div className="text-base font-bold text-blue-600 dark:text-blue-400 mb-0.5">
+                
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                 {todayData.physical}%
               </div>
-              <div className="text-[10px] text-blue-800 dark:text-blue-300 font-medium">体力</div>
+              <div className="text-xs text-blue-800 dark:text-blue-300 font-medium">体力</div>
             </div>
-            
-            <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded p-2 text-center">
-              <div className="text-base font-bold text-red-600 dark:text-red-400 mb-0.5">
+                  
+            <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
+              <div className="text-xl font-bold text-red-600 dark:text-red-400 mb-1">
                 {todayData.emotional}%
               </div>
-              <div className="text-[10px] text-red-800 dark:text-red-300 font-medium">情绪</div>
+              <div className="text-xs text-red-800 dark:text-red-300 font-medium">情绪</div>
             </div>
-            
-            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded p-2 text-center">
-              <div className="text-base font-bold text-green-600 dark:text-green-400 mb-0.5">
+                  
+            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
+              <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-1">
                 {todayData.intellectual}%
               </div>
-              <div className="text-[10px] text-green-800 dark:text-green-300 font-medium">智力</div>
+              <div className="text-xs text-green-800 dark:text-green-300 font-medium">智力</div>
             </div>
           </div>
-          
+                
           {/* 状态解读 */}
-          <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
               {todayData.physical >= 0 ? '✓ 体力充沛' : '⚠ 体力偏低'} · 
               {todayData.emotional >= 0 ? ' 情绪稳定' : ' 情绪波动'} · 
               {todayData.intellectual >= 0 ? ' 思维清晰' : ' 思考需谨慎'}
@@ -290,47 +345,47 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
       )}
 
       {/* 今日实践建议卡片 */}
-      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 dark:bg-opacity-20 border border-purple-100 dark:border-purple-700 rounded-lg shadow-sm p-3">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300">
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 dark:bg-opacity-20 border border-purple-100 dark:border-purple-700 rounded-lg shadow-sm p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-base font-semibold text-purple-800 dark:text-purple-300">
             今日实践建议
           </h3>
           <button 
             onClick={refreshActivities}
-            className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium flex items-center"
+            className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium flex items-center"
           >
             换一批
-            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
         </div>
         
-        <p className="text-xs text-purple-700 dark:text-purple-400 mb-2">
+        <p className="text-sm text-purple-700 dark:text-purple-400 mb-3">
           根据您的节律状态，推荐以下活动提升能量：
         </p>
         
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {practiceActivities.map((activity, index) => (
             <div 
               key={activity.id} 
-              className="bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-md p-2 flex items-start"
+              className="bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-md p-3 flex items-start"
             >
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center mr-2 mt-0.5">
-                <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center mr-3 mt-0.5">
+                <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
                   {index + 1}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
                     {activity.title}
                   </h4>
-                  <span className="text-[10px] text-gray-500 dark:text-gray-400 ml-1 whitespace-nowrap">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                     {activity.duration}
                   </span>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {activity.description}
                 </p>
               </div>
@@ -340,46 +395,46 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
       </div>
 
       {/* 生物节律曲线图 - 手机优化 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
           趋势图表
         </h3>
-        
+          
         {rhythmData && rhythmData.length > 0 ? (
-          <div className="h-48">
+          <div className="h-64">
             <BiorhythmChart 
               data={rhythmData}
-              isMobile={true}
+              isMobile={!isDesktop}
             />
           </div>
         ) : (
-          <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-xs">
+          <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
             暂无图表数据
           </div>
         )}
-        
-        <div className="flex items-center justify-center mt-2 space-x-3">
+          
+        <div className="flex items-center justify-center mt-3 space-x-4">
           <div className="flex items-center">
-            <div className="w-2 h-2 rounded-full bg-blue-500 mr-1"></div>
-            <span className="text-[10px] text-gray-600 dark:text-gray-400">体力</span>
+            <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">体力</span>
           </div>
           <div className="flex items-center">
-            <div className="w-2 h-2 rounded-full bg-red-500 mr-1"></div>
-            <span className="text-[10px] text-gray-600 dark:text-gray-400">情绪</span>
+            <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">情绪</span>
           </div>
           <div className="flex items-center">
-            <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
-            <span className="text-[10px] text-gray-600 dark:text-gray-400">智力</span>
+            <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">智力</span>
           </div>
         </div>
       </div>
-
+  
       {/* 节律说明 - 精简卡片 */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 dark:bg-opacity-20 border border-blue-100 dark:border-blue-700 rounded-lg p-3">
-        <h4 className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
+      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 dark:bg-opacity-20 border border-blue-100 dark:border-blue-700 rounded-lg p-4">
+        <h4 className="text-base font-semibold text-blue-800 dark:text-blue-300 mb-2">
           节律知识
         </h4>
-        <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+        <p className="text-sm text-blue-700 dark:text-blue-400 leading-relaxed">
           生物节律理论包含23天体力周期、28天情绪周期和33天智力周期。正值表示能量充沛，负值表示能量偏低。每日节律状态可作为参考，帮助您合理安排活动。
         </p>
       </div>

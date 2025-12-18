@@ -3,9 +3,27 @@ import { lazy, Suspense } from 'react';
 import PageLayout, { Card } from '../components/PageLayout';
 import '../index.css';
 
-// 懒加载组件以提升初始加载性能
-const MayaCalendar = lazy(() => import('../components/MayaCalendar_optimized'));
-const MayaBirthChart = lazy(() => import('../components/MayaBirthChart_optimized'));
+// 优化的懒加载组件预加载策略
+let MayaCalendarPromise;
+let MayaBirthChartPromise;
+
+const preloadMayaCalendar = () => {
+  if (!MayaCalendarPromise) {
+    MayaCalendarPromise = import('../components/MayaCalendar_optimized');
+  }
+  return MayaCalendarPromise;
+};
+
+const preloadMayaBirthChart = () => {
+  if (!MayaBirthChartPromise) {
+    MayaBirthChartPromise = import('../components/MayaBirthChart_optimized');
+  }
+  return MayaBirthChartPromise;
+};
+
+// 懒加载组件并预加载
+const MayaCalendar = lazy(() => preloadMayaCalendar());
+const MayaBirthChart = lazy(() => preloadMayaBirthChart());
 
 // 优化的加载组件
 const TabContentLoader = memo(() => (
@@ -57,24 +75,44 @@ const MayaPage = memo(() => {
   
   // 优化的显示出生图函数
   const handleShowBirthChart = useCallback(() => {
-    // 使用requestAnimationFrame确保平滑过渡
-    requestAnimationFrame(() => {
-      setShowBirthChart(true);
-      setActiveTab('birthChart');
-    });
+    // 使用requestIdleCallback推迟非紧急状态更新
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        setShowBirthChart(true);
+        setActiveTab('birthChart');
+      }, { timeout: 300 });
+    } else {
+      // 降级到setTimeout
+      setTimeout(() => {
+        setShowBirthChart(true);
+        setActiveTab('birthChart');
+      }, 0);
+    }
   }, []);
 
   // 优化的返回历法函数
   const handleBackToCalendar = useCallback(() => {
-    // 使用requestAnimationFrame确保平滑过渡
-    requestAnimationFrame(() => {
-      setShowBirthChart(false);
-      setActiveTab('calendar');
-    });
+    // 使用requestIdleCallback推迟非紧急状态更新
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        setShowBirthChart(false);
+        setActiveTab('calendar');
+      }, { timeout: 300 });
+    } else {
+      // 降级到setTimeout
+      setTimeout(() => {
+        setShowBirthChart(false);
+        setActiveTab('calendar');
+      }, 0);
+    }
   }, []);
 
   // 组件挂载时的优化加载
   useEffect(() => {
+    // 预加载两个组件以提升切换性能
+    preloadMayaCalendar();
+    preloadMayaBirthChart();
+    
     // 使用较短的延迟时间，提升用户体验
     timeoutRef.current = setTimeout(() => {
       setIsLoaded(true);
@@ -107,7 +145,7 @@ const MayaPage = memo(() => {
     </Card>
   ), [activeTab, handleBackToCalendar, handleShowBirthChart]);
 
-  // 优化的内容渲染
+  // 优化的内容渲染 - 添加组件预加载和性能优化
   const renderContent = useMemo(() => {
     // 使用CSS过渡而不是JS动画，提升性能
     const contentClass = "animate-fadeIn";

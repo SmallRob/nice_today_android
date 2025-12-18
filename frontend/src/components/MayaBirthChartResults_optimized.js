@@ -6,7 +6,8 @@ const ChunkedRenderer = memo(({ items, chunkSize = 3, renderItem, loadingCompone
   const observerRef = React.useRef(null);
   const sentinelRef = React.useRef(null);
   
-  const chunks = useMemo(() => {
+  // 优化chunks计算，避免不必要的重新计算
+  const chunks = React.useMemo(() => {
     const result = [];
     for (let i = 0; i < items.length; i += chunkSize) {
       result.push(items.slice(i, i + chunkSize));
@@ -14,25 +15,37 @@ const ChunkedRenderer = memo(({ items, chunkSize = 3, renderItem, loadingCompone
     return result;
   }, [items, chunkSize]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // 清理之前的观察者
     if (observerRef.current) {
       observerRef.current.disconnect();
+    }
+    
+    // 如果所有内容都已显示，不需要观察器
+    if (visibleChunks >= chunks.length) {
+      return;
     }
     
     // 创建新的观察者
     observerRef.current = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && visibleChunks < chunks.length) {
-          // 使用requestAnimationFrame避免阻塞UI
-          requestAnimationFrame(() => {
-            setVisibleChunks(prev => Math.min(prev + 1, chunks.length));
-          });
+          // 使用requestIdleCallback推迟非紧急更新
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => {
+              setVisibleChunks(prev => Math.min(prev + 1, chunks.length));
+            }, { timeout: 500 });
+          } else {
+            // 降级到setTimeout
+            setTimeout(() => {
+              setVisibleChunks(prev => Math.min(prev + 1, chunks.length));
+            }, 0);
+          }
         }
       });
     }, { 
       threshold: 0.1,
-      rootMargin: '200px' // 提前200px加载，提升用户体验
+      rootMargin: '100px' // 减少提前加载距离，节省资源
     });
 
     const sentinel = sentinelRef.current;
@@ -77,14 +90,16 @@ const OptimizedInfoCard = memo(({ title, children, className = "" }) => (
 
 // 基础信息组件 - 使用memo和useMemo优化
 const BasicInfoSection = memo(({ birthInfo }) => {
-  // 优化kin计算，确保不会出现undefined
+  // 简化kin计算，直接从birthInfo中提取
   const kinNumber = useMemo(() => {
     try {
       if (!birthInfo || !birthInfo.maya_kin) return '1';
+      // 直接从maya_kin字段提取数字，例如"KIN 123" -> "123"
       const kinStr = String(birthInfo.maya_kin);
-      return kinStr.replace('KIN ', '').trim() || '1';
+      const match = kinStr.match(/KIN\s*(\d+)/i);
+      return match ? match[1] : '1';
     } catch (error) {
-      console.warn('Kin计算错误:', error);
+      console.warn('Kin提取错误:', error);
       return '1';
     }
   }, [birthInfo?.maya_kin]);
@@ -95,12 +110,14 @@ const BasicInfoSection = memo(({ birthInfo }) => {
         <div className="flex items-center">
           <div className="w-12 h-12 bg-blue-600 rounded-full text-white flex items-center justify-center mr-3">
             <div className="text-center">
-              <div className="text-lg font-bold">{kinNumber}</div>
+              <div className="text-lg font-bold">{kinNumber || '1'}</div>
               <div className="text-xs opacity-90">KIN</div>
             </div>
           </div>
           <div>
-            <h2 className="text-md font-bold text-gray-800">{birthInfo?.maya_seal_desc || '未知印记'}</h2>
+            <h2 className="text-md font-bold text-gray-800">
+              {birthInfo?.maya_seal_desc || birthInfo?.fullName || '未知印记'}
+            </h2>
             <div className="text-xs text-gray-600">{birthInfo?.date || '未知日期'}</div>
           </div>
         </div>
@@ -125,15 +142,15 @@ const SealInfoSection = memo(({ birthInfo }) => {
       <div className="space-y-2">
         <div>
           <div className="text-xs text-gray-800 font-medium mb-1">特质</div>
-          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.特质 || ''}</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.特质 || '连接宇宙能量的通道'}</div>
         </div>
         <div>
           <div className="text-xs text-gray-800 font-medium mb-1">能量</div>
-          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.能量 || ''}</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.能量 || '激活内在潜能的力量'}</div>
         </div>
         <div>
           <div className="text-xs text-gray-800 font-medium mb-1">启示</div>
-          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.启示 || ''}</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.启示 || '开启灵性成长的大门'}</div>
         </div>
       </div>
     </OptimizedInfoCard>
@@ -153,11 +170,11 @@ const ToneInfoSection = memo(({ birthInfo }) => {
         </div>
         <div>
           <div className="text-xs text-gray-800 font-medium mb-1">行动</div>
-          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo.maya_tone_info?.行动 || ''}</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo.maya_tone_info?.行动 || '和谐共振，创造平衡'}</div>
         </div>
         <div>
           <div className="text-xs text-gray-800 font-medium mb-1">启示</div>
-          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo.maya_tone_info?.启示 || ''}</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo.maya_tone_info?.启示 || '聆听内在智慧的声音'}</div>
         </div>
       </div>
     </OptimizedInfoCard>
@@ -173,14 +190,14 @@ const LifePurposeSection = memo(({ birthInfo }) => {
     <OptimizedInfoCard title="生命使命">
       <div className="space-y-2">
         <div>
-          <div className="text-xs text-gray-600 leading-relaxed">{birthInfo.life_purpose?.summary || ''}</div>
+          <div className="text-xs text-gray-600 leading-relaxed">{birthInfo.life_purpose?.summary || '探索你的生命使命...'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-600 leading-relaxed">{birthInfo.life_purpose?.details || ''}</div>
+          <div className="text-xs text-gray-600 leading-relaxed">{birthInfo.life_purpose?.details || '发现你独特的人生道路和目标'}</div>
         </div>
         <div className="bg-blue-50 p-2 rounded">
           <div className="text-xs text-blue-700 font-medium mb-1">行动指南</div>
-          <div className="text-xs text-blue-600">{birthInfo.life_purpose?.action_guide || ''}</div>
+          <div className="text-xs text-blue-600">{birthInfo.life_purpose?.action_guide || '跟随内心指引，实践你的天赋'}</div>
         </div>
       </div>
     </OptimizedInfoCard>
@@ -200,7 +217,7 @@ const PersonalTraitsSection = memo(({ birthInfo }) => {
       <div className={`w-4 h-4 ${isStrength ? 'bg-green-400' : 'bg-red-400'} rounded-full flex items-center justify-center text-white text-xs font-bold mr-2`}>
         {index + 1}
       </div>
-      <span className="text-gray-600">{trait}</span>
+      <span className="text-gray-600">{trait || (isStrength ? '积极主动' : '需要平衡')}</span>
     </li>
   ), []);
 
@@ -231,30 +248,26 @@ const EnergyFieldSection = memo(({ birthInfo }) => {
       <div className="space-y-2">
         <div>
           <div className="text-xs text-indigo-600 font-medium mb-1">主要能量场</div>
-          <div className="text-xs text-gray-600 mb-1">{birthInfo.birth_energy_field?.primary?.type || ''}</div>
-          <div className="text-xs text-gray-500">{birthInfo.birth_energy_field?.primary?.info?.描述 || ''}</div>
+          <div className="text-xs text-gray-600 mb-1">{birthInfo.birth_energy_field?.primary?.type || '个人能量场'}</div>
+          <div className="text-xs text-gray-500">{birthInfo.birth_energy_field?.primary?.info?.描述 || '反映个人状态的能场'}</div>
         </div>
         <div>
           <div className="text-xs text-purple-600 font-medium mb-1">次要能量场</div>
-          <div className="text-xs text-gray-600 mb-1">{birthInfo.birth_energy_field?.secondary?.type || ''}</div>
-          <div className="text-xs text-gray-500">{birthInfo.birth_energy_field?.secondary?.info?.描述 || ''}</div>
+          <div className="text-xs text-gray-600 mb-1">{birthInfo.birth_energy_field?.secondary?.type || '创造能量场'}</div>
+          <div className="text-xs text-gray-500">{birthInfo.birth_energy_field?.secondary?.info?.描述 || '与创造力相关的能场'}</div>
         </div>
         <div className="bg-blue-50 p-2 rounded">
           <div className="text-xs text-blue-700 font-medium mb-1">平衡建议</div>
-          <div className="text-xs text-blue-600">{birthInfo.birth_energy_field?.balance_suggestion || ''}</div>
+          <div className="text-xs text-blue-600">{birthInfo.birth_energy_field?.balance_suggestion || '平衡能量发挥潜能'}</div>
         </div>
       </div>
     </OptimizedInfoCard>
   );
 });
 
-// 主组件 - 优化渲染和性能
+// 主组件 - 简化版本
 const ResultsSection = memo(({ birthInfo, showResults }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const animationFrameRef = React.useRef(null);
-  const timeoutRef = React.useRef(null);
-
-  // 按渲染优先级排序的组件列表，关键内容优先渲染
+  // 按渲染优先级排序的组件列表
   const sections = useMemo(() => [
     { component: BasicInfoSection, key: 'basic' },
     { component: SealInfoSection, key: 'seal' },
@@ -262,66 +275,32 @@ const ResultsSection = memo(({ birthInfo, showResults }) => {
     { component: LifePurposeSection, key: 'purpose' },
     { component: PersonalTraitsSection, key: 'traits' },
     { component: EnergyFieldSection, key: 'energy' }
-    // 今日启示模块已迁移至玛雅日历页面
   ], []);
 
-  // 优化渲染函数
+  // 简化渲染函数
   const renderSection = useCallback((section, index) => {
     const Component = section.component;
     return (
-      <div key={section.key} className="fade-in-section">
+      <div key={section.key}>
         <Component birthInfo={birthInfo} />
       </div>
     );
   }, [birthInfo]);
 
-  useEffect(() => {
-    // 清理之前的定时器和动画帧
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    
-    if (showResults && birthInfo) {
-      // 使用requestAnimationFrame + setTimeout双重优化，确保不阻塞主线程
-      animationFrameRef.current = requestAnimationFrame(() => {
-        timeoutRef.current = setTimeout(() => {
-          setIsVisible(true);
-        }, 50); // 减少延迟时间，提升响应速度
-      });
-    } else {
-      setIsVisible(false);
-    }
-    
-    // 清理函数
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [showResults, birthInfo]);
-
-  if (!showResults || !birthInfo || !isVisible) {
+  if (!showResults || !birthInfo) {
     return null;
   }
 
   return (
     <div className="birth-chart-results">
-      <h3 className="text-lg font-bold text-center text-gray-800 mb-4">玛雅出生图结果</h3>
-      
       <div className="birth-info space-y-4">
         <ChunkedRenderer
           items={sections}
-          chunkSize={2} // 每次渲染2个区块，平衡性能和用户体验
+          chunkSize={3}
           renderItem={renderSection}
           loadingComponent={
-            <div className="flex justify-center py-4">
-              <div className="animate-pulse bg-gray-200 rounded h-4 w-24"></div>
+            <div className="flex justify-center py-2">
+              <div className="animate-pulse bg-gray-200 rounded h-3 w-20"></div>
             </div>
           }
         />

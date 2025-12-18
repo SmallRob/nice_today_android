@@ -455,7 +455,7 @@ const ZodiacEnergyTab = () => {
                 strokeWidth="2.5"
                 strokeDasharray={`${匹配度}, 100`}
               />
-              <text x="18" y="20.5" textAnchor="middle" className="text-base font-bold fill-gray-800 dark:fill-white">
+              <text x="18" y="20.5" textAnchor="middle" className="text-xs font-bold fill-gray-800 dark:fill-white">
                 {匹配度}%
               </text>
             </svg>
