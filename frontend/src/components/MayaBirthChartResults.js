@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 // 分块渲染组件
 const ChunkedRenderer = ({ items, chunkSize = 3, renderItem, loadingComponent }) => {
