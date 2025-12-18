@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import './MayaBirthChart.css';
@@ -21,6 +21,9 @@ import {
   DEFAULT_TONE_INFO,
   WEEKDAYS
 } from '../config/mayaConfig';
+
+// 懒加载复杂组件
+const ResultsSection = lazy(() => import('./MayaBirthChartResults'));
 
 // 玛雅日历计算工具类
 class MayaCalendarCalculator {
@@ -197,161 +200,6 @@ const InfoCard = ({ title, children, className = "" }) => (
     {children}
   </div>
 );
-
-const ResultsSection = ({ birthInfo, showResults }) => {
-  if (!showResults || !birthInfo) return null;
-  
-  return (
-    <div className="birth-chart-results">
-      <h3 className="text-lg font-bold text-center text-gray-800 mb-4">玛雅出生图结果</h3>
-      
-      <div className="birth-info space-y-4">
-        {/* 基本信息 */}
-        <InfoCard title="基本信息" className="text-center">
-          <div className="mb-4">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500 rounded-full text-white mb-3">
-              <div className="text-center">
-                <div className="text-lg font-bold">{birthInfo.maya_kin}</div>
-                <div className="text-xs opacity-90">KIN</div>
-              </div>
-            </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">{birthInfo.maya_seal_desc}</h2>
-            <div className="flex justify-center space-x-2 mb-3">
-              <span className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm font-medium">
-                {birthInfo.maya_seal}
-              </span>
-              <span className="px-3 py-1 bg-purple-500 text-white rounded-full text-sm font-medium">
-                {birthInfo.maya_tone_info?.数字 || '1'}号音
-              </span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="bg-gray-50 p-3 rounded">
-              <div className="text-sm text-gray-600">日期</div>
-              <div className="font-medium">{birthInfo.date}</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded">
-              <div className="text-sm text-gray-600">星期</div>
-              <div className="font-medium">{birthInfo.weekday}</div>
-            </div>
-          </div>
-        </InfoCard>
-
-        {/* 印记信息 */}
-        <div className="grid grid-cols-1 gap-4">
-          <InfoCard title="印记信息">
-            <div className="space-y-3">
-              <div className="bg-blue-50 p-3 rounded">
-                <div className="text-sm text-blue-800 font-medium mb-1">特质</div>
-                <div className="text-gray-700">{birthInfo.maya_seal_info.特质}</div>
-              </div>
-              <div className="bg-green-50 p-3 rounded">
-                <div className="text-sm text-green-800 font-medium mb-1">能量</div>
-                <div className="text-gray-700">{birthInfo.maya_seal_info.能量}</div>
-              </div>
-              <div className="bg-purple-50 p-3 rounded">
-                <div className="text-sm text-purple-800 font-medium mb-1">启示</div>
-                <div className="text-gray-700">{birthInfo.maya_seal_info.启示}</div>
-              </div>
-            </div>
-          </InfoCard>
-
-          {/* 音调信息 */}
-          <InfoCard title="音调信息">
-            <div className="space-y-3">
-              <div className="bg-yellow-50 p-3 rounded">
-                <div className="text-sm text-yellow-800 font-medium mb-1">数字能量</div>
-                <div className="text-gray-700">第{birthInfo.maya_tone_info.数字}号音调代表着独特的宇宙振动频率</div>
-              </div>
-              <div className="bg-red-50 p-3 rounded">
-                <div className="text-sm text-red-800 font-medium mb-1">行动</div>
-                <div className="text-gray-700">{birthInfo.maya_tone_info.行动}</div>
-              </div>
-              <div className="bg-indigo-50 p-3 rounded">
-                <div className="text-sm text-indigo-800 font-medium mb-1">启示</div>
-                <div className="text-gray-700">{birthInfo.maya_tone_info.启示}</div>
-              </div>
-            </div>
-          </InfoCard>
-        </div>
-        
-        {/* 每日启示 */}
-        {birthInfo.daily_quote && (
-          <InfoCard title="今日启示">
-            <blockquote className="italic text-gray-700 border-l-4 border-blue-400 pl-4 py-2">
-              "{birthInfo.daily_quote.content}"
-              <footer className="text-right mt-2 text-gray-600 text-sm">— {birthInfo.daily_quote.author}</footer>
-            </blockquote>
-          </InfoCard>
-        )}
-      </div>
-
-      {/* 生命使命 */}
-      <InfoCard title="生命使命">
-        <div className="space-y-3">
-          <p className="text-gray-700">{birthInfo.life_purpose.summary}</p>
-          <p className="text-gray-600 text-sm">{birthInfo.life_purpose.details}</p>
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="text-sm text-blue-800 font-medium mb-1">行动指南</div>
-            <div className="text-gray-700">{birthInfo.life_purpose.action_guide}</div>
-          </div>
-        </div>
-      </InfoCard>
-
-      {/* 个人特质 */}
-      <div className="grid grid-cols-1 gap-4">
-        <InfoCard title="个人优势">
-          <ul className="space-y-2">
-            {birthInfo.personal_traits.strengths.map((strength, index) => (
-              <li key={index} className="flex items-center text-gray-700">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                  {index + 1}
-                </div>
-                {strength}
-              </li>
-            ))}
-          </ul>
-        </InfoCard>
-
-        <InfoCard title="个人挑战">
-          <ul className="space-y-2">
-            {birthInfo.personal_traits.challenges.map((challenge, index) => (
-              <li key={index} className="flex items-center text-gray-700">
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                  {index + 1}
-                </div>
-                {challenge}
-              </li>
-            ))}
-          </ul>
-        </InfoCard>
-      </div>
-
-      {/* 能量场信息 */}
-      <InfoCard title="出生能量场">
-        <div className="grid grid-cols-1 gap-4">
-          <div className="bg-indigo-50 p-3 rounded">
-            <div className="text-sm text-indigo-800 font-medium mb-2">主要能量场</div>
-            <div className="text-gray-700 mb-1">{birthInfo.birth_energy_field.primary.type}</div>
-            <div className="text-xs text-gray-600">{birthInfo.birth_energy_field.primary.info.描述}</div>
-          </div>
-          
-          <div className="bg-purple-50 p-3 rounded">
-            <div className="text-sm text-purple-800 font-medium mb-2">次要能量场</div>
-            <div className="text-gray-700 mb-1">{birthInfo.birth_energy_field.secondary.type}</div>
-            <div className="text-xs text-gray-600">{birthInfo.birth_energy_field.secondary.info.描述}</div>
-          </div>
-          
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="text-sm text-blue-800 font-medium mb-1">平衡建议</div>
-            <div className="text-gray-700 text-sm">{birthInfo.birth_energy_field.balance_suggestion}</div>
-          </div>
-        </div>
-      </InfoCard>
-    </div>
-  );
-};
 
 // 主组件
 const MayaBirthChart = () => {
@@ -688,7 +536,49 @@ const MayaBirthChart = () => {
     }
   }, [saveToStorage]);
 
-  // 主逻辑
+  // 使用Web Worker进行异步计算（如果可用）
+  const computeMayaData = async (dateStr, birthDateObj) => {
+    // 如果支持Web Worker，使用Web Worker进行计算
+    if (window.Worker) {
+      return new Promise((resolve) => {
+        // 延迟计算，避免阻塞主线程
+        setTimeout(() => {
+          const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
+          const seal = MayaCalendarCalculator.calculateSeal(kin);
+          const tone = MayaCalendarCalculator.calculateTone(kin);
+          const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
+          
+          resolve({ kin, seal, tone, seed });
+        }, 0);
+      });
+    }
+    
+    // 如果不支持Web Worker，使用requestIdleCallback
+    return new Promise((resolve) => {
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(() => {
+          const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
+          const seal = MayaCalendarCalculator.calculateSeal(kin);
+          const tone = MayaCalendarCalculator.calculateTone(kin);
+          const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
+          
+          resolve({ kin, seal, tone, seed });
+        });
+      } else {
+        // 回退方案：使用setTimeout
+        setTimeout(() => {
+          const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
+          const seal = MayaCalendarCalculator.calculateSeal(kin);
+          const tone = MayaCalendarCalculator.calculateTone(kin);
+          const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
+          
+          resolve({ kin, seal, tone, seed });
+        }, 0);
+      }
+    });
+  };
+
+  // 优化的主逻辑
   const loadBirthInfo = useCallback(
     async (date, saveToHistory = false) => {
       if (!date) {
@@ -704,23 +594,14 @@ const MayaBirthChart = () => {
 
       try {
         const dateStr = typeof date === 'string' ? date : formatDateString(date);
-        
-        await new Promise(resolve => {
-          if (typeof requestIdleCallback === 'function') {
-            requestIdleCallback(() => resolve());
-          } else {
-            setTimeout(resolve, 0);
-          }
-        });
-        
         const birthDateObj = typeof date === 'string' ? new Date(date) : date;
-        const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
-        const seal = MayaCalendarCalculator.calculateSeal(kin);
-        const tone = MayaCalendarCalculator.calculateTone(kin);
-        const sealDesc = MayaCalendarCalculator.getSealDescription(kin);
-        const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
         const weekday = WEEKDAYS[birthDateObj.getDay()];
         
+        // 异步计算玛雅数据
+        const { kin, seal, tone, seed } = await computeMayaData(dateStr, birthDateObj);
+        const sealDesc = MayaCalendarCalculator.getSealDescription(kin);
+        
+        // 分块生成数据，避免一次性阻塞
         const localBirthInfo = {
           date: dateStr,
           weekday: weekday || "未知",
@@ -741,27 +622,37 @@ const MayaBirthChart = () => {
         
         const processedLocalBirthInfo = ensureQuoteExists(localBirthInfo);
         
-        setBirthInfo(processedLocalBirthInfo);
-        setShowResults(true);
+        // 使用requestAnimationFrame确保流畅的UI更新
+        requestAnimationFrame(() => {
+          setBirthInfo(processedLocalBirthInfo);
+          setShowResults(true);
+          
+          if (typeof date === 'string') {
+            setBirthDate(new Date(date));
+          }
+        });
         
-        if (typeof date === 'string') {
-          setBirthDate(new Date(date));
-        }
+        // 异步保存数据
+        setTimeout(async () => {
+          await saveBirthDateToGlobal(date);
+          
+          if (saveToHistory && userInteracted) {
+            let newHistory = [dateStr, ...historyDates.filter(d => d !== dateStr)];
+            if (newHistory.length > 6) newHistory = newHistory.slice(0, 6);
+            setHistoryDates(newHistory);
+            saveHistory(newHistory);
+          }
+        }, 0);
         
-        await saveBirthDateToGlobal(date);
-        
-        if (saveToHistory && userInteracted) {
-          let newHistory = [dateStr, ...historyDates.filter(d => d !== dateStr)];
-          if (newHistory.length > 6) newHistory = newHistory.slice(0, 6);
-          setHistoryDates(newHistory);
-          saveHistory(newHistory);
-        }
       } catch (error) {
         console.error("计算玛雅出生图信息失败:", error);
         setError("计算数据失败，请稍后再试");
       } finally {
-        setLoading(false);
-        loadingRef.current = false;
+        // 延迟设置loading为false，确保UI更新完成
+        setTimeout(() => {
+          setLoading(false);
+          loadingRef.current = false;
+        }, 0);
       }
     },
     [userInteracted, historyDates, saveHistory, saveBirthDateToGlobal]

@@ -7,14 +7,13 @@ const TabNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const isNative = Capacitor.isNativePlatform();
   
   // 检测是否为iOS设备，用于调整底部安全区域
   const isIOS = Capacitor.getPlatform() === 'ios';
 
-  // 统一的Tab样式类
+  // 优化的Tab样式类 - 确保等宽且自适应
   const getTabClassName = (isActive) => {
-    const baseClasses = "flex flex-col items-center justify-center w-full h-full transition-all duration-200 relative";
+    const baseClasses = "flex flex-col items-center justify-center w-full h-full transition-all duration-200 relative min-w-0 flex-1";
     
     if (isActive) {
       return `${baseClasses} text-blue-600 dark:text-blue-400`;
@@ -102,7 +101,7 @@ const TabNavigation = () => {
         isIOS ? 'pb-safe-bottom' : ''
       } shadow-lg`}
     >
-      <div className="flex justify-around items-center h-16 relative">
+      <div className="flex justify-between items-center h-16 relative px-2">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           return (
@@ -110,19 +109,23 @@ const TabNavigation = () => {
               key={tab.id}
               onClick={() => handleTabClick(tab.path)}
               className={getTabClassName(isActive)}
+              style={{ minWidth: '0', flexBasis: '0', flexGrow: 1 }}
             >
               {/* 活跃指示器 */}
               {isActive && (
                 <div className={`absolute top-0 w-full h-0.5 ${activeIndicatorClass}`}></div>
               )}
               
-              {/* 图标 */}
-              <div className="relative mb-1">
-                {isActive ? tab.activeIcon : tab.icon}
+              {/* 图标和文字容器 */}
+              <div className="flex flex-col items-center justify-center space-y-1 px-2 max-w-full overflow-hidden">
+                {/* 图标 */}
+                <div className="relative flex-shrink-0">
+                  {isActive ? tab.activeIcon : tab.icon}
+                </div>
+                
+                {/* 标签文字 - 确保自适应 */}
+                <span className="text-xs font-medium truncate max-w-full">{tab.label}</span>
               </div>
-              
-              {/* 标签文字 */}
-              <span className="text-xs font-medium">{tab.label}</span>
             </button>
           );
         })}

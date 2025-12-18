@@ -1,0 +1,155 @@
+/* 玛雅日历性能优化样式 */
+
+/* 强制GPU加速，提升渲染性能 */
+.maya-calendar-optimized {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+/* 优化动画性能 */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+  animation-fill-mode: both;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* 优化卡片渲染性能 */
+.maya-card {
+  contain: layout style paint;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 分块渲染样式 */
+.chunk-container {
+  opacity: 0;
+  animation: fadeInChunk 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeInChunk {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 虚拟滚动容器 */
+.virtual-scroll-container {
+  overflow-y: auto;
+  height: 400px;
+  position: relative;
+}
+
+.virtual-scroll-item {
+  position: absolute;
+  width: 100%;
+  transform: translateZ(0);
+}
+
+/* 懒加载占位符 */
+.lazy-placeholder {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 优化图片加载 */
+.maya-image {
+  content-visibility: auto;
+  contain-intrinsic-size: 100px 100px;
+}
+
+/* 减少重绘和重排 */
+.maya-static {
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+/* 优化字体渲染 */
+.maya-text {
+  font-display: swap;
+  text-rendering: optimizeLegibility;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .maya-mobile-optimized {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+  }
+  
+  .maya-card {
+    contain: none; /* 移动端禁用contain以提高兼容性 */
+  }
+}
+
+/* 性能监控样式 */
+.performance-monitor {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.performance-good { color: #4ade80; }
+.performance-warning { color: #fbbf24; }
+.performance-critical { color: #ef4444; }
+
+/* 滚动优化 */
+.maya-scroll-optimized {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 减少阴影和渐变的使用 */
+.maya-flat {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+/* 优化的网格布局 */
+.maya-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* 媒体查询优化 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

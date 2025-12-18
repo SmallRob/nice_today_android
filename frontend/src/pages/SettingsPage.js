@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DarkModeToggle from '../components/DarkModeToggle';
+import PerformanceTestTool from '../components/PerformanceTestTool';
 import { getAppVersion } from '../utils/capacitor';
 import { Capacitor } from '@capacitor/core';
 import PageLayout, { Card, Button } from '../components/PageLayout';
@@ -83,6 +84,9 @@ function SettingsPage() {
   return (
     <PageLayout title="设置">
       <div className="max-w-lg mx-auto space-y-6">
+        {/* 性能测试工具 */}
+        <PerformanceTestTool />
+        
         {/* 应用设置部分 */}
         <Card title="应用设置">
           <div className="space-y-4">

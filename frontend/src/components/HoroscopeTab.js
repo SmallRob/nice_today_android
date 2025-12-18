@@ -197,8 +197,8 @@ const HoroscopeTab = () => {
       setUserHoroscope(horoscope);
       setBirthDate({ year, month, day });
       
-      // 保存到存储 - 使用标准接口和localStorage
-      await storageManager.setUserZodiac(horoscope);
+      // 保存到存储 - 使用新的星座存储接口
+      await storageManager.setUserHoroscope(horoscope);
       await storageManager.setBirthYear(year);
       
       // 同时保存完整的出生日期到localStorage用于后续计算
@@ -209,8 +209,8 @@ const HoroscopeTab = () => {
   // 获取存储的星座信息
   const getStoredHoroscope = async () => {
     try {
-      // 使用存储管理器提供的标准接口
-      const storedHoroscope = await storageManager.getUserZodiac();
+      // 使用新的星座存储接口
+      const storedHoroscope = await storageManager.getUserHoroscope();
       const storedBirthYear = await storageManager.getBirthYear();
       
       if (storedHoroscope) {
@@ -463,8 +463,8 @@ const HoroscopeTab = () => {
   // 处理星座选择
   const handleHoroscopeChange = async (horoscope) => {
     setUserHoroscope(horoscope);
-    // 保存到存储
-    await storageManager.setUserZodiac(horoscope);
+    // 保存到存储 - 使用新的星座存储接口
+    await storageManager.setUserHoroscope(horoscope);
   };
 
   // 处理出生日期输入
@@ -496,11 +496,13 @@ const HoroscopeTab = () => {
         
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <p className="text-gray-600 dark:text-gray-300 mb-2">
-              <span className="font-semibold">日期范围：</span>{dateRange}
+            <p className="text-gray-600 dark:text-gray-300 mb-3">
+              <span className="font-semibold">日期范围：</span>
+              <span className="ml-1">{dateRange}</span>
             </p>
             <p className="text-gray-600 dark:text-gray-300">
-              <span className="font-semibold">性格特点：</span>{traits}
+              <span className="font-semibold">性格特点：</span>
+              <span className="ml-1">{traits}</span>
             </p>
           </div>
           <div className="flex items-center justify-center">

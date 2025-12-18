@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 // 玛雅日历工具类 - 本地化版本
 class MayaCalendarUtils {
@@ -87,72 +87,128 @@ const MayaCalendar = ({ serviceStatus, isDesktop }) => {
   const [mayaData, setMayaData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // 格式化日期为YYYY-MM-DD
-  const formatDateLocal = (date) => {
+  // 优化后的日期格式化函数
+  const formatDateLocal = useCallback((date) => {
     if (!date) return null;
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };
+  }, []);
 
-  // 加载玛雅历法数据
-  const loadMayaData = async (date) => {
+  // 优化的玛雅数据计算函数
+  const calculateMayaDataAsync = useCallback(async (date) => {
+    return new Promise((resolve) => {
+      // 使用requestIdleCallback或setTimeout避免阻塞主线程
+      const calculate = () => {
+        try {
+          const mayaResult = MayaCalendarUtils.calculateMayaDate(date);
+          const energyTip = MayaCalendarUtils.getTip(mayaResult.kin);
+          resolve({
+            ...mayaResult,
+            ...energyTip,
+            date: formatDateLocal(date)
+          });
+        } catch (error) {
+          console.error('计算玛雅数据失败:', error);
+          resolve(null);
+        }
+      };
+
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(calculate);
+      } else {
+        setTimeout(calculate, 0);
+      }
+    });
+  }, [formatDateLocal]);
+
+  // 优化的加载函数
+  const loadMayaData = useCallback(async (date) => {
+    if (loading) return;
+    
     setLoading(true);
     setError(null);
 
     try {
-      const mayaResult = MayaCalendarUtils.calculateMayaDate(date);
-      const energyTip = MayaCalendarUtils.getTip(mayaResult.kin);
+      const mayaResult = await calculateMayaDataAsync(date);
       
-      setMayaData({
-        ...mayaResult,
-        ...energyTip,
-        date: formatDateLocal(date)
-      });
+      if (mayaResult) {
+        // 使用requestAnimationFrame确保流畅的UI更新
+        requestAnimationFrame(() => {
+          setMayaData(mayaResult);
+        });
+      } else {
+        setError("计算玛雅历法数据时出错");
+      }
     } catch (error) {
       setError("计算玛雅历法数据时出错");
       console.error('加载玛雅历法数据失败:', error);
+    } finally {
+      // 延迟设置loading为false，确保UI更新完成
+      setTimeout(() => {
+        setLoading(false);
+      }, 0);
     }
-    
-    setLoading(false);
-  };
+  }, [loading, calculateMayaDataAsync]);
 
-  // 处理日期选择变化
-  const handleDateChange = (e) => {
+  // 优化的日期变化处理
+  const handleDateChange = useCallback((e) => {
     const newDate = new Date(e.target.value);
     if (!isNaN(newDate.getTime())) {
       setSelectedDate(newDate);
-      loadMayaData(newDate);
+      // 使用防抖，避免频繁计算
+      setTimeout(() => {
+        loadMayaData(newDate);
+      }, 50);
     }
-  };
+  }, [loadMayaData]);
 
-  // 快速选择日期
-  const handleQuickSelect = (daysOffset) => {
+  // 优化的快速选择日期
+  const handleQuickSelect = useCallback((daysOffset) => {
     const newDate = new Date();
     newDate.setDate(newDate.getDate() + daysOffset);
     setSelectedDate(newDate);
-    loadMayaData(newDate);
-  };
+    setTimeout(() => {
+      loadMayaData(newDate);
+    }, 0);
+  }, [loadMayaData]);
 
-  // 组件挂载时自动加载今日数据
+  // 组件挂载时延迟加载数据
   useEffect(() => {
-    loadMayaData(new Date());
-  }, []);
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+      loadMayaData(new Date());
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [loadMayaData]);
 
+  // 优化的渲染组件
+  const MayaInfoCard = useCallback(({ children, className = "" }) => (
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 ${className}`}>
+      {children}
+    </div>
+  ), []);
+
+  // 优化的加载状态组件
   if (loading && !mayaData) {
     return (
-      <div className="flex flex-col items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mb-3"></div>
-        <p className="text-gray-600 dark:text-gray-400 text-sm">正在计算玛雅历法...</p>
+      <div className="flex flex-col items-center justify-center py-8 animate-fadeIn">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mb-3"></div>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">正在计算玛雅历法...</p>
+        </div>
       </div>
     );
   }
 
+  // 优化的错误状态组件
   if (error && !mayaData) {
     return (
-      <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-4 text-center">
+      <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-4 text-center animate-fadeIn">
         <div className="w-6 h-6 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center mx-auto mb-2">
           <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -170,9 +226,10 @@ const MayaCalendar = ({ serviceStatus, isDesktop }) => {
     );
   }
 
-  if (!mayaData) {
+  // 优化的空状态组件
+  if (!mayaData || !isVisible) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
+      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center animate-fadeIn">
         <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
           <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />

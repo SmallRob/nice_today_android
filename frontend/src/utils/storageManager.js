@@ -135,7 +135,8 @@ class StorageManager {
   constructor() {
     this.storageKey = 'nice_today_app_preferences';
     this.defaultPreferences = {
-      userZodiac: '',
+      userZodiac: '',        // 生肖（十二生肖）
+      userHoroscope: '',     // 星座（十二星座）
       birthYear: null,
       theme: 'light',
       notifications: true
@@ -201,6 +202,22 @@ class StorageManager {
   }
 
   /**
+   * 获取用户星座
+   */
+  async getUserHoroscope() {
+    const preferences = await this.getPreferences();
+    return preferences.userHoroscope;
+  }
+
+  /**
+   * 设置用户星座
+   * @param {string} horoscope - 星座名称
+   */
+  async setUserHoroscope(horoscope) {
+    return await this.savePreferences({ userHoroscope: horoscope });
+  }
+
+  /**
    * 获取用户出生年份
    */
   async getBirthYear() {
@@ -239,14 +256,25 @@ class StorageManager {
   }
 
   /**
+   * 检查是否有存储的用户星座数据
+   */
+  async hasHoroscopeData() {
+    const preferences = await this.getPreferences();
+    return !!preferences.userHoroscope;
+  }
+
+  /**
    * 获取完整的用户信息
    */
   async getUserInfo() {
     const preferences = await this.getPreferences();
     return {
       zodiac: preferences.userZodiac,
+      horoscope: preferences.userHoroscope,
       birthYear: preferences.birthYear,
-      hasCompleteInfo: !!preferences.userZodiac && !!preferences.birthYear
+      hasZodiacInfo: !!preferences.userZodiac,
+      hasHoroscopeInfo: !!preferences.userHoroscope,
+      hasBirthYearInfo: !!preferences.birthYear
     };
   }
 }
@@ -267,10 +295,13 @@ export const {
   savePreferences,
   getUserZodiac,
   setUserZodiac,
+  getUserHoroscope,
+  setUserHoroscope,
   getBirthYear,
   setBirthYear,
   clearAll,
   hasZodiacData,
+  hasHoroscopeData,
   getUserInfo
 } = storageManager;
 
