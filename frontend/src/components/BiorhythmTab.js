@@ -10,10 +10,23 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     initDataMigration();
   }, []);
 
-  // 从localStorage获取上次使用的出生日期（兼容性版本）
+  // 从localStorage获取上次使用的出生日期（增强兼容性版本）
   const getStoredBirthDate = () => {
     try {
-      const stored = CompatibleStorage.getItem('last_biorhythm_birthdate');
+      // 首先尝试从生物节律专用存储读取
+      let stored = CompatibleStorage.getItem('last_biorhythm_birthdate');
+      
+      // 如果没有找到，尝试从玛雅出生图存储读取
+      if (!stored) {
+        stored = CompatibleStorage.getItem('maya_birth_date');
+      }
+      
+      // 如果没有找到，尝试从localStorage直接读取
+      if (!stored) {
+        stored = localStorage.getItem('last_biorhythm_birthdate') || 
+                 localStorage.getItem('maya_birth_date');
+      }
+      
       return stored ? new Date(stored) : null;
     } catch (error) {
       console.error('获取存储的出生日期失败:', error);

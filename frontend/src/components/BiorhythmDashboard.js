@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BiorhythmTab from './BiorhythmTab';
+import ZodiacEnergyTab from './ZodiacEnergyTab';
+import HoroscopeTab from './HoroscopeTab';
 import { BiorhythmIcon, IconLibrary } from './IconLibrary';
 import PageLayout from './PageLayout';
 
@@ -26,7 +28,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
     checkServiceStatus();
   }, []);
 
-  // 标签配置 - 简化界面，只保留生物节律
+  // 标签配置 - 添加生肖能量和星座运程标签
   const tabs = [
     { 
       id: 'biorhythm', 
@@ -34,6 +36,28 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       icon: BiorhythmIcon,
       description: '科学计算您的生物节律状态',
       color: 'blue'
+    },
+    { 
+      id: 'zodiac', 
+      label: '生肖能量', 
+      icon: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      description: '根据生肖提供能量指引',
+      color: 'purple'
+    },
+    { 
+      id: 'horoscope', 
+      label: '星座运程', 
+      icon: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+        </svg>
+      ),
+      description: '根据星座提供运势指导',
+      color: 'indigo'
     }
   ];
 
@@ -88,6 +112,12 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 serviceStatus={serviceStatus.biorhythm}
                 isDesktop={appInfo.isDesktop}
               />
+            )}
+            {activeTab === 'zodiac' && (
+              <ZodiacEnergyTab />
+            )}
+            {activeTab === 'horoscope' && (
+              <HoroscopeTab />
             )}
           </div>
         </div>
