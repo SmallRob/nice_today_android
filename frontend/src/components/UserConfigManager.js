@@ -36,7 +36,7 @@ const LoadingSpinner = () => (
 );
 
 // 配置表单组件
-const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, isExpanded, onToggleExpand }) => {
+const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, isExpanded, onToggleExpand, configs, showMessage }) => {
   const [formData, setFormData] = useState({ ...config });
   const [hasChanges, setHasChanges] = useState(false);
   const formRef = useRef(null);
@@ -519,6 +519,15 @@ const UserConfigManagerComponent = () => {
     );
   }
   
+  // 显示提示信息
+  const showMessage = (text, type = 'info') => {
+    setMessage({ text, type });
+    // 3秒后自动清除消息
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  };
+
   if (error) {
     return (
       <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4 rounded-lg">
@@ -537,15 +546,6 @@ const UserConfigManagerComponent = () => {
       </div>
     );
   }
-
-  // 显示提示信息
-  const showMessage = (text, type = 'info') => {
-    setMessage({ text, type });
-    // 3秒后自动清除消息
-    setTimeout(() => {
-      setMessage(null);
-    }, 3000);
-  };
   
   return (
     <div className="space-y-4">
@@ -629,6 +629,8 @@ const UserConfigManagerComponent = () => {
             onDelete={handleDeleteConfig}
             onSetActive={handleSetActiveConfig}
             onToggleExpand={handleToggleExpand}
+            configs={configs}
+            showMessage={showMessage}
           />
         ))}
       </div>

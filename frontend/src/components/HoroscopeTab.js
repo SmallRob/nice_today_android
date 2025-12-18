@@ -651,7 +651,7 @@ const HoroscopeTab = () => {
               <span className="mr-2">🏠</span> 生活
             </h4>
             <div className="flex items-center justify-between">
-              <span className={`text-xl font-bold ${getScoreColor(life.score)`}>
+              <span className={`text-xl font-bold ${getScoreColor(life.score)}`}>
                 {life.score > 0 ? `+${life.score}` : life.score}
               </span>
               <span className={`px-2 py-1 rounded text-xs ${getScoreColor(life.score)}`}>
@@ -669,7 +669,7 @@ const HoroscopeTab = () => {
               <span className="mr-2">💼</span> 事业
             </h4>
             <div className="flex items-center justify-between">
-              <span className={`text-xl font-bold ${getScoreColor(career.score)`}>
+              <span className={`text-xl font-bold ${getScoreColor(career.score)}`}>
                 {career.score > 0 ? `+${career.score}` : career.score}
               </span>
               <span className={`px-2 py-1 rounded text-xs ${getScoreColor(career.score)}`}>
@@ -687,7 +687,7 @@ const HoroscopeTab = () => {
               <span className="mr-2">💚</span> 健康
             </h4>
             <div className="flex items-center justify-between">
-              <span className={`text-xl font-bold ${getScoreColor(health.score)`}>
+              <span className={`text-xl font-bold ${getScoreColor(health.score)}`}>
                 {health.score > 0 ? `+${health.score}` : health.score}
               </span>
               <span className={`px-2 py-1 rounded text-xs ${getScoreColor(health.score)}`}>
@@ -705,7 +705,7 @@ const HoroscopeTab = () => {
               <span className="mr-2">❤️</span> 爱情
             </h4>
             <div className="flex items-center justify-between">
-              <span className={`text-xl font-bold ${getScoreColor(love.score)`}>
+              <span className={`text-xl font-bold ${getScoreColor(love.score)}`}>
                 {love.score > 0 ? `+${love.score}` : love.score}
               </span>
               <span className={`px-2 py-1 rounded text-xs ${getScoreColor(love.score)}`}>

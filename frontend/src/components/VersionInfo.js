@@ -11,7 +11,7 @@ const VersionInfo = ({
   customVersion = null
 }) => {
   // 默认版本号
-  const defaultVersion = 'v1.0.0';
+  const defaultVersion = 'v1.0.12';
   const version = customVersion || defaultVersion;
 
   return (
