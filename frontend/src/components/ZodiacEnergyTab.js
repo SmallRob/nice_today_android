@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { storageManager } from '../utils/storageManager';
+import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 
 const ZodiacEnergyTab = () => {
@@ -10,6 +11,14 @@ const ZodiacEnergyTab = () => {
   const [error, setError] = useState(null);
   const [allZodiacs, setAllZodiacs] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [userInfo, setUserInfo] = useState({
+    nickname: '',
+    birthDate: '',
+    zodiac: '',
+    zodiacAnimal: ''
+  });
+  const [initialized, setInitialized] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // 五行元素数据 - 使用useMemo缓存，避免重复创建
   const wuxingElements = React.useMemo(() => [
@@ -266,29 +275,89 @@ const ZodiacEnergyTab = () => {
   // 初始化组件
   useEffect(() => {
     let isMounted = true;
+    const removeListener = () => {};
     
     const initialize = async () => {
-      if (!isMounted) return;
-      
-      await loadAllZodiacs();
-      
-      if (!isMounted) return;
-      
-      // 首先尝试从存储中获取已保存的生肖
-      const storedZodiac = await getStoredZodiac();
-      if (storedZodiac && isMounted) {
-        setUserZodiac(storedZodiac);
-        return;
-      }
-      
-      // 如果没有保存的生肖，尝试从生物节律中获取出生年份
       try {
-        const birthYear = await storageManager.getBirthYear();
-        if (birthYear && isMounted) {
-          calculateZodiacFromYear(birthYear);
+        // 确保用户配置管理器已初始化
+        if (!userConfigManager.initialized) {
+          await userConfigManager.initialize();
+        }
+        
+        // 加载所有生肖
+        await loadAllZodiacs();
+        
+        if (!isMounted) return;
+        
+        // 从用户配置管理器获取用户信息
+        const currentConfig = userConfigManager.getCurrentConfig();
+        if (currentConfig && isMounted) {
+          setUserInfo(currentConfig);
+          
+          // 优先使用用户配置中的生肖信息
+          if (currentConfig.zodiacAnimal) {
+            setUserZodiac(currentConfig.zodiacAnimal);
+            
+            // 同步到storageManager以保持兼容性
+            await saveZodiac(currentConfig.zodiacAnimal);
+          } else if (currentConfig.birthDate) {
+            // 如果没有生肖但有出生日期，计算生肖
+            const birthYear = new Date(currentConfig.birthDate).getFullYear();
+            if (birthYear && birthYear > 1900 && birthYear < 2100) {
+              calculateZodiacFromYear(birthYear);
+            }
+          }
+        }
+        
+        // 添加配置变更监听器
+        const removeConfigListener = userConfigManager.addListener((configData) => {
+          if (isMounted && configData.currentConfig) {
+            setUserInfo(configData.currentConfig);
+            
+            // 当配置变更时，更新生肖信息
+            if (configData.currentConfig.zodiacAnimal && 
+                configData.currentConfig.zodiacAnimal !== userZodiac) {
+              setUserZodiac(configData.currentConfig.zodiacAnimal);
+              saveZodiac(configData.currentConfig.zodiacAnimal);
+              // 强制重新加载数据（包括配置切换和强制重载）
+              setDataLoaded(false);
+            }
+            
+            // 如果收到强制重载标志，确保重新加载数据
+            if (configData.forceReload) {
+              setDataLoaded(false);
+            }
+          }
+        });
+        
+        removeListener.current = removeConfigListener;
+        
+        if (isMounted) {
+          setInitialized(true);
         }
       } catch (error) {
-        console.log('无法从生物节律获取出生年份:', error);
+        console.error('初始化生肖能量组件失败:', error);
+        
+        // 降级处理：使用原有逻辑
+        await loadAllZodiacs();
+        if (isMounted) {
+          // 尝试从存储中获取已保存的生肖
+          const storedZodiac = await getStoredZodiac();
+          if (storedZodiac) {
+            setUserZodiac(storedZodiac);
+          } else {
+            // 尝试从生物节律中获取出生年份
+            try {
+              const birthYear = await storageManager.getBirthYear();
+              if (birthYear) {
+                calculateZodiacFromYear(birthYear);
+              }
+            } catch (err) {
+              console.log('无法从生物节律获取出生年份:', err);
+            }
+          }
+          setInitialized(true);
+        }
       }
     };
     
@@ -296,19 +365,26 @@ const ZodiacEnergyTab = () => {
     
     return () => {
       isMounted = false;
+      if (removeListener.current) {
+        removeListener.current();
+      }
     };
-  }, [loadAllZodiacs, calculateZodiacFromYear]);
+  }, [loadAllZodiacs, calculateZodiacFromYear, userZodiac]);
 
-  // 当生肖或日期变化时重新加载数据 - 添加防抖
+  // 当生肖或日期变化时重新加载数据 - 优化加载逻辑
   useEffect(() => {
-    if (!userZodiac) return;
+    if (!userZodiac || !initialized) return;
     
-    const timer = setTimeout(() => {
-      loadEnergyGuidance();
-    }, 200);
-    
-    return () => clearTimeout(timer);
-  }, [userZodiac, selectedDate, loadEnergyGuidance]);
+    // 仅在首次默认加载或用户主动切换时执行数据请求
+    if (!dataLoaded) {
+      const timer = setTimeout(() => {
+        loadEnergyGuidance();
+        setDataLoaded(true);
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [userZodiac, selectedDate, loadEnergyGuidance, initialized, dataLoaded]);
 
   // 本地日期格式化方法
   const formatDateLocal = (date) => {
@@ -321,17 +397,15 @@ const ZodiacEnergyTab = () => {
 
   // 处理生肖选择
   const handleZodiacChange = async (zodiac) => {
-    setUserZodiac(zodiac);
-    await saveZodiac(zodiac);
-  };
-
-  // 处理年份输入
-  const handleYearInput = (event) => {
-    const year = parseInt(event.target.value);
-    if (year && year > 1900 && year < 2100) {
-      calculateZodiacFromYear(year);
+    if (userZodiac !== zodiac) {
+      setUserZodiac(zodiac);
+      await saveZodiac(zodiac);
+      // 标记需要重新加载数据
+      setDataLoaded(false);
     }
   };
+
+
 
   // 渲染能量匹配度仪表板
   const renderEnergyMatchDashboard = () => {
@@ -629,6 +703,49 @@ const ZodiacEnergyTab = () => {
     );
   };
 
+  // 用户信息显示组件
+  const UserInfoDisplay = useMemo(() => {
+    return (
+      <Card title="当前用户信息" className="mb-4">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                用户昵称
+              </p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {userInfo.nickname || '未知用户'}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                出生日期
+              </p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {userInfo.birthDate || '未知'}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                当前生肖
+              </p>
+              <p className="font-medium text-blue-600 dark:text-blue-400">
+                {userZodiac || '未设置'}
+              </p>
+            </div>
+          </div>
+          {userInfo.nickname && (
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                💡 如需修改信息，请在设置页面进行用户配置管理
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
+    );
+  }, [userInfo, userZodiac]);
+
   return (
     <div className="space-y-6">
       {/* 标题区域 */}
@@ -643,58 +760,49 @@ const ZodiacEnergyTab = () => {
         </div>
       </Card>
 
-      {/* 生肖选择器 */}
-      <Card title="选择您的生肖" className="mb-4">
-          <div className="space-y-4">
-            {/* 年份输入 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                根据出生年份计算生肖
-              </label>
-              <input
-                type="number"
-                placeholder="例如：1991"
-                min="1900"
-                max="2100"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                onBlur={handleYearInput}
-              />
-            </div>
+      {/* 用户信息显示 */}
+      {UserInfoDisplay}
+      
+      {/* 简化的生肖选择器 */}
+      <Card title="临时切换生肖" className="mb-4">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            您可以临时切换查看不同生肖的能量指引，这不会修改您的用户配置
+          </p>
+          
+          {/* 生肖选择网格 */}
+          <div className="grid grid-cols-6 gap-2">
+            {(allZodiacs.length > 0 ? allZodiacs : ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']).map((zodiac) => (
+              <button
+                key={zodiac}
+                onClick={() => handleZodiacChange(zodiac)}
+                className={`p-2 rounded-lg text-center transition-all duration-200 text-sm font-medium ${
+                  userZodiac === zodiac
+                    ? 'bg-blue-500 text-white shadow'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                {zodiac}
+              </button>
+            ))}
+          </div>
 
-            {/* 生肖选择网格 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                或者直接选择生肖
-              </label>
-              <div className="grid grid-cols-6 gap-2">
-                {(allZodiacs.length > 0 ? allZodiacs : ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']).map((zodiac) => (
-                  <button
-                    key={zodiac}
-                    onClick={() => handleZodiacChange(zodiac)}
-                    className={`p-2 rounded-lg text-center transition-all duration-200 text-sm font-medium ${
-                      userZodiac === zodiac
-                        ? 'bg-blue-500 text-white shadow'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    {zodiac}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 日期选择器 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                查看指定日期的能量指引
-              </label>
-              <input
-                type="date"
-                value={selectedDate ? formatDateLocal(selectedDate) : ''}
-                onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : new Date())}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-              />
-            </div>
+          {/* 日期选择器 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              查看指定日期的能量指引
+            </label>
+            <input
+              type="date"
+              value={selectedDate ? formatDateLocal(selectedDate) : ''}
+              onChange={(e) => {
+                const newDate = e.target.value ? new Date(e.target.value) : new Date();
+                setSelectedDate(newDate);
+                // 日期变更时标记需要重新加载数据
+                setDataLoaded(false);
+              }}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+            />
           </div>
 
           {/* 当前选择显示 */}
@@ -710,6 +818,7 @@ const ZodiacEnergyTab = () => {
               </p>
             </div>
           )}
+        </div>
       </Card>
 
       {/* 加载状态 */}

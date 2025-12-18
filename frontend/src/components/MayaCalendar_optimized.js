@@ -372,22 +372,7 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
     </div>
   )), []);
 
-  // 优化的加载状态组件
-  if (loading && !mayaData) {
-    return <LoadingSpinner />;
-  }
-
-  // 优化的错误状态组件
-  if (error && !mayaData) {
-    return <ErrorDisplay error={error} onRetry={handleRetry} />;
-  }
-
-  // 优化的空状态组件
-  if (!mayaData || !isVisible) {
-    return <EmptyState onRetry={handleRetry} />;
-  }
-
-  // 优化的日期选择按钮
+  // 优化的日期选择按钮 - 移到条件渲染之前
   const QuickSelectButtons = useMemo(() => (
     <div className="flex justify-center space-x-2 mt-3">
       {[-1, 0, 1].map((offset) => (
@@ -406,13 +391,13 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
     </div>
   ), [handleQuickSelect]);
 
-  // 优化的玛雅历法核心信息组件
+  // 优化的玛雅历法核心信息组件 - 移到条件渲染之前
   const MayaCoreInfo = useMemo(() => (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {/* KIN数 */}
       <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
         <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
-          KIN {mayaData.kin}
+          KIN {mayaData?.kin}
         </div>
         <div className="text-xs text-purple-800 dark:text-purple-300">能量编号</div>
       </div>
@@ -420,7 +405,7 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
       {/* 调性 */}
       <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
         <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-1">
-          {mayaData.tone}
+          {mayaData?.tone}
         </div>
         <div className="text-xs text-blue-800 dark:text-blue-300">银河音调</div>
       </div>
@@ -428,35 +413,50 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
       {/* 图腾 */}
       <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
         <div className="text-lg font-bold text-green-600 dark:text-green-400 mb-1">
-          {mayaData.seal}
+          {mayaData?.seal}
         </div>
         <div className="text-xs text-green-800 dark:text-green-300">太阳印记</div>
       </div>
     </div>
-  ), [mayaData.kin, mayaData.tone, mayaData.seal]);
+  ), [mayaData?.kin, mayaData?.tone, mayaData?.seal]);
 
-  // 优化的完整名称组件
+  // 优化的完整名称组件 - 移到条件渲染之前
   const MayaFullName = useMemo(() => (
     <div className="mt-3 p-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg text-center">
-      <div className="text-lg font-bold">{mayaData.fullName}</div>
+      <div className="text-lg font-bold">{mayaData?.fullName}</div>
       <div className="text-sm opacity-90">今日玛雅历法能量</div>
     </div>
-  ), [mayaData.fullName]);
+  ), [mayaData?.fullName]);
 
-  // 优化的能量提示组件
+  // 优化的能量提示组件 - 移到条件渲染之前
   const EnergyTip = useMemo(() => (
-    <div className={`${mayaData.bgColor} border-l-4 border-purple-500 dark:border-purple-400 rounded-r-lg p-3`}>
+    <div className={`${mayaData?.bgColor} border-l-4 border-purple-500 dark:border-purple-400 rounded-r-lg p-3`}>
       <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
         今日能量提示
       </h4>
-      <p className={`text-xs ${mayaData.textColor}`}>
-        <strong>能量等级：{mayaData.level}</strong> - {mayaData.tip}
+      <p className={`text-xs ${mayaData?.textColor}`}>
+        <strong>能量等级：{mayaData?.level}</strong> - {mayaData?.tip}
       </p>
       <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-        <strong>建议活动：</strong>{mayaData.suggestion}
+        <strong>建议活动：</strong>{mayaData?.suggestion}
       </div>
     </div>
-  ), [mayaData.bgColor, mayaData.textColor, mayData.level, mayData.tip, mayaData.suggestion]);
+  ), [mayaData?.bgColor, mayaData?.textColor, mayaData?.level, mayaData?.tip, mayaData?.suggestion]);
+
+  // 优化的加载状态组件
+  if (loading && !mayaData) {
+    return <LoadingSpinner />;
+  }
+
+  // 优化的错误状态组件
+  if (error && !mayaData) {
+    return <ErrorDisplay error={error} onRetry={handleRetry} />;
+  }
+
+  // 优化的空状态组件
+  if (!mayaData || !isVisible) {
+    return <EmptyState onRetry={handleRetry} />;
+  }
 
   return (
     <div className="space-y-4">

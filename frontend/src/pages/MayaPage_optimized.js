@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { lazy, Suspense } from 'react';
 import PageLayout, { Card } from '../components/PageLayout';
 import '../index.css';

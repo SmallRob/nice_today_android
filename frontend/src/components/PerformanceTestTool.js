@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { mayaPerformanceTest, benchmark } from '../utils/performanceTest';
+import { mayaPerformanceTest } from '../utils/performanceTest';
 import { Card } from './PageLayout';
 
 const PerformanceTestTool = () => {
@@ -7,6 +7,12 @@ const PerformanceTestTool = () => {
   const [testResults, setTestResults] = useState(null);
   const [progress, setProgress] = useState(0);
   const [currentTest, setCurrentTest] = useState('');
+  const [expandedSections, setExpandedSections] = useState({
+    summary: true,
+    details: false,
+    recommendations: false
+  });
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // 模拟性能测试函数
   const simulateMayaCalculation = async () => {
@@ -110,6 +116,35 @@ const PerformanceTestTool = () => {
     if (score >= 70) return 'bg-yellow-100 dark:bg-yellow-900';
     return 'bg-red-100 dark:bg-red-900';
   };
+  
+  // 优化切换展开/折叠状态，添加动画效果
+  const toggleSection = useCallback((section) => {
+    if (isAnimating) return;
+    
+    setIsAnimating(true);
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+    
+    // 设置动画定时器
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 300);
+  }, [isAnimating]);
+  
+  // 优化的展开图标组件
+  const ExpandIcon = ({ isExpanded }) => (
+    <svg 
+      className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`} 
+      fill="none" 
+      stroke="currentColor" 
+      viewBox="0 0 24 24" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  );
 
   return (
     <Card title="性能测试工具" className="mb-6">
@@ -167,8 +202,11 @@ const PerformanceTestTool = () => {
         {testResults && !isRunning && (
           <div className="space-y-4">
             {/* 总体评分 */}
-            <div className={`rounded-lg p-4 ${getScoreBgColor(testResults.overallScore)}`}>
-              <div className="flex items-center justify-between">
+            <div className={`rounded-lg overflow-hidden ${getScoreBgColor(testResults.overallScore)}`}>
+              <div 
+                className="p-4 cursor-pointer flex items-center justify-between"
+                onClick={() => toggleSection('summary')}
+              >
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                     性能评分
@@ -177,58 +215,121 @@ const PerformanceTestTool = () => {
                     {testResults.passedTests}/{testResults.totalTests} 项测试通过
                   </p>
                 </div>
-                <div className={`text-3xl font-bold ${getScoreColor(testResults.overallScore)}`}>
-                  {testResults.overallScore}/100
+                <div className="flex items-center space-x-2">
+                  <div className={`text-3xl font-bold ${getScoreColor(testResults.overallScore)}`}>
+                    {testResults.overallScore}/100
+                  </div>
+                  <ExpandIcon isExpanded={expandedSections.summary} />
                 </div>
               </div>
               
-              <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                测试时间: {testResults.timestamp}
-              </div>
+              {expandedSections.summary && (
+                <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-2">
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    测试时间: {testResults.timestamp}
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-4">
+                    <div className="text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">总体评级: </span>
+                      <span className={`font-medium ${getScoreColor(testResults.overallScore)}`}>
+                        {testResults.overallScore >= 90 ? '优秀' : 
+                         testResults.overallScore >= 70 ? '良好' : 
+                         testResults.overallScore >= 50 ? '一般' : '较差'}
+                      </span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">通过率: </span>
+                      <span className={`font-medium ${getScoreColor((testResults.passedTests / testResults.totalTests) * 100)}`}>
+                        {Math.round((testResults.passedTests / testResults.totalTests) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 详细结果 */}
             <div className="space-y-3">
-              <h5 className="font-medium text-gray-900 dark:text-white">详细测试结果</h5>
-              {testResults.details.map((result, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {result.componentName}
-                    </span>
-                    {result.error && (
-                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                        {result.error}
-                      </p>
-                    )}
-                  </div>
-                  <div className={`px-2 py-1 rounded text-xs font-medium ${
-                    result.passed 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
-                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                  }`}>
-                    {result.passed ? '通过' : '失败'}
-                  </div>
+              <div 
+                className="flex items-center justify-between cursor-pointer p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+                onClick={() => toggleSection('details')}
+              >
+                <div className="flex items-center space-x-2">
+                  <h5 className="font-medium text-gray-900 dark:text-white">详细测试结果</h5>
+                  <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded-full">
+                    {testResults.details.length} 项
+                  </span>
                 </div>
-              ))}
+                <ExpandIcon isExpanded={expandedSections.details} />
+              </div>
+              
+              <div className={`transition-all duration-300 overflow-hidden ${
+                expandedSections.details ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+              }`}>
+                <div className="space-y-2">
+                  {testResults.details.map((result, index) => (
+                    <div key={index} className={`flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg transition-all duration-200 ${
+                      isAnimating ? 'transform scale-95' : ''
+                    }`}>
+                      <div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {result.componentName}
+                        </span>
+                        {result.error && (
+                          <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                            {result.error}
+                          </p>
+                        )}
+                      </div>
+                      <div className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200 ${
+                        result.passed 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                      }`}>
+                        {result.passed ? '通过' : '失败'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* 优化建议 */}
             {testResults.overallScore < 90 && (
-              <div className="bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 border-l-4 border-yellow-400 rounded-r-lg p-4">
-                <h5 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">
-                  优化建议
-                </h5>
-                <ul className="text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
-                  {testResults.overallScore < 70 && (
-                    <li>• 建议关闭不必要的后台应用，释放系统资源</li>
-                  )}
-                  <li>• 确保浏览器为最新版本以获得最佳性能</li>
-                  <li>• 定期清理浏览器缓存和临时文件</li>
-                  {testResults.overallScore < 80 && (
-                    <li>• 考虑升级设备硬件以获得更好的体验</li>
-                  )}
-                </ul>
+              <div className="bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 border-l-4 border-yellow-400 rounded-r-lg overflow-hidden">
+                <div 
+                  className="p-4 cursor-pointer flex items-center justify-between hover:bg-yellow-100 dark:hover:bg-yellow-800 transition-colors duration-200"
+                  onClick={() => toggleSection('recommendations')}
+                >
+                  <div className="flex items-center space-x-2">
+                    <h5 className="font-medium text-yellow-800 dark:text-yellow-300">
+                      优化建议
+                    </h5>
+                    <span className="px-2 py-0.5 bg-yellow-200 dark:bg-yellow-700 text-yellow-800 dark:text-yellow-200 text-xs rounded-full">
+                      {testResults.overallScore < 70 ? '强烈建议' : '建议'}
+                    </span>
+                  </div>
+                  <ExpandIcon isExpanded={expandedSections.recommendations} />
+                </div>
+                
+                <div className={`transition-all duration-300 overflow-hidden ${
+                  expandedSections.recommendations ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
+                }`}>
+                  <div className="px-4 pb-4 border-t border-yellow-200 dark:border-yellow-700 pt-2">
+                    <ul className="text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
+                      {testResults.overallScore < 70 && (
+                        <li className="transition-all duration-200 hover:translate-x-1">• 建议关闭不必要的后台应用，释放系统资源</li>
+                      )}
+                      <li className="transition-all duration-200 hover:translate-x-1">• 确保浏览器为最新版本以获得最佳性能</li>
+                      <li className="transition-all duration-200 hover:translate-x-1">• 定期清理浏览器缓存和临时文件</li>
+                      {testResults.overallScore < 80 && (
+                        <li className="transition-all duration-200 hover:translate-x-1">• 考虑升级设备硬件以获得更好的体验</li>
+                      )}
+                      <li className="transition-all duration-200 hover:translate-x-1">• 使用原生应用以获得更好的性能表现</li>
+                      <li className="transition-all duration-200 hover:translate-x-1">• 在设置中启用本地计算模式，减少网络请求延迟</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             )}
 

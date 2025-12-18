@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import './MayaBirthChart.css';
@@ -22,91 +22,121 @@ import {
   WEEKDAYS
 } from '../config/mayaConfig';
 
-// 玛雅日历计算工具类
+// 懒加载优化版本的结果组件
+const ResultsSection = lazy(() => import('./MayaBirthChartResults_optimized'));
+
+// 优化的加载组件
+const LoadingSpinner = memo(() => (
+  <div className="flex justify-center items-center py-4">
+    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+  </div>
+));
+
+// 优化的错误提示组件
+const ErrorDisplay = memo(({ error }) => (
+  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+    {error}
+  </div>
+));
+
+// 优化的计算工具类 - 移除实例化，使用静态方法
 class MayaCalendarCalculator {
+  // 使用静态常量避免每次调用时创建数组
+  static TONES = [
+    '磁性', '月亮', '电子', '自我存在', '倍音', '韵律', '共振',
+    '银河', '太阳', '行星', '光谱', '水晶', '宇宙'
+  ];
+  
+  static SEALS = [
+    '红龙', '白风', '蓝夜', '黄种子', '红蛇', '白世界连接者', '蓝手', '黄星星',
+    '红月亮', '白狗', '蓝猴', '黄人', '红天空行者', '白巫师', '蓝鹰', '黄战士',
+    '红地球', '白镜子', '蓝风暴', '黄太阳'
+  ];
+  
+  // 缓存参考日期对象，避免重复创建
+  static REFERENCE_DATE = new Date('2025-09-23');
+  static REFERENCE_KIN = 183;
+
+  // 优化的玛雅日期计算
   static calculateMayaDate(gregorianDate) {
-    const TONES = [
-      '磁性', '月亮', '电子', '自我存在', '倍音', '韵律', '共振',
-      '银河', '太阳', '行星', '光谱', '水晶', '宇宙'
-    ];
-    
-    const SEALS = [
-      '红龙', '白风', '蓝夜', '黄种子', '红蛇', '白世界连接者', '蓝手', '黄星星',
-      '红月亮', '白狗', '蓝猴', '黄人', '红天空行者', '白巫师', '蓝鹰', '黄战士',
-      '红地球', '白镜子', '蓝风暴', '黄太阳'
-    ];
-    
-    const REFERENCE_DATE = new Date('2025-09-23');
-    const REFERENCE_KIN = 183;
-    
-    const targetDate = new Date(gregorianDate);
-    const timeDiff = targetDate.getTime() - REFERENCE_DATE.getTime();
-    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-    
-    let kin = REFERENCE_KIN + daysDiff;
-    kin = ((kin - 1) % 260) + 1;
-    
-    const toneIndex = (kin - 1) % 13;
-    const sealIndex = (kin - 1) % 20;
-    
-    const tone = TONES[toneIndex];
-    const seal = SEALS[sealIndex];
-    
-    return {
-      kin: kin,
-      tone: tone,
-      seal: seal,
-      fullName: `${tone}的${seal}`,
-      daysDiff: daysDiff,
-      toneIndex: toneIndex,
-      sealIndex: sealIndex
-    };
+    try {
+      const targetDate = new Date(gregorianDate);
+      const timeDiff = targetDate.getTime() - this.REFERENCE_DATE.getTime();
+      const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      
+      let kin = this.REFERENCE_KIN + daysDiff;
+      kin = ((kin - 1) % 260) + 1;
+      
+      const toneIndex = (kin - 1) % 13;
+      const sealIndex = (kin - 1) % 20;
+      
+      return {
+        kin,
+        tone: this.TONES[toneIndex],
+        seal: this.SEALS[sealIndex],
+        fullName: `${this.TONES[toneIndex]}的${this.SEALS[sealIndex]}`,
+        toneIndex,
+        sealIndex
+      };
+    } catch (error) {
+      console.error('计算玛雅日期时出错:', error);
+      return {
+        kin: 1,
+        tone: this.TONES[0],
+        seal: this.SEALS[0],
+        fullName: `${this.TONES[0]}的${this.SEALS[0]}`,
+        toneIndex: 0,
+        sealIndex: 0
+      };
+    }
   }
   
+  // 优化的KIN计算
   static calculateKin(birthDate) {
     const result = this.calculateMayaDate(birthDate);
     return result.kin;
   }
   
+  // 优化的印记计算
   static calculateSeal(kin) {
-    const SEALS = [
-      '红龙', '白风', '蓝夜', '黄种子', '红蛇', '白世界连接者', '蓝手', '黄星星',
-      '红月亮', '白狗', '蓝猴', '黄人', '红天空行者', '白巫师', '蓝鹰', '黄战士',
-      '红地球', '白镜子', '蓝风暴', '黄太阳'
-    ];
     const sealIndex = (kin - 1) % 20;
-    return SEALS[sealIndex];
+    return this.SEALS[sealIndex];
   }
   
+  // 优化的音调计算
   static calculateTone(kin) {
-    const TONES = [
-      '磁性', '月亮', '电子', '自我存在', '倍音', '韵律', '共振',
-      '银河', '太阳', '行星', '光谱', '水晶', '宇宙'
-    ];
     const toneIndex = (kin - 1) % 13;
-    return TONES[toneIndex];
+    return this.TONES[toneIndex];
   }
   
+  // 优化的印记描述计算
   static getSealDescription(kin) {
     const tone = this.calculateTone(kin);
     const seal = this.calculateSeal(kin);
     return `${tone}的${seal}`;
   }
   
+  // 优化的确定性哈希计算
   static generateDeterministicHash(birthDate) {
-    const dateStr = typeof birthDate === 'string' ? birthDate : formatDateString(birthDate);
-    let hash = 0;
-    if (dateStr.length === 0) return hash;
-    
-    for (let i = 0; i < dateStr.length; i++) {
-      const char = dateStr.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
+    try {
+      const dateStr = typeof birthDate === 'string' ? birthDate : formatDateString(birthDate);
+      let hash = 0;
+      if (dateStr.length === 0) return hash;
+      
+      for (let i = 0; i < dateStr.length; i++) {
+        const char = dateStr.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      
+      return Math.abs(hash);
+    } catch (error) {
+      console.error('生成哈希值时出错:', error);
+      return 0;
     }
-    
-    return Math.abs(hash);
   }
   
+  // 优化的伪随机数生成器
   static linearCongruentialGenerator(seed) {
     const a = 1664525;
     const c = 1013904223;
@@ -119,11 +149,13 @@ class MayaCalendarCalculator {
     return newSeed / Math.pow(2, 32);
   }
   
+  // 优化随机整数生成
   static getRandomInt(min, max, seed) {
     const random = this.seededRandom(seed);
     return Math.floor(random * (max - min + 1)) + min;
   }
   
+  // 优化随机元素选择
   static getRandomElement(array, seed) {
     if (!array || array.length === 0) return null;
     const index = seed % array.length;
@@ -131,15 +163,16 @@ class MayaCalendarCalculator {
   }
 }
 
-// 存储键常量
+// 缓存对象避免重复创建
 const STORAGE_KEYS = {
   BIRTH_DATE: 'maya_birth_date',
   HISTORY: 'maya_calendar_history',
-  LAST_QUERY: 'last_maya_birth_query_date'
+  LAST_QUERY: 'last_maya_birth_query_date',
+  BIRTH_INFO_CACHE: 'maya_birth_info_cache'
 };
 
-// 子组件定义
-const DatePickerSection = ({ birthDate, loading, handleDateChange, handleSubmit }) => (
+// 优化的子组件 - 使用memo防止重渲染
+const DatePickerSection = memo(({ birthDate, loading, handleDateChange, handleSubmit }) => (
   <div className="date-picker-container">
     <div className="flex w-full items-center justify-center flex-col sm:flex-row gap-3">
       <DatePicker
@@ -170,9 +203,9 @@ const DatePickerSection = ({ birthDate, loading, handleDateChange, handleSubmit 
       </button>
     </div>
   </div>
-);
+));
 
-const HistorySection = ({ historyDates, handleHistoryClick }) => (
+const HistorySection = memo(({ historyDates, handleHistoryClick }) => (
   historyDates.length > 0 && (
     <div className="history-container">
       <h3>历史记录</h3>
@@ -189,175 +222,23 @@ const HistorySection = ({ historyDates, handleHistoryClick }) => (
       </div>
     </div>
   )
-);
+));
 
-const InfoCard = ({ title, children, className = "" }) => (
+const InfoCard = memo(({ title, children, className = "" }) => (
   <div className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm ${className}`}>
     <h4 className="font-semibold text-gray-800 mb-3 text-base">{title}</h4>
     {children}
   </div>
-);
+));
 
-const ResultsSection = ({ birthInfo, showResults }) => {
-  if (!showResults || !birthInfo) return null;
-  
-  return (
-    <div className="birth-chart-results">
-      <h3 className="text-lg font-bold text-center text-gray-800 mb-4">玛雅出生图结果</h3>
-      
-      <div className="birth-info space-y-4">
-        {/* 基本信息 */}
-        <InfoCard title="基本信息" className="text-center">
-          <div className="mb-4">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500 rounded-full text-white mb-3">
-              <div className="text-center">
-                <div className="text-lg font-bold">{birthInfo.maya_kin}</div>
-                <div className="text-xs opacity-90">KIN</div>
-              </div>
-            </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">{birthInfo.maya_seal_desc}</h2>
-            <div className="flex justify-center space-x-2 mb-3">
-              <span className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm font-medium">
-                {birthInfo.maya_seal}
-              </span>
-              <span className="px-3 py-1 bg-purple-500 text-white rounded-full text-sm font-medium">
-                {birthInfo.maya_tone_info?.数字 || '1'}号音
-              </span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="bg-gray-50 p-3 rounded">
-              <div className="text-sm text-gray-600">日期</div>
-              <div className="font-medium">{birthInfo.date}</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded">
-              <div className="text-sm text-gray-600">星期</div>
-              <div className="font-medium">{birthInfo.weekday}</div>
-            </div>
-          </div>
-        </InfoCard>
-
-        {/* 印记信息 */}
-        <div className="grid grid-cols-1 gap-4">
-          <InfoCard title="印记信息">
-            <div className="space-y-3">
-              <div className="bg-blue-50 p-3 rounded">
-                <div className="text-sm text-blue-800 font-medium mb-1">特质</div>
-                <div className="text-gray-700">{birthInfo.maya_seal_info.特质}</div>
-              </div>
-              <div className="bg-green-50 p-3 rounded">
-                <div className="text-sm text-green-800 font-medium mb-1">能量</div>
-                <div className="text-gray-700">{birthInfo.maya_seal_info.能量}</div>
-              </div>
-              <div className="bg-purple-50 p-3 rounded">
-                <div className="text-sm text-purple-800 font-medium mb-1">启示</div>
-                <div className="text-gray-700">{birthInfo.maya_seal_info.启示}</div>
-              </div>
-            </div>
-          </InfoCard>
-
-          {/* 音调信息 */}
-          <InfoCard title="音调信息">
-            <div className="space-y-3">
-              <div className="bg-yellow-50 p-3 rounded">
-                <div className="text-sm text-yellow-800 font-medium mb-1">数字能量</div>
-                <div className="text-gray-700">第{birthInfo.maya_tone_info.数字}号音调代表着独特的宇宙振动频率</div>
-              </div>
-              <div className="bg-red-50 p-3 rounded">
-                <div className="text-sm text-red-800 font-medium mb-1">行动</div>
-                <div className="text-gray-700">{birthInfo.maya_tone_info.行动}</div>
-              </div>
-              <div className="bg-indigo-50 p-3 rounded">
-                <div className="text-sm text-indigo-800 font-medium mb-1">启示</div>
-                <div className="text-gray-700">{birthInfo.maya_tone_info.启示}</div>
-              </div>
-            </div>
-          </InfoCard>
-        </div>
-        
-        {/* 每日启示 */}
-        {birthInfo.daily_quote && (
-          <InfoCard title="今日启示">
-            <blockquote className="italic text-gray-700 border-l-4 border-blue-400 pl-4 py-2">
-              "{birthInfo.daily_quote.content}"
-              <footer className="text-right mt-2 text-gray-600 text-sm">— {birthInfo.daily_quote.author}</footer>
-            </blockquote>
-          </InfoCard>
-        )}
-      </div>
-
-      {/* 生命使命 */}
-      <InfoCard title="生命使命">
-        <div className="space-y-3">
-          <p className="text-gray-700">{birthInfo.life_purpose.summary}</p>
-          <p className="text-gray-600 text-sm">{birthInfo.life_purpose.details}</p>
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="text-sm text-blue-800 font-medium mb-1">行动指南</div>
-            <div className="text-gray-700">{birthInfo.life_purpose.action_guide}</div>
-          </div>
-        </div>
-      </InfoCard>
-
-      {/* 个人特质 */}
-      <div className="grid grid-cols-1 gap-4">
-        <InfoCard title="个人优势">
-          <ul className="space-y-2">
-            {birthInfo.personal_traits.strengths.map((strength, index) => (
-              <li key={index} className="flex items-center text-gray-700">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                  {index + 1}
-                </div>
-                {strength}
-              </li>
-            ))}
-          </ul>
-        </InfoCard>
-
-        <InfoCard title="个人挑战">
-          <ul className="space-y-2">
-            {birthInfo.personal_traits.challenges.map((challenge, index) => (
-              <li key={index} className="flex items-center text-gray-700">
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
-                  {index + 1}
-                </div>
-                {challenge}
-              </li>
-            ))}
-          </ul>
-        </InfoCard>
-      </div>
-
-      {/* 能量场信息 */}
-      <InfoCard title="出生能量场">
-        <div className="grid grid-cols-1 gap-4">
-          <div className="bg-indigo-50 p-3 rounded">
-            <div className="text-sm text-indigo-800 font-medium mb-2">主要能量场</div>
-            <div className="text-gray-700 mb-1">{birthInfo.birth_energy_field.primary.type}</div>
-            <div className="text-xs text-gray-600">{birthInfo.birth_energy_field.primary.info.描述}</div>
-          </div>
-          
-          <div className="bg-purple-50 p-3 rounded">
-            <div className="text-sm text-purple-800 font-medium mb-2">次要能量场</div>
-            <div className="text-gray-700 mb-1">{birthInfo.birth_energy_field.secondary.type}</div>
-            <div className="text-xs text-gray-600">{birthInfo.birth_energy_field.secondary.info.描述}</div>
-          </div>
-          
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="text-sm text-blue-800 font-medium mb-1">平衡建议</div>
-            <div className="text-gray-700 text-sm">{birthInfo.birth_energy_field.balance_suggestion}</div>
-          </div>
-        </div>
-      </InfoCard>
-    </div>
-  );
-};
-
-// 主组件
+// 主组件 - 优化性能和内存管理
 const MayaBirthChart = () => {
+  // 使用useRef管理不需要触发重渲染的状态
   const loadingRef = useRef(false);
   const birthDateRef = useRef(null);
+  const abortControllerRef = useRef(null);
   
+  // useState管理需要触发重渲染的状态
   const [birthDate, _setBirthDate] = useState(DEFAULT_BIRTH_DATE);
   const [birthInfo, setBirthInfo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -366,29 +247,32 @@ const MayaBirthChart = () => {
   const [historyDates, setHistoryDates] = useState([]);
   const [userInteracted, setUserInteracted] = useState(false);
 
+  // 优化的状态更新函数
   const setBirthDate = useCallback((date) => {
     _setBirthDate(date);
     birthDateRef.current = date;
   }, []);
 
-  // 生成函数
-  const generateSealInfo = (seal) => {
+  // 优化的印记信息生成函数
+  const generateSealInfo = useCallback((seal) => {
     if (!seal || !sealInfoMap[seal]) {
       console.warn(`印记 "${seal}" 不存在于配置中，使用默认值`);
       return DEFAULT_SEAL_INFO;
     }
     return sealInfoMap[seal];
-  };
+  }, []);
 
-  const generateToneInfo = (tone) => {
+  // 优化的音调信息生成函数
+  const generateToneInfo = useCallback((tone) => {
     if (!tone || !toneInfoMap[tone]) {
       console.warn(`音调 "${tone}" 不存在于配置中，使用默认值`);
       return DEFAULT_TONE_INFO;
     }
     return toneInfoMap[tone];
-  };
+  }, []);
 
-  const generateLifePurpose = (sealDesc, seed) => {
+  // 优化的生命使命生成函数
+  const generateLifePurpose = useCallback((sealDesc, seed) => {
     const baseSummary = `${sealDesc || "玛雅印记"}代表了一种独特的生命能量`;
     
     const seedForDetails = seed + 1;
@@ -401,12 +285,13 @@ const MayaBirthChart = () => {
     
     return {
       summary: baseSummary,
-      details: details,
+      details,
       action_guide: actionGuide
     };
-  };
+  }, []);
 
-  const generatePersonalTraits = (seed) => {
+  // 优化的个人特质生成函数
+  const generatePersonalTraits = useCallback((seed) => {
     if (!personalTraitsStrengthsPool || personalTraitsStrengthsPool.length === 0) {
       return {
         strengths: ["创造性思维", "适应能力强", "直觉敏锐", "表达能力强", "学习能力强"],
@@ -421,52 +306,35 @@ const MayaBirthChart = () => {
       };
     }
     
-    const strengths = [];
+    // 使用Set避免重复
+    const strengthsSet = new Set();
     let strengthSeed = seed;
-    for (let i = 0; i < 5 && strengths.length < 5; i++) {
-      try {
-        const strength = MayaCalendarCalculator.getRandomElement(personalTraitsStrengthsPool, strengthSeed);
-        if (strength && !strengths.includes(strength)) {
-          strengths.push(strength);
-        }
-      } catch (error) {
-        console.error("生成优势特质时出错:", error);
-      }
+    
+    while (strengthsSet.size < 5) {
+      const strength = MayaCalendarCalculator.getRandomElement(personalTraitsStrengthsPool, strengthSeed);
+      if (strength) strengthsSet.add(strength);
       strengthSeed += 1;
     }
     
-    while (strengths.length < 5) {
-      strengths.push("适应能力强");
-    }
-    
-    const challenges = [];
+    const challengesSet = new Set();
     let challengeSeed = seed + 100;
-    for (let i = 0; i < 3 && challenges.length < 3; i++) {
-      try {
-        const challenge = MayaCalendarCalculator.getRandomElement(personalTraitsChallengesPool, challengeSeed);
-        if (challenge && !challenges.includes(challenge)) {
-          challenges.push(challenge);
-        }
-      } catch (error) {
-        console.error("生成挑战特质时出错:", error);
-      }
+    
+    while (challengesSet.size < 3) {
+      const challenge = MayaCalendarCalculator.getRandomElement(personalTraitsChallengesPool, challengeSeed);
+      if (challenge) challengesSet.add(challenge);
       challengeSeed += 1;
     }
     
-    while (challenges.length < 3) {
-      challenges.push("平衡工作与生活");
-    }
-    
     return {
-      strengths: strengths,
-      challenges: challenges
+      strengths: Array.from(strengthsSet),
+      challenges: Array.from(challengesSet)
     };
-  };
+  }, []);
 
-  const generateEnergyField = (seed) => {
+  // 优化的能量场生成函数
+  const generateEnergyField = useCallback((seed) => {
     try {
-      if (!energyFieldTypes || !energyFieldTypes.primary || !energyFieldTypes.secondary || 
-          !energyFieldTypes.primary.length || !energyFieldTypes.secondary.length) {
+      if (!energyFieldTypes?.primary?.length || !energyFieldTypes?.secondary?.length) {
         return {
           primary: {
             type: "个人能量场",
@@ -491,46 +359,21 @@ const MayaBirthChart = () => {
       const primaryType = MayaCalendarCalculator.getRandomElement(energyFieldTypes.primary, seed) || "个人能量场";
       const secondaryType = MayaCalendarCalculator.getRandomElement(energyFieldTypes.secondary, seed + 50) || "创造能量场";
       
-      if (!energyFieldInfoTemplates) {
-        return {
-          primary: {
-            type: primaryType,
-            info: {
-              "描述": "围绕个体的能量场，反映个人状态",
-              "影响范围": "个人情绪、健康、思维模式",
-              "增强方法": "冥想、运动、健康饮食、充足睡眠"
-            }
-          },
-          secondary: {
-            type: secondaryType,
-            info: {
-              "描述": "与创造力和表达相关的能量场",
-              "影响范围": "艺术创作、问题解决、创新思维",
-              "增强方法": "艺术活动、自由表达、接触大自然、打破常规"
-            }
-          },
-          balance_suggestion: `平衡${primaryType}和${secondaryType}的能量，发挥你的最大潜能`
-        };
-      }
-      
-      const primaryInfo = energyFieldInfoTemplates[primaryType] || energyFieldInfoTemplates["个人能量场"] || {
+      const primaryInfo = energyFieldInfoTemplates?.[primaryType] || energyFieldInfoTemplates["个人能量场"] || {
         "描述": "围绕个体的能量场，反映个人状态",
         "影响范围": "个人情绪、健康、思维模式",
         "增强方法": "冥想、运动、健康饮食、充足睡眠"
       };
       
-      const secondaryInfo = energyFieldInfoTemplates[secondaryType] || energyFieldInfoTemplates["创造能量场"] || {
+      const secondaryInfo = energyFieldInfoTemplates?.[secondaryType] || energyFieldInfoTemplates["创造能量场"] || {
         "描述": "与创造力和表达相关的能量场",
         "影响范围": "艺术创作、问题解决、创新思维",
         "增强方法": "艺术活动、自由表达、接触大自然、打破常规"
       };
       
-      let balanceSuggestion;
-      if (!energyFieldBalanceSuggestionOptions || energyFieldBalanceSuggestionOptions.length === 0) {
-        balanceSuggestion = `平衡${primaryType}和${secondaryType}的能量，发挥你的最大潜能`;
-      } else {
-        balanceSuggestion = MayaCalendarCalculator.getRandomElement(energyFieldBalanceSuggestionOptions, seed + 150) || 
-          `平衡${primaryType}和${secondaryType}的能量，发挥你的最大潜能`;
+      let balanceSuggestion = "平衡个人能量场和创造能量场的能量，发挥你的最大潜能";
+      if (energyFieldBalanceSuggestionOptions?.length > 0) {
+        balanceSuggestion = MayaCalendarCalculator.getRandomElement(energyFieldBalanceSuggestionOptions, seed + 150) || balanceSuggestion;
         balanceSuggestion = balanceSuggestion.replace('{primary}', primaryType).replace('{secondary}', secondaryType);
       }
       
@@ -567,57 +410,51 @@ const MayaBirthChart = () => {
         balance_suggestion: "平衡个人能量场和创造能量场的能量，发挥你的最大潜能"
       };
     }
-  };
+  }, []);
   
-  const generateQuote = (seed) => {
-    try {
-      if (!dailyQuotes || dailyQuotes.length === 0) {
-        return "生命不是等待风暴过去，而是学会在雨中跳舞。";
-      }
-      return MayaCalendarCalculator.getRandomElement(dailyQuotes, seed + 200) || "生命不是等待风暴过去，而是学会在雨中跳舞。";
-    } catch (error) {
-      console.error("生成名言时出错:", error);
+  // 优化的名言生成函数
+  const generateQuote = useCallback((seed) => {
+    if (!dailyQuotes?.length) {
       return "生命不是等待风暴过去，而是学会在雨中跳舞。";
     }
-  };
+    return MayaCalendarCalculator.getRandomElement(dailyQuotes, seed + 200) || "生命不是等待风暴过去，而是学会在雨中跳舞。";
+  }, []);
   
-  const generateAuthor = (seed) => {
-    try {
-      if (!quoteAuthors || quoteAuthors.length === 0) {
-        return "玛雅智者";
-      }
-      return MayaCalendarCalculator.getRandomElement(quoteAuthors, seed + 300) || "玛雅智者";
-    } catch (error) {
-      console.error("生成作者时出错:", error);
+  // 优化的作者生成函数
+  const generateAuthor = useCallback((seed) => {
+    if (!quoteAuthors?.length) {
       return "玛雅智者";
     }
-  };
+    return MayaCalendarCalculator.getRandomElement(quoteAuthors, seed + 300) || "玛雅智者";
+  }, []);
 
-  const ensureQuoteExists = (birthInfo) => {
+  // 确保引言存在的函数
+  const ensureQuoteExists = useCallback((birthInfo) => {
+    if (!birthInfo) return birthInfo;
+    
+    const seed = MayaCalendarCalculator.generateDeterministicHash(new Date(birthInfo.date));
+    
     if (!birthInfo.daily_quote) {
-      const seed = MayaCalendarCalculator.generateDeterministicHash(new Date(birthInfo.date));
       birthInfo.daily_quote = {
         content: generateQuote(seed),
         author: generateAuthor(seed)
       };
     } else if (typeof birthInfo.daily_quote === 'string') {
       const quoteContent = birthInfo.daily_quote;
-      const seed = MayaCalendarCalculator.generateDeterministicHash(new Date(birthInfo.date));
       birthInfo.daily_quote = {
         content: quoteContent,
         author: generateAuthor(seed)
       };
     } else if (!birthInfo.daily_quote.author) {
-      const seed = MayaCalendarCalculator.generateDeterministicHash(new Date(birthInfo.date));
       birthInfo.daily_quote.author = generateAuthor(seed);
     } else if (!birthInfo.daily_quote.content) {
-      const seed = MayaCalendarCalculator.generateDeterministicHash(new Date(birthInfo.date));
       birthInfo.daily_quote.content = generateQuote(seed);
     }
+    
     return birthInfo;
-  };
+  }, [generateQuote, generateAuthor]);
 
-  // 存储函数
+  // 优化的存储函数
   const saveToStorage = useCallback(async (key, value) => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
@@ -629,6 +466,72 @@ const MayaBirthChart = () => {
       return true;
     } catch (err) {
       console.error(`保存到${key}失败:`, err);
+      return false;
+    }
+  }, []);
+
+  // 优化的缓存函数 - 使用内存缓存
+  const cacheRef = useRef(new Map());
+  
+  const getCachedBirthInfo = useCallback(async (dateStr) => {
+    try {
+      // 先检查内存缓存
+      if (cacheRef.current.has(dateStr)) {
+        const { timestamp, data } = cacheRef.current.get(dateStr);
+        // 检查缓存是否过期（24小时）
+        if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+          return data;
+        } else {
+          // 清除过期缓存
+          cacheRef.current.delete(dateStr);
+        }
+      }
+      
+      // 然后检查localStorage
+      const cacheKey = `${STORAGE_KEYS.BIRTH_INFO_CACHE}_${dateStr}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // 检查缓存是否过期（24小时）
+        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+          // 更新内存缓存
+          cacheRef.current.set(dateStr, parsed);
+          return parsed.data;
+        } else {
+          // 清除过期缓存
+          localStorage.removeItem(cacheKey);
+        }
+      }
+      return null;
+    } catch (err) {
+      console.error('获取缓存数据失败:', err);
+      return null;
+    }
+  }, []);
+
+  const setCachedBirthInfo = useCallback(async (dateStr, data) => {
+    try {
+      const cacheKey = `${STORAGE_KEYS.BIRTH_INFO_CACHE}_${dateStr}`;
+      const cacheData = {
+        timestamp: Date.now(),
+        data: data
+      };
+      
+      // 更新内存缓存
+      cacheRef.current.set(dateStr, cacheData);
+      
+      // 更新localStorage
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      
+      // 限制内存缓存大小，避免内存泄漏
+      if (cacheRef.current.size > 50) {
+        const firstKey = cacheRef.current.keys().next().value;
+        cacheRef.current.delete(firstKey);
+      }
+      
+      return true;
+    } catch (err) {
+      console.error('保存缓存数据失败:', err);
       return false;
     }
   }, []);
@@ -688,7 +591,33 @@ const MayaBirthChart = () => {
     }
   }, [saveToStorage]);
 
-  // 主逻辑
+  // 优化的玛雅数据计算函数
+  const computeMayaData = useCallback(async (dateStr, birthDateObj) => {
+    return new Promise((resolve) => {
+      // 使用setTimeout避免阻塞主线程
+      setTimeout(() => {
+        try {
+          const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
+          const seal = MayaCalendarCalculator.calculateSeal(kin);
+          const tone = MayaCalendarCalculator.calculateTone(kin);
+          const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
+          
+          resolve({ kin, seal, tone, seed });
+        } catch (error) {
+          console.error('计算玛雅数据时出错:', error);
+          // 返回默认值以防出错
+          resolve({ 
+            kin: 1, 
+            seal: '红龙', 
+            tone: '磁性', 
+            seed: 0 
+          });
+        }
+      }, 0);
+    });
+  }, []);
+
+  // 优化的主逻辑
   const loadBirthInfo = useCallback(
     async (date, saveToHistory = false) => {
       if (!date) {
@@ -696,51 +625,69 @@ const MayaBirthChart = () => {
         return;
       }
       
+      // 防止重复调用
       if (loadingRef.current) return;
+      
+      // 检查日期是否发生变化，避免不必要的计算
+      const currentDateStr = typeof date === 'string' ? date : formatDateString(date);
+      if (birthInfo && birthInfo.date === currentDateStr) {
+        // 如果日期相同且已有数据，直接显示
+        setShowResults(true);
+        return;
+      }
+      
+      // 创建AbortController用于取消请求
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
       
       setLoading(true);
       loadingRef.current = true;
       setError(null);
 
       try {
-        const dateStr = typeof date === 'string' ? date : formatDateString(date);
-        
-        await new Promise(resolve => {
-          if (typeof requestIdleCallback === 'function') {
-            requestIdleCallback(() => resolve());
-          } else {
-            setTimeout(resolve, 0);
-          }
-        });
-        
+        const dateStr = currentDateStr;
         const birthDateObj = typeof date === 'string' ? new Date(date) : date;
-        const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
-        const seal = MayaCalendarCalculator.calculateSeal(kin);
-        const tone = MayaCalendarCalculator.calculateTone(kin);
-        const sealDesc = MayaCalendarCalculator.getSealDescription(kin);
-        const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
         const weekday = WEEKDAYS[birthDateObj.getDay()];
         
-        const localBirthInfo = {
-          date: dateStr,
-          weekday: weekday || "未知",
-          maya_kin: `KIN ${kin}`,
-          maya_tone: `${tone}之音 | 第${(kin % 28) || 28}天`,
-          maya_seal: seal,
-          maya_seal_desc: sealDesc,
-          maya_seal_info: generateSealInfo(seal),
-          maya_tone_info: generateToneInfo(tone),
-          life_purpose: generateLifePurpose(sealDesc, seed),
-          personal_traits: generatePersonalTraits(seed),
-          birth_energy_field: generateEnergyField(seed),
-          daily_quote: {
-            content: generateQuote(seed) || "每一天都是新的开始",
-            author: generateAuthor(seed) || "玛雅智者"
-          }
-        };
+        // 首先检查缓存
+        let localBirthInfo = await getCachedBirthInfo(dateStr);
+        
+        if (!localBirthInfo) {
+          // 如果没有缓存，计算玛雅数据
+          const { kin, seal, tone, seed } = await computeMayaData(dateStr, birthDateObj);
+          const sealDesc = MayaCalendarCalculator.getSealDescription(kin);
+          
+          // 优化数据生成，减少不必要的函数调用
+          localBirthInfo = {
+            date: dateStr,
+            weekday: weekday || "未知",
+            maya_kin: `KIN ${kin}`,
+            maya_tone: `${tone}之音 | 第${(kin % 28) || 28}天`,
+            maya_seal: seal,
+            maya_seal_desc: sealDesc,
+            maya_seal_info: generateSealInfo(seal),
+            maya_tone_info: generateToneInfo(tone),
+            life_purpose: generateLifePurpose(sealDesc, seed),
+            personal_traits: generatePersonalTraits(seed),
+            birth_energy_field: generateEnergyField(seed),
+            daily_quote: {
+              content: generateQuote(seed) || "每一天都是新的开始",
+              author: generateAuthor(seed) || "玛雅智者"
+            }
+          };
+          
+          // 缓存结果
+          await setCachedBirthInfo(dateStr, localBirthInfo);
+        }
         
         const processedLocalBirthInfo = ensureQuoteExists(localBirthInfo);
         
+        // 检查是否已取消
+        if (abortControllerRef.current?.signal.aborted) return;
+        
+        // 直接更新状态，避免requestAnimationFrame的额外开销
         setBirthInfo(processedLocalBirthInfo);
         setShowResults(true);
         
@@ -748,27 +695,43 @@ const MayaBirthChart = () => {
           setBirthDate(new Date(date));
         }
         
-        await saveBirthDateToGlobal(date);
+        // 异步保存数据
+        setTimeout(async () => {
+          // 再次检查是否已取消
+          if (abortControllerRef.current?.signal.aborted) return;
+          
+          await saveBirthDateToGlobal(date);
+          
+          if (saveToHistory && userInteracted) {
+            let newHistory = [dateStr, ...historyDates.filter(d => d !== dateStr)];
+            if (newHistory.length > 6) newHistory = newHistory.slice(0, 6);
+            setHistoryDates(newHistory);
+            saveHistory(newHistory);
+          }
+        }, 0);
         
-        if (saveToHistory && userInteracted) {
-          let newHistory = [dateStr, ...historyDates.filter(d => d !== dateStr)];
-          if (newHistory.length > 6) newHistory = newHistory.slice(0, 6);
-          setHistoryDates(newHistory);
-          saveHistory(newHistory);
-        }
       } catch (error) {
-        console.error("计算玛雅出生图信息失败:", error);
-        setError("计算数据失败，请稍后再试");
+        if (error.name !== 'AbortError') {
+          console.error("计算玛雅出生图信息失败:", error);
+          setError("计算数据失败，请稍后再试");
+        }
       } finally {
-        setLoading(false);
-        loadingRef.current = false;
+        // 延迟设置loading为false，确保UI更新完成
+        setTimeout(() => {
+          setLoading(false);
+          loadingRef.current = false;
+        }, 0);
       }
     },
-    [userInteracted, historyDates, saveHistory, saveBirthDateToGlobal]
+    [userInteracted, historyDates, saveHistory, saveBirthDateToGlobal, birthInfo, getCachedBirthInfo, setCachedBirthInfo, computeMayaData, generateSealInfo, generateToneInfo, generateLifePurpose, generatePersonalTraits, generateEnergyField, generateQuote, generateAuthor, ensureQuoteExists]
   );
 
   const initializeComponent = useCallback(async () => {
-    console.log("初始化玛雅出生图");
+    // 创建新的AbortController用于初始化
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
     
     await Promise.all([
       fetchHistory(),
@@ -800,7 +763,10 @@ const MayaBirthChart = () => {
           
           setBirthDate(birthDateToUse);
           
+          // 延迟加载，避免阻塞UI
           setTimeout(() => {
+            // 检查是否已取消
+            if (abortControllerRef.current?.signal.aborted) return;
             loadBirthInfo(birthDateToUse, false);
           }, 100);
           
@@ -808,6 +774,8 @@ const MayaBirthChart = () => {
           console.error("初始化日期失败:", error);
           setBirthDate(DEFAULT_BIRTH_DATE);
           setTimeout(() => {
+            // 检查是否已取消
+            if (abortControllerRef.current?.signal.aborted) return;
             loadBirthInfo(DEFAULT_BIRTH_DATE, false);
           }, 100);
         }
@@ -817,14 +785,23 @@ const MayaBirthChart = () => {
 
   useEffect(() => {
     initializeComponent();
+    
+    // 清理函数防止内存泄漏
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [initializeComponent]);
 
+  // 优化的日期变化处理 - 使用防抖
   const handleDateChange = useCallback((date) => {
     if (!date) return;
     
     setBirthDate(date);
     setUserInteracted(true);
     
+    // 使用防抖避免频繁计算
     if (handleDateChange.debounceTimer) {
       clearTimeout(handleDateChange.debounceTimer);
     }
@@ -843,6 +820,18 @@ const MayaBirthChart = () => {
     loadBirthInfo(dateStr, true);
   }, [loadBirthInfo]);
 
+  // 组件卸载时的清理
+  useEffect(() => {
+    return () => {
+      if (handleDateChange.debounceTimer) {
+        clearTimeout(handleDateChange.debounceTimer);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
   return (
     <div className="maya-birth-chart">
       <h2>玛雅出生图</h2>
@@ -859,12 +848,14 @@ const MayaBirthChart = () => {
         handleHistoryClick={handleHistoryClick}
       />
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <ErrorDisplay error={error} />}
 
-      <ResultsSection
-        birthInfo={birthInfo}
-        showResults={showResults}
-      />
+      <Suspense fallback={<LoadingSpinner />}>
+        <ResultsSection
+          birthInfo={birthInfo}
+          showResults={showResults}
+        />
+      </Suspense>
     </div>
   );
 };

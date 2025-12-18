@@ -3,6 +3,7 @@ import BiorhythmChart from './BiorhythmChart';
 import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
 import { CompatibleStorage, initDataMigration } from '../utils/dataMigration';
+import { userConfigManager } from '../utils/userConfigManager';
 
 const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
   // 初始化数据迁移
@@ -10,42 +11,49 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     initDataMigration();
   }, []);
 
-  // 从localStorage获取上次使用的出生日期（增强兼容性版本）
-  const getStoredBirthDate = () => {
-    try {
-      // 首先尝试从生物节律专用存储读取
-      let stored = CompatibleStorage.getItem('last_biorhythm_birthdate');
+  // 从用户配置管理器获取出生日期
+  const [birthDate, setBirthDate] = useState(null);
+  const [configManagerReady, setConfigManagerReady] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    nickname: '',
+    birthDate: ''
+  });
+
+  // 初始化配置管理器并获取用户配置
+  useEffect(() => {
+    const initConfigManager = async () => {
+      await userConfigManager.initialize();
+      setConfigManagerReady(true);
       
-      // 如果没有找到，尝试从玛雅出生图存储读取
-      if (!stored) {
-        stored = CompatibleStorage.getItem('maya_birth_date');
+      const currentConfig = userConfigManager.getCurrentConfig();
+      if (currentConfig && currentConfig.birthDate) {
+        setBirthDate(new Date(currentConfig.birthDate));
+        setUserInfo({
+          nickname: currentConfig.nickname,
+          birthDate: currentConfig.birthDate
+        });
       }
-      
-      // 如果没有找到，尝试从localStorage直接读取
-      if (!stored) {
-        stored = localStorage.getItem('last_biorhythm_birthdate') || 
-                 localStorage.getItem('maya_birth_date');
+    };
+    
+    initConfigManager();
+    
+    // 添加配置变更监听器
+    const removeListener = userConfigManager.addListener(({
+      currentConfig
+    }) => {
+      if (currentConfig && currentConfig.birthDate) {
+        setBirthDate(new Date(currentConfig.birthDate));
+        setUserInfo({
+          nickname: currentConfig.nickname,
+          birthDate: currentConfig.birthDate
+        });
       }
-      
-      return stored ? new Date(stored) : null;
-    } catch (error) {
-      console.error('获取存储的出生日期失败:', error);
-      return null;
-    }
-  };
-  
-  // 保存出生日期到localStorage（兼容性版本）
-  const saveBirthDate = (date) => {
-    try {
-      if (date) {
-        CompatibleStorage.setItem('last_biorhythm_birthdate', formatDateLocal(date));
-      }
-    } catch (error) {
-      console.error('保存出生日期失败:', error);
-    }
-  };
-  
-  const [birthDate, setBirthDate] = useState(getStoredBirthDate());
+    });
+    
+    return () => {
+      removeListener();
+    };
+  }, []);
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -108,7 +116,6 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         if (typeof dateToUse === 'string') {
           const dateObj = parseDateLocal(dateToUse);
           setBirthDate(dateObj);
-          saveBirthDate(dateObj);
         }
       } else {
         setError(result.error || "获取数据失败");
@@ -121,20 +128,13 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     setLoading(false);
   }, [birthDate]);
 
-  // 处理日期选择变化
-  const handleDateChange = (e) => {
-    const newDate = new Date(e.target.value);
-    if (!isNaN(newDate.getTime())) {
-      setBirthDate(newDate);
-      saveBirthDate(newDate);
-      loadBiorhythmData(newDate);
-    }
-  };
-
   // 组件挂载时自动加载默认数据
   useEffect(() => {
     const loadDefaultData = async () => {
-      // 如果已有存储的出生日期，则使用它
+      // 等待配置管理器初始化完成
+      if (!configManagerReady) return;
+      
+      // 如果已有出生日期，则使用它
       if (birthDate) {
         await loadBiorhythmData(birthDate);
         return;
@@ -147,7 +147,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     };
     
     loadDefaultData();
-  }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE]);
+  }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE, configManagerReady]);
 
   if (loading && !rhythmData) {
     return (
@@ -200,24 +200,20 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
   return (
     <div className="space-y-4">
-      {/* 日期选择区域 */}
+      {/* 用户信息显示区域 */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
         <div className="flex flex-col sm:flex-row items-center justify-between">
-          <div className="mb-3 sm:mb-0">
+          <div>
             <h3 className="text-base font-medium text-gray-900 dark:text-white">
-              选择出生日期
+              {userInfo.nickname ? `${userInfo.nickname} 的生物节律` : '生物节律'}
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              基于您的出生日期计算生物节律
+              {userInfo.birthDate ? `基于出生日期 ${userInfo.birthDate} 计算` : '请到设置页面配置个人信息'}
             </p>
           </div>
-          <div>
-            <input
-              type="date"
-              value={birthDate ? formatDateLocal(birthDate) : ''}
-              onChange={handleDateChange}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            />
+          <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+            <p>数据来源</p>
+            <p className="font-medium text-green-600 dark:text-green-400">本地计算</p>
           </div>
         </div>
       </div>

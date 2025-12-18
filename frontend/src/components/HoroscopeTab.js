@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { storageManager } from '../utils/storageManager';
+import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 
 const HoroscopeTab = () => {
@@ -11,6 +12,14 @@ const HoroscopeTab = () => {
   const [allHoroscopes, setAllHoroscopes] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [birthDate, setBirthDate] = useState({ year: null, month: null, day: null });
+  const [userInfo, setUserInfo] = useState({
+    nickname: '',
+    birthDate: '',
+    zodiac: '',
+    zodiacAnimal: ''
+  });
+  const [initialized, setInitialized] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // 星座数据
   const getHoroscopeData = () => {
@@ -429,27 +438,123 @@ const HoroscopeTab = () => {
 
   // 初始化组件
   useEffect(() => {
+    let isMounted = true;
+    const removeListener = () => {};
+    
     const initialize = async () => {
-      await loadAllHoroscopes();
-      
-      // 首先尝试从存储中获取已保存的星座
-      await getStoredHoroscope();
-      
-      // 如果没有保存的星座，尝试从生物节律中获取出生年份
-      if (!userHoroscope) {
-        await getBirthDateFromBiorhythm();
+      try {
+        // 确保用户配置管理器已初始化
+        if (!userConfigManager.initialized) {
+          await userConfigManager.initialize();
+        }
+        
+        // 加载所有星座
+        await loadAllHoroscopes();
+        
+        if (!isMounted) return;
+        
+        // 从用户配置管理器获取用户信息
+        const currentConfig = userConfigManager.getCurrentConfig();
+        if (currentConfig && isMounted) {
+          setUserInfo(currentConfig);
+          
+          // 优先使用用户配置中的星座信息
+          if (currentConfig.zodiac) {
+            setUserHoroscope(currentConfig.zodiac);
+            
+            // 同步到storageManager以保持兼容性
+            await storageManager.setUserHoroscope(currentConfig.zodiac);
+          } else if (currentConfig.birthDate) {
+            // 如果没有星座但有出生日期，计算星座
+            const birthDateObj = new Date(currentConfig.birthDate);
+            const year = birthDateObj.getFullYear();
+            const month = birthDateObj.getMonth() + 1;
+            const day = birthDateObj.getDate();
+            
+            if (year && month && day) {
+              await calculateHoroscopeFromDate(year, month, day);
+            }
+          }
+        }
+        
+        // 添加配置变更监听器
+        const removeConfigListener = userConfigManager.addListener((configData) => {
+          if (isMounted && configData.currentConfig) {
+            setUserInfo(configData.currentConfig);
+            
+            // 当配置变更时，更新星座信息
+            if (configData.currentConfig.zodiac && 
+                configData.currentConfig.zodiac !== userHoroscope) {
+              setUserHoroscope(configData.currentConfig.zodiac);
+              storageManager.setUserHoroscope(configData.currentConfig.zodiac);
+              // 强制重新加载数据（包括配置切换和强制重载）
+              setDataLoaded(false);
+            } else if (configData.currentConfig.birthDate && 
+                       !configData.currentConfig.zodiac) {
+              // 如果有出生日期但没有星座，计算星座
+              const birthDateObj = new Date(configData.currentConfig.birthDate);
+              const year = birthDateObj.getFullYear();
+              const month = birthDateObj.getMonth() + 1;
+              const day = birthDateObj.getDate();
+              
+              if (year && month && day) {
+                calculateHoroscopeFromDate(year, month, day);
+              }
+            }
+            
+            // 如果收到强制重载标志，确保重新加载数据
+            if (configData.forceReload) {
+              setDataLoaded(false);
+            }
+          }
+        });
+        
+        removeListener.current = removeConfigListener;
+        
+        if (isMounted) {
+          setInitialized(true);
+        }
+      } catch (error) {
+        console.error('初始化星座运程组件失败:', error);
+        
+        // 降级处理：使用原有逻辑
+        await loadAllHoroscopes();
+        if (isMounted) {
+          await getStoredHoroscope();
+          
+          // 如果没有保存的星座，尝试从生物节律中获取出生年份
+          if (!userHoroscope) {
+            await getBirthDateFromBiorhythm();
+          }
+          setInitialized(true);
+        }
       }
     };
     
     initialize();
-  }, [loadAllHoroscopes]);
+    
+    return () => {
+      isMounted = false;
+      if (removeListener.current) {
+        removeListener.current();
+      }
+    };
+  }, [loadAllHoroscopes, calculateHoroscopeFromDate, userHoroscope]);
 
-  // 当星座或日期变化时重新加载数据
+  // 当星座或日期变化时重新加载数据 - 优化加载逻辑
   useEffect(() => {
-    if (userHoroscope) {
-      loadHoroscopeGuidance();
+    if (!userHoroscope || !initialized) return;
+    
+    // 仅在首次默认加载或用户主动切换时执行数据请求
+    if (!dataLoaded) {
+      const timer = setTimeout(() => {
+        loadHoroscopeGuidance();
+        setDataLoaded(true);
+      }, 200);
+      
+      return () => clearTimeout(timer);
     }
-  }, [userHoroscope, selectedDate, loadHoroscopeGuidance]);
+  }, [userHoroscope, selectedDate, loadHoroscopeGuidance, initialized, dataLoaded]);
 
   // 本地日期格式化方法
   const formatDateLocal = (date) => {
@@ -462,23 +567,16 @@ const HoroscopeTab = () => {
 
   // 处理星座选择
   const handleHoroscopeChange = async (horoscope) => {
-    setUserHoroscope(horoscope);
-    // 保存到存储 - 使用新的星座存储接口
-    await storageManager.setUserHoroscope(horoscope);
-  };
-
-  // 处理出生日期输入
-  const handleDateInput = async (event) => {
-    const dateStr = event.target.value;
-    if (dateStr) {
-      const date = new Date(dateStr);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      
-      await calculateHoroscopeFromDate(year, month, day);
+    if (userHoroscope !== horoscope) {
+      setUserHoroscope(horoscope);
+      // 保存到存储 - 使用新的星座存储接口
+      await storageManager.setUserHoroscope(horoscope);
+      // 标记需要重新加载数据
+      setDataLoaded(false);
     }
   };
+
+
 
   // 渲染星座信息卡片
   const renderHoroscopeInfo = () => {
@@ -627,7 +725,7 @@ const HoroscopeTab = () => {
   const renderRecommendations = () => {
     if (!horoscopeGuidance?.recommendations) return null;
 
-    const { luckyColors, luckyNumbers, compatibleSigns, incompatibleSigns, todayMoonSign } = horoscopeGuidance.recommendations;
+    const { luckyColors, luckyNumbers, compatibleSigns, todayMoonSign } = horoscopeGuidance.recommendations;
     const horoscopeData = getHoroscopeData();
 
     return (
@@ -708,6 +806,49 @@ const HoroscopeTab = () => {
     );
   };
 
+  // 用户信息显示组件
+  const UserInfoDisplay = useMemo(() => {
+    return (
+      <Card title="当前用户信息" className="mb-4">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                用户昵称
+              </p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {userInfo.nickname || '未知用户'}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                出生日期
+              </p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {userInfo.birthDate || '未知'}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                当前星座
+              </p>
+              <p className="font-medium text-blue-600 dark:text-blue-400">
+                {userHoroscope || '未设置'}
+              </p>
+            </div>
+          </div>
+          {userInfo.nickname && (
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                💡 如需修改信息，请在设置页面进行用户配置管理
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
+    );
+  }, [userInfo, userHoroscope]);
+
   return (
     <div className="space-y-6">
       {/* 标题区域 */}
@@ -722,48 +863,38 @@ const HoroscopeTab = () => {
         </div>
       </Card>
 
-      {/* 星座选择器 */}
-      <Card title="选择您的星座" className="mb-4">
+      {/* 用户信息显示 */}
+      {UserInfoDisplay}
+      
+      {/* 简化的星座选择器 */}
+      <Card title="临时切换星座" className="mb-4">
         <div className="space-y-4">
-          {/* 出生日期输入 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              根据出生日期计算星座
-            </label>
-            <input
-              type="date"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-              onChange={handleDateInput}
-            />
-          </div>
-
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            您可以临时切换查看不同星座的运程，这不会修改您的用户配置
+          </p>
+          
           {/* 星座选择网格 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              或者直接选择星座
-            </label>
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-              {(allHoroscopes.length > 0 ? allHoroscopes : 
-                ['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', 
-                 '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座']
-              ).map((horoscope) => {
-                const horoscopeData = getHoroscopeData().find(h => h.name === horoscope);
-                return (
-                  <button
-                    key={horoscope}
-                    onClick={() => handleHoroscopeChange(horoscope)}
-                    className={`p-2 rounded-lg text-center transition-all duration-200 text-sm font-medium flex flex-col items-center ${
-                      userHoroscope === horoscope
-                        ? 'bg-blue-500 text-white shadow'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    <span className="text-lg mb-1">{horoscopeData?.icon || '⭐'}</span>
-                    <span>{horoscope.replace('座', '')}</span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+            {(allHoroscopes.length > 0 ? allHoroscopes : 
+              ['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', 
+               '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座']
+            ).map((horoscope) => {
+              const horoscopeData = getHoroscopeData().find(h => h.name === horoscope);
+              return (
+                <button
+                  key={horoscope}
+                  onClick={() => handleHoroscopeChange(horoscope)}
+                  className={`p-2 rounded-lg text-center transition-all duration-200 text-sm font-medium flex flex-col items-center ${
+                    userHoroscope === horoscope
+                      ? 'bg-blue-500 text-white shadow'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <span className="text-lg mb-1">{horoscopeData?.icon || '⭐'}</span>
+                  <span>{horoscope.replace('座', '')}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* 日期选择器 */}
@@ -774,32 +905,37 @@ const HoroscopeTab = () => {
             <input
               type="date"
               value={selectedDate ? formatDateLocal(selectedDate) : ''}
-              onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : new Date())}
+              onChange={(e) => {
+                const newDate = e.target.value ? new Date(e.target.value) : new Date();
+                setSelectedDate(newDate);
+                // 日期变更时标记需要重新加载数据
+                setDataLoaded(false);
+              }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
             />
           </div>
-        </div>
 
-        {/* 当前选择显示 */}
-        {userHoroscope && (
-          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded-lg border border-blue-200 dark:border-blue-700">
-            <p className="text-blue-700 dark:text-blue-300 text-sm">
-              当前选择：<span className="font-bold">{userHoroscope}</span>
-              {selectedDate && (
-                <span className="ml-2">
-                  查看日期：<span className="font-bold">{formatDateLocal(selectedDate)}</span>
-                </span>
-              )}
-              {birthDate.year && birthDate.month && birthDate.day && (
-                <span className="ml-2">
-                  出生日期：<span className="font-bold">
-                    {birthDate.year}-{String(birthDate.month).padStart(2, '0')}-{String(birthDate.day).padStart(2, '0')}
+          {/* 当前选择显示 */}
+          {userHoroscope && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded-lg border border-blue-200 dark:border-blue-700">
+              <p className="text-blue-700 dark:text-blue-300 text-sm">
+                当前选择：<span className="font-bold">{userHoroscope}</span>
+                {selectedDate && (
+                  <span className="ml-2">
+                    查看日期：<span className="font-bold">{formatDateLocal(selectedDate)}</span>
                   </span>
-                </span>
-              )}
-            </p>
-          </div>
-        )}
+                )}
+                {birthDate.year && birthDate.month && birthDate.day && (
+                  <span className="ml-2">
+                    出生日期：<span className="font-bold">
+                      {birthDate.year}-{String(birthDate.month).padStart(2, '0')}-{String(birthDate.day).padStart(2, '0')}
+                    </span>
+                  </span>
+                )}
+              </p>
+            </div>
+          )}
+        </div>
       </Card>
 
       {/* 加载状态 */}

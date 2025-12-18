@@ -132,6 +132,16 @@ function App() {
         // 继续执行，不阻止应用启动
       }
       
+      // 初始化用户配置管理器，确保在应用启动时加载配置
+      try {
+        const { userConfigManager } = await import('./utils/userConfigManager');
+        await userConfigManager.initialize();
+        console.log('用户配置管理器初始化成功');
+      } catch (error) {
+        console.warn('用户配置管理器初始化失败:', error);
+        // 继续执行，不阻止应用启动
+      }
+      
       setAppState({
         initialized: true,
         error: null

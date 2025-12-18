@@ -139,7 +139,7 @@ const SealInfoSection = memo(({ birthInfo }) => {
     </div>
   ), [birthInfo.maya_seal_info?.能量]);
   
-  const启示Info = useMemo(() => (
+  const revelationInfo = useMemo(() => (
     <div className="bg-purple-50 p-3 rounded">
       <div className="text-sm text-purple-800 font-medium mb-1">启示</div>
       <div className="text-gray-700">{birthInfo.maya_seal_info?.启示 || ''}</div>
@@ -151,7 +151,7 @@ const SealInfoSection = memo(({ birthInfo }) => {
       <div className="space-y-3">
         {traitsInfo}
         {energyInfo}
-        {启示Info}
+        {revelationInfo}
       </div>
     </OptimizedInfoCard>
   );
@@ -175,7 +175,7 @@ const ToneInfoSection = memo(({ birthInfo }) => {
     </div>
   ), [birthInfo.maya_tone_info?.行动]);
   
-  const tone启示Info = useMemo(() => (
+  const toneRevelationInfo = useMemo(() => (
     <div className="bg-indigo-50 p-3 rounded">
       <div className="text-sm text-indigo-800 font-medium mb-1">启示</div>
       <div className="text-gray-700">{birthInfo.maya_tone_info?.启示 || ''}</div>
@@ -187,7 +187,7 @@ const ToneInfoSection = memo(({ birthInfo }) => {
       <div className="space-y-3">
         {digitalEnergyInfo}
         {actionInfo}
-        {tone启示Info}
+        {toneRevelationInfo}
       </div>
     </OptimizedInfoCard>
   );
@@ -195,14 +195,14 @@ const ToneInfoSection = memo(({ birthInfo }) => {
 
 // 每日启示组件 - 使用memo和条件渲染
 const DailyQuoteSection = memo(({ birthInfo }) => {
-  if (!birthInfo.daily_quote) return null;
-  
   const quoteContent = useMemo(() => (
     <blockquote className="italic text-gray-700 border-l-4 border-blue-400 pl-4 py-2">
       "{birthInfo.daily_quote.content}"
       <footer className="text-right mt-2 text-gray-600 text-sm">— {birthInfo.daily_quote.author}</footer>
     </blockquote>
   ), [birthInfo.daily_quote]);
+  
+  if (!birthInfo.daily_quote) return null;
   
   return (
     <OptimizedInfoCard title="今日启示">
@@ -333,6 +333,27 @@ const ResultsSection = memo(({ birthInfo, showResults }) => {
   const animationFrameRef = React.useRef(null);
   const timeoutRef = React.useRef(null);
 
+  // 按渲染优先级排序的组件列表，关键内容优先渲染
+  const sections = useMemo(() => [
+    { component: BasicInfoSection, key: 'basic' },
+    { component: SealInfoSection, key: 'seal' },
+    { component: ToneInfoSection, key: 'tone' },
+    { component: LifePurposeSection, key: 'purpose' },
+    { component: PersonalTraitsSection, key: 'traits' },
+    { component: EnergyFieldSection, key: 'energy' },
+    { component: DailyQuoteSection, key: 'quote' }
+  ], []);
+
+  // 优化渲染函数
+  const renderSection = useCallback((section, index) => {
+    const Component = section.component;
+    return (
+      <div key={section.key} className="fade-in-section">
+        <Component birthInfo={birthInfo} />
+      </div>
+    );
+  }, [birthInfo]);
+
   useEffect(() => {
     // 清理之前的定时器和动画帧
     if (timeoutRef.current) {
@@ -367,27 +388,6 @@ const ResultsSection = memo(({ birthInfo, showResults }) => {
   if (!showResults || !birthInfo || !isVisible) {
     return null;
   }
-
-  // 按渲染优先级排序的组件列表，关键内容优先渲染
-  const sections = useMemo(() => [
-    { component: BasicInfoSection, key: 'basic' },
-    { component: SealInfoSection, key: 'seal' },
-    { component: ToneInfoSection, key: 'tone' },
-    { component: LifePurposeSection, key: 'purpose' },
-    { component: PersonalTraitsSection, key: 'traits' },
-    { component: EnergyFieldSection, key: 'energy' },
-    { component: DailyQuoteSection, key: 'quote' }
-  ], []);
-
-  // 优化渲染函数
-  const renderSection = useCallback((section, index) => {
-    const Component = section.component;
-    return (
-      <div key={section.key} className="fade-in-section">
-        <Component birthInfo={birthInfo} />
-      </div>
-    );
-  }, [birthInfo]);
 
   return (
     <div className="birth-chart-results">
