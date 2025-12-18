@@ -261,9 +261,6 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         {rhythmData && rhythmData.length > 0 ? (
           <BiorhythmChart 
             data={rhythmData}
-            height={200}
-            showLegend={true}
-            simplified={true}
           />
         ) : (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">

@@ -1,14 +1,32 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
+import { useTheme } from '../context/ThemeContext';
 
 const TabNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const isNative = Capacitor.isNativePlatform();
   
   // 检测是否为iOS设备，用于调整底部安全区域
   const isIOS = Capacitor.getPlatform() === 'ios';
+
+  // 统一的Tab样式类
+  const getTabClassName = (isActive) => {
+    const baseClasses = "flex flex-col items-center justify-center w-full h-full transition-all duration-200 relative";
+    
+    if (isActive) {
+      return `${baseClasses} text-blue-600 dark:text-blue-400`;
+    } else {
+      return `${baseClasses} text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`;
+    }
+  };
+
+  // 活跃Tab指示器样式
+  const activeIndicatorClass = theme === 'dark' 
+    ? 'bg-blue-400' 
+    : 'bg-blue-600';
 
   const tabs = [
     {
@@ -47,12 +65,12 @@ const TabNavigation = () => {
       path: '/dress',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h16M4 8h16M4 12h16M4 16h16M4 20h16" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
         </svg>
       ),
       activeIcon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 4h16M4 8h16M4 12h16M4 16h16M4 20h16" />
+          <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
         </svg>
       )
     },
@@ -82,25 +100,29 @@ const TabNavigation = () => {
     <div 
       className={`bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 ${
         isIOS ? 'pb-safe-bottom' : ''
-      }`}
+      } shadow-lg`}
     >
-      <div className="flex justify-around items-center h-16">
+      <div className="flex justify-around items-center h-16 relative">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           return (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.path)}
-              className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
-                isActive 
-                  ? 'text-blue-600 dark:text-blue-400' 
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
+              className={getTabClassName(isActive)}
             >
-              <div className="relative">
+              {/* 活跃指示器 */}
+              {isActive && (
+                <div className={`absolute top-0 w-full h-0.5 ${activeIndicatorClass}`}></div>
+              )}
+              
+              {/* 图标 */}
+              <div className="relative mb-1">
                 {isActive ? tab.activeIcon : tab.icon}
               </div>
-              <span className="text-xs mt-1 font-medium">{tab.label}</span>
+              
+              {/* 标签文字 */}
+              <span className="text-xs font-medium">{tab.label}</span>
             </button>
           );
         })}

@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
+import { useTheme } from '../context/ThemeContext';
 
 // 注册 Chart.js 组件
 ChartJS.register(
@@ -42,24 +43,53 @@ const getRhythmStatus = (value) => {
 };
 
 const BiorhythmChart = ({ data }) => {
-  if (!data || !data.dates || !data.physical || !data.emotional || !data.intellectual) {
+  const { theme } = useTheme();
+  
+  // 深色模式下的文字颜色
+  const textColor = theme === 'dark' ? '#f3f4f6' : '#1f2937';
+  const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+  // 处理不同的数据结构格式
+  const formatData = () => {
+    if (!data) return null;
+    
+    // 如果是数组格式（本地计算返回的数据）
+    if (Array.isArray(data)) {
+      const dates = data.map(item => item.date);
+      const physical = data.map(item => item.physical);
+      const emotional = data.map(item => item.emotional);
+      const intellectual = data.map(item => item.intellectual);
+      
+      return { dates, physical, emotional, intellectual };
+    }
+    
+    // 如果是对象格式（API返回的数据）
+    if (data.dates && data.physical && data.emotional && data.intellectual) {
+      return data;
+    }
+    
+    return null;
+  };
+  
+  const formattedData = formatData();
+  
+  if (!formattedData) {
     return <div className="text-center py-4 text-gray-900 dark:text-white">没有可用的图表数据</div>;
   }
 
   // 找到今天的索引
-  const todayIndex = data.dates.findIndex(date => {
+  const todayIndex = formattedData.dates.findIndex(date => {
     const today = new Date().toISOString().split('T')[0];
     return date === today;
   });
 
   // 获取今天的节律值
-  const todayPhysical = todayIndex >= 0 ? data.physical[todayIndex] : null;
-  const todayEmotional = todayIndex >= 0 ? data.emotional[todayIndex] : null;
-  const todayIntellectual = todayIndex >= 0 ? data.intellectual[todayIndex] : null;
+  const todayPhysical = todayIndex >= 0 ? formattedData.physical[todayIndex] : null;
+  const todayEmotional = todayIndex >= 0 ? formattedData.emotional[todayIndex] : null;
+  const todayIntellectual = todayIndex >= 0 ? formattedData.intellectual[todayIndex] : null;
 
   // 准备图表数据
   const chartData = {
-    labels: data.dates.map(date => {
+    labels: formattedData.dates.map(date => {
       // 将日期格式化为 MM-DD
       const dateObj = new Date(date);
       return `${dateObj.getMonth() + 1}-${dateObj.getDate()}`;
@@ -67,7 +97,7 @@ const BiorhythmChart = ({ data }) => {
     datasets: [
       {
         label: '体力节律',
-        data: data.physical,
+        data: formattedData.physical,
         borderColor: '#3b82f6', // 蓝色
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderWidth: 2,
@@ -75,7 +105,7 @@ const BiorhythmChart = ({ data }) => {
       },
       {
         label: '情绪节律',
-        data: data.emotional,
+        data: formattedData.emotional,
         borderColor: '#ef4444', // 红色
         backgroundColor: 'rgba(239, 68, 68, 0.1)',
         borderWidth: 2,
@@ -83,7 +113,7 @@ const BiorhythmChart = ({ data }) => {
       },
       {
         label: '智力节律',
-        data: data.intellectual,
+        data: formattedData.intellectual,
         borderColor: '#10b981', // 绿色
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         borderWidth: 2,
@@ -103,7 +133,7 @@ const BiorhythmChart = ({ data }) => {
           font: {
             size: 14,
           },
-          color: '#1f2937', // Default text color
+          color: textColor, // 根据主题设置文字颜色
         },
       },
       tooltip: {
@@ -151,18 +181,18 @@ const BiorhythmChart = ({ data }) => {
         max: 100,
         ticks: {
           stepSize: 25,
-          color: '#6b7280', // Default tick color
+          color: textColor, // 根据主题设置坐标轴刻度颜色
         },
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: gridColor, // 根据主题设置网格线颜色
         },
       },
       x: {
         ticks: {
-          color: '#6b7280', // Default tick color
+          color: textColor, // 根据主题设置坐标轴刻度颜色
         },
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: gridColor, // 根据主题设置网格线颜色
         },
       },
     },

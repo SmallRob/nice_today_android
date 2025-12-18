@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BiorhythmTab from './BiorhythmTab';
 import { BiorhythmIcon, IconLibrary } from './IconLibrary';
+import PageLayout from './PageLayout';
 
 const BiorhythmDashboard = ({ appInfo = {} }) => {
   const [loading, setLoading] = useState(true);
@@ -48,35 +49,19 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* 顶部导航栏 - 简化设计 */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between">
-            <div className="flex items-center mb-3 sm:mb-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white mr-3">
-                <IconLibrary.Icon name="star" size={20} />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Nice Today</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  您的每日生活助手
-                </p>
-              </div>
-            </div>
-            
-            {/* 状态指示器 - 简化 */}
-            <div className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-xs font-medium">
-              ✅ 本地化运行
-            </div>
-          </div>
+    <PageLayout 
+      title="Nice Today"
+      subtitle="您的每日生活助手"
+      bgGradient={true}
+      headerAction={
+        <div className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-xs font-medium">
+          ✅ 本地化运行
         </div>
-      </div>
-
-      {/* 主内容区域 */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      }
+    >
+      <div className="max-w-4xl space-y-6">
         {/* 标签导航 - 移动端优化 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
           <div className="flex overflow-x-auto">
             {tabs.map((tab) => (
               <button
@@ -127,18 +112,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
           </div>
         </div>
       </div>
-
-      {/* 页脚 - 简化 */}
-      <footer className="bg-white dark:bg-gray-800 border-t dark:border-gray-700 mt-8">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="text-center">
-            <div className="text-gray-600 dark:text-gray-400 text-xs">
-              © 2024 Nice Today. 您的每日生活助手
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PageLayout>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getDressInfoRange, getSpecificDateDressInfo, getWeekday } from '../services/localDataService';
 import { seasonHealthTips, organRhythmTips, dietHealthTips, seasonGeneralTips, warmReminders, fiveElementsInfo } from '../config/healthTipsConfig';
+import PageLayout, { Card, Alert } from '../components/PageLayout';
 import '../index.css';
 
 // 优化后的日期选择器组件
@@ -27,11 +28,7 @@ const OptimizedDatePicker = ({ selectedDate, onDateChange, minDate, maxDate }) =
 // 五行基础知识卡片组件
 const FiveElementsInfoCard = React.memo(() => {
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-4">
-      <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
-        <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
-        五行基础知识
-      </h3>
+    <Card title="五行基础知识" className="mb-4">
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
         {Object.entries(fiveElementsInfo).map(([element, info]) => {
           const bgColorMap = {
@@ -60,7 +57,7 @@ const FiveElementsInfoCard = React.memo(() => {
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 });
 
@@ -69,17 +66,10 @@ const LuckyColorsCard = React.memo(({ luckyColors }) => {
   if (!luckyColors || luckyColors.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-4">
-      <h3 className="text-lg font-semibold mb-3 flex items-center text-green-600 dark:text-green-400">
-        <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-        今日吉祥颜色搭配
-      </h3>
-      
-      <div className="mb-3 p-3 bg-green-50 dark:bg-green-900 dark:bg-opacity-20 border border-green-200 dark:border-green-700 rounded-lg">
-        <p className="text-green-800 dark:text-green-300 text-sm">
-          <strong>穿衣建议：</strong>优先选择以下颜色作为主色调，可以作为外套、上衣或配饰的颜色。
-        </p>
-      </div>
+    <Card title="今日吉祥颜色搭配" className="mb-4">
+      <Alert variant="success" className="mb-3">
+        <strong>穿衣建议：</strong>优先选择以下颜色作为主色调，可以作为外套、上衣或配饰的颜色。
+      </Alert>
 
       <div className="space-y-3">
         {luckyColors.map((colorSystem, index) => (
@@ -111,7 +101,7 @@ const LuckyColorsCard = React.memo(({ luckyColors }) => {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 });
 
@@ -120,17 +110,10 @@ const UnluckyColorsCard = React.memo(({ unluckyColors }) => {
   if (!unluckyColors || unluckyColors.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-4">
-      <h3 className="text-lg font-semibold mb-3 flex items-center text-red-600 dark:text-red-400">
-        <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-        今日不宜颜色
-      </h3>
-      
-      <div className="mb-3 p-3 bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg">
-        <p className="text-red-800 dark:text-red-300 text-sm">
-          <strong>注意事项：</strong>以下颜色在今日可能与您的气场相冲，建议避免作为主色调使用。
-        </p>
-      </div>
+    <Card title="今日不宜颜色" className="mb-4">
+      <Alert variant="danger" className="mb-3">
+        <strong>注意事项：</strong>以下颜色在今日可能与您的气场相冲，建议避免作为主色调使用。
+      </Alert>
 
       <div className="space-y-3">
         {unluckyColors.map((colorSystem, index) => (
@@ -162,7 +145,7 @@ const UnluckyColorsCard = React.memo(({ unluckyColors }) => {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 });
 
@@ -171,17 +154,10 @@ const DietGuideCard = React.memo(({ foodSuggestions }) => {
   if (!foodSuggestions) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-4">
-      <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
-        <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
-        今日饮食养生指南
-      </h3>
-      
-      <div className="mb-3 p-3 bg-orange-50 dark:bg-orange-900 dark:bg-opacity-20 border border-orange-200 dark:border-orange-700 rounded-lg">
-        <p className="text-orange-800 dark:text-orange-300 text-sm">
-          <strong>饮食养生原理：</strong>根据五行相生相克的原理，选择与当日五行相配的食物。
-        </p>
-      </div>
+    <Card title="今日饮食养生指南" className="mb-4">
+      <Alert variant="warning" className="mb-3">
+        <strong>饮食养生原理：</strong>根据五行相生相克的原理，选择与当日五行相配的食物。
+      </Alert>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 border border-green-200 dark:border-green-700 rounded-lg p-3">
@@ -222,7 +198,7 @@ const DietGuideCard = React.memo(({ foodSuggestions }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 });
 

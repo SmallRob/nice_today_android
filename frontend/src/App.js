@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { optimizeAppStartup } from './utils/startupOptimizer';
+import { ThemeProvider } from './context/ThemeContext';
 import './index.css';
 
 // 懒加载页面组件
@@ -174,7 +175,9 @@ function App() {
   return (
     <Router>
       <ErrorBoundary>
-        <AppLayout />
+        <ThemeProvider>
+          <AppLayout />
+        </ThemeProvider>
       </ErrorBoundary>
     </Router>
   );
