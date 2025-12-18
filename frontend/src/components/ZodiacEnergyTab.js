@@ -422,7 +422,7 @@ const ZodiacEnergyTab = () => {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
         <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-          <span className="text-3xl mr-3">{elementData?.icon}</span>
+          <span className="text-2xl mr-3">{elementData?.icon}</span>
           今日能量匹配度
         </h3>
         
@@ -447,14 +447,14 @@ const ZodiacEnergyTab = () => {
                 strokeWidth="2.5"
                 strokeDasharray={`${匹配度}, 100`}
               />
-              <text x="18" y="20.5" textAnchor="middle" className="text-2xl font-bold fill-gray-800 dark:fill-white">
+              <text x="18" y="20.5" textAnchor="middle" className="text-xl font-bold fill-gray-800 dark:fill-white">
                 {匹配度}%
               </text>
             </svg>
           </div>
           
           <div className="text-center md:text-left">
-            <p className={`text-2xl font-bold ${colorClass} mb-2`}>
+            <p className={`text-xl font-bold ${colorClass} mb-2`}>
               {关系} - {匹配度}%
             </p>
             <p className="text-gray-600 dark:text-gray-300 mb-3">{描述}</p>
@@ -580,7 +580,7 @@ const ZodiacEnergyTab = () => {
 
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
           <span className="mr-3">🍎</span> 饮食调理建议
         </h3>
         
@@ -625,7 +625,7 @@ const ZodiacEnergyTab = () => {
 
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
           <span className="mr-3">🏠</span> 家居风水调整
         </h3>
         
@@ -663,7 +663,7 @@ const ZodiacEnergyTab = () => {
 
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
           <span className="mr-3">👥</span> 人际关系调整
         </h3>
         

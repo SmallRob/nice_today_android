@@ -1,4 +1,4 @@
-/* 玛雅出生图样式 - 性能优化版 */
+/* 玛雅出生图样式 - 统一优化版 */
 .maya-birth-chart {
   max-width: 100%;
   width: 100%;
@@ -7,16 +7,18 @@
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 .maya-birth-chart h2 {
   text-align: center;
   color: #2d3748;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   font-size: 1.5rem;
   font-weight: 600;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #e2e8f0;
+  line-height: 1.4;
 }
 
 .date-picker-container {

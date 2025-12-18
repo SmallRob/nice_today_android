@@ -372,14 +372,17 @@ const UserConfigManagerComponent = () => {
     const success = userConfigManager.addConfig(newConfig);
     if (success) {
       // 更新本地状态
-      setConfigs(prev => [...prev, newConfig]);
-      // 展开新添加的配置
-      setExpandedIndex(configs.length);
+      setConfigs(prev => {
+        const newConfigs = [...prev, newConfig];
+        // 展开新添加的配置
+        setExpandedIndex(newConfigs.length - 1);
+        return newConfigs;
+      });
       showMessage('添加配置成功', 'success');
     } else {
       showMessage('添加配置失败，请重试', 'error');
     }
-  }, [configs.length, showMessage]);
+  }, [showMessage]);
   
   // 处理删除配置
   const handleDeleteConfig = useCallback((index) => {

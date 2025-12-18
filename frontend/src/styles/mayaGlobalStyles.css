@@ -1,0 +1,242 @@
+/* 玛雅组件全局样式规范 - 统一字体、边距和文本样式 */
+
+/* 基础字体定义 */
+.maya-font-base {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  color: #374151;
+}
+
+/* 标题字体规范 */
+.maya-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #1f2937;
+}
+
+.maya-subtitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #374151;
+}
+
+/* 正文字体规范 */
+.maya-body {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.maya-body-sm {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #9ca3af;
+}
+
+/* 按钮字体规范 */
+.maya-button {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.maya-button-sm {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* 间距规范 */
+.maya-spacing-xs { margin-bottom: 0.5rem; }
+.maya-spacing-sm { margin-bottom: 0.75rem; }
+.maya-spacing-md { margin-bottom: 1rem; }
+.maya-spacing-lg { margin-bottom: 1.5rem; }
+.maya-spacing-xl { margin-bottom: 2rem; }
+
+.maya-padding-xs { padding: 0.5rem; }
+.maya-padding-sm { padding: 0.75rem; }
+.maya-padding-md { padding: 1rem; }
+.maya-padding-lg { padding: 1.5rem; }
+.maya-padding-xl { padding: 2rem; }
+
+/* 圆角规范 */
+.maya-rounded { border-radius: 0.375rem; }
+.maya-rounded-lg { border-radius: 0.5rem; }
+.maya-rounded-xl { border-radius: 0.75rem; }
+
+/* 阴影规范 */
+.maya-shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+.maya-shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+.maya-shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+
+/* 颜色规范 */
+.maya-primary { color: #8b5cf6; }
+.maya-primary-bg { background-color: #8b5cf6; }
+.maya-secondary { color: #6b7280; }
+.maya-secondary-bg { background-color: #6b7280; }
+.maya-success { color: #10b981; }
+.maya-success-bg { background-color: #10b981; }
+.maya-warning { color: #f59e0b; }
+.maya-warning-bg { background-color: #f59e0b; }
+.maya-error { color: #ef4444; }
+.maya-error-bg { background-color: #ef4444; }
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .maya-font-base {
+    color: #e5e7eb;
+  }
+  
+  .maya-title {
+    color: #f9fafb;
+  }
+  
+  .maya-subtitle {
+    color: #e5e7eb;
+  }
+  
+  .maya-body {
+    color: #d1d5db;
+  }
+  
+  .maya-body-sm {
+    color: #9ca3af;
+  }
+}
+
+/* 响应式字体大小 */
+@media (max-width: 768px) {
+  .maya-title {
+    font-size: 1.25rem;
+  }
+  
+  .maya-subtitle {
+    font-size: 1rem;
+  }
+  
+  .maya-body {
+    font-size: 0.8125rem;
+  }
+}
+
+/* 日期输入框统一样式 */
+.maya-date-input {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #374151;
+  background-color: white;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.maya-date-input:focus {
+  border-color: #8b5cf6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* 按钮统一样式 */
+.maya-button-base {
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  transition: all 0.15s ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+
+.maya-button-primary {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.maya-button-primary:hover {
+  background-color: #7c3aed;
+}
+
+.maya-button-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.maya-button-secondary:hover {
+  background-color: #e5e7eb;
+}
+
+/* 卡片统一样式 */
+.maya-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+}
+
+/* 加载状态统一样式 */
+.maya-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.maya-loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #8b5cf6;
+  border-radius: 50%;
+  animation: maya-spin 1s linear infinite;
+  margin-bottom: 0.75rem;
+}
+
+@keyframes maya-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 错误状态统一样式 */
+.maya-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: #dc2626;
+  text-align: center;
+}
+
+/* 空状态统一样式 */
+.maya-empty {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* 网格布局统一规范 */
+.maya-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.maya-grid-cols-1 { grid-template-columns: 1fr; }
+.maya-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.maya-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 768px) {
+  .maya-grid-cols-2,
+  .maya-grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+}

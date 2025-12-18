@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from 'react';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+// 移除DatePicker导入，不再使用日期选择器
+// import DatePicker from 'react-datepicker';
+// import "react-datepicker/dist/react-datepicker.css";
 import './MayaBirthChart.css';
+import '../styles/mayaGlobalStyles.css';
 import { formatDateString } from '../services/apiServiceRefactored';
 import { storageManager } from '../utils/storageManager';
+import { userConfigManager } from '../utils/userConfigManager';
 import { 
   sealInfoMap, 
   toneInfoMap,
@@ -27,15 +30,24 @@ const ResultsSection = lazy(() => import('./MayaBirthChartResults_optimized'));
 
 // 优化的加载组件
 const LoadingSpinner = memo(() => (
-  <div className="flex justify-center items-center py-4">
-    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+  <div className="flex flex-col items-center justify-center py-6 animate-fadeIn">
+    <div className="animate-pulse flex flex-col items-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mb-2"></div>
+      <p className="text-gray-600 dark:text-gray-400 text-sm leading-5 text-center">正在计算玛雅出生图...</p>
+    </div>
   </div>
 ));
 
 // 优化的错误提示组件
 const ErrorDisplay = memo(({ error }) => (
-  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-    {error}
+  <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-4 text-center animate-fadeIn">
+    <div className="w-6 h-6 bg-red-100 dark:bg-red-800 rounded-full flex items-center justify-center mx-auto mb-2">
+      <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+      </svg>
+    </div>
+    <h3 className="text-red-800 dark:text-red-300 text-sm font-medium mb-2 leading-5">加载失败</h3>
+    <p className="text-red-600 dark:text-red-400 text-xs mb-3 leading-5">{error}</p>
   </div>
 ));
 
@@ -171,35 +183,34 @@ const STORAGE_KEYS = {
   BIRTH_INFO_CACHE: 'maya_birth_info_cache'
 };
 
-// 优化的子组件 - 使用memo防止重渲染
-const DatePickerSection = memo(({ birthDate, loading, handleDateChange, handleSubmit }) => (
-  <div className="date-picker-container">
-    <div className="flex w-full items-center justify-center flex-col sm:flex-row gap-3">
-      <DatePicker
-        selected={birthDate}
-        onChange={handleDateChange}
-        dateFormat="yyyy-MM-dd"
-        showYearDropdown
-        scrollableYearDropdown
-        yearDropdownItemNumber={50}
-        className="date-picker w-full sm:w-auto"
-        placeholderText="选择出生日期"
-        popperPlacement="bottom-start"
-        popperModifiers={[
-          {
-            name: 'offset',
-            options: {
-              offset: [0, 8]
-            }
-          }
-        ]}
-      />
-      <button 
-        onClick={handleSubmit} 
+// 用户信息组件 - 显示用户信息和配置切换
+const UserInfoSection = memo(({ userInfo, loading, onSwitchProfile }) => (
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 mb-4">
+    <div className="flex flex-col sm:flex-row items-center justify-between">
+      <div>
+        <h3 className="text-base font-medium text-gray-900 dark:text-white">
+          {userInfo.nickname ? `${userInfo.nickname} 的玛雅出生图` : '玛雅出生图'}
+        </h3>
+        <p className="text-xs text-gray-600 dark:text-gray-400">
+          {userInfo.birthDate ? `基于出生日期 ${userInfo.birthDate} 计算` : '请到设置页面配置个人信息'}
+        </p>
+        {userInfo.zodiac && userInfo.zodiacAnimal && (
+          <div className="flex gap-2 mt-1">
+            <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 text-xs rounded-full">
+              {userInfo.zodiac}
+            </span>
+            <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900 dark:bg-opacity-20 text-purple-600 dark:text-purple-400 text-xs rounded-full">
+              {userInfo.zodiacAnimal}
+            </span>
+          </div>
+        )}
+      </div>
+      <button
+        onClick={onSwitchProfile}
         disabled={loading}
-        className="submit-button w-full sm:w-auto"
+        className="mt-3 sm:mt-0 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white text-sm rounded-md transition-colors"
       >
-        {loading ? "加载中..." : "查看出生图"}
+        切换配置
       </button>
     </div>
   </div>
@@ -239,13 +250,19 @@ const MayaBirthChart = () => {
   const abortControllerRef = useRef(null);
   
   // useState管理需要触发重渲染的状态
-  const [birthDate, _setBirthDate] = useState(DEFAULT_BIRTH_DATE);
   const [birthInfo, setBirthInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showResults, setShowResults] = useState(false);
   const [historyDates, setHistoryDates] = useState([]);
   const [userInteracted, setUserInteracted] = useState(false);
+  const [configManagerReady, setConfigManagerReady] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    nickname: '',
+    birthDate: '',
+    zodiac: '',
+    zodiacAnimal: ''
+  });
 
   // 优化的状态更新函数
   const setBirthDate = useCallback((date) => {
@@ -412,47 +429,23 @@ const MayaBirthChart = () => {
     }
   }, []);
   
-  // 优化的名言生成函数
-  const generateQuote = useCallback((seed) => {
-    if (!dailyQuotes?.length) {
-      return "生命不是等待风暴过去，而是学会在雨中跳舞。";
-    }
-    return MayaCalendarCalculator.getRandomElement(dailyQuotes, seed + 200) || "生命不是等待风暴过去，而是学会在雨中跳舞。";
-  }, []);
+  // 今日启示模块已迁移至玛雅日历页面
+  // 以下相关函数已不再使用
   
-  // 优化的作者生成函数
-  const generateAuthor = useCallback((seed) => {
-    if (!quoteAuthors?.length) {
-      return "玛雅智者";
-    }
-    return MayaCalendarCalculator.getRandomElement(quoteAuthors, seed + 300) || "玛雅智者";
-  }, []);
-
-  // 确保引言存在的函数
-  const ensureQuoteExists = useCallback((birthInfo) => {
+  // 确保数据结构的完整性函数
+  const ensureBirthInfoIntegrity = useCallback((birthInfo) => {
     if (!birthInfo) return birthInfo;
     
-    const seed = MayaCalendarCalculator.generateDeterministicHash(new Date(birthInfo.date));
-    
-    if (!birthInfo.daily_quote) {
-      birthInfo.daily_quote = {
-        content: generateQuote(seed),
-        author: generateAuthor(seed)
-      };
-    } else if (typeof birthInfo.daily_quote === 'string') {
-      const quoteContent = birthInfo.daily_quote;
-      birthInfo.daily_quote = {
-        content: quoteContent,
-        author: generateAuthor(seed)
-      };
-    } else if (!birthInfo.daily_quote.author) {
-      birthInfo.daily_quote.author = generateAuthor(seed);
-    } else if (!birthInfo.daily_quote.content) {
-      birthInfo.daily_quote.content = generateQuote(seed);
-    }
+    // 确保基本数据结构完整
+    if (!birthInfo.date) birthInfo.date = '';
+    if (!birthInfo.weekday) birthInfo.weekday = '未知';
+    if (!birthInfo.maya_kin) birthInfo.maya_kin = 'KIN 1';
+    if (!birthInfo.maya_tone) birthInfo.maya_tone = '磁性之音 | 第1天';
+    if (!birthInfo.maya_seal) birthInfo.maya_seal = '红龙';
+    if (!birthInfo.maya_seal_desc) birthInfo.maya_seal_desc = '磁性的红龙';
     
     return birthInfo;
-  }, [generateQuote, generateAuthor]);
+  }, []);
 
   // 优化的存储函数
   const saveToStorage = useCallback(async (key, value) => {
@@ -671,18 +664,15 @@ const MayaBirthChart = () => {
             maya_tone_info: generateToneInfo(tone),
             life_purpose: generateLifePurpose(sealDesc, seed),
             personal_traits: generatePersonalTraits(seed),
-            birth_energy_field: generateEnergyField(seed),
-            daily_quote: {
-              content: generateQuote(seed) || "每一天都是新的开始",
-              author: generateAuthor(seed) || "玛雅智者"
-            }
+            birth_energy_field: generateEnergyField(seed)
+            // 今日启示模块已迁移至玛雅日历页面
           };
           
           // 缓存结果
           await setCachedBirthInfo(dateStr, localBirthInfo);
         }
         
-        const processedLocalBirthInfo = ensureQuoteExists(localBirthInfo);
+        const processedLocalBirthInfo = ensureBirthInfoIntegrity(localBirthInfo);
         
         // 检查是否已取消
         if (abortControllerRef.current?.signal.aborted) return;
@@ -723,7 +713,7 @@ const MayaBirthChart = () => {
         }, 0);
       }
     },
-    [userInteracted, historyDates, saveHistory, saveBirthDateToGlobal, birthInfo, getCachedBirthInfo, setCachedBirthInfo, computeMayaData, generateSealInfo, generateToneInfo, generateLifePurpose, generatePersonalTraits, generateEnergyField, generateQuote, generateAuthor, ensureQuoteExists]
+    [historyDates, saveHistory, saveBirthDateToGlobal, birthInfo, getCachedBirthInfo, setCachedBirthInfo, computeMayaData, generateSealInfo, generateToneInfo, generateLifePurpose, generatePersonalTraits, generateEnergyField, generateQuote, generateAuthor, ensureQuoteExists]
   );
 
   const initializeComponent = useCallback(async () => {
@@ -733,88 +723,104 @@ const MayaBirthChart = () => {
     }
     abortControllerRef.current = new AbortController();
     
-    await Promise.all([
-      fetchHistory(),
-      (async () => {
-        try {
-          let storedDate = await loadFromStorage(STORAGE_KEYS.BIRTH_DATE, null);
-          
-          if (!storedDate) {
-            const globalDate = await loadFromStorage('last_biorhythm_birthdate', null);
-            if (globalDate) storedDate = globalDate;
-          }
-          
-          if (!storedDate) {
-            const localDate = localStorage.getItem('lastMayaBirthQueryDate');
-            if (localDate) storedDate = localDate;
-          }
-          
-          let birthDateToUse = DEFAULT_BIRTH_DATE;
-          if (storedDate) {
-            try {
-              const parsedDate = typeof storedDate === 'string' ? new Date(storedDate) : storedDate;
-              if (!isNaN(parsedDate.getTime())) {
-                birthDateToUse = parsedDate;
-              }
-            } catch (parseError) {
-              console.error("解析存储的日期失败:", parseError);
-            }
-          }
-          
-          setBirthDate(birthDateToUse);
-          
-          // 延迟加载，避免阻塞UI
-          setTimeout(() => {
-            // 检查是否已取消
-            if (abortControllerRef.current?.signal.aborted) return;
-            loadBirthInfo(birthDateToUse, false);
-          }, 100);
-          
-        } catch (error) {
-          console.error("初始化日期失败:", error);
-          setBirthDate(DEFAULT_BIRTH_DATE);
-          setTimeout(() => {
-            // 检查是否已取消
-            if (abortControllerRef.current?.signal.aborted) return;
-            loadBirthInfo(DEFAULT_BIRTH_DATE, false);
-          }, 100);
+    // 初始化配置管理器
+    await userConfigManager.initialize();
+    setConfigManagerReady(true);
+    
+    // 获取当前配置
+    const currentConfig = userConfigManager.getCurrentConfig();
+    
+    // 更新用户信息
+    setUserInfo({
+      nickname: currentConfig.nickname || '',
+      birthDate: currentConfig.birthDate || '',
+      zodiac: currentConfig.zodiac || '',
+      zodiacAnimal: currentConfig.zodiacAnimal || ''
+    });
+    
+    // 获取出生日期
+    let birthDateToUse = DEFAULT_BIRTH_DATE;
+    if (currentConfig && currentConfig.birthDate) {
+      try {
+        const parsedDate = new Date(currentConfig.birthDate);
+        if (!isNaN(parsedDate.getTime())) {
+          birthDateToUse = parsedDate;
         }
-      })()
-    ]);
-  }, [fetchHistory, loadBirthInfo, loadFromStorage]);
+      } catch (parseError) {
+        console.error("解析存储的日期失败:", parseError);
+      }
+    }
+    
+    setBirthDate(birthDateToUse);
+    
+    // 延迟加载，避免阻塞UI
+    setTimeout(() => {
+      // 检查是否已取消
+      if (abortControllerRef.current?.signal.aborted) return;
+      loadBirthInfo(birthDateToUse, false);
+    }, 100);
+    
+    // 加载历史记录
+    await fetchHistory();
+    
+    // 添加配置变更监听器
+    const removeListener = userConfigManager.addListener(({
+      currentConfig: updatedConfig
+    }) => {
+      if (updatedConfig) {
+        setUserInfo({
+          nickname: updatedConfig.nickname || '',
+          birthDate: updatedConfig.birthDate || '',
+          zodiac: updatedConfig.zodiac || '',
+          zodiacAnimal: updatedConfig.zodiacAnimal || ''
+        });
+        
+        // 如果出生日期有变化，重新加载数据
+        if (updatedConfig.birthDate && updatedConfig.birthDate !== (birthDate ? formatDateString(birthDate) : '')) {
+          try {
+            const newBirthDate = new Date(updatedConfig.birthDate);
+            if (!isNaN(newBirthDate.getTime())) {
+              setBirthDate(newBirthDate);
+              setTimeout(() => {
+                if (abortControllerRef.current?.signal.aborted) return;
+                loadBirthInfo(newBirthDate, true);
+              }, 0);
+            }
+          } catch (error) {
+            console.error("处理新出生日期失败:", error);
+          }
+        }
+      }
+    });
+    
+    return removeListener;
+  }, [fetchHistory, loadBirthInfo]);
 
   useEffect(() => {
-    initializeComponent();
+    let removeListener;
+    
+    const initialize = async () => {
+      removeListener = await initializeComponent();
+    };
+    
+    initialize();
     
     // 清理函数防止内存泄漏
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
+      if (removeListener) {
+        removeListener();
+      }
     };
   }, [initializeComponent]);
 
-  // 优化的日期变化处理 - 使用防抖
-  const handleDateChange = useCallback((date) => {
-    if (!date) return;
-    
-    setBirthDate(date);
-    setUserInteracted(true);
-    
-    // 使用防抖避免频繁计算
-    if (handleDateChange.debounceTimer) {
-      clearTimeout(handleDateChange.debounceTimer);
-    }
-    
-    handleDateChange.debounceTimer = setTimeout(() => {
-      saveBirthDateToGlobal(date);
-      loadBirthInfo(date, true);
-    }, 300);
-  }, [loadBirthInfo, saveBirthDateToGlobal]);
-
-  const handleSubmit = useCallback(() => {
-    loadBirthInfo(birthDate, true);
-  }, [birthDate, loadBirthInfo]);
+  // 切换配置处理函数
+  const handleSwitchProfile = useCallback(() => {
+    // 导航到设置页面
+    window.location.href = '/settings?tab=userConfigs';
+  }, []);
 
   const handleHistoryClick = useCallback((dateStr) => {
     loadBirthInfo(dateStr, true);
@@ -823,9 +829,6 @@ const MayaBirthChart = () => {
   // 组件卸载时的清理
   useEffect(() => {
     return () => {
-      if (handleDateChange.debounceTimer) {
-        clearTimeout(handleDateChange.debounceTimer);
-      }
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -836,11 +839,10 @@ const MayaBirthChart = () => {
     <div className="maya-birth-chart">
       <h2>玛雅出生图</h2>
       
-      <DatePickerSection
-        birthDate={birthDate}
+      <UserInfoSection
+        userInfo={userInfo}
         loading={loading}
-        handleDateChange={handleDateChange}
-        handleSubmit={handleSubmit}
+        onSwitchProfile={handleSwitchProfile}
       />
 
       <HistorySection

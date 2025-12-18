@@ -193,23 +193,8 @@ const ToneInfoSection = memo(({ birthInfo }) => {
   );
 });
 
-// 每日启示组件 - 使用memo和条件渲染
-const DailyQuoteSection = memo(({ birthInfo }) => {
-  const quoteContent = useMemo(() => (
-    <blockquote className="italic text-gray-700 border-l-4 border-blue-400 pl-4 py-2">
-      "{birthInfo.daily_quote.content}"
-      <footer className="text-right mt-2 text-gray-600 text-sm">— {birthInfo.daily_quote.author}</footer>
-    </blockquote>
-  ), [birthInfo.daily_quote]);
-  
-  if (!birthInfo.daily_quote) return null;
-  
-  return (
-    <OptimizedInfoCard title="今日启示">
-      {quoteContent}
-    </OptimizedInfoCard>
-  );
-});
+// 每日启示组件 - 已迁移至玛雅日历页面
+// 此组件在玛雅出生图中已不再使用
 
 // 生命使命组件 - 使用memo和useMemo
 const LifePurposeSection = memo(({ birthInfo }) => {
@@ -340,8 +325,8 @@ const ResultsSection = memo(({ birthInfo, showResults }) => {
     { component: ToneInfoSection, key: 'tone' },
     { component: LifePurposeSection, key: 'purpose' },
     { component: PersonalTraitsSection, key: 'traits' },
-    { component: EnergyFieldSection, key: 'energy' },
-    { component: DailyQuoteSection, key: 'quote' }
+    { component: EnergyFieldSection, key: 'energy' }
+    // 今日启示模块已迁移至玛雅日历页面
   ], []);
 
   // 优化渲染函数

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
+import '../styles/mayaGlobalStyles.css';
 
 // 玛雅日历工具类 - 优化版本
 class MayaCalendarUtils {
@@ -129,10 +130,10 @@ class MayaCalendarUtils {
 
 // 优化的加载组件
 const LoadingSpinner = memo(() => (
-  <div className="flex flex-col items-center justify-center py-8 animate-fadeIn">
+  <div className="flex flex-col items-center justify-center py-6 animate-fadeIn">
     <div className="animate-pulse flex flex-col items-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mb-3"></div>
-      <p className="text-gray-600 dark:text-gray-400 text-sm">正在计算玛雅历法...</p>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mb-2"></div>
+      <p className="text-gray-600 dark:text-gray-400 text-sm leading-5 text-center">正在计算玛雅历法...</p>
     </div>
   </div>
 ));
@@ -145,12 +146,12 @@ const ErrorDisplay = memo(({ error, onRetry }) => (
         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
       </svg>
     </div>
-    <h3 className="text-red-800 dark:text-red-300 text-sm font-medium mb-1">加载失败</h3>
-    <p className="text-red-600 dark:text-red-400 text-xs mb-2">{error}</p>
+    <h3 className="text-red-800 dark:text-red-300 text-sm font-medium mb-2 leading-5">加载失败</h3>
+    <p className="text-red-600 dark:text-red-400 text-xs mb-3 leading-5">{error}</p>
     {onRetry && (
       <button 
         onClick={onRetry} 
-        className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+        className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors font-medium"
       >
         重新加载
       </button>
@@ -166,12 +167,12 @@ const EmptyState = memo(({ onRetry }) => (
         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
       </svg>
     </div>
-    <h3 className="text-gray-800 dark:text-gray-300 text-sm font-medium mb-1">暂无数据</h3>
-    <p className="text-gray-600 dark:text-gray-400 text-xs mb-2">暂时无法获取玛雅历法数据</p>
+    <h3 className="text-gray-800 dark:text-gray-300 text-sm font-medium mb-2 leading-5">暂无数据</h3>
+    <p className="text-gray-600 dark:text-gray-400 text-xs mb-3 leading-5">暂时无法获取玛雅历法数据</p>
     {onRetry && (
       <button 
         onClick={onRetry} 
-        className="mt-2 px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 transition-colors"
+        className="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors font-medium"
       >
         重新加载
       </button>
@@ -300,20 +301,14 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
     }
   }, [loading, calculateMayaDataAsync]);
 
-  // 优化的日期变化处理 - 使用防抖
+  // 优化的日期变化处理 - 立即更新并加载数据
   const handleDateChange = useCallback((e) => {
     const newDate = new Date(e.target.value);
     if (!isNaN(newDate.getTime())) {
       setSelectedDate(newDate);
       
-      // 使用防抖避免频繁计算
-      if (handleDateChange.debounceTimer) {
-        clearTimeout(handleDateChange.debounceTimer);
-      }
-      
-      handleDateChange.debounceTimer = setTimeout(() => {
-        loadMayaData(newDate);
-      }, 50);
+      // 立即加载新日期的数据，不需要防抖
+      loadMayaData(newDate);
     }
   }, [loadMayaData]);
 
@@ -334,21 +329,17 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
     loadMayaData(selectedDate);
   }, [selectedDate, loadMayaData]);
 
-  // 组件挂载时延迟加载数据
+  // 组件挂载时延迟加载数据 - 使用当前选择的日期
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
-      loadMayaData(new Date());
+      loadMayaData(selectedDate);
     }, 100);
     
     return () => {
       clearTimeout(timer);
-      // 清理防抖定时器
-      if (handleDateChange.debounceTimer) {
-        clearTimeout(handleDateChange.debounceTimer);
-      }
     };
-  }, [loadMayaData]);
+  }, [loadMayaData, selectedDate]);
 
   // 组件卸载时清理
   useEffect(() => {
@@ -358,9 +349,6 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
       }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (handleDateChange.debounceTimer) {
-        clearTimeout(handleDateChange.debounceTimer);
       }
     };
   }, []);
@@ -374,14 +362,14 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
 
   // 优化的日期选择按钮 - 移到条件渲染之前
   const QuickSelectButtons = useMemo(() => (
-    <div className="flex justify-center space-x-2 mt-3">
+    <div className="flex justify-center space-x-3 mt-3">
       {[-1, 0, 1].map((offset) => (
         <button
           key={offset}
           onClick={() => handleQuickSelect(offset)}
-          className={`px-3 py-1 text-xs rounded transition-colors ${
+          className={`px-4 py-2 text-sm rounded-md transition-colors font-medium ${
             offset === 0
-              ? 'bg-purple-600 text-white'
+              ? 'bg-purple-600 text-white hover:bg-purple-700'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
           }`}
         >
@@ -395,53 +383,89 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
   const MayaCoreInfo = useMemo(() => (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {/* KIN数 */}
-      <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
+      <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-4 text-center">
+        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2 leading-8">
           KIN {mayaData?.kin}
         </div>
-        <div className="text-xs text-purple-800 dark:text-purple-300">能量编号</div>
+        <div className="text-xs text-purple-800 dark:text-purple-300 font-medium leading-4">能量编号</div>
       </div>
       
       {/* 调性 */}
-      <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-        <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-1">
+      <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-4 text-center">
+        <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-2 leading-6">
           {mayaData?.tone}
         </div>
-        <div className="text-xs text-blue-800 dark:text-blue-300">银河音调</div>
+        <div className="text-xs text-blue-800 dark:text-blue-300 font-medium leading-4">银河音调</div>
       </div>
       
       {/* 图腾 */}
-      <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-        <div className="text-lg font-bold text-green-600 dark:text-green-400 mb-1">
+      <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-4 text-center">
+        <div className="text-lg font-bold text-green-600 dark:text-green-400 mb-2 leading-6">
           {mayaData?.seal}
         </div>
-        <div className="text-xs text-green-800 dark:text-green-300">太阳印记</div>
+        <div className="text-xs text-green-800 dark:text-green-300 font-medium leading-4">太阳印记</div>
       </div>
     </div>
   ), [mayaData?.kin, mayaData?.tone, mayaData?.seal]);
 
   // 优化的完整名称组件 - 移到条件渲染之前
   const MayaFullName = useMemo(() => (
-    <div className="mt-3 p-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg text-center">
-      <div className="text-lg font-bold">{mayaData?.fullName}</div>
-      <div className="text-sm opacity-90">今日玛雅历法能量</div>
+    <div className="mt-4 p-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg text-center">
+      <div className="text-lg font-bold mb-1 leading-6">{mayaData?.fullName}</div>
+      <div className="text-sm opacity-90 leading-5">今日玛雅历法能量</div>
     </div>
   ), [mayaData?.fullName]);
 
   // 优化的能量提示组件 - 移到条件渲染之前
   const EnergyTip = useMemo(() => (
-    <div className={`${mayaData?.bgColor} border-l-4 border-purple-500 dark:border-purple-400 rounded-r-lg p-3`}>
-      <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+    <div className={`${mayaData?.bgColor} border-l-4 border-purple-500 dark:border-purple-400 rounded-r-lg p-4`}>
+      <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 leading-5">
         今日能量提示
       </h4>
-      <p className={`text-xs ${mayaData?.textColor}`}>
+      <p className={`text-sm ${mayaData?.textColor} mb-2 leading-5`}>
         <strong>能量等级：{mayaData?.level}</strong> - {mayaData?.tip}
       </p>
-      <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+      <div className="text-xs text-gray-600 dark:text-gray-400 leading-4">
         <strong>建议活动：</strong>{mayaData?.suggestion}
       </div>
     </div>
   ), [mayaData?.bgColor, mayaData?.textColor, mayaData?.level, mayaData?.tip, mayaData?.suggestion]);
+
+  // 优化的今日启示组件 - 从玛雅出生图迁移而来
+  const DailyInspiration = useMemo(() => {
+    // 生成基于KIN的今日启示
+    const getDailyInspiration = (kin) => {
+      const inspirations = [
+        "生命不是等待风暴过去，而是学会在雨中跳舞。",
+        "真正的智慧在于认识自己的无知。",
+        "活在当下，珍惜每一刻的美好。",
+        "勇气不是没有恐惧，而是面对恐惧并继续前行。",
+        "爱是唯一能够超越时间和空间的力量。",
+        "简单的生活是最充实的生活。",
+        "内心的平静是最大的财富。",
+        "每一次结束都是新的开始。",
+        "真正的力量来自于内心的平衡。",
+        "感恩的心是通往幸福的道路。"
+      ];
+      
+      const seed = kin % inspirations.length;
+      return inspirations[seed];
+    };
+    
+    const inspiration = mayaData ? getDailyInspiration(mayaData.kin) : "今日启示将在此显示";
+    
+    return (
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-4 text-white">
+        <h4 className="text-sm font-semibold mb-2 flex items-center">
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          今日启示
+        </h4>
+        <p className="text-sm opacity-90 leading-5">{inspiration}</p>
+      </div>
+    );
+  }, [mayaData?.kin]);
 
   // 优化的加载状态组件
   if (loading && !mayaData) {
@@ -464,19 +488,19 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
       <MayaInfoCard>
         <div className="flex flex-col sm:flex-row items-center justify-between">
           <div className="mb-3 sm:mb-0">
-            <h3 className="text-base font-medium text-gray-900 dark:text-white">
+            <h3 className="text-base font-medium text-gray-900 dark:text-white leading-6">
               选择查询日期
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-4 mt-1">
               查看特定日期的玛雅历法能量
             </p>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <input
               type="date"
               value={formatDateLocal(selectedDate)}
               onChange={handleDateChange}
-              className="border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-normal min-w-[140px]"
             />
           </div>
         </div>
@@ -499,11 +523,11 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
       {EnergyTip}
 
       {/* 玛雅历法说明 */}
-      <div className="bg-gray-50 dark:bg-gray-800 border-l-4 border-gray-400 dark:border-gray-600 rounded-r-lg p-3">
-        <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">
+      <div className="bg-gray-50 dark:bg-gray-800 border-l-4 border-gray-400 dark:border-gray-600 rounded-r-lg p-4">
+        <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-300 mb-2 leading-5">
           玛雅历法说明
         </h4>
-        <p className="text-xs text-gray-700 dark:text-gray-400">
+        <p className="text-sm text-gray-700 dark:text-gray-400 leading-5">
           玛雅历法基于260天的神圣周期（Tzolkin），每个KIN代表独特的能量组合。
           调性代表行动方式，图腾代表生命能量。建议结合个人直觉感受能量流动。
         </p>
