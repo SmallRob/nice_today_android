@@ -98,7 +98,7 @@ code {
 /* 防止内容被系统UI覆盖 */
 .app-container {
   height: 100vh;
-  overflow: hidden;
+  overflow: auto;
   display: flex;
   flex-direction: column;
 }

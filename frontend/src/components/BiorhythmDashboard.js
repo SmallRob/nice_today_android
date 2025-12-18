@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import BiorhythmTab from './BiorhythmTab';
-import DressInfo from './DressInfo';
-import MayaCalendar from './MayaCalendar';
-import { BiorhythmIcon, MayaIcon, DressIcon, IconLibrary } from './IconLibrary';
+import { BiorhythmIcon, IconLibrary } from './IconLibrary';
 
 const BiorhythmDashboard = ({ appInfo = {} }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('biorhythm');
   const [serviceStatus, setServiceStatus] = useState({
-    biorhythm: true,
-    maya: true,
-    dress: true
+    biorhythm: true
   });
 
   // 检测服务状态
@@ -19,9 +15,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
     
     // 所有环境下的默认状态（本地化运行）
     setServiceStatus({
-      biorhythm: true,
-      maya: true,
-      dress: true
+      biorhythm: true
     });
 
     setLoading(false);
@@ -31,7 +25,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
     checkServiceStatus();
   }, []);
 
-  // 标签配置 - 简化界面
+  // 标签配置 - 简化界面，只保留生物节律
   const tabs = [
     { 
       id: 'biorhythm', 
@@ -39,20 +33,6 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       icon: BiorhythmIcon,
       description: '科学计算您的生物节律状态',
       color: 'blue'
-    },
-    { 
-      id: 'maya', 
-      label: '玛雅历法', 
-      icon: MayaIcon,
-      description: '探索玛雅历法智慧与能量',
-      color: 'purple'
-    },
-    { 
-      id: 'dress', 
-      label: '穿衣指南', 
-      icon: DressIcon,
-      description: '五行能量穿衣饮食建议',
-      color: 'green'
     }
   ];
 
@@ -121,20 +101,6 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             {activeTab === 'biorhythm' && (
               <BiorhythmTab 
                 serviceStatus={serviceStatus.biorhythm}
-                isDesktop={appInfo.isDesktop}
-              />
-            )}
-            
-            {activeTab === 'maya' && (
-              <MayaCalendar 
-                serviceStatus={serviceStatus.maya}
-                isDesktop={appInfo.isDesktop}
-              />
-            )}
-            
-            {activeTab === 'dress' && (
-              <DressInfo 
-                serviceStatus={serviceStatus.dress}
                 isDesktop={appInfo.isDesktop}
               />
             )}

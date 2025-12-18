@@ -601,8 +601,9 @@ export const fetchMayaBirthInfo = async (apiBaseUrl, birthDateStr) => {
   try {
     // 首先尝试新的玛雅出生图API (POST请求)
     console.log(`正在请求玛雅出生图API: ${apiBaseUrl}${API_ENDPOINTS.MAYA.BIRTH_INFO}, 日期: ${birthDateStr}`);
-    
-    const response = await apiClient.post(`${apiBaseUrl}${API_ENDPOINTS.MAYA.BIRTH_INFO}`, {
+      
+    // 使用指定的API地址
+    const response = await apiClient.post(`${apiBaseUrl}/api/maya/birth-info`, {
       birth_date: birthDateStr
     });
     

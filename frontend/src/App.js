@@ -2,8 +2,6 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { optimizeAppStartup } from './utils/startupOptimizer';
 import './index.css';
-import 'cxdialog/dist/css/cxdialog.min.css';
-import cxDialog from 'cxdialog';
 
 // 懒加载页面组件
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
@@ -20,20 +18,62 @@ const LoadingScreen = () => (
   </div>
 );
 
-// 应用布局组件
-const AppLayout = ({ dataPolicyConsent }) => {
-  // 如果用户未同意数据使用策略，不显示主要内容
-  if (!dataPolicyConsent) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900">
-        <p className="text-gray-600 dark:text-gray-400">正在等待数据使用策略确认...</p>
-      </div>
-    );
+// 错误边界组件
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
   }
-  
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('应用错误:', error, errorInfo);
+    this.setState({
+      error: error,
+      errorInfo: errorInfo
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900 p-4">
+          <div className="text-red-500 text-xl mb-4">应用遇到错误</div>
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-w-md">
+            <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">
+              {this.state.error && this.state.error.toString()}
+            </p>
+            {process.env.NODE_ENV === 'development' && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs">查看详细信息</summary>
+                <pre className="text-xs mt-2 whitespace-pre-wrap">
+                  {this.state.errorInfo.componentStack}
+                </pre>
+              </details>
+            )}
+          </div>
+          <button 
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+            onClick={() => window.location.reload()}
+          >
+            重新加载应用
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// 应用布局组件
+const AppLayout = () => {
   return (
     <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         <Suspense fallback={<div className="flex items-center justify-center h-full">
           <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
         </div>}>
@@ -54,61 +94,88 @@ const AppLayout = ({ dataPolicyConsent }) => {
 };
 
 function App() {
-  const [dataPolicyConsent, setDataPolicyConsent] = useState(false);
+  const [appState, setAppState] = useState({
+    initialized: false,
+    error: null
+  });
   
-  // 检查用户是否已经同意数据使用策略
-  useEffect(() => {
-    const consentGiven = localStorage.getItem('dataPolicyConsent');
-    if (consentGiven === 'true') {
-      setDataPolicyConsent(true);
-    }
-  }, []);
-  
-  // 初始化应用
-  useEffect(() => {
-    const init = async () => {
+  // 简化的初始化函数
+  const initializeApp = async () => {
+    try {
+      // 延迟初始化，确保DOM已加载
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // 使用try-catch块导入和初始化每个模块
+      let capacitorInit;
       try {
-        // 使用优化的启动流程初始化应用
-        const result = await optimizeAppStartup({
-          // 可以在这里添加特定的启动配置
+        capacitorInit = await import('./utils/capacitorInit');
+        await capacitorInit.initializeApp({
+          debug: process.env.NODE_ENV === 'development',
+          performance: {
+            enabled: true,
+            autoLog: true
+          },
+          permissions: {
+            autoRequest: false,
+            required: [],
+            optional: []
+          },
+          compatibility: {
+            autoCheck: true,
+            fixProblems: false,
+            logProblems: true
+          }
         });
-        
-        if (result.success) {
-          console.log(`App initialized successfully in ${result.duration.toFixed(2)}ms`);
-        } else {
-          console.error('Error initializing app:', result.error);
-        }
       } catch (error) {
-        console.error('Error initializing app:', error);
+        console.warn('Capacitor初始化失败:', error);
+        // 继续执行，不阻止应用启动
       }
-    };
-
-    // 只有在用户同意数据使用策略后才初始化应用
-    if (dataPolicyConsent) {
-      init();
+      
+      setAppState({
+        initialized: true,
+        error: null
+      });
+    } catch (error) {
+      console.error('应用初始化错误:', error);
+      setAppState({
+        initialized: false,
+        error: error.message
+      });
     }
-  }, [dataPolicyConsent]);
+  };
+
+  useEffect(() => {
+    initializeApp();
+  }, []);
+
+  // 显示加载屏幕直到应用初始化完成
+  if (!appState.initialized) {
+    return <LoadingScreen />;
+  }
+
+  // 显示错误屏幕（如果有错误）
+  if (appState.error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900 p-4">
+        <div className="text-red-500 text-xl mb-4">应用初始化失败</div>
+        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-w-md">
+          <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">{appState.error}</p>
+        </div>
+        <button 
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          onClick={() => initializeApp()}
+        >
+          重试
+        </button>
+      </div>
+    );
+  }
 
   return (
     <Router>
-      {/* 数据使用策略同意弹窗 */}
-      {!dataPolicyConsent && (
-        cxDialog({
-          title: '数据使用策略',
-          info: '请确认您已阅读并同意我们的数据使用策略。',
-          ok: () => {
-            localStorage.setItem('dataPolicyConsent', 'true');
-            setDataPolicyConsent(true);
-          },
-          no: () => {
-            // 用户不同意时的处理
-          }
-        })
-      )}
-      
-      <Suspense fallback={<LoadingScreen />}>
-        <AppLayout dataPolicyConsent={dataPolicyConsent} />
-      </Suspense>
+      <ErrorBoundary>
+        <AppLayout />
+      </ErrorBoundary>
     </Router>
   );
 }
