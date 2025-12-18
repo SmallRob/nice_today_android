@@ -4,7 +4,7 @@ import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
 
-// 生肖能量组件配置管理器
+// 生肖能量组件配置管理器 - 仅用于读取默认配置
 class ZodiacEnergyConfigManager {
   constructor() {
     this.CONFIG_KEY = 'zodiac_energy_config';
@@ -22,67 +22,10 @@ class ZodiacEnergyConfigManager {
     };
   }
 
-  // 获取配置
+  // 获取配置 - 仅返回默认配置，不保存任何用户选择
   getConfig() {
-    try {
-      const config = localStorage.getItem(this.CONFIG_KEY);
-      if (config) {
-        const parsedConfig = JSON.parse(config);
-        // 合并默认配置以确保完整性
-        return { ...this.DEFAULT_CONFIG, ...parsedConfig };
-      }
-    } catch (error) {
-      console.error('读取生肖能量配置失败:', error);
-    }
-    
-    // 返回默认配置
+    // 始终返回默认配置，忽略任何已保存的用户配置
     return { ...this.DEFAULT_CONFIG };
-  }
-
-  // 保存配置
-  saveConfig(config) {
-    try {
-      const fullConfig = {
-        ...config,
-        lastUpdated: Date.now(),
-        version: '1.0'
-      };
-      localStorage.setItem(this.CONFIG_KEY, JSON.stringify(fullConfig));
-      return true;
-    } catch (error) {
-      console.error('保存生肖能量配置失败:', error);
-      return false;
-    }
-  }
-
-  // 更新特定配置字段
-  updateConfig(field, value) {
-    const currentConfig = this.getConfig();
-    const updatedConfig = { ...currentConfig, [field]: value };
-    return this.saveConfig(updatedConfig);
-  }
-
-  // 添加生肖到历史记录
-  addToZodiacHistory(zodiac) {
-    const currentConfig = this.getConfig();
-    const history = currentConfig.zodiacHistory || [];
-    
-    // 移除重复项，保持历史记录有序
-    const filteredHistory = history.filter(item => item !== zodiac);
-    const newHistory = [zodiac, ...filteredHistory].slice(0, 10); // 最多保存10条记录
-    
-    return this.updateConfig('zodiacHistory', newHistory);
-  }
-
-  // 清除配置
-  clearConfig() {
-    try {
-      localStorage.removeItem(this.CONFIG_KEY);
-      return true;
-    } catch (error) {
-      console.error('清除生肖能量配置失败:', error);
-      return false;
-    }
   }
 }
 
@@ -108,7 +51,6 @@ const ZodiacEnergyTab = () => {
   });
   const [initialized, setInitialized] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const [zodiacConfig, setZodiacConfig] = useState(zodiacEnergyConfigManager.getConfig());
 
   // 五行元素数据 - 使用useMemo缓存，避免重复创建
   const wuxingElements = React.useMemo(() => [
@@ -194,38 +136,6 @@ const ZodiacEnergyTab = () => {
     }
   ], []);
 
-  // 从存储管理器获取用户生肖（同步版本）
-  const getStoredZodiac = async () => {
-    try {
-      const zodiac = await storageManager.getUserZodiac();
-      return zodiac || '';
-    } catch (error) {
-      console.error('获取存储的生肖失败:', error);
-      return '';
-    }
-  };
-
-  // 保存生肖到存储管理器
-  const saveZodiac = async (zodiac) => {
-    if (zodiac) {
-      try {
-        // 保存到全局存储管理器以保持兼容性
-        await storageManager.setUserZodiac(zodiac);
-        
-        // 保存到独立配置
-        zodiacEnergyConfigManager.updateConfig('userZodiac', zodiac);
-        zodiacEnergyConfigManager.updateConfig('lastUsedZodiac', zodiac);
-        zodiacEnergyConfigManager.addToZodiacHistory(zodiac);
-        
-        // 更新本地配置状态
-        setZodiacConfig(zodiacEnergyConfigManager.getConfig());
-        
-      } catch (error) {
-        console.error('保存生肖失败:', error);
-      }
-    }
-  };
-
   // 生肖列表 - 使用useMemo缓存
   const zodiacs = React.useMemo(() => ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'], []);
 
@@ -242,8 +152,6 @@ const ZodiacEnergyTab = () => {
     
     if (zodiac) {
       setUserZodiac(zodiac);
-      saveZodiac(zodiac);
-      storageManager.setBirthYear(year); // 保存出生年份
     }
   }, [zodiacs]);
 
@@ -389,14 +297,10 @@ const ZodiacEnergyTab = () => {
         
         if (!isMounted) return;
         
-        // 从独立配置中加载数据
+        // 仅读取默认配置，不保存任何用户选择
         const zodiacConfig = zodiacEnergyConfigManager.getConfig();
         
-        // 设置选中的生肖和日期
-        if (zodiacConfig.userZodiac) {
-          setUserZodiac(zodiacConfig.userZodiac);
-        }
-        
+        // 设置默认日期
         if (zodiacConfig.selectedDate) {
           try {
             const savedDate = new Date(zodiacConfig.selectedDate);
@@ -404,7 +308,7 @@ const ZodiacEnergyTab = () => {
               setSelectedDate(savedDate);
             }
           } catch (dateError) {
-            console.error('解析保存的日期失败:', dateError);
+            console.error('解析默认日期失败:', dateError);
           }
         }
         
@@ -414,12 +318,9 @@ const ZodiacEnergyTab = () => {
           setUserInfo(currentConfig);
           
           // 优先使用用户配置中的生肖信息
-          if (currentConfig.zodiacAnimal && !zodiacConfig.userZodiac) {
+          if (currentConfig.zodiacAnimal) {
             setUserZodiac(currentConfig.zodiacAnimal);
-            
-            // 同步到独立配置
-            await saveZodiac(currentConfig.zodiacAnimal);
-          } else if (currentConfig.birthDate && !currentConfig.zodiacAnimal) {
+          } else if (currentConfig.birthDate) {
             // 如果没有生肖但有出生日期，计算生肖
             const birthYear = new Date(currentConfig.birthDate).getFullYear();
             if (birthYear && birthYear > 1900 && birthYear < 2100) {
@@ -437,7 +338,6 @@ const ZodiacEnergyTab = () => {
             if (configData.currentConfig.zodiacAnimal && 
                 configData.currentConfig.zodiacAnimal !== userZodiac) {
               setUserZodiac(configData.currentConfig.zodiacAnimal);
-              saveZodiac(configData.currentConfig.zodiacAnimal);
               // 强制重新加载数据（包括配置切换和强制重载）
               setDataLoaded(false);
             }
@@ -460,21 +360,6 @@ const ZodiacEnergyTab = () => {
         // 降级处理：使用原有逻辑
         await loadAllZodiacs();
         if (isMounted) {
-          // 尝试从存储中获取已保存的生肖
-          const storedZodiac = await getStoredZodiac();
-          if (storedZodiac) {
-            setUserZodiac(storedZodiac);
-          } else {
-            // 尝试从生物节律中获取出生年份
-            try {
-              const birthYear = await storageManager.getBirthYear();
-              if (birthYear) {
-                calculateZodiacFromYear(birthYear);
-              }
-            } catch (err) {
-              console.log('无法从生物节律获取出生年份:', err);
-            }
-          }
           setInitialized(true);
         }
       }
@@ -514,31 +399,21 @@ const ZodiacEnergyTab = () => {
     return `${year}-${month}-${day}`;
   };
 
-  // 处理生肖选择
+  // 处理生肖选择 - 仅更新状态，不保存配置
   const handleZodiacChange = async (zodiac) => {
     if (userZodiac !== zodiac) {
       setUserZodiac(zodiac);
-      await saveZodiac(zodiac);
       // 标记需要重新加载数据
       setDataLoaded(false);
     }
   };
 
-  // 处理日期选择
+  // 处理日期选择 - 仅更新状态，不保存配置
   const handleDateChange = (newDate) => {
     setSelectedDate(newDate);
-    
-    // 保存到独立配置
-    zodiacEnergyConfigManager.updateConfig('selectedDate', newDate.toISOString());
-    
-    // 更新本地配置状态
-    setZodiacConfig(zodiacEnergyConfigManager.getConfig());
-    
     // 标记需要重新加载数据
     setDataLoaded(false);
   };
-
-
 
   // 渲染能量匹配度仪表板
   const renderEnergyMatchDashboard = () => {
@@ -900,7 +775,7 @@ const ZodiacEnergyTab = () => {
       <Card title="临时切换生肖" className="mb-4">
         <div className="space-y-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            您可以临时切换查看不同生肖的能量指引，这不会修改您的用户配置
+            您可以临时切换查看不同生肖的能量指引，这不会保存任何配置
           </p>
           
           {/* 生肖选择网格 */}
@@ -948,7 +823,7 @@ const ZodiacEnergyTab = () => {
                 )}
               </p>
               <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">
-                💡 配置已独立保存，不会影响其他功能
+                💡 选择仅用于临时查询，不会保存配置
               </p>
             </div>
           )}
