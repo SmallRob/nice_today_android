@@ -162,14 +162,14 @@ const PersonalTraitsSection = React.memo(({ birthInfo }) => {
     challenges: birthInfo.personal_traits.challenges || []
   }), [birthInfo.personal_traits]);
 
-  const renderTraitItem = (trait, index, isStrength = true) => (
+  const renderTraitItem = useCallback((trait, index, isStrength = true) => (
     <li key={index} className="flex items-center text-gray-700">
       <div className={`w-6 h-6 ${isStrength ? 'bg-green-500' : 'bg-red-500'} rounded-full flex items-center justify-center text-white text-xs font-bold mr-2`}>
         {index + 1}
       </div>
       {trait}
     </li>
-  );
+  ), []);
 
   return (
     <div className="grid grid-cols-1 gap-4">

@@ -138,11 +138,12 @@ class MayaCalendarCalculator {
 const STORAGE_KEYS = {
   BIRTH_DATE: 'maya_birth_date',
   HISTORY: 'maya_calendar_history',
-  LAST_QUERY: 'last_maya_birth_query_date'
+  LAST_QUERY: 'last_maya_birth_query_date',
+  BIRTH_INFO_CACHE: 'maya_birth_info_cache'
 };
 
 // 子组件定义
-const DatePickerSection = ({ birthDate, loading, handleDateChange, handleSubmit }) => (
+const DatePickerSection = React.memo(({ birthDate, loading, handleDateChange, handleSubmit }) => (
   <div className="date-picker-container">
     <div className="flex w-full items-center justify-center flex-col sm:flex-row gap-3">
       <DatePicker
@@ -173,9 +174,9 @@ const DatePickerSection = ({ birthDate, loading, handleDateChange, handleSubmit 
       </button>
     </div>
   </div>
-);
+));
 
-const HistorySection = ({ historyDates, handleHistoryClick }) => (
+const HistorySection = React.memo(({ historyDates, handleHistoryClick }) => (
   historyDates.length > 0 && (
     <div className="history-container">
       <h3>历史记录</h3>
@@ -192,14 +193,14 @@ const HistorySection = ({ historyDates, handleHistoryClick }) => (
       </div>
     </div>
   )
-);
+));
 
-const InfoCard = ({ title, children, className = "" }) => (
+const InfoCard = React.memo(({ title, children, className = "" }) => (
   <div className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm ${className}`}>
     <h4 className="font-semibold text-gray-800 mb-3 text-base">{title}</h4>
     {children}
   </div>
-);
+));
 
 // 主组件
 const MayaBirthChart = () => {
@@ -481,6 +482,43 @@ const MayaBirthChart = () => {
     }
   }, []);
 
+  // 缓存函数
+  const getCachedBirthInfo = useCallback(async (dateStr) => {
+    try {
+      const cacheKey = `${STORAGE_KEYS.BIRTH_INFO_CACHE}_${dateStr}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // 检查缓存是否过期（24小时）
+        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+          return parsed.data;
+        } else {
+          // 清除过期缓存
+          localStorage.removeItem(cacheKey);
+        }
+      }
+      return null;
+    } catch (err) {
+      console.error('获取缓存数据失败:', err);
+      return null;
+    }
+  }, []);
+
+  const setCachedBirthInfo = useCallback(async (dateStr, data) => {
+    try {
+      const cacheKey = `${STORAGE_KEYS.BIRTH_INFO_CACHE}_${dateStr}`;
+      const cacheData = {
+        timestamp: Date.now(),
+        data: data
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      return true;
+    } catch (err) {
+      console.error('保存缓存数据失败:', err);
+      return false;
+    }
+  }, []);
+
   const loadFromStorage = useCallback(async (key, defaultValue) => {
     try {
       const preferences = await storageManager.getPreferences();
@@ -536,45 +574,31 @@ const MayaBirthChart = () => {
     }
   }, [saveToStorage]);
 
-  // 使用Web Worker进行异步计算（如果可用）
+  // 优化的玛雅数据计算函数
   const computeMayaData = async (dateStr, birthDateObj) => {
-    // 如果支持Web Worker，使用Web Worker进行计算
-    if (window.Worker) {
-      return new Promise((resolve) => {
-        // 延迟计算，避免阻塞主线程
-        setTimeout(() => {
-          const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
-          const seal = MayaCalendarCalculator.calculateSeal(kin);
-          const tone = MayaCalendarCalculator.calculateTone(kin);
-          const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
-          
-          resolve({ kin, seal, tone, seed });
-        }, 0);
-      });
-    }
-    
-    // 如果不支持Web Worker，使用requestIdleCallback
+    // 直接在主线程计算，避免创建Worker的开销
+    // 对于简单的数学计算，直接计算比创建Worker更快
     return new Promise((resolve) => {
-      if (typeof requestIdleCallback === 'function') {
-        requestIdleCallback(() => {
+      // 使用setTimeout确保不会阻塞当前事件循环
+      setTimeout(() => {
+        try {
           const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
           const seal = MayaCalendarCalculator.calculateSeal(kin);
           const tone = MayaCalendarCalculator.calculateTone(kin);
           const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
           
           resolve({ kin, seal, tone, seed });
-        });
-      } else {
-        // 回退方案：使用setTimeout
-        setTimeout(() => {
-          const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
-          const seal = MayaCalendarCalculator.calculateSeal(kin);
-          const tone = MayaCalendarCalculator.calculateTone(kin);
-          const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
-          
-          resolve({ kin, seal, tone, seed });
-        }, 0);
-      }
+        } catch (error) {
+          console.error('计算玛雅数据时出错:', error);
+          // 返回默认值以防出错
+          resolve({ 
+            kin: 1, 
+            seal: '红龙', 
+            tone: '磁性', 
+            seed: 0 
+          });
+        }
+      }, 0);
     });
   };
 
@@ -586,51 +610,66 @@ const MayaBirthChart = () => {
         return;
       }
       
+      // 防止重复调用
       if (loadingRef.current) return;
+      
+      // 检查日期是否发生变化，避免不必要的计算
+      const currentDateStr = typeof date === 'string' ? date : formatDateString(date);
+      if (birthInfo && birthInfo.date === currentDateStr) {
+        // 如果日期相同且已有数据，直接显示
+        setShowResults(true);
+        return;
+      }
       
       setLoading(true);
       loadingRef.current = true;
       setError(null);
 
       try {
-        const dateStr = typeof date === 'string' ? date : formatDateString(date);
+        const dateStr = currentDateStr;
         const birthDateObj = typeof date === 'string' ? new Date(date) : date;
         const weekday = WEEKDAYS[birthDateObj.getDay()];
         
-        // 异步计算玛雅数据
-        const { kin, seal, tone, seed } = await computeMayaData(dateStr, birthDateObj);
-        const sealDesc = MayaCalendarCalculator.getSealDescription(kin);
+        // 首先检查缓存
+        let localBirthInfo = await getCachedBirthInfo(dateStr);
         
-        // 分块生成数据，避免一次性阻塞
-        const localBirthInfo = {
-          date: dateStr,
-          weekday: weekday || "未知",
-          maya_kin: `KIN ${kin}`,
-          maya_tone: `${tone}之音 | 第${(kin % 28) || 28}天`,
-          maya_seal: seal,
-          maya_seal_desc: sealDesc,
-          maya_seal_info: generateSealInfo(seal),
-          maya_tone_info: generateToneInfo(tone),
-          life_purpose: generateLifePurpose(sealDesc, seed),
-          personal_traits: generatePersonalTraits(seed),
-          birth_energy_field: generateEnergyField(seed),
-          daily_quote: {
-            content: generateQuote(seed) || "每一天都是新的开始",
-            author: generateAuthor(seed) || "玛雅智者"
-          }
-        };
+        if (!localBirthInfo) {
+          // 如果没有缓存，计算玛雅数据
+          const { kin, seal, tone, seed } = await computeMayaData(dateStr, birthDateObj);
+          const sealDesc = MayaCalendarCalculator.getSealDescription(kin);
+          
+          // 优化数据生成，减少不必要的函数调用
+          localBirthInfo = {
+            date: dateStr,
+            weekday: weekday || "未知",
+            maya_kin: `KIN ${kin}`,
+            maya_tone: `${tone}之音 | 第${(kin % 28) || 28}天`,
+            maya_seal: seal,
+            maya_seal_desc: sealDesc,
+            maya_seal_info: generateSealInfo(seal),
+            maya_tone_info: generateToneInfo(tone),
+            life_purpose: generateLifePurpose(sealDesc, seed),
+            personal_traits: generatePersonalTraits(seed),
+            birth_energy_field: generateEnergyField(seed),
+            daily_quote: {
+              content: generateQuote(seed) || "每一天都是新的开始",
+              author: generateAuthor(seed) || "玛雅智者"
+            }
+          };
+          
+          // 缓存结果
+          await setCachedBirthInfo(dateStr, localBirthInfo);
+        }
         
         const processedLocalBirthInfo = ensureQuoteExists(localBirthInfo);
         
-        // 使用requestAnimationFrame确保流畅的UI更新
-        requestAnimationFrame(() => {
-          setBirthInfo(processedLocalBirthInfo);
-          setShowResults(true);
-          
-          if (typeof date === 'string') {
-            setBirthDate(new Date(date));
-          }
-        });
+        // 直接更新状态，避免requestAnimationFrame的额外开销
+        setBirthInfo(processedLocalBirthInfo);
+        setShowResults(true);
+        
+        if (typeof date === 'string') {
+          setBirthDate(new Date(date));
+        }
         
         // 异步保存数据
         setTimeout(async () => {
@@ -655,7 +694,7 @@ const MayaBirthChart = () => {
         }, 0);
       }
     },
-    [userInteracted, historyDates, saveHistory, saveBirthDateToGlobal]
+    [userInteracted, historyDates, saveHistory, saveBirthDateToGlobal, birthInfo]
   );
 
   const initializeComponent = useCallback(async () => {
@@ -707,7 +746,19 @@ const MayaBirthChart = () => {
   }, [fetchHistory, loadBirthInfo, loadFromStorage]);
 
   useEffect(() => {
+    const abortController = new AbortController();
+    
     initializeComponent();
+    
+    // 清理函数防止内存泄漏
+    return () => {
+      abortController.abort();
+      // 清理所有定时器
+      if (handleDateChange.debounceTimer) {
+        clearTimeout(handleDateChange.debounceTimer);
+        handleDateChange.debounceTimer = null;
+      }
+    };
   }, [initializeComponent]);
 
   const handleDateChange = useCallback((date) => {
@@ -716,14 +767,29 @@ const MayaBirthChart = () => {
     setBirthDate(date);
     setUserInteracted(true);
     
+    // 清理之前的防抖定时器
     if (handleDateChange.debounceTimer) {
       clearTimeout(handleDateChange.debounceTimer);
     }
     
-    handleDateChange.debounceTimer = setTimeout(() => {
+    // 设置新的防抖定时器
+    const timerId = setTimeout(() => {
       saveBirthDateToGlobal(date);
       loadBirthInfo(date, true);
+      // 清理定时器引用
+      handleDateChange.debounceTimer = null;
     }, 300);
+    
+    // 保存定时器引用以便下次清理
+    handleDateChange.debounceTimer = timerId;
+    
+    // 清理函数
+    return () => {
+      if (handleDateChange.debounceTimer) {
+        clearTimeout(handleDateChange.debounceTimer);
+        handleDateChange.debounceTimer = null;
+      }
+    };
   }, [loadBirthInfo, saveBirthDateToGlobal]);
 
   const handleSubmit = useCallback(() => {

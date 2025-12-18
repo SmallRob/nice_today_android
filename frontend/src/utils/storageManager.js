@@ -143,20 +143,38 @@ class StorageManager {
     };
   }
 
+  // 缓存偏好设置以提高性能
+  _preferencesCache = null;
+  _lastPreferencesFetch = 0;
+  _cacheTimeout = 1000; // 1秒缓存超时
+
   /**
    * 获取所有用户偏好设置
    */
   async getPreferences() {
     try {
+      // 检查缓存是否有效
+      const now = Date.now();
+      if (this._preferencesCache && (now - this._lastPreferencesFetch) < this._cacheTimeout) {
+        return this._preferencesCache;
+      }
+
       const api = await ensureStorageAPI();
       const stored = await api.get({ key: this.storageKey });
       
+      let result;
       if (stored.value) {
         const parsed = JSON.parse(stored.value);
-        return { ...this.defaultPreferences, ...parsed };
+        result = { ...this.defaultPreferences, ...parsed };
+      } else {
+        result = { ...this.defaultPreferences };
       }
       
-      return { ...this.defaultPreferences };
+      // 更新缓存
+      this._preferencesCache = result;
+      this._lastPreferencesFetch = now;
+      
+      return result;
     } catch (error) {
       console.error('获取用户偏好设置失败:', error);
       return { ...this.defaultPreferences };
@@ -177,6 +195,10 @@ class StorageManager {
         key: this.storageKey, 
         value: JSON.stringify(updated) 
       });
+      
+      // 更新缓存
+      this._preferencesCache = updated;
+      this._lastPreferencesFetch = Date.now();
       
       return true;
     } catch (error) {
