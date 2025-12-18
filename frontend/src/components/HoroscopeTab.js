@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { storageManager } from '../utils/storageManager';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
@@ -6,6 +6,7 @@ import { Card } from './PageLayout';
 const HoroscopeTab = () => {
   // 状态管理
   const [userHoroscope, setUserHoroscope] = useState('');
+  const [isTemporaryHoroscope, setIsTemporaryHoroscope] = useState(false);
   const [horoscopeGuidance, setHoroscopeGuidance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,6 +21,9 @@ const HoroscopeTab = () => {
   });
   const [initialized, setInitialized] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  
+  // 创建ref来跟踪临时状态
+  const isTemporaryRef = useRef(false);
 
   // 星座数据
   const getHoroscopeData = () => {
@@ -216,7 +220,7 @@ const HoroscopeTab = () => {
   }, []);
 
   // 获取存储的星座信息
-  const getStoredHoroscope = async () => {
+  const getStoredHoroscope = useCallback(async () => {
     try {
       // 使用新的星座存储接口
       const storedHoroscope = await storageManager.getUserHoroscope();
@@ -250,10 +254,10 @@ const HoroscopeTab = () => {
     } catch (err) {
       console.log('无法从存储中获取星座信息:', err);
     }
-  };
+  }, [calculateHoroscopeFromDate]);
 
   // 从生物节律中获取出生日期
-  const getBirthDateFromBiorhythm = async () => {
+  const getBirthDateFromBiorhythm = useCallback(async () => {
     try {
       // 尝试从生物节律中获取出生年份
       const birthYear = await storageManager.getBirthYear();
@@ -266,7 +270,7 @@ const HoroscopeTab = () => {
     } catch (err) {
       console.log('无法从生物节律获取出生日期:', err);
     }
-  };
+  }, []);
 
   // 加载运势数据
   const loadHoroscopeGuidance = useCallback(async () => {
@@ -434,7 +438,7 @@ const HoroscopeTab = () => {
     } finally {
       setLoading(false);
     }
-  }, [userHoroscope, selectedDate]);
+  }, [userHoroscope]);
 
   // 初始化组件
   useEffect(() => {
@@ -461,6 +465,8 @@ const HoroscopeTab = () => {
           // 优先使用用户配置中的星座信息
           if (currentConfig.zodiac) {
             setUserHoroscope(currentConfig.zodiac);
+            setIsTemporaryHoroscope(false);
+            isTemporaryRef.current = false;
             
             // 同步到storageManager以保持兼容性
             await storageManager.setUserHoroscope(currentConfig.zodiac);
@@ -482,23 +488,26 @@ const HoroscopeTab = () => {
           if (isMounted && configData.currentConfig) {
             setUserInfo(configData.currentConfig);
             
-            // 当配置变更时，更新星座信息
-            if (configData.currentConfig.zodiac && 
-                configData.currentConfig.zodiac !== userHoroscope) {
-              setUserHoroscope(configData.currentConfig.zodiac);
-              storageManager.setUserHoroscope(configData.currentConfig.zodiac);
-              // 强制重新加载数据（包括配置切换和强制重载）
-              setDataLoaded(false);
-            } else if (configData.currentConfig.birthDate && 
-                       !configData.currentConfig.zodiac) {
-              // 如果有出生日期但没有星座，计算星座
-              const birthDateObj = new Date(configData.currentConfig.birthDate);
-              const year = birthDateObj.getFullYear();
-              const month = birthDateObj.getMonth() + 1;
-              const day = birthDateObj.getDate();
-              
-              if (year && month && day) {
-                calculateHoroscopeFromDate(year, month, day);
+            // 只有当不是临时星座时，才更新星座信息
+            if (!isTemporaryRef.current) {
+              // 当配置变更时，更新星座信息
+              if (configData.currentConfig.zodiac && 
+                  configData.currentConfig.zodiac !== userHoroscope) {
+                setUserHoroscope(configData.currentConfig.zodiac);
+                storageManager.setUserHoroscope(configData.currentConfig.zodiac);
+                // 强制重新加载数据（包括配置切换和强制重载）
+                setDataLoaded(false);
+              } else if (configData.currentConfig.birthDate && 
+                         !configData.currentConfig.zodiac) {
+                // 如果有出生日期但没有星座，计算星座
+                const birthDateObj = new Date(configData.currentConfig.birthDate);
+                const year = birthDateObj.getFullYear();
+                const month = birthDateObj.getMonth() + 1;
+                const day = birthDateObj.getDate();
+                
+                if (year && month && day) {
+                  calculateHoroscopeFromDate(year, month, day);
+                }
               }
             }
             
@@ -539,7 +548,12 @@ const HoroscopeTab = () => {
         removeListener.current();
       }
     };
-  }, [loadAllHoroscopes, calculateHoroscopeFromDate, userHoroscope]);
+  }, [loadAllHoroscopes, calculateHoroscopeFromDate, userHoroscope, getStoredHoroscope]);
+
+  // 同步临时状态到ref
+  useEffect(() => {
+    isTemporaryRef.current = isTemporaryHoroscope;
+  }, [isTemporaryHoroscope]);
 
   // 当星座或日期变化时重新加载数据 - 优化加载逻辑
   useEffect(() => {
@@ -565,16 +579,32 @@ const HoroscopeTab = () => {
     return `${year}-${month}-${day}`;
   };
 
-  // 处理星座选择
-  const handleHoroscopeChange = async (horoscope) => {
+  // 处理星座选择 - 修复临时点击问题
+  const handleHoroscopeChange = useCallback(async (horoscope) => {
     if (userHoroscope !== horoscope) {
       setUserHoroscope(horoscope);
+      // 标记为临时选择
+      setIsTemporaryHoroscope(true);
       // 保存到存储 - 使用新的星座存储接口
       await storageManager.setUserHoroscope(horoscope);
       // 标记需要重新加载数据
       setDataLoaded(false);
     }
-  };
+  }, [userHoroscope, storageManager, setDataLoaded, setIsTemporaryHoroscope]);
+
+  // 新增：恢复用户配置的星座
+  const handleRestoreUserHoroscope = useCallback(async () => {
+    // 从用户配置获取星座
+    const currentConfig = userConfigManager.getCurrentConfig();
+    if (currentConfig && currentConfig.zodiac) {
+      setUserHoroscope(currentConfig.zodiac);
+      setIsTemporaryHoroscope(false);
+      // 保存到存储
+      await storageManager.setUserHoroscope(currentConfig.zodiac);
+      // 标记需要重新加载数据
+      setDataLoaded(false);
+    }
+  }, [storageManager, setDataLoaded, setIsTemporaryHoroscope, userConfigManager]);
 
 
 
@@ -918,21 +948,32 @@ const HoroscopeTab = () => {
           {/* 当前选择显示 */}
           {userHoroscope && (
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded-lg border border-blue-200 dark:border-blue-700">
-              <p className="text-blue-700 dark:text-blue-300 text-sm">
-                当前选择：<span className="font-bold">{userHoroscope}</span>
-                {selectedDate && (
-                  <span className="ml-2">
-                    查看日期：<span className="font-bold">{formatDateLocal(selectedDate)}</span>
-                  </span>
-                )}
-                {birthDate.year && birthDate.month && birthDate.day && (
-                  <span className="ml-2">
-                    出生日期：<span className="font-bold">
-                      {birthDate.year}-{String(birthDate.month).padStart(2, '0')}-{String(birthDate.day).padStart(2, '0')}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                <p className="text-blue-700 dark:text-blue-300 text-sm mb-2 md:mb-0">
+                  当前选择：<span className="font-bold">{userHoroscope}</span>
+                  {isTemporaryHoroscope && <span className="ml-2 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs px-2 py-1 rounded">临时</span>}
+                  {selectedDate && (
+                    <span className="ml-2">
+                      查看日期：<span className="font-bold">{formatDateLocal(selectedDate)}</span>
                     </span>
-                  </span>
+                  )}
+                  {birthDate.year && birthDate.month && birthDate.day && (
+                    <span className="ml-2">
+                      出生日期：<span className="font-bold">
+                        {birthDate.year}-{String(birthDate.month).padStart(2, '0')}-{String(birthDate.day).padStart(2, '0')}
+                      </span>
+                    </span>
+                  )}
+                </p>
+                {isTemporaryHoroscope && (
+                  <button 
+                    onClick={handleRestoreUserHoroscope}
+                    className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition-colors"
+                  >
+                    恢复我的星座
+                  </button>
                 )}
-              </p>
+              </div>
             </div>
           )}
         </div>

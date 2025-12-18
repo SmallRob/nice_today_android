@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import BiorhythmTab from './BiorhythmTab';
 import ZodiacEnergyTab from './ZodiacEnergyTab';
 import HoroscopeTab from './HoroscopeTab';
+import MBTIPersonalityTabHome from './MBTIPersonalityTabHome';
 import { BiorhythmIcon, IconLibrary } from './IconLibrary';
 import PageLayout from './PageLayout';
+import DarkModeToggle from './DarkModeToggle';
 
 const BiorhythmDashboard = ({ appInfo = {} }) => {
   const [loading, setLoading] = useState(true);
@@ -58,6 +60,17 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       ),
       description: '根据星座提供运势指导',
       color: 'indigo'
+    },
+    { 
+      id: 'mbti', 
+      label: '人格魅力', 
+      icon: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      ),
+      description: '探索16型人格的魅力与潜能',
+      color: 'pink'
     }
   ];
 
@@ -77,11 +90,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       title="Nice Today"
       subtitle="您的每日生活助手"
       bgGradient={true}
-      headerAction={
-        <div className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-xs font-medium">
-          ✅ 本地化运行
-        </div>
-      }
+      headerAction={<DarkModeToggle />}
     >
       <div className="max-w-4xl space-y-6">
         {/* 标签导航 - 移动端优化 */}
@@ -118,6 +127,9 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             )}
             {activeTab === 'horoscope' && (
               <HoroscopeTab />
+            )}
+            {activeTab === 'mbti' && (
+              <MBTIPersonalityTabHome />
             )}
           </div>
         </div>
