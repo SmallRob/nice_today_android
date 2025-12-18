@@ -148,6 +148,10 @@ class StorageManager {
   _lastPreferencesFetch = 0;
   _cacheTimeout = 1000; // 1秒缓存超时
 
+  // 全局缓存机制
+  _globalCache = new Map();
+  _globalCacheTimeouts = new Map();
+
   /**
    * 获取所有用户偏好设置
    */
@@ -298,6 +302,89 @@ class StorageManager {
       hasHoroscopeInfo: !!preferences.userHoroscope,
       hasBirthYearInfo: !!preferences.birthYear
     };
+  }
+  /**
+   * 设置全局缓存超时时间（毫秒）
+   * @param {number} timeout - 超时时间
+   */
+  setGlobalCacheTimeout(timeout) {
+    this._globalCacheTimeout = timeout;
+  }
+
+  /**
+   * 获取全局缓存超时时间
+   * @returns {number} 超时时间（毫秒）
+   */
+  getGlobalCacheTimeout() {
+    return this._globalCacheTimeout || 180000; // 默认3分钟
+  }
+
+  /**
+   * 设置全局缓存
+   * @param {string} key - 缓存键
+   * @param {any} value - 缓存值
+   * @param {number} [timeout] - 超时时间（毫秒），如果不提供则使用默认值
+   */
+  setGlobalCache(key, value, timeout) {
+    const expiry = Date.now() + (timeout || this.getGlobalCacheTimeout());
+    this._globalCache.set(key, {
+      value: value,
+      expiry: expiry
+    });
+    this._globalCacheTimeouts.set(key, expiry);
+  }
+
+  /**
+   * 获取全局缓存
+   * @param {string} key - 缓存键
+   * @returns {any|null} 缓存值，如果不存在或过期则返回null
+   */
+  getGlobalCache(key) {
+    const cached = this._globalCache.get(key);
+    if (!cached) return null;
+    
+    // 检查是否过期
+    if (Date.now() > cached.expiry) {
+      this._globalCache.delete(key);
+      this._globalCacheTimeouts.delete(key);
+      return null;
+    }
+    
+    return cached.value;
+  }
+
+  /**
+   * 删除全局缓存
+   * @param {string} key - 缓存键
+   */
+  removeGlobalCache(key) {
+    this._globalCache.delete(key);
+    this._globalCacheTimeouts.delete(key);
+  }
+
+  /**
+   * 清除所有全局缓存
+   */
+  clearGlobalCache() {
+    this._globalCache.clear();
+    this._globalCacheTimeouts.clear();
+  }
+
+  /**
+   * 获取所有全局缓存键
+   * @returns {string[]} 缓存键数组
+   */
+  getAllGlobalCacheKeys() {
+    // 清理过期缓存
+    const now = Date.now();
+    for (const [key, expiry] of this._globalCacheTimeouts) {
+      if (now > expiry) {
+        this._globalCache.delete(key);
+        this._globalCacheTimeouts.delete(key);
+      }
+    }
+    
+    return Array.from(this._globalCache.keys());
   }
 }
 

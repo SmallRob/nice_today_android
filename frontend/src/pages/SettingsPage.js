@@ -16,6 +16,7 @@ function SettingsPage() {
   });
   const [apiBaseUrl, setApiBaseUrl] = useState('https://nice-mcp.leansoftx.com/api');
   const [useLocalCalculation, setUseLocalCalculation] = useState(false);
+  const [cacheTimeout, setCacheTimeout] = useState(180000); // 默认3分钟
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -44,6 +45,12 @@ function SettingsPage() {
         if (savedUseLocal) {
           setUseLocalCalculation(savedUseLocal === 'true');
         }
+        
+        // 从本地存储加载缓存超时设置
+        const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+        if (savedCacheTimeout) {
+          setCacheTimeout(parseInt(savedCacheTimeout));
+        }
       } catch (error) {
         console.error('Error loading app info:', error);
       } finally {
@@ -66,6 +73,13 @@ function SettingsPage() {
     const newValue = e.target.checked;
     setUseLocalCalculation(newValue);
     localStorage.setItem('useLocalCalculation', newValue.toString());
+  };
+
+  // 保存缓存超时设置
+  const handleCacheTimeoutChange = (e) => {
+    const newValue = parseInt(e.target.value);
+    setCacheTimeout(newValue);
+    localStorage.setItem('cacheTimeout', newValue.toString());
   };
 
   if (!isLoaded) {
@@ -148,6 +162,25 @@ function SettingsPage() {
                 <input type="checkbox" className="sr-only peer" defaultChecked={true} />
                 <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
+            </div>
+            
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">缓存超时时间</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置数据缓存的有效时间</p>
+                <select 
+                  value={cacheTimeout}
+                  onChange={handleCacheTimeoutChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                >
+                  <option value="60000">1分钟</option>
+                  <option value="120000">2分钟</option>
+                  <option value="180000">3分钟</option>
+                  <option value="300000">5分钟</option>
+                  <option value="600000">10分钟</option>
+                  <option value="1800000">30分钟</option>
+                </select>
+              </div>
             </div>
           </div>
         </Card>

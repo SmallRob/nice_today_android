@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { useTheme } from '../context/ThemeContext';
+import { storageManager } from '../utils/storageManager';
 
 const TabNavigation = () => {
   const location = useLocation();
@@ -10,10 +11,35 @@ const TabNavigation = () => {
   
   // 检测是否为iOS设备，用于调整底部安全区域
   const isIOS = Capacitor.getPlatform() === 'ios';
+  
+  // 页面切换时更新缓存
+  useEffect(() => {
+    // 从本地存储获取缓存超时设置
+    const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+    const timeout = savedCacheTimeout ? parseInt(savedCacheTimeout) : 180000; // 默认3分钟
+    storageManager.setGlobalCacheTimeout(timeout);
+    
+    // 根据当前路径触发相应页面的缓存更新
+    const updatePageCache = async () => {
+      // 这里可以根据不同路径触发不同页面的缓存更新逻辑
+      // 例如：
+      // if (location.pathname === '/') {
+      //   // 触发首页缓存更新
+      // }
+      // if (location.pathname === '/maya') {
+      //   // 触发玛雅页面缓存更新
+      // }
+      // if (location.pathname === '/dress') {
+      //   // 触发穿衣指南页面缓存更新
+      // }
+    };
+    
+    updatePageCache();
+  }, [location.pathname]);
 
-  // 优化的Tab样式类 - 确保等宽且自适应
+  // 优化的Tab样式类 - 根据文本长度自适应宽度
   const getTabClassName = (isActive) => {
-    const baseClasses = "flex flex-col items-center justify-center w-full h-full transition-all duration-200 relative min-w-0 flex-1";
+    const baseClasses = "flex flex-col items-center justify-center h-full transition-all duration-200 relative min-w-0 flex-1 px-1";
     
     if (isActive) {
       return `${baseClasses} text-blue-600 dark:text-blue-400`;
@@ -92,6 +118,21 @@ const TabNavigation = () => {
   ];
 
   const handleTabClick = (path) => {
+    // 在切换Tab前清除相关页面的缓存，确保获取最新数据
+    if (path === '/') {
+      // 清除首页相关缓存
+      storageManager.removeGlobalCache('dashboard_data');
+    } else if (path === '/maya') {
+      // 清除玛雅页面相关缓存
+      storageManager.removeGlobalCache('maya_data');
+    } else if (path === '/dress') {
+      // 清除穿衣指南页面相关缓存
+      storageManager.removeGlobalCache('dress_data');
+    } else if (path === '/settings') {
+      // 清除设置页面相关缓存
+      storageManager.removeGlobalCache('settings_data');
+    }
+    
     navigate(path);
   };
 
@@ -101,7 +142,7 @@ const TabNavigation = () => {
         isIOS ? 'pb-safe-bottom' : ''
       } shadow-lg`}
     >
-      <div className="flex justify-between items-center h-16 relative px-2">
+      <div className="flex justify-center items-center h-16 relative px-1">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           return (
@@ -109,7 +150,6 @@ const TabNavigation = () => {
               key={tab.id}
               onClick={() => handleTabClick(tab.path)}
               className={getTabClassName(isActive)}
-              style={{ minWidth: '0', flexBasis: '0', flexGrow: 1 }}
             >
               {/* 活跃指示器 */}
               {isActive && (
@@ -117,14 +157,14 @@ const TabNavigation = () => {
               )}
               
               {/* 图标和文字容器 */}
-              <div className="flex flex-col items-center justify-center space-y-1 px-2 max-w-full overflow-hidden">
+              <div className="flex flex-col items-center justify-center space-y-1 max-w-full overflow-hidden">
                 {/* 图标 */}
                 <div className="relative flex-shrink-0">
                   {isActive ? tab.activeIcon : tab.icon}
                 </div>
                 
-                {/* 标签文字 - 确保自适应 */}
-                <span className="text-xs font-medium truncate max-w-full">{tab.label}</span>
+                {/* 标签文字 - 根据文本长度自适应 */}
+                <span className="text-xs font-medium truncate max-w-full px-1">{tab.label}</span>
               </div>
             </button>
           );
