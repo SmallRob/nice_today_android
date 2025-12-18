@@ -2,8 +2,97 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { storageManager } from '../utils/storageManager';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
+import { useTheme } from '../context/ThemeContext';
+
+// 生肖能量组件配置管理器
+class ZodiacEnergyConfigManager {
+  constructor() {
+    this.CONFIG_KEY = 'zodiac_energy_config';
+    this.DEFAULT_CONFIG = {
+      userZodiac: '',
+      selectedDate: new Date().toISOString(),
+      lastUsedZodiac: '',
+      zodiacHistory: [],
+      themeSettings: {
+        autoSync: true,
+        independentMode: false
+      },
+      version: '1.0',
+      lastUpdated: Date.now()
+    };
+  }
+
+  // 获取配置
+  getConfig() {
+    try {
+      const config = localStorage.getItem(this.CONFIG_KEY);
+      if (config) {
+        const parsedConfig = JSON.parse(config);
+        // 合并默认配置以确保完整性
+        return { ...this.DEFAULT_CONFIG, ...parsedConfig };
+      }
+    } catch (error) {
+      console.error('读取生肖能量配置失败:', error);
+    }
+    
+    // 返回默认配置
+    return { ...this.DEFAULT_CONFIG };
+  }
+
+  // 保存配置
+  saveConfig(config) {
+    try {
+      const fullConfig = {
+        ...config,
+        lastUpdated: Date.now(),
+        version: '1.0'
+      };
+      localStorage.setItem(this.CONFIG_KEY, JSON.stringify(fullConfig));
+      return true;
+    } catch (error) {
+      console.error('保存生肖能量配置失败:', error);
+      return false;
+    }
+  }
+
+  // 更新特定配置字段
+  updateConfig(field, value) {
+    const currentConfig = this.getConfig();
+    const updatedConfig = { ...currentConfig, [field]: value };
+    return this.saveConfig(updatedConfig);
+  }
+
+  // 添加生肖到历史记录
+  addToZodiacHistory(zodiac) {
+    const currentConfig = this.getConfig();
+    const history = currentConfig.zodiacHistory || [];
+    
+    // 移除重复项，保持历史记录有序
+    const filteredHistory = history.filter(item => item !== zodiac);
+    const newHistory = [zodiac, ...filteredHistory].slice(0, 10); // 最多保存10条记录
+    
+    return this.updateConfig('zodiacHistory', newHistory);
+  }
+
+  // 清除配置
+  clearConfig() {
+    try {
+      localStorage.removeItem(this.CONFIG_KEY);
+      return true;
+    } catch (error) {
+      console.error('清除生肖能量配置失败:', error);
+      return false;
+    }
+  }
+}
+
+// 创建配置管理器实例
+const zodiacEnergyConfigManager = new ZodiacEnergyConfigManager();
 
 const ZodiacEnergyTab = () => {
+  // 使用主题管理
+  const { theme, configManager: themeConfigManager } = useTheme();
+  
   // 状态管理
   const [userZodiac, setUserZodiac] = useState('');
   const [energyGuidance, setEnergyGuidance] = useState(null);
@@ -19,6 +108,7 @@ const ZodiacEnergyTab = () => {
   });
   const [initialized, setInitialized] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [zodiacConfig, setZodiacConfig] = useState(zodiacEnergyConfigManager.getConfig());
 
   // 五行元素数据 - 使用useMemo缓存，避免重复创建
   const wuxingElements = React.useMemo(() => [
@@ -119,7 +209,17 @@ const ZodiacEnergyTab = () => {
   const saveZodiac = async (zodiac) => {
     if (zodiac) {
       try {
+        // 保存到全局存储管理器以保持兼容性
         await storageManager.setUserZodiac(zodiac);
+        
+        // 保存到独立配置
+        zodiacEnergyConfigManager.updateConfig('userZodiac', zodiac);
+        zodiacEnergyConfigManager.updateConfig('lastUsedZodiac', zodiac);
+        zodiacEnergyConfigManager.addToZodiacHistory(zodiac);
+        
+        // 更新本地配置状态
+        setZodiacConfig(zodiacEnergyConfigManager.getConfig());
+        
       } catch (error) {
         console.error('保存生肖失败:', error);
       }
@@ -289,18 +389,37 @@ const ZodiacEnergyTab = () => {
         
         if (!isMounted) return;
         
+        // 从独立配置中加载数据
+        const zodiacConfig = zodiacEnergyConfigManager.getConfig();
+        
+        // 设置选中的生肖和日期
+        if (zodiacConfig.userZodiac) {
+          setUserZodiac(zodiacConfig.userZodiac);
+        }
+        
+        if (zodiacConfig.selectedDate) {
+          try {
+            const savedDate = new Date(zodiacConfig.selectedDate);
+            if (!isNaN(savedDate.getTime())) {
+              setSelectedDate(savedDate);
+            }
+          } catch (dateError) {
+            console.error('解析保存的日期失败:', dateError);
+          }
+        }
+        
         // 从用户配置管理器获取用户信息
         const currentConfig = userConfigManager.getCurrentConfig();
         if (currentConfig && isMounted) {
           setUserInfo(currentConfig);
           
           // 优先使用用户配置中的生肖信息
-          if (currentConfig.zodiacAnimal) {
+          if (currentConfig.zodiacAnimal && !zodiacConfig.userZodiac) {
             setUserZodiac(currentConfig.zodiacAnimal);
             
-            // 同步到storageManager以保持兼容性
+            // 同步到独立配置
             await saveZodiac(currentConfig.zodiacAnimal);
-          } else if (currentConfig.birthDate) {
+          } else if (currentConfig.birthDate && !currentConfig.zodiacAnimal) {
             // 如果没有生肖但有出生日期，计算生肖
             const birthYear = new Date(currentConfig.birthDate).getFullYear();
             if (birthYear && birthYear > 1900 && birthYear < 2100) {
@@ -405,6 +524,20 @@ const ZodiacEnergyTab = () => {
     }
   };
 
+  // 处理日期选择
+  const handleDateChange = (newDate) => {
+    setSelectedDate(newDate);
+    
+    // 保存到独立配置
+    zodiacEnergyConfigManager.updateConfig('selectedDate', newDate.toISOString());
+    
+    // 更新本地配置状态
+    setZodiacConfig(zodiacEnergyConfigManager.getConfig());
+    
+    // 标记需要重新加载数据
+    setDataLoaded(false);
+  };
+
 
 
   // 渲染能量匹配度仪表板
@@ -421,14 +554,14 @@ const ZodiacEnergyTab = () => {
 
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-          <span className="text-2xl mr-3">{elementData?.icon}</span>
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+          <span className="text-xl mr-3">{elementData?.icon}</span>
           今日能量匹配度
         </h3>
         
         {/* 能量匹配度圆形进度条 */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
-          <div className="relative w-32 h-32">
+          <div className="relative w-28 h-28">
             <svg className="w-full h-full" viewBox="0 0 36 36">
               <path
                 d="M18 2.0845
@@ -447,22 +580,22 @@ const ZodiacEnergyTab = () => {
                 strokeWidth="2.5"
                 strokeDasharray={`${匹配度}, 100`}
               />
-              <text x="18" y="20.5" textAnchor="middle" className="text-xl font-bold fill-gray-800 dark:fill-white">
+              <text x="18" y="20.5" textAnchor="middle" className="text-base font-bold fill-gray-800 dark:fill-white">
                 {匹配度}%
               </text>
             </svg>
           </div>
           
           <div className="text-center md:text-left">
-            <p className={`text-xl font-bold ${colorClass} mb-2`}>
+            <p className={`text-lg font-bold ${colorClass} mb-2`}>
               {关系} - {匹配度}%
             </p>
-            <p className="text-gray-600 dark:text-gray-300 mb-3">{描述}</p>
-            <div className="flex flex-col sm:flex-row gap-3 text-sm">
-              <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
+            <p className="text-gray-600 dark:text-gray-300 mb-3 text-sm">{描述}</p>
+            <div className="flex flex-col sm:flex-row gap-2 text-xs">
+              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
                 用户五行: <span className="font-semibold">{用户五行}</span>
               </span>
-              <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
+              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
                 当日五行: <span className="font-semibold">{当日五行}</span>
               </span>
             </div>
@@ -797,9 +930,7 @@ const ZodiacEnergyTab = () => {
               value={selectedDate ? formatDateLocal(selectedDate) : ''}
               onChange={(e) => {
                 const newDate = e.target.value ? new Date(e.target.value) : new Date();
-                setSelectedDate(newDate);
-                // 日期变更时标记需要重新加载数据
-                setDataLoaded(false);
+                handleDateChange(newDate);
               }}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
             />
@@ -815,6 +946,9 @@ const ZodiacEnergyTab = () => {
                     查看日期：<span className="font-bold">{formatDateLocal(selectedDate)}</span>
                   </span>
                 )}
+              </p>
+              <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">
+                💡 配置已独立保存，不会影响其他功能
               </p>
             </div>
           )}

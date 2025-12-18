@@ -593,12 +593,24 @@ const MayaBirthChart = () => {
       // 使用setTimeout避免阻塞主线程
       setTimeout(() => {
         try {
+          // 确保日期对象有效
+          if (!birthDateObj || isNaN(birthDateObj.getTime())) {
+            throw new Error('无效的出生日期');
+          }
+          
           const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
-          const seal = MayaCalendarCalculator.calculateSeal(kin);
-          const tone = MayaCalendarCalculator.calculateTone(kin);
+          // 确保kin是有效数字
+          const validKin = Math.max(1, Math.min(260, parseInt(kin) || 1));
+          const seal = MayaCalendarCalculator.calculateSeal(validKin);
+          const tone = MayaCalendarCalculator.calculateTone(validKin);
           const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
           
-          resolve({ kin, seal, tone, seed });
+          resolve({ 
+            kin: validKin, 
+            seal: seal || '红龙', 
+            tone: tone || '磁性', 
+            seed: seed || 0 
+          });
         } catch (error) {
           console.error('计算玛雅数据时出错:', error);
           // 返回默认值以防出错

@@ -69,55 +69,50 @@ const ChunkedRenderer = memo(({ items, chunkSize = 3, renderItem, loadingCompone
 
 // 优化的信息卡片组件 - 使用memo避免重渲染
 const OptimizedInfoCard = memo(({ title, children, className = "" }) => (
-  <div className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm ${className}`}>
-    <h4 className="font-semibold text-gray-800 mb-3 text-base">{title}</h4>
+  <div className={`bg-white p-3 border border-gray-200 ${className}`}>
+    <h4 className="font-semibold text-gray-800 mb-2 text-sm">{title}</h4>
     {children}
   </div>
 ));
 
 // 基础信息组件 - 使用memo和useMemo优化
 const BasicInfoSection = memo(({ birthInfo }) => {
+  // 优化kin计算，确保不会出现undefined
   const kinNumber = useMemo(() => {
-    return birthInfo.maya_kin?.replace('KIN ', '') || '1';
-  }, [birthInfo.maya_kin]);
-  
-  const sealBadge = useMemo(() => (
-    <span className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm font-medium">
-      {birthInfo.maya_seal || ''}
-    </span>
-  ), [birthInfo.maya_seal]);
-  
-  const toneBadge = useMemo(() => (
-    <span className="px-3 py-1 bg-purple-500 text-white rounded-full text-sm font-medium">
-      {birthInfo.maya_tone_info?.数字 || '1'}号音
-    </span>
-  ), [birthInfo.maya_tone_info?.数字]);
+    try {
+      if (!birthInfo || !birthInfo.maya_kin) return '1';
+      const kinStr = String(birthInfo.maya_kin);
+      return kinStr.replace('KIN ', '').trim() || '1';
+    } catch (error) {
+      console.warn('Kin计算错误:', error);
+      return '1';
+    }
+  }, [birthInfo?.maya_kin]);
   
   return (
     <OptimizedInfoCard title="基本信息" className="text-center">
-      <div className="mb-4">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500 rounded-full text-white mb-3">
-          <div className="text-center">
-            <div className="text-lg font-bold">{kinNumber}</div>
-            <div className="text-xs opacity-90">KIN</div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center">
+          <div className="w-12 h-12 bg-blue-600 rounded-full text-white flex items-center justify-center mr-3">
+            <div className="text-center">
+              <div className="text-lg font-bold">{kinNumber}</div>
+              <div className="text-xs opacity-90">KIN</div>
+            </div>
           </div>
-        </div>
-        <h2 className="text-xl font-bold text-gray-800 mb-2">{birthInfo.maya_seal_desc}</h2>
-        <div className="flex justify-center space-x-2 mb-3">
-          {sealBadge}
-          {toneBadge}
+          <div>
+            <h2 className="text-md font-bold text-gray-800">{birthInfo?.maya_seal_desc || '未知印记'}</h2>
+            <div className="text-xs text-gray-600">{birthInfo?.date || '未知日期'}</div>
+          </div>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="bg-gray-50 p-3 rounded">
-          <div className="text-sm text-gray-600">日期</div>
-          <div className="font-medium">{birthInfo.date}</div>
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <div className="text-sm text-gray-600">星期</div>
-          <div className="font-medium">{birthInfo.weekday}</div>
-        </div>
+      <div className="flex space-x-2">
+        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+          {birthInfo?.maya_seal || '未知印记'}
+        </span>
+        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+          {birthInfo?.maya_tone_info?.数字 || '1'}号音
+        </span>
       </div>
     </OptimizedInfoCard>
   );
@@ -125,33 +120,21 @@ const BasicInfoSection = memo(({ birthInfo }) => {
 
 // 印记信息组件 - 使用memo和useMemo
 const SealInfoSection = memo(({ birthInfo }) => {
-  const traitsInfo = useMemo(() => (
-    <div className="bg-blue-50 p-3 rounded">
-      <div className="text-sm text-blue-800 font-medium mb-1">特质</div>
-      <div className="text-gray-700">{birthInfo.maya_seal_info?.特质 || ''}</div>
-    </div>
-  ), [birthInfo.maya_seal_info?.特质]);
-  
-  const energyInfo = useMemo(() => (
-    <div className="bg-green-50 p-3 rounded">
-      <div className="text-sm text-green-800 font-medium mb-1">能量</div>
-      <div className="text-gray-700">{birthInfo.maya_seal_info?.能量 || ''}</div>
-    </div>
-  ), [birthInfo.maya_seal_info?.能量]);
-  
-  const revelationInfo = useMemo(() => (
-    <div className="bg-purple-50 p-3 rounded">
-      <div className="text-sm text-purple-800 font-medium mb-1">启示</div>
-      <div className="text-gray-700">{birthInfo.maya_seal_info?.启示 || ''}</div>
-    </div>
-  ), [birthInfo.maya_seal_info?.启示]);
-
   return (
     <OptimizedInfoCard title="印记信息">
-      <div className="space-y-3">
-        {traitsInfo}
-        {energyInfo}
-        {revelationInfo}
+      <div className="space-y-2">
+        <div>
+          <div className="text-xs text-gray-800 font-medium mb-1">特质</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.特质 || ''}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-800 font-medium mb-1">能量</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.能量 || ''}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-800 font-medium mb-1">启示</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.启示 || ''}</div>
+        </div>
       </div>
     </OptimizedInfoCard>
   );
@@ -159,35 +142,23 @@ const SealInfoSection = memo(({ birthInfo }) => {
 
 // 音调信息组件 - 使用memo和useMemo
 const ToneInfoSection = memo(({ birthInfo }) => {
-  const digitalEnergyInfo = useMemo(() => (
-    <div className="bg-yellow-50 p-3 rounded">
-      <div className="text-sm text-yellow-800 font-medium mb-1">数字能量</div>
-      <div className="text-gray-700">
-        第{birthInfo.maya_tone_info?.数字 || '1'}号音调代表着独特的宇宙振动频率
-      </div>
-    </div>
-  ), [birthInfo.maya_tone_info?.数字]);
-  
-  const actionInfo = useMemo(() => (
-    <div className="bg-red-50 p-3 rounded">
-      <div className="text-sm text-red-800 font-medium mb-1">行动</div>
-      <div className="text-gray-700">{birthInfo.maya_tone_info?.行动 || ''}</div>
-    </div>
-  ), [birthInfo.maya_tone_info?.行动]);
-  
-  const toneRevelationInfo = useMemo(() => (
-    <div className="bg-indigo-50 p-3 rounded">
-      <div className="text-sm text-indigo-800 font-medium mb-1">启示</div>
-      <div className="text-gray-700">{birthInfo.maya_tone_info?.启示 || ''}</div>
-    </div>
-  ), [birthInfo.maya_tone_info?.启示]);
-
   return (
     <OptimizedInfoCard title="音调信息">
-      <div className="space-y-3">
-        {digitalEnergyInfo}
-        {actionInfo}
-        {toneRevelationInfo}
+      <div className="space-y-2">
+        <div>
+          <div className="text-xs text-gray-800 font-medium mb-1">数字能量</div>
+          <div className="text-gray-600 text-xs leading-relaxed">
+            第{birthInfo.maya_tone_info?.数字 || '1'}号音调代表着独特的宇宙振动频率
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-800 font-medium mb-1">行动</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo.maya_tone_info?.行动 || ''}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-800 font-medium mb-1">启示</div>
+          <div className="text-gray-600 text-xs leading-relaxed">{birthInfo.maya_tone_info?.启示 || ''}</div>
+        </div>
       </div>
     </OptimizedInfoCard>
   );
@@ -198,27 +169,19 @@ const ToneInfoSection = memo(({ birthInfo }) => {
 
 // 生命使命组件 - 使用memo和useMemo
 const LifePurposeSection = memo(({ birthInfo }) => {
-  const summary = useMemo(() => (
-    <p className="text-gray-700">{birthInfo.life_purpose?.summary || ''}</p>
-  ), [birthInfo.life_purpose?.summary]);
-  
-  const details = useMemo(() => (
-    <p className="text-gray-600 text-sm">{birthInfo.life_purpose?.details || ''}</p>
-  ), [birthInfo.life_purpose?.details]);
-  
-  const actionGuide = useMemo(() => (
-    <div className="bg-blue-50 p-3 rounded">
-      <div className="text-sm text-blue-800 font-medium mb-1">行动指南</div>
-      <div className="text-gray-700">{birthInfo.life_purpose?.action_guide || ''}</div>
-    </div>
-  ), [birthInfo.life_purpose?.action_guide]);
-
   return (
     <OptimizedInfoCard title="生命使命">
-      <div className="space-y-3">
-        {summary}
-        {details}
-        {actionGuide}
+      <div className="space-y-2">
+        <div>
+          <div className="text-xs text-gray-600 leading-relaxed">{birthInfo.life_purpose?.summary || ''}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-600 leading-relaxed">{birthInfo.life_purpose?.details || ''}</div>
+        </div>
+        <div className="bg-blue-50 p-2 rounded">
+          <div className="text-xs text-blue-700 font-medium mb-1">行动指南</div>
+          <div className="text-xs text-blue-600">{birthInfo.life_purpose?.action_guide || ''}</div>
+        </div>
       </div>
     </OptimizedInfoCard>
   );
@@ -231,82 +194,55 @@ const PersonalTraitsSection = memo(({ birthInfo }) => {
     challenges: birthInfo.personal_traits?.challenges || []
   }), [birthInfo.personal_traits]);
 
-  // 优化渲染函数，使用useCallback避免重复创建
+  // 优化渲染函数，简化样式
   const renderTraitItem = useCallback((trait, index, isStrength = true) => (
-    <li key={`${isStrength ? 'strength' : 'challenge'}-${index}`} className="flex items-center text-gray-700">
-      <div className={`w-6 h-6 ${isStrength ? 'bg-green-500' : 'bg-red-500'} rounded-full flex items-center justify-center text-white text-xs font-bold mr-2`}>
+    <li key={`${isStrength ? 'strength' : 'challenge'}-${index}`} className="flex items-center text-gray-700 text-xs mb-1">
+      <div className={`w-4 h-4 ${isStrength ? 'bg-green-400' : 'bg-red-400'} rounded-full flex items-center justify-center text-white text-xs font-bold mr-2`}>
         {index + 1}
       </div>
-      {trait}
+      <span className="text-gray-600">{trait}</span>
     </li>
   ), []);
 
-  // 为优势和挑战创建独立的组件以减少重渲染
-  const StrengthsList = memo(() => (
-    <OptimizedInfoCard title="个人优势">
-      <ul className="space-y-2">
-        <ChunkedRenderer
-          items={traits.strengths}
-          chunkSize={2}
-          renderItem={(trait, index) => renderTraitItem(trait, index, true)}
-          loadingComponent={<div className="text-center text-gray-400 animate-pulse">加载优势...</div>}
-        />
-      </ul>
-    </OptimizedInfoCard>
-  ));
-  
-  const ChallengesList = memo(() => (
-    <OptimizedInfoCard title="个人挑战">
-      <ul className="space-y-2">
-        <ChunkedRenderer
-          items={traits.challenges}
-          chunkSize={2}
-          renderItem={(trait, index) => renderTraitItem(trait, index, false)}
-          loadingComponent={<div className="text-center text-gray-400 animate-pulse">加载挑战...</div>}
-        />
-      </ul>
-    </OptimizedInfoCard>
-  ));
-
   return (
-    <div className="grid grid-cols-1 gap-4">
-      <StrengthsList />
-      <ChallengesList />
-    </div>
+    <OptimizedInfoCard title="个人特质">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <div className="text-xs text-green-600 font-medium mb-2">优势</div>
+          <ul className="space-y-1">
+            {traits.strengths.slice(0, 3).map((trait, index) => renderTraitItem(trait, index, true))}
+          </ul>
+        </div>
+        <div>
+          <div className="text-xs text-red-600 font-medium mb-2">挑战</div>
+          <ul className="space-y-1">
+            {traits.challenges.slice(0, 3).map((trait, index) => renderTraitItem(trait, index, false))}
+          </ul>
+        </div>
+      </div>
+    </OptimizedInfoCard>
   );
 });
 
 // 能量场信息组件 - 使用memo和useMemo
 const EnergyFieldSection = memo(({ birthInfo }) => {
-  const primaryEnergyInfo = useMemo(() => (
-    <div className="bg-indigo-50 p-3 rounded">
-      <div className="text-sm text-indigo-800 font-medium mb-2">主要能量场</div>
-      <div className="text-gray-700 mb-1">{birthInfo.birth_energy_field?.primary?.type || ''}</div>
-      <div className="text-xs text-gray-600">{birthInfo.birth_energy_field?.primary?.info?.描述 || ''}</div>
-    </div>
-  ), [birthInfo.birth_energy_field?.primary]);
-  
-  const secondaryEnergyInfo = useMemo(() => (
-    <div className="bg-purple-50 p-3 rounded">
-      <div className="text-sm text-purple-800 font-medium mb-2">次要能量场</div>
-      <div className="text-gray-700 mb-1">{birthInfo.birth_energy_field?.secondary?.type || ''}</div>
-      <div className="text-xs text-gray-600">{birthInfo.birth_energy_field?.secondary?.info?.描述 || ''}</div>
-    </div>
-  ), [birthInfo.birth_energy_field?.secondary]);
-  
-  const balanceSuggestionInfo = useMemo(() => (
-    <div className="bg-blue-50 p-3 rounded">
-      <div className="text-sm text-blue-800 font-medium mb-1">平衡建议</div>
-      <div className="text-gray-700 text-sm">{birthInfo.birth_energy_field?.balance_suggestion || ''}</div>
-    </div>
-  ), [birthInfo.birth_energy_field?.balance_suggestion]);
-
   return (
     <OptimizedInfoCard title="出生能量场">
-      <div className="grid grid-cols-1 gap-4">
-        {primaryEnergyInfo}
-        {secondaryEnergyInfo}
-        {balanceSuggestionInfo}
+      <div className="space-y-2">
+        <div>
+          <div className="text-xs text-indigo-600 font-medium mb-1">主要能量场</div>
+          <div className="text-xs text-gray-600 mb-1">{birthInfo.birth_energy_field?.primary?.type || ''}</div>
+          <div className="text-xs text-gray-500">{birthInfo.birth_energy_field?.primary?.info?.描述 || ''}</div>
+        </div>
+        <div>
+          <div className="text-xs text-purple-600 font-medium mb-1">次要能量场</div>
+          <div className="text-xs text-gray-600 mb-1">{birthInfo.birth_energy_field?.secondary?.type || ''}</div>
+          <div className="text-xs text-gray-500">{birthInfo.birth_energy_field?.secondary?.info?.描述 || ''}</div>
+        </div>
+        <div className="bg-blue-50 p-2 rounded">
+          <div className="text-xs text-blue-700 font-medium mb-1">平衡建议</div>
+          <div className="text-xs text-blue-600">{birthInfo.birth_energy_field?.balance_suggestion || ''}</div>
+        </div>
       </div>
     </OptimizedInfoCard>
   );

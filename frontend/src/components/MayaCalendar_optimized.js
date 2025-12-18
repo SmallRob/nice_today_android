@@ -431,38 +431,132 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
     </div>
   ), [mayaData?.bgColor, mayaData?.textColor, mayaData?.level, mayaData?.tip, mayaData?.suggestion]);
 
-  // 优化的今日启示组件 - 从玛雅出生图迁移而来
+  // 增强的今日启示组件 - 包含治愈心灵的多维度提示
   const DailyInspiration = useMemo(() => {
-    // 生成基于KIN的今日启示
+    // 生成基于KIN的多维度启示
     const getDailyInspiration = (kin) => {
-      const inspirations = [
+      // 心灵治愈类启示
+      const healingInspirations = [
+        "允许自己感受所有的情绪，它们都是灵魂的导航。",
+        "在静谧中，倾听内心的声音，那里有最深的智慧。",
+        "真正的疗愈始于接纳不完美的自己。",
+        "每一次深呼吸都是与内在平静的连接。",
+        "你的存在本身就是宇宙最珍贵的礼物。",
+        "在喧嚣中寻找宁静，在混乱中创造秩序。",
+        "爱自己是最强大的治愈力量。",
+        "放下对完美的执着，拥抱真实的自己。",
+        "内心的平静是抵抗外界风暴的堡垒。",
+        "每一个今天都是重新开始的机会。"
+      ];
+      
+      // 生活智慧类启示
+      const wisdomInspirations = [
         "生命不是等待风暴过去，而是学会在雨中跳舞。",
         "真正的智慧在于认识自己的无知。",
         "活在当下，珍惜每一刻的美好。",
         "勇气不是没有恐惧，而是面对恐惧并继续前行。",
         "爱是唯一能够超越时间和空间的力量。",
         "简单的生活是最充实的生活。",
-        "内心的平静是最大的财富。",
         "每一次结束都是新的开始。",
         "真正的力量来自于内心的平衡。",
-        "感恩的心是通往幸福的道路。"
+        "感恩的心是通往幸福的道路。",
+        "成长的过程比结果更加珍贵。"
       ];
       
-      const seed = kin % inspirations.length;
-      return inspirations[seed];
+      // 能量连接类启示
+      const energyInspirations = [
+        "与大地连接，感受生命的脉动。",
+        "让阳光温暖你的心，让月光照亮你的梦。",
+        "宇宙的能量时刻环绕着你，保持开放的心。",
+        "在自然中找到平衡，在静心中找到力量。",
+        "你的每一次呼吸都与宇宙同步。",
+        "感受能量的流动，顺应生命的节奏。",
+        "在寂静中听见宇宙的智慧。",
+        "大地承载着你的足迹，天空放飞着你的梦想。",
+        "每一个生命都是宇宙意识的体现。",
+        "在万物中找到连接，在连接中找到和谐。"
+      ];
+      
+      // 基于KIN选择不同的启示类型
+      const type = kin % 3;
+      let selectedInspirations;
+      
+      switch(type) {
+        case 0:
+          selectedInspirations = healingInspirations;
+          break;
+        case 1:
+          selectedInspirations = wisdomInspirations;
+          break;
+        default:
+          selectedInspirations = energyInspirations;
+      }
+      
+      const seed = kin % selectedInspirations.length;
+      return {
+        text: selectedInspirations[seed],
+        type: type === 0 ? 'healing' : type === 1 ? 'wisdom' : 'energy'
+      };
     };
     
-    const inspiration = mayaData ? getDailyInspiration(mayaData.kin) : "今日启示将在此显示";
+    const inspiration = mayaData ? getDailyInspiration(mayaData.kin) : {text: "今日启示将在此显示", type: 'wisdom'};
+    
+    // 根据启示类型设置不同的颜色主题
+    const getTheme = (type) => {
+      switch(type) {
+        case 'healing':
+          return 'bg-gradient-to-r from-green-500 to-teal-600';
+        case 'energy':
+          return 'bg-gradient-to-r from-purple-500 to-indigo-600';
+        default:
+          return 'bg-gradient-to-r from-blue-500 to-cyan-600';
+      }
+    };
+    
+    const getIcon = (type) => {
+      switch(type) {
+        case 'healing':
+          return (
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          );
+        case 'energy':
+          return (
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          );
+        default:
+          return (
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          );
+      }
+    };
     
     return (
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-4 text-white">
-        <h4 className="text-sm font-semibold mb-2 flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-          今日启示
-        </h4>
-        <p className="text-sm opacity-90 leading-5">{inspiration}</p>
+      <div className="mb-4">
+        <div className={`${getTheme(inspiration.type)} rounded-lg p-4 text-white shadow-sm`}>
+          <h4 className="text-sm font-semibold mb-2 flex items-center">
+            {getIcon(inspiration.type)}
+            {inspiration.type === 'healing' ? '心灵治愈' : inspiration.type === 'energy' ? '能量连接' : '生活智慧'}
+          </h4>
+          <p className="text-sm opacity-95 leading-relaxed">{inspiration.text}</p>
+        </div>
+        
+        {/* 添加简短的实践建议 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mt-2 border border-gray-200 dark:border-gray-700">
+          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-1">今日实践建议</div>
+          <div className="text-xs text-gray-500 dark:text-gray-500">
+            {inspiration.type === 'healing' 
+              ? "花5分钟冥想，感受内心的平静" 
+              : inspiration.type === 'energy' 
+              ? "到户外散步，感受自然的能量流动" 
+              : "记录今天的感恩时刻"}
+          </div>
+        </div>
       </div>
     );
   }, [mayaData?.kin]);
@@ -483,15 +577,18 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      {/* 今日启示 */}
+      {DailyInspiration}
+
       {/* 日期选择区域 */}
       <MayaInfoCard>
         <div className="flex flex-col sm:flex-row items-center justify-between">
-          <div className="mb-3 sm:mb-0">
-            <h3 className="text-base font-medium text-gray-900 dark:text-white leading-6">
+          <div className="mb-2 sm:mb-0">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
               选择查询日期
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400 leading-4 mt-1">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               查看特定日期的玛雅历法能量
             </p>
           </div>
@@ -500,7 +597,7 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
               type="date"
               value={formatDateLocal(selectedDate)}
               onChange={handleDateChange}
-              className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-normal min-w-[140px]"
+              className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-normal min-w-[140px]"
             />
           </div>
         </div>
@@ -511,7 +608,7 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
 
       {/* 玛雅历法核心信息 */}
       <MayaInfoCard>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-2">
           玛雅历法信息
         </h3>
         
@@ -523,11 +620,11 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
       {EnergyTip}
 
       {/* 玛雅历法说明 */}
-      <div className="bg-gray-50 dark:bg-gray-800 border-l-4 border-gray-400 dark:border-gray-600 rounded-r-lg p-4">
-        <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-300 mb-2 leading-5">
+      <div className="bg-gray-50 dark:bg-gray-800 border-l-2 border-gray-400 dark:border-gray-600 rounded-r-lg p-3">
+        <h4 className="text-xs font-semibold text-gray-800 dark:text-gray-300 mb-1">
           玛雅历法说明
         </h4>
-        <p className="text-sm text-gray-700 dark:text-gray-400 leading-5">
+        <p className="text-xs text-gray-700 dark:text-gray-400">
           玛雅历法基于260天的神圣周期（Tzolkin），每个KIN代表独特的能量组合。
           调性代表行动方式，图腾代表生命能量。建议结合个人直觉感受能量流动。
         </p>

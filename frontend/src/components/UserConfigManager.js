@@ -337,6 +337,15 @@ const UserConfigManagerComponent = () => {
     };
   }, [isInitialized]);
   
+  // 显示提示信息
+  const showMessage = useCallback((text, type = 'info') => {
+    setMessage({ text, type });
+    // 3秒后自动清除消息
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  }, []);
+
   // 处理配置保存
   const handleSaveConfig = useCallback((index, configData) => {
     const success = userConfigManager.updateConfig(index, configData);
@@ -382,7 +391,7 @@ const UserConfigManagerComponent = () => {
     } else {
       showMessage('添加配置失败，请重试', 'error');
     }
-  }, [showMessage]);
+  }, [configs.length, showMessage]);
   
   // 处理删除配置
   const handleDeleteConfig = useCallback((index) => {
@@ -521,15 +530,6 @@ const UserConfigManagerComponent = () => {
       </div>
     );
   }
-  
-  // 显示提示信息
-  const showMessage = (text, type = 'info') => {
-    setMessage({ text, type });
-    // 3秒后自动清除消息
-    setTimeout(() => {
-      setMessage(null);
-    }, 3000);
-  };
 
   if (error) {
     return (
