@@ -5,6 +5,19 @@ import elementConfig from '../config/elementConfig.json';
 import { CompatibleStorage, initDataMigration } from '../utils/dataMigration';
 import { userConfigManager } from '../utils/userConfigManager';
 
+// 实践活动数据
+const PRACTICE_ACTIVITIES = [
+  { id: 1, title: "10分钟冥想", description: "专注呼吸，平静思绪", energy: "medium", duration: "10分钟" },
+  { id: 2, title: "户外散步", description: "接触自然，呼吸新鲜空气", energy: "high", duration: "15分钟" },
+  { id: 3, title: "感恩日记", description: "写下三件感恩的事", energy: "low", duration: "5分钟" },
+  { id: 4, title: "深呼吸练习", description: "5-5-5呼吸法", energy: "low", duration: "3分钟" },
+  { id: 5, title: "能量伸展", description: "简单拉伸，唤醒身体", energy: "medium", duration: "8分钟" },
+  { id: 6, title: "积极肯定语", description: "对自己说积极的话", energy: "low", duration: "2分钟" },
+  { id: 7, title: "饮水提醒", description: "喝一杯温水", energy: "low", duration: "1分钟" },
+  { id: 8, title: "短暂静坐", description: "闭眼静坐，放松身心", energy: "medium", duration: "7分钟" },
+  { id: 9, title: "能量音乐", description: "听一首提升能量的音乐", energy: "low", duration: "4分钟" }
+];
+
 const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
   // 初始化数据迁移
   useEffect(() => {
@@ -54,10 +67,12 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
       removeListener();
     };
   }, []);
+  
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [practiceActivities, setPracticeActivities] = useState([]);
 
   // 从配置文件获取默认出生日期
   const DEFAULT_BIRTH_DATE = elementConfig.defaultBirthDate || "1991-01-01";
@@ -83,6 +98,12 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     }
     return new Date(dateStr);
   };
+
+  // 随机选择实践活动
+  const getRandomActivities = useCallback(() => {
+    const shuffled = [...PRACTICE_ACTIVITIES].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 3);
+  }, []);
 
   // 加载生物节律数据 - 本地化版本
   const loadBiorhythmData = useCallback(async (selectedDate = null) => {
@@ -147,7 +168,15 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     };
     
     loadDefaultData();
-  }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE, configManagerReady]);
+    
+    // 初始化实践活动
+    setPracticeActivities(getRandomActivities());
+  }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE, configManagerReady, getRandomActivities]);
+
+  // 更换实践活动
+  const refreshActivities = () => {
+    setPracticeActivities(getRandomActivities());
+  };
 
   if (loading && !rhythmData) {
     return (
@@ -199,82 +228,159 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
   }
 
   return (
-    <div className="space-y-4">
-      {/* 用户信息显示区域 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between">
+    <div className="space-y-3">
+      {/* 用户信息卡片 - 手机优化 */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3">
+        <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-medium text-gray-900 dark:text-white">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
               {userInfo.nickname ? `${userInfo.nickname} 的生物节律` : '生物节律'}
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              {userInfo.birthDate ? `基于出生日期 ${userInfo.birthDate} 计算` : '请到设置页面配置个人信息'}
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+              {userInfo.birthDate ? `出生日期: ${userInfo.birthDate}` : '请到设置页面配置信息'}
             </p>
           </div>
-          <div className="text-right text-xs text-gray-500 dark:text-gray-400">
-            <p>数据来源</p>
-            <p className="font-medium text-green-600 dark:text-green-400">本地计算</p>
+          <div className="text-right">
+            <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 dark:bg-opacity-30 rounded">
+              本地计算
+            </span>
           </div>
         </div>
       </div>
 
-      {/* 今日生物节律状态 */}
+      {/* 今日节律状态卡片 - 精简布局 */}
       {todayData && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
-            今日生物节律状态
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            今日状态
           </h3>
           
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-md p-2 text-center">
-              <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-1">
+          <div className="grid grid-cols-3 gap-1.5">
+            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded p-2 text-center">
+              <div className="text-base font-bold text-blue-600 dark:text-blue-400 mb-0.5">
                 {todayData.physical}%
               </div>
-              <div className="text-xs text-blue-800 dark:text-blue-300">体力</div>
+              <div className="text-[10px] text-blue-800 dark:text-blue-300 font-medium">体力</div>
             </div>
             
-            <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded-md p-2 text-center">
-              <div className="text-lg font-bold text-red-600 dark:text-red-400 mb-1">
+            <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded p-2 text-center">
+              <div className="text-base font-bold text-red-600 dark:text-red-400 mb-0.5">
                 {todayData.emotional}%
               </div>
-              <div className="text-xs text-red-800 dark:text-red-300">情绪</div>
+              <div className="text-[10px] text-red-800 dark:text-red-300 font-medium">情绪</div>
             </div>
             
-            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-md p-2 text-center">
-              <div className="text-lg font-bold text-green-600 dark:text-green-400 mb-1">
+            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded p-2 text-center">
+              <div className="text-base font-bold text-green-600 dark:text-green-400 mb-0.5">
                 {todayData.intellectual}%
               </div>
-              <div className="text-xs text-green-800 dark:text-green-300">智力</div>
+              <div className="text-[10px] text-green-800 dark:text-green-300 font-medium">智力</div>
             </div>
+          </div>
+          
+          {/* 状态解读 */}
+          <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              {todayData.physical >= 0 ? '✓ 体力充沛' : '⚠ 体力偏低'} · 
+              {todayData.emotional >= 0 ? ' 情绪稳定' : ' 情绪波动'} · 
+              {todayData.intellectual >= 0 ? ' 思维清晰' : ' 思考需谨慎'}
+            </p>
           </div>
         </div>
       )}
 
-      {/* 生物节律曲线图 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3 -mt-1">
-        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
-          生物节律趋势图
+      {/* 今日实践建议卡片 */}
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 dark:bg-opacity-20 border border-purple-100 dark:border-purple-700 rounded-lg shadow-sm p-3">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300">
+            今日实践建议
+          </h3>
+          <button 
+            onClick={refreshActivities}
+            className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium flex items-center"
+          >
+            换一批
+            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
+        
+        <p className="text-xs text-purple-700 dark:text-purple-400 mb-2">
+          根据您的节律状态，推荐以下活动提升能量：
+        </p>
+        
+        <div className="space-y-1.5">
+          {practiceActivities.map((activity, index) => (
+            <div 
+              key={activity.id} 
+              className="bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-md p-2 flex items-start"
+            >
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center mr-2 mt-0.5">
+                <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+                  {index + 1}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                    {activity.title}
+                  </h4>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 ml-1 whitespace-nowrap">
+                    {activity.duration}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                  {activity.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 生物节律曲线图 - 手机优化 */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+          趋势图表
         </h3>
         
         {rhythmData && rhythmData.length > 0 ? (
-          <BiorhythmChart 
-            data={rhythmData}
-          />
+          <div className="h-48">
+            <BiorhythmChart 
+              data={rhythmData}
+              isMobile={true}
+            />
+          </div>
         ) : (
-          <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
+          <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-xs">
             暂无图表数据
           </div>
         )}
+        
+        <div className="flex items-center justify-center mt-2 space-x-3">
+          <div className="flex items-center">
+            <div className="w-2 h-2 rounded-full bg-blue-500 mr-1"></div>
+            <span className="text-[10px] text-gray-600 dark:text-gray-400">体力</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-2 h-2 rounded-full bg-red-500 mr-1"></div>
+            <span className="text-[10px] text-gray-600 dark:text-gray-400">情绪</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
+            <span className="text-[10px] text-gray-600 dark:text-gray-400">智力</span>
+          </div>
+        </div>
       </div>
 
-      {/* 生物节律说明 */}
-      <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 border-l-4 border-blue-500 dark:border-blue-400 rounded-r-lg p-3">
-        <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1">
-          生物节律说明
+      {/* 节律说明 - 精简卡片 */}
+      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 dark:bg-opacity-20 border border-blue-100 dark:border-blue-700 rounded-lg p-3">
+        <h4 className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
+          节律知识
         </h4>
-        <p className="text-xs text-blue-700 dark:text-blue-400">
-          生物节律理论基于23天体力周期、28天情绪周期和33天智力周期。
-          正值表示能量充沛，负值表示能量偏低。建议结合个人感受合理参考。
+        <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+          生物节律理论包含23天体力周期、28天情绪周期和33天智力周期。正值表示能量充沛，负值表示能量偏低。每日节律状态可作为参考，帮助您合理安排活动。
         </p>
       </div>
     </div>
