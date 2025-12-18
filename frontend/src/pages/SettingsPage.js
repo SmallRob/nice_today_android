@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import DarkModeToggle from '../components/DarkModeToggle';
 import PerformanceTestTool from '../components/PerformanceTestTool';
 import UserConfigManager from '../components/UserConfigManager';
