@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import './MayaBirthChart.css';
-import { fetchMayaBirthInfo, formatDateString, fetchMayaHistory } from '../services/apiServiceRefactored';
+import { formatDateString } from '../services/apiServiceRefactored';
 import { 
   MAYA_EPOCH, 
   mayaSeals, 
@@ -25,48 +25,87 @@ import {
 } from '../config/mayaConfig';
 
 // 玛雅日历计算工具类 - 确保计算结果的一致性
+// 使用与玛雅日历组件相同的计算逻辑
 class MayaCalendarCalculator {
-  // 玛雅日历的基准日期 - 使用固定的基准日期确保计算一致性
-  static MAYA_EPOCH = MAYA_EPOCH;
-  
-  // 计算两个日期之间的天数差
-  static daysBetween(date1, date2) {
-    // 确保使用UTC时间，避免时区问题
-    const utc1 = Date.UTC(date1.getFullYear(), date1.getMonth(), date1.getDate());
-    const utc2 = Date.UTC(date2.getFullYear(), date2.getMonth(), date2.getDate());
-    return Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
+  // 标准玛雅历法计算（基于KIN 183校准）
+  static calculateMayaDate(gregorianDate) {
+    // 13种调性（银河音调）
+    const TONES = [
+      '磁性', '月亮', '电子', '自我存在', '倍音', '韵律', '共振',
+      '银河', '太阳', '行星', '光谱', '水晶', '宇宙'
+    ];
+    
+    // 20种图腾（太阳印记）
+    const SEALS = [
+      '红龙', '白风', '蓝夜', '黄种子', '红蛇', '白世界连接者', '蓝手', '黄星星',
+      '红月亮', '白狗', '蓝猴', '黄人', '红天空行者', '白巫师', '蓝鹰', '黄战士',
+      '红地球', '白镜子', '蓝风暴', '黄太阳'
+    ];
+    
+    // 使用已知正确的参考点：2025年9月23日 = KIN 183 磁性的蓝夜
+    const REFERENCE_DATE = new Date('2025-09-23');
+    const REFERENCE_KIN = 183;
+    
+    // 计算目标日期
+    const targetDate = new Date(gregorianDate);
+    
+    // 计算从参考日期到目标日期的天数
+    const timeDiff = targetDate.getTime() - REFERENCE_DATE.getTime();
+    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    
+    // 计算KIN数（1-260的循环）
+    let kin = REFERENCE_KIN + daysDiff;
+    kin = ((kin - 1) % 260) + 1;
+    
+    // 从KIN数计算调性和图腾
+    const toneIndex = (kin - 1) % 13;
+    const sealIndex = (kin - 1) % 20;
+    
+    const tone = TONES[toneIndex];
+    const seal = SEALS[sealIndex];
+    
+    return {
+      kin: kin,
+      tone: tone,
+      seal: seal,
+      fullName: `${tone}的${seal}`,
+      daysDiff: daysDiff,
+      toneIndex: toneIndex,
+      sealIndex: sealIndex
+    };
   }
   
   // 计算玛雅Kin数
   static calculateKin(birthDate) {
-    // 将日期字符串转换为Date对象
-    const birthDateObj = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
-    
-    // 计算与基准日期的天数差
-    const dayDiff = this.daysBetween(this.MAYA_EPOCH, birthDateObj);
-    
-    // 计算Kin数 (1-260范围内)
-    // 使用模运算确保结果在1-260范围内，并处理负数情况
-    let kin = dayDiff % 260;
-    if (kin <= 0) {
-      kin = 260 + kin;
-    }
-    
-    return kin;
+    const result = this.calculateMayaDate(birthDate);
+    return result.kin;
   }
   
   // 根据Kin数计算玛雅印记
   static calculateSeal(kin) {
+    // 20种图腾（太阳印记）
+    const SEALS = [
+      '红龙', '白风', '蓝夜', '黄种子', '红蛇', '白世界连接者', '蓝手', '黄星星',
+      '红月亮', '白狗', '蓝猴', '黄人', '红天空行者', '白巫师', '蓝鹰', '黄战士',
+      '红地球', '白镜子', '蓝风暴', '黄太阳'
+    ];
+    
     // 玛雅印记是基于Kin数模20计算的
     const sealIndex = (kin - 1) % 20;
-    return mayaSeals[sealIndex];
+    return SEALS[sealIndex];
   }
   
   // 根据Kin数计算玛雅音调
   static calculateTone(kin) {
+    // 13种调性（银河音调）
+    const TONES = [
+      '磁性', '月亮', '电子', '自我存在', '倍音', '韵律', '共振',
+      '银河', '太阳', '行星', '光谱', '水晶', '宇宙'
+    ];
+    
     // 玛雅音调是基于Kin数模13计算的
     const toneIndex = (kin - 1) % 13;
-    return mayaTones[toneIndex];
+    return TONES[toneIndex];
   }
   
   // 获取完整的玛雅印记描述
@@ -124,7 +163,7 @@ class MayaCalendarCalculator {
   }
 }
 
-const MayaBirthChart = ({ apiBaseUrl }) => {
+const MayaBirthChart = () => {
   // 默认日期设置为配置中的默认日期
   const defaultDate = DEFAULT_BIRTH_DATE;
   const [birthDate, setBirthDate] = useState(defaultDate);
@@ -141,66 +180,36 @@ const MayaBirthChart = ({ apiBaseUrl }) => {
 
   // 获取历史记录（最多6条）
   const fetchHistory = useCallback(async () => {
-    if (!apiBaseUrl) return;
     try {
-      const result = await fetchMayaHistory(apiBaseUrl);
-      if (result.success && Array.isArray(result.history)) {
-        setHistoryDates(result.history.slice(0, 6));
+      // 从本地存储获取历史记录
+      const historyStr = localStorage.getItem('mayaCalendarHistory');
+      if (historyStr) {
+        const history = JSON.parse(historyStr);
+        if (Array.isArray(history)) {
+          setHistoryDates(history.slice(0, 6));
+        }
       }
     } catch (err) {
       console.error("获取历史记录失败:", err);
     }
-  }, [apiBaseUrl]);
+  }, []);
 
-  // 保存历史记录到后端（假设有POST接口）
+  // 保存历史记录到本地存储
   const saveHistory = useCallback(async (dates) => {
-    if (!apiBaseUrl) return;
     try {
-      // 尝试不同的API路径前缀
-      const possiblePrefixes = ['', '/api', '/maya'];
-      let saved = false;
-      
-      for (const prefix of possiblePrefixes) {
-        if (saved) break;
-        try {
-          const url = `${apiBaseUrl}${prefix}/maya/history`;
-          await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ history: dates })
-          });
-          saved = true;
-          console.log(`历史记录已保存到 ${url}`);
-        } catch (prefixErr) {
-          console.error(`使用前缀 ${prefix} 保存历史记录失败:`, prefixErr);
-        }
-      }
-      
-      // 如果API保存失败，尝试保存到本地存储
-      if (!saved) {
-        try {
-          localStorage.setItem('mayaCalendarHistory', JSON.stringify(dates));
-          console.log('历史记录已保存到本地存储');
-        } catch (localErr) {
-          console.error("保存历史记录到本地存储失败:", localErr);
-        }
-      }
+      localStorage.setItem('mayaCalendarHistory', JSON.stringify(dates));
+      console.log('历史记录已保存到本地存储');
     } catch (err) {
       // 失败不影响前端展示
       console.error("保存历史记录失败:", err);
     }
-  }, [apiBaseUrl]);
+  }, []);
 
   // 加载出生日期的玛雅日历信息，并处理历史记录
   const loadBirthInfo = useCallback(
     async (date, saveToHistory = false) => {
       if (!date) {
         setError("请选择出生日期");
-        return;
-      }
-      
-      if (!apiBaseUrl) {
-        setError("API服务未连接，请检查网络连接");
         return;
       }
       
@@ -211,100 +220,78 @@ const MayaBirthChart = ({ apiBaseUrl }) => {
 
       try {
         const dateStr = typeof date === 'string' ? date : formatDateString(date);
-        console.log("正在请求玛雅出生图数据，日期:", dateStr, "API基础URL:", apiBaseUrl);
+        console.log("正在计算玛雅出生图数据，日期:", dateStr);
         
-        // 首先尝试从API获取数据
-        const result = await fetchMayaBirthInfo(apiBaseUrl, dateStr);
-        console.log("API返回结果:", result);
-
-        if (result && result.success && result.birthInfo) {
-          // 如果API成功返回数据，使用API数据
-          console.log("使用API返回的数据");
-          setBirthInfo(result.birthInfo);
-          setShowResults(true);
-
-          // 如果是字符串日期，转换为Date对象并更新birthDate
-          if (typeof date === 'string') {
-            setBirthDate(new Date(date));
+        // 直接使用本地计算方法生成一致的结果
+        console.log("使用本地计算方法");
+        
+        // 将日期字符串转换为Date对象
+        const birthDateObj = typeof date === 'string' ? new Date(date) : date;
+        
+        // 计算玛雅Kin数
+        const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
+        
+        // 计算玛雅印记和音调
+        const seal = MayaCalendarCalculator.calculateSeal(kin);
+        const tone = MayaCalendarCalculator.calculateTone(kin);
+        const sealDesc = MayaCalendarCalculator.getSealDescription(kin);
+        
+        // 生成确定性哈希值，用于伪随机数生成
+        const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
+        
+        // 使用种子生成一致的随机数据
+        const weekday = WEEKDAYS[birthDateObj.getDay()];
+        
+        // 构建一致的出生图信息，确保所有字段都有默认值
+        const localBirthInfo = {
+          date: dateStr,
+          weekday: weekday || "未知",
+          maya_kin: `KIN ${kin}`,
+          maya_tone: `${tone}之音 | 第${(kin % 28) || 28}天`,
+          maya_seal: seal,
+          maya_seal_desc: sealDesc,
+          maya_seal_info: generateSealInfo(seal, seed),
+          maya_tone_info: generateToneInfo(tone, seed),
+          life_purpose: generateLifePurpose(sealDesc, seed),
+          personal_traits: generatePersonalTraits(seal, tone, seed),
+          birth_energy_field: generateEnergyField(seal, tone, seed),
+          daily_quote: {
+            content: generateQuote(seed) || "每一天都是新的开始",
+            author: generateAuthor(seed) || "玛雅智者"
           }
-
-          // 处理历史记录（仅在用户交互后且需要保存时）
-          if (saveToHistory && userInteracted) {
-            let newHistory = [dateStr, ...historyDates.filter(d => d !== dateStr)];
-            if (newHistory.length > 6) newHistory = newHistory.slice(0, 6);
-            setHistoryDates(newHistory);
-            saveHistory(newHistory);
-          }
-        } else {
-          console.log("API返回失败或数据格式不正确，使用本地计算方法");
-          // 如果API失败，使用本地计算方法生成一致的结果
-          console.log("API获取失败，使用本地计算方法");
-          
-          // 将日期字符串转换为Date对象
-          const birthDateObj = typeof date === 'string' ? new Date(date) : date;
-          
-          // 计算玛雅Kin数
-          const kin = MayaCalendarCalculator.calculateKin(birthDateObj);
-          
-          // 计算玛雅印记和音调
-          const seal = MayaCalendarCalculator.calculateSeal(kin);
-          const tone = MayaCalendarCalculator.calculateTone(kin);
-          const sealDesc = MayaCalendarCalculator.getSealDescription(kin);
-          
-          // 生成确定性哈希值，用于伪随机数生成
-          const seed = MayaCalendarCalculator.generateDeterministicHash(birthDateObj);
-          
-          // 使用种子生成一致的随机数据
-          const weekday = WEEKDAYS[birthDateObj.getDay()];
-          
-          // 构建一致的出生图信息，确保所有字段都有默认值
-          const localBirthInfo = {
-            date: dateStr,
-            weekday: weekday || "未知",
-            maya_kin: `KIN ${kin}`,
-            maya_tone: `${tone}之音 | 第${(kin % 28) || 28}天`,
-            maya_seal: seal,
-            maya_seal_desc: sealDesc,
-            maya_seal_info: generateSealInfo(seal, seed),
-            maya_tone_info: generateToneInfo(tone, seed),
-            life_purpose: generateLifePurpose(sealDesc, seed),
-            personal_traits: generatePersonalTraits(seal, tone, seed),
-            birth_energy_field: generateEnergyField(seal, tone, seed),
-            daily_quote: {
-              content: generateQuote(seed) || "每一天都是新的开始",
-              author: generateAuthor(seed) || "玛雅智者"
-            }
-          };
-          
-          console.log("本地生成的出生图信息:", localBirthInfo);
-          
-          // 确保daily_quote对象存在
-          const processedLocalBirthInfo = ensureQuoteExists(localBirthInfo);
-          setBirthInfo(processedLocalBirthInfo);
-          setShowResults(true);
-          
-          // 如果是字符串日期，转换为Date对象并更新birthDate
-          if (typeof date === 'string') {
-            setBirthDate(new Date(date));
-          }
-          
-          // 处理历史记录（仅在用户交互后且需要保存时）
-          if (saveToHistory && userInteracted) {
-            let newHistory = [dateStr, ...historyDates.filter(d => d !== dateStr)];
-            if (newHistory.length > 6) newHistory = newHistory.slice(0, 6);
-            setHistoryDates(newHistory);
-            saveHistory(newHistory);
-          }
+        };
+        
+        console.log("本地生成的出生图信息:", localBirthInfo);
+        
+        // 确保daily_quote对象存在
+        const processedLocalBirthInfo = ensureQuoteExists(localBirthInfo);
+        setBirthInfo(processedLocalBirthInfo);
+        setShowResults(true);
+        
+        // 如果是字符串日期，转换为Date对象并更新birthDate
+        if (typeof date === 'string') {
+          setBirthDate(new Date(date));
+        }
+        
+        // 保存当前查询日期到本地存储
+        localStorage.setItem('lastMayaBirthQueryDate', dateStr);
+        
+        // 处理历史记录（仅在用户交互后且需要保存时）
+        if (saveToHistory && userInteracted) {
+          let newHistory = [dateStr, ...historyDates.filter(d => d !== dateStr)];
+          if (newHistory.length > 6) newHistory = newHistory.slice(0, 6);
+          setHistoryDates(newHistory);
+          saveHistory(newHistory);
         }
       } catch (error) {
-        console.error("获取玛雅出生图信息失败:", error);
-        setError("获取数据失败，请稍后再试");
+        console.error("计算玛雅出生图信息失败:", error);
+        setError("计算数据失败，请稍后再试");
       } finally {
         setLoading(false);
         loadingRef.current = false;
       }
     },
-    [apiBaseUrl, userInteracted, historyDates, saveHistory]
+    [userInteracted, historyDates, saveHistory]
   );
 
   // 生成印记信息 - 基于种子确保一致性
@@ -589,21 +576,44 @@ const MayaBirthChart = ({ apiBaseUrl }) => {
     return birthInfo;
   };
 
-  // 初始化时加载历史记录
+  // 初始化时加载历史记录和上次查询的日期
   useEffect(() => {
-    if (apiBaseUrl) {
-      console.log("初始化玛雅出生图，API基础URL:", apiBaseUrl);
-      fetchHistory();
+    console.log("初始化玛雅出生图");
+    fetchHistory();
+    
+    // 尝试从本地存储获取上次查询的日期
+    const lastQueryDate = localStorage.getItem('lastMayaBirthQueryDate');
+    if (lastQueryDate) {
+      try {
+        const date = new Date(lastQueryDate);
+        if (!isNaN(date.getTime())) {
+          setBirthDate(date);
+          // 自动加载上次查询的日期信息
+          loadBirthInfo(date, false);
+        }
+      } catch (error) {
+        console.error("解析上次查询日期失败:", error);
+        // 如果解析失败，使用默认日期
+        setBirthDate(DEFAULT_BIRTH_DATE);
+      }
     } else {
-      console.error("apiBaseUrl未定义，无法加载玛雅出生图数据");
+      // 如果没有上次查询记录，使用默认日期并自动加载
+      setBirthDate(DEFAULT_BIRTH_DATE);
+      loadBirthInfo(DEFAULT_BIRTH_DATE, false);
     }
-  }, [fetchHistory, apiBaseUrl]);
+  }, [fetchHistory, loadBirthInfo]);
 
   // 处理日期变更
   const handleDateChange = (date) => {
     setBirthDate(date);
     setIsDefaultDate(false);
     setUserInteracted(true);
+    
+    // 保存选择的日期到本地存储
+    if (date) {
+      const dateStr = formatDateString(date);
+      localStorage.setItem('lastMayaBirthQueryDate', dateStr);
+    }
   };
 
   // 处理查询按钮点击

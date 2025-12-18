@@ -251,6 +251,140 @@ export const getTodayDressInfo = async () => {
   };
 };
 
+// 玛雅日历计算工具类
+const MayaCalendarCalculator = {
+  // 标准玛雅历法计算（基于KIN 183校准）
+  calculateMayaDate: (gregorianDate) => {
+    // 13种调性（银河音调）
+    const TONES = [
+      '磁性', '月亮', '电子', '自我存在', '倍音', '韵律', '共振',
+      '银河', '太阳', '行星', '光谱', '水晶', '宇宙'
+    ];
+    
+    // 20种图腾（太阳印记）
+    const SEALS = [
+      '红龙', '白风', '蓝夜', '黄种子', '红蛇', '白世界连接者', '蓝手', '黄星星',
+      '红月亮', '白狗', '蓝猴', '黄人', '红天空行者', '白巫师', '蓝鹰', '黄战士',
+      '红地球', '白镜子', '蓝风暴', '黄太阳'
+    ];
+    
+    // 使用已知正确的参考点：2025年9月23日 = KIN 183 磁性的蓝夜
+    const REFERENCE_DATE = new Date('2025-09-23');
+    const REFERENCE_KIN = 183;
+    
+    // 计算目标日期
+    const targetDate = new Date(gregorianDate);
+    
+    // 计算从参考日期到目标日期的天数
+    const timeDiff = targetDate.getTime() - REFERENCE_DATE.getTime();
+    const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    
+    // 计算KIN数（1-260的循环）
+    let kin = REFERENCE_KIN + daysDiff;
+    kin = ((kin - 1) % 260) + 1;
+    
+    // 从KIN数计算调性和图腾
+    const toneIndex = (kin - 1) % 13;
+    const sealIndex = (kin - 1) % 20;
+    
+    const tone = TONES[toneIndex];
+    const seal = SEALS[sealIndex];
+    
+    return {
+      kin: kin,
+      tone: tone,
+      seal: seal,
+      fullName: `${tone}的${seal}`,
+      daysDiff: daysDiff,
+      toneIndex: toneIndex,
+      sealIndex: sealIndex
+    };
+  },
+  
+  // 计算玛雅Kin数
+  calculateKin: function(birthDate) {
+    const result = this.calculateMayaDate(birthDate);
+    return result.kin;
+  },
+  
+  // 根据Kin数计算玛雅印记
+  calculateSeal: function(kin) {
+    // 20种图腾（太阳印记）
+    const SEALS = [
+      '红龙', '白风', '蓝夜', '黄种子', '红蛇', '白世界连接者', '蓝手', '黄星星',
+      '红月亮', '白狗', '蓝猴', '黄人', '红天空行者', '白巫师', '蓝鹰', '黄战士',
+      '红地球', '白镜子', '蓝风暴', '黄太阳'
+    ];
+    
+    // 玛雅印记是基于Kin数模20计算的
+    const sealIndex = (kin - 1) % 20;
+    return SEALS[sealIndex];
+  },
+  
+  // 根据Kin数计算玛雅音调
+  calculateTone: function(kin) {
+    // 13种调性（银河音调）
+    const TONES = [
+      '磁性', '月亮', '电子', '自我存在', '倍音', '韵律', '共振',
+      '银河', '太阳', '行星', '光谱', '水晶', '宇宙'
+    ];
+    
+    // 玛雅音调是基于Kin数模13计算的
+    const toneIndex = (kin - 1) % 13;
+    return TONES[toneIndex];
+  },
+  
+  // 获取完整的玛雅印记描述
+  getSealDescription: function(kin) {
+    const tone = this.calculateTone(kin);
+    const seal = this.calculateSeal(kin);
+    return `${tone}的${seal}`;
+  }
+};
+
+// 计算玛雅出生信息
+export const calculateMayaBirthInfo = async (birthDateStr) => {
+  try {
+    // 解析出生日期
+    const birthDate = new Date(birthDateStr);
+    
+    if (isNaN(birthDate.getTime())) {
+      return {
+        success: false,
+        error: "无效的出生日期格式"
+      };
+    }
+    
+    // 计算玛雅信息
+    const mayaResult = MayaCalendarCalculator.calculateMayaDate(birthDate);
+    
+    // 获取星期几
+    const weekday = getWeekday(birthDate);
+    
+    // 生成出生信息
+    const birthInfo = {
+      date: birthDateStr,
+      weekday: weekday,
+      maya_kin: `KIN ${mayaResult.kin}`,
+      maya_tone: `${mayaResult.tone}之音 | 第${(mayaResult.kin % 28) || 28}天`,
+      maya_seal: mayaResult.seal,
+      maya_seal_desc: mayaResult.fullName,
+      // 这里可以添加更多详细的玛雅信息
+    };
+    
+    return {
+      success: true,
+      birthInfo: birthInfo
+    };
+  } catch (error) {
+    console.error('计算玛雅出生信息失败:', error);
+    return {
+      success: false,
+      error: `计算玛雅出生信息失败: ${error.message}`
+    };
+  }
+};
+
 // 生物节律本地计算
 export const calculateBiorhythmData = async (birthDate, targetDate = new Date()) => {
   if (!birthDate) {
@@ -365,6 +499,7 @@ export default {
   getTodayDressInfo,
   calculateBiorhythmData,
   getBiorhythmRange,
+  calculateMayaBirthInfo,
   saveToLocalStorage,
   loadFromLocalStorage,
   clearLocalStorage,

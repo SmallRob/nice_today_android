@@ -576,66 +576,43 @@ export const fetchMayaHistory = async (apiBaseUrl) => {
 
 // 获取出生日期的玛雅日历信息
 export const fetchMayaBirthInfo = async (apiBaseUrl, birthDateStr) => {
-  // 检查是否启用本地计算
-  const useLocalCalculation = localStorage.getItem('useLocalCalculation') === 'true';
-  
-  if (useLocalCalculation) {
-    // 使用本地计算（这里可以实现玛雅出生信息的本地计算逻辑）
-    console.log(`使用本地计算出生日期${birthDateStr}的玛雅日历信息（模拟）`);
-    
-    // 所有API尝试都失败，返回错误信息让前端使用本地计算
-    console.log('使用本地计算方法');
-    return {
-      success: false,
-      error: "使用本地计算方法"
-    };
-  }
-  
+  // 如果未提供出生日期，则尝试从本地存储获取上次查询记录，否则使用默认日期
   if (!birthDateStr) {
-    return {
-      success: false,
-      error: "请选择出生日期"
-    };
+    const lastQueryDate = localStorage.getItem('lastMayaBirthQueryDate');
+    if (lastQueryDate) {
+      birthDateStr = lastQueryDate;
+    } else {
+      // 默认日期
+      birthDateStr = '1991-01-01';
+    }
+  } else {
+    // 保存本次查询日期到本地存储
+    localStorage.setItem('lastMayaBirthQueryDate', birthDateStr);
   }
-
+  
+  // 始终使用本地计算
+  console.log(`使用本地计算出生日期${birthDateStr}的玛雅日历信息`);
+  
   try {
-    // 首先尝试新的玛雅出生图API (POST请求)
-    console.log(`正在请求玛雅出生图API: ${apiBaseUrl}${API_ENDPOINTS.MAYA.BIRTH_INFO}, 日期: ${birthDateStr}`);
-      
-    // 使用指定的API地址
-    const response = await apiClient.post(`${apiBaseUrl}/api/maya/birth-info`, {
-      birth_date: birthDateStr
-    });
+    // 导入本地数据服务
+    const localDataService = await import('./localDataService');
     
-    if (response && response.success && response.birthInfo) {
-      console.log('玛雅出生图API返回成功:', response.birthInfo);
+    // 使用本地计算方法生成玛雅出生图信息
+    const result = await localDataService.calculateMayaBirthInfo(birthDateStr);
+    
+    if (result.success) {
       return {
         success: true,
-        birthInfo: response.birthInfo
+        birthInfo: result.birthInfo
       };
+    } else {
+      throw new Error(result.error || '本地计算失败');
     }
-  } catch (mayaApiErr) {
-    console.error('玛雅出生图API请求失败:', mayaApiErr);
-  }
-  
-  try {
-    console.log(`正在请求出生日期玛雅日历信息:`, `${apiBaseUrl}${API_ENDPOINTS.MAYA.BIRTH}?birth_date=${birthDateStr}`);
-    const response = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.MAYA.BIRTH}`, {
-      birth_date: birthDateStr
-    });
-    
+  } catch (localErr) {
+    console.error(`本地计算出生日期${birthDateStr}的玛雅日历信息失败:`, localErr);
     return {
-      success: true,
-      birthInfo: response
+      success: false,
+      error: `本地计算失败，请稍后再试。错误详情: ${localErr.message}`
     };
-  } catch (err) {
-    console.error(`获取出生日期${birthDateStr}的玛雅日历信息失败:`, err);
   }
-  
-  // 所有API尝试都失败，返回错误信息让前端使用本地计算
-  console.log('所有API尝试都失败，前端将使用本地计算方法');
-  return {
-    success: false,
-    error: "API服务暂时不可用，将使用本地计算方法"
-  };
 };
