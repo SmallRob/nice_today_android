@@ -17,8 +17,6 @@ import {
   energyFieldTypes,
   energyFieldInfoTemplates,
   energyFieldBalanceSuggestionOptions,
-  dailyQuotes,
-  quoteAuthors,
   DEFAULT_BIRTH_DATE,
   DEFAULT_SEAL_INFO,
   DEFAULT_TONE_INFO,
@@ -266,7 +264,12 @@ const MayaBirthChart = () => {
 
   // 优化的状态更新函数
   const setBirthDate = useCallback((date) => {
-    _setBirthDate(date);
+    setBirthDateRef.current = date;
+    birthDateRef.current = date;
+  }, []);
+
+  // 用于设置birthDateRef的函数
+  const setBirthDateRef = useCallback((date) => {
     birthDateRef.current = date;
   }, []);
 
@@ -713,7 +716,7 @@ const MayaBirthChart = () => {
         }, 0);
       }
     },
-    [historyDates, saveHistory, saveBirthDateToGlobal, birthInfo, getCachedBirthInfo, setCachedBirthInfo, computeMayaData, generateSealInfo, generateToneInfo, generateLifePurpose, generatePersonalTraits, generateEnergyField, generateQuote, generateAuthor, ensureQuoteExists]
+    [historyDates, saveHistory, saveBirthDateToGlobal, birthInfo, getCachedBirthInfo, setCachedBirthInfo, computeMayaData, generateSealInfo, generateToneInfo, generateLifePurpose, generatePersonalTraits, generateEnergyField, ensureBirthInfoIntegrity]
   );
 
   const initializeComponent = useCallback(async () => {
@@ -776,7 +779,7 @@ const MayaBirthChart = () => {
         });
         
         // 如果出生日期有变化，重新加载数据
-        if (updatedConfig.birthDate && updatedConfig.birthDate !== (birthDate ? formatDateString(birthDate) : '')) {
+        if (updatedConfig.birthDate && updatedConfig.birthDate !== (birthDateRef.current ? formatDateString(birthDateRef.current) : '')) {
           try {
             const newBirthDate = new Date(updatedConfig.birthDate);
             if (!isNaN(newBirthDate.getTime())) {
