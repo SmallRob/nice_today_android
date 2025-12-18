@@ -48,6 +48,7 @@ const BiorhythmChart = ({ data, isMobile }) => {
   // 深色模式下的文字颜色
   const textColor = theme === 'dark' ? '#f3f4f6' : '#1f2937';
   const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+  
   // 优化的数据格式化函数 - 使用useMemo避免不必要的重新计算
   const formattedData = useMemo(() => {
     if (!data) return null;
@@ -69,13 +70,14 @@ const BiorhythmChart = ({ data, isMobile }) => {
     
     return null;
   }, [data]);
-  
-  if (!formattedData) {
-    return <div className="text-center py-4 text-gray-900 dark:text-white">没有可用的图表数据</div>;
-  }
 
   // 优化的日期处理 - 使用useMemo避免不必要的重新计算
   const { todayIndex, chartData } = useMemo(() => {
+    // 如果没有数据，返回默认值
+    if (!formattedData) {
+      return { todayIndex: -1, chartData: null };
+    }
+    
     // 找到今天的索引
     const todayIndex = formattedData.dates.findIndex(date => {
       const today = new Date().toISOString().split('T')[0];
@@ -139,7 +141,11 @@ const BiorhythmChart = ({ data, isMobile }) => {
           title: (items) => {
             if (!items.length) return '';
             const index = items[0].dataIndex;
-            return `日期: ${data.dates[index]}`;
+            // 确保data和dates存在
+            if (data && data.dates && data.dates[index]) {
+              return `日期: ${data.dates[index]}`;
+            }
+            return '';
           },
           label: (context) => {
             const label = context.dataset.label || '';
@@ -203,6 +209,11 @@ const BiorhythmChart = ({ data, isMobile }) => {
     },
   }), [isMobile, textColor, gridColor, todayIndex, data]);
 
+  // 如果没有数据，显示空状态
+  if (!chartData) {
+    return <div className="text-center py-4 text-gray-900 dark:text-white">没有可用的图表数据</div>;
+  }
+  
   return (
     <div className="w-full" style={{ height: isMobile ? '250px' : '400px' }}>
       <Line data={chartData} options={options} />
