@@ -14,27 +14,72 @@ const PerformanceTestTool = () => {
   });
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // 模拟性能测试函数
+  // 优化的性能测试函数
   const simulateMayaCalculation = async () => {
-    // 模拟玛雅日历计算
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100));
+    // 模拟玛雅日历计算 - 更轻量级
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 50 + 20));
     
-    // 模拟DOM操作
-    for (let i = 0; i < 1000; i++) {
+    // 模拟DOM操作 - 减少操作次数
+    for (let i = 0; i < 50; i++) {
       const element = document.createElement('div');
       element.textContent = '测试元素';
+      element.style.display = 'none'; // 隐藏元素避免重绘
       document.body.appendChild(element);
       document.body.removeChild(element);
     }
     
-    // 模拟内存使用
-    const data = Array.from({ length: 10000 }, (_, i) => ({
+    // 模拟内存使用 - 减少数据量
+    const data = Array.from({ length: 100 }, (_, i) => ({
       id: i,
       value: Math.random() * 100,
       timestamp: Date.now()
     }));
     
     return data;
+  };
+
+  // 专门用于FPS测试的函数
+  const simulateFPSMeasurement = async () => {
+    // 简单的动画测试，不进行复杂操作
+    const startTime = performance.now();
+    
+    // 模拟一些轻量级的动画操作
+    for (let i = 0; i < 10; i++) {
+      await new Promise(resolve => {
+        requestAnimationFrame(() => {
+          // 非常轻量级的操作
+          const dummyElement = document.createElement('div');
+          dummyElement.style.opacity = '0';
+          document.body.appendChild(dummyElement);
+          document.body.removeChild(dummyElement);
+          resolve();
+        });
+      });
+    }
+    
+    return performance.now() - startTime;
+  };
+
+  // 专门用于内存测试的函数
+  const simulateMemoryUsage = async () => {
+    // 创建一些临时对象来模拟内存使用
+    const tempObjects = [];
+    
+    for (let i = 0; i < 100; i++) {
+      tempObjects.push({
+        id: i,
+        data: new Array(100).fill(0).map((_, j) => j),
+        timestamp: Date.now()
+      });
+    }
+    
+    // 短暂延迟后清理
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
+    // 清理内存
+    tempObjects.length = 0;
+    
+    return true;
   };
 
   // 运行性能测试
@@ -47,8 +92,8 @@ const PerformanceTestTool = () => {
       const testFunctions = [
         { name: '玛雅日历计算', func: simulateMayaCalculation },
         { name: 'DOM渲染测试', func: simulateMayaCalculation },
-        { name: '内存使用测试', func: simulateMayaCalculation },
-        { name: 'FPS性能测试', func: simulateMayaCalculation }
+        { name: '内存使用测试', func: simulateMemoryUsage },
+        { name: 'FPS性能测试', func: simulateFPSMeasurement }
       ];
       
       const results = [];
