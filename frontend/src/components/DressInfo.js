@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { getDressInfoRange, getSpecificDateDressInfo, formatDateString } from '../services/localDataService';
-import { dietHealthTips, warmReminders, fiveElementsInfo } from '../config/healthTipsConfig';
+import { warmReminders } from '../config/healthTipsConfig';
 
 // 优化后的DressInfo组件
 const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {

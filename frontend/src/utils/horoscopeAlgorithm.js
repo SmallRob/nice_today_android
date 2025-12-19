@@ -593,6 +593,9 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
       baseScores.love += 5;
       baseScores.study += 3;
       break;
+    default:
+      // 默认情况下不做额外调整
+      break;
   }
   
   // 确保分数在合理范围内
@@ -754,7 +757,7 @@ export const validateHoroscopeUniqueness = (horoscopeData1, horoscopeData2) => {
   );
 };
 
-export default {
+const horoscopeAlgorithm = {
   HOROSCOPE_DATA_ENHANCED,
   calculateDailyHoroscopeScore,
   generateSoulQuestion,
@@ -762,3 +765,5 @@ export default {
   generateDailyHoroscope,
   validateHoroscopeUniqueness
 };
+
+export default horoscopeAlgorithm;

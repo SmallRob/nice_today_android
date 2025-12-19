@@ -25,22 +25,7 @@ ChartJS.register(
   annotationPlugin  // 注册注解插件
 );
 
-// 节律状态评估函数
-const getRhythmStatus = (value) => {
-  const absValue = Math.abs(value);
-  
-  if (absValue >= 90) {
-    return value > 0 ? '极佳' : '极差';
-  } else if (absValue >= 70) {
-    return value > 0 ? '很好' : '很差';
-  } else if (absValue >= 50) {
-    return value > 0 ? '良好' : '较差';
-  } else if (absValue >= 30) {
-    return value > 0 ? '一般' : '一般偏低';
-  } else {
-    return '平稳期';
-  }
-};
+
 
 const BiorhythmChart = ({ data, isMobile }) => {
   const { theme } = useTheme();

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import BiorhythmChart from './BiorhythmChart';
 import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
-import { CompatibleStorage, initDataMigration } from '../utils/dataMigration';
+import { initDataMigration } from '../utils/dataMigration';
 import { userConfigManager } from '../utils/userConfigManager';
 import { useTheme } from '../context/ThemeContext';
 
@@ -22,7 +22,6 @@ const PRACTICE_ACTIVITIES = [
 
 
 const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
-  const { theme } = useTheme();
   
   // 初始化数据迁移
   useEffect(() => {

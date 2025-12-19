@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
+import { useTheme } from '../context/ThemeContext';
 
 // 生肖能量组件配置管理器 - 仅用于读取默认配置
 class ZodiacEnergyConfigManager {
@@ -277,7 +278,7 @@ const ZodiacEnergyTab = () => {
     } finally {
       setLoading(false);
     }
-  }, [userZodiac, selectedDate]);
+  }, [userZodiac, selectedDate, wuxingElements]);
 
   // 初始化组件
   useEffect(() => {
@@ -378,7 +379,7 @@ const ZodiacEnergyTab = () => {
         removeListener.current();
       }
     };
-  }, [loadAllZodiacs, calculateZodiacFromYear, userZodiac]);
+  }, [loadAllZodiacs, calculateZodiacFromYear, userZodiac, tempZodiac]);
 
   // 当生肖或日期变化时重新加载数据 - 优化加载逻辑
   useEffect(() => {
@@ -393,7 +394,7 @@ const ZodiacEnergyTab = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [userZodiac, selectedDate, loadEnergyGuidance, initialized, dataLoaded]);
+  }, [userZodiac, selectedDate, loadEnergyGuidance, initialized, dataLoaded, userInfo.zodiacAnimal, tempZodiac]);
 
   // 本地日期格式化方法
   const formatDateLocal = (date) => {

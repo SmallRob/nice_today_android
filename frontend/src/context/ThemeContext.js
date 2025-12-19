@@ -110,27 +110,37 @@ export const ThemeProvider = ({ children }) => {
   const [configManager] = useState(themeConfigManager);
 
   useEffect(() => {
-    // 从配置文件加载主题
-    const themeConfig = configManager.getThemeConfig();
+    let isMounted = true;
     
-    // 检查系统偏好作为后备方案
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const systemTheme = prefersDark ? 'dark' : 'light';
+    const initializeTheme = () => {
+      if (!isMounted) return;
+      
+      // 从配置文件加载主题
+      const themeConfig = configManager.getThemeConfig();
+      
+      // 检查系统偏好作为后备方案
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const systemTheme = prefersDark ? 'dark' : 'light';
+      
+      // 优先使用配置文件中的主题，其次是系统偏好
+      const initialTheme = themeConfig.theme || systemTheme;
+      setTheme(initialTheme);
+    };
     
-    // 优先使用配置文件中的主题，其次是系统偏好
-    const initialTheme = themeConfig.theme || systemTheme;
-    setTheme(initialTheme);
+    initializeTheme();
     
     // 监听主题配置变化
     const handleThemeConfigChange = (event) => {
-      if (event.detail && event.detail.timestamp) {
+      if (isMounted && event.detail && event.detail.timestamp) {
         // 重新加载主题配置
         const updatedConfig = configManager.getThemeConfig();
         setTheme(updatedConfig.theme);
         
         // 清除缓存刷新标记
         setTimeout(() => {
-          configManager.clearCacheRefreshFlag();
+          if (isMounted) {
+            configManager.clearCacheRefreshFlag();
+          }
         }, 1000);
       }
     };
@@ -138,6 +148,7 @@ export const ThemeProvider = ({ children }) => {
     window.addEventListener('theme-config-changed', handleThemeConfigChange);
     
     return () => {
+      isMounted = false;
       window.removeEventListener('theme-config-changed', handleThemeConfigChange);
     };
   }, [configManager]);

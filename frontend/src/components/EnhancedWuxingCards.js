@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { fetchDressInfoRange, fetchSpecificDateDressInfo, formatDateString } from '../services/apiServiceRefactored';
 import { desktopDressService, isDesktopApp } from '../services/desktopService';
@@ -386,7 +385,7 @@ const EnhancedWuxingCards = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
           <div className="daily-element-display">
             <span className="daily-element-label">当日主导五行:</span>
             <span className="daily-element-value" style={{
-              background: wuxingElements.find(e => e.name === selectedDressInfo.daily_element)?.bgGradient || '#f0f0f0'
+              background: (wuxingElements.find(e => e.name === selectedDressInfo.daily_element)?.bgGradient || '#f0f0f0')
             }}>
               {selectedDressInfo.daily_element}
             </span>
