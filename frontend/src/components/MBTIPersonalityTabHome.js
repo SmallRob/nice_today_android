@@ -48,6 +48,7 @@ const MBTIPersonalityTabHome = () => {
   });
   const [initialized, setInitialized] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [tempMBTI, setTempMBTI] = useState(''); // 用于临时切换MBTI查看
 
   // MBTI人格类型数据 - 使用useMemo缓存
   const mbtiTypes = useMemo(() => [
@@ -465,6 +466,8 @@ const MBTIPersonalityTabHome = () => {
           // 优先使用用户配置中的MBTI信息
           if (currentConfig.mbti) {
             setUserMBTI(currentConfig.mbti);
+            // 初始化时不设置为临时MBTI，确保用户配置是默认显示的
+            setTempMBTI('');
           }
         }
         
@@ -477,9 +480,10 @@ const MBTIPersonalityTabHome = () => {
               mbti: configData.currentConfig.mbti || ''
             });
             
-            // 当配置变更时，更新MBTI信息
+            // 仅在没有临时MBTI时更新MBTI信息，避免覆盖用户临时选择
             if (configData.currentConfig.mbti && 
-                configData.currentConfig.mbti !== userMBTI) {
+                configData.currentConfig.mbti !== userMBTI &&
+                !tempMBTI) { // 仅在没有临时MBTI时更新
               setUserMBTI(configData.currentConfig.mbti);
               // 标记需要重新加载数据
               setDataLoaded(false);
@@ -501,6 +505,9 @@ const MBTIPersonalityTabHome = () => {
         
         // 降级处理
         setAllMBTIs(mbtiList);
+        // 设置默认MBTI类型
+        setUserMBTI('INFP');
+        setTempMBTI('');
         if (isMounted) {
           setInitialized(true);
         }
@@ -532,9 +539,17 @@ const MBTIPersonalityTabHome = () => {
     }
   }, [userMBTI, initialized, dataLoaded]);
 
-  // 处理MBTI类型选择 - 仅更新状态，不保存配置
+  // 处理MBTI类型选择 - 支持临时查看模式
   const handleMBTIChange = (mbti) => {
     if (userMBTI !== mbti) {
+      // 如果是用户配置的MBTI，清除临时标记
+      if (mbti === userInfo.mbti) {
+        setTempMBTI('');
+      } else {
+        // 否则设置为临时MBTI
+        setTempMBTI(mbti);
+      }
+      
       setUserMBTI(mbti);
       // 标记需要重新加载数据
       setDataLoaded(false);
@@ -754,22 +769,33 @@ const MBTIPersonalityTabHome = () => {
               <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded border border-blue-200 dark:border-blue-700">
                 <p className="text-blue-700 dark:text-blue-300 text-xs">
                   您的MBTI类型：<span className="font-bold">{userInfo.mbti}</span>
+                  {tempMBTI && tempMBTI !== userInfo.mbti && (
+                    <span className="ml-1 text-xs">（当前查看：{tempMBTI}）</span>
+                  )}
                 </p>
               </div>
             )}
+            
+            {/* 提示文本 */}
+            <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">
+              点击任意MBTI类型查看分析，临时查看不会保存配置
+            </div>
             
             {/* MBTI类型网格 */}
             <div className="mb-3">
               <div className="grid grid-cols-8 gap-1">
                 {allMBTIs.map((mbti) => {
                   const typeData = mbtiTypes.find(t => t.type === mbti);
+                  const isTempSelected = tempMBTI === mbti && tempMBTI !== userInfo.mbti;
+                  const isUserConfig = userInfo.mbti === mbti;
+                  
                   return (
                     <button
                       key={mbti}
                       onClick={() => handleMBTIChange(mbti)}
-                      className={`p-1.5 rounded text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center ${
+                      className={`p-1.5 rounded text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center relative ${
                         userMBTI === mbti
-                          ? 'ring-1 ring-offset-1'
+                          ? 'ring-1 ring-offset-1 shadow-sm'
                           : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}
                       style={{
@@ -777,14 +803,45 @@ const MBTIPersonalityTabHome = () => {
                         color: userMBTI === mbti ? 'white' : undefined,
                         borderColor: typeData?.color
                       }}
+                      title={
+                        isUserConfig 
+                          ? '您的配置MBTI类型' 
+                          : isTempSelected 
+                            ? '临时查看的MBTI类型' 
+                            : `查看${mbti}类型分析`
+                      }
                     >
                       <span className="text-sm mb-0.5">{typeData?.icon}</span>
                       <span>{mbti}</span>
+                      {/* 用户配置标记 */}
+                      {isUserConfig && (
+                        <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-blue-500 rounded-full" title="您的配置"></span>
+                      )}
+                      {/* 临时查看标记 */}
+                      {isTempSelected && (
+                        <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-orange-500 rounded-full" title="临时查看"></span>
+                      )}
                     </button>
                   );
                 })}
               </div>
             </div>
+            
+            {/* 重置按钮 */}
+            {tempMBTI && tempMBTI !== userInfo.mbti && (
+              <div className="flex justify-center">
+                <button
+                  onClick={() => {
+                    setUserMBTI(userInfo.mbti);
+                    setTempMBTI('');
+                    setDataLoaded(false);
+                  }}
+                  className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  返回您的配置 ({userInfo.mbti})
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </Card>
