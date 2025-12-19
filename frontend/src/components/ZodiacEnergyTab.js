@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { storageManager } from '../utils/storageManager';
+import React, { useState, useEffect, useCallback } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
-import { useTheme } from '../context/ThemeContext';
 
 // 生肖能量组件配置管理器 - 仅用于读取默认配置
 class ZodiacEnergyConfigManager {
@@ -51,6 +49,7 @@ const ZodiacEnergyTab = () => {
   });
   const [initialized, setInitialized] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [tempZodiac, setTempZodiac] = useState(''); // 用于临时切换生肖查看
 
   // 五行元素数据 - 使用useMemo缓存，避免重复创建
   const wuxingElements = React.useMemo(() => [
@@ -320,6 +319,8 @@ const ZodiacEnergyTab = () => {
           // 优先使用用户配置中的生肖信息
           if (currentConfig.zodiacAnimal) {
             setUserZodiac(currentConfig.zodiacAnimal);
+            // 初始化时不设置为临时生肖，确保用户配置是默认显示的
+            setTempZodiac('');
           } else if (currentConfig.birthDate) {
             // 如果没有生肖但有出生日期，计算生肖
             const birthYear = new Date(currentConfig.birthDate).getFullYear();
@@ -334,9 +335,10 @@ const ZodiacEnergyTab = () => {
           if (isMounted && configData.currentConfig) {
             setUserInfo(configData.currentConfig);
             
-            // 当配置变更时，更新生肖信息
+            // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
             if (configData.currentConfig.zodiacAnimal && 
-                configData.currentConfig.zodiacAnimal !== userZodiac) {
+                configData.currentConfig.zodiacAnimal !== userZodiac &&
+                !tempZodiac) { // 仅在没有临时生肖时更新
               setUserZodiac(configData.currentConfig.zodiacAnimal);
               // 强制重新加载数据（包括配置切换和强制重载）
               setDataLoaded(false);
@@ -359,6 +361,9 @@ const ZodiacEnergyTab = () => {
         
         // 降级处理：使用原有逻辑
         await loadAllZodiacs();
+        // 设置默认生肖类型
+        setUserZodiac('鼠');
+        setTempZodiac('');
         if (isMounted) {
           setInitialized(true);
         }
@@ -399,9 +404,17 @@ const ZodiacEnergyTab = () => {
     return `${year}-${month}-${day}`;
   };
 
-  // 处理生肖选择 - 仅更新状态，不保存配置
+  // 处理生肖选择 - 支持临时查看模式
   const handleZodiacChange = async (zodiac) => {
     if (userZodiac !== zodiac) {
+      // 如果是用户配置的生肖，清除临时标记
+      if (zodiac === userInfo.zodiacAnimal) {
+        setTempZodiac('');
+      } else {
+        // 否则设置为临时生肖
+        setTempZodiac(zodiac);
+      }
+      
       setUserZodiac(zodiac);
       // 标记需要重新加载数据
       setDataLoaded(false);
@@ -428,14 +441,8 @@ const ZodiacEnergyTab = () => {
     else if (匹配度 < 70) colorClass = 'text-yellow-500';
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-          <span className="text-xl mr-3">{elementData?.icon}</span>
-          今日能量匹配度
-        </h3>
-        
-        {/* 能量匹配度圆形进度条 */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
+      <Card title="能量匹配度" className="mb-4">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 p-4">
           <div className="relative w-28 h-28">
             <svg className="w-full h-full" viewBox="0 0 36 36">
               <path
@@ -462,21 +469,25 @@ const ZodiacEnergyTab = () => {
           </div>
           
           <div className="text-center md:text-left">
+            <div className="flex items-center mb-2">
+              <span className="text-xl mr-2">{elementData?.icon}</span>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">能量匹配度</h3>
+            </div>
             <p className={`text-lg font-bold ${colorClass} mb-2`}>
               {关系} - {匹配度}%
             </p>
-            <p className="text-gray-600 dark:text-gray-300 mb-3 text-sm">{描述}</p>
-            <div className="flex flex-col sm:flex-row gap-2 text-xs">
-              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+            <p className="text-gray-600 dark:text-gray-300 text-xs mb-3">{描述}</p>
+            <div className="flex flex-wrap gap-1">
+              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                 用户五行: <span className="font-semibold">{用户五行}</span>
               </span>
-              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                 当日五行: <span className="font-semibold">{当日五行}</span>
               </span>
             </div>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -490,45 +501,42 @@ const ZodiacEnergyTab = () => {
     if (!elementData) return null;
     
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 mb-5 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center">
-          <span className="text-2xl mr-2">{elementData.icon}</span>
-          {elementData.name}元素能量提升
-        </h3>
-        
-        {/* 快速能量提升方法 */}
-        <div className="grid md:grid-cols-2 gap-4 mb-5">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-3">
-            <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
-              <span className="mr-2">⚡</span> {elementData.quickBoost.method}
-            </h4>
-            <p className="text-gray-700 dark:text-gray-300 text-sm">{elementData.quickBoost.description}</p>
+      <Card title={`${elementData.name}元素能量提升`} className="mb-4">
+        <div className="space-y-3">
+          {/* 快速能量提升方法 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded p-3">
+              <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
+                <span className="mr-2">⚡</span> {elementData.quickBoost.method}
+              </h4>
+              <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.description}</p>
+            </div>
+            
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded p-3">
+              <h4 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2 flex items-center">
+                <span className="mr-2">🌟</span> {elementData.quickBoost.secondMethod}
+              </h4>
+              <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.secondDescription}</p>
+            </div>
           </div>
           
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-3">
-            <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2 flex items-center">
-              <span className="mr-2">🌟</span> {elementData.quickBoost.secondMethod}
+          {/* 五行养生运动 */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded p-3">
+            <h4 className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">
+              <span className="mr-2">🏃</span> {elementData.name}行运动
             </h4>
-            <p className="text-gray-700 dark:text-gray-300 text-sm">{elementData.quickBoost.secondDescription}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.exercise}</p>
+          </div>
+          
+          {/* 呼吸调息法 */}
+          <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-gray-700 dark:to-gray-600 rounded p-3">
+            <h4 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center">
+              <span className="mr-2">🫁</span> {elementData.timeSlot} 呼吸调息
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.breathingMethod}</p>
           </div>
         </div>
-        
-        {/* 五行养生运动 */}
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-3 mb-5">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">
-            <span className="mr-2">🏃</span> {elementData.name}行运动
-          </h4>
-          <p className="text-gray-700 dark:text-gray-300 text-sm">{elementData.exercise}</p>
-        </div>
-        
-        {/* 呼吸调息法 */}
-        <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-gray-700 dark:to-gray-600 rounded-lg p-3">
-          <h4 className="font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center">
-            <span className="mr-2">🫁</span> {elementData.timeSlot} 呼吸调息
-          </h4>
-          <p className="text-gray-700 dark:text-gray-300 text-sm">{elementData.breathingMethod}</p>
-        </div>
-      </div>
+      </Card>
     );
   };
 
@@ -539,17 +547,15 @@ const ZodiacEnergyTab = () => {
     const { 幸运颜色, 适合饰品, 适合行业, 幸运方位, 能量提升 } = energyGuidance.生活建议;
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 mb-5 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-5 flex items-center">
-          <span className="mr-2 text-lg">💼</span> 生活习惯调整建议
-        </h3>
-        
-        <div className="space-y-4">
+      <Card title="生活习惯调整建议" className="mb-4">
+        <div className="space-y-3">
           <div>
-            <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">幸运颜色</h4>
-            <div className="flex flex-wrap gap-2 mt-1">
+            <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-2 flex items-center">
+              <span className="mr-1">🎨</span> 幸运颜色
+            </h4>
+            <div className="flex flex-wrap gap-1">
               {幸运颜色.map((color, index) => (
-                <span key={index} className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900 rounded-full text-xs text-gray-700 dark:text-gray-200 border border-blue-200 dark:border-blue-700">
+                <span key={index} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-xs text-gray-700 dark:text-gray-200 border border-blue-200 dark:border-blue-700">
                   {color}
                 </span>
               ))}
@@ -557,26 +563,34 @@ const ZodiacEnergyTab = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-purple-700 dark:text-purple-300 mb-2">适合饰品</h4>
-            <p className="text-gray-700 dark:text-gray-300 text-sm">{适合饰品.join('、')}</p>
+            <h4 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2 flex items-center">
+              <span className="mr-1">💎</span> 适合饰品
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{适合饰品.join('、')}</p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-green-700 dark:text-green-300 mb-2">适合行业</h4>
-            <p className="text-gray-700 dark:text-gray-300 text-sm">{适合行业.join('、')}</p>
+            <h4 className="text-sm font-semibold text-green-700 dark:text-green-300 mb-2 flex items-center">
+              <span className="mr-1">💼</span> 适合行业
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{适合行业.join('、')}</p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-orange-700 dark:text-orange-300 mb-2">幸运方位</h4>
-            <p className="text-gray-700 dark:text-gray-300 text-sm">{幸运方位.join('、')}</p>
+            <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-2 flex items-center">
+              <span className="mr-1">🧭</span> 幸运方位
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{幸运方位.join('、')}</p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-indigo-700 dark:text-indigo-300 mb-2">能量提升方法</h4>
-            <p className="text-gray-700 dark:text-gray-300 bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-30 p-3 rounded-lg text-sm">{能量提升}</p>
+            <h4 className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-2 flex items-center">
+              <span className="mr-1">⚡</span> 能量提升方法
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300 bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 p-2 rounded">{能量提升}</p>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -587,41 +601,37 @@ const ZodiacEnergyTab = () => {
     const { 宜, 忌 } = energyGuidance.饮食调理;
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
-          <span className="mr-3">🍎</span> 饮食调理建议
-        </h3>
-        
-        <div className="grid md:grid-cols-2 gap-6">
+      <Card title="饮食调理建议" className="mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <h4 className="font-semibold text-green-700 dark:text-green-300 mb-4 text-lg flex items-center">
-              <span className="mr-2">✅</span> 宜食食物
+            <h4 className="text-sm font-semibold text-green-700 dark:text-green-300 mb-2 flex items-center">
+              <span className="mr-1">✅</span> 宜食食物
             </h4>
-            <div className="space-y-3">
+            <div className="space-y-1">
               {宜.map((food, index) => (
-                <div key={index} className="flex items-center bg-green-50 dark:bg-green-900 dark:bg-opacity-20 p-3 rounded-lg">
-                  <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-                  <span className="text-gray-700 dark:text-gray-300">{food}</span>
+                <div key={index} className="flex items-center bg-green-50 dark:bg-green-900 dark:bg-opacity-20 p-2 rounded">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 flex-shrink-0"></span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">{food}</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div>
-            <h4 className="font-semibold text-red-700 dark:text-red-300 mb-4 text-lg flex items-center">
-              <span className="mr-2">❌</span> 忌食食物
+            <h4 className="text-sm font-semibold text-red-700 dark:text-red-300 mb-2 flex items-center">
+              <span className="mr-1">❌</span> 忌食食物
             </h4>
-            <div className="space-y-3">
+            <div className="space-y-1">
               {忌.map((food, index) => (
-                <div key={index} className="flex items-center bg-red-50 dark:bg-red-900 dark:bg-opacity-20 p-3 rounded-lg">
-                  <span className="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
-                  <span className="text-gray-700 dark:text-gray-300">{food}</span>
+                <div key={index} className="flex items-center bg-red-50 dark:bg-red-900 dark:bg-opacity-20 p-2 rounded">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2 flex-shrink-0"></span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">{food}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -632,17 +642,15 @@ const ZodiacEnergyTab = () => {
     const { 家居布置, 摆放位置, 建议 } = energyGuidance.家居风水;
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
-          <span className="mr-3">🏠</span> 家居风水调整
-        </h3>
-        
-        <div className="space-y-4">
+      <Card title="家居风水调整" className="mb-4">
+        <div className="space-y-3">
           <div>
-            <h4 className="font-semibold text-purple-700 dark:text-purple-300 mb-2 text-lg">家居布置</h4>
-            <div className="flex flex-wrap gap-2 mt-1">
+            <h4 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2 flex items-center">
+              <span className="mr-1">🏡</span> 家居布置
+            </h4>
+            <div className="flex flex-wrap gap-1">
               {家居布置.map((item, index) => (
-                <span key={index} className="px-4 py-2 bg-purple-100 dark:bg-purple-900 rounded-full text-sm text-gray-700 dark:text-gray-200 border border-purple-200 dark:border-purple-700">
+                <span key={index} className="px-2 py-1 bg-purple-100 dark:bg-purple-900 rounded-full text-xs text-gray-700 dark:text-gray-200 border border-purple-200 dark:border-purple-700">
                   {item}
                 </span>
               ))}
@@ -650,16 +658,20 @@ const ZodiacEnergyTab = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-indigo-700 dark:text-indigo-300 mb-2 text-lg">摆放位置</h4>
-            <p className="text-gray-700 dark:text-gray-300">{摆放位置.join('、')}</p>
+            <h4 className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-2 flex items-center">
+              <span className="mr-1">📍</span> 摆放位置
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{摆放位置.join('、')}</p>
           </div>
 
           <div>
-            <h4 className="font-semibold text-pink-700 dark:text-pink-300 mb-2 text-lg">风水建议</h4>
-            <p className="text-gray-700 dark:text-gray-300 bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-3 rounded-lg">{建议}</p>
+            <h4 className="text-sm font-semibold text-pink-700 dark:text-pink-300 mb-2 flex items-center">
+              <span className="mr-1">💡</span> 风水建议
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300 bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-2 rounded">{建议}</p>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -670,19 +682,17 @@ const ZodiacEnergyTab = () => {
     const { 适合交往的五行, 适合交往的生肖, 建议 } = energyGuidance.人际关系;
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
-          <span className="mr-3">👥</span> 人际关系调整
-        </h3>
-        
-        <div className="space-y-4">
+      <Card title="人际关系调整" className="mb-4">
+        <div className="space-y-3">
           <div>
-            <h4 className="font-semibold text-amber-700 dark:text-amber-300 mb-2 text-lg">适合交往的五行</h4>
-            <div className="flex flex-wrap gap-2 mt-1">
+            <h4 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-2 flex items-center">
+              <span className="mr-1">🌟</span> 适合交往的五行
+            </h4>
+            <div className="flex flex-wrap gap-1">
               {适合交往的五行.map((element, index) => {
                 const elementData = wuxingElements.find(el => el.name === element);
                 return (
-                  <span key={index} className="px-4 py-2 bg-amber-100 dark:bg-amber-900 rounded-full text-sm text-gray-700 dark:text-gray-200 border border-amber-200 dark:border-amber-700 flex items-center">
+                  <span key={index} className="px-2 py-1 bg-amber-100 dark:bg-amber-900 rounded-full text-xs text-gray-700 dark:text-gray-200 border border-amber-200 dark:border-amber-700 flex items-center">
                     <span className="mr-1">{elementData?.icon}</span>
                     {element}
                   </span>
@@ -692,10 +702,12 @@ const ZodiacEnergyTab = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-orange-700 dark:text-orange-300 mb-2 text-lg">适合交往的生肖</h4>
-            <div className="flex flex-wrap gap-2 mt-1">
+            <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-2 flex items-center">
+              <span className="mr-1">🐲</span> 适合交往的生肖
+            </h4>
+            <div className="flex flex-wrap gap-1">
               {适合交往的生肖.map((zodiac, index) => (
-                <span key={index} className="px-4 py-2 bg-orange-100 dark:bg-orange-900 rounded-full text-sm text-gray-700 dark:text-gray-200 border border-orange-200 dark:border-orange-700">
+                <span key={index} className="px-2 py-1 bg-orange-100 dark:bg-orange-900 rounded-full text-xs text-gray-700 dark:text-gray-200 border border-orange-200 dark:border-orange-700">
                   {zodiac}
                 </span>
               ))}
@@ -703,139 +715,149 @@ const ZodiacEnergyTab = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold text-yellow-700 dark:text-yellow-300 mb-2 text-lg">交往建议</h4>
-            <p className="text-gray-700 dark:text-gray-300 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-3 rounded-lg">{建议}</p>
+            <h4 className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 mb-2 flex items-center">
+              <span className="mr-1">💡</span> 交往建议
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-2 rounded">{建议}</p>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
-  // 用户信息显示组件
-  const UserInfoDisplay = useMemo(() => {
+  // 渲染生肖选择器
+  const renderZodiacSelector = () => {
     return (
-      <Card title="当前用户信息" className="mb-4">
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-          <div className="flex items-center justify-between">
+      <Card title="选择生肖类型" className="mb-4">
+        <div className="space-y-3">
+          <div>
+            {/* 当前用户信息 */}
+            {userInfo.zodiacAnimal && (
+              <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded border border-blue-200 dark:border-blue-700">
+                <p className="text-blue-700 dark:text-blue-300 text-xs">
+                  您的生肖类型：<span className="font-bold">{userInfo.zodiacAnimal}</span>
+                  {tempZodiac && tempZodiac !== userInfo.zodiacAnimal && (
+                    <span className="ml-1 text-xs">（当前查看：{tempZodiac}）</span>
+                  )}
+                </p>
+              </div>
+            )}
+            
+            {/* 提示文本 */}
+            <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">
+              点击任意生肖类型查看能量指引，临时查看不会保存配置
+            </div>
+            
+            {/* 生肖选择网格 */}
+            <div className="mb-3">
+              <div className="grid grid-cols-6 gap-2">
+                {(allZodiacs.length > 0 ? allZodiacs : ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']).map((zodiac) => {
+                  const isTempSelected = tempZodiac === zodiac && tempZodiac !== userInfo.zodiacAnimal;
+                  const isUserConfig = userInfo.zodiacAnimal === zodiac;
+                  const zodiacColors = {
+                    '鼠': '#f97316', '牛': '#84cc16', '虎': '#ef4444', '兔': '#ec4899',
+                    '龙': '#a855f7', '蛇': '#06b6d4', '马': '#fbbf24', '羊': '#10b981',
+                    '猴': '#f59e0b', '鸡': '#eab308', '狗': '#22c55e', '猪': '#3b82f6'
+                  };
+                  const color = zodiacColors[zodiac] || '#6b7280';
+                  
+                  return (
+                    <button
+                      key={zodiac}
+                      onClick={() => handleZodiacChange(zodiac)}
+                      className={`p-2 rounded text-center transition-all duration-200 text-sm font-medium relative ${
+                        userZodiac === zodiac
+                          ? 'ring-1 ring-offset-1 shadow-sm'
+                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                      style={{
+                        backgroundColor: userZodiac === zodiac ? color : undefined,
+                        color: userZodiac === zodiac ? 'white' : undefined,
+                        borderColor: color
+                      }}
+                      title={
+                        isUserConfig 
+                          ? '您的配置生肖类型' 
+                          : isTempSelected 
+                            ? '临时查看的生肖类型' 
+                            : `查看${zodiac}类型能量指引`
+                      }
+                    >
+                      <span>{zodiac}</span>
+                      {/* 用户配置标记 */}
+                      {isUserConfig && (
+                        <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-blue-500 rounded-full" title="您的配置"></span>
+                      )}
+                      {/* 临时查看标记 */}
+                      {isTempSelected && (
+                        <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-orange-500 rounded-full" title="临时查看"></span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* 日期选择器 */}
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                用户昵称
-              </p>
-              <p className="font-medium text-gray-900 dark:text-white">
-                {userInfo.nickname || '未知用户'}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                出生日期
-              </p>
-              <p className="font-medium text-gray-900 dark:text-white">
-                {userInfo.birthDate || '未知'}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                当前生肖
-              </p>
-              <p className="font-medium text-blue-600 dark:text-blue-400">
-                {userZodiac || '未设置'}
-              </p>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                查看指定日期的能量指引
+              </label>
+              <input
+                type="date"
+                value={selectedDate ? formatDateLocal(selectedDate) : ''}
+                onChange={(e) => {
+                  const newDate = e.target.value ? new Date(e.target.value) : new Date();
+                  handleDateChange(newDate);
+                }}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+              />
             </div>
           </div>
-          {userInfo.nickname && (
-            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                💡 如需修改信息，请在设置页面进行用户配置管理
-              </p>
+          
+          {/* 重置按钮 */}
+          {tempZodiac && tempZodiac !== userInfo.zodiacAnimal && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => {
+                  setUserZodiac(userInfo.zodiacAnimal);
+                  setTempZodiac('');
+                  setDataLoaded(false);
+                }}
+                className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                返回您的配置 ({userInfo.zodiacAnimal})
+              </button>
             </div>
           )}
         </div>
       </Card>
     );
-  }, [userInfo, userZodiac]);
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* 标题区域 */}
       <Card>
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+        <div className="text-center p-4">
+          <h1 className="text-lg font-bold text-gray-800 dark:text-white mb-1">
             🌟 生肖能量
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-xs text-gray-600 dark:text-gray-300">
             根据您的生肖属相和当日五行，为您提供生活健康建议
           </p>
         </div>
       </Card>
 
-      {/* 用户信息显示 */}
-      {UserInfoDisplay}
+      {/* 生肖选择器 */}
+      {renderZodiacSelector()}
       
-      {/* 简化的生肖选择器 */}
-      <Card title="临时切换生肖" className="mb-4">
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            您可以临时切换查看不同生肖的能量指引，这不会保存任何配置
-          </p>
-          
-          {/* 生肖选择网格 */}
-          <div className="grid grid-cols-6 gap-2">
-            {(allZodiacs.length > 0 ? allZodiacs : ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']).map((zodiac) => (
-              <button
-                key={zodiac}
-                onClick={() => handleZodiacChange(zodiac)}
-                className={`p-2 rounded-lg text-center transition-all duration-200 text-sm font-medium ${
-                  userZodiac === zodiac
-                    ? 'bg-blue-500 text-white shadow'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {zodiac}
-              </button>
-            ))}
-          </div>
-
-          {/* 日期选择器 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              查看指定日期的能量指引
-            </label>
-            <input
-              type="date"
-              value={selectedDate ? formatDateLocal(selectedDate) : ''}
-              onChange={(e) => {
-                const newDate = e.target.value ? new Date(e.target.value) : new Date();
-                handleDateChange(newDate);
-              }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-            />
-          </div>
-
-          {/* 当前选择显示 */}
-          {userZodiac && (
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded-lg border border-blue-200 dark:border-blue-700">
-              <p className="text-blue-700 dark:text-blue-300 text-sm">
-                当前选择：<span className="font-bold">{userZodiac}</span>生肖
-                {selectedDate && (
-                  <span className="ml-2">
-                    查看日期：<span className="font-bold">{formatDateLocal(selectedDate)}</span>
-                  </span>
-                )}
-              </p>
-              <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">
-                💡 选择仅用于临时查询，不会保存配置
-              </p>
-            </div>
-          )}
-        </div>
-      </Card>
-
       {/* 加载状态 */}
       {loading && (
         <Card>
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">正在加载能量指引...</p>
+          <div className="text-center py-6">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
+            <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载能量指引...</p>
           </div>
         </Card>
       )}
@@ -843,44 +865,30 @@ const ZodiacEnergyTab = () => {
       {/* 错误显示 */}
       {error && (
         <Card>
-          <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-4">
-            <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+          <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
+            <p className="text-red-700 dark:text-red-300 text-xs">{error}</p>
           </div>
         </Card>
       )}
 
       {/* 能量指引内容 */}
       {!loading && !error && energyGuidance && userZodiac && (
-        <div>
+        <div className="space-y-3">
           {/* 能量匹配度仪表板 */}
-          <Card>
-            {renderEnergyMatchDashboard()}
-          </Card>
+          {renderEnergyMatchDashboard()}
           
           {/* 五行能量提升卡片 */}
-          <Card>
-            {renderWuxingEnergyCard()}
-          </Card>
+          {renderWuxingEnergyCard()}
 
           {/* 分类建议卡片 */}
-          <div className="space-y-4">
-            <Card>
-              {renderLifestyleCard()}
-            </Card>
-            <Card>
-              {renderFoodCard()}
-            </Card>
-            <Card>
-              {renderFengshuiCard()}
-            </Card>
-            <Card>
-              {renderRelationshipCard()}
-            </Card>
-          </div>
+          {renderLifestyleCard()}
+          {renderFoodCard()}
+          {renderFengshuiCard()}
+          {renderRelationshipCard()}
 
           {/* 底部信息 */}
           <Card>
-            <div className="text-center text-gray-500 dark:text-gray-400 text-xs">
+            <div className="text-center text-gray-500 dark:text-gray-400 text-xs p-3">
               <p>数据更新时间：{new Date().toLocaleString()}</p>
               <p className="mt-1">五行讲究动态平衡，请根据自身状态灵活调整养生方法</p>
             </div>
@@ -891,10 +899,10 @@ const ZodiacEnergyTab = () => {
       {/* 未选择生肖时的提示 */}
       {!loading && !error && !userZodiac && (
         <Card>
-          <div className="text-center py-8">
-            <div className="text-4xl mb-4">🐉</div>
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择您的生肖</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
+          <div className="text-center py-6">
+            <div className="text-3xl mb-2">🐉</div>
+            <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择您的生肖</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-xs max-w-xs mx-auto">
               选择生肖后，将为您提供个性化的每日能量指引
             </p>
           </div>
