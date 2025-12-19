@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from 'react';
 
 import './MayaBirthChart.css';
 import { formatDateString } from '../services/apiServiceRefactored';
 import { userConfigManager } from '../utils/userConfigManager';
+import { useTheme } from '../context/ThemeContext';
 import { 
   sealInfoMap, 
   toneInfoMap,
@@ -10,10 +11,6 @@ import {
   lifePurposeActionGuideOptions,
   personalTraitsStrengthsPool,
   personalTraitsChallengesPool,
-  energyFieldTypes,
-  energyFieldInfoTemplates,
-  energyFieldBalanceSuggestionOptions,
-  DEFAULT_BIRTH_DATE,
   DEFAULT_SEAL_INFO,
   DEFAULT_TONE_INFO,
   WEEKDAYS
@@ -155,6 +152,7 @@ class MayaCalendarCalculator {
 
 // 主组件 - 极简移动端优化版本
 const MayaBirthChart = () => {
+  const { theme } = useTheme();
   const [birthInfo, setBirthInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

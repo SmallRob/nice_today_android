@@ -1,132 +1,254 @@
-/* 玛雅出生图样式 - 统一优化版 */
-.maya-birth-chart {
+/* 玛雅出生图样式 - 主题适配优化版 */
+
+/* 主题变量定义 */
+:root {
+  /* 基础颜色 */
+  --maya-bg-primary: #ffffff;
+  --maya-bg-secondary: #f8fafc;
+  --maya-text-primary: #1f2937;
+  --maya-text-secondary: #6b7280;
+  --maya-border: #e5e7eb;
+  --maya-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  
+  /* 组件颜色 */
+  --maya-card-bg: #ffffff;
+  --maya-header-bg: transparent;
+  --maya-error-bg: #fee2e2;
+  --maya-error-border: #fecaca;
+  
+  /* 玛雅主题色 */
+  --maya-kin-color: #ff6b6b;
+  --maya-tone-color: #48cae4;
+  --maya-seal-color: #a8e6cf;
+  --maya-desc-color: #f093fb;
+  --maya-primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --maya-secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.dark {
+  /* 暗黑主题颜色 */
+  --maya-bg-primary: #111827;
+  --maya-bg-secondary: #1f2937;
+  --maya-text-primary: #f9fafb;
+  --maya-text-secondary: #d1d5db;
+  --maya-border: #374151;
+  --maya-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  
+  /* 组件颜色 */
+  --maya-card-bg: #1f2937;
+  --maya-header-bg: transparent;
+  --maya-error-bg: #7f1d1d;
+  --maya-error-border: #991b1b;
+  
+  /* 玛雅主题色（暗黑主题下调整亮度） */
+  --maya-kin-color: #fca5a5;
+  --maya-tone-color: #67e8f9;
+  --maya-seal-color: #99f6e4;
+  --maya-desc-color: #f0abfc;
+  --maya-primary-gradient: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  --maya-secondary-gradient: linear-gradient(135deg, #f0abfc 0%, #f87171 100%);
+}
+
+/* 主容器 */
+.maya-container {
   max-width: 100%;
   width: 100%;
   margin: 0 auto;
   padding: 16px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: var(--maya-bg-primary);
+  color: var(--maya-text-primary);
   font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
 }
 
-.maya-birth-chart h2 {
+/* 用户头部 */
+.maya-user-header {
   text-align: center;
-  color: #2d3748;
   margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--maya-border);
+}
+
+.maya-user-header h1 {
   font-size: 1.5rem;
   font-weight: 600;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e2e8f0;
+  color: var(--maya-text-primary);
+  margin-bottom: 8px;
   line-height: 1.4;
 }
 
-.date-picker-container {
+.maya-birth-date {
+  font-size: 0.9rem;
+  color: var(--maya-text-secondary);
+  margin: 0;
+}
+
+/* 加载和错误状态 */
+.maya-loading {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  background-color: #f8fafc;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.date-picker {
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  min-width: 120px;
-  background-color: white;
-}
-
-.date-picker:focus {
-  border-color: #3b82f6;
-  outline: none;
-}
-
-.submit-button {
-  padding: 10px 20px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  min-width: 100px;
-}
-
-.submit-button:hover {
-  background-color: #2563eb;
-}
-
-.submit-button:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.history-container {
-  margin-bottom: 20px;
-  background-color: #f9fafb;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
-}
-
-.history-container h3 {
-  font-size: 1rem;
-  color: #374151;
-  margin-bottom: 8px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-}
-
-.history-container h3::before {
-  content: "";
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background-color: #667eea;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-.history-dates {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.history-date-button {
-  padding: 6px 10px;
-  background-color: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  color: #374151;
-}
-
-.history-date-button:hover {
-  background-color: #e5e7eb;
-}
-
-.error-message {
-  color: #dc2626;
+  padding: 40px 20px;
   text-align: center;
-  margin: 16px 0;
-  padding: 10px;
-  background-color: #fee2e2;
+}
+
+.maya-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--maya-border);
+  border-top: 4px solid var(--maya-kin-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.maya-loading p {
+  color: var(--maya-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.maya-error {
+  background-color: var(--maya-error-bg);
+  border: 1px solid var(--maya-error-border);
   border-radius: 6px;
-  border: 1px solid #fecaca;
+  padding: 12px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.maya-error p {
+  color: #dc2626;
   font-weight: 500;
   font-size: 0.9rem;
+  margin: 0;
+}
+
+.maya-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--maya-text-secondary);
+}
+
+.maya-empty-state p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* 结果容器 */
+.birth-chart-results {
+  margin-top: 20px;
+}
+
+.birth-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 信息卡片基础样式 */
+.birth-info > div > div {
+  background-color: var(--maya-card-bg);
+  border: 1px solid var(--maya-border);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--maya-shadow);
+  transition: all 0.3s ease;
+}
+
+/* 简化色块显示样式 - 主题适配 */
+.maya-info-card {
+  background: var(--maya-primary-gradient);
+  border-radius: 8px;
+  padding: 16px;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.maya-kin-display {
+  background-color: var(--maya-kin-color);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+
+.maya-tone-display {
+  background-color: var(--maya-tone-color);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 8px 0;
+}
+
+.maya-seal-display {
+  background-color: var(--maya-seal-color);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 8px 0;
+}
+
+.maya-seal-desc-display {
+  background-color: var(--maya-desc-color);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 8px 0;
+}
+
+/* 印记和音调信息样式 */
+.seal-info-enhanced {
+  background-color: var(--maya-bg-secondary);
+  border: 1px solid var(--maya-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.tone-info-enhanced {
+  background-color: var(--maya-bg-secondary);
+  border: 1px solid var(--maya-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* 能量场样式 */
+.energy-field-primary {
+  background-color: var(--maya-bg-secondary);
+  border: 1px solid var(--maya-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.energy-field-secondary {
+  background-color: var(--maya-bg-secondary);
+  border: 1px solid var(--maya-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.energy-field-balance {
+  background-color: var(--maya-bg-secondary);
+  border: 1px solid var(--maya-border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  font-weight: bold;
+  color: var(--maya-text-primary);
 }
 
 .birth-chart-results {
@@ -278,22 +400,22 @@
   color: #e65100;
 }
 
-/* 个人特质简化样式 */
+/* 个人特质样式 */
 .strengths-container {
-  background-color: #e8f5e8;
-  border: 1px solid #4caf50;
+  background-color: var(--maya-bg-secondary);
+  border: 1px solid var(--maya-border);
   border-radius: 8px;
   padding: 16px;
 }
 
 .challenges-container {
-  background-color: #ffebee;
-  border: 1px solid #f44336;
+  background-color: var(--maya-bg-secondary);
+  border: 1px solid var(--maya-border);
   border-radius: 8px;
   padding: 16px;
 }
 
-/* 色彩指示器 */
+/* 色彩指示器 - 主题适配 */
 .color-indicator {
   display: inline-block;
   width: 12px;
@@ -302,28 +424,76 @@
   margin-right: 8px;
 }
 
-.color-blue { background-color: #2196f3; }
-.color-purple { background-color: #9c27b0; }
-.color-green { background-color: #4caf50; }
-.color-orange { background-color: #ff9800; }
+.color-blue { background-color: var(--maya-tone-color); }
+.color-purple { background-color: var(--maya-desc-color); }
+.color-green { background-color: var(--maya-seal-color); }
+.color-orange { background-color: var(--maya-kin-color); }
 .color-red { background-color: #f44336; }
 .color-teal { background-color: #009688; }
 .color-indigo { background-color: #3f51b5; }
 
-/* 响应式简化 */
+/* 动画定义 */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 结果卡片动画 */
+.birth-info > div > div {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
+  .maya-container {
+    padding: 12px;
+  }
+  
+  .maya-user-header h1 {
+    font-size: 1.3rem;
+  }
+  
   .maya-info-card {
     padding: 12px;
   }
   
-  .strengths-container,
-  .challenges-container {
+  .birth-info > div > div {
     padding: 12px;
   }
   
-  .energy-field-primary,
-  .energy-field-secondary,
-  .energy-field-balance {
-    padding: 12px;
+  .maya-kin-display,
+  .maya-tone-display,
+  .maya-seal-display,
+  .maya-seal-desc-display {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .maya-container {
+    padding: 8px;
+  }
+  
+  .maya-user-header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .maya-birth-date {
+    font-size: 0.8rem;
+  }
+  
+  .maya-loading {
+    padding: 30px 16px;
+  }
+  
+  .maya-loading .spinner {
+    width: 32px;
+    height: 32px;
   }
 }
