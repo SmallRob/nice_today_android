@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BiorhythmTab from './BiorhythmTab';
 import ZodiacEnergyTab from './ZodiacEnergyTab';
-import HoroscopeTab from './HoroscopeTab';
+import HoroscopeTabNew from './HoroscopeTabNew';
 import MBTIPersonalityTabHome from './MBTIPersonalityTabHome';
 import { BiorhythmIcon, IconLibrary } from './IconLibrary';
 import PageLayout from './PageLayout';
@@ -126,7 +126,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               <ZodiacEnergyTab />
             )}
             {activeTab === 'horoscope' && (
-              <HoroscopeTab />
+              <HoroscopeTabNew />
             )}
             {activeTab === 'mbti' && (
               <MBTIPersonalityTabHome />
