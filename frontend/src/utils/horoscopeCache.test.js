@@ -10,7 +10,7 @@ import {
   initializeHoroscopeCache,
   clearHoroscopeCache
 } from './horoscopeCache';
-import { generateDailyHoroscope } from './horoscopeAlgorithm';
+import * as algorithm from './horoscopeAlgorithm';
 
 // 测试数据
 const TEST_HOROSCOPE = '白羊座';
@@ -28,9 +28,11 @@ describe('缓存基础功能', () => {
 
   test('缓存初始化', () => {
     const cacheStats = initializeHoroscopeCache();
-    expect(cacheStats).toHaveProperty('totalCached');
-    expect(cacheStats).toHaveProperty('cacheHits');
-    expect(cacheStats).toHaveProperty('cacheMisses');
+    expect(cacheStats).toHaveProperty('cleanedCount');
+    expect(cacheStats).toHaveProperty('stats');
+    expect(cacheStats.stats).toHaveProperty('total');
+    expect(cacheStats.stats).toHaveProperty('valid');
+    expect(cacheStats.stats).toHaveProperty('expired');
   });
 
   test('运势数据缓存', async () => {
@@ -38,7 +40,7 @@ describe('缓存基础功能', () => {
     const data1 = await getDailyHoroscopeWithCache(
       TEST_HOROSCOPE, 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     expect(data1).toBeDefined();
@@ -47,7 +49,7 @@ describe('缓存基础功能', () => {
     const data2 = await getDailyHoroscopeWithCache(
       TEST_HOROSCOPE, 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     expect(data2).toBeDefined();
@@ -55,15 +57,15 @@ describe('缓存基础功能', () => {
   });
 
   test('心灵问答缓存', async () => {
-    const question1 = await getSoulQuestionWithCache(TEST_HOROSCOPE, TEST_DATE);
-    const question2 = await getSoulQuestionWithCache(TEST_HOROSCOPE, TEST_DATE);
+    const question1 = await getSoulQuestionWithCache(TEST_HOROSCOPE, TEST_DATE, algorithm);
+    const question2 = await getSoulQuestionWithCache(TEST_HOROSCOPE, TEST_DATE, algorithm);
     
     expect(question1.question).toBe(question2.question);
   });
 
   test('幸运物品缓存', async () => {
-    const item1 = await getLuckyItemWithCache(TEST_HOROSCOPE, TEST_DATE);
-    const item2 = await getLuckyItemWithCache(TEST_HOROSCOPE, TEST_DATE);
+    const item1 = await getLuckyItemWithCache(TEST_HOROSCOPE, TEST_DATE, algorithm);
+    const item2 = await getLuckyItemWithCache(TEST_HOROSCOPE, TEST_DATE, algorithm);
     
     expect(item1.name).toBe(item2.name);
   });
@@ -88,7 +90,7 @@ describe('缓存过期机制', () => {
     const data1 = await getDailyHoroscopeWithCache(
       TEST_HOROSCOPE, 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     // 等待过期
@@ -98,7 +100,7 @@ describe('缓存过期机制', () => {
     const data2 = await getDailyHoroscopeWithCache(
       TEST_HOROSCOPE, 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     expect(data1.dailyId).toBe(data2.dailyId); // 数据应该相同
@@ -128,7 +130,7 @@ describe('缓存性能测试', () => {
     await getDailyHoroscopeWithCache(
       TEST_HOROSCOPE, 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     const duration1 = performance.now() - startTime1;
@@ -139,7 +141,7 @@ describe('缓存性能测试', () => {
     await getDailyHoroscopeWithCache(
       TEST_HOROSCOPE, 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     const duration2 = performance.now() - startTime2;
@@ -152,13 +154,13 @@ describe('缓存性能测试', () => {
     const data1 = await getDailyHoroscopeWithCache(
       '白羊座', 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     const data2 = await getDailyHoroscopeWithCache(
       '金牛座', 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     expect(data1.horoscopeInfo.name).toBe('白羊座');
@@ -176,10 +178,10 @@ describe('缓存清理功能', () => {
     await getDailyHoroscopeWithCache(
       TEST_HOROSCOPE, 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
-    await getSoulQuestionWithCache(TEST_HOROSCOPE, TEST_DATE);
+    await getSoulQuestionWithCache(TEST_HOROSCOPE, TEST_DATE, algorithm);
     
     // 检查缓存存在
     const cacheKeys = Object.keys(localStorage).filter(key => 
@@ -204,8 +206,8 @@ describe('缓存清理功能', () => {
     const date1 = new Date('2024-12-19');
     const date2 = new Date('2024-12-20');
     
-    await getDailyHoroscopeWithCache(TEST_HOROSCOPE, date1, { generateDailyHoroscope });
-    await getDailyHoroscopeWithCache(TEST_HOROSCOPE, date2, { generateDailyHoroscope });
+    await getDailyHoroscopeWithCache(TEST_HOROSCOPE, date1, algorithm);
+    await getDailyHoroscopeWithCache(TEST_HOROSCOPE, date2, algorithm);
     
     // 只清理某一天的缓存
     const cacheKeysBefore = Object.keys(localStorage).filter(key => 
@@ -254,7 +256,7 @@ describe('缓存错误处理', () => {
     const data = await getDailyHoroscopeWithCache(
       TEST_HOROSCOPE, 
       TEST_DATE, 
-      { generateDailyHoroscope }
+      algorithm
     );
     
     expect(data).toBeDefined();
