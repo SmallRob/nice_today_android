@@ -1,9 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { ThemeProvider } from './context/ThemeContext';
 import { initializeApp } from './utils/capacitorInit-simulated';
+import WelcomeScreen from './components/WelcomeScreen';
+import timeCacheManager from './utils/timeCache';
 
 // #region agent log
 fetch('http://127.0.0.1:7242/ingest/b3387138-a87a-4b03-a45b-f70781421b47',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'frontend/src/index.js:8',message:'React app starting',data:{hasElectronAPI:typeof window.electronAPI!=='undefined',electronAPIReady:window.electronAPI?.isReady?.()||false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
@@ -39,43 +41,74 @@ const initApp = async () => {
 const startApp = () => {
   const root = ReactDOM.createRoot(document.getElementById('root'));
   
-  // 添加加载屏幕
-  const LoadingScreen = () => (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      backgroundColor: '#ffffff'
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #3498db',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-          margin: '0 auto 16px'
-        }}></div>
-        <p style={{ color: '#666' }}>正在加载...</p>
+  // 使用AppWrapper组件管理欢迎界面
+  const AppWrapper = () => {
+    const [showWelcome, setShowWelcome] = useState(true);
+    const [appReady, setAppReady] = useState(false);
+    
+    useEffect(() => {
+      // 初始化时间缓存
+      timeCacheManager.update();
+      
+      // 3秒后隐藏欢迎界面
+      const timer = setTimeout(() => {
+        setShowWelcome(false);
+      }, 3000);
+      
+      // 标记应用已准备就绪
+      setAppReady(true);
+      
+      return () => clearTimeout(timer);
+    }, []);
+    
+    // 添加加载屏幕
+    const LoadingScreen = () => (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#ffffff'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #f3f3f3',
+            borderTop: '4px solid #3498db',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }}></div>
+          <p style={{ color: '#666' }}>正在加载...</p>
+        </div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
-  );
+    );
+    
+    return (
+      <>
+        {showWelcome ? (
+          <WelcomeScreen onComplete={() => setShowWelcome(false)} />
+        ) : (
+          <Suspense fallback={<LoadingScreen />}>
+            <ThemeProvider>
+              <App />
+            </ThemeProvider>
+          </Suspense>
+        )}
+      </>
+    );
+  };
 
   root.render(
     <React.StrictMode>
-      <Suspense fallback={<LoadingScreen />}>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
-      </Suspense>
+      <AppWrapper />
     </React.StrictMode>
   );
 };

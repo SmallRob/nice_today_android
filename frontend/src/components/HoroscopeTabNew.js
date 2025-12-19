@@ -10,10 +10,12 @@ import {
 } from '../utils/horoscopeCache';
 import {
   debounce,
-  performanceMonitor,
   initializePerformanceOptimization
 } from '../utils/performanceOptimization';
+import performanceMonitor from '../utils/performanceMonitor';
+import timeCacheManager, { getToday, getDateString } from '../utils/timeCache';
 import '../styles/mobileOptimization.css';
+import '../styles/animations.css';
 
 const HoroscopeTab = () => {
   // 状态管理
@@ -30,13 +32,18 @@ const HoroscopeTab = () => {
   useEffect(() => {
     const initOptimizations = async () => {
       try {
-        // 初始化性能优化
-        initializePerformanceOptimization();
+        // 检查函数是否存在再初始化性能优化
+        if (typeof initializePerformanceOptimization === 'function') {
+          initializePerformanceOptimization();
+        }
         
-        // 初始化缓存管理器
-        initializeHoroscopeCache();
+        // 检查函数是否存在再初始化缓存管理器
+        if (typeof initializeHoroscopeCache === 'function') {
+          initializeHoroscopeCache();
+        }
       } catch (error) {
-        console.warn('优化初始化失败:', error);
+        console.error('优化初始化失败:', error);
+        setError('初始化失败: ' + error.message);
       }
     };
     
@@ -62,35 +69,76 @@ const HoroscopeTab = () => {
     }
   }, []);
 
-  // 加载运势数据（使用增强版算法和缓存）- 简化版
-  const loadHoroscopeGuidance = useCallback(async (horoscope = userHoroscope, date = new Date()) => {
-    if (!horoscope) return;
+  // 优化的模块化运势数据计算
+  const calculateHoroscopeData = useCallback((horoscope, date) => {
+    try {
+      // 检查函数是否存在
+      if (typeof generateDailyHoroscope !== 'function') {
+        throw new Error('星座数据生成函数未正确加载');
+      }
+      
+      // 模块化计算步骤
+      // 第一步：基础数据生成
+      const basicData = generateDailyHoroscope(horoscope, date);
+      if (!basicData) {
+        throw new Error('无法生成基础星座数据');
+      }
+      
+      // 第二步：增强数据处理
+      const enhancedData = {
+        ...basicData,
+        calculatedAt: new Date().toISOString(),
+        calculationMethod: 'modular'
+      };
+      
+      // 第三步：验证数据完整性
+      const requiredFields = ['horoscopeInfo', 'dailyForecast', 'recommendations'];
+      for (const field of requiredFields) {
+        if (!enhancedData[field]) {
+          console.warn(`缺少必要字段: ${field}`);
+        }
+      }
+      
+      return enhancedData;
+    } catch (error) {
+      console.error('计算星座运势数据失败:', error);
+      throw error;
+    }
+  }, []);
 
-    performanceMonitor.start();
+  // 优化的加载函数 - 使用时间缓存确保准确性
+  const loadHoroscopeGuidance = useCallback(async (horoscope = userHoroscope, date) => {
+    if (!horoscope) return Promise.resolve();
+
+    // 使用缓存的当前时间，确保所有组件使用一致的日期
+    const currentDate = date || getToday();
+    
+    // 确保性能监控函数存在再调用
+    if (typeof performanceMonitor?.start === 'function') {
+      performanceMonitor.start();
+    }
+    
     setLoading(true);
     setError(null);
 
     try {
-      // 使用缓存机制获取运势数据
-      const horoscopeData = await getDailyHoroscopeWithCache(
-        horoscope, 
-        date, 
-        { generateDailyHoroscope }
-      );
-      
-      if (!horoscopeData) {
-        throw new Error('无法生成星座运势数据');
-      }
+      // 使用模块化计算
+      const horoscopeData = calculateHoroscopeData(horoscope, currentDate);
       
       setHoroscopeGuidance(horoscopeData);
+      return Promise.resolve(horoscopeData);
     } catch (error) {
       console.error('加载星座运势失败:', error);
       setError(error.message || '加载失败');
+      return Promise.reject(error);
     } finally {
       setLoading(false);
-      performanceMonitor.end('加载星座运势数据');
+      // 确保性能监控函数存在再调用
+      if (typeof performanceMonitor?.end === 'function') {
+        performanceMonitor.end('加载星座运势数据');
+      }
     }
-  }, [userHoroscope]);
+  }, [calculateHoroscopeData]);
 
   // 防抖版本的加载函数，用于用户快速切换时避免多次请求
   const debouncedLoadHoroscopeGuidance = useMemo(
@@ -98,7 +146,7 @@ const HoroscopeTab = () => {
     [loadHoroscopeGuidance]
   );
 
-  // 初始化组件 - 简化版
+  // 初始化组件 - 优化为优先获取用户数据
   useEffect(() => {
     let isMounted = true;
     
@@ -109,21 +157,28 @@ const HoroscopeTab = () => {
           await userConfigManager.initialize();
         }
         
-        // 从用户配置获取用户星座
+        // 获取用户星座
         const userZodiac = getUserZodiac();
-        if (userZodiac && isMounted) {
-          setUserHoroscope(userZodiac);
-          setIsTemporaryHoroscope(false);
-          isTemporaryRef.current = false;
-        }
+        
+        // 如果用户有配置星座，优先使用；否则使用白羊座
+        const initialHoroscope = userZodiac || '白羊座';
         
         if (isMounted) {
+          setUserHoroscope(initialHoroscope);
+          setIsTemporaryHoroscope(!userZodiac); // 如果不是用户配置的星座，标记为临时
+          isTemporaryRef.current = !userZodiac;
           setInitialized(true);
+          setDataLoaded(false); // 标记需要加载运势数据
         }
       } catch (error) {
         console.error('初始化星座运程组件失败:', error);
+        // 降级处理
         if (isMounted) {
+          setUserHoroscope('白羊座');
+          setIsTemporaryHoroscope(true);
+          isTemporaryRef.current = true;
           setInitialized(true);
+          setDataLoaded(false);
         }
       }
     };
@@ -140,31 +195,41 @@ const HoroscopeTab = () => {
     isTemporaryRef.current = isTemporaryHoroscope;
   }, [isTemporaryHoroscope]);
 
-  // 当星座变化时重新加载数据 - 简化版
+  // 当星座变化时重新加载数据 - 使用时间缓存确保一致性
   useEffect(() => {
     if (!userHoroscope || !initialized) return;
     
-    // 仅在首次默认加载或用户主动切换时执行数据请求
+    // 立即加载数据，不使用防抖，确保实时响应
     if (!dataLoaded) {
-      const timer = setTimeout(() => {
-        debouncedLoadHoroscopeGuidance();
-        setDataLoaded(true);
-      }, 200);
-      
-      return () => clearTimeout(timer);
+      // 直接调用，不使用防抖，确保立即计算新数据
+      loadHoroscopeGuidance(userHoroscope, getToday())
+        .then(() => {
+          if (typeof setDataLoaded === 'function') {
+            setDataLoaded(true);
+          }
+        })
+        .catch(error => {
+          console.error('加载星座数据失败:', error);
+          setError('加载失败: ' + error.message);
+        });
     }
-  }, [userHoroscope, debouncedLoadHoroscopeGuidance, initialized, dataLoaded]);
+  }, [userHoroscope, loadHoroscopeGuidance, initialized, dataLoaded]);
 
-  // 处理星座选择 - 简化版（仅临时查询，不保存）
+  // 处理星座选择 - 实时计算，不缓存旧数据
   const handleHoroscopeChange = useCallback((horoscope) => {
     if (userHoroscope !== horoscope) {
       setUserHoroscope(horoscope);
-      // 标记为临时选择
-      setIsTemporaryHoroscope(true);
+      // 标记为临时选择（如果不是用户配置的星座）
+      setIsTemporaryHoroscope(horoscope !== getUserZodiac());
+      isTemporaryRef.current = horoscope !== getUserZodiac();
+      
+      // 立即重置数据，确保不会显示旧数据
+      setHoroscopeGuidance(null);
+      setError(null);
       // 标记需要重新加载数据
       setDataLoaded(false);
     }
-  }, [userHoroscope]);
+  }, [userHoroscope, getUserZodiac]);
 
   // 恢复用户配置的星座
   const handleRestoreUserHoroscope = useCallback(() => {
@@ -197,42 +262,41 @@ const HoroscopeTab = () => {
 
     return (
       <div className="space-y-4">
-        {/* 综合分数卡片 */}
-        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+        {/* 综合分数卡片 - 突出显示 */}
+        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl transform transition-all duration-300 hover:scale-102">
           <div className="text-center mb-4">
-            <h3 className="text-lg font-medium mb-1">综合分数</h3>
-            <div className="text-5xl font-bold mb-2">{overallScore}<span className="text-2xl">分</span></div>
-            <p className="text-blue-100 text-sm">今天运气还不错</p>
+            <h3 className="text-lg font-medium mb-1 opacity-90">今日运势</h3>
+            <div className="text-6xl font-bold mb-2 drop-shadow-md">{overallScore}<span className="text-2xl opacity-75">分</span></div>
+            <p className="text-blue-100 text-sm font-medium">{overallScore > 75 ? '运势极佳' : overallScore > 60 ? '运势良好' : overallScore > 45 ? '运势平稳' : '运势一般'}</p>
           </div>
           
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-3">
             {scores.map((item, index) => (
-              <div key={index} className="text-center">
-                <div className="text-lg mb-1">{item.icon}</div>
-                <div className="text-xl font-bold">{item.score}</div>
+              <div key={index} className="text-center bg-white bg-opacity-10 rounded-lg p-2 backdrop-blur-sm">
+                <div className="text-xl mb-1">{item.icon}</div>
+                <div className="text-2xl font-bold">{item.score}</div>
                 <div className="text-xs opacity-90">{item.name}</div>
               </div>
             ))}
           </div>
           
           {/* 分数排序 */}
-          <div className="mt-4 flex justify-center items-center text-sm">
-            <span className="mr-2">运势排行:</span>
-            {sortedScores.map((item, index) => (
-              <span key={index} className="flex items-center mr-2">
-                <span className="mr-1">{item.name}</span>
-                {index < sortedScores.length - 1 && <span className="text-xs">&gt;</span>}
-              </span>
-            ))}
+          <div className="mt-4 flex justify-center items-center text-sm bg-white bg-opacity-10 rounded-full px-4 py-2 backdrop-blur-sm">
+            <span className="mr-2 font-medium">运势最强:</span>
+            <span className="flex items-center font-bold">
+              <span className="mr-1">{sortedScores[0].icon}</span>
+              {sortedScores[0].name}
+            </span>
           </div>
         </div>
 
-        {/* 今日运势描述 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-          <h4 className="font-bold text-gray-800 dark:text-white mb-2 flex items-center">
-            <span className="mr-2">📝</span>今日运势
+        {/* 今日运势描述 - 优化版 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border-l-4 border-blue-500">
+          <h4 className="font-bold text-gray-800 dark:text-white mb-3 flex items-center">
+            <span className="mr-2 text-lg">📝</span>
+            <span className="text-lg">今日运势</span>
           </h4>
-          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+          <p className="text-gray-700 dark:text-gray-200 text-base leading-relaxed">
             {overallDescription}
           </p>
         </div>
@@ -247,15 +311,21 @@ const HoroscopeTab = () => {
           </p>
         </div>
 
-        {/* 建议 */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 shadow border border-green-100 dark:border-green-800">
-            <h4 className="font-bold text-green-700 dark:text-green-300 mb-2">✅ 建议</h4>
-            <p className="text-green-600 dark:text-green-400 text-sm">{recommendations.positiveAdvice}</p>
+        {/* 建议 - 突出显示 */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-5 shadow-lg border-l-4 border-green-500 transform transition-all duration-300 hover:scale-102">
+            <h4 className="font-bold text-green-700 dark:text-green-300 mb-3 flex items-center text-lg">
+              <span className="mr-2 text-xl">✅</span>
+              宜做
+            </h4>
+            <p className="text-green-700 dark:text-green-400 text-base leading-relaxed">{recommendations.positiveAdvice}</p>
           </div>
-          <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 rounded-xl p-4 shadow border border-red-100 dark:border-red-800">
-            <h4 className="font-bold text-red-700 dark:text-red-300 mb-2">❌ 避免</h4>
-            <p className="text-red-600 dark:text-red-400 text-sm">{recommendations.avoidAdvice}</p>
+          <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 rounded-xl p-5 shadow-lg border-l-4 border-red-500 transform transition-all duration-300 hover:scale-102">
+            <h4 className="font-bold text-red-700 dark:text-red-300 mb-3 flex items-center text-lg">
+              <span className="mr-2 text-xl">❌</span>
+              忌做
+            </h4>
+            <p className="text-red-700 dark:text-red-400 text-base leading-relaxed">{recommendations.avoidAdvice}</p>
           </div>
         </div>
 
@@ -355,12 +425,12 @@ const HoroscopeTab = () => {
           </div>
         </div>
 
-        {/* 星座信息 */}
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-4 shadow border border-purple-100 dark:border-purple-800">
-          <div className="flex items-center mb-3">
-            <span className="text-3xl mr-3">{horoscopeGuidance.horoscopeInfo.icon}</span>
+        {/* 星座信息 - 精简版 */}
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl p-4 shadow-lg border-l-4 border-purple-500">
+          <div className="flex items-center">
+            <span className="text-4xl mr-4 bg-white rounded-full p-2 shadow-md">{horoscopeGuidance.horoscopeInfo.icon}</span>
             <div>
-              <h4 className="font-bold text-purple-700 dark:text-purple-300 text-lg">
+              <h4 className="font-bold text-purple-700 dark:text-purple-300 text-xl">
                 {userHoroscope}
               </h4>
               <p className="text-purple-600 dark:text-purple-400 text-sm">
@@ -368,10 +438,6 @@ const HoroscopeTab = () => {
               </p>
             </div>
           </div>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">
-            <span className="font-medium">性格特点：</span>
-            {horoscopeGuidance.horoscopeInfo.traits}
-          </p>
         </div>
 
         {/* 相容星座 */}
@@ -419,14 +485,21 @@ const HoroscopeTab = () => {
                   <button
                     key={horoscope.name}
                     onClick={() => handleHoroscopeChange(horoscope.name)}
-                    className={`flex-shrink-0 px-4 py-2 rounded-lg flex flex-col items-center justify-center min-w-[70px] transition-all ${
+                    className={`flex-shrink-0 px-4 py-2 rounded-lg flex flex-col items-center justify-center min-w-[70px] transition-all relative overflow-hidden ${
                       isActive
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-110'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:scale-105'
                     }`}
                   >
-                    <span className="text-xl mb-1">{horoscope.icon}</span>
-                    <span className="text-xs font-medium">{horoscope.name.replace('座', '')}</span>
+                    {/* 选中状态的高亮效果 */}
+                    {isActive && (
+                      <>
+                        <span className="absolute top-0 left-0 w-full h-full bg-white opacity-20 animate-pulse"></span>
+                        <span className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                      </>
+                    )}
+                    <span className="relative z-10 text-xl mb-1">{horoscope.icon}</span>
+                    <span className="relative z-10 text-xs font-bold">{horoscope.name.replace('座', '')}</span>
                   </button>
                 );
               })}
@@ -454,7 +527,7 @@ const HoroscopeTab = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 animate-fade-in">
       {/* 移动端标题 */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-4">
         <h1 className="text-xl font-bold flex items-center">
@@ -468,11 +541,49 @@ const HoroscopeTab = () => {
       {renderMobileHoroscopeSelector()}
 
       <div className="px-3">
-        {/* 加载状态 */}
+        {/* 优化的加载状态 - 骨架屏 */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-10">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">正在加载星座运势...</p>
+          <div className="space-y-4">
+            {/* 综合分数骨架屏 */}
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+              <div className="text-center mb-4">
+                <div className="h-6 bg-white bg-opacity-20 rounded w-32 mx-auto mb-2 animate-pulse"></div>
+                <div className="h-16 w-24 bg-white bg-opacity-20 rounded mx-auto mb-2 animate-pulse"></div>
+                <div className="h-4 bg-white bg-opacity-10 rounded w-40 mx-auto animate-pulse"></div>
+              </div>
+              
+              <div className="grid grid-cols-4 gap-2">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="text-center">
+                    <div className="h-6 w-6 bg-white bg-opacity-20 rounded-full mx-auto mb-1 animate-pulse"></div>
+                    <div className="h-6 w-8 bg-white bg-opacity-20 rounded mx-auto mb-1 animate-pulse"></div>
+                    <div className="h-3 w-12 bg-white bg-opacity-10 rounded mx-auto animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 运势描述骨架屏 */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+              <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded mb-2 animate-pulse"></div>
+              <div className="space-y-1">
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6 animate-pulse"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/6 animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* 建议骨架屏 */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 shadow border border-green-100 dark:border-green-800">
+                <div className="h-4 w-12 bg-green-200 dark:bg-green-800 rounded mb-2 animate-pulse"></div>
+                <div className="h-12 bg-green-100 dark:bg-green-900 rounded animate-pulse"></div>
+              </div>
+              <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 rounded-xl p-4 shadow border border-red-100 dark:border-red-800">
+                <div className="h-4 w-12 bg-red-200 dark:bg-red-800 rounded mb-2 animate-pulse"></div>
+                <div className="h-12 bg-red-100 dark:bg-red-900 rounded animate-pulse"></div>
+              </div>
+            </div>
           </div>
         )}
 

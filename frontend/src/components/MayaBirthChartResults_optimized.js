@@ -80,15 +80,25 @@ const ChunkedRenderer = memo(({ items, chunkSize = 3, renderItem, loadingCompone
   );
 });
 
-// 优化的信息卡片组件 - 使用memo避免重渲染，适配主题
-const OptimizedInfoCard = memo(({ title, children, className = "" }) => (
-  <div className={`bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-600 ${className}`}>
-    <h4 className="font-semibold text-gray-800 dark:text-white mb-2 text-sm">{title}</h4>
+// 优化的信息卡片组件 - 紧凑设计，增强选择指示
+const OptimizedInfoCard = memo(({ title, children, className = "", isActive = false }) => (
+  <div className={`bg-white dark:bg-gray-800 p-3 border ${
+    isActive 
+      ? 'border-purple-500 shadow-md shadow-purple-100 dark:shadow-purple-900/20' 
+      : 'border-gray-200 dark:border-gray-600'
+  } rounded-lg transition-all ${className}`}>
+    {title && (
+      <h4 className={`font-semibold mb-2 text-sm ${
+        isActive 
+          ? 'text-purple-700 dark:text-purple-400' 
+          : 'text-gray-800 dark:text-white'
+      }`}>{title}</h4>
+    )}
     {children}
   </div>
 ));
 
-// 基础信息组件 - 使用memo和useMemo优化
+// 基础信息组件 - 紧凑设计，增强高亮效果
 const BasicInfoSection = memo(({ birthInfo }) => {
   // 简化kin计算，直接从birthInfo中提取
   const kinNumber = useMemo(() => {
@@ -102,20 +112,20 @@ const BasicInfoSection = memo(({ birthInfo }) => {
       console.warn('Kin提取错误:', error);
       return '1';
     }
-  }, [birthInfo?.maya_kin]);
+  }, [birthInfo]);
   
   return (
-    <OptimizedInfoCard title="基本信息" className="text-center">
-      <div className="flex items-center justify-between mb-3">
+    <OptimizedInfoCard title="基本信息" className="text-center" isActive={true}>
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center">
-          <div className="w-12 h-12 bg-blue-600 dark:bg-blue-500 rounded-full text-white flex items-center justify-center mr-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 rounded-full text-white flex items-center justify-center mr-3 shadow-md">
             <div className="text-center">
-              <div className="text-lg font-bold">{kinNumber || '1'}</div>
+              <div className="text-base font-bold">{kinNumber || '1'}</div>
               <div className="text-xs opacity-90">KIN</div>
             </div>
           </div>
           <div>
-            <h2 className="text-md font-bold text-gray-800 dark:text-white">
+            <h2 className="text-sm font-bold text-gray-800 dark:text-white">
               {birthInfo?.maya_seal_desc || birthInfo?.fullName || '未知印记'}
             </h2>
             <div className="text-xs text-gray-600 dark:text-gray-400">{birthInfo?.date || '未知日期'}</div>
@@ -123,11 +133,11 @@ const BasicInfoSection = memo(({ birthInfo }) => {
         </div>
       </div>
       
-      <div className="flex space-x-2">
-        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
+      <div className="flex space-x-2 justify-center">
+        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium shadow-sm">
           {birthInfo?.maya_seal || '未知印记'}
         </span>
-        <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded text-xs font-medium">
+        <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium shadow-sm">
           {birthInfo?.maya_tone_info?.数字 || '1'}号音
         </span>
       </div>
@@ -265,11 +275,11 @@ const EnergyFieldSection = memo(({ birthInfo }) => {
   );
 });
 
-// 主组件 - 简化版本
+// 主组件 - 紧凑设计版本
 const ResultsSection = memo(({ birthInfo, showResults }) => {
   // 按渲染优先级排序的组件列表
   const sections = useMemo(() => [
-    { component: BasicInfoSection, key: 'basic' },
+    { component: BasicInfoSection, key: 'basic', isActive: true },
     { component: SealInfoSection, key: 'seal' },
     { component: ToneInfoSection, key: 'tone' },
     { component: LifePurposeSection, key: 'purpose' },
@@ -277,12 +287,12 @@ const ResultsSection = memo(({ birthInfo, showResults }) => {
     { component: EnergyFieldSection, key: 'energy' }
   ], []);
 
-  // 简化渲染函数
+  // 简化渲染函数 - 增强选择指示
   const renderSection = useCallback((section) => {
     const Component = section.component;
     return (
-      <div key={section.key}>
-        <Component birthInfo={birthInfo} />
+      <div key={section.key} className="transition-all hover:shadow-md">
+        <Component birthInfo={birthInfo} isActive={section.isActive} />
       </div>
     );
   }, [birthInfo]);
@@ -292,19 +302,17 @@ const ResultsSection = memo(({ birthInfo, showResults }) => {
   }
 
   return (
-    <div className="birth-chart-results">
-      <div className="birth-info space-y-4">
-        <ChunkedRenderer
-          items={sections}
-          chunkSize={3}
-          renderItem={renderSection}
-          loadingComponent={
-            <div className="flex justify-center py-2">
-              <div className="animate-pulse bg-gray-200 rounded h-3 w-20"></div>
-            </div>
-          }
-        />
-      </div>
+    <div className="space-y-2">
+      <ChunkedRenderer
+        items={sections}
+        chunkSize={3}
+        renderItem={renderSection}
+        loadingComponent={
+          <div className="flex justify-center py-2">
+            <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-2 w-20"></div>
+          </div>
+        }
+      />
     </div>
   );
 });

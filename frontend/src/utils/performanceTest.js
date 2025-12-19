@@ -391,7 +391,7 @@ export const usePerformanceTest = (componentName, testFunction, dependencies = [
     };
     
     runTest();
-  }, dependencies);
+  }, [componentName, testFunction]);
 };
 
 // 性能基准测试

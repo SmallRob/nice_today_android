@@ -223,9 +223,11 @@ export const usePerformanceMonitor = (componentName) => {
   }, [componentName]);
 
   useEffect(() => {
+    const startTimeValue = startTime.current;
+    
     return () => {
       // 组件卸载时记录
-      const totalTime = now() - startTime.current;
+      const totalTime = now() - startTimeValue;
       recordMetric('componentLifecycles', `${componentName}_lifecycle`, totalTime, {
         component: componentName,
         lifecycle: 'mount-to-unmount'

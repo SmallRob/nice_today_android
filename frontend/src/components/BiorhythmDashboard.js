@@ -3,9 +3,11 @@ import BiorhythmTab from './BiorhythmTab';
 import ZodiacEnergyTab from './ZodiacEnergyTab';
 import HoroscopeTabNew from './HoroscopeTabNew';
 import MBTIPersonalityTabHome from './MBTIPersonalityTabHome';
+import MayaCalendarTab from './MayaCalendarTab';
 import { BiorhythmIcon, IconLibrary } from './IconLibrary';
 import PageLayout from './PageLayout';
 import DarkModeToggle from './DarkModeToggle';
+import '../styles/animations.css';
 
 const BiorhythmDashboard = ({ appInfo = {} }) => {
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,12 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
     
     const checkStatus = async () => {
       if (!isMounted) return;
-      await checkServiceStatus();
+      
+      // 使用requestAnimationFrame确保流畅渲染
+      requestAnimationFrame(async () => {
+        if (!isMounted) return;
+        await checkServiceStatus();
+      });
     };
     
     checkStatus();
@@ -87,13 +94,13 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex items-center justify-center transition-opacity duration-300">
         <div className="text-center">
           <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6 relative">
             <div className="absolute inset-0 border-4 border-transparent border-t-purple-400 rounded-full animate-ping"></div>
           </div>
-          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Nice Today</h3>
-          <p className="text-gray-500 dark:text-gray-400">正在为您准备个性化体验...</p>
+          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2 animate-fade-in">Nice Today</h3>
+          <p className="text-gray-500 dark:text-gray-400 animate-fade-in" style={{ animationDelay: '0.2s' }}>正在为您准备个性化体验...</p>
           <div className="mt-4 flex justify-center space-x-1">
             {[0, 1, 2].map((i) => (
               <div 
@@ -110,84 +117,71 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Nice Today</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">您的每日生活助手</p>
-            </div>
-            <DarkModeToggle />
-          </div>
-        </div>
-      </div>
       <div className="app-scroll-content">
-        <div className="max-w-6xl mx-auto space-y-8">
-        {/* 欢迎横幅 */}
-        <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 dark:from-blue-600 dark:via-purple-600 dark:to-indigo-700 rounded-2xl shadow-xl text-white p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white bg-opacity-10 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white bg-opacity-5 rounded-full translate-y-12 -translate-x-12"></div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3 shadow-lg">
-                <IconLibrary.Icon name="heart" size={24} className="text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold">Nice Today 生活助手</h2>
-                <p className="text-blue-100 text-sm">科学算法 · 个性化建议 · 隐私保护</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-300 rounded-full"></div>
-                <span>本地化计算，保护隐私数据</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                <span>科学算法，个性化生活建议</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-pink-300 rounded-full"></div>
-                <span>现代化界面，支持深色模式</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div className="max-w-6xl mx-auto space-y-4 p-2">
 
-        {/* 标签导航 - 增强版 */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-0 dark:border dark:border-gray-700 overflow-hidden">
-          {/* 标签导航栏 */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-4 py-2 border-b dark:border-gray-700">
-            <div className="flex overflow-x-auto scrollbar-hide">
-              {tabs.map((tab) => (
+        {/* 紧凑型标签导航 - 移动端优化 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border-0 dark:border dark:border-gray-700 overflow-hidden">
+          {/* 标签导航栏 - 紧凑设计 */}
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-2 py-1.5 border-b dark:border-gray-700">
+            <div className="grid grid-cols-4 gap-1">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                const colorMap = {
+                  'blue': 'bg-blue-500',
+                  'purple': 'bg-purple-500',
+                  'indigo': 'bg-indigo-500',
+                  'pink': 'bg-pink-500'
+                };
+                
+                return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-shrink-0 py-3 px-6 text-center font-medium transition-all duration-300 min-w-28 rounded-lg mx-1 ${
-                    activeTab === tab.id
-                      ? `bg-white dark:bg-gray-700 shadow-md text-${tab.color}-600 dark:text-${tab.color}-400 border border-${tab.color}-200 dark:border-${tab.color}-800`
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-700 hover:shadow-sm'
+                  className={`py-2 px-1 text-center font-medium transition-all duration-200 rounded-md relative overflow-hidden ${
+                    isActive
+                      ? 'bg-white dark:bg-gray-700 shadow-sm transform scale-105'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-gray-700/70'
                   }`}
                 >
-                  <div className="flex flex-col items-center space-y-2">
-                    <div className={`p-2 rounded-full ${
-                      activeTab === tab.id 
-                        ? `bg-${tab.color}-100 dark:bg-${tab.color}-900` 
-                        : 'bg-gray-100 dark:bg-gray-700'
+                  {/* 活跃指示器 - 增强高亮效果 */}
+                  {isActive && (
+                    <>
+                      {/* 背景高亮 */}
+                      <div className={`absolute top-0 left-0 w-full h-full ${colorMap[tab.color]} opacity-20 rounded-md -z-10 animate-pulse`}></div>
+                      {/* 顶部指示器 */}
+                      <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 ${colorMap[tab.color]} rounded-t-full`}></div>
+                      {/* 底部指示器 */}
+                      <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 ${colorMap[tab.color]} rounded-b-full`}></div>
+                    </>
+                  )}
+                  <div className="flex flex-col items-center space-y-1">
+                    <div className={`p-1 rounded-md transition-all duration-200 ${
+                      isActive 
+                        ? `${colorMap[tab.color]} text-white shadow-md` 
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                     }`}>
-                      <tab.icon size={20} />
+                      <tab.icon size={16} />
                     </div>
-                    <span className="text-sm font-medium">{tab.label}</span>
+                    <span className={`text-xs font-medium truncate w-full transition-all duration-200 ${
+                      isActive ? 'font-bold' : 'font-medium'
+                    }`}>{tab.label}</span>
                   </div>
+                  {/* 点击涟漪效果容器 */}
+                  <span className="absolute inset-0 rounded-md overflow-hidden pointer-events-none">
+                    {isActive && (
+                      <span className={`absolute inset-0 ${colorMap[tab.color]} opacity-0 animate-ping`}></span>
+                    )}
+                  </span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          {/* 标签内容 */}
-          <div className="p-6">
-            <div className="animate-fadeIn">
+          {/* 标签内容 - 紧凑布局 */}
+          <div className="p-2">
+            <div className="animate-fade-in">
               {activeTab === 'biorhythm' && (
                 <BiorhythmTab 
                   serviceStatus={serviceStatus.biorhythm}
@@ -197,6 +191,9 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               {activeTab === 'zodiac' && (
                 <ZodiacEnergyTab />
               )}
+              {activeTab === 'maya' && (
+                <MayaCalendarTab />
+              )}
               {activeTab === 'horoscope' && (
                 <HoroscopeTabNew />
               )}
@@ -205,51 +202,6 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               )}
             </div>
           </div>
-        </div>
-
-        {/* 功能特色卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-5 border border-green-100 dark:border-green-800/30">
-            <div className="flex items-center mb-3">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mr-3">
-                <IconLibrary.Icon name="shield" size={20} className="text-green-600 dark:text-green-400" />
-              </div>
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200">隐私保护</h3>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">所有数据本地计算，无需网络传输，确保您的个人信息安全</p>
-          </div>
-          
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-5 border border-purple-100 dark:border-purple-800/30">
-            <div className="flex items-center mb-3">
-              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mr-3">
-                <IconLibrary.Icon name="science" size={20} className="text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200">科学算法</h3>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">基于生物节律、星座能量等科学原理，提供精准分析</p>
-          </div>
-          
-          <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-5 border border-orange-100 dark:border-orange-800/30">
-            <div className="flex items-center mb-3">
-              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mr-3">
-                <IconLibrary.Icon name="accessibility" size={20} className="text-orange-600 dark:text-orange-400" />
-              </div>
-              <h3 className="font-semibold text-gray-800 dark:text-gray-200">个性化体验</h3>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">根据您的个人信息，提供专属的生活建议和健康指导</p>
-          </div>
-        </div>
-
-        {/* 免责声明 */}
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-5 border dark:border-gray-700">
-          <div className="flex items-center mb-2">
-            <IconLibrary.Icon name="info" size={16} className="text-blue-500 mr-2" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">温馨提示</span>
-          </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-            本应用提供的所有建议和分析结果仅供参考，不构成专业医疗或心理建议。
-            请结合自身实际情况合理参考，如有健康问题请咨询专业医生。
-          </p>
         </div>
       </div>
       </div>

@@ -65,21 +65,7 @@ const SeasonalHealthTab = () => {
     "水": "bg-blue-500"
   };
 
-  // 器官颜色映射
-  const organColors = {
-    "肝胆": "bg-green-500",
-    "肺": "bg-white",
-    "大肠": "bg-yellow-500",
-    "胃": "bg-yellow-300",
-    "脾": "bg-yellow-400",
-    "心": "bg-red-500",
-    "小肠": "bg-red-300",
-    "膀胱": "bg-blue-500",
-    "肾": "bg-blue-300",
-    "心包": "bg-red-200",
-    "三焦": "bg-purple-300",
-    "胆": "bg-green-300"
-  };
+
 
   return (
     <div className="space-y-3 md:space-y-4">

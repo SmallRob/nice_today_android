@@ -1,7 +1,4 @@
 import { Capacitor } from '@capacitor/core';
-import performanceMonitor from './performanceMonitor';
-import { permissionManager } from './permissionManager';
-import resourceManager from './resourceManager';
 
 // 应用优化器类
 class AppOptimizer {
@@ -64,7 +61,7 @@ class AppOptimizer {
   // 设置定期清理
   setupPeriodicCleanup() {
     if (this.config.memory.enableGC) {
-      resourceManager.setInterval(() => {
+      setInterval(() => {
         this.performGarbageCollection();
       }, this.config.memory.cleanupInterval);
     }

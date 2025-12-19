@@ -438,74 +438,78 @@ const MBTIPersonalityTabHome = () => {
     }
   };
 
-  // 初始化组件
+  // 初始化组件 - 优化为立即加载默认数据
   useEffect(() => {
     let isMounted = true;
     
     const initialize = async () => {
       try {
-        // 确保用户配置管理器已初始化
-        if (!userConfigManager.initialized) {
-          await userConfigManager.initialize();
-        }
-        
-        // 加载所有MBTI类型
+        // 立即加载所有MBTI类型和默认MBTI，不等待用户配置
         setAllMBTIs(mbtiList);
+        setUserMBTI('INFP');
+        setTempMBTI('');
         
-        if (!isMounted) return;
-        
-        // 从用户配置管理器获取用户信息
-        const currentConfig = userConfigManager.getCurrentConfig();
-        if (currentConfig && isMounted) {
-          setUserInfo({
-            nickname: currentConfig.nickname || '',
-            birthDate: currentConfig.birthDate || '',
-            mbti: currentConfig.mbti || ''
-          });
-          
-          // 优先使用用户配置中的MBTI信息
-          if (currentConfig.mbti) {
-            setUserMBTI(currentConfig.mbti);
-            // 初始化时不设置为临时MBTI，确保用户配置是默认显示的
-            setTempMBTI('');
-          }
-        }
-        
-        // 添加配置变更监听器
-        const removeConfigListener = userConfigManager.addListener((configData) => {
-          if (isMounted && configData.currentConfig) {
-            setUserInfo({
-              nickname: configData.currentConfig.nickname || '',
-              birthDate: configData.currentConfig.birthDate || '',
-              mbti: configData.currentConfig.mbti || ''
+        // 异步获取用户配置，但不阻塞界面
+        setTimeout(async () => {
+          try {
+            // 确保用户配置管理器已初始化
+            if (!userConfigManager.initialized) {
+              await userConfigManager.initialize();
+            }
+            
+            // 获取用户配置
+            const currentConfig = userConfigManager.getCurrentConfig();
+            if (currentConfig && isMounted) {
+              setUserInfo({
+                nickname: currentConfig.nickname || '',
+                birthDate: currentConfig.birthDate || '',
+                mbti: currentConfig.mbti || ''
+              });
+              
+              // 如果用户有配置的MBTI且不是默认值，则更新显示
+              if (currentConfig.mbti && currentConfig.mbti !== 'INFP') {
+                setUserMBTI(currentConfig.mbti);
+                // 标记需要重新加载数据
+                setDataLoaded(false);
+              }
+            }
+            
+            // 添加配置变更监听器
+            const removeConfigListener = userConfigManager.addListener((configData) => {
+              if (isMounted && configData.currentConfig) {
+                setUserInfo({
+                  nickname: configData.currentConfig.nickname || '',
+                  birthDate: configData.currentConfig.birthDate || '',
+                  mbti: configData.currentConfig.mbti || ''
+                });
+                
+                // 仅在没有临时MBTI时更新MBTI信息，避免覆盖用户临时选择
+                if (configData.currentConfig.mbti && 
+                    configData.currentConfig.mbti !== userMBTI &&
+                    !tempMBTI) { // 仅在没有临时MBTI时更新
+                  setUserMBTI(configData.currentConfig.mbti);
+                  // 标记需要重新加载数据
+                  setDataLoaded(false);
+                }
+              }
             });
             
-            // 仅在没有临时MBTI时更新MBTI信息，避免覆盖用户临时选择
-            if (configData.currentConfig.mbti && 
-                configData.currentConfig.mbti !== userMBTI &&
-                !tempMBTI) { // 仅在没有临时MBTI时更新
-              setUserMBTI(configData.currentConfig.mbti);
-              // 标记需要重新加载数据
-              setDataLoaded(false);
+            if (removeConfigListener) {
+              removeConfigListener();
             }
+          } catch (error) {
+            console.warn('异步加载用户配置失败:', error);
           }
-        });
+        }, 50); // 短延迟，确保界面先显示
         
         if (isMounted) {
           setInitialized(true);
         }
-        
-        return () => {
-          if (removeConfigListener) {
-            removeConfigListener();
-          }
-        };
       } catch (error) {
         console.error('初始化MBTI组件失败:', error);
         
         // 降级处理
         setAllMBTIs(mbtiList);
-        // 设置默认MBTI类型
         setUserMBTI('INFP');
         setTempMBTI('');
         if (isMounted) {
@@ -514,15 +518,12 @@ const MBTIPersonalityTabHome = () => {
       }
     };
     
-    const cleanup = initialize();
+    initialize();
     
     return () => {
       isMounted = false;
-      if (cleanup && typeof cleanup.then === 'function') {
-        cleanup.then(cleanupFn => cleanupFn && cleanupFn());
-      }
     };
-  }, [mbtiList, userMBTI]);
+  }, [mbtiList]);
 
   // 当MBTI类型变化时重新加载数据
   useEffect(() => {
@@ -793,15 +794,16 @@ const MBTIPersonalityTabHome = () => {
                     <button
                       key={mbti}
                       onClick={() => handleMBTIChange(mbti)}
-                      className={`p-1.5 rounded text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center relative ${
+                      className={`p-1.5 rounded text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center relative overflow-hidden ${
                         userMBTI === mbti
-                          ? 'ring-1 ring-offset-1 shadow-sm'
-                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          ? 'ring-2 ring-offset-1 shadow-sm transform scale-110'
+                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
                       }`}
                       style={{
                         backgroundColor: userMBTI === mbti ? typeData?.color : undefined,
                         color: userMBTI === mbti ? 'white' : undefined,
-                        borderColor: typeData?.color
+                        borderColor: typeData?.color,
+                        borderWidth: userMBTI === mbti ? '2px' : '1px'
                       }}
                       title={
                         isUserConfig 
@@ -811,15 +813,27 @@ const MBTIPersonalityTabHome = () => {
                             : `查看${mbti}类型分析`
                       }
                     >
-                      <span className="text-sm mb-0.5">{typeData?.icon}</span>
-                      <span>{mbti}</span>
+                      {/* 选中状态的高亮效果 */}
+                      {userMBTI === mbti && (
+                        <>
+                          <span 
+                            className="absolute inset-0 rounded animate-pulse opacity-30"
+                            style={{ backgroundColor: typeData?.color }}
+                          ></span>
+                          <span 
+                            className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-white animate-ping"
+                          ></span>
+                        </>
+                      )}
+                      <span className="relative z-10 text-sm mb-0.5">{typeData?.icon}</span>
+                      <span className="relative z-10 font-bold">{mbti}</span>
                       {/* 用户配置标记 */}
                       {isUserConfig && (
-                        <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-blue-500 rounded-full" title="您的配置"></span>
+                        <span className="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full animate-pulse" title="您的配置"></span>
                       )}
                       {/* 临时查看标记 */}
                       {isTempSelected && (
-                        <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-orange-500 rounded-full" title="临时查看"></span>
+                        <span className="absolute top-0 right-0 w-2 h-2 bg-orange-500 rounded-full animate-pulse" title="临时查看"></span>
                       )}
                     </button>
                   );

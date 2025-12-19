@@ -57,8 +57,7 @@ const initCapacitorApp = async (options = {}) => {
     statusBarBackgroundColor = '#ffffff',
     enableKeyboardListeners = true,
     enableNetworkListener = false,
-    networkCallback,
-    lifecycleCallbacks
+    networkCallback
   } = options;
 
   // 检测平台和设备信息

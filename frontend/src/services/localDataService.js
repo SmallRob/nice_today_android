@@ -453,12 +453,7 @@ export const getBiorhythmRange = async (birthDate, daysBefore = 10, daysAfter = 
   };
 };
 
-// 本地存储管理
-const STORAGE_KEYS = {
-  BIRTH_DATE: 'biorhythm_birth_date',
-  DRESS_HISTORY: 'dress_info_history',
-  USER_PREFERENCES: 'user_preferences'
-};
+
 
 // 保存数据到本地存储
 export const saveToLocalStorage = (key, data) => {
@@ -493,7 +488,7 @@ export const clearLocalStorage = (key) => {
   }
 };
 
-export default {
+const localDataService = {
   getDressInfoRange,
   getSpecificDateDressInfo,
   getTodayDressInfo,
@@ -506,3 +501,5 @@ export default {
   formatDateString,
   getWeekday
 };
+
+export default localDataService;

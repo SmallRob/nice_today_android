@@ -237,7 +237,7 @@ const getPermissionsAPI = async () => {
     
     // 测试真实API是否工作
     try {
-      const testResult = await Permissions.query({ name: PermissionTypes.NOTIFICATIONS });
+      await Permissions.query({ name: PermissionTypes.NOTIFICATIONS });
       console.log('Using real permissions API');
       return Permissions;
     } catch (testError) {

@@ -204,8 +204,9 @@ export const initDataMigration = () => {
   return migratedCount;
 };
 
-export default {
+const dataMigration = {
   migrateOldData,
-  CompatibleStorage,
   initDataMigration
 };
+
+export default dataMigration;

@@ -280,79 +280,80 @@ const ZodiacEnergyTab = () => {
     }
   }, [userZodiac, selectedDate, wuxingElements]);
 
-  // 初始化组件
+  // 初始化组件 - 优化为立即加载默认数据
   useEffect(() => {
     let isMounted = true;
     const removeListener = () => {};
     
     const initialize = async () => {
       try {
-        // 确保用户配置管理器已初始化
-        if (!userConfigManager.initialized) {
-          await userConfigManager.initialize();
-        }
-        
-        // 加载所有生肖
+        // 立即加载所有生肖，不等待
         await loadAllZodiacs();
         
         if (!isMounted) return;
         
-        // 仅读取默认配置，不保存任何用户选择
-        const zodiacConfig = zodiacEnergyConfigManager.getConfig();
+        // 设置默认生肖为"鼠"，确保有数据可显示
+        setUserZodiac('鼠');
+        setTempZodiac('');
         
-        // 设置默认日期
-        if (zodiacConfig.selectedDate) {
+        // 异步获取用户配置，但不阻塞界面
+        setTimeout(async () => {
           try {
-            const savedDate = new Date(zodiacConfig.selectedDate);
-            if (!isNaN(savedDate.getTime())) {
-              setSelectedDate(savedDate);
-            }
-          } catch (dateError) {
-            console.error('解析默认日期失败:', dateError);
-          }
-        }
-        
-        // 从用户配置管理器获取用户信息
-        const currentConfig = userConfigManager.getCurrentConfig();
-        if (currentConfig && isMounted) {
-          setUserInfo(currentConfig);
-          
-          // 优先使用用户配置中的生肖信息
-          if (currentConfig.zodiacAnimal) {
-            setUserZodiac(currentConfig.zodiacAnimal);
-            // 初始化时不设置为临时生肖，确保用户配置是默认显示的
-            setTempZodiac('');
-          } else if (currentConfig.birthDate) {
-            // 如果没有生肖但有出生日期，计算生肖
-            const birthYear = new Date(currentConfig.birthDate).getFullYear();
-            if (birthYear && birthYear > 1900 && birthYear < 2100) {
-              calculateZodiacFromYear(birthYear);
-            }
-          }
-        }
-        
-        // 添加配置变更监听器
-        const removeConfigListener = userConfigManager.addListener((configData) => {
-          if (isMounted && configData.currentConfig) {
-            setUserInfo(configData.currentConfig);
-            
-            // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
-            if (configData.currentConfig.zodiacAnimal && 
-                configData.currentConfig.zodiacAnimal !== userZodiac &&
-                !tempZodiac) { // 仅在没有临时生肖时更新
-              setUserZodiac(configData.currentConfig.zodiacAnimal);
-              // 强制重新加载数据（包括配置切换和强制重载）
-              setDataLoaded(false);
+            // 确保用户配置管理器已初始化
+            if (!userConfigManager.initialized) {
+              await userConfigManager.initialize();
             }
             
-            // 如果收到强制重载标志，确保重新加载数据
-            if (configData.forceReload) {
-              setDataLoaded(false);
+            // 获取用户配置
+            const currentConfig = userConfigManager.getCurrentConfig();
+            if (currentConfig && isMounted) {
+              setUserInfo(currentConfig);
+              
+              // 如果用户有配置的生肖，则更新显示
+              if (currentConfig.zodiacAnimal && currentConfig.zodiacAnimal !== '鼠') {
+                setUserZodiac(currentConfig.zodiacAnimal);
+                // 标记需要重新加载数据
+                setDataLoaded(false);
+              } else if (currentConfig.birthDate) {
+                // 如果没有生肖但有出生日期，计算生肖
+                const birthYear = new Date(currentConfig.birthDate).getFullYear();
+                if (birthYear && birthYear > 1900 && birthYear < 2100) {
+                  const calculatedZodiac = zodiacs[(birthYear - 4) % 12];
+                  if (calculatedZodiac && calculatedZodiac !== '鼠') {
+                    setUserZodiac(calculatedZodiac);
+                    // 标记需要重新加载数据
+                    setDataLoaded(false);
+                  }
+                }
+              }
             }
+            
+            // 添加配置变更监听器
+            const removeConfigListener = userConfigManager.addListener((configData) => {
+              if (isMounted && configData.currentConfig) {
+                setUserInfo(configData.currentConfig);
+                
+                // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
+                if (configData.currentConfig.zodiacAnimal && 
+                    configData.currentConfig.zodiacAnimal !== userZodiac &&
+                    !tempZodiac) { // 仅在没有临时生肖时更新
+                  setUserZodiac(configData.currentConfig.zodiacAnimal);
+                  // 强制重新加载数据（包括配置切换和强制重载）
+                  setDataLoaded(false);
+                }
+                
+                // 如果收到强制重载标志，确保重新加载数据
+                if (configData.forceReload) {
+                  setDataLoaded(false);
+                }
+              }
+            });
+            
+            removeListener.current = removeConfigListener;
+          } catch (error) {
+            console.warn('异步加载用户配置失败:', error);
           }
-        });
-        
-        removeListener.current = removeConfigListener;
+        }, 50); // 短延迟，确保界面先显示
         
         if (isMounted) {
           setInitialized(true);
@@ -360,9 +361,8 @@ const ZodiacEnergyTab = () => {
       } catch (error) {
         console.error('初始化生肖能量组件失败:', error);
         
-        // 降级处理：使用原有逻辑
+        // 降级处理：使用默认逻辑
         await loadAllZodiacs();
-        // 设置默认生肖类型
         setUserZodiac('鼠');
         setTempZodiac('');
         if (isMounted) {
@@ -379,7 +379,7 @@ const ZodiacEnergyTab = () => {
         removeListener.current();
       }
     };
-  }, [loadAllZodiacs, calculateZodiacFromYear, userZodiac, tempZodiac]);
+  }, [loadAllZodiacs, zodiacs]);
 
   // 当生肖或日期变化时重新加载数据 - 优化加载逻辑
   useEffect(() => {
@@ -766,15 +766,16 @@ const ZodiacEnergyTab = () => {
                     <button
                       key={zodiac}
                       onClick={() => handleZodiacChange(zodiac)}
-                      className={`p-2 rounded text-center transition-all duration-200 text-sm font-medium relative ${
+                      className={`p-2 rounded text-center transition-all duration-200 text-sm font-medium relative overflow-hidden ${
                         userZodiac === zodiac
-                          ? 'ring-1 ring-offset-1 shadow-sm'
-                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          ? 'ring-2 ring-offset-1 shadow-sm transform scale-110'
+                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
                       }`}
                       style={{
                         backgroundColor: userZodiac === zodiac ? color : undefined,
                         color: userZodiac === zodiac ? 'white' : undefined,
-                        borderColor: color
+                        borderColor: color,
+                        borderWidth: userZodiac === zodiac ? '2px' : '1px'
                       }}
                       title={
                         isUserConfig 
@@ -784,14 +785,26 @@ const ZodiacEnergyTab = () => {
                             : `查看${zodiac}类型能量指引`
                       }
                     >
-                      <span>{zodiac}</span>
+                      {/* 选中状态的高亮效果 */}
+                      {userZodiac === zodiac && (
+                        <>
+                          <span 
+                            className="absolute inset-0 rounded animate-pulse opacity-30"
+                            style={{ backgroundColor: color }}
+                          ></span>
+                          <span 
+                            className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-white"
+                          ></span>
+                        </>
+                      )}
+                      <span className="relative z-10">{zodiac}</span>
                       {/* 用户配置标记 */}
                       {isUserConfig && (
-                        <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-blue-500 rounded-full" title="您的配置"></span>
+                        <span className="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full animate-pulse" title="您的配置"></span>
                       )}
                       {/* 临时查看标记 */}
                       {isTempSelected && (
-                        <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-orange-500 rounded-full" title="临时查看"></span>
+                        <span className="absolute top-0 right-0 w-2 h-2 bg-orange-500 rounded-full animate-pulse" title="临时查看"></span>
                       )}
                     </button>
                   );

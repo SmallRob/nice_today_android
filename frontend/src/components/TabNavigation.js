@@ -14,27 +14,44 @@ const TabNavigation = () => {
   
   // 页面切换时更新缓存
   useEffect(() => {
-    // 从本地存储获取缓存超时设置
-    const savedCacheTimeout = localStorage.getItem('cacheTimeout');
-    const timeout = savedCacheTimeout ? parseInt(savedCacheTimeout) : 180000; // 默认3分钟
-    storageManager.setGlobalCacheTimeout(timeout);
+    let isMounted = true;
     
-    // 根据当前路径触发相应页面的缓存更新
-    const updatePageCache = async () => {
-      // 这里可以根据不同路径触发不同页面的缓存更新逻辑
-      // 例如：
-      // if (location.pathname === '/') {
-      //   // 触发首页缓存更新
-      // }
-      // if (location.pathname === '/maya') {
-      //   // 触发玛雅页面缓存更新
-      // }
-      // if (location.pathname === '/dress') {
-      //   // 触发穿衣指南页面缓存更新
-      // }
+    const updateCache = async () => {
+      if (!isMounted) return;
+      
+      try {
+        // 从本地存储获取缓存超时设置
+        const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+        const timeout = savedCacheTimeout ? parseInt(savedCacheTimeout) : 180000; // 默认3分钟
+        storageManager.setGlobalCacheTimeout(timeout);
+        
+        // 根据当前路径触发相应页面的缓存更新逻辑
+        const updatePageCache = async () => {
+          if (!isMounted) return;
+          // 这里可以根据不同路径触发不同页面的缓存更新逻辑
+          // 例如：
+          // if (location.pathname === '/') {
+          //   // 触发首页缓存更新
+          // }
+          // if (location.pathname === '/maya') {
+          //   // 触发玛雅页面缓存更新
+          // }
+          // if (location.pathname === '/dress') {
+          //   // 触发穿衣指南页面缓存更新
+          // }
+        };
+        
+        await updatePageCache();
+      } catch (error) {
+        console.warn('缓存更新失败:', error);
+      }
     };
     
-    updatePageCache();
+    updateCache();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [location.pathname]);
 
   // 优化的Tab样式类 - 根据文本长度自适应宽度
@@ -142,7 +159,8 @@ const TabNavigation = () => {
         isIOS ? 'pb-safe-bottom' : ''
       } shadow-lg`}
     >
-      <div className="flex justify-center items-center h-16 relative px-1">
+      {/* 减少高度，优化间距 */}
+      <div className="flex justify-around items-center h-12 relative px-0.5">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           return (
@@ -151,20 +169,26 @@ const TabNavigation = () => {
               onClick={() => handleTabClick(tab.path)}
               className={getTabClassName(isActive)}
             >
-              {/* 活跃指示器 */}
+              {/* 活跃指示器 - 增强高亮效果 */}
               {isActive && (
-                <div className={`absolute top-0 w-full h-0.5 ${activeIndicatorClass}`}></div>
+                <>
+                  <div className={`absolute top-0 w-full h-0.5 ${activeIndicatorClass}`}></div>
+                  <div className={`absolute inset-0 rounded-lg ${activeIndicatorClass} opacity-10`}></div>
+                </>
               )}
               
-              {/* 图标和文字容器 */}
-              <div className="flex flex-col items-center justify-center space-y-1 max-w-full overflow-hidden">
-                {/* 图标 */}
+              {/* 图标和文字容器 - 超紧凑布局 */}
+              <div className="flex flex-col items-center justify-center space-y-0 max-w-full overflow-hidden">
+                {/* 图标 - 保持适当大小 */}
                 <div className="relative flex-shrink-0">
-                  {isActive ? tab.activeIcon : tab.icon}
+                  {isActive ? 
+                    React.cloneElement(tab.activeIcon, { className: "w-5 h-5" }) : 
+                    React.cloneElement(tab.icon, { className: "w-5 h-5" })
+                  }
                 </div>
                 
-                {/* 标签文字 - 根据文本长度自适应 */}
-                <span className="text-xs font-medium truncate max-w-full px-1">{tab.label}</span>
+                {/* 标签文字 - 减小字体大小，去除内边距 */}
+                <span className="text-xs font-medium truncate w-full leading-tight">{tab.label}</span>
               </div>
             </button>
           );

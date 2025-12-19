@@ -27,18 +27,18 @@ const getResultsSection = () => {
 
 const ResultsSection = lazy(() => getResultsSection());
 
-// 极简加载组件
+// 优化的加载组件 - 紧凑设计
 const LoadingSpinner = memo(() => (
-  <div className="maya-loading">
-    <div className="spinner"></div>
-    <p>正在计算...</p>
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 text-center">
+    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500 mx-auto mb-2"></div>
+    <p className="text-xs text-gray-500 dark:text-gray-400">正在计算...</p>
   </div>
 ));
 
-// 极简错误提示
+// 优化的错误提示 - 紧凑设计
 const ErrorDisplay = memo(({ error }) => (
-  <div className="maya-error">
-    <p>⚠️ {error}</p>
+  <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-3 text-center">
+    <p className="text-xs text-red-600 dark:text-red-400">⚠️ {error}</p>
   </div>
 ));
 
@@ -226,7 +226,7 @@ const MayaBirthChart = () => {
         balance_suggestion: "平衡能量发挥潜能"
       }
     };
-  }, []);
+  }, [personalTraitsStrengthsPool, personalTraitsChallengesPool]);
 
   // 优化版加载函数 - 添加防抖和取消机制
   const loadBirthInfo = useCallback(async (date) => {
@@ -306,21 +306,28 @@ const MayaBirthChart = () => {
         setLoading(false);
       }
     }
-  }, [generateBirthInfo]);
+  }, [generateBirthInfo, cacheRef]);
 
-  // 用户信息栏
+  // 简化的用户信息栏 - 紧凑设计
   const UserHeader = () => (
-    <div className="maya-user-header">
-      <h1>{userInfo.nickname ? `${userInfo.nickname}的玛雅印记` : '玛雅出生图'}</h1>
-      {userInfo.birthDate && (
-        <p className="maya-birth-date">出生日期: {userInfo.birthDate}</p>
-      )}
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3 mb-2">
+      <div className="flex items-center justify-between">
+        <h1 className="text-base font-semibold text-gray-900 dark:text-white">
+          {userInfo.nickname ? `${userInfo.nickname}的玛雅印记` : '玛雅出生图'}
+        </h1>
+        {userInfo.birthDate && (
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {userInfo.birthDate}
+          </span>
+        )}
+      </div>
     </div>
   );
 
-  // 主界面
+  // 主界面 - 紧凑设计
   return (
-    <div className="maya-container">
+    <div className="space-y-2">
+      {/* 简化的用户信息栏 */}
       <UserHeader />
         
       {error && <ErrorDisplay error={error} />}
@@ -332,8 +339,8 @@ const MayaBirthChart = () => {
           {showResults && birthInfo ? (
             <ResultsSection birthInfo={birthInfo} showResults={showResults} />
           ) : (
-            <div className="maya-empty-state">
-              <p>加载中...</p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">加载中...</p>
             </div>
           )}
         </Suspense>
