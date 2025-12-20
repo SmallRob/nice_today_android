@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
-import {
-  HOROSCOPE_DATA_ENHANCED as getHoroscopeData,
-  generateDailyHoroscope
-} from '../utils/horoscopeAlgorithm';
+import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
+
+// 解构赋值确保函数正确导入
+const { 
+  HOROSCOPE_DATA_ENHANCED, 
+  generateDailyHoroscope 
+} = horoscopeAlgorithm;
+
+// 创建别名以保持向后兼容性
+const getHoroscopeData = () => HOROSCOPE_DATA_ENHANCED;
 import {
   getDailyHoroscopeWithCache,
   initializeHoroscopeCache
@@ -72,14 +78,22 @@ const HoroscopeTab = () => {
   // 优化的模块化运势数据计算
   const calculateHoroscopeData = useCallback((horoscope, date) => {
     try {
-      // 检查函数是否存在
+      // 添加更详细的调试信息
+      console.log('开始计算星座运势数据:', { horoscope, date });
+      console.log('generateDailyHoroscope函数:', typeof generateDailyHoroscope);
+      
+      // 检查函数是否存在并添加类型验证
       if (typeof generateDailyHoroscope !== 'function') {
+        console.error('generateDailyHoroscope类型错误:', typeof generateDailyHoroscope);
+        console.error('完整horoscopeAlgorithm对象:', horoscopeAlgorithm);
         throw new Error('星座数据生成函数未正确加载');
       }
       
       // 模块化计算步骤
       // 第一步：基础数据生成
       const basicData = generateDailyHoroscope(horoscope, date);
+      console.log('基础数据生成结果:', basicData);
+      
       if (!basicData) {
         throw new Error('无法生成基础星座数据');
       }
@@ -99,9 +113,14 @@ const HoroscopeTab = () => {
         }
       }
       
+      console.log('增强数据处理结果:', enhancedData);
       return enhancedData;
     } catch (error) {
       console.error('计算星座运势数据失败:', error);
+      // 添加更详细的错误信息
+      if (error.stack) {
+        console.error('错误堆栈:', error.stack);
+      }
       throw error;
     }
   }, []);
@@ -122,9 +141,13 @@ const HoroscopeTab = () => {
     setError(null);
 
     try {
+      // 添加调试信息
+      console.log('准备调用calculateHoroscopeData:', { horoscope, currentDate });
+      
       // 使用模块化计算
       const horoscopeData = calculateHoroscopeData(horoscope, currentDate);
       
+      console.log('calculateHoroscopeData返回结果:', horoscopeData);
       setHoroscopeGuidance(horoscopeData);
       return Promise.resolve(horoscopeData);
     } catch (error) {
