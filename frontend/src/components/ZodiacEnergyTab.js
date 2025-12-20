@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
+import ChineseZodiacSelector from './ChineseZodiacSelector';
 import '../styles/zodiac-icons.css';
+import '../styles/chinese-zodiac-icons.css';
 
 // 生肖能量组件配置管理器 - 仅用于读取默认配置
 class ZodiacEnergyConfigManager {
@@ -731,67 +733,42 @@ const ZodiacEnergyTab = () => {
   const renderZodiacSelector = () => {
     return (
       <Card className="mb-4">
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div>
             {/* 当前用户信息 */}
             {userInfo.zodiacAnimal && (
-              <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded border border-blue-200 dark:border-blue-700">
-                <p className="text-blue-700 dark:text-blue-300 text-xs">
-                  您的生肖类型：<span className="font-bold">{userInfo.zodiacAnimal}</span>
+              <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
+                <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">
+                  您的生肖类型：<span className="font-bold text-lg">{userInfo.zodiacAnimal}</span>
                   {tempZodiac && tempZodiac !== userInfo.zodiacAnimal && (
-                    <span className="ml-1 text-xs">（当前查看：{tempZodiac}）</span>
+                    <span className="ml-2 text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded-full">
+                      当前查看：{tempZodiac}
+                    </span>
                   )}
                 </p>
               </div>
             )}
             
             {/* 提示文本 */}
-            <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">
-              点击任意生肖类型查看能量指引，临时查看不会保存配置
+            <div className="mb-3 text-sm text-gray-600 dark:text-gray-400 text-center bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+              ✨ 点击任意生肖图标查看能量指引，临时查看不会保存配置
             </div>
             
-            {/* 生肖选择网格 */}
-            <div className="mb-3">
-              <div className="zodiac-grid zodiac-energy-page">
-                {(allZodiacs.length > 0 ? allZodiacs : ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']).map((zodiac) => {
-                  const isTempSelected = tempZodiac === zodiac && tempZodiac !== userInfo.zodiacAnimal;
-                  const isUserConfig = userInfo.zodiacAnimal === zodiac;
-                  
-                  return (
-                    <div 
-                      key={zodiac}
-                      className={`zodiac-icon-container ${userZodiac === zodiac ? 'selected' : ''}`}
-                      title={
-                        isUserConfig 
-                          ? '您的配置生肖类型' 
-                          : isTempSelected 
-                            ? '临时查看的生肖类型' 
-                            : `查看${zodiac}类型能量指引`
-                      }
-                    >
-                      <div 
-                        className={`zodiac-icon zodiac-icon-md zodiac-icon-${zodiac} ${userZodiac === zodiac ? 'selected' : ''}`}
-                        onClick={() => handleZodiacChange(zodiac)}
-                      >
-                        {/* 用户配置标记 */}
-                        {isUserConfig && (
-                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse border border-white" title="您的配置"></span>
-                        )}
-                        {/* 临时查看标记 */}
-                        {isTempSelected && (
-                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse border border-white" title="临时查看"></span>
-                        )}
-                      </div>
-                      <span className="zodiac-icon-label">{zodiac}</span>
-                    </div>
-                  );
-                })}
-              </div>
+            {/* 炫彩生肖选择器 */}
+            <div className="mb-4">
+              <ChineseZodiacSelector
+                selectedZodiac={userZodiac}
+                onZodiacChange={handleZodiacChange}
+                size="md"
+                showLabels={true}
+                gridLayout="4"
+                className="chinese-zodiac-selector-energy"
+              />
             </div>
             
             {/* 日期选择器 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 查看指定日期的能量指引
               </label>
               <input
@@ -801,7 +778,7 @@ const ZodiacEnergyTab = () => {
                   const newDate = e.target.value ? new Date(e.target.value) : new Date();
                   handleDateChange(newDate);
                 }}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm transition-colors"
               />
             </div>
           </div>
@@ -815,9 +792,9 @@ const ZodiacEnergyTab = () => {
                   setTempZodiac('');
                   setDataLoaded(false);
                 }}
-                className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-md hover:shadow-lg"
               >
-                返回您的配置 ({userInfo.zodiacAnimal})
+                🔄 返回您的配置 ({userInfo.zodiacAnimal})
               </button>
             </div>
           )}
