@@ -166,6 +166,8 @@
   flex-direction: column;
   gap: 8px;
   text-align: center;
+  position: relative;
+  padding-top: 3px; /* 为生肖能量页面添加3px的上边距 */
 }
 
 .zodiac-icon-label {
@@ -256,6 +258,20 @@
   /* 确保背景图片正确显示 */
   background-color: #f9fafb;
   border-color: #e5e7eb;
+}
+
+/* 生肖能量页面特定调整 */
+.zodiac-energy-page .zodiac-icon-container {
+  padding-top: 0; /* 移除默认的3px上边距 */
+  margin-top: 3px; /* 改为使用外边距，确保位置更精确 */
+}
+
+.zodiac-energy-page .zodiac-icon {
+  margin-bottom: 2px; /* 为标签留出空间 */
+}
+
+.zodiac-energy-page .zodiac-icon-label {
+  margin-top: 2px; /* 确保标签与图标间距合适 */
 }
 
 .zodiac-icon:hover {

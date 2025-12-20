@@ -752,7 +752,7 @@ const ZodiacEnergyTab = () => {
             
             {/* 生肖选择网格 */}
             <div className="mb-3">
-              <div className="zodiac-grid">
+              <div className="zodiac-grid zodiac-energy-page">
                 {(allZodiacs.length > 0 ? allZodiacs : ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']).map((zodiac) => {
                   const isTempSelected = tempZodiac === zodiac && tempZodiac !== userInfo.zodiacAnimal;
                   const isUserConfig = userInfo.zodiacAnimal === zodiac;

@@ -1,0 +1,293 @@
+/* 星座图标CSS样式 */
+
+/* 星座图标容器 */
+.zodiac-sign-icon {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.zodiac-sign-icon-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border-width: 1px;
+}
+
+.zodiac-sign-icon-md {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+/* 星座图标样式 */
+.zodiac-sign-icon-白羊座 { background: linear-gradient(135deg, #ff6b6b, #ff8e8e); }
+.zodiac-sign-icon-金牛座 { background: linear-gradient(135deg, #4ecdc4, #88d3ce); }
+.zodiac-sign-icon-双子座 { background: linear-gradient(135deg, #45b7d1, #7bcde3); }
+.zodiac-sign-icon-巨蟹座 { background: linear-gradient(135deg, #96ceb4, #b8e0d2); }
+.zodiac-sign-icon-狮子座 { background: linear-gradient(135deg, #feca57, #ffd98e); }
+.zodiac-sign-icon-处女座 { background: linear-gradient(135deg, #ff9ff3, #ffb8f6); }
+.zodiac-sign-icon-天秤座 { background: linear-gradient(135deg, #54a0ff, #7eb6ff); }
+.zodiac-sign-icon-天蝎座 { background: linear-gradient(135deg, #5f27cd, #7e4cd4); }
+.zodiac-sign-icon-射手座 { background: linear-gradient(135deg, #00d2d3, #4de3e4); }
+.zodiac-sign-icon-摩羯座 { background: linear-gradient(135deg, #8395a7, #a5b1c2); }
+.zodiac-sign-icon-水瓶座 { background: linear-gradient(135deg, #c8d6e5, #dbe4f0); }
+.zodiac-sign-icon-双鱼座 { background: linear-gradient(135deg, #ff9ff3, #ffb8f6); }
+
+/* 星座图标内容 */
+.zodiac-sign-icon::before {
+  content: attr(data-symbol);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.zodiac-sign-icon-sm::before {
+  font-size: 12px;
+}
+
+/* 星座符号映射 */
+.zodiac-sign-icon-白羊座::before { content: "♈"; }
+.zodiac-sign-icon-金牛座::before { content: "♉"; }
+.zodiac-sign-icon-双子座::before { content: "♊"; }
+.zodiac-sign-icon-巨蟹座::before { content: "♋"; }
+.zodiac-sign-icon-狮子座::before { content: "♌"; }
+.zodiac-sign-icon-处女座::before { content: "♍"; }
+.zodiac-sign-icon-天秤座::before { content: "♎"; }
+.zodiac-sign-icon-天蝎座::before { content: "♏"; }
+.zodiac-sign-icon-射手座::before { content: "♐"; }
+.zodiac-sign-icon-摩羯座::before { content: "♑"; }
+.zodiac-sign-icon-水瓶座::before { content: "♒"; }
+.zodiac-sign-icon-双鱼座::before { content: "♓"; }
+
+/* MBTI图标CSS样式 */
+
+/* MBTI图标容器 */
+.mbti-icon {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.mbti-icon-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border-width: 1px;
+}
+
+.mbti-icon-md {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+/* MBTI类型颜色映射 */
+.mbti-icon-ISTJ { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+.mbti-icon-ISFJ { background: linear-gradient(135deg, #10b981, #34d399); }
+.mbti-icon-INFJ { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+.mbti-icon-INTJ { background: linear-gradient(135deg, #6366f1, #818cf8); }
+.mbti-icon-ISTP { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+.mbti-icon-ISFP { background: linear-gradient(135deg, #ef4444, #f87171); }
+.mbti-icon-INFP { background: linear-gradient(135deg, #ec4899, #f472b6); }
+.mbti-icon-INTP { background: linear-gradient(135deg, #14b8a6, #2dd4bf); }
+.mbti-icon-ESTP { background: linear-gradient(135deg, #f97316, #fb923c); }
+.mbti-icon-ESFP { background: linear-gradient(135deg, #eab308, #facc15); }
+.mbti-icon-ENFP { background: linear-gradient(135deg, #84cc16, #a3e635); }
+.mbti-icon-ENTP { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
+.mbti-icon-ESTJ { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.mbti-icon-ESFJ { background: linear-gradient(135deg, #65a30d, #84cc16); }
+.mbti-icon-ENFJ { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+.mbti-icon-ENTJ { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+
+/* MBTI图标内容 */
+.mbti-icon::before {
+  content: attr(data-type);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.5px;
+}
+
+.mbti-icon-sm::before {
+  font-size: 8px;
+}
+
+/* 悬停效果 */
+.zodiac-sign-icon:hover,
+.mbti-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.zodiac-sign-icon-sm:hover,
+.mbti-icon-sm:hover {
+  transform: scale(1.05);
+}
+
+/* 选中状态 */
+.zodiac-sign-icon.selected,
+.mbti-icon.selected {
+  transform: scale(1.15);
+  border-color: #3b82f6;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  animation: pulse 2s infinite;
+}
+
+.zodiac-sign-icon-sm.selected,
+.mbti-icon-sm.selected {
+  transform: scale(1.1);
+}
+
+/* 星座和MBTI网格布局 */
+.zodiac-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.mbti-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 16px;
+}
+
+/* 图标容器布局 */
+.zodiac-sign-icon-container,
+.mbti-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+  position: relative;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.zodiac-sign-icon-label,
+.mbti-icon-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #374151;
+  transition: color 0.3s ease;
+}
+
+.zodiac-sign-icon-container:hover .zodiac-sign-icon-label,
+.mbti-icon-container:hover .mbti-icon-label {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.zodiac-sign-icon-container.selected .zodiac-sign-icon-label,
+.mbti-icon-container.selected .mbti-icon-label {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .zodiac-grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+  
+  .mbti-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .zodiac-sign-icon,
+  .mbti-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .zodiac-sign-icon-label,
+  .mbti-icon-label {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .zodiac-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .mbti-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 8px;
+  }
+  
+  .zodiac-sign-icon,
+  .mbti-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .zodiac-sign-icon-label,
+  .mbti-icon-label {
+    font-size: 9px;
+  }
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .zodiac-sign-icon-label,
+  .mbti-icon-label {
+    color: #d1d5db;
+  }
+  
+  .zodiac-sign-icon-container:hover .zodiac-sign-icon-label,
+  .mbti-icon-container:hover .mbti-icon-label {
+    color: #60a5fa;
+  }
+  
+  .zodiac-sign-icon-container.selected .zodiac-sign-icon-label,
+  .mbti-icon-container.selected .mbti-icon-label {
+    color: #60a5fa;
+  }
+  
+  .zodiac-sign-icon,
+  .mbti-icon {
+    background-color: #374151;
+    border-color: #4b5563;
+  }
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
 import { userConfigManager } from '../utils/userConfigManager';
 import '../styles/zodiac-icons.css';
+import '../styles/zodiac-mbti-icons.css';
 
 // 星座选项
 const ZODIAC_OPTIONS = [
@@ -165,21 +166,57 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             />
           </div>
           
+          {/* 性别 - 移动到出生日期后面 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              性别
+            </label>
+            <div className="gender-options grid grid-cols-3 gap-2">
+              {GENDER_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`p-2 rounded-md text-center transition-all duration-200 text-sm font-medium ${
+                    formData.gender === option.value
+                      ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-sm'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                  onClick={() => handleFieldChange('gender', option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
           {/* 星座 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               星座
             </label>
-            <select
-              value={formData.zodiac}
-              onChange={(e) => handleFieldChange('zodiac', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">请选择星座</option>
-              {ZODIAC_OPTIONS.map(zodiac => (
-                <option key={zodiac} value={zodiac}>{zodiac}</option>
+            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+              点击选择您的星座
+            </div>
+            <div className="zodiac-grid-4">
+              {ZODIAC_OPTIONS.map((zodiac) => (
+                <div 
+                  key={zodiac}
+                  className={`zodiac-sign-icon-container ${formData.zodiac === zodiac ? 'selected' : ''}`}
+                  onClick={() => handleFieldChange('zodiac', zodiac)}
+                >
+                  <div 
+                    className={`zodiac-sign-icon zodiac-sign-icon-sm zodiac-sign-icon-${zodiac} ${formData.zodiac === zodiac ? 'selected' : ''}`}
+                    data-symbol=""
+                  ></div>
+                  <span className="zodiac-sign-icon-label">{zodiac}</span>
+                </div>
               ))}
-            </select>
+            </div>
+            {formData.zodiac && (
+              <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                已选择：<span className="font-medium">{formData.zodiac}</span>
+              </div>
+            )}
           </div>
           
           {/* 生肖 */}
@@ -232,15 +269,29 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               MBTI类型
             </label>
-            <select
-              value={formData.mbti || 'ISFP'}
-              onChange={(e) => handleFieldChange('mbti', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-              {MBTI_OPTIONS.map(type => (
-                <option key={type} value={type}>{type}</option>
+            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+              点击选择您的MBTI类型
+            </div>
+            <div className="mbti-grid">
+              {MBTI_OPTIONS.map((type) => (
+                <div 
+                  key={type}
+                  className={`mbti-icon-container ${formData.mbti === type ? 'selected' : ''}`}
+                  onClick={() => handleFieldChange('mbti', type)}
+                >
+                  <div 
+                    className={`mbti-icon mbti-icon-sm mbti-icon-${type} ${formData.mbti === type ? 'selected' : ''}`}
+                    data-type={type}
+                  ></div>
+                  <span className="mbti-icon-label">{type}</span>
+                </div>
               ))}
-            </select>
+            </div>
+            {formData.mbti && (
+              <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                已选择：<span className="font-medium">{formData.mbti}</span>
+              </div>
+            )}
           </div>
           
           {/* 操作按钮 */}
