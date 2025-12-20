@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
 import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
-
-// 解构赋值确保函数正确导入
-const { 
-  HOROSCOPE_DATA_ENHANCED, 
-  generateDailyHoroscope 
-} = horoscopeAlgorithm;
-
-// 创建别名以保持向后兼容性
-const getHoroscopeData = () => HOROSCOPE_DATA_ENHANCED;
 import {
   getDailyHoroscopeWithCache,
   initializeHoroscopeCache
@@ -22,6 +13,15 @@ import performanceMonitor from '../utils/performanceMonitor';
 import timeCacheManager, { getToday, getDateString } from '../utils/timeCache';
 import '../styles/mobileOptimization.css';
 import '../styles/animations.css';
+
+// 解构赋值确保函数正确导入
+const { 
+  HOROSCOPE_DATA_ENHANCED, 
+  generateDailyHoroscope 
+} = horoscopeAlgorithm;
+
+// 创建别名以保持向后兼容性
+const getHoroscopeData = () => HOROSCOPE_DATA_ENHANCED;
 
 const HoroscopeTab = () => {
   // 状态管理
