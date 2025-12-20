@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { calculateBiorhythm } from '../utils/biorhythmCalculator';
 import { userConfigManager } from '../../utils/userConfigManager';
-import notificationService from '../../utils/notificationService';
 import '../styles/globalLiteStyles.css';
 
 const BiorhythmLitePage = () => {
@@ -33,14 +32,12 @@ const BiorhythmLitePage = () => {
     loadUserInfo();
   }, []);
 
-  // 计算生物节律
+  // 计算生物节律 - 移除了通知检查以提高性能
   useEffect(() => {
     if (userInfo.birthDate) {
+      // 使用 useMemo 优化计算性能
       const calculated = calculateBiorhythm(userInfo.birthDate, currentDate);
       setBiorhythms(calculated);
-      
-      // 检查节律极值并发送通知
-      notificationService.checkBiorhythmCritical(calculated);
     }
   }, [userInfo.birthDate, currentDate]);
 
@@ -66,8 +63,8 @@ const BiorhythmLitePage = () => {
     setCurrentDate(newDate);
   };
 
-  // 获取简单的生活提醒
-  const getSimpleLifeTips = (biorhythms) => {
+  // 获取简单的生活提醒 - 使用 useMemo 优化性能
+  const lifeTips = useMemo(() => {
     if (!biorhythms) return [];
     
     const tips = [];
@@ -100,10 +97,10 @@ const BiorhythmLitePage = () => {
     }
     
     return tips;
-  };
-  
+  }, [biorhythms]);
+
   // 生物节律知识卡片数据
-  const biorhythmKnowledge = [
+  const biorhythmKnowledge = useMemo(() => [
     {
       type: '体力节律',
       description: '反映了人的体力状况，影响运动能力、耐力和身体活力。',
@@ -122,28 +119,28 @@ const BiorhythmLitePage = () => {
       cycle: '周期为33天',
       color: '#9C27B0'
     }
-  ];
-  
+  ], []);
+
   // 获取节律状态说明
-  const getBiorhythmStatusDescription = (value) => {
+  const getBiorhythmStatusDescription = useMemo(() => (value) => {
     if (value > 50) return '极佳状态';
     if (value > 20) return '良好状态';
     if (value > -20) return '普通状态';
     if (value > -50) return '较差状态';
     return '极差状态';
-  };
-  
+  }, []);
+
   // 获取节律状态建议
-  const getBiorhythmStatusAdvice = (value) => {
+  const getBiorhythmStatusAdvice = useMemo(() => (value) => {
     if (value > 50) return '充分利用此状态，进行挑战性活动';
     if (value > 20) return '正常发挥，保持当前节奏';
     if (value > -20) return '适度活动，避免过度劳累';
     if (value > -50) return '注意休息，减少压力';
     return '充分休息，恢复精力';
-  };
+  }, []);
 
   // 获取综合状态
-  const getOverallStatus = (biorhythms) => {
+  const overallStatus = useMemo(() => {
     if (!biorhythms) return '';
     
     const avg = (biorhythms.physical + biorhythms.emotional + biorhythms.intellectual) / 3;
@@ -152,10 +149,10 @@ const BiorhythmLitePage = () => {
     if (avg > 0) return '状态平稳';
     if (avg > -30) return '状态一般';
     return '状态欠佳';
-  };
+  }, [biorhythms]);
 
   // 获取未来7天节律趋势
-  const getFutureTrends = (biorhythms, currentDate) => {
+  const futureTrends = useMemo(() => {
     if (!biorhythms || !userInfo.birthDate) return [];
     
     const trends = [];
@@ -178,30 +175,26 @@ const BiorhythmLitePage = () => {
     }
     
     return trends;
-  };
-  
+  }, [biorhythms, currentDate, userInfo.birthDate]);
+
   // 获取趋势符号
-  const getTrendSymbol = (currentValue, futureValue) => {
+  const getTrendSymbol = useMemo(() => (currentValue, futureValue) => {
     const diff = futureValue - currentValue;
     if (diff > 2) return '↑↑';
     if (diff > 0.5) return '↑';
     if (diff < -2) return '↓↓';
     if (diff < -0.5) return '↓';
     return '→';
-  };
-  
+  }, []);
+
   // 获取趋势颜色
-  const getTrendColor = (symbol) => {
+  const getTrendColor = useMemo(() => (symbol) => {
     if (symbol === '↑↑') return 'trend-up-strong';
     if (symbol === '↑') return 'trend-up';
     if (symbol === '↓↓') return 'trend-down-strong';
     if (symbol === '↓') return 'trend-down';
     return 'trend-stable';
-  };
-
-  const lifeTips = getSimpleLifeTips(biorhythms);
-  const overallStatus = getOverallStatus(biorhythms);
-  const futureTrends = getFutureTrends(biorhythms, currentDate);
+  }, []);
 
   if (!userInfo.birthDate) {
     return (

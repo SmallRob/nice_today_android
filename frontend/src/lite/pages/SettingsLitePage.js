@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { userConfigManager } from '../../utils/userConfigManager';
-import notificationService from '../../utils/notificationService';
 
 const SettingsLitePage = ({ userInfo, setUserInfo }) => {
   const [formData, setFormData] = useState({
@@ -9,24 +8,6 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
     birthDate: userInfo.birthDate || ''
   });
   const [saveStatus, setSaveStatus] = useState('');
-  
-  // 通知设置状态
-  const [notificationSettings, setNotificationSettings] = useState({
-    enabled: false,
-    morningTime: '07:00',
-    eveningTime: '21:00',
-    permissionGranted: false
-  });
-
-  // 加载通知设置
-  useEffect(() => {
-    const loadNotificationSettings = () => {
-      const settings = notificationService.getSettings();
-      setNotificationSettings(settings);
-    };
-    
-    loadNotificationSettings();
-  }, []);
 
   useEffect(() => {
     setFormData({
@@ -85,47 +66,6 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
     
     // 重新加载页面以切换到完整版
     window.location.reload();
-  };
-
-  // 处理通知设置变更
-  const handleNotificationChange = (field, value) => {
-    const newSettings = {
-      ...notificationSettings,
-      [field]: value
-    };
-    
-    setNotificationSettings(newSettings);
-    
-    // 更新通知服务设置
-    notificationService.updateSettings(newSettings);
-  };
-
-  // 请求通知权限
-  const handleRequestPermission = async () => {
-    const granted = await notificationService.requestPermission();
-    setNotificationSettings(prev => ({
-      ...prev,
-      permissionGranted: granted
-    }));
-    
-    if (granted) {
-      alert('通知权限已授权！');
-    } else {
-      alert('通知权限被拒绝，请在浏览器设置中手动开启。');
-    }
-  };
-
-  // 测试通知
-  const handleTestNotification = () => {
-    if (!notificationSettings.permissionGranted) {
-      alert('请先授权通知权限');
-      return;
-    }
-    
-    notificationService.sendNotification(
-      '测试通知',
-      '这是一个测试通知，确认通知功能正常工作。'
-    );
   };
 
   // 切换到轻量版
@@ -216,88 +156,6 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
             保持轻量版
           </button>
         </div>
-      </div>
-      
-      {/* 通知设置 */}
-      <div className="lite-card">
-        <h3>通知设置</h3>
-        
-        {!notificationSettings.permissionGranted ? (
-          <div style={{marginBottom: '15px'}}>
-            <p style={{color: '#ff9800', marginBottom: '10px'}}>
-              通知权限未授权，需要授权后才能接收提醒
-            </p>
-            <button 
-              className="lite-button" 
-              onClick={handleRequestPermission}
-              style={{backgroundColor: '#ff9800'}}
-            >
-              授权通知权限
-            </button>
-          </div>
-        ) : (
-          <div style={{marginBottom: '15px'}}>
-            <p style={{color: '#4CAF50', marginBottom: '10px'}}>
-              ✓ 通知权限已授权
-            </p>
-            <button 
-              className="lite-button" 
-              onClick={handleTestNotification}
-              style={{backgroundColor: '#2196F3', marginBottom: '10px'}}
-            >
-              测试通知
-            </button>
-          </div>
-        )}
-        
-        <div style={{display: 'flex', alignItems: 'center', marginBottom: '15px'}}>
-          <input
-            type="checkbox"
-            id="notificationEnabled"
-            checked={notificationSettings.enabled}
-            onChange={(e) => handleNotificationChange('enabled', e.target.checked)}
-            disabled={!notificationSettings.permissionGranted}
-            style={{marginRight: '10px'}}
-          />
-          <label htmlFor="notificationEnabled">启用通知提醒</label>
-        </div>
-        
-        {notificationSettings.enabled && notificationSettings.permissionGranted && (
-          <>
-            <div style={{marginBottom: '15px'}}>
-              <label htmlFor="morningTime" style={{display: 'block', marginBottom: '5px'}}>
-                早上提醒时间:
-              </label>
-              <input
-                type="time"
-                id="morningTime"
-                value={notificationSettings.morningTime}
-                onChange={(e) => handleNotificationChange('morningTime', e.target.value)}
-                className="lite-input"
-                style={{width: '120px'}}
-              />
-            </div>
-            
-            <div style={{marginBottom: '15px'}}>
-              <label htmlFor="eveningTime" style={{display: 'block', marginBottom: '5px'}}>
-                晚上提醒时间:
-              </label>
-              <input
-                type="time"
-                id="eveningTime"
-                value={notificationSettings.eveningTime}
-                onChange={(e) => handleNotificationChange('eveningTime', e.target.value)}
-                className="lite-input"
-                style={{width: '120px'}}
-              />
-            </div>
-            
-            <div style={{fontSize: '14px', color: '#666'}}>
-              <p>• 系统会在指定时间推送节律提醒</p>
-              <p>• 当节律值达到极值（≤-90或≥90）时，会额外推送预警提醒</p>
-            </div>
-          </>
-        )}
       </div>
 
       <div className="lite-card">
