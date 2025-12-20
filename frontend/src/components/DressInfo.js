@@ -186,7 +186,7 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 performance-optimized">
       {/* 页面标题和说明 */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg p-4">
         <h2 className="text-xl font-bold mb-1">五行穿衣与饮食指南</h2>

@@ -1,13 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import BiorhythmTab from './BiorhythmTab';
-import ZodiacEnergyTab from './ZodiacEnergyTab';
-import HoroscopeTabNew from './HoroscopeTabNew';
-import MBTIPersonalityTabHome from './MBTIPersonalityTabHome';
-import MayaCalendarTab from './MayaCalendarTab';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { BiorhythmIcon, IconLibrary } from './IconLibrary';
 import PageLayout from './PageLayout';
 import DarkModeToggle from './DarkModeToggle';
+import { useTabPerformance } from '../utils/tabPerformanceMonitor';
 import '../styles/animations.css';
+
+// 懒加载组件 - 提升初始加载性能
+const BiorhythmTab = lazy(() => import('./BiorhythmTab'));
+const ZodiacEnergyTab = lazy(() => import('./ZodiacEnergyTab'));
+const HoroscopeTabNew = lazy(() => import('./HoroscopeTabLite'));
+const MBTIPersonalityTabHome = lazy(() => import('./MBTIPersonalityTabHome'));
+const MayaCalendarTab = lazy(() => import('./MayaCalendarTab'));
+
+  // 加载占位符组件
+const TabLoadingPlaceholder = () => (
+  <div className="flex justify-center items-center py-8">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+      <p className="text-gray-600 dark:text-gray-400 text-sm">正在加载内容...</p>
+    </div>
+  </div>
+);
+
+// 错误边界组件
+const ErrorBoundaryFallback = ({ error, resetError }) => (
+  <div className="flex-1 flex items-center justify-center p-4">
+    <div className="text-center">
+      <div className="text-4xl mb-3">❌</div>
+      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        加载出错
+      </h3>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+        {error?.message || '未知错误'}
+      </p>
+      <button 
+        onClick={resetError}
+        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        重试
+      </button>
+    </div>
+  </div>
+);
 
 const BiorhythmDashboard = ({ appInfo = {} }) => {
   const [loading, setLoading] = useState(true);
@@ -15,6 +49,81 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   const [serviceStatus, setServiceStatus] = useState({
     biorhythm: true
   });
+  const [loadedTabs, setLoadedTabs] = useState(new Set(['biorhythm'])); // 预加载当前标签
+  const [tabTransition, setTabTransition] = useState(false);
+  const [error, setError] = useState(null);
+  const [fallbackMode, setFallbackMode] = useState(false);
+  
+  // 性能监控
+  const { measureTabSwitch } = useTabPerformance();
+  
+  // 优化的内存管理：减少清理频率
+  const cleanupUnusedTabs = useCallback((currentTab) => {
+    // 仅在内存压力较大时清理，减少不必要的状态更新
+    const shouldCleanup = performance.memory && performance.memory.usedJSHeapSize > 50 * 1024 * 1024; // 超过50MB
+    
+    if (shouldCleanup) {
+      setTimeout(() => {
+        setLoadedTabs(prev => {
+          const newSet = new Set(prev);
+          // 保留当前标签和相邻标签
+          const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
+          const currentIndex = tabOrder.indexOf(currentTab);
+          const tabsToKeep = [
+            currentTab,
+            tabOrder[currentIndex - 1],
+            tabOrder[currentIndex + 1]
+          ].filter(Boolean);
+          
+          // 仅清理长时间未使用的标签
+          Array.from(newSet).forEach(tab => {
+            if (!tabsToKeep.includes(tab)) {
+              newSet.delete(tab);
+            }
+          });
+          
+          return newSet;
+        });
+      }, 10000); // 10秒后清理，减少频繁更新
+    }
+  }, []);
+  
+  // 错误处理函数
+  const handleError = useCallback((error, context) => {
+    console.error(`[${context}] 组件错误:`, error);
+    setError(`加载失败: ${error.message || '未知错误'}`);
+    
+    // 如果错误严重，启用降级模式
+    if (error.name === 'ChunkLoadError' || error.message?.includes('加载失败')) {
+      setFallbackMode(true);
+    }
+    
+    // 自动恢复机制
+    setTimeout(() => {
+      setError(null);
+    }, 5000);
+  }, []);
+  
+  // 降级模式组件
+  const FallbackComponent = useCallback(() => (
+    <div className="flex-1 flex items-center justify-center p-4">
+      <div className="text-center">
+        <div className="text-4xl mb-3">⚠️</div>
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          功能暂时不可用
+        </h3>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">
+          当前功能正在维护中，请稍后再试
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          刷新页面
+        </button>
+      </div>
+    </div>
+  ), []);
 
   // 检测服务状态
   const checkServiceStatus = async () => {
@@ -27,6 +136,79 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
     setLoading(false);
   };
+
+  // 优化的预加载策略
+  const preloadAdjacentTabs = useCallback((currentTab) => {
+    const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
+    const currentIndex = tabOrder.indexOf(currentTab);
+    
+    if (currentIndex === -1) return;
+    
+    // 优先预加载紧邻标签，延迟预加载较远标签
+    const immediateTabs = [
+      tabOrder[currentIndex - 1],
+      tabOrder[currentIndex + 1]
+    ].filter(Boolean);
+    
+    // 立即预加载紧邻标签
+    if (immediateTabs.length > 0) {
+      setLoadedTabs(prev => {
+        const newSet = new Set(prev);
+        immediateTabs.forEach(tab => newSet.add(tab));
+        return newSet;
+      });
+    }
+    
+    // 延迟预加载更远的标签
+    const distantTabs = [
+      tabOrder[currentIndex - 2],
+      tabOrder[currentIndex + 2]
+    ].filter(Boolean);
+    
+    if (distantTabs.length > 0) {
+      setTimeout(() => {
+        setLoadedTabs(prev => {
+          const newSet = new Set(prev);
+          distantTabs.forEach(tab => newSet.add(tab));
+          return newSet;
+        });
+      }, 500);
+    }
+  }, []);
+
+  // 高性能标签切换函数
+  const handleTabChange = useCallback((tabId) => {
+    if (tabId === activeTab) return;
+    
+    // 性能监控
+    const endMeasurement = measureTabSwitch(activeTab, tabId);
+    
+    // 立即更新活跃标签，不等待动画
+    setActiveTab(tabId);
+    
+    // 标记新标签为已加载
+    setLoadedTabs(prev => {
+      const newSet = new Set(prev);
+      newSet.add(tabId);
+      return newSet;
+    });
+    
+    // 异步处理其他任务，不阻塞UI更新
+    requestAnimationFrame(() => {
+      // 预加载相邻标签
+      preloadAdjacentTabs(tabId);
+      
+      // 清理未使用的标签数据（延迟执行）
+      setTimeout(() => cleanupUnusedTabs(tabId), 1000);
+      
+      // 结束性能测量
+      if (endMeasurement) setTimeout(endMeasurement, 50);
+    });
+    
+    // 轻量级切换效果（可选）
+    setTabTransition(true);
+    setTimeout(() => setTabTransition(false), 100);
+  }, [activeTab, preloadAdjacentTabs, cleanupUnusedTabs, measureTabSwitch]);
 
   useEffect(() => {
     let isMounted = true;
@@ -116,10 +298,9 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   }
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 safe-area-inset-top">
-      <div className="app-scroll-content optimized-scroll">
-        <div className="max-w-6xl mx-auto space-y-3 p-2">
-
+    <div className="flex-1 flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 safe-area-inset-top">
+      {/* 固定顶部区域 */}
+      <div className="sticky top-0 z-10 space-y-3 p-2 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
         {/* Nice Today 应用banner */}
         <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
           <div className="p-3 flex items-center justify-between">
@@ -170,12 +351,13 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 text-center font-medium transition-all duration-200 rounded-md relative overflow-hidden ${
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`py-2 px-1 text-center font-medium transition-all duration-200 rounded-md relative overflow-hidden touch-manipulation performance-optimized ${
                     isActive
                       ? 'bg-white dark:bg-gray-700 shadow-sm transform scale-105'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-gray-700/70'
-                  }`}
+                  } ${tabTransition ? 'pointer-events-none' : ''}`}
+                  style={{ touchAction: 'manipulation' }}
                 >
                   {/* 活跃指示器 - 增强高亮效果 */}
                   {isActive && (
@@ -211,32 +393,70 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               })}
             </div>
           </div>
-
-          {/* 标签内容 - 优化间距 */}
-          <div className="p-3">
-            <div className="animate-fade-in">
-              {activeTab === 'biorhythm' && (
-                <BiorhythmTab 
-                  serviceStatus={serviceStatus.biorhythm}
-                  isDesktop={appInfo.isDesktop}
-                />
-              )}
-              {activeTab === 'zodiac' && (
-                <ZodiacEnergyTab />
-              )}
-              {activeTab === 'maya' && (
-                <MayaCalendarTab />
-              )}
-              {activeTab === 'horoscope' && (
-                <HoroscopeTabNew />
-              )}
-              {activeTab === 'mbti' && (
-                <MBTIPersonalityTabHome />
-              )}
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* 可滚动内容区域 - 性能优化 */}
+      <div className="flex-1 overflow-auto optimized-scroll scroll-performance-optimized p-2"
+           style={{ 
+             WebkitOverflowScrolling: 'touch',
+             scrollBehavior: 'smooth',
+             overscrollBehavior: 'contain'
+           }}>
+        <div className="max-w-6xl mx-auto space-y-3">
+          {/* 错误显示 */}
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4">
+              <div className="flex items-center">
+                <span className="text-red-500 mr-2">⚠️</span>
+                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+                <button 
+                  onClick={() => setError(null)}
+                  className="ml-auto text-red-500 hover:text-red-700"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* 标签内容 - 高性能渲染优化 */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border-0 dark:border dark:border-gray-700 overflow-hidden p-3">
+            {fallbackMode ? (
+              <FallbackComponent />
+            ) : (
+              <Suspense fallback={<TabLoadingPlaceholder />}>
+                {activeTab === 'biorhythm' && loadedTabs.has('biorhythm') && (
+                  <BiorhythmTab 
+                    serviceStatus={serviceStatus.biorhythm}
+                    isDesktop={appInfo.isDesktop}
+                    onError={(error) => handleError(error, 'BiorhythmTab')}
+                  />
+                )}
+                {activeTab === 'zodiac' && loadedTabs.has('zodiac') && (
+                  <ZodiacEnergyTab 
+                    onError={(error) => handleError(error, 'ZodiacEnergyTab')}
+                  />
+                )}
+                {activeTab === 'maya' && loadedTabs.has('maya') && (
+                  <MayaCalendarTab 
+                    onError={(error) => handleError(error, 'MayaCalendarTab')}
+                  />
+                )}
+                {activeTab === 'horoscope' && loadedTabs.has('horoscope') && (
+                  <HoroscopeTabNew 
+                    onError={(error) => handleError(error, 'HoroscopeTabNew')}
+                  />
+                )}
+                {activeTab === 'mbti' && loadedTabs.has('mbti') && (
+                  <MBTIPersonalityTabHome 
+                    onError={(error) => handleError(error, 'MBTIPersonalityTabHome')}
+                  />
+                )}
+              </Suspense>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
 import { userConfigManager } from '../utils/userConfigManager';
+import '../styles/zodiac-icons.css';
 
 // 星座选项
 const ZODIAC_OPTIONS = [
@@ -186,16 +187,28 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               生肖
             </label>
-            <select
-              value={formData.zodiacAnimal}
-              onChange={(e) => handleFieldChange('zodiacAnimal', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">请选择生肖</option>
-              {ZODIAC_ANIMAL_OPTIONS.map(animal => (
-                <option key={animal} value={animal}>{animal}</option>
+            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+              点击选择您的生肖
+            </div>
+            <div className="zodiac-grid">
+              {ZODIAC_ANIMAL_OPTIONS.map((animal) => (
+                <div 
+                  key={animal}
+                  className={`zodiac-icon-container ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
+                  onClick={() => handleFieldChange('zodiacAnimal', animal)}
+                >
+                  <div 
+                    className={`zodiac-icon zodiac-icon-sm zodiac-icon-${animal} ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
+                  ></div>
+                  <span className="zodiac-icon-label">{animal}</span>
+                </div>
               ))}
-            </select>
+            </div>
+            {formData.zodiacAnimal && (
+              <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                已选择：<span className="font-medium">{formData.zodiacAnimal}</span>
+              </div>
+            )}
           </div>
           
           {/* 性别 */}

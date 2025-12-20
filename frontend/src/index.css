@@ -378,3 +378,172 @@ code {
     margin-top: 3.5rem;
   }
 }
+
+/* 穿衣养生页面特定滚动优化 */
+.dress-health-scroll-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  /* 防止页面缩放导致的布局问题 */
+  -webkit-text-size-adjust: 100%;
+}
+
+.dress-health-fixed-header {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1000;
+  /* 确保固定区域不会被内容覆盖 */
+  background: inherit;
+}
+
+.dress-health-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  /* 优化滚动性能 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 性能优化类 - 增强版 */
+.performance-optimized {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+  will-change: transform, scroll-position;
+  /* 防止重排重绘 */
+  contain: layout style paint;
+}
+
+/* 滚动容器性能优化 */
+.scroll-performance-optimized {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  /* 硬件加速 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  /* 防止滚动抖动 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* 优化滚动性能 */
+  will-change: transform, scroll-position;
+}
+
+/* 隐藏滚动条优化 */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* 移动端滚动性能优化 */
+@media (max-width: 768px) {
+  .dress-health-scroll-container {
+    height: 100vh;
+    min-height: -webkit-fill-available;
+    /* 移动端安全区域适配 */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .dress-health-scroll-content {
+    /* 更精确的高度计算，考虑安全区域 */
+    height: calc(100vh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: calc(100vh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    /* 移动端滚动优化 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* 移动端滚动性能增强 */
+  .scroll-performance-optimized {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+}
+
+/* 防止内容跳动 - 增强版 */
+.scroll-stable {
+  contain: layout style paint;
+  content-visibility: auto;
+  /* 防止布局抖动 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 滚动防抖优化 */
+.scroll-debounced {
+  scroll-snap-type: y proximity;
+  scroll-padding: 0;
+}
+
+/* 触摸操作优化 */
+.touch-optimized {
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 设置页面特定滚动优化 */
+.settings-scroll-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  /* 防止页面缩放导致的布局问题 */
+  -webkit-text-size-adjust: 100%;
+}
+
+.settings-fixed-header {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1000;
+  /* 确保固定区域不会被内容覆盖 */
+  background: inherit;
+}
+
+.settings-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  /* 优化滚动性能 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 移动端设置页面滚动优化 */
+@media (max-width: 768px) {
+  .settings-scroll-container {
+    height: 100vh;
+    min-height: -webkit-fill-available;
+    /* 移动端安全区域适配 */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .settings-scroll-content {
+    /* 更精确的高度计算，考虑安全区域 */
+    height: calc(100vh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: calc(100vh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    /* 移动端滚动优化 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+}

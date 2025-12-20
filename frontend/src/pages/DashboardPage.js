@@ -71,43 +71,41 @@ function DashboardPage() {
   }, []);
 
   return (
-    <div className="flex-1 relative bg-white dark:bg-gray-900 animate-fade-in">
-      <div className="absolute inset-0 app-scroll-container">
-        {appInfo.status === 'loading' && (
-          <div className="flex justify-center items-center h-32">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <p className="text-gray-600 dark:text-gray-400">正在加载...</p>
-            </div>
+    <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 animate-fade-in">
+      {appInfo.status === 'loading' && (
+        <div className="flex justify-center items-center h-32">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+            <p className="text-gray-600 dark:text-gray-400">正在加载...</p>
           </div>
-        )}
-        
-        {appInfo.status === 'initializing' && (
-          <div className="flex justify-center items-center h-32">
-            <div className="text-center">
-              <div className="animate-pulse">
-                <div className="h-8 w-8 bg-blue-500 rounded-full mx-auto mb-2"></div>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400">正在初始化应用...</p>
+        </div>
+      )}
+      
+      {appInfo.status === 'initializing' && (
+        <div className="flex justify-center items-center h-32">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 w-8 bg-blue-500 rounded-full mx-auto mb-2"></div>
             </div>
+            <p className="text-gray-600 dark:text-gray-400">正在初始化应用...</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {appInfo.status === 'ready' && (
-          <div className="pb-safe-bottom">
-            <BiorhythmDashboard appInfo={appInfo} />
+      {appInfo.status === 'ready' && (
+        <div className="flex-1 flex flex-col pb-safe-bottom">
+          <BiorhythmDashboard appInfo={appInfo} />
+        </div>
+      )}
+      
+      {appInfo.status === 'error' && (
+        <div className="flex justify-center items-center h-32">
+          <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg max-w-md mx-auto">
+            <p className="text-red-600 dark:text-red-400">应用初始化失败</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{appInfo.error}</p>
           </div>
-        )}
-        
-        {appInfo.status === 'error' && (
-          <div className="flex justify-center items-center h-32">
-            <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg max-w-md mx-auto">
-              <p className="text-red-600 dark:text-red-400">应用初始化失败</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{appInfo.error}</p>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

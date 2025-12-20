@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
+import '../styles/zodiac-icons.css';
 
 // 生肖能量组件配置管理器 - 仅用于读取默认配置
 class ZodiacEnergyConfigManager {
@@ -751,32 +752,15 @@ const ZodiacEnergyTab = () => {
             
             {/* 生肖选择网格 */}
             <div className="mb-3">
-              <div className="grid grid-cols-6 gap-2">
+              <div className="zodiac-grid">
                 {(allZodiacs.length > 0 ? allZodiacs : ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']).map((zodiac) => {
                   const isTempSelected = tempZodiac === zodiac && tempZodiac !== userInfo.zodiacAnimal;
                   const isUserConfig = userInfo.zodiacAnimal === zodiac;
-                  const zodiacColors = {
-                    '鼠': '#f97316', '牛': '#84cc16', '虎': '#ef4444', '兔': '#ec4899',
-                    '龙': '#a855f7', '蛇': '#06b6d4', '马': '#fbbf24', '羊': '#10b981',
-                    '猴': '#f59e0b', '鸡': '#eab308', '狗': '#22c55e', '猪': '#3b82f6'
-                  };
-                  const color = zodiacColors[zodiac] || '#6b7280';
                   
                   return (
-                    <button
+                    <div 
                       key={zodiac}
-                      onClick={() => handleZodiacChange(zodiac)}
-                      className={`p-2 rounded text-center transition-all duration-200 text-sm font-medium relative overflow-hidden ${
-                        userZodiac === zodiac
-                          ? 'ring-2 ring-offset-1 shadow-sm transform scale-110'
-                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
-                      }`}
-                      style={{
-                        backgroundColor: userZodiac === zodiac ? color : undefined,
-                        color: userZodiac === zodiac ? 'white' : undefined,
-                        borderColor: color,
-                        borderWidth: userZodiac === zodiac ? '2px' : '1px'
-                      }}
+                      className={`zodiac-icon-container ${userZodiac === zodiac ? 'selected' : ''}`}
                       title={
                         isUserConfig 
                           ? '您的配置生肖类型' 
@@ -785,28 +769,21 @@ const ZodiacEnergyTab = () => {
                             : `查看${zodiac}类型能量指引`
                       }
                     >
-                      {/* 选中状态的高亮效果 */}
-                      {userZodiac === zodiac && (
-                        <>
-                          <span 
-                            className="absolute inset-0 rounded animate-pulse opacity-30"
-                            style={{ backgroundColor: color }}
-                          ></span>
-                          <span 
-                            className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-white"
-                          ></span>
-                        </>
-                      )}
-                      <span className="relative z-10">{zodiac}</span>
-                      {/* 用户配置标记 */}
-                      {isUserConfig && (
-                        <span className="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full animate-pulse" title="您的配置"></span>
-                      )}
-                      {/* 临时查看标记 */}
-                      {isTempSelected && (
-                        <span className="absolute top-0 right-0 w-2 h-2 bg-orange-500 rounded-full animate-pulse" title="临时查看"></span>
-                      )}
-                    </button>
+                      <div 
+                        className={`zodiac-icon zodiac-icon-md zodiac-icon-${zodiac} ${userZodiac === zodiac ? 'selected' : ''}`}
+                        onClick={() => handleZodiacChange(zodiac)}
+                      >
+                        {/* 用户配置标记 */}
+                        {isUserConfig && (
+                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse border border-white" title="您的配置"></span>
+                        )}
+                        {/* 临时查看标记 */}
+                        {isTempSelected && (
+                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse border border-white" title="临时查看"></span>
+                        )}
+                      </div>
+                      <span className="zodiac-icon-label">{zodiac}</span>
+                    </div>
                   );
                 })}
               </div>

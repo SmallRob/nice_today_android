@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DarkModeToggle from '../components/DarkModeToggle';
 import PerformanceTestTool from '../components/PerformanceTestTool';
 import UserConfigManager from '../components/UserConfigManager';
@@ -26,6 +26,16 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [tabTransition, setTabTransition] = useState(false);
   const [error, setError] = useState(null);
+  
+  // 滚动容器引用
+  const scrollContainerRef = useRef(null);
+
+  // 滚动到顶部函数
+  const scrollToTop = useCallback(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, []);
 
   // 优化标签切换函数
   const handleTabChange = useCallback((tab) => {
@@ -38,12 +48,20 @@ function SettingsPage() {
     newUrl.searchParams.set('tab', tab);
     window.history.replaceState({}, '', newUrl);
     
+    // 滚动到顶部
+    scrollToTop();
+    
     // 延迟切换标签，添加动画效果
     setTimeout(() => {
       setActiveTab(tab);
       setTabTransition(false);
     }, 150);
-  }, [activeTab, tabTransition]);
+  }, [activeTab, tabTransition, scrollToTop]);
+
+  // 标签切换时自动滚动到顶部
+  useEffect(() => {
+    scrollToTop();
+  }, [activeTab, scrollToTop]);
 
   useEffect(() => {
     const loadAppInfo = async () => {
@@ -140,234 +158,246 @@ function SettingsPage() {
 
   return (
     <PageLayout title="设置">
-      <div className="max-w-4xl mx-auto">
-        {/* 错误提示 */}
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4 rounded-lg mb-6">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <p className="text-red-700 dark:text-red-300">{error}</p>
+      <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 settings-scroll-container">
+        {/* 固定顶部区域 - 包含错误提示和标签导航 */}
+        <div className="flex-shrink-0 settings-fixed-header">
+          {/* 错误提示 */}
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <p className="text-red-700 dark:text-red-300">{error}</p>
+              </div>
+            </div>
+          )}
+          
+          {/* 标签导航 */}
+          <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex">
+                <button
+                  className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
+                    activeTab === 'app'
+                      ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => handleTabChange('app')}
+                  disabled={tabTransition}
+                >
+                  应用设置
+                  {activeTab === 'app' && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
+                  )}
+                </button>
+                <button
+                  className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
+                    activeTab === 'userConfigs'
+                      ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => handleTabChange('userConfigs')}
+                  disabled={tabTransition}
+                >
+                  用户配置
+                  {activeTab === 'userConfigs' && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
+                  )}
+                </button>
+                <button
+                  className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
+                    activeTab === 'about'
+                      ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => handleTabChange('about')}
+                  disabled={tabTransition}
+                >
+                  关于
+                  {activeTab === 'about' && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        )}
-        
-        {/* 标签导航 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 mb-6 overflow-hidden">
-          <div className="flex">
-            <button
-              className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
-                activeTab === 'app'
-                  ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-              } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
-              onClick={() => handleTabChange('app')}
-              disabled={tabTransition}
-            >
-              应用设置
-              {activeTab === 'app' && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-              )}
-            </button>
-            <button
-              className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
-                activeTab === 'userConfigs'
-                  ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-              } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
-              onClick={() => handleTabChange('userConfigs')}
-              disabled={tabTransition}
-            >
-              用户配置
-              {activeTab === 'userConfigs' && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-              )}
-            </button>
-            <button
-              className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
-                activeTab === 'about'
-                  ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-              } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
-              onClick={() => handleTabChange('about')}
-              disabled={tabTransition}
-            >
-              关于
-              {activeTab === 'about' && (
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-              )}
-            </button>
-          </div>
         </div>
-        
-        {/* 标签内容 */}
-        <div className="space-y-6">
-          <div className={`transition-all duration-300 ${tabTransition ? 'opacity-50' : 'opacity-100'}`}>
-            {activeTab === 'app' && (
-              <div className="space-y-6">
-                {/* 应用设置部分 */}
-                <Card title="应用设置">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between py-3">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
-                      </div>
-                      <DarkModeToggle />
-                    </div>
-                    
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">通知提醒</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">接收生物节律变化提醒</p>
-                      </div>
-                      <label className="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked={true} />
-                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                      </label>
-                    </div>
-                    
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <div className="mb-4">
-                        <p className="font-medium text-gray-900 dark:text-white">API服务地址</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置后端服务地址</p>
-                        <input 
-                          type="text" 
-                          value={apiBaseUrl}
-                          onChange={handleApiBaseUrlChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                          placeholder="https://nice-mcp.leansoftx.com/api"
-                        />
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">使用本地计算</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">启用后将使用本地JavaScript计算代替API调用</p>
-                        </div>
-                        <label className="inline-flex items-center cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="sr-only peer" 
-                            checked={useLocalCalculation}
-                            onChange={handleUseLocalCalculationChange}
-                          />
-                          <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        </label>
-                      </div>
-                    </div>
-                    
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">数据同步</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">自动备份您的数据</p>
-                      </div>
-                      <label className="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked={true} />
-                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                      </label>
-                    </div>
-                    
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">缓存超时时间</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置数据缓存的有效时间</p>
-                        <select 
-                          value={cacheTimeout}
-                          onChange={handleCacheTimeoutChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        >
-                          <option value="60000">1分钟</option>
-                          <option value="120000">2分钟</option>
-                          <option value="180000">3分钟</option>
-                          <option value="300000">5分钟</option>
-                          <option value="600000">10分钟</option>
-                          <option value="1800000">30分钟</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-                
-                {/* 其他设置 */}
-                <Card title="其他">
-                  <div className="space-y-1">
-                    <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                      <span className="font-medium text-gray-900 dark:text-white">用户协议</span>
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    
-                    <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                      <span className="font-medium text-gray-900 dark:text-white">隐私政策</span>
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                    
-                    <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                      <span className="font-medium text-gray-900 dark:text-white">意见反馈</span>
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-                </Card>
-              </div>
-            )}
-            
-            {activeTab === 'userConfigs' && (
-              <div className="transition-all duration-300 transform">
-                <UserConfigManager />
-              </div>
-            )}
-            
-            {activeTab === 'about' && (
-              <div className="transition-all duration-300 transform">
-                <Card title="关于">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between py-2">
-                      <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                      <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-                        {platformInfo.isNative ? 
-                          (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) : 
-                          'Web'
-                        }
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                      <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
-                    </div>
-                    
-                    {/* 性能测试工具 */}
-                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <PerformanceTestTool />
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* 仅在原生应用中显示的重置按钮 */}
-        {platformInfo.isNative && (
-          <Button 
-            variant="danger" 
-            className="w-full py-3 mt-6"
+
+        {/* 独立滚动的内容区域 */}
+        <div className="flex-1 overflow-hidden">
+          <div 
+            ref={scrollContainerRef}
+            className="h-full overflow-y-auto optimized-scroll hide-scrollbar performance-optimized scroll-performance-optimized touch-optimized settings-scroll-content"
           >
-            重置应用数据
-          </Button>
-        )}
+            <div className="max-w-4xl mx-auto p-4">
+              <div className={`transition-all duration-300 ${tabTransition ? 'opacity-50' : 'opacity-100'}`}>
+                {activeTab === 'app' && (
+                  <div className="space-y-6">
+                    {/* 应用设置部分 */}
+                    <Card title="应用设置">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
+                          </div>
+                          <DarkModeToggle />
+                        </div>
+                        
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">通知提醒</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">接收生物节律变化提醒</p>
+                          </div>
+                          <label className="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" defaultChecked={true} />
+                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                          </label>
+                        </div>
+                        
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                          <div className="mb-4">
+                            <p className="font-medium text-gray-900 dark:text-white">API服务地址</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置后端服务地址</p>
+                            <input 
+                              type="text" 
+                              value={apiBaseUrl}
+                              onChange={handleApiBaseUrlChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="https://nice-mcp.leansoftx.com/api"
+                            />
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">使用本地计算</p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">启用后将使用本地JavaScript计算代替API调用</p>
+                            </div>
+                            <label className="inline-flex items-center cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                className="sr-only peer" 
+                                checked={useLocalCalculation}
+                                onChange={handleUseLocalCalculationChange}
+                              />
+                              <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                        </div>
+                        
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">数据同步</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">自动备份您的数据</p>
+                          </div>
+                          <label className="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" className="sr-only peer" defaultChecked={true} />
+                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                          </label>
+                        </div>
+                        
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">缓存超时时间</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置数据缓存的有效时间</p>
+                            <select 
+                              value={cacheTimeout}
+                              onChange={handleCacheTimeoutChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            >
+                              <option value="60000">1分钟</option>
+                              <option value="120000">2分钟</option>
+                              <option value="180000">3分钟</option>
+                              <option value="300000">5分钟</option>
+                              <option value="600000">10分钟</option>
+                              <option value="1800000">30分钟</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    {/* 其他设置 */}
+                    <Card title="其他">
+                      <div className="space-y-1">
+                        <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                          <span className="font-medium text-gray-900 dark:text-white">用户协议</span>
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                        
+                        <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                          <span className="font-medium text-gray-900 dark:text-white">隐私政策</span>
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                        
+                        <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                          <span className="font-medium text-gray-900 dark:text-white">意见反馈</span>
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+                
+                {activeTab === 'userConfigs' && (
+                  <div className="transition-all duration-300 transform">
+                    <UserConfigManager />
+                  </div>
+                )}
+                
+                {activeTab === 'about' && (
+                  <div className="transition-all duration-300 transform">
+                    <Card title="关于">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
+                        </div>
+                        
+                        <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
+                          <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                            {platformInfo.isNative ? 
+                              (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) : 
+                              'Web'
+                            }
+                          </p>
+                        </div>
+                        
+                        <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
+                          <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
+                        </div>
+                        
+                        {/* 性能测试工具 */}
+                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <PerformanceTestTool />
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+              </div>
+              
+              {/* 仅在原生应用中显示的重置按钮 */}
+              {platformInfo.isNative && (
+                <Button 
+                  variant="danger" 
+                  className="w-full py-3 mt-6"
+                >
+                  重置应用数据
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </PageLayout>
   );

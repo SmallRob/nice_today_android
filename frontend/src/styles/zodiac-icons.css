@@ -1,0 +1,285 @@
+/* 十二生肖图标CSS Sprite样式 */
+
+/* 基础图标容器样式 */
+.zodiac-icon {
+  display: inline-block;
+  background-image: url('../images/12zodiac.png');
+  background-repeat: no-repeat;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 不同尺寸的图标容器 */
+.zodiac-icon-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border-width: 1px;
+}
+
+.zodiac-icon-md {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.zodiac-icon-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  border-width: 3px;
+}
+
+.zodiac-icon-xl {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  border-width: 3px;
+}
+
+/* 图片尺寸假设：3行4列，总尺寸 192x144 像素，每个图标 48x48 像素 */
+/* 第一行：鼠、牛、虎、兔 */
+.zodiac-icon-鼠 { background-position: 0 0; }
+.zodiac-icon-牛 { background-position: -48px 0; }
+.zodiac-icon-虎 { background-position: -96px 0; }
+.zodiac-icon-兔 { background-position: -144px 0; }
+
+/* 第二行：龙、蛇、马、羊 */
+.zodiac-icon-龙 { background-position: 0 -48px; }
+.zodiac-icon-蛇 { background-position: -48px -48px; }
+.zodiac-icon-马 { background-position: -96px -48px; }
+.zodiac-icon-羊 { background-position: -144px -48px; }
+
+/* 第三行：猴、鸡、狗、猪 */
+.zodiac-icon-猴 { background-position: 0 -96px; }
+.zodiac-icon-鸡 { background-position: -48px -96px; }
+.zodiac-icon-狗 { background-position: -96px -96px; }
+.zodiac-icon-猪 { background-position: -144px -96px; }
+
+/* 不同尺寸的图标背景位置调整 */
+.zodiac-icon-sm.zodiac-icon-鼠 { background-position: 0 0; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-牛 { background-position: -32px 0; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-虎 { background-position: -64px 0; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-兔 { background-position: -96px 0; background-size: 128px 96px; }
+
+.zodiac-icon-sm.zodiac-icon-龙 { background-position: 0 -32px; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-蛇 { background-position: -32px -32px; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-马 { background-position: -64px -32px; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-羊 { background-position: -96px -32px; background-size: 128px 96px; }
+
+.zodiac-icon-sm.zodiac-icon-猴 { background-position: 0 -64px; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-鸡 { background-position: -32px -64px; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-狗 { background-position: -64px -64px; background-size: 128px 96px; }
+.zodiac-icon-sm.zodiac-icon-猪 { background-position: -96px -64px; background-size: 128px 96px; }
+
+.zodiac-icon-lg.zodiac-icon-鼠 { background-position: 0 0; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-牛 { background-position: -64px 0; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-虎 { background-position: -128px 0; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-兔 { background-position: -192px 0; background-size: 256px 192px; }
+
+.zodiac-icon-lg.zodiac-icon-龙 { background-position: 0 -64px; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-蛇 { background-position: -64px -64px; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-马 { background-position: -128px -64px; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-羊 { background-position: -192px -64px; background-size: 256px 192px; }
+
+.zodiac-icon-lg.zodiac-icon-猴 { background-position: 0 -128px; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-鸡 { background-position: -64px -128px; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-狗 { background-position: -128px -128px; background-size: 256px 192px; }
+.zodiac-icon-lg.zodiac-icon-猪 { background-position: -192px -128px; background-size: 256px 192px; }
+
+/* 悬停效果 */
+.zodiac-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.zodiac-icon-sm:hover {
+  transform: scale(1.05);
+}
+
+.zodiac-icon-lg:hover {
+  transform: scale(1.08);
+}
+
+.zodiac-icon-xl:hover {
+  transform: scale(1.06);
+}
+
+/* 选中状态 */
+.zodiac-icon.selected {
+  transform: scale(1.15);
+  border-color: #3b82f6;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  animation: pulse 2s infinite;
+}
+
+.zodiac-icon-sm.selected {
+  transform: scale(1.1);
+}
+
+.zodiac-icon-lg.selected {
+  transform: scale(1.12);
+}
+
+.zodiac-icon-xl.selected {
+  transform: scale(1.1);
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* 禁用状态 */
+.zodiac-icon.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.zodiac-icon.disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 图标容器布局 */
+.zodiac-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.zodiac-icon-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  transition: color 0.3s ease;
+}
+
+.zodiac-icon-container:hover .zodiac-icon-label {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.zodiac-icon-container.selected .zodiac-icon-label {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+/* 网格布局 */
+.zodiac-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.zodiac-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.zodiac-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .zodiac-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+  
+  .zodiac-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .zodiac-icon-label {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .zodiac-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .zodiac-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .zodiac-icon-label {
+    font-size: 9px;
+  }
+}
+
+/* 深色主题支持 */
+@media (prefers-color-scheme: dark) {
+  .zodiac-icon-label {
+    color: #d1d5db;
+  }
+  
+  .zodiac-icon-container:hover .zodiac-icon-label {
+    color: #60a5fa;
+  }
+  
+  .zodiac-icon-container.selected .zodiac-icon-label {
+    color: #60a5fa;
+  }
+}
+
+/* 兼容性回退 */
+.zodiac-icon {
+  /* 确保背景图片正确显示 */
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.zodiac-icon:hover {
+  background-color: #f3f4f6;
+}
+
+.zodiac-icon.selected {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+}
+
+/* 加载状态 */
+.zodiac-icon.loading {
+  animation: skeleton-loading 1.5s infinite;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  background-image: none;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

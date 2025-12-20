@@ -95,7 +95,7 @@ const SeasonalHealthTab = () => {
 
 
   return (
-    <div className="space-y-3 md:space-y-4">
+    <div className="space-y-3 md:space-y-4 performance-optimized">
       {/* 页面标题 - 移动端优化 */}
       <div className="bg-gradient-to-r from-teal-600 to-green-600 text-white rounded-lg p-3 md:p-4">
         <h2 className="text-lg md:text-xl font-bold mb-1">时令养生指南</h2>

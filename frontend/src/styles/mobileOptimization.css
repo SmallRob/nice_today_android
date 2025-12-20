@@ -142,6 +142,163 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+  will-change: transform, scroll-position;
+  -webkit-transform: translate3d(0,0,0);
+  -webkit-backface-visibility: hidden;
+  contain: layout style paint;
+}
+
+/* 减少重绘优化 */
+.repaint-optimized {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* 减少重排优化 */
+.reflow-optimized {
+  will-change: transform;
+  contain: layout;
+}
+
+/* 触摸响应优化 */
+.touch-responsive {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.touch-responsive:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* 硬件加速优化 */
+.hardware-accelerated {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+
+/* 防止布局抖动 */
+.layout-stable {
+  contain: layout;
+  will-change: transform;
+}
+
+/* 优化图片渲染 */
+.image-rendering-optimized {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+/* 优化字体渲染 */
+.font-rendering-optimized {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-display: swap;
+}
+
+/* 优化阴影渲染 */
+.shadow-optimized {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shadow-optimized {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    filter: none;
+  }
+}
+
+/* 滚动容器性能优化 */
+.scroll-container-optimized {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: scroll-position;
+  contain: layout style paint;
+}
+
+/* 滚动性能优化类 */
+.scroll-performance-optimized {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: scroll-position;
+  contain: layout style paint;
+  -webkit-transform: translate3d(0,0,0);
+}
+
+/* 虚拟滚动容器 */
+.virtual-scroll-container {
+  position: relative;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  contain: strict;
+  will-change: transform;
+}
+
+.virtual-scroll-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  will-change: transform;
+}
+
+/* 分块加载优化 */
+.chunk-loaded {
+  opacity: 0;
+  animation: chunk-fade-in 0.3s ease-out forwards;
+}
+
+@keyframes chunk-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 防止滚动闪烁 */
+.prevent-scroll-flicker {
+  -webkit-transform: translate3d(0,0,0);
+  transform: translate3d(0,0,0);
+}
+
+/* 固定定位优化 */
+.fixed-position-optimized {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 独立滚动区域 */
+.independent-scroll-area {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
 }
 
 /* 移动端加载状态优化 */
@@ -172,4 +329,276 @@
   background: linear-gradient(45deg, #e8f5e8, #c8e6c9);
   border: 1px solid #4caf50;
   color: #2e7d32;
+}
+
+/* 五行道家养生风格banner样式 */
+.taoist-banner-container {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+  contain: layout style paint;
+}
+
+.taoist-wuxing-banner {
+  position: relative;
+  min-height: 120px;
+  background: linear-gradient(135deg, 
+    #4caf50 0%,    /* 木 - 青色 */
+    #f44336 25%,   /* 火 - 赤色 */
+    #ff9800 50%,   /* 土 - 黄色 */
+    #2196f3 75%,   /* 金 - 白色 */
+    #3f51b5 100%   /* 水 - 黑色 */
+  );
+  background-size: 400% 400%;
+  animation: wuxingFlow 8s ease-in-out infinite;
+}
+
+.wuxing-gradient {
+  background: linear-gradient(45deg, 
+    rgba(76, 175, 80, 0.3) 0%,    /* 木 */
+    rgba(244, 67, 54, 0.3) 20%,   /* 火 */
+    rgba(255, 152, 0, 0.3) 40%,   /* 土 */
+    rgba(33, 150, 243, 0.3) 60%,  /* 金 */
+    rgba(63, 81, 181, 0.3) 80%    /* 水 */
+  );
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+}
+
+@keyframes wuxingFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+
+.taoist-title {
+  font-family: 'SimSun', 'STSong', serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.1em;
+}
+
+.taoist-subtitle {
+  font-family: 'KaiTi', 'STKaiti', serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 五行色彩定义 */
+.bg-wood { background-color: #4caf50; }    /* 木 - 青色 */
+.bg-fire { background-color: #f44336; }    /* 火 - 赤色 */
+.bg-earth { background-color: #ff9800; }   /* 土 - 黄色 */
+.bg-metal { background-color: #2196f3; }   /* 金 - 白色 */
+.bg-water { background-color: #3f51b5; }   /* 水 - 黑色 */
+
+.text-wood { color: #4caf50; }
+.text-fire { color: #f44336; }
+.text-earth { color: #ff9800; }
+.text-metal { color: #2196f3; }
+.text-water { color: #3f51b5; }
+
+/* 固定定位优化 - 确保banner和菜单栏固定 */
+.dress-health-fixed-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* 滚动容器优化 - 确保仅内容区域滚动 */
+.dress-health-scroll-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dress-health-scroll-container > .flex-1 {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 移动端触摸滚动优化 */
+.taoist-scroll-area {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: scroll-position;
+  contain: layout style paint;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .taoist-wuxing-banner {
+    min-height: 100px;
+  }
+  
+  .taoist-title {
+    font-size: 1.25rem;
+    letter-spacing: 0.05em;
+  }
+  
+  .taoist-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .taoist-wuxing-banner {
+    min-height: 90px;
+  }
+  
+  .taoist-title {
+    font-size: 1.125rem;
+  }
+  
+  .taoist-subtitle {
+    font-size: 0.75rem;
+  }
+}
+
+/* 性能优化：减少动画复杂度 */
+@media (prefers-reduced-motion: reduce) {
+  .taoist-wuxing-banner,
+  .wuxing-gradient {
+    animation: none;
+  }
+  
+  .taoist-wuxing-banner {
+    background: linear-gradient(135deg, #4caf50, #3f51b5);
+  }
+}
+
+/* 五行道家养生风格标签导航 */
+.taoist-tab-navigation {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+  contain: layout style paint;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.taoist-tab-button {
+  position: relative;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.taoist-tab-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.taoist-tab-button:hover::before {
+  left: 100%;
+}
+
+.taoist-tab-button:active {
+  transform: scale(0.98);
+}
+
+/* 五行色彩动态效果 */
+.text-wood { color: #4caf50; }
+.text-fire { color: #f44336; }
+.text-earth { color: #ff9800; }
+.text-metal { color: #2196f3; }
+.text-water { color: #3f51b5; }
+
+.bg-wood { background-color: #4caf50; }
+.bg-fire { background-color: #f44336; }
+.bg-earth { background-color: #ff9800; }
+.bg-metal { background-color: #2196f3; }
+.bg-water { background-color: #3f51b5; }
+
+/* 内容区域滚动优化 */
+.taoist-content-scroll {
+  background: linear-gradient(180deg, 
+    rgba(255,255,255,0.95) 0%, 
+    rgba(248,250,252,0.9) 30%, 
+    rgba(241,245,249,0.85) 100%
+  ) !important;
+  border-radius: 0;
+}
+
+/* 移动端触摸优化 */
+@media (max-width: 768px) {
+  .taoist-tab-navigation {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+  
+  .taoist-tab-button {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  .taoist-content-scroll {
+    background: linear-gradient(180deg, 
+      rgba(255,255,255,0.98) 0%, 
+      rgba(248,250,252,0.95) 100%
+    ) !important;
+  }
+}
+
+/* 防止iOS Safari的弹性滚动问题 */
+@supports (-webkit-touch-callout: none) {
+  .taoist-content-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: scroll;
+  }
+}
+
+/* 滚动性能优化 */
+.taoist-content-scroll::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+.taoist-content-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* 硬件加速优化 */
+.taoist-banner-container,
+.taoist-tab-navigation,
+.taoist-content-scroll {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+
+/* 安全区域适配 */
+@supports (padding: max(0px)) {
+  .taoist-banner-container {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
 }
