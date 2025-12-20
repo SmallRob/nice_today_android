@@ -121,8 +121,6 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
             <SeasonalHealthTab />
           )}
         </div>
-      </div>
-
         {/* 功能介绍卡片 - 移动端优化 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 md:p-4">
