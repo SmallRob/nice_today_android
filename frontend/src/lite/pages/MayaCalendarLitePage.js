@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './MayaLiteStyles.css';
+import './mayaLiteStyles.css';
 
 // 简化的玛雅历法计算工具类
 class SimpleMayaCalendarUtils {
