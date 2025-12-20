@@ -118,7 +118,30 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
       <div className="app-scroll-content">
-        <div className="max-w-6xl mx-auto space-y-4 p-2">
+        <div className="max-w-6xl mx-auto space-y-3 p-2">
+
+        {/* Nice Today 应用banner */}
+        <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
+          <div className="p-3 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              {/* 应用图标 */}
+              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-white">Nice Today</h1>
+                <p className="text-blue-100 text-xs">您的个性化健康助手</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="inline-block px-2 py-1 text-xs font-medium text-white bg-white bg-opacity-20 rounded-full">
+                每日更新
+              </span>
+            </div>
+          </div>
+        </div>
 
         {/* 紧凑型标签导航 - 移动端优化 */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border-0 dark:border dark:border-gray-700 overflow-hidden">
@@ -180,7 +203,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
           </div>
 
           {/* 标签内容 - 紧凑布局 */}
-          <div className="p-2">
+          <div className="p-1">
             <div className="animate-fade-in">
               {activeTab === 'biorhythm' && (
                 <BiorhythmTab 

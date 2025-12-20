@@ -334,6 +334,18 @@ const MayaCalendarTab = memo(() => {
     }, 0);
   }, [loadMayaData]);
 
+  // 回到今天函数
+  const handleBackToToday = useCallback(() => {
+    const today = getToday();
+    setSelectedDate(today);
+    setSelectedOffset(0);
+    
+    // 使用setTimeout确保UI更新完成后再加载数据
+    setTimeout(() => {
+      loadMayaData(today);
+    }, 0);
+  }, [loadMayaData]);
+
   // 重新加载函数
   const handleRetry = useCallback(() => {
     loadMayaData(selectedDate);
@@ -343,14 +355,16 @@ const MayaCalendarTab = memo(() => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
-      setSelectedOffset(0); // 初始化为今天
-      loadMayaData(selectedDate);
+      // 仅在初始加载时设置偏移量为0（今天）
+      if (selectedOffset === 0) {
+        loadMayaData(selectedDate);
+      }
     }, 100);
     
     return () => {
       clearTimeout(timer);
     };
-  }, [loadMayaData, selectedDate]);
+  }, [loadMayaData, selectedDate, selectedOffset]);
 
   // 组件卸载时清理
   useEffect(() => {
@@ -465,17 +479,37 @@ const MayaCalendarTab = memo(() => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
-      {/* 页面标题 - 与穿衣养生页面保持一致的渐变背景 */}
+      {/* 优化的页面标题 - 添加日期状态指示 */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-b-lg shadow-lg">
         <div className="container mx-auto px-3 py-4 md:px-4 md:py-6">
-          <h1 className="text-xl md:text-2xl font-bold mb-1 flex items-center">
-            <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-            </svg>
-            玛雅历法
-          </h1>
+          <div className="flex items-center justify-between mb-1">
+            <h1 className="text-xl md:text-2xl font-bold flex items-center">
+              <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+              </svg>
+              玛雅历法
+            </h1>
+            
+            {/* 日期状态指示器 */}
+            {selectedOffset !== 0 && (
+              <div className="flex items-center bg-white/20 rounded-full px-3 py-1">
+                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V6z" clipRule="evenodd" />
+                </svg>
+                <span className="text-xs font-medium">
+                  {selectedOffset < 0 ? `查看${Math.abs(selectedOffset)}天前` : `查看${selectedOffset}天后`}
+                </span>
+              </div>
+            )}
+          </div>
+          
           <p className="text-purple-100 text-xs md:text-sm opacity-90">
-            古代玛雅人的神圣历法系统，揭示每日独特能量
+            {selectedOffset === 0 
+              ? "古代玛雅人的神圣历法系统，揭示每日独特能量" 
+              : selectedOffset < 0 
+                ? `探索${Math.abs(selectedOffset)}天前的玛雅能量，了解历史周期` 
+                : `预览${selectedOffset}天后的玛雅能量，为未来做好准备`
+            }
           </p>
         </div>
       </div>
@@ -499,20 +533,55 @@ const MayaCalendarTab = memo(() => {
           </div>
         </div>
 
-        {/* 日期选择区域 - 使用与穿衣养生页面一致的样式 */}
+        {/* 优化的日期选择区域 - 添加清晰的视觉反馈和回到今天功能 */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
           <div className="p-4 md:p-5">
+            {/* 日期状态指示器 */}
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">选择日期</h3>
+              <div className="flex items-center">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mr-3">
+                  查看日期
+                </h3>
+                {/* 日期状态标签 */}
+                {selectedOffset !== 0 && (
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    selectedOffset < 0 
+                      ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' 
+                      : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  }`}>
+                    {selectedOffset < 0 ? '查看过去' : '查看未来'}
+                  </span>
+                )}
+              </div>
+              
+              {/* 回到今天按钮 - 仅在非今天时显示 */}
+              {selectedOffset !== 0 && (
+                <button
+                  onClick={handleBackToToday}
+                  className="px-3 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium text-sm transition-all duration-200 hover:from-purple-700 hover:to-blue-700 active:scale-95 shadow-md touch-manipulation flex items-center"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  回到今天
+                </button>
+              )}
+            </div>
+            
+            {/* 日期选择器 */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                选择查看日期
+              </label>
               <input
                 type="date"
                 value={formatDateLocal(selectedDate)}
                 onChange={handleDateChange}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base transition-all duration-200 hover:border-purple-300 dark:hover:border-purple-500 active:scale-95 touch-manipulation"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all duration-200 hover:border-purple-300 dark:hover:border-purple-500"
               />
             </div>
             
-            {/* 快速选择按钮 - 增强交互效果 */}
+            {/* 快速选择按钮 - 增强视觉反馈 */}
             <div className="flex justify-center space-x-2 md:space-x-3">
               {[-1, 0, 1].map((offset) => (
                 <button
@@ -539,6 +608,19 @@ const MayaCalendarTab = memo(() => {
                   <span className="relative font-medium">{offset === -1 ? '昨天' : offset === 0 ? '今天' : '明天'}</span>
                 </button>
               ))}
+            </div>
+            
+            {/* 当前查看日期提示 */}
+            <div className="mt-3 text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {selectedOffset === 0 ? (
+                  <>当前查看：<span className="font-medium text-purple-600 dark:text-purple-400">今日玛雅历法</span></>
+                ) : selectedOffset < 0 ? (
+                  <>当前查看：<span className="font-medium text-orange-600 dark:text-orange-400">{Math.abs(selectedOffset)}天前的玛雅历法</span></>
+                ) : (
+                  <>当前查看：<span className="font-medium text-green-600 dark:text-green-400">{selectedOffset}天后的玛雅历法</span></>
+                )}
+              </p>
             </div>
           </div>
         </div>

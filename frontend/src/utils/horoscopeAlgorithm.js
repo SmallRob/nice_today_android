@@ -604,49 +604,55 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
     baseScores[key] = Math.max(0, Math.min(100, Math.round(baseScores[key])));
   });
   
+  // 确保所有函数调用都返回字符串值，而不是函数引用
+  const dailyForecast = {
+    love: {
+      score: baseScores.love,
+      description: getScoreDescription(baseScores.love),
+      trend: getTrend(baseScores.love)
+    },
+    wealth: {
+      score: baseScores.wealth,
+      description: getScoreDescription(baseScores.wealth),
+      trend: getTrend(baseScores.wealth)
+    },
+    career: {
+      score: baseScores.career,
+      description: getScoreDescription(baseScores.career),
+      trend: getTrend(baseScores.career)
+    },
+    study: {
+      score: baseScores.study,
+      description: getScoreDescription(baseScores.study),
+      trend: getTrend(baseScores.study)
+    }
+  };
+
+  const recommendations = {
+    luckyColors: horoscope.luckyColor,
+    luckyNumbers: horoscope.luckyNumber,
+    compatibleSigns: horoscope.compatible,
+    todayMoonSign: getRandomMoonSign(horoscopeName),
+    soulQuestion: soulQuestion,
+    luckyItem: luckyItem,
+    positiveAdvice: generatePositiveAdvice(horoscopeName),
+    avoidAdvice: generateAvoidAdvice(horoscopeName),
+    dailyReminder: generateDailyReminder(horoscopeName)
+  };
+
+  const horoscopeInfo = {
+    name: horoscope.name,
+    element: horoscope.element,
+    dateRange: horoscope.dateRange,
+    icon: horoscope.icon,
+    traits: horoscope.traits,
+    color: horoscope.color
+  };
+
   return {
-    horoscopeInfo: {
-      name: horoscope.name,
-      element: horoscope.element,
-      dateRange: horoscope.dateRange,
-      icon: horoscope.icon,
-      traits: horoscope.traits,
-      color: horoscope.color
-    },
-    dailyForecast: {
-      love: {
-        score: baseScores.love,
-        description: getScoreDescription(baseScores.love),
-        trend: getTrend(baseScores.love)
-      },
-      wealth: {
-        score: baseScores.wealth,
-        description: getScoreDescription(baseScores.wealth),
-        trend: getTrend(baseScores.wealth)
-      },
-      career: {
-        score: baseScores.career,
-        description: getScoreDescription(baseScores.career),
-        trend: getTrend(baseScores.career)
-      },
-      study: {
-        score: baseScores.study,
-        description: getScoreDescription(baseScores.study),
-        trend: getTrend(baseScores.study)
-      }
-    },
-    recommendations: {
-      luckyColors: horoscope.luckyColor,
-      luckyNumbers: horoscope.luckyNumber,
-      compatibleSigns: horoscope.compatible,
-      todayMoonSign: getRandomMoonSign(horoscopeName, date),
-      // 新增内容
-      soulQuestion: soulQuestion,
-      luckyItem: luckyItem,
-      positiveAdvice: generatePositiveAdvice(horoscopeName),
-      avoidAdvice: generateAvoidAdvice(horoscopeName),
-      dailyReminder: generateDailyReminder(horoscopeName, date)
-    },
+    horoscopeInfo,
+    dailyForecast,
+    recommendations,
     overallDescription: generateOverallDescription(overallScore, horoscopeName),
     overallScore: overallScore,
     timestamp: date.getTime(),
