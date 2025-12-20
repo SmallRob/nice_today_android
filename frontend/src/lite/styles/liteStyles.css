@@ -1,0 +1,232 @@
+/* 轻量版样式文件 */
+
+/* 全局样式重置 */
+.lite-app-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  color: #333333;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .lite-app-container {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+}
+
+/* 加载容器 */
+.lite-loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-loading-container {
+    background-color: #1a1a1a;
+  }
+}
+
+.lite-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-loading-spinner {
+    border: 4px solid #3a3a3a;
+    border-top: 4px solid #3498db;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 主内容区域 */
+.lite-main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  padding-bottom: 70px; /* 为底部导航留出空间 */
+}
+
+/* 页面标题 */
+.lite-page-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px 0;
+  color: #333333;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-page-title {
+    color: #ffffff;
+  }
+}
+
+/* 卡片样式 */
+.lite-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
+  padding: 15px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-card {
+    background-color: #2a2a2a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+}
+
+/* 输入框样式 */
+.lite-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-input {
+    background-color: #3a3a3a;
+    border: 1px solid #555;
+    color: #ffffff;
+  }
+}
+
+/* 按钮样式 */
+.lite-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: center;
+  display: inline-block;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.lite-button:hover {
+  background-color: #2980b9;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-button {
+    background-color: #2980b9;
+  }
+  
+  .lite-button:hover {
+    background-color: #2573a7;
+  }
+}
+
+/* 版本切换器 */
+.lite-version-switcher {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.lite-version-switcher-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* 底部导航 */
+.lite-tab-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-top: 1px solid #eee;
+  display: flex;
+  z-index: 100;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-tab-navigation {
+    background-color: #2a2a2a;
+    border-top: 1px solid #444;
+  }
+}
+
+.lite-tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666666;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-tab-item {
+    color: #aaaaaa;
+  }
+}
+
+.lite-tab-item.active {
+  color: #3498db;
+  font-weight: bold;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-tab-item.active {
+    color: #5dade2;
+  }
+}
+
+.lite-tab-icon {
+  display: block;
+  margin: 0 auto 5px;
+  font-size: 20px;
+}
+
+/* 响应式设计 */
+@media (min-width: 768px) {
+  .lite-main-content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .lite-page-title {
+    font-size: 1.8rem;
+  }
+}

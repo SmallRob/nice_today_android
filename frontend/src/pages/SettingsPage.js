@@ -133,6 +133,25 @@ function SettingsPage() {
     localStorage.setItem('cacheTimeout', newValue.toString());
   };
 
+  // 切换应用版本
+  const handleVersionSwitch = (version) => {
+    // 设置版本标记
+    localStorage.setItem('appVersion', version);
+    
+    // 显示确认消息
+    setError(`${version === 'lite' ? '轻量版' : '炫彩版'}已设置，重启应用后生效`);
+    
+    // 3秒后清除消息
+    setTimeout(() => {
+      setError(null);
+    }, 3000);
+  };
+
+  // 获取当前版本
+  const getCurrentVersion = () => {
+    return localStorage.getItem('appVersion') || 'lite';
+  };
+
   if (!isLoaded) {
     return (
       <PageLayout title="设置">
@@ -169,6 +188,18 @@ function SettingsPage() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
                 <p className="text-red-700 dark:text-red-300">{error}</p>
+              </div>
+            </div>
+          )}
+          
+          {/* 成功提示 */}
+          {error && !error.includes('失败') && (
+            <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-400 p-4">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <p className="text-green-700 dark:text-green-300">{error}</p>
               </div>
             </div>
           )}
@@ -316,6 +347,30 @@ function SettingsPage() {
                               <option value="600000">10分钟</option>
                               <option value="1800000">30分钟</option>
                             </select>
+                          </div>
+                        </div>
+                        
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">切换应用版本以适应不同设备性能</p>
+                            <div className="flex space-x-4">
+                              <button 
+                                className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                                onClick={() => handleVersionSwitch('lite')}
+                              >
+                                轻量版
+                              </button>
+                              <button 
+                                className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                                onClick={() => handleVersionSwitch('full')}
+                              >
+                                炫彩版
+                              </button>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                              {getCurrentVersion() === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
+                            </p>
                           </div>
                         </div>
                       </div>

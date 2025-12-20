@@ -42,7 +42,8 @@
     "ios:run": "npx cap run ios",
     "ios:build": "npx cap build ios",
     "ios:sync": "npx cap sync ios",
-    "sync": "npm run build && npx cap sync"
+    "sync": "npm run build && npx cap sync",
+    "build:lite": "cross-env BUILD_LITE_VERSION=true craco build"
   },
   "eslintConfig": {
     "extends": [
@@ -65,6 +66,7 @@
   "devDependencies": {
     "@craco/craco": "^7.1.0",
     "autoprefixer": "^10.4.14",
+    "cross-env": "^10.1.0",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.7"
   },

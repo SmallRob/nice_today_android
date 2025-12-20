@@ -1,7 +1,7 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
+import VersionRouter from './VersionRouter';
 import { ThemeProvider } from './context/ThemeContext';
 import { initializeApp } from './utils/capacitorInit-simulated';
 import WelcomeScreen from './components/WelcomeScreen';
@@ -98,7 +98,7 @@ const startApp = () => {
         ) : (
           <Suspense fallback={<LoadingScreen />}>
             <ThemeProvider>
-              <App />
+              <VersionRouter />
             </ThemeProvider>
           </Suspense>
         )}

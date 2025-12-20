@@ -1,33 +1,42 @@
+const path = require('path');
+
 module.exports = {
   webpack: {
-    configure: (webpackConfig) => {
-      // 添加 fallback 配置来解决 axios 的 http 模块问题
-      webpackConfig.resolve.fallback = {
-        ...webpackConfig.resolve.fallback,
-        "http": false,
-        "https": false,
-        "http2": false,
-        "zlib": false,
-        "stream": false,
-        "buffer": false,
-        "url": false,
-        "util": false,
-        "assert": false,
-        "fs": false,
-        "path": false,
-        "os": false,
-        "crypto": false,
-        "process": false
-      };
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@lite': path.resolve(__dirname, 'src/lite'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@pages': path.resolve(__dirname, 'src/pages'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@styles': path.resolve(__dirname, 'src/styles'),
+    },
+    configure: (webpackConfig, { env, paths }) => {
+      // 检查是否构建轻量版
+      const isLiteBuild = process.env.BUILD_LITE_VERSION === 'true';
       
-      // 确保只使用浏览器适配器
-      webpackConfig.resolve.alias = {
-        ...webpackConfig.resolve.alias,
-        './adapters/http.js': './helpers/null.js',
-        './platform/node/index.js': './platform/browser/index.js'
-      };
+      if (isLiteBuild) {
+        // 修改入口文件以使用轻量版
+        paths.appIndexJs = path.resolve(__dirname, 'src/index.js');
+        
+        // 可以在这里添加其他轻量版特定的webpack配置
+        console.log('Building Lite Version');
+      } else {
+        console.log('Building Full Version');
+      }
       
       return webpackConfig;
+    }
+  },
+  jest: {
+    configure: {
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@lite/(.*)$': '<rootDir>/src/lite/$1',
+        '^@components/(.*)$': '<rootDir>/src/components/$1',
+        '^@pages/(.*)$': '<rootDir>/src/pages/$1',
+        '^@utils/(.*)$': '<rootDir>/src/utils/$1',
+        '^@styles/(.*)$': '<rootDir>/src/styles/$1',
+      }
     }
   }
 };
