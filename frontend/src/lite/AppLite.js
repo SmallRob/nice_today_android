@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { userConfigManager } from '../utils/userConfigManager';
+import { ThemeProvider } from '../context/ThemeContext';
+import { useThemeColor } from '../hooks/useThemeColor';
 import './styles/liteStyles.css';
 
 // 轻量版页面组件
@@ -12,6 +14,37 @@ import SettingsLitePage from './pages/SettingsLitePage';
 // 轻量版组件
 import LiteTabNavigation from './components/LiteTabNavigation';
 import VersionSwitcher from './components/VersionSwitcher';
+
+// 应用布局组件 - 包含主题颜色管理
+const AppLayout = ({ children, activeTab, setActiveTab }) => {
+  // 使用主题颜色Hook确保状态栏颜色与主题同步
+  const theme = useThemeColor();
+  
+  // 设置CSS变量以便在样式中使用主题颜色
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.style.setProperty('--status-bar-background', '#1e293b');
+    } else {
+      root.style.setProperty('--status-bar-background', '#6366f1');
+    }
+  }, [theme]);
+  
+  return (
+    <div className="lite-app-container">
+      {/* 版本切换器 */}
+      <VersionSwitcher />
+      
+      {/* 主要内容区域 */}
+      <div className="lite-main-content">
+        {children}
+      </div>
+      
+      {/* 底部导航 */}
+      <LiteTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+    </div>
+  );
+};
 
 const AppLite = () => {
   const [userInfo, setUserInfo] = useState({
@@ -76,23 +109,16 @@ const AppLite = () => {
 
   return (
     <Router>
-      <div className="lite-app-container">
-        {/* 版本切换器 */}
-        <VersionSwitcher />
-        
-        {/* 主要内容区域 */}
-        <div className="lite-main-content">
+      <ThemeProvider>
+        <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
           <Routes>
             <Route path="/" element={<BiorhythmLitePage userInfo={userInfo} />} />
             <Route path="/maya" element={<MayaCalendarLitePage userInfo={userInfo} />} />
             <Route path="/dress" element={<DressGuideLitePage userInfo={userInfo} />} />
             <Route path="/settings" element={<SettingsLitePage userInfo={userInfo} setUserInfo={setUserInfo} />} />
           </Routes>
-        </div>
-        
-        {/* 底部导航 */}
-        <LiteTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
+        </AppLayout>
+      </ThemeProvider>
     </Router>
   );
 };

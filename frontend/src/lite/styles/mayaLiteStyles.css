@@ -1,0 +1,202 @@
+/* 玛雅日历轻量版样式 */
+
+/* 月历样式 - 引用zencalendar的样式 */
+.calendar {
+  position: relative;
+  color: #434a54;
+  text-align: center;
+  margin: 0 10px;
+}
+
+.calendar section {
+  box-sizing: border-box;
+  position: relative;
+}
+
+.calendar .hd {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 12px 10px 12px 26px;
+  background-color: rgba(255, 255, 255, 0.9);
+  font-weight: bold;
+  font-size: 1.8rem;
+  line-height: 24px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 70%, rgba(255, 255, 255, 0) 100%);
+}
+
+.calendar .hd span:after {
+  margin-left: 0.2em;
+}
+
+.calendar .hd span + span {
+  margin-left: 0.5em;
+}
+
+.calendar .hd .year:after {
+  content: '年';
+}
+
+.calendar .hd .month:after {
+  content: '月';
+}
+
+.calendar .bd {
+  padding: 0 10px 0 26px;
+}
+
+.calendar .bd ol {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.calendar .bd li {
+  box-sizing: border-box;
+  position: relative;
+  min-width: 0;
+  padding: 2px;
+  flex: 0 0 14.25%;
+}
+
+.calendar .bd li:nth-child(7n) {
+  flex-basis: 14.5%;
+}
+
+/* 星期 */
+.calendar .weeks {
+  font-weight: bold;
+  font-size: 1.4rem;
+  line-height: 24px;
+}
+
+.calendar .weeks li:before {
+  content: attr(data-day);
+}
+
+/* 日期 */
+.calendar .days {
+  line-height: 20px;
+}
+
+.calendar .days .item {
+  position: relative;
+  padding: 4px 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.calendar .days .num {
+  font-size: 1.6rem;
+}
+
+.calendar .days .sat {
+  color: #4a89dc;
+}
+
+.calendar .days .sun {
+  color: #da4453;
+}
+
+.calendar .days .now .item {
+  background-color: #d44;
+  color: #fff;
+}
+
+.calendar .days .selected .item {
+  background-color: #4a89dc;
+  color: #fff;
+}
+
+.calendar .days .other .item {
+  opacity: 0.4;
+}
+
+/* 玛雅信息网格 */
+.maya-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.maya-info-item {
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.maya-label {
+  font-size: 1.2rem;
+  color: #6c757d;
+  margin-bottom: 5px;
+}
+
+.maya-value {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #495057;
+}
+
+/* 玛雅全名 */
+.maya-full-name {
+  text-align: center;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  color: white;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+/* 每日启示 */
+.daily-inspiration {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #e9f7fe;
+  border-left: 4px solid #3498db;
+}
+
+.daily-inspiration h4 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 1.4rem;
+}
+
+.daily-inspiration p {
+  margin-bottom: 0;
+  color: #34495e;
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .calendar .hd {
+    font-size: 1.6rem;
+    padding: 10px;
+  }
+  
+  .calendar .days .num {
+    font-size: 1.4rem;
+  }
+  
+  .maya-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .maya-full-name {
+    font-size: 1.6rem;
+  }
+  
+  .daily-inspiration h4 {
+    font-size: 1.2rem;
+  }
+  
+  .daily-inspiration p {
+    font-size: 1.1rem;
+  }
+}

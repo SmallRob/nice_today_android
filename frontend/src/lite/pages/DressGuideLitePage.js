@@ -1,66 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import { generateDressInfo } from '../../services/localDataService';
+import '../styles/dressGuideLiteStyles.css';
 
 const DressGuideLitePage = ({ userInfo }) => {
   const [dressAdvice, setDressAdvice] = useState(null);
 
   useEffect(() => {
     if (userInfo.birthDate) {
-      // 简化的穿衣指南逻辑
-      // 实际应用中应该根据五行理论计算
+      // 使用本地数据服务生成穿衣建议
       const today = new Date();
-      const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
-      
-      // 示例穿衣建议
-      const advice = {
-        color: getColorOfTheDay(dayOfWeek),
-        description: getDescription(dayOfWeek),
-        food: getFoodRecommendation(dayOfWeek)
-      };
+      const advice = generateDressInfo(today);
       
       setDressAdvice(advice);
     }
   }, [userInfo.birthDate]);
 
-  // 根据星期几获取推荐颜色
-  const getColorOfTheDay = (day) => {
-    const colors = [
-      "黑色", // Sunday
-      "白色", // Monday
-      "红色", // Tuesday
-      "绿色", // Wednesday
-      "黄色", // Thursday
-      "蓝色", // Friday
-      "紫色"  // Saturday
-    ];
-    return colors[day];
-  };
-
-  // 根据星期几获取描述
-  const getDescription = (day) => {
-    const descriptions = [
-      "宁静与休息的一天，适合穿深色系服装",
-      "清新与纯净的一天，适合穿白色或浅色系服装",
-      "活力与激情的一天，适合穿红色系服装",
-      "成长与和谐的一天，适合穿绿色系服装",
-      "快乐与光明的一天，适合穿黄色系服装",
-      "平静与信任的一天，适合穿蓝色系服装",
-      "神秘与创意的一天，适合穿紫色系服装"
-    ];
-    return descriptions[day];
-  };
-
-  // 根据星期几获取食物推荐
-  const getFoodRecommendation = (day) => {
-    const foods = [
-      "清淡的食物，如蔬菜汤、水果",
-      "新鲜的蔬果，如苹果、梨子",
-      "辛辣的食物，如辣椒、生姜",
-      "绿色蔬菜，如菠菜、西兰花",
-      "黄色食物，如玉米、香蕉",
-      "海鲜和咸味食物",
-      "紫色食物，如葡萄、茄子"
-    ];
-    return foods[day];
+  // 获取健康提醒
+  const getHealthAdvice = (element) => {
+    const healthTips = {
+      "木": "今日适合户外活动，多接触绿色植物，有助于肝胆健康。保持情绪舒畅，避免过度愤怒。",
+      "火": "注意心脏健康，避免过度兴奋和激动。适当休息，保持心情愉快。",
+      "土": "关注脾胃健康，饮食要有规律，避免暴饮暴食。适当运动，增强体质。",
+      "金": "注意呼吸系统健康，避免干燥环境。保持室内湿度，多喝水。",
+      "水": "关注肾脏健康，避免过度劳累。注意保暖，尤其是腰部和足部。"
+    };
+    
+    return healthTips[element] || "保持良好的作息习惯，适度运动，均衡饮食。";
   };
 
   if (!userInfo.birthDate) {
@@ -83,12 +48,47 @@ const DressGuideLitePage = ({ userInfo }) => {
       </div>
       
       {dressAdvice && (
-        <div className="lite-card">
-          <h3>今日穿衣建议</h3>
-          <p>推荐颜色: {dressAdvice.color}</p>
-          <p>说明: {dressAdvice.description}</p>
-          <p>饮食建议: {dressAdvice.food}</p>
-        </div>
+        <>
+          <div className="lite-card">
+            <h3>今日五行信息</h3>
+            <p>日期: {dressAdvice.date} ({dressAdvice.weekday})</p>
+            <p>主导五行: {dressAdvice.daily_element}</p>
+          </div>
+          
+          <div className="lite-card">
+            <h3>穿衣颜色推荐</h3>
+            {dressAdvice.color_suggestions && dressAdvice.color_suggestions.length > 0 ? (
+              <div className="color-suggestions">
+                {dressAdvice.color_suggestions.map((suggestion, index) => (
+                  <div key={index} className="color-suggestion-item">
+                    <p><strong>{suggestion["颜色系统"]}</strong> ({suggestion["吉凶"]})</p>
+                    <p>推荐颜色: {suggestion["具体颜色"].join("、")}</p>
+                    <p>说明: {suggestion["描述"]}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>暂无颜色推荐信息</p>
+            )}
+          </div>
+          
+          <div className="lite-card">
+            <h3>饮食建议</h3>
+            {dressAdvice.food_suggestions ? (
+              <div className="food-suggestions">
+                <p><strong>宜食:</strong> {dressAdvice.food_suggestions["宜"].join("、")}</p>
+                <p><strong>忌食:</strong> {dressAdvice.food_suggestions["忌"].join("、")}</p>
+              </div>
+            ) : (
+              <p>暂无饮食建议信息</p>
+            )}
+          </div>
+          
+          <div className="lite-card">
+            <h3>健康提醒</h3>
+            <p>{getHealthAdvice(dressAdvice.daily_element)}</p>
+          </div>
+        </>
       )}
       
       <div className="lite-card">

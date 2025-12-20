@@ -1,0 +1,94 @@
+/* 穿衣指南轻量版样式 */
+
+.lite-dress-page {
+  padding: 10px;
+}
+
+.lite-dress-page .lite-card {
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lite-dress-page .lite-card h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+/* 颜色推荐样式 */
+.color-suggestions {
+  margin-top: 10px;
+}
+
+.color-suggestion-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  border-left: 3px solid #4a89dc;
+}
+
+.color-suggestion-item:last-child {
+  margin-bottom: 0;
+}
+
+.color-suggestion-item p {
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.color-suggestion-item strong {
+  color: #333;
+}
+
+/* 饮食建议样式 */
+.food-suggestions {
+  padding: 10px;
+  background-color: #f0f8ff;
+  border-radius: 5px;
+}
+
+.food-suggestions p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.food-suggestions strong {
+  color: #333;
+}
+
+/* 健康提醒样式 */
+.health-advice {
+  padding: 10px;
+  background-color: #fff8e1;
+  border-radius: 5px;
+  border-left: 3px solid #ffc107;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .lite-dress-page {
+    padding: 5px;
+  }
+  
+  .lite-dress-page .lite-card {
+    margin-bottom: 10px;
+    padding: 12px;
+  }
+  
+  .color-suggestion-item,
+  .food-suggestions,
+  .health-advice {
+    padding: 8px;
+  }
+  
+  .color-suggestion-item p,
+  .food-suggestions p {
+    font-size: 13px;
+  }
+}
