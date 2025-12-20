@@ -42,11 +42,11 @@ const DressGuideLitePage = ({ userInfo }) => {
     <div className="lite-dress-page lite-page-container" style={{ WebkitOverflowScrolling: 'touch' }}>
       <h2 className="lite-h2 lite-text-center">穿衣指南</h2>
       
-      <div className="lite-card">
+      {/* <div className="lite-card">
         <h3 className="lite-h3">用户信息</h3>
         <p className="lite-text">昵称: {userInfo.nickname || '未设置'}</p>
         <p className="lite-text">出生日期: {userInfo.birthDate}</p>
-      </div>
+      </div> */}
       
       {dressAdvice && (
         <>
