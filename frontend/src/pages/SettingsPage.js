@@ -210,7 +210,7 @@ function SettingsPage() {
               <button
                 className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
                   activeTab === 'app'
-                    ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
                 } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTabChange('app')}
@@ -224,7 +224,7 @@ function SettingsPage() {
               <button
                 className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
                   activeTab === 'userConfigs'
-                    ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
                 } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTabChange('userConfigs')}
@@ -238,7 +238,7 @@ function SettingsPage() {
               <button
                 className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
                   activeTab === 'about'
-                    ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
                 } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTabChange('about')}

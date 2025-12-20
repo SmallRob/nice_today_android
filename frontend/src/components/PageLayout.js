@@ -42,12 +42,12 @@ const PageLayout = ({
     return (
       <div className={`flex-1 overflow-auto ${bgClass} pb-safe-bottom`}>
         <div className="flex flex-col items-center justify-center h-64 p-4">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900 dark:bg-opacity-20 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-red-500 dark:text-red-300" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-red-800 dark:text-red-300 mb-2">加载失败</h3>
+          <h3 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">加载失败</h3>
           <p className="text-red-600 dark:text-red-400 mb-4 text-center">{error}</p>
         </div>
       </div>
