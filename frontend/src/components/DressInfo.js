@@ -188,15 +188,15 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   return (
     <div className="space-y-4 performance-optimized">
       {/* 页面标题和说明 */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg p-4">
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg p-4 shadow-lg dark:from-purple-800 dark:to-blue-900">
         <h2 className="text-xl font-bold mb-1">五行穿衣与饮食指南</h2>
-        <p className="text-purple-100 text-sm">
+        <p className="text-purple-100 text-sm dark:text-purple-200">
           根据传统五行理论，为您提供每日的穿衣配色和饮食建议
         </p>
       </div>
 
       {/* 日期选择区域 */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-3">
           <div className="mb-3 sm:mb-0">
             <h3 className="text-base font-medium flex items-center text-gray-900 dark:text-white">
@@ -236,14 +236,14 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       </div>
       
       {/* 当日五行信息 */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+      <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold flex items-center text-gray-900 dark:text-white">
             <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
             {selectedDressInfo.date} {selectedDressInfo.weekday}
           </h3>
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400">当日主导五行:</span>
+            <span className="text-xs text-gray-500 dark:text-gray-300">当日主导五行:</span>
             <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full text-xs font-medium shadow-md">
               {selectedDressInfo.daily_element}
             </span>
@@ -260,7 +260,7 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
 
       {/* 吉祥颜色详细指南 */}
       {luckyColors.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold mb-3 flex items-center text-green-600 dark:text-green-400">
             <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
             今日吉祥颜色搭配
@@ -301,7 +301,7 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
 
       {/* 不宜颜色警示 */}
       {unluckyColors.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold mb-3 flex items-center text-red-600 dark:text-red-400">
             <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
             今日不宜颜色
@@ -342,7 +342,7 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
 
       {/* 饮食养生指南 */}
       {selectedDressInfo.food_suggestions && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+        <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
             <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
             今日饮食养生指南
@@ -391,12 +391,12 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       )}
 
       {/* 温馨提示 */}
-      <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-lg p-4">
+      <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-lg p-4 shadow-lg dark:from-yellow-600 dark:to-orange-700">
         <h4 className="text-base font-semibold mb-2 flex items-center">
           <span className="w-4 h-4 mr-1">💡</span>
           温馨提示
         </h4>
-        <div className="text-yellow-100 text-xs leading-relaxed space-y-1">
+        <div className="text-yellow-100 text-xs leading-relaxed space-y-1 dark:text-yellow-200">
           {warmReminders.slice(0, 3).map((reminder, index) => (
             <p key={index}>• {reminder}</p>
           ))}

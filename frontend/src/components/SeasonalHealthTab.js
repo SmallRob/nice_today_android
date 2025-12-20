@@ -97,15 +97,15 @@ const SeasonalHealthTab = () => {
   return (
     <div className="space-y-3 md:space-y-4 performance-optimized">
       {/* 页面标题 - 移动端优化 */}
-      <div className="bg-gradient-to-r from-teal-600 to-green-600 text-white rounded-lg p-3 md:p-4">
+      <div className="bg-gradient-to-r from-teal-600 to-green-600 text-white rounded-lg p-3 md:p-4 shadow-lg dark:from-teal-800 dark:to-green-900">
         <h2 className="text-lg md:text-xl font-bold mb-1">时令养生指南</h2>
-        <p className="text-teal-100 text-xs md:text-sm">
+        <p className="text-teal-100 text-xs md:text-sm dark:text-teal-200">
           根据四季五行规律和器官节律，为您提供个性化的养生建议
         </p>
       </div>
 
       {/* 标签切换 - 移动端优化 */}
-      <div className="flex bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+      <div className="flex bg-white dark:bg-gray-800 dark:bg-opacity-90 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setActiveTab('season')}
           className={`flex-1 py-2 md:py-3 px-2 md:px-4 text-center transition-colors duration-200 touch-manipulation ${
@@ -192,13 +192,13 @@ const SeasonalHealthTab = () => {
       {activeTab === 'organ' && (
         <div className="space-y-3 md:space-y-4">
           {/* 当前器官节律信息 - 移动端优化 */}
-          <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 border-l-4 border-purple-500 rounded-lg p-3 md:p-4">
+          <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-30 border-l-4 border-purple-500 rounded-lg p-3 md:p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 md:mb-3">
               <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-1 md:mb-0">
                 <span className="w-2 h-2 md:w-3 md:h-3 bg-purple-500 rounded-full mr-2"></span>
                 {selectedOrganIndex !== null ? '查看器官节律' : '当前器官节律'}
               </h3>
-              <span className="px-2 py-1 md:px-3 md:py-1 bg-white dark:bg-gray-700 rounded-full text-xs md:text-sm font-medium text-purple-700 dark:text-purple-300">
+              <span className="px-2 py-1 md:px-3 md:py-1 bg-white dark:bg-gray-700 rounded-full text-xs md:text-sm font-medium text-purple-700 dark:text-purple-300 shadow-sm">
                 {(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).time}
               </span>
             </div>
@@ -252,7 +252,7 @@ const SeasonalHealthTab = () => {
           </div>
 
           {/* 24小时器官节律表 - 移动端优化 */}
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-3 md:p-4">
+          <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-3 md:p-4 border border-gray-200 dark:border-gray-700">
             <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 md:mb-3">
               24小时器官节律表
             </h3>
@@ -285,12 +285,12 @@ const SeasonalHealthTab = () => {
       )}
 
       {/* 温馨提示 - 移动端优化 */}
-      <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-lg p-3 md:p-4">
+      <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-lg p-3 md:p-4 shadow-lg dark:from-yellow-600 dark:to-orange-700">
         <h4 className="text-sm md:text-base font-semibold mb-1 md:mb-2 flex items-center">
           <span className="w-3 h-3 md:w-4 md:h-4 mr-1">💡</span>
           养生小贴士
         </h4>
-        <div className="text-yellow-100 text-xs leading-relaxed space-y-0.5 md:space-y-1">
+        <div className="text-yellow-100 text-xs leading-relaxed space-y-0.5 md:space-y-1 dark:text-yellow-200">
           <p>• 养生贵在坚持，长期坚持才能看到效果</p>
           <p>• 根据个人体质调整养生方案，不必完全照搬</p>
           <p>• 保持心情愉悦是养生的重要前提</p>
