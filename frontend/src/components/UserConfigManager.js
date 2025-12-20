@@ -197,18 +197,18 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
               点击选择您的星座
             </div>
-            <div className="zodiac-grid-4">
+            <div className="selector-grid grid grid-cols-4 gap-2">
               {ZODIAC_OPTIONS.map((zodiac) => (
                 <div 
                   key={zodiac}
-                  className={`zodiac-sign-icon-container ${formData.zodiac === zodiac ? 'selected' : ''}`}
+                  className={`selector-item ${formData.zodiac === zodiac ? 'selected' : ''}`}
                   onClick={() => handleFieldChange('zodiac', zodiac)}
                 >
                   <div 
-                    className={`zodiac-sign-icon zodiac-sign-icon-sm zodiac-sign-icon-${zodiac} ${formData.zodiac === zodiac ? 'selected' : ''}`}
+                    className={`selector-icon zodiac-sign-icon zodiac-sign-icon-sm zodiac-sign-icon-${zodiac} ${formData.zodiac === zodiac ? 'selected' : ''}`}
                     data-symbol=""
                   ></div>
-                  <span className="zodiac-sign-icon-label">{zodiac}</span>
+                  <span className="selector-label">{zodiac}</span>
                 </div>
               ))}
             </div>
@@ -227,17 +227,17 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
               点击选择您的生肖
             </div>
-            <div className="zodiac-grid">
+            <div className="selector-grid grid grid-cols-4 gap-2">
               {ZODIAC_ANIMAL_OPTIONS.map((animal) => (
                 <div 
                   key={animal}
-                  className={`zodiac-icon-container ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
+                  className={`selector-item ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
                   onClick={() => handleFieldChange('zodiacAnimal', animal)}
                 >
                   <div 
-                    className={`zodiac-icon zodiac-icon-sm zodiac-icon-${animal} ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
+                    className={`selector-icon zodiac-icon zodiac-icon-sm zodiac-icon-${animal} ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
                   ></div>
-                  <span className="zodiac-icon-label">{animal}</span>
+                  <span className="selector-label">{animal}</span>
                 </div>
               ))}
             </div>
@@ -248,21 +248,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             )}
           </div>
           
-          {/* 性别 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              性别
-            </label>
-            <select
-              value={formData.gender || 'secret'}
-              onChange={(e) => handleFieldChange('gender', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-              {GENDER_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </div>
+
           
           {/* MBTI类型 */}
           <div>
@@ -272,18 +258,18 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
               点击选择您的MBTI类型
             </div>
-            <div className="mbti-grid">
+            <div className="selector-grid grid grid-cols-4 gap-2">
               {MBTI_OPTIONS.map((type) => (
                 <div 
                   key={type}
-                  className={`mbti-icon-container ${formData.mbti === type ? 'selected' : ''}`}
+                  className={`selector-item ${formData.mbti === type ? 'selected' : ''}`}
                   onClick={() => handleFieldChange('mbti', type)}
                 >
                   <div 
-                    className={`mbti-icon mbti-icon-sm mbti-icon-${type} ${formData.mbti === type ? 'selected' : ''}`}
+                    className={`selector-icon mbti-icon mbti-icon-sm mbti-icon-${type} ${formData.mbti === type ? 'selected' : ''}`}
                     data-type={type}
                   ></div>
-                  <span className="mbti-icon-label">{type}</span>
+                  <span className="selector-label">{type}</span>
                 </div>
               ))}
             </div>

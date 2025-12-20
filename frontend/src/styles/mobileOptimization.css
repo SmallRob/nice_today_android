@@ -404,13 +404,16 @@
 
 /* 固定定位优化 - 确保banner和菜单栏固定 */
 .dress-health-fixed-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   transform: translateZ(0);
   backface-visibility: hidden;
   will-change: transform;
   contain: layout style paint;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 滚动容器优化 - 确保仅内容区域滚动 */
