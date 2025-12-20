@@ -125,8 +125,18 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
           <div className="p-3 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {/* 应用图标 */}
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/images/nice_day.png" 
+                  alt="Nice Today" 
+                  className="w-8 h-8 object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+                {/* 备用图标 */}
+                <svg className="w-6 h-6 text-white hidden" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </div>
@@ -202,8 +212,8 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             </div>
           </div>
 
-          {/* 标签内容 - 紧凑布局 */}
-          <div className="p-1">
+          {/* 标签内容 - 优化间距 */}
+          <div className="p-3">
             <div className="animate-fade-in">
               {activeTab === 'biorhythm' && (
                 <BiorhythmTab 

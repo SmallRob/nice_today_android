@@ -629,15 +629,20 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
   };
 
   const recommendations = {
-    luckyColors: horoscope.luckyColor,
-    luckyNumbers: horoscope.luckyNumber,
-    compatibleSigns: horoscope.compatible,
-    todayMoonSign: getRandomMoonSign(horoscopeName),
+    luckyColors: Array.isArray(horoscope.luckyColor) ? horoscope.luckyColor : [horoscope.luckyColor || '#FF6B6B'],
+    luckyNumbers: Array.isArray(horoscope.luckyNumber) ? horoscope.luckyNumber : [horoscope.luckyNumber || 7],
+    compatibleSigns: Array.isArray(horoscope.compatible) ? horoscope.compatible : [horoscope.compatible || '未知星座'],
+    todayMoonSign: String(getRandomMoonSign(horoscopeName) || '白羊座'),
     soulQuestion: soulQuestion,
-    luckyItem: luckyItem,
-    positiveAdvice: generatePositiveAdvice(horoscopeName),
-    avoidAdvice: generateAvoidAdvice(horoscopeName),
-    dailyReminder: generateDailyReminder(horoscopeName)
+    luckyItem: String(luckyItem?.name || '幸运物品'),
+    luckyAccessory: String(luckyItem?.name || '幸运配饰'),
+    luckyTime: '上午9-11点',
+    luckyDirection: '东方',
+    luckyFood: '水果',
+    luckyFlower: '向日葵',
+    positiveAdvice: String(generatePositiveAdvice(horoscopeName) || '保持积极心态'),
+    avoidAdvice: String(generateAvoidAdvice(horoscopeName) || '避免消极思维'),
+    dailyReminder: String(generateDailyReminder(horoscopeName) || '今天会是美好的一天')
   };
 
   const horoscopeInfo = {

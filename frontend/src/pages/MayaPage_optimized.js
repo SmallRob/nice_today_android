@@ -1,6 +1,5 @@
 import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { lazy, Suspense } from 'react';
-import PageLayout, { Card } from '../components/PageLayout';
 import '../index.css';
 
 // 优化的懒加载组件预加载策略
@@ -25,37 +24,49 @@ const preloadMayaBirthChart = () => {
 const MayaCalendar = lazy(() => preloadMayaCalendar());
 const MayaBirthChart = lazy(() => preloadMayaBirthChart());
 
-// 优化的加载组件
+// 优化的加载组件 - 玛雅风格
 const TabContentLoader = memo(() => (
-  <div className="flex justify-center items-center py-8">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
-    <span className="text-gray-600">加载中...</span>
+  <div className="flex justify-center items-center py-12">
+    <div className="relative">
+      {/* 玛雅太阳轮加载动画 */}
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-amber-200 border-t-amber-500 dark:border-amber-600 dark:border-t-amber-400"></div>
+      <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border-2 border-orange-300 dark:border-orange-500"></div>
+    </div>
+    <span className="ml-4 text-amber-700 dark:text-amber-300 font-medium">正在连接古老的玛雅智慧...</span>
   </div>
 ));
 
-// 使用memo优化Tab按钮组件
+// 使用memo优化Tab按钮组件 - 玛雅风格
 const TabButton = memo(({ 
   isActive, 
   onClick, 
   children 
 }) => (
   <button
-    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+    className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-all duration-300 relative overflow-hidden ${
       isActive
-        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+        ? 'bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-700 text-white shadow-lg transform scale-105'
+        : 'text-amber-800 dark:text-amber-200 bg-white/80 dark:bg-gray-700/80 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-900 dark:hover:text-amber-100'
     }`}
     onClick={onClick}
   >
-    {children}
+    {/* 玛雅纹样装饰 */}
+    {isActive && (
+      <>
+        <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/20 to-orange-400/20 animate-pulse"></div>
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-yellow-300 to-orange-400"></div>
+        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-400 to-yellow-300"></div>
+      </>
+    )}
+    <span className="relative z-10 font-semibold">{children}</span>
   </button>
 ));
 
-// 优化的返回按钮组件
+// 优化的返回按钮组件 - 玛雅风格
 const BackButton = memo(({ onClick }) => (
   <button
     onClick={onClick}
-    className="text-sm text-blue-600 dark:text-blue-400 flex items-center"
+    className="text-sm text-amber-700 dark:text-amber-300 flex items-center hover:text-amber-900 dark:hover:text-amber-100 transition-colors duration-200 bg-amber-100 dark:bg-amber-900/30 px-3 py-1 rounded-lg border border-amber-200 dark:border-amber-700 hover:bg-amber-200 dark:hover:bg-amber-800/50"
   >
     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -125,24 +136,22 @@ const MayaPage = memo(() => {
     };
   }, []);
 
-  // 优化的Tab切换区域
+  // 优化的Tab切换区域 - 玛雅风格
   const TabNavigation = useMemo(() => (
-    <Card padding="p-1">
-      <div className="flex">
-        <TabButton
-          isActive={activeTab === 'calendar'}
-          onClick={handleBackToCalendar}
-        >
-          玛雅历法
-        </TabButton>
-        <TabButton
-          isActive={activeTab === 'birthChart'}
-          onClick={handleShowBirthChart}
-        >
-          出生星盘
-        </TabButton>
-      </div>
-    </Card>
+    <div className="flex space-x-2 p-1 bg-gradient-to-r from-amber-200/50 to-orange-200/50 dark:from-amber-800/30 dark:to-orange-800/30 rounded-lg border border-amber-300/50 dark:border-amber-600/30">
+      <TabButton
+        isActive={activeTab === 'calendar'}
+        onClick={handleBackToCalendar}
+      >
+        玛雅历法
+      </TabButton>
+      <TabButton
+        isActive={activeTab === 'birthChart'}
+        onClick={handleShowBirthChart}
+      >
+        出生星盘
+      </TabButton>
+    </div>
   ), [activeTab, handleBackToCalendar, handleShowBirthChart]);
 
   // 优化的内容渲染 - 添加组件预加载和性能优化
@@ -162,17 +171,21 @@ const MayaPage = memo(() => {
     
     if (activeTab === 'birthChart') {
       return (
-        <div className="space-y-4">
-          <Card 
-            title="玛雅出生星盘"
-            headerAction={<BackButton onClick={handleBackToCalendar} />}
-          >
-            <div className={contentClass}>
-              <Suspense fallback={<TabContentLoader />}>
-                <MayaBirthChart />
-              </Suspense>
+        <div className="space-y-6">
+          <div className="bg-gradient-to-br from-white to-amber-50 dark:from-gray-800 dark:to-amber-900/20 rounded-xl shadow-lg border-2 border-amber-200 dark:border-amber-700 overflow-hidden">
+            {/* 玛雅星盘标题栏 */}
+            <div className="bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-700 px-6 py-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white">玛雅出生星盘</h2>
+              <BackButton onClick={handleBackToCalendar} />
             </div>
-          </Card>
+            <div className="p-6">
+              <div className={contentClass}>
+                <Suspense fallback={<TabContentLoader />}>
+                  <MayaBirthChart />
+                </Suspense>
+              </div>
+            </div>
+          </div>
         </div>
       );
     }
@@ -181,20 +194,73 @@ const MayaPage = memo(() => {
   }, [activeTab, handleShowBirthChart, handleBackToCalendar]);
 
   return (
-    <PageLayout
-      title="玛雅历法"
-      subtitle="探索古老的玛雅智慧"
-      loading={!isLoaded}
-      loadingMessage="正在加载玛雅历法..."
-    >
-      <div className="space-y-4">
-        {/* Tab切换按钮 */}
-        {TabNavigation}
-
-        {/* 内容区域 */}
-        {renderContent}
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 relative overflow-hidden">
+      {/* 玛雅金字塔背景装饰 */}
+      <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-amber-200 to-orange-300 dark:from-amber-600 dark:to-orange-700 rounded-lg transform rotate-45"></div>
+        <div className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-amber-300 to-orange-400 dark:from-amber-700 dark:to-orange-800 rounded-lg transform rotate-12"></div>
+        <div className="absolute bottom-20 left-1/4 w-28 h-28 bg-gradient-to-br from-orange-200 to-amber-300 dark:from-orange-600 dark:to-amber-700 rounded-lg transform -rotate-15"></div>
       </div>
-    </PageLayout>
+
+      {/* 玛雅传统纹样边框 */}
+      <div className="absolute inset-0 border-8 border-transparent pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent dark:via-amber-600"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent dark:via-orange-600"></div>
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-yellow-500 to-transparent dark:via-yellow-600"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-red-500 to-transparent dark:via-red-600"></div>
+      </div>
+
+      {/* 神秘光影效果 */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-700 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-r from-yellow-400 to-red-500 dark:from-yellow-600 dark:to-red-700 rounded-full filter blur-2xl opacity-15 animate-bounce"></div>
+        <div className="absolute top-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-orange-300 to-amber-400 dark:from-orange-500 dark:to-amber-600 rounded-full filter blur-xl opacity-25 animate-ping"></div>
+      </div>
+
+      <div className="relative z-10">
+        {/* 玛雅历法顶部标题区域 */}
+        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 relative overflow-hidden">
+          {/* 玛雅象形文字装饰 */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <div className="absolute top-4 left-4 text-2xl text-white font-mono">☀️</div>
+            <div className="absolute top-4 right-4 text-2xl text-white font-mono">🌙</div>
+            <div className="absolute bottom-4 left-4 text-2xl text-white font-mono">⭐</div>
+            <div className="absolute bottom-4 right-4 text-2xl text-white font-mono">🌀</div>
+          </div>
+
+          <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+            {/* 玛雅历法主标题 */}
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 relative">
+              <span className="bg-gradient-to-r from-yellow-200 to-amber-200 bg-clip-text text-transparent">玛雅历法</span>
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-yellow-300 to-amber-300 rounded-full"></div>
+            </h1>
+            
+            {/* 副标题 */}
+            <p className="text-lg md:text-xl text-amber-100 mb-4 italic">探索古老的玛雅智慧</p>
+            
+            {/* 玛雅太阳历装饰 */}
+            <div className="flex justify-center items-center space-x-4">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-300 to-orange-400 animate-spin"></div>
+              <div className="text-sm text-amber-200 font-medium">太阳历 · 神圣周期 · 宇宙能量</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-red-500 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* 主要内容区域 */}
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="space-y-6">
+            {/* Tab切换按钮 - 增强玛雅风格 */}
+            <div className="bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 rounded-xl shadow-lg border-2 border-amber-200 dark:border-amber-800 p-2">
+              {TabNavigation}
+            </div>
+
+            {/* 内容区域 */}
+            {renderContent}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 });
 

@@ -312,7 +312,7 @@ const HoroscopeTab = () => {
             <span className="mr-2">💖</span>爱情提醒 - 来自生辰
           </h4>
           <p className="text-pink-600 dark:text-pink-400 text-sm leading-relaxed mobile-text mobile-responsive-text">
-            {recommendations.dailyReminder}
+            {String(recommendations.dailyReminder || '今天会是美好的一天')}
           </p>
         </div>
 
@@ -323,25 +323,25 @@ const HoroscopeTab = () => {
               <span className="mr-2 text-xl">✅</span>
               宜做
             </h4>
-            <p className="text-green-700 dark:text-green-400 text-base leading-relaxed mobile-text mobile-responsive-text">{recommendations.positiveAdvice}</p>
+            <p className="text-green-700 dark:text-green-400 text-base leading-relaxed mobile-text mobile-responsive-text">{String(recommendations.positiveAdvice || '保持积极心态')}</p>
           </div>
           <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 rounded-xl p-5 shadow-lg border-l-4 border-red-500 transform transition-all duration-200 hover:scale-102 active:scale-98" style={{ touchAction: 'manipulation' }}>
             <h4 className="font-bold text-red-700 dark:text-red-300 mb-3 flex items-center text-lg">
               <span className="mr-2 text-xl">❌</span>
               忌做
             </h4>
-            <p className="text-red-700 dark:text-red-400 text-base leading-relaxed mobile-text mobile-responsive-text">{recommendations.avoidAdvice}</p>
+            <p className="text-red-700 dark:text-red-400 text-base leading-relaxed mobile-text mobile-responsive-text">{String(recommendations.avoidAdvice || '避免消极思维')}</p>
           </div>
         </div>
 
         {/* 心灵问答 */}
-        {recommendations.soulQuestion && (
+        {recommendations.soulQuestion && typeof recommendations.soulQuestion === 'object' && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 shadow border border-blue-100 dark:border-blue-800">
             <h4 className="font-bold text-blue-700 dark:text-blue-300 mb-2 flex items-center">
-              <span className="mr-2">❓</span>问 {recommendations.soulQuestion.question}
+              <span className="mr-2">❓</span>问 {String(recommendations.soulQuestion.question || '今日问题')}
             </h4>
             <p className="text-blue-600 dark:text-blue-400 text-sm">
-              {recommendations.soulQuestion.answer}
+              {String(recommendations.soulQuestion.answer || '今日解答')}
             </p>
           </div>
         )}
@@ -356,12 +356,12 @@ const HoroscopeTab = () => {
               <div className="flex justify-center mb-2">
                 <div 
                   className="w-12 h-12 rounded-full border-2 border-white shadow-md transition-transform duration-200 hover:scale-110 active:scale-95"
-                  style={{ backgroundColor: recommendations.luckyColors[0], touchAction: 'manipulation' }}
+                  style={{ backgroundColor: (Array.isArray(recommendations.luckyColors) && recommendations.luckyColors[0]) ? recommendations.luckyColors[0] : '#FF6B6B', touchAction: 'manipulation' }}
                 ></div>
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运色</div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
-                {recommendations.luckyColors[0].replace('#', '')}
+                {String((Array.isArray(recommendations.luckyColors) && recommendations.luckyColors[0]) ? recommendations.luckyColors[0].replace('#', '') : 'FF6B6B')}
               </div>
             </div>
 
@@ -370,7 +370,7 @@ const HoroscopeTab = () => {
               <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>💎</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运配饰</div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
-                {recommendations.luckyAccessory}
+                {String(recommendations.luckyAccessory || '幸运配饰')}
               </div>
             </div>
 
@@ -379,7 +379,7 @@ const HoroscopeTab = () => {
               <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🕒</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运时辰</div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
-                {recommendations.luckyTime}
+                {String(recommendations.luckyTime || '上午9-11点')}
               </div>
             </div>
 
@@ -388,7 +388,7 @@ const HoroscopeTab = () => {
               <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🧭</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运方位</div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
-                {recommendations.luckyDirection}
+                {String(recommendations.luckyDirection || '东方')}
               </div>
             </div>
 
@@ -397,7 +397,7 @@ const HoroscopeTab = () => {
               <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🔢</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运数字</div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
-                {recommendations.luckyNumbers.join('/')}
+                {Array.isArray(recommendations.luckyNumbers) ? recommendations.luckyNumbers.join('/') : String(recommendations.luckyNumbers || '7')}
               </div>
             </div>
 
@@ -406,7 +406,7 @@ const HoroscopeTab = () => {
               <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🍵</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运食物</div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
-                {recommendations.luckyFood}
+                {String(recommendations.luckyFood || '水果')}
               </div>
             </div>
 
@@ -415,7 +415,7 @@ const HoroscopeTab = () => {
               <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>📓</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运随身物</div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
-                {recommendations.luckyItem}
+                {String(recommendations.luckyItem || '幸运物品')}
               </div>
             </div>
 
@@ -424,7 +424,7 @@ const HoroscopeTab = () => {
               <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🌻</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运花</div>
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
-                {recommendations.luckyFlower}
+                {String(recommendations.luckyFlower || '向日葵')}
               </div>
             </div>
           </div>
@@ -449,15 +449,15 @@ const HoroscopeTab = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow transition-all duration-200 hover:shadow-md mobile-card" style={{ touchAction: 'manipulation' }}>
           <h4 className="font-bold text-gray-800 dark:text-white mb-3 mobile-responsive-heading">🤝 相容星座</h4>
           <div className="flex flex-wrap gap-2">
-            {recommendations.compatibleSigns.map((sign, index) => (
+            {Array.isArray(recommendations.compatibleSigns) ? recommendations.compatibleSigns.map((sign, index) => (
               <span 
                 key={index} 
                 className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-blue-700 dark:text-blue-300 transition-all duration-200 hover:bg-blue-200 dark:hover:bg-blue-800 active:scale-95 cursor-pointer"
                 style={{ touchAction: 'manipulation' }}
               >
-                {sign}
+                {String(sign)}
               </span>
-            ))}
+            )) : null}
           </div>
         </div>
 
@@ -467,7 +467,7 @@ const HoroscopeTab = () => {
             <span className="text-3xl mr-3 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🌙</span>
             <div>
               <h4 className="font-bold text-indigo-700 dark:text-indigo-300 mobile-responsive-heading">今日月亮星座</h4>
-              <p className="text-indigo-600 dark:text-indigo-400 mobile-text mobile-responsive-text">{recommendations.todayMoonSign}</p>
+              <p className="text-indigo-600 dark:text-indigo-400 mobile-text mobile-responsive-text">{String(recommendations.todayMoonSign || '未知')}</p>
             </div>
           </div>
         </div>
@@ -485,7 +485,7 @@ const HoroscopeTab = () => {
           </label>
           <div className="overflow-x-auto pb-2 hide-scrollbar optimized-scroll">
             <div className="flex space-x-3 min-w-max px-1">
-              {getHoroscopeData().map((horoscope) => {
+              {getHoroscopeData() && Array.isArray(getHoroscopeData()) ? getHoroscopeData().map((horoscope) => {
                 const isActive = userHoroscope === horoscope.name;
                 return (
                   <button
@@ -509,7 +509,7 @@ const HoroscopeTab = () => {
                     <span className="relative z-10 text-xs font-bold">{horoscope.name.replace('座', '')}</span>
                   </button>
                 );
-              })}
+              }) : null}
             </div>
           </div>
         </div>
