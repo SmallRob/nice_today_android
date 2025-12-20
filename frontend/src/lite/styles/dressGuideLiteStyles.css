@@ -2,12 +2,14 @@
 
 .lite-dress-page {
   padding: 10px;
+  -webkit-overflow-scrolling: touch; /* 启用iOS momentum scrolling */
 }
 
 .lite-dress-page .lite-card {
   margin-bottom: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease; /* 平滑过渡效果 */
 }
 
 .lite-dress-page .lite-card h3 {
@@ -29,6 +31,12 @@
   border-radius: 5px;
   background-color: #f9f9f9;
   border-left: 3px solid #4a89dc;
+  -webkit-touch-callout: none; /* 禁止长按选择 */
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .color-suggestion-item:last-child {
@@ -90,5 +98,12 @@
   .color-suggestion-item p,
   .food-suggestions p {
     font-size: 13px;
+  }
+  
+  /* 移动端触摸优化 */
+  .lite-dress-page .lite-card {
+    -webkit-transform: translateZ(0); /* 启用硬件加速 */
+    transform: translateZ(0);
+    will-change: scroll-position; /* 提示浏览器优化滚动 */
   }
 }

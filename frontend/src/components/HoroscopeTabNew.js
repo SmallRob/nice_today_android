@@ -636,7 +636,6 @@ const HoroscopeTab = () => {
             )}
           </div>
         </div>
-        </div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import './mayaLiteStyles.css';
+import '../styles/globalLiteStyles.css';
+import '../styles/mayaLiteStyles.css';
 
 // 简化的玛雅历法计算工具类
 class SimpleMayaCalendarUtils {
@@ -200,47 +201,47 @@ const MayaCalendarLitePage = ({ userInfo }) => {
   }
   
   return (
-    <div className="lite-maya-page">
-      <h2 className="lite-page-title">玛雅日历</h2>
-      
-      <div className="lite-card">
-        <h3>用户信息</h3>
-        <p>昵称: {userInfo.nickname || '未设置'}</p>
-        <p>出生日期: {userInfo.birthDate}</p>
-      </div>
+    <div className="lite-maya-page lite-page-container">
+      <h2 className="lite-h2 lite-text-center">玛雅日历</h2>
       
       {/* 月历 */}
       <div className="lite-card">
-        <h3>选择日期</h3>
+        <h3 className="lite-h3">选择日期</h3>
         {renderCalendar()}
+      </div>
+      
+      <div className="lite-card">
+        <h3 className="lite-h3">用户信息</h3>
+        <p className="lite-text">昵称: {userInfo.nickname || '未设置'}</p>
+        <p className="lite-text">出生日期: {userInfo.birthDate}</p>
       </div>
       
       {/* 玛雅信息 */}
       {mayaData && (
         <div className="lite-card">
-          <h3>玛雅历法信息 - {selectedDate.toISOString().split('T')[0]}</h3>
-          <div className="maya-info-grid">
-            <div className="maya-info-item">
-              <div className="maya-label">KIN</div>
-              <div className="maya-value">{mayaData.kin}</div>
+          <h3 className="lite-h3">玛雅历法信息 - {selectedDate.toISOString().split('T')[0]}</h3>
+          <div className="lite-grid lite-grid-cols-3">
+            <div className="lite-card lite-text-center">
+              <div className="lite-text-muted">KIN</div>
+              <div className="lite-text-lg lite-text-bold">{mayaData.kin}</div>
             </div>
-            <div className="maya-info-item">
-              <div className="maya-label">调性</div>
-              <div className="maya-value">{mayaData.tone}</div>
+            <div className="lite-card lite-text-center">
+              <div className="lite-text-muted">调性</div>
+              <div className="lite-text-lg lite-text-bold">{mayaData.tone}</div>
             </div>
-            <div className="maya-info-item">
-              <div className="maya-label">图腾</div>
-              <div className="maya-value">{mayaData.seal}</div>
+            <div className="lite-card lite-text-center">
+              <div className="lite-text-muted">图腾</div>
+              <div className="lite-text-lg lite-text-bold">{mayaData.seal}</div>
             </div>
           </div>
-          <div className="maya-full-name">
-            {mayaData.fullName}
+          <div className="lite-card lite-text-center lite-mt-base">
+            <div className="lite-text-xl lite-text-bold">{mayaData.fullName}</div>
           </div>
           
           {/* 每日启示 */}
-          <div className="daily-inspiration">
-            <h4>今日启示</h4>
-            <p>{SimpleMayaCalendarUtils.getDailyInspiration(mayaData.kin)}</p>
+          <div className="lite-card lite-mt-base">
+            <h4 className="lite-h4">今日启示</h4>
+            <p className="lite-text">{SimpleMayaCalendarUtils.getDailyInspiration(mayaData.kin)}</p>
           </div>
         </div>
       )}

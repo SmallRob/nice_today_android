@@ -1,0 +1,235 @@
+/* 轻量版全局统一样式 */
+:root {
+  /* 字体大小 */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  
+  /* 颜色 */
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --gray-color: #6c757d;
+  --border-color: #dee2e6;
+  
+  /* 间距 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-base: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* 圆角 */
+  --border-radius-sm: 4px;
+  --border-radius-base: 8px;
+  --border-radius-lg: 12px;
+  
+  /* 阴影 */
+  --box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --box-shadow-base: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --box-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 全局重置 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
+/* 页面容器 */
+.lite-page-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+@media (max-width: 768px) {
+  .lite-page-container {
+    padding: 0 5px;
+  }
+}
+
+/* 文本对齐 */
+.lite-text-left { text-align: left; }
+.lite-text-center { text-align: center; }
+.lite-text-right { text-align: right; }
+
+/* 字体粗细 */
+.lite-text-normal { font-weight: normal; }
+.lite-text-bold { font-weight: bold; }
+
+/* 字体大小 */
+.lite-text-xs { font-size: var(--font-size-xs); }
+.lite-text-sm { font-size: var(--font-size-sm); }
+.lite-text-base { font-size: var(--font-size-base); }
+.lite-text-lg { font-size: var(--font-size-lg); }
+.lite-text-xl { font-size: var(--font-size-xl); }
+.lite-text-xxl { font-size: var(--font-size-xxl); }
+
+/* 标题样式 */
+.lite-h1 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin: var(--spacing-lg) 0 var(--spacing-base);
+  color: var(--secondary-color);
+}
+
+.lite-h2 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: var(--spacing-base) 0 var(--spacing-sm);
+  color: var(--secondary-color);
+}
+
+.lite-h3 {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  margin: var(--spacing-base) 0 var(--spacing-xs);
+  color: var(--secondary-color);
+}
+
+.lite-h4 {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin: var(--spacing-sm) 0 var(--spacing-xs);
+  color: var(--gray-color);
+}
+
+/* 文本样式 */
+.lite-text {
+  font-size: var(--font-size-base);
+  color: var(--dark-color);
+  margin: 0 0 var(--spacing-base);
+}
+
+.lite-text-sm {
+  font-size: var(--font-size-sm);
+  color: var(--gray-color);
+}
+
+.lite-text-muted {
+  font-size: var(--font-size-sm);
+  color: var(--gray-color);
+}
+
+/* 卡片样式 */
+.lite-card {
+  background-color: #ffffff;
+  border-radius: var(--border-radius-base);
+  box-shadow: var(--box-shadow-base);
+  margin-bottom: var(--spacing-base);
+  padding: var(--spacing-base);
+}
+
+@media (prefers-color-scheme: dark) {
+  .lite-card {
+    background-color: #2a2a2a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+}
+
+/* 网格布局 */
+.lite-grid {
+  display: grid;
+  gap: var(--spacing-base);
+}
+
+.lite-grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.lite-grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.lite-grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Flex 布局 */
+.lite-flex {
+  display: flex;
+}
+
+.lite-flex-col {
+  flex-direction: column;
+}
+
+.lite-items-center {
+  align-items: center;
+}
+
+.lite-justify-between {
+  justify-content: space-between;
+}
+
+.lite-gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.lite-gap-base {
+  gap: var(--spacing-base);
+}
+
+/* 间距工具类 */
+.lite-m-0 { margin: 0; }
+.lite-mt-0 { margin-top: 0; }
+.lite-mb-0 { margin-bottom: 0; }
+.lite-p-0 { padding: 0; }
+.lite-pt-0 { padding-top: 0; }
+.lite-pb-0 { padding-bottom: 0; }
+
+.lite-m-sm { margin: var(--spacing-sm); }
+.lite-mt-sm { margin-top: var(--spacing-sm); }
+.lite-mb-sm { margin-bottom: var(--spacing-sm); }
+.lite-p-sm { padding: var(--spacing-sm); }
+.lite-pt-sm { padding-top: var(--spacing-sm); }
+.lite-pb-sm { padding-bottom: var(--spacing-sm); }
+
+.lite-m-base { margin: var(--spacing-base); }
+.lite-mt-base { margin-top: var(--spacing-base); }
+.lite-mb-base { margin-bottom: var(--spacing-base); }
+.lite-p-base { padding: var(--spacing-base); }
+.lite-pt-base { padding-top: var(--spacing-base); }
+.lite-pb-base { padding-bottom: var(--spacing-base); }
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  :root {
+    --font-size-xs: 11px;
+    --font-size-sm: 13px;
+    --font-size-base: 15px;
+    --font-size-lg: 17px;
+    --font-size-xl: 19px;
+    --font-size-xxl: 22px;
+    
+    --spacing-xs: 3px;
+    --spacing-sm: 6px;
+    --spacing-base: 12px;
+    --spacing-lg: 18px;
+    --spacing-xl: 24px;
+  }
+  
+  .lite-card {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+}

@@ -71,8 +71,12 @@
 .lite-main-content {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* 启用iOS momentum scrolling */
   padding: 10px;
   padding-bottom: 70px; /* 为底部导航留出空间 */
+  -webkit-transform: translateZ(0); /* 启用硬件加速 */
+  transform: translateZ(0);
+  will-change: scroll-position; /* 提示浏览器优化滚动 */
 }
 
 /* 页面标题 */
@@ -233,5 +237,10 @@
   
   .lite-page-title {
     font-size: 1.8rem;
+  }
+  
+  /* 桌面端优化 */
+  .lite-main-content {
+    -webkit-overflow-scrolling: auto; /* 桌面端使用默认滚动 */
   }
 }
