@@ -13,7 +13,6 @@ import SettingsLitePage from './pages/SettingsLitePage';
 
 // 轻量版组件
 import LiteTabNavigation from './components/LiteTabNavigation';
-import VersionSwitcher from './components/VersionSwitcher';
 
 // 应用布局组件 - 包含主题颜色管理
 const AppLayout = ({ children, activeTab, setActiveTab }) => {
@@ -32,9 +31,6 @@ const AppLayout = ({ children, activeTab, setActiveTab }) => {
   
   return (
     <div className="lite-app-container">
-      {/* 版本切换器 */}
-      <VersionSwitcher />
-      
       {/* 主要内容区域 */}
       <div className="lite-main-content">
         {children}

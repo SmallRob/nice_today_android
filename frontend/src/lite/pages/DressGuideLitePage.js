@@ -39,8 +39,11 @@ const DressGuideLitePage = ({ userInfo }) => {
   }
 
   return (
-    <div className="lite-dress-page lite-page-container" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <h2 className="lite-h2 lite-text-center">穿衣指南</h2>
+    <div className="lite-page-container">
+      <div className="lite-page-header">
+        <h2 className="lite-page-title">穿衣指南</h2>
+      </div>
+      <div className="lite-dress-page" style={{ WebkitOverflowScrolling: 'touch' }}>
       
       {/* <div className="lite-card">
         <h3 className="lite-h3">用户信息</h3>
@@ -96,6 +99,7 @@ const DressGuideLitePage = ({ userInfo }) => {
         <h3 className="lite-h3">穿衣指南说明</h3>
         <p className="lite-text">根据传统五行理论和现代色彩心理学，不同颜色的服装会对人的情绪和运势产生不同的影响。</p>
         <p className="lite-text">选择合适的颜色不仅能让您看起来更有精神，还可能带来更好的心情和运势。</p>
+      </div>
       </div>
     </div>
   );

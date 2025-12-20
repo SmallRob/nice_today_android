@@ -7,8 +7,8 @@ echo "开始构建Android应用..."
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH
 
-# 进入前端目录
-cd /Users/healer2027/AndroidStudioProjects/nice_today_android/frontend
+# 进入前端目录 (Windows兼容路径)
+cd "e:/WorkSource/nice_today_android/frontend" || { echo "无法进入前端目录"; exit 1; }
 
 # 同步Web资源到Android项目
 echo "同步Web资源到Android项目..."

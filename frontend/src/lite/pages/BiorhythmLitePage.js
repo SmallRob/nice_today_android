@@ -152,8 +152,11 @@ const BiorhythmLitePage = () => {
   }
 
   return (
-    <div className="lite-biorhythm-page lite-page-container">
-      <h2 className="lite-h2 lite-text-center">生物节律</h2>
+    <div className="lite-page-container">
+      <div className="lite-page-header">
+        <h2 className="lite-page-title">生物节律</h2>
+      </div>
+      <div className="lite-biorhythm-page">
       
       <div className="lite-card">
         <h3 className="lite-h3">当前日期: {currentDate.toISOString().split('T')[0]}</h3>
@@ -251,6 +254,7 @@ const BiorhythmLitePage = () => {
           )}
         </>
       )}
+      </div>
     </div>
   );
 };

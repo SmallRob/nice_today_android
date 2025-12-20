@@ -78,8 +78,11 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
   };
 
   return (
-    <div className="lite-settings-page">
-      <h2 className="lite-page-title">设置</h2>
+    <div className="lite-page-container">
+      <div className="lite-page-header">
+        <h2 className="lite-page-title">设置</h2>
+      </div>
+      <div className="lite-settings-page">
       
       <div className="lite-card">
         <h3>用户信息</h3>
@@ -159,6 +162,7 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
         <h3>关于</h3>
         <p>轻量版 v1.0.0</p>
         <p>专为移动设备优化，提供更流畅的体验</p>
+      </div>
       </div>
     </div>
   );

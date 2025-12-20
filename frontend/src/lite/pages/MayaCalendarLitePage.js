@@ -201,8 +201,11 @@ const MayaCalendarLitePage = ({ userInfo }) => {
   }
   
   return (
-    <div className="lite-maya-page lite-page-container">
-      <h2 className="lite-h2 lite-text-center">玛雅日历</h2>
+    <div className="lite-page-container">
+      <div className="lite-page-header">
+        <h2 className="lite-page-title">玛雅日历</h2>
+      </div>
+      <div className="lite-maya-page">
       
       {/* 月历 */}
       <div className="lite-card">
@@ -245,6 +248,7 @@ const MayaCalendarLitePage = ({ userInfo }) => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
