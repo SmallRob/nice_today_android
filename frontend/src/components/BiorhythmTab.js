@@ -5,6 +5,7 @@ import elementConfig from '../config/elementConfig.json';
 import { initDataMigration } from '../utils/dataMigration';
 import { userConfigManager } from '../utils/userConfigManager';
 import { useTheme } from '../context/ThemeContext';
+import notificationService from '../utils/notificationService';
 
 // 实践活动数据
 const PRACTICE_ACTIVITIES = [
@@ -183,6 +184,14 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     // 初始化实践活动
     setPracticeActivities(getRandomActivities());
   }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE, configManagerReady, getRandomActivities]);
+
+  // 检测节律极值并发送通知
+  useEffect(() => {
+    if (todayData) {
+      // 检查节律极值
+      notificationService.checkBiorhythmCritical(todayData);
+    }
+  }, [todayData]);
 
   // 更换实践活动
   const refreshActivities = () => {

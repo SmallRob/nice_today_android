@@ -372,3 +372,189 @@ label {
     min-height: 36px;
   }
 }
+
+/* 生物节律知识卡片样式 */
+.knowledge-card {
+  border: 1px solid #3498db;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.knowledge-card-title {
+  color: #3498db !important;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-base);
+  text-align: center;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: var(--spacing-sm);
+}
+
+.knowledge-grid {
+  display: grid;
+  gap: var(--spacing-base);
+}
+
+.knowledge-item {
+  background: rgba(52, 152, 219, 0.1);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-base);
+  border-left: 4px solid #3498db;
+}
+
+.knowledge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.knowledge-type {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.knowledge-cycle {
+  font-size: var(--font-size-sm);
+  color: var(--gray-color);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+}
+
+.knowledge-description {
+  color: var(--dark-color);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* 移动端知识卡片适配 */
+@media (max-width: 768px) {
+  .knowledge-grid {
+    gap: var(--spacing-sm);
+  }
+  
+  .knowledge-item {
+    padding: var(--spacing-sm);
+  }
+  
+  .knowledge-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+  
+  .knowledge-cycle {
+    align-self: flex-end;
+  }
+}
+
+/* 未来节律趋势样式 */
+.trend-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.trend-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+.trend-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trend-day {
+  font-weight: 500;
+}
+
+.trend-value {
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+}
+
+.trend-up-strong {
+  color: #4CAF50;
+}
+
+.trend-up {
+  color: #8BC34A;
+}
+
+.trend-stable {
+  color: var(--gray-color);
+}
+
+.trend-down {
+  color: #FF9800;
+}
+
+.trend-down-strong {
+  color: #F44336;
+}
+
+.trend-legend {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-base);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+}
+
+.trend-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 移动端趋势表格适配 */
+@media (max-width: 768px) {
+  .trend-header {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) 0;
+  }
+  
+  .trend-row {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) 0;
+  }
+  
+  .trend-value {
+    font-size: var(--font-size-base);
+  }
+  
+  .trend-legend {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .trend-legend span {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .trend-header {
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  }
+  
+  .trend-row {
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+  }
+  
+  .trend-value {
+    font-size: var(--font-size-sm);
+  }
+}

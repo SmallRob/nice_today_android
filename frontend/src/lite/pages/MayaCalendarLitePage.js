@@ -248,6 +248,43 @@ const MayaCalendarLitePage = ({ userInfo }) => {
           </div>
         </div>
       )}
+      
+      {/* 玛雅知识小卡片 */}
+      <div className="lite-card knowledge-card">
+        <h3 className="knowledge-card-title">玛雅历法知识</h3>
+        <div className="knowledge-grid">
+          <div className="knowledge-item">
+            <div className="knowledge-header">
+              <span className="knowledge-type" style={{ color: '#9C27B0' }}>13种调性</span>
+              <span className="knowledge-cycle">银河音调</span>
+            </div>
+            <p className="lite-text-sm knowledge-description">
+              代表宇宙的振动频率，从磁性到宇宙，每个调性都有独特的能量特质和指引方向。
+            </p>
+          </div>
+          
+          <div className="knowledge-item">
+            <div className="knowledge-header">
+              <span className="knowledge-type" style={{ color: '#2196F3' }}>20种图腾</span>
+              <span className="knowledge-cycle">太阳印记</span>
+            </div>
+            <p className="lite-text-sm knowledge-description">
+              象征自然的能量原型，从红龙到黄太阳，每个图腾都承载着特定的智慧和品质。
+            </p>
+          </div>
+          
+          <div className="knowledge-item">
+            <div className="knowledge-header">
+              <span className="knowledge-type" style={{ color: '#4CAF50' }}>260天周期</span>
+              <span className="knowledge-cycle">神圣历法</span>
+            </div>
+            <p className="lite-text-sm knowledge-description">
+              13调性 × 20图腾 = 260天的神圣周期，对应人类的孕育周期和银河的振动频率。
+            </p>
+          </div>
+        </div>
+      </div>
+      
       </div>
     </div>
   );

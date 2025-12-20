@@ -6,6 +6,7 @@ import {
   biorhythmScienceInfo 
 } from '../config/biorhythmConfig';
 import { fetchOrganRhythmData } from '../services/dataService';
+import notificationService from '../utils/notificationService';
 
 // 节律状态评估函数
 const getRhythmStatus = (value) => {
@@ -193,6 +194,14 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
   const [organData, setOrganData] = useState([]);
   const [organLoading, setOrganLoading] = useState(true);
   const [organError, setOrganError] = useState(null);
+
+  // 极值检测和通知功能
+  useEffect(() => {
+    if (data && title === '今日') {
+      // 检查节律极值并发送通知
+      notificationService.checkBiorhythmCritical(data);
+    }
+  }, [data, title]);
 
   // 加载器官节律数据
   useEffect(() => {

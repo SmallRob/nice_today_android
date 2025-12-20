@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { calculateBiorhythm } from '../utils/biorhythmCalculator';
 import { userConfigManager } from '../../utils/userConfigManager';
+import notificationService from '../../utils/notificationService';
 import '../styles/globalLiteStyles.css';
 
 const BiorhythmLitePage = () => {
@@ -37,6 +38,9 @@ const BiorhythmLitePage = () => {
     if (userInfo.birthDate) {
       const calculated = calculateBiorhythm(userInfo.birthDate, currentDate);
       setBiorhythms(calculated);
+      
+      // 检查节律极值并发送通知
+      notificationService.checkBiorhythmCritical(calculated);
     }
   }, [userInfo.birthDate, currentDate]);
 
@@ -98,16 +102,27 @@ const BiorhythmLitePage = () => {
     return tips;
   };
   
-  // 获取节律解释
-  const getBiorhythmExplanation = (type) => {
-    const explanations = {
-      physical: '体力节律反映了人的体力状况，影响运动能力、耐力和身体活力。周期为23天。',
-      emotional: '情绪节律反映了人的情绪状态，影响情感表达、创造力和人际交往。周期为28天。',
-      intellectual: '智力节律反映了人的思维能力，影响逻辑推理、记忆力和学习效率。周期为33天。'
-    };
-    
-    return explanations[type] || '';
-  };
+  // 生物节律知识卡片数据
+  const biorhythmKnowledge = [
+    {
+      type: '体力节律',
+      description: '反映了人的体力状况，影响运动能力、耐力和身体活力。',
+      cycle: '周期为23天',
+      color: '#4CAF50'
+    },
+    {
+      type: '情绪节律',
+      description: '反映了人的情绪状态，影响情感表达、创造力和人际交往。',
+      cycle: '周期为28天',
+      color: '#2196F3'
+    },
+    {
+      type: '智力节律',
+      description: '反映了人的思维能力，影响逻辑推理、记忆力和学习效率。',
+      cycle: '周期为33天',
+      color: '#9C27B0'
+    }
+  ];
   
   // 获取节律状态说明
   const getBiorhythmStatusDescription = (value) => {
@@ -139,8 +154,54 @@ const BiorhythmLitePage = () => {
     return '状态欠佳';
   };
 
+  // 获取未来7天节律趋势
+  const getFutureTrends = (biorhythms, currentDate) => {
+    if (!biorhythms || !userInfo.birthDate) return [];
+    
+    const trends = [];
+    
+    for (let i = 1; i <= 7; i++) {
+      const futureDate = new Date(currentDate);
+      futureDate.setDate(futureDate.getDate() + i);
+      
+      const futureBiorhythm = calculateBiorhythm(userInfo.birthDate, futureDate);
+      
+      const trend = {
+        day: i === 1 ? '明天' : `${i}天后`,
+        date: futureDate.toISOString().split('T')[0],
+        physical: getTrendSymbol(biorhythms.physical, futureBiorhythm.physical),
+        emotional: getTrendSymbol(biorhythms.emotional, futureBiorhythm.emotional),
+        intellectual: getTrendSymbol(biorhythms.intellectual, futureBiorhythm.intellectual)
+      };
+      
+      trends.push(trend);
+    }
+    
+    return trends;
+  };
+  
+  // 获取趋势符号
+  const getTrendSymbol = (currentValue, futureValue) => {
+    const diff = futureValue - currentValue;
+    if (diff > 2) return '↑↑';
+    if (diff > 0.5) return '↑';
+    if (diff < -2) return '↓↓';
+    if (diff < -0.5) return '↓';
+    return '→';
+  };
+  
+  // 获取趋势颜色
+  const getTrendColor = (symbol) => {
+    if (symbol === '↑↑') return 'trend-up-strong';
+    if (symbol === '↑') return 'trend-up';
+    if (symbol === '↓↓') return 'trend-down-strong';
+    if (symbol === '↓') return 'trend-down';
+    return 'trend-stable';
+  };
+
   const lifeTips = getSimpleLifeTips(biorhythms);
   const overallStatus = getOverallStatus(biorhythms);
+  const futureTrends = getFutureTrends(biorhythms, currentDate);
 
   if (!userInfo.birthDate) {
     return (
@@ -184,7 +245,6 @@ const BiorhythmLitePage = () => {
                 <span className="lite-text-bold">体力节律:</span> {biorhythms.physical.toFixed(2)} 
                 <span className="lite-text-sm">({getBiorhythmStatusDescription(biorhythms.physical)})</span>
               </p>
-              <p className="lite-text-sm lite-text-muted">{getBiorhythmExplanation('physical')}</p>
               <p className="lite-text-sm">建议: {getBiorhythmStatusAdvice(biorhythms.physical)}</p>
               <div className="progress-bar">
                 <div 
@@ -203,7 +263,6 @@ const BiorhythmLitePage = () => {
                 <span className="lite-text-bold">情绪节律:</span> {biorhythms.emotional.toFixed(2)} 
                 <span className="lite-text-sm">({getBiorhythmStatusDescription(biorhythms.emotional)})</span>
               </p>
-              <p className="lite-text-sm lite-text-muted">{getBiorhythmExplanation('emotional')}</p>
               <p className="lite-text-sm">建议: {getBiorhythmStatusAdvice(biorhythms.emotional)}</p>
               <div className="progress-bar">
                 <div 
@@ -222,7 +281,6 @@ const BiorhythmLitePage = () => {
                 <span className="lite-text-bold">智力节律:</span> {biorhythms.intellectual.toFixed(2)} 
                 <span className="lite-text-sm">({getBiorhythmStatusDescription(biorhythms.intellectual)})</span>
               </p>
-              <p className="lite-text-sm lite-text-muted">{getBiorhythmExplanation('intellectual')}</p>
               <p className="lite-text-sm">建议: {getBiorhythmStatusAdvice(biorhythms.intellectual)}</p>
               <div className="progress-bar">
                 <div 
@@ -240,6 +298,27 @@ const BiorhythmLitePage = () => {
             </div>
           </div>
           
+          {/* 生物节律知识卡片 */}
+          <div className="lite-card knowledge-card">
+            <h3 className="knowledge-card-title">生物节律知识</h3>
+            <div className="knowledge-grid">
+              {biorhythmKnowledge.map((item, index) => (
+                <div key={index} className="knowledge-item">
+                  <div className="knowledge-header">
+                    <span 
+                      className="knowledge-type" 
+                      style={{ color: item.color }}
+                    >
+                      {item.type}
+                    </span>
+                    <span className="knowledge-cycle">{item.cycle}</span>
+                  </div>
+                  <p className="lite-text-sm knowledge-description">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          
           {lifeTips.length > 0 && (
             <div className="lite-card">
               <h3 className="lite-h3">今日提醒</h3>
@@ -250,6 +329,42 @@ const BiorhythmLitePage = () => {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+          
+          {/* 未来7天节律趋势 */}
+          {futureTrends.length > 0 && (
+            <div className="lite-card">
+              <h3 className="lite-h3">未来7天节律趋势</h3>
+              <div className="trend-table">
+                <div className="trend-header lite-text-bold">
+                  <span>日期</span>
+                  <span>体力</span>
+                  <span>情绪</span>
+                  <span>智力</span>
+                </div>
+                {futureTrends.map((trend, index) => (
+                  <div key={index} className="trend-row">
+                    <span className="trend-day">{trend.day}</span>
+                    <span className={`trend-value ${getTrendColor(trend.physical)}`}>
+                      {trend.physical}
+                    </span>
+                    <span className={`trend-value ${getTrendColor(trend.emotional)}`}>
+                      {trend.emotional}
+                    </span>
+                    <span className={`trend-value ${getTrendColor(trend.intellectual)}`}>
+                      {trend.intellectual}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="trend-legend lite-text-sm">
+                <span>↑↑: 大幅上升</span>
+                <span>↑: 上升</span>
+                <span>→: 平稳</span>
+                <span>↓: 下降</span>
+                <span>↓↓: 大幅下降</span>
+              </div>
             </div>
           )}
         </>

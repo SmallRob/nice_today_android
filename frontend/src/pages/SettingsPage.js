@@ -5,6 +5,7 @@ import UserConfigManager from '../components/UserConfigManager';
 import { getAppVersion } from '../utils/capacitor';
 import { Capacitor } from '@capacitor/core';
 import PageLayout, { Card, Button } from '../components/PageLayout';
+import notificationService from '../utils/notificationService';
 import '../index.css';
 
 function SettingsPage() {
@@ -26,6 +27,14 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [tabTransition, setTabTransition] = useState(false);
   const [error, setError] = useState(null);
+  
+  // 通知设置状态
+  const [notificationSettings, setNotificationSettings] = useState({
+    enabled: false,
+    morningTime: '07:00',
+    eveningTime: '21:00',
+    permissionGranted: false
+  });
   
   // 滚动容器引用
   const scrollContainerRef = useRef(null);
@@ -101,6 +110,10 @@ function SettingsPage() {
         if (savedCacheTimeout) {
           setCacheTimeout(parseInt(savedCacheTimeout));
         }
+        
+        // 加载通知设置
+        const notificationSettings = notificationService.getSettings();
+        setNotificationSettings(notificationSettings);
       } catch (error) {
         console.error('Error loading app info:', error);
         setError('加载应用信息失败: ' + error.message);
@@ -131,6 +144,53 @@ function SettingsPage() {
     const newValue = parseInt(e.target.value);
     setCacheTimeout(newValue);
     localStorage.setItem('cacheTimeout', newValue.toString());
+  };
+
+  // 处理通知设置变更
+  const handleNotificationChange = (field, value) => {
+    const newSettings = {
+      ...notificationSettings,
+      [field]: value
+    };
+    
+    setNotificationSettings(newSettings);
+    
+    // 更新通知服务设置
+    notificationService.updateSettings(newSettings);
+  };
+
+  // 请求通知权限
+  const handleRequestPermission = async () => {
+    const granted = await notificationService.requestPermission();
+    setNotificationSettings(prev => ({
+      ...prev,
+      permissionGranted: granted
+    }));
+    
+    if (granted) {
+      setError('通知权限已授权！');
+      setTimeout(() => setError(null), 3000);
+    } else {
+      setError('通知权限被拒绝，请在浏览器设置中手动开启。');
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  // 测试通知
+  const handleTestNotification = () => {
+    if (!notificationSettings.permissionGranted) {
+      setError('请先授权通知权限');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    
+    notificationService.sendNotification(
+      '测试通知',
+      '这是一个测试通知，确认通知功能正常工作。'
+    );
+    
+    setError('测试通知已发送');
+    setTimeout(() => setError(null), 3000);
   };
 
   // 切换应用版本
@@ -303,15 +363,88 @@ function SettingsPage() {
                           </div>
                         </div>
                         
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">通知提醒</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">接收生物节律变化提醒</p>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                          <div className="mb-4">
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-2">通知设置</h4>
+                            
+                            {!notificationSettings.permissionGranted ? (
+                              <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-30 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                                <p className="text-yellow-700 dark:text-yellow-200 text-sm mb-2">
+                                  通知权限未授权，需要授权后才能接收提醒
+                                </p>
+                                <button 
+                                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition-colors"
+                                  onClick={handleRequestPermission}
+                                >
+                                  授权通知权限
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900 dark:bg-opacity-30 border border-green-200 dark:border-green-700 rounded-lg">
+                                <p className="text-green-700 dark:text-green-200 text-sm mb-2">
+                                  ✓ 通知权限已授权
+                                </p>
+                                <button 
+                                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors"
+                                  onClick={handleTestNotification}
+                                >
+                                  测试通知
+                                </button>
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center justify-between mb-4">
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">启用通知提醒</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">接收生物节律变化提醒</p>
+                              </div>
+                              <label className="inline-flex items-center cursor-pointer">
+                                <input 
+                                  type="checkbox" 
+                                  className="sr-only peer" 
+                                  checked={notificationSettings.enabled}
+                                  onChange={(e) => handleNotificationChange('enabled', e.target.checked)}
+                                  disabled={!notificationSettings.permissionGranted}
+                                />
+                                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                              </label>
+                            </div>
+                            
+                            {notificationSettings.enabled && notificationSettings.permissionGranted && (
+                              <div className="space-y-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-lg">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    早上提醒时间:
+                                  </label>
+                                  <input
+                                    type="time"
+                                    value={notificationSettings.morningTime}
+                                    onChange={(e) => handleNotificationChange('morningTime', e.target.value)}
+                                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    style={{width: '120px'}}
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    晚上提醒时间:
+                                  </label>
+                                  <input
+                                    type="time"
+                                    value={notificationSettings.eveningTime}
+                                    onChange={(e) => handleNotificationChange('eveningTime', e.target.value)}
+                                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    style={{width: '120px'}}
+                                  />
+                                </div>
+                                
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  <p>• 系统会在指定时间推送节律提醒</p>
+                                  <p>• 当节律值达到极值（≤-90或≥90）时，会额外推送预警提醒</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <label className="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" defaultChecked={true} />
-                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                          </label>
                         </div>
                         
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
