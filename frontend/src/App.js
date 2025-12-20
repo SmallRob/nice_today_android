@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { optimizeAppStartup } from './utils/startupOptimizer';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import './index.css';
 
 // 懒加载页面组件
@@ -72,6 +72,9 @@ class ErrorBoundary extends React.Component {
 
 // 应用布局组件
 const AppLayout = () => {
+  // 使用主题颜色Hook
+  useThemeColor();
+  
   return (
     <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
       <div className="flex-1 overflow-auto">

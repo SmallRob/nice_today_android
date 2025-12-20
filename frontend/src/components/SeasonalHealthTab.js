@@ -5,6 +5,7 @@ import { seasonHealthTips, organRhythmTips, seasonGeneralTips } from '../config/
 const SeasonalHealthTab = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState('season'); // 'season' 或 'organ'
+  const [selectedOrganIndex, setSelectedOrganIndex] = useState(null); // 用于临时点击查看
 
   // 更新当前时间
   useEffect(() => {
@@ -36,7 +37,20 @@ const SeasonalHealthTab = () => {
   // 获取当前器官节律信息
   const getCurrentOrganInfo = useMemo(() => {
     const hour = currentTime.getHours();
-    const index = Math.floor((hour + 1) / 2) % 12;
+    // 修正器官节律计算逻辑
+    let index;
+    if (hour >= 1 && hour <= 2) index = 0;  // 01:00-03:00
+    else if (hour >= 3 && hour <= 4) index = 1;  // 03:00-05:00
+    else if (hour >= 5 && hour <= 6) index = 2;  // 05:00-07:00
+    else if (hour >= 7 && hour <= 8) index = 3;  // 07:00-09:00
+    else if (hour >= 9 && hour <= 10) index = 4;  // 09:00-11:00
+    else if (hour >= 11 && hour <= 12) index = 5;  // 11:00-13:00
+    else if (hour >= 13 && hour <= 14) index = 6;  // 13:00-15:00
+    else if (hour >= 15 && hour <= 16) index = 7;  // 15:00-17:00
+    else if (hour >= 17 && hour <= 18) index = 8;  // 17:00-19:00
+    else if (hour >= 19 && hour <= 20) index = 9;  // 19:00-21:00
+    else if (hour >= 21 && hour <= 22) index = 10; // 21:00-23:00
+    else index = 11; // 23:00-01:00 (包括0点)
     
     return {
       time: organRhythmTips.organTimes[index],
@@ -46,6 +60,19 @@ const SeasonalHealthTab = () => {
       healthTip: organRhythmTips.organHealthTips[organRhythmTips.organs[index]] || ""
     };
   }, [currentTime]);
+
+  // 获取选定的器官节律信息（用于临时查看）
+  const getSelectedOrganInfo = useMemo(() => {
+    if (selectedOrganIndex === null) return null;
+    
+    return {
+      time: organRhythmTips.organTimes[selectedOrganIndex],
+      organ: organRhythmTips.organs[selectedOrganIndex],
+      description: organRhythmTips.organDescriptions[organRhythmTips.organs[selectedOrganIndex]] || "",
+      suggestion: organRhythmTips.organSuggestions[organRhythmTips.organs[selectedOrganIndex]] || "",
+      healthTip: organRhythmTips.organHealthTips[organRhythmTips.organs[selectedOrganIndex]] || ""
+    };
+  }, [selectedOrganIndex]);
 
   // 季节颜色映射
   const seasonColors = {
@@ -169,18 +196,18 @@ const SeasonalHealthTab = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 md:mb-3">
               <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-1 md:mb-0">
                 <span className="w-2 h-2 md:w-3 md:h-3 bg-purple-500 rounded-full mr-2"></span>
-                当前器官节律
+                {selectedOrganIndex !== null ? '查看器官节律' : '当前器官节律'}
               </h3>
               <span className="px-2 py-1 md:px-3 md:py-1 bg-white dark:bg-gray-700 rounded-full text-xs md:text-sm font-medium text-purple-700 dark:text-purple-300">
-                {getCurrentOrganInfo.time}
+                {(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).time}
               </span>
             </div>
 
             {/* 当前器官 */}
             <div className="flex items-center justify-between mb-2 md:mb-3">
-              <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">当令器官：</span>
+              <span className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">{selectedOrganIndex !== null ? '查看器官' : '当令器官'}：</span>
               <span className="px-2 py-1 md:px-3 md:py-1 bg-white dark:bg-gray-700 rounded-full text-xs md:text-sm font-medium text-purple-700 dark:text-purple-300">
-                {getCurrentOrganInfo.organ}
+                {(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).organ}
               </span>
             </div>
 
@@ -188,7 +215,7 @@ const SeasonalHealthTab = () => {
             <div className="mb-2 md:mb-3">
               <h4 className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">节律特点：</h4>
               <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                {getCurrentOrganInfo.description}
+                {(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).description}
               </p>
             </div>
 
@@ -196,7 +223,7 @@ const SeasonalHealthTab = () => {
             <div className="mb-2 md:mb-3">
               <h4 className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">养生建议：</h4>
               <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                {getCurrentOrganInfo.suggestion}
+                {(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).suggestion}
               </p>
             </div>
 
@@ -204,9 +231,24 @@ const SeasonalHealthTab = () => {
             <div className="bg-purple-100 dark:bg-purple-900 dark:bg-opacity-30 rounded-lg p-2 md:p-3">
               <h5 className="text-xs md:text-sm font-medium text-purple-800 dark:text-purple-300 mb-1">健康提示：</h5>
               <p className="text-xs text-purple-700 dark:text-purple-300">
-                {getCurrentOrganInfo.healthTip}
+                {(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).healthTip}
               </p>
             </div>
+            
+            {/* 临时查看提示 */}
+            {selectedOrganIndex !== null && (
+              <div className="mt-3 p-2 bg-blue-100 dark:bg-blue-900 dark:bg-opacity-30 rounded-lg text-center">
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  临时查看模式：点击其他时段可切换查看，当前时间节律会自动更新
+                </p>
+                <button 
+                  onClick={() => setSelectedOrganIndex(null)}
+                  className="mt-1 text-xs text-blue-600 dark:text-blue-400 underline"
+                >
+                  返回当前时间节律
+                </button>
+              </div>
+            )}
           </div>
 
           {/* 24小时器官节律表 - 移动端优化 */}
@@ -218,10 +260,13 @@ const SeasonalHealthTab = () => {
               {organRhythmTips.organTimes.map((time, index) => (
                 <div
                   key={index}
-                  className={`p-1 md:p-2 rounded-lg text-center transition-all duration-200 ${
-                    getCurrentOrganInfo.organ === organRhythmTips.organs[index]
-                      ? 'bg-purple-500 text-white shadow-md transform scale-105'
-                      : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                  onClick={() => setSelectedOrganIndex(index)}
+                  className={`p-1 md:p-2 rounded-lg text-center transition-all duration-200 cursor-pointer touch-manipulation ${
+                    selectedOrganIndex === index
+                      ? 'bg-blue-500 text-white shadow-md transform scale-105'
+                      : getCurrentOrganInfo.organ === organRhythmTips.organs[index]
+                        ? 'bg-purple-500 text-white shadow-md'
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                   }`}
                 >
                   <div className="text-xs font-medium">{time}</div>

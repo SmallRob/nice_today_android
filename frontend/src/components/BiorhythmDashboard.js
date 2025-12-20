@@ -116,8 +116,8 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   }
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-      <div className="app-scroll-content">
+    <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 safe-area-inset-top">
+      <div className="app-scroll-content optimized-scroll">
         <div className="max-w-6xl mx-auto space-y-3 p-2">
 
         {/* Nice Today 应用banner */}

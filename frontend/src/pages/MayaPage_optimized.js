@@ -174,11 +174,11 @@ const MayaPage = memo(() => {
         <div className="space-y-6">
           <div className="bg-gradient-to-br from-white to-amber-50 dark:from-gray-800 dark:to-amber-900/20 rounded-xl shadow-lg border-2 border-amber-200 dark:border-amber-700 overflow-hidden">
             {/* 玛雅星盘标题栏 */}
-            <div className="bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-700 px-6 py-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-white">玛雅出生星盘</h2>
+            <div className="bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-700 px-4 py-3 flex justify-between items-center">
+              <h2 className="text-lg font-bold text-white">玛雅出生星盘</h2>
               <BackButton onClick={handleBackToCalendar} />
             </div>
-            <div className="p-6">
+            <div className="p-4">
               <div className={contentClass}>
                 <Suspense fallback={<TabContentLoader />}>
                   <MayaBirthChart />
@@ -194,7 +194,7 @@ const MayaPage = memo(() => {
   }, [activeTab, handleShowBirthChart, handleBackToCalendar]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 relative overflow-hidden safe-area-inset-top optimized-scroll performance-optimized">
       {/* 玛雅金字塔背景装饰 */}
       <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
         <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-amber-200 to-orange-300 dark:from-amber-600 dark:to-orange-700 rounded-lg transform rotate-45"></div>
@@ -218,8 +218,8 @@ const MayaPage = memo(() => {
       </div>
 
       <div className="relative z-10">
-        {/* 玛雅历法顶部标题区域 */}
-        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 relative overflow-hidden">
+        {/* 玛雅历法顶部标题区域 - 延伸至状态栏 */}
+        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 relative overflow-hidden pt-8">
           {/* 玛雅象形文字装饰 */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute top-4 left-4 text-2xl text-white font-mono">☀️</div>
@@ -228,21 +228,21 @@ const MayaPage = memo(() => {
             <div className="absolute bottom-4 right-4 text-2xl text-white font-mono">🌀</div>
           </div>
 
-          <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+          <div className="max-w-6xl mx-auto px-4 py-6 text-center">
             {/* 玛雅历法主标题 */}
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 relative">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 relative">
               <span className="bg-gradient-to-r from-yellow-200 to-amber-200 bg-clip-text text-transparent">玛雅历法</span>
               <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-yellow-300 to-amber-300 rounded-full"></div>
             </h1>
             
             {/* 副标题 */}
-            <p className="text-lg md:text-xl text-amber-100 mb-4 italic">探索古老的玛雅智慧</p>
+            <p className="text-base md:text-lg text-amber-100 mb-3 italic">探索古老的玛雅智慧</p>
             
             {/* 玛雅太阳历装饰 */}
-            <div className="flex justify-center items-center space-x-4">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-300 to-orange-400 animate-spin"></div>
-              <div className="text-sm text-amber-200 font-medium">太阳历 · 神圣周期 · 宇宙能量</div>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-red-500 animate-pulse"></div>
+            <div className="flex justify-center items-center space-x-3">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-300 to-orange-400 animate-spin"></div>
+              <div className="text-xs text-amber-200 font-medium">太阳历 · 神圣周期 · 宇宙能量</div>
+              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-orange-400 to-red-500 animate-pulse"></div>
             </div>
           </div>
         </div>
@@ -250,13 +250,15 @@ const MayaPage = memo(() => {
         {/* 主要内容区域 */}
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="space-y-6">
-            {/* Tab切换按钮 - 增强玛雅风格 */}
-            <div className="bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 rounded-xl shadow-lg border-2 border-amber-200 dark:border-amber-800 p-2">
+            {/* Tab切换按钮 - 固定在顶部 */}
+            <div className="sticky top-0 z-20 bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 rounded-xl shadow-lg border-2 border-amber-200 dark:border-amber-800 p-2">
               {TabNavigation}
             </div>
 
-            {/* 内容区域 */}
-            {renderContent}
+            {/* 内容区域 - 优化滚动性能 */}
+            <div className="optimized-scroll max-h-[calc(100vh-200px)] overflow-y-auto">
+              {renderContent}
+            </div>
           </div>
         </div>
       </div>
