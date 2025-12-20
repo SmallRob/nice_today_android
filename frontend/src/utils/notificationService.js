@@ -48,6 +48,11 @@ class AndroidNotificationService {
       const { LocalNotifications } = await import('@capacitor/local-notifications');
       this.LocalNotifications = LocalNotifications;
       
+      // 检查插件是否可用
+      if (!LocalNotifications || typeof LocalNotifications.requestPermissions !== 'function') {
+        throw new Error('LocalNotifications插件不可用');
+      }
+      
       // 请求通知权限
       const permission = await LocalNotifications.requestPermissions();
       this.permissionGranted = permission.display === 'granted';
@@ -72,6 +77,7 @@ class AndroidNotificationService {
     } catch (error) {
       console.error('Capacitor通知初始化失败:', error);
       // 降级到Web通知
+      this.isNativeApp = false;
       await this.initWebNotifications();
     }
   }
@@ -153,8 +159,15 @@ class AndroidNotificationService {
   // 安排Android原生定时通知
   async scheduleAndroidNotifications() {
     try {
-      // 取消所有现有通知
-      await this.LocalNotifications.cancel();
+      // 安全地取消所有现有通知（避免空指针异常）
+      try {
+        await this.LocalNotifications.cancel({
+          notifications: [] // 明确传入空数组而不是null
+        });
+      } catch (cancelError) {
+        console.warn('取消通知时出现警告:', cancelError);
+        // 继续执行，不中断后续安排
+      }
       
       // 安排早上通知
       await this.scheduleAndroidSingleNotification(
@@ -279,28 +292,41 @@ class AndroidNotificationService {
 
   // 发送Android原生通知
   async sendAndroidNotification(title, body, options = {}) {
+    if (!this.LocalNotifications || typeof this.LocalNotifications.schedule !== 'function') {
+      console.warn('LocalNotifications插件不可用，降级到Web通知');
+      this.sendWebNotification(title, body, options);
+      return Date.now();
+    }
+    
     const notificationId = Date.now();
     
-    await this.LocalNotifications.schedule({
-      notifications: [{
-        id: notificationId,
-        title: title,
-        body: body,
-        schedule: { at: new Date(Date.now() + 100) }, // 立即发送
-        sound: 'default',
-        attachments: null,
-        actionTypeId: '',
-        extra: {
-          ...options,
-          timestamp: Date.now()
-        },
-        channelId: 'biorhythm_channel',
-        smallIcon: 'ic_stat_icon',
-        largeIcon: 'ic_launcher'
-      }]
-    });
-    
-    return notificationId;
+    try {
+      await this.LocalNotifications.schedule({
+        notifications: [{
+          id: notificationId,
+          title: title,
+          body: body,
+          schedule: { at: new Date(Date.now() + 100) }, // 立即发送
+          sound: 'default',
+          attachments: null,
+          actionTypeId: '',
+          extra: {
+            ...options,
+            timestamp: Date.now()
+          },
+          channelId: 'biorhythm_channel',
+          smallIcon: 'ic_stat_icon',
+          largeIcon: 'ic_launcher'
+        }]
+      });
+      
+      return notificationId;
+    } catch (error) {
+      console.error('发送Android通知失败:', error);
+      // 降级到Web通知
+      this.sendWebNotification(title, body, options);
+      return notificationId;
+    }
   }
 
   // 发送Web浏览器通知
