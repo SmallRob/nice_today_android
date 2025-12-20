@@ -546,6 +546,124 @@
   border-radius: 0;
 }
 
+/* 星座运势页面样式统一 */
+.horoscope-title {
+  font-family: 'SimSun', 'STSong', serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.1em;
+}
+
+.horoscope-subtitle {
+  font-family: 'KaiTi', 'STKaiti', serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.horoscope-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .horoscope-card {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.horoscope-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.horoscope-score-container {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  box-shadow: 0 8px 25px -5px rgba(79, 70, 229, 0.3);
+  transition: all 0.3s ease;
+}
+
+.horoscope-score-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 30px -5px rgba(79, 70, 229, 0.4);
+}
+
+.horoscope-zodiac-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .horoscope-zodiac-selector {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+}
+
+.horoscope-zodiac-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-family: 'KaiTi', 'STKaiti', serif;
+  min-height: 48px;
+}
+
+.horoscope-zodiac-button.active {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px -2px rgba(79, 70, 229, 0.3);
+}
+
+.horoscope-zodiac-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .horoscope-title {
+    font-size: 1.25rem;
+    letter-spacing: 0.05em;
+  }
+  
+  .horoscope-subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .horoscope-zodiac-selector {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .horoscope-title {
+    font-size: 1.125rem;
+  }
+  
+  .horoscope-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .horoscope-zodiac-selector {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 8px;
+  }
+  
+  .horoscope-zodiac-button {
+    min-height: 44px;
+    font-size: 0.875rem;
+  }
+}
+
 /* 移动端触摸优化 */
 @media (max-width: 768px) {
   .taoist-tab-navigation {
