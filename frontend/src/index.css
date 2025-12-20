@@ -526,6 +526,14 @@ code {
   /* 优化滚动性能 */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+  /* 确保底部内容可见 */
+  padding-bottom: 2rem;
+}
+
+/* 设置页面内容容器优化 */
+.settings-content-wrapper {
+  min-height: calc(100vh - 120px);
+  padding-bottom: 4rem; /* 为底部按钮留出空间 */
 }
 
 /* 移动端设置页面滚动优化 */
@@ -540,10 +548,17 @@ code {
   
   .settings-scroll-content {
     /* 更精确的高度计算，考虑安全区域 */
-    height: calc(100vh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    min-height: calc(100vh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: calc(100vh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: calc(100vh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     /* 移动端滚动优化 */
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+    /* 确保底部内容可见 */
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+  
+  .settings-content-wrapper {
+    min-height: calc(100vh - 100px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 1rem) + 4rem);
   }
 }

@@ -8,7 +8,7 @@ import '../styles/animations.css';
 // 懒加载组件 - 提升初始加载性能
 const BiorhythmTab = lazy(() => import('./BiorhythmTab'));
 const ZodiacEnergyTab = lazy(() => import('./ZodiacEnergyTab'));
-const HoroscopeTabNew = lazy(() => import('./HoroscopeTab'));
+const HoroscopeTabNew = lazy(() => import('./HoroscopeTabNew'));
 const MBTIPersonalityTabHome = lazy(() => import('./MBTIPersonalityTabHome'));
 const MayaCalendarTab = lazy(() => import('./MayaCalendarTab'));
 

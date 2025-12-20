@@ -479,6 +479,15 @@ const HoroscopeTab = () => {
   const renderMobileHoroscopeSelector = () => {
     return (
       <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 pb-3 pt-2 shadow-sm">
+        {/* 标题区域 */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-b-lg p-3 shadow-md hardware-accelerated mb-3">
+          <h1 className="text-base md:text-lg font-bold flex items-center mobile-responsive-heading font-rendering-optimized">
+            <span className="mr-2 text-lg">🔮</span>
+            <span>星座运势</span>
+          </h1>
+          <p className="text-blue-100 text-xs mt-1 mobile-text font-rendering-optimized">为您提供每日星座运势指导</p>
+        </div>
+        
         <div className="mb-2 px-2">
           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 mobile-text mobile-responsive-text">
             选择星座查看运势
@@ -541,15 +550,6 @@ const HoroscopeTab = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 animate-fade-in performance-optimized safe-area-inset-top touch-responsive">
-      {/* 移动端标题 - 优化为触摸友好 */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-b-lg p-3 shadow-md hardware-accelerated">
-        <h1 className="text-base md:text-lg font-bold flex items-center mobile-responsive-heading font-rendering-optimized">
-          <span className="mr-2 text-lg">🔮</span>
-          <span>星座运势</span>
-        </h1>
-        <p className="text-blue-100 text-xs mt-1 mobile-text font-rendering-optimized">为您提供每日星座运势指导</p>
-      </div>
-
       {/* 星座选择器 */}
       {renderMobileHoroscopeSelector()}
 

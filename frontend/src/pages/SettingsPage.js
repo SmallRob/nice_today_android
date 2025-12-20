@@ -158,9 +158,9 @@ function SettingsPage() {
 
   return (
     <PageLayout title="设置">
-      <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 settings-scroll-container">
+      <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
         {/* 固定顶部区域 - 包含错误提示和标签导航 */}
-        <div className="flex-shrink-0 settings-fixed-header">
+        <div className="flex-shrink-0 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           {/* 错误提示 */}
           {error && (
             <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4">
@@ -174,52 +174,50 @@ function SettingsPage() {
           )}
           
           {/* 标签导航 */}
-          <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex">
-                <button
-                  className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
-                    activeTab === 'app'
-                      ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={() => handleTabChange('app')}
-                  disabled={tabTransition}
-                >
-                  应用设置
-                  {activeTab === 'app' && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-                  )}
-                </button>
-                <button
-                  className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
-                    activeTab === 'userConfigs'
-                      ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={() => handleTabChange('userConfigs')}
-                  disabled={tabTransition}
-                >
-                  用户配置
-                  {activeTab === 'userConfigs' && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-                  )}
-                </button>
-                <button
-                  className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
-                    activeTab === 'about'
-                      ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={() => handleTabChange('about')}
-                  disabled={tabTransition}
-                >
-                  关于
-                  {activeTab === 'about' && (
-                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-                  )}
-                </button>
-              </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="flex">
+              <button
+                className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
+                  activeTab === 'app'
+                    ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => handleTabChange('app')}
+                disabled={tabTransition}
+              >
+                应用设置
+                {activeTab === 'app' && (
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
+                )}
+              </button>
+              <button
+                className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
+                  activeTab === 'userConfigs'
+                    ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => handleTabChange('userConfigs')}
+                disabled={tabTransition}
+              >
+                用户配置
+                {activeTab === 'userConfigs' && (
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
+                )}
+              </button>
+              <button
+                className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${
+                  activeTab === 'about'
+                    ? 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500 dark:border-blue-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => handleTabChange('about')}
+                disabled={tabTransition}
+              >
+                关于
+                {activeTab === 'about' && (
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -228,9 +226,14 @@ function SettingsPage() {
         <div className="flex-1 overflow-hidden">
           <div 
             ref={scrollContainerRef}
-            className="h-full overflow-y-auto optimized-scroll hide-scrollbar performance-optimized scroll-performance-optimized touch-optimized settings-scroll-content"
+            className="h-full overflow-y-auto optimized-scroll hide-scrollbar performance-optimized scroll-performance-optimized touch-optimized"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehaviorY: 'contain',
+              scrollBehavior: 'smooth'
+            }}
           >
-            <div className="max-w-4xl mx-auto p-4">
+            <div className="max-w-4xl mx-auto p-4 settings-content-wrapper">
               <div className={`transition-all duration-300 ${tabTransition ? 'opacity-50' : 'opacity-100'}`}>
                 {activeTab === 'app' && (
                   <div className="space-y-6">

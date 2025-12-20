@@ -730,7 +730,7 @@ const ZodiacEnergyTab = () => {
   // 渲染生肖选择器
   const renderZodiacSelector = () => {
     return (
-      <Card title="选择生肖类型" className="mb-4">
+      <Card className="mb-4">
         <div className="space-y-3">
           <div>
             {/* 当前用户信息 */}
@@ -828,18 +828,6 @@ const ZodiacEnergyTab = () => {
 
   return (
     <div className="space-y-3">
-      {/* 标题区域 */}
-      <Card>
-        <div className="text-center p-4">
-          <h1 className="text-lg font-bold text-gray-800 dark:text-white mb-1">
-            🌟 生肖能量
-          </h1>
-          <p className="text-xs text-gray-600 dark:text-gray-300">
-            根据您的生肖属相和当日五行，为您提供生活健康建议
-          </p>
-        </div>
-      </Card>
-
       {/* 生肖选择器 */}
       {renderZodiacSelector()}
       
