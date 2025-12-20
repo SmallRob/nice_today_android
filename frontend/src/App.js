@@ -6,7 +6,7 @@ import './index.css';
 
 // 懒加载页面组件
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
-const MayaPage = React.lazy(() => import('./pages/MayaPage'));
+const MayaPage = React.lazy(() => import('./pages/MayaPage_optimized'));
 const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
 const TabNavigation = React.lazy(() => import('./components/TabNavigation'));

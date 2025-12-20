@@ -425,7 +425,8 @@ const LUCKY_ITEMS = {
 // 生成每日唯一ID（基于日期和星座）
 const generateDailyId = (horoscopeName, date = new Date()) => {
   const dateStr = date.toISOString().split('T')[0];
-  const horoscopeCode = Buffer.from(horoscopeName).toString('base64').substr(0, 6);
+  // 使用浏览器兼容的简单哈希函数替代Buffer
+  const horoscopeCode = btoa(encodeURIComponent(horoscopeName)).substring(0, 6);
   return `${dateStr}-${horoscopeCode}`;
 };
 
@@ -671,7 +672,7 @@ const getTrend = (score) => {
   return '大幅下降';
 };
 
-const getRandomMoonSign = (horoscopeName, date) => {
+const getRandomMoonSign = (horoscopeName) => {
   const random = dailyRandom(horoscopeName, 'moon');
   const moonSigns = ['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', 
                     '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'];
@@ -714,7 +715,7 @@ const generateAvoidAdvice = (horoscopeName) => {
   return avoids[horoscopeName] || '避免消极思维，保持理性';
 };
 
-const generateDailyReminder = (horoscopeName, date) => {
+const generateDailyReminder = (horoscopeName) => {
   const reminders = {
     '白羊座': '今天适合主动出击，但要注意控制脾气，避免因小事与人发生冲突。',
     '金牛座': '保持稳定节奏，避免被外界干扰，专注完成手头工作会有不错收获。',

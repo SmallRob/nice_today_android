@@ -9,7 +9,7 @@ let MayaBirthChartPromise;
 
 const preloadMayaCalendar = () => {
   if (!MayaCalendarPromise) {
-    MayaCalendarPromise = import('../components/MayaCalendar_optimized');
+    MayaCalendarPromise = import('../components/MayaCalendarTab');
   }
   return MayaCalendarPromise;
 };

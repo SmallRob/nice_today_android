@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from 'react';
 // 移除DatePicker导入，不再使用日期选择器
 // import DatePicker from 'react-datepicker';
 // import "react-datepicker/dist/react-datepicker.css";
@@ -173,34 +173,23 @@ const STORAGE_KEYS = {
   BIRTH_INFO_CACHE: 'maya_birth_info_cache'
 };
 
-// 优化的子组件 - 显示用户信息和配置切换
+// 精简的用户信息组件 - 去除标题显示
 const UserInfoSection = memo(({ userInfo, loading, onSwitchProfile }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 mb-4">
-    <div className="flex flex-col sm:flex-row items-center justify-between">
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3 mb-3">
+    <div className="flex items-center justify-between">
       <div>
-        <h3 className="text-base font-medium text-gray-900 dark:text-white">
-          {userInfo.nickname ? `${userInfo.nickname} 的玛雅出生图` : '玛雅出生图'}
-        </h3>
-        <p className="text-xs text-gray-600 dark:text-gray-400">
-          {userInfo.birthDate ? `基于出生日期 ${userInfo.birthDate} 计算` : '请到设置页面配置个人信息'}
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {userInfo.birthDate ? `出生日期: ${userInfo.birthDate}` : '请到设置页面配置个人信息'}
         </p>
-        {userInfo.zodiac && userInfo.zodiacAnimal && (
-          <div className="flex gap-2 mt-1">
-            <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 text-xs rounded-full">
-              {userInfo.zodiac}
-            </span>
-            <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900 dark:bg-opacity-20 text-purple-600 dark:text-purple-400 text-xs rounded-full">
-              {userInfo.zodiacAnimal}
-            </span>
-          </div>
-        )}
       </div>
       <button
         onClick={onSwitchProfile}
         disabled={loading}
-        className="mt-3 sm:mt-0 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white text-sm rounded-md transition-colors"
+        className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-purple-300 disabled:to-blue-300 text-white text-xs rounded-md transition-all duration-200 active:scale-95 active:shadow-inner relative overflow-hidden group touch-manipulation"
       >
-        切换配置
+        {/* 高亮反馈效果 */}
+        <div className="absolute inset-0 bg-white opacity-0 group-active:opacity-20 transition-opacity duration-150"></div>
+        <span className="relative font-medium">切换配置</span>
       </button>
     </div>
   </div>
@@ -208,16 +197,18 @@ const UserInfoSection = memo(({ userInfo, loading, onSwitchProfile }) => (
 
 const HistorySection = memo(({ historyDates, handleHistoryClick }) => (
   historyDates.length > 0 && (
-    <div className="history-container">
-      <h3>历史记录</h3>
-      <div className="history-dates">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 mb-4">
+      <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-3">历史记录</h3>
+      <div className="flex flex-wrap gap-2">
         {historyDates.map((date, index) => (
           <button
             key={`${date}-${index}`}
             onClick={() => handleHistoryClick(date)}
-            className="history-date-button"
+            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs rounded-md transition-all duration-200 active:scale-95 active:shadow-inner relative overflow-hidden group touch-manipulation"
           >
-            {date}
+            {/* 高亮反馈效果 */}
+            <div className="absolute inset-0 bg-white opacity-0 group-active:opacity-20 transition-opacity duration-150"></div>
+            <span className="relative">{date}</span>
           </button>
         ))}
       </div>
@@ -225,12 +216,7 @@ const HistorySection = memo(({ historyDates, handleHistoryClick }) => (
   )
 ));
 
-const InfoCard = memo(({ title, children, className = "" }) => (
-  <div className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm ${className}`}>
-    <h4 className="font-semibold text-gray-800 mb-3 text-base">{title}</h4>
-    {children}
-  </div>
-));
+// InfoCard组件已定义但未使用，暂时保留以备后续使用
 
 // 主组件 - 优化性能和内存管理
 const MayaBirthChart = () => {
@@ -246,13 +232,11 @@ const MayaBirthChart = () => {
   const [error, setError] = useState(null);
   const [showResults, setShowResults] = useState(false);
   const [historyDates, setHistoryDates] = useState([]);
-  const [userInteracted, setUserInteracted] = useState(false);
-  const [configManagerReady, setConfigManagerReady] = useState(false);
+  const [userInteracted, _setUserInteracted] = useState(false);
+  const [configManagerReady, _setConfigManagerReady] = useState(false);
   const [userInfo, setUserInfo] = useState({
     nickname: '',
-    birthDate: '',
-    zodiac: '',
-    zodiacAnimal: ''
+    birthDate: ''
   });
 
   // 优化的状态更新函数
@@ -745,16 +729,14 @@ const MayaBirthChart = () => {
     await userConfigManager.initialize();
     setConfigManagerReady(true);
     
-    // 获取当前配置
-    const currentConfig = userConfigManager.getCurrentConfig();
-    
-    // 更新用户信息
-    setUserInfo({
-      nickname: currentConfig.nickname || '',
-      birthDate: currentConfig.birthDate || '',
-      zodiac: currentConfig.zodiac || '',
-      zodiacAnimal: currentConfig.zodiacAnimal || ''
-    });
+  // 获取当前配置
+  const currentConfig = userConfigManager.getCurrentConfig();
+  
+  // 精简用户信息，只保留必要字段
+  setUserInfo({
+    nickname: currentConfig.nickname || '',
+    birthDate: currentConfig.birthDate || ''
+  });
     
     // 获取出生日期
     let birthDateToUse = DEFAULT_BIRTH_DATE;
@@ -788,9 +770,7 @@ const MayaBirthChart = () => {
       if (updatedConfig) {
         setUserInfo({
           nickname: updatedConfig.nickname || '',
-          birthDate: updatedConfig.birthDate || '',
-          zodiac: updatedConfig.zodiac || '',
-          zodiacAnimal: updatedConfig.zodiacAnimal || ''
+          birthDate: updatedConfig.birthDate || ''
         });
         
         // 如果出生日期有变化，重新加载数据
@@ -857,28 +837,81 @@ const MayaBirthChart = () => {
   }, []);
 
   return (
-    <div className="maya-birth-chart">
-      <h2>玛雅出生图</h2>
-      
-      <UserInfoSection
-        userInfo={userInfo}
-        loading={loading}
-        onSwitchProfile={handleSwitchProfile}
-      />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+      {/* 页面标题区域 - 简洁设计 */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-b-lg shadow-lg mb-4">
+        <div className="container mx-auto px-4 py-4">
+          <h1 className="text-xl font-bold mb-1 flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            玛雅出生图
+          </h1>
+          <p className="text-purple-100 text-sm opacity-90">
+            探索你的玛雅印记，发现生命能量密码
+          </p>
+        </div>
+      </div>
 
-      <HistorySection
-        historyDates={historyDates}
-        handleHistoryClick={handleHistoryClick}
-      />
+      {/* 主内容区域 - 优化布局结构 */}
+      <div className="container mx-auto px-4 space-y-3">
+        {/* 用户信息和操作区域 */}
+        <div className="space-y-2">
+          <UserInfoSection
+            userInfo={userInfo}
+            loading={loading}
+            onSwitchProfile={handleSwitchProfile}
+          />
 
-      {error && <ErrorDisplay error={error} />}
+          {historyDates.length > 0 && (
+            <HistorySection
+              historyDates={historyDates}
+              handleHistoryClick={handleHistoryClick}
+            />
+          )}
+        </div>
 
-      <Suspense fallback={<LoadingSpinner />}>
-        <ResultsSection
-          birthInfo={birthInfo}
-          showResults={showResults}
-        />
-      </Suspense>
+        {/* 错误提示 */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-3">
+            <div className="flex items-center">
+              <svg className="w-4 h-4 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="text-red-700 dark:text-red-300 text-sm">{error}</span>
+            </div>
+          </div>
+        )}
+
+        {/* 结果区域 - 增强视觉层次 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 overflow-hidden">
+          <Suspense fallback={
+            <div className="p-6 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">正在加载玛雅印记信息...</p>
+            </div>
+          }>
+            <ResultsSection
+              birthInfo={birthInfo}
+              showResults={showResults}
+            />
+          </Suspense>
+        </div>
+
+        {/* 底部提示信息 */}
+        {showResults && birthInfo && (
+          <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+            <div className="flex items-center">
+              <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span className="text-blue-700 dark:text-blue-300 text-xs">
+                玛雅出生图基于13月亮历法计算，每个KIN代表独特的宇宙能量组合
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

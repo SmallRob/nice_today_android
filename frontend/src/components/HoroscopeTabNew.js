@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
 import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
 import {
-  getDailyHoroscopeWithCache,
   initializeHoroscopeCache
 } from '../utils/horoscopeCache';
 import {
@@ -10,7 +9,7 @@ import {
   initializePerformanceOptimization
 } from '../utils/performanceOptimization';
 import performanceMonitor from '../utils/performanceMonitor';
-import timeCacheManager, { getToday, getDateString } from '../utils/timeCache';
+import { getToday } from '../utils/timeCache';
 import '../styles/mobileOptimization.css';
 import '../styles/animations.css';
 
@@ -78,21 +77,14 @@ const HoroscopeTab = () => {
   // 优化的模块化运势数据计算
   const calculateHoroscopeData = useCallback((horoscope, date) => {
     try {
-      // 添加更详细的调试信息
-      console.log('开始计算星座运势数据:', { horoscope, date });
-      console.log('generateDailyHoroscope函数:', typeof generateDailyHoroscope);
-      
       // 检查函数是否存在并添加类型验证
       if (typeof generateDailyHoroscope !== 'function') {
-        console.error('generateDailyHoroscope类型错误:', typeof generateDailyHoroscope);
-        console.error('完整horoscopeAlgorithm对象:', horoscopeAlgorithm);
         throw new Error('星座数据生成函数未正确加载');
       }
       
       // 模块化计算步骤
       // 第一步：基础数据生成
       const basicData = generateDailyHoroscope(horoscope, date);
-      console.log('基础数据生成结果:', basicData);
       
       if (!basicData) {
         throw new Error('无法生成基础星座数据');
@@ -113,14 +105,9 @@ const HoroscopeTab = () => {
         }
       }
       
-      console.log('增强数据处理结果:', enhancedData);
       return enhancedData;
     } catch (error) {
       console.error('计算星座运势数据失败:', error);
-      // 添加更详细的错误信息
-      if (error.stack) {
-        console.error('错误堆栈:', error.stack);
-      }
       throw error;
     }
   }, []);
@@ -141,13 +128,8 @@ const HoroscopeTab = () => {
     setError(null);
 
     try {
-      // 添加调试信息
-      console.log('准备调用calculateHoroscopeData:', { horoscope, currentDate });
-      
       // 使用模块化计算
       const horoscopeData = calculateHoroscopeData(horoscope, currentDate);
-      
-      console.log('calculateHoroscopeData返回结果:', horoscopeData);
       setHoroscopeGuidance(horoscopeData);
       return Promise.resolve(horoscopeData);
     } catch (error) {
@@ -284,29 +266,29 @@ const HoroscopeTab = () => {
     const sortedScores = [...scores].sort((a, b) => b.score - a.score);
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 sm:space-y-5">
         {/* 综合分数卡片 - 突出显示 */}
-        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl transform transition-all duration-300 hover:scale-102">
+        <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl transform transition-all duration-300 hover:scale-102 active:scale-98 mobile-card" style={{ touchAction: 'manipulation' }}>
           <div className="text-center mb-4">
-            <h3 className="text-lg font-medium mb-1 opacity-90">今日运势</h3>
-            <div className="text-6xl font-bold mb-2 drop-shadow-md">{overallScore}<span className="text-2xl opacity-75">分</span></div>
-            <p className="text-blue-100 text-sm font-medium">{overallScore > 75 ? '运势极佳' : overallScore > 60 ? '运势良好' : overallScore > 45 ? '运势平稳' : '运势一般'}</p>
+            <h3 className="text-lg sm:text-xl font-medium mb-1 opacity-90 mobile-responsive-heading">今日运势</h3>
+            <div className="text-5xl sm:text-6xl font-bold mb-2 drop-shadow-md">{overallScore}<span className="text-xl sm:text-2xl opacity-75">分</span></div>
+            <p className="text-blue-100 text-sm font-medium mobile-text">{overallScore > 75 ? '运势极佳' : overallScore > 60 ? '运势良好' : overallScore > 45 ? '运势平稳' : '运势一般'}</p>
           </div>
           
           <div className="grid grid-cols-4 gap-3">
             {scores.map((item, index) => (
-              <div key={index} className="text-center bg-white bg-opacity-10 rounded-lg p-2 backdrop-blur-sm">
-                <div className="text-xl mb-1">{item.icon}</div>
+              <div key={index} className="text-center bg-white bg-opacity-10 rounded-lg p-2 backdrop-blur-sm mobile-animation">
+                <div className="text-xl sm:text-2xl mb-1">{item.icon}</div>
                 <div className="text-2xl font-bold">{item.score}</div>
-                <div className="text-xs opacity-90">{item.name}</div>
+                <div className="text-xs opacity-90 mobile-text">{item.name}</div>
               </div>
             ))}
           </div>
           
           {/* 分数排序 */}
-          <div className="mt-4 flex justify-center items-center text-sm bg-white bg-opacity-10 rounded-full px-4 py-2 backdrop-blur-sm">
-            <span className="mr-2 font-medium">运势最强:</span>
-            <span className="flex items-center font-bold">
+          <div className="mt-4 flex justify-center items-center text-sm bg-white bg-opacity-10 rounded-full px-4 py-2 backdrop-blur-sm mobile-animation">
+            <span className="mr-2 font-medium mobile-text">运势最强:</span>
+            <span className="flex items-center font-bold mobile-text">
               <span className="mr-1">{sortedScores[0].icon}</span>
               {sortedScores[0].name}
             </span>
@@ -314,41 +296,41 @@ const HoroscopeTab = () => {
         </div>
 
         {/* 今日运势描述 - 优化版 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border-l-4 border-blue-500">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border-l-4 border-blue-500 transition-all duration-200 hover:shadow-xl active:scale-98" style={{ touchAction: 'manipulation' }}>
           <h4 className="font-bold text-gray-800 dark:text-white mb-3 flex items-center">
-            <span className="mr-2 text-lg">📝</span>
-            <span className="text-lg">今日运势</span>
+            <span className="mr-2 text-lg sm:text-xl">📝</span>
+            <span className="text-lg mobile-responsive-heading">今日运势</span>
           </h4>
-          <p className="text-gray-700 dark:text-gray-200 text-base leading-relaxed">
+          <p className="text-gray-700 dark:text-gray-200 text-base leading-relaxed mobile-text mobile-responsive-text">
             {overallDescription}
           </p>
         </div>
 
         {/* 爱情提醒 */}
-        <div className="bg-gradient-to-r from-pink-50 to-red-50 dark:from-pink-900/20 dark:to-red-900/20 rounded-xl p-4 shadow border border-pink-100 dark:border-pink-800">
+        <div className="bg-gradient-to-r from-pink-50 to-red-50 dark:from-pink-900/20 dark:to-red-900/20 rounded-xl p-4 shadow border border-pink-100 dark:border-pink-800 transition-all duration-200 hover:shadow-md active:scale-98" style={{ touchAction: 'manipulation' }}>
           <h4 className="font-bold text-pink-700 dark:text-pink-300 mb-2 flex items-center">
             <span className="mr-2">💖</span>爱情提醒 - 来自生辰
           </h4>
-          <p className="text-pink-600 dark:text-pink-400 text-sm leading-relaxed">
+          <p className="text-pink-600 dark:text-pink-400 text-sm leading-relaxed mobile-text mobile-responsive-text">
             {recommendations.dailyReminder}
           </p>
         </div>
 
         {/* 建议 - 突出显示 */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-5 shadow-lg border-l-4 border-green-500 transform transition-all duration-300 hover:scale-102">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-5 shadow-lg border-l-4 border-green-500 transform transition-all duration-200 hover:scale-102 active:scale-98" style={{ touchAction: 'manipulation' }}>
             <h4 className="font-bold text-green-700 dark:text-green-300 mb-3 flex items-center text-lg">
               <span className="mr-2 text-xl">✅</span>
               宜做
             </h4>
-            <p className="text-green-700 dark:text-green-400 text-base leading-relaxed">{recommendations.positiveAdvice}</p>
+            <p className="text-green-700 dark:text-green-400 text-base leading-relaxed mobile-text mobile-responsive-text">{recommendations.positiveAdvice}</p>
           </div>
-          <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 rounded-xl p-5 shadow-lg border-l-4 border-red-500 transform transition-all duration-300 hover:scale-102">
+          <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 rounded-xl p-5 shadow-lg border-l-4 border-red-500 transform transition-all duration-200 hover:scale-102 active:scale-98" style={{ touchAction: 'manipulation' }}>
             <h4 className="font-bold text-red-700 dark:text-red-300 mb-3 flex items-center text-lg">
               <span className="mr-2 text-xl">❌</span>
               忌做
             </h4>
-            <p className="text-red-700 dark:text-red-400 text-base leading-relaxed">{recommendations.avoidAdvice}</p>
+            <p className="text-red-700 dark:text-red-400 text-base leading-relaxed mobile-text mobile-responsive-text">{recommendations.avoidAdvice}</p>
           </div>
         </div>
 
@@ -365,83 +347,83 @@ const HoroscopeTab = () => {
         )}
 
         {/* 幸运物品网格 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-          <h4 className="font-bold text-gray-800 dark:text-white mb-4 text-center">✨ 今日幸运物</h4>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow transition-all duration-200 hover:shadow-md mobile-card" style={{ touchAction: 'manipulation' }}>
+          <h4 className="font-bold text-gray-800 dark:text-white mb-4 text-center mobile-responsive-heading">✨ 今日幸运物</h4>
           
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {/* 幸运色 */}
             <div className="text-center">
               <div className="flex justify-center mb-2">
                 <div 
-                  className="w-10 h-10 rounded-full border-2 border-white shadow"
-                  style={{ backgroundColor: recommendations.luckyColors[0] }}
+                  className="w-12 h-12 rounded-full border-2 border-white shadow-md transition-transform duration-200 hover:scale-110 active:scale-95"
+                  style={{ backgroundColor: recommendations.luckyColors[0], touchAction: 'manipulation' }}
                 ></div>
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">幸运色</div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运色</div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
                 {recommendations.luckyColors[0].replace('#', '')}
               </div>
             </div>
 
             {/* 幸运配饰 */}
             <div className="text-center">
-              <div className="text-2xl mb-2">💎</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">幸运配饰</div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>💎</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运配饰</div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
                 {recommendations.luckyAccessory}
               </div>
             </div>
 
             {/* 幸运时辰 */}
             <div className="text-center">
-              <div className="text-2xl mb-2">🕒</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">幸运时辰</div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🕒</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运时辰</div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
                 {recommendations.luckyTime}
               </div>
             </div>
 
             {/* 幸运方位 */}
             <div className="text-center">
-              <div className="text-2xl mb-2">🧭</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">幸运方位</div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🧭</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运方位</div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
                 {recommendations.luckyDirection}
               </div>
             </div>
 
             {/* 幸运数字 */}
             <div className="text-center">
-              <div className="text-2xl mb-2">🔢</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">幸运数字</div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🔢</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运数字</div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
                 {recommendations.luckyNumbers.join('/')}
               </div>
             </div>
 
             {/* 幸运食物 */}
             <div className="text-center">
-              <div className="text-2xl mb-2">🍵</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">幸运食物</div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🍵</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运食物</div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
                 {recommendations.luckyFood}
               </div>
             </div>
 
             {/* 幸运随身物 */}
             <div className="text-center">
-              <div className="text-2xl mb-2">📓</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">幸运随身物</div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>📓</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运随身物</div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
                 {recommendations.luckyItem}
               </div>
             </div>
 
             {/* 幸运花 */}
             <div className="text-center">
-              <div className="text-2xl mb-2">🌻</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">幸运花</div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-3xl mb-2 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🌻</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mobile-text">幸运花</div>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile-text">
                 {recommendations.luckyFlower}
               </div>
             </div>
@@ -449,14 +431,14 @@ const HoroscopeTab = () => {
         </div>
 
         {/* 星座信息 - 精简版 */}
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl p-4 shadow-lg border-l-4 border-purple-500">
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl p-4 shadow-lg border-l-4 border-purple-500 transition-all duration-200 hover:shadow-xl active:scale-98" style={{ touchAction: 'manipulation' }}>
           <div className="flex items-center">
-            <span className="text-4xl mr-4 bg-white rounded-full p-2 shadow-md">{horoscopeGuidance.horoscopeInfo.icon}</span>
+            <span className="text-5xl mr-4 bg-white rounded-full p-3 shadow-md transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>{horoscopeGuidance.horoscopeInfo.icon}</span>
             <div>
-              <h4 className="font-bold text-purple-700 dark:text-purple-300 text-xl">
+              <h4 className="font-bold text-purple-700 dark:text-purple-300 text-xl mobile-responsive-heading">
                 {userHoroscope}
               </h4>
-              <p className="text-purple-600 dark:text-purple-400 text-sm">
+              <p className="text-purple-600 dark:text-purple-400 text-sm mobile-text">
                 {horoscopeGuidance.horoscopeInfo.element} · {horoscopeGuidance.horoscopeInfo.dateRange}
               </p>
             </div>
@@ -464,13 +446,14 @@ const HoroscopeTab = () => {
         </div>
 
         {/* 相容星座 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-          <h4 className="font-bold text-gray-800 dark:text-white mb-3">🤝 相容星座</h4>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow transition-all duration-200 hover:shadow-md mobile-card" style={{ touchAction: 'manipulation' }}>
+          <h4 className="font-bold text-gray-800 dark:text-white mb-3 mobile-responsive-heading">🤝 相容星座</h4>
           <div className="flex flex-wrap gap-2">
             {recommendations.compatibleSigns.map((sign, index) => (
               <span 
                 key={index} 
-                className="px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-blue-700 dark:text-blue-300"
+                className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-blue-700 dark:text-blue-300 transition-all duration-200 hover:bg-blue-200 dark:hover:bg-blue-800 active:scale-95 cursor-pointer"
+                style={{ touchAction: 'manipulation' }}
               >
                 {sign}
               </span>
@@ -479,12 +462,12 @@ const HoroscopeTab = () => {
         </div>
 
         {/* 月亮星座 */}
-        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl p-4 shadow border border-indigo-100 dark:border-indigo-800">
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl p-4 shadow border border-indigo-100 dark:border-indigo-800 mobile-card transition-all duration-200 hover:shadow-md active:scale-98" style={{ touchAction: 'manipulation' }}>
           <div className="flex items-center">
-            <span className="text-2xl mr-3">🌙</span>
+            <span className="text-3xl mr-3 transition-transform duration-200 hover:scale-110 active:scale-95" style={{ touchAction: 'manipulation' }}>🌙</span>
             <div>
-              <h4 className="font-bold text-indigo-700 dark:text-indigo-300">今日月亮星座</h4>
-              <p className="text-indigo-600 dark:text-indigo-400">{recommendations.todayMoonSign}</p>
+              <h4 className="font-bold text-indigo-700 dark:text-indigo-300 mobile-responsive-heading">今日月亮星座</h4>
+              <p className="text-indigo-600 dark:text-indigo-400 mobile-text mobile-responsive-text">{recommendations.todayMoonSign}</p>
             </div>
           </div>
         </div>
@@ -492,27 +475,28 @@ const HoroscopeTab = () => {
     );
   };
 
-  // 移动端星座选择器
+  // 移动端星座选择器 - 优化触摸体验
   const renderMobileHoroscopeSelector = () => {
     return (
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 pb-3 pt-1">
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 pb-3 pt-1 shadow-md">
         <div className="mb-3">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             选择星座查看运势
           </label>
-          <div className="overflow-x-auto pb-2">
-            <div className="flex space-x-2 min-w-max">
+          <div className="overflow-x-auto pb-2 hide-scrollbar optimized-scroll">
+            <div className="flex space-x-3 min-w-max px-1">
               {getHoroscopeData().map((horoscope) => {
                 const isActive = userHoroscope === horoscope.name;
                 return (
                   <button
                     key={horoscope.name}
                     onClick={() => handleHoroscopeChange(horoscope.name)}
-                    className={`flex-shrink-0 px-4 py-2 rounded-lg flex flex-col items-center justify-center min-w-[70px] transition-all relative overflow-hidden ${
+                    className={`flex-shrink-0 px-4 py-3 rounded-xl flex flex-col items-center justify-center min-w-[80px] transition-all relative overflow-hidden transform ${
                       isActive
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-110'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:scale-105'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95'
                     }`}
+                    style={{ touchAction: 'manipulation' }} // 优化触摸响应
                   >
                     {/* 选中状态的高亮效果 */}
                     {isActive && (
@@ -521,7 +505,7 @@ const HoroscopeTab = () => {
                         <span className="absolute top-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
                       </>
                     )}
-                    <span className="relative z-10 text-xl mb-1">{horoscope.icon}</span>
+                    <span className="relative z-10 text-2xl mb-1">{horoscope.icon}</span>
                     <span className="relative z-10 text-xs font-bold">{horoscope.name.replace('座', '')}</span>
                   </button>
                 );
@@ -531,14 +515,18 @@ const HoroscopeTab = () => {
         </div>
         
         {isTemporaryHoroscope && (
-          <div className="mb-3 p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700">
+          <div className="mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl border border-yellow-200 dark:border-yellow-700 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-yellow-700 dark:text-yellow-300 text-xs">
-                ⚠️ 临时查看 {userHoroscope} 的运势
-              </span>
+              <div className="flex items-center">
+                <span className="text-yellow-500 mr-2 text-base">⚠️</span>
+                <span className="text-yellow-700 dark:text-yellow-300 text-sm">
+                  临时查看 {userHoroscope} 的运势
+                </span>
+              </div>
               <button
                 onClick={handleRestoreUserHoroscope}
-                className="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-xs rounded"
+                className="px-3 py-1.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-sm rounded-lg hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors active:scale-95"
+                style={{ touchAction: 'manipulation' }}
               >
                 恢复我的星座
               </button>
@@ -550,20 +538,20 @@ const HoroscopeTab = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 animate-fade-in">
-      {/* 移动端标题 */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-4">
-        <h1 className="text-xl font-bold flex items-center">
-          <span className="mr-2">🔮</span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 animate-fade-in performance-optimized safe-area-inset-top">
+      {/* 移动端标题 - 优化为触摸友好 */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-4 shadow-lg">
+        <h1 className="text-2xl font-bold flex items-center">
+          <span className="mr-3 text-3xl">🔮</span>
           星座运势
         </h1>
-        <p className="text-blue-100 text-sm mt-1">为您提供每日星座运势指导</p>
+        <p className="text-blue-100 text-sm mt-2">为您提供每日星座运势指导</p>
       </div>
 
       {/* 星座选择器 */}
       {renderMobileHoroscopeSelector()}
 
-      <div className="px-3">
+      <div className="px-3 sm:px-4">
         {/* 优化的加载状态 - 骨架屏 */}
         {loading && (
           <div className="space-y-4">
@@ -612,8 +600,8 @@ const HoroscopeTab = () => {
 
         {/* 错误显示 */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4 my-3">
-            <p className="text-red-700 dark:text-red-300 text-sm text-center">{error}</p>
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4 my-3 mobile-error mobile-animation">
+            <p className="text-red-700 dark:text-red-300 text-sm text-center mobile-text">{error}</p>
           </div>
         )}
 
@@ -634,8 +622,8 @@ const HoroscopeTab = () => {
 
         {/* 底部信息 */}
         {!loading && !error && horoscopeGuidance && (
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-center text-gray-400 dark:text-gray-500 text-xs">
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 mobile-responsive-text">
+            <p className="text-center text-gray-400 dark:text-gray-500 text-xs mobile-text">
               数据更新时间：{new Date().toLocaleString('zh-CN', { 
                 month: '2-digit', 
                 day: '2-digit', 
@@ -643,7 +631,7 @@ const HoroscopeTab = () => {
                 minute: '2-digit' 
               })}
             </p>
-            <p className="text-center text-gray-400 dark:text-gray-500 text-xs mt-1">
+            <p className="text-center text-gray-400 dark:text-gray-500 text-xs mt-1 mobile-text">
               星座运势仅供参考，请理性看待
             </p>
           </div>
