@@ -10,6 +10,14 @@
     --color-background: #ffffff;
     --color-text: #1f2937;
     --color-border: #e5e7eb;
+    /* 增强对比度的颜色变量 */
+    --color-card-bg: #ffffff;
+    --color-card-border: #e5e7eb;
+    --color-info-bg: #f3f4f6;
+    --color-warning-bg: #fef3c7;
+    --color-success-bg: #d1fae5;
+    --color-danger-bg: #fee2e2;
+    --color-text-secondary: #6b7280;
   }
   
   .dark {
@@ -19,6 +27,14 @@
     --color-background: #0f1419;
     --color-text: #f8fafc;
     --color-border: #334155;
+    /* 增强暗黑模式对比度的颜色变量 */
+    --color-card-bg: #1e293b;
+    --color-card-border: #334155;
+    --color-info-bg: #1e3a8a;
+    --color-warning-bg: #78350f;
+    --color-success-bg: #065f46;
+    --color-danger-bg: #7f1d1d;
+    --color-text-secondary: #cbd5e1;
   }
 }
 
@@ -411,8 +427,9 @@ code {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   /* 为固定头部留出空间 */
-  margin-top: 180px; /* 根据实际头部高度调整 */
-  height: calc(100vh - 180px);
+  margin-top: var(--dress-health-header-height, 220px); /* 使用动态计算的高度 */
+  height: calc(100vh - var(--dress-health-header-height, 220px));
+  padding-bottom: 2rem; /* 确保底部内容可见 */
 }
 
 /* 性能优化类 - 增强版 */
@@ -465,9 +482,9 @@ code {
   
   .dress-health-scroll-content {
     /* 更精确的高度计算，考虑安全区域和固定头部高度 */
-    height: calc(100vh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    min-height: calc(100vh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    margin-top: 160px;
+    height: calc(100vh - var(--dress-health-header-height, 220px) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: calc(100vh - var(--dress-health-header-height, 220px) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    margin-top: var(--dress-health-header-height, 220px);
     /* 确保底部内容可见 */
     padding-bottom: 2rem;
     /* 移动端滚动优化 */

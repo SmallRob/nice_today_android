@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import DressInfo from './DressInfo';
 import SeasonalHealthTab from './SeasonalHealthTab';
 
@@ -6,6 +6,32 @@ import SeasonalHealthTab from './SeasonalHealthTab';
 const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   const [activeTab, setActiveTab] = useState('dress'); // 'dress' 或 'seasonal'
   const scrollContainerRef = useRef(null);
+  const fixedHeaderRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(220); // 默认高度
+
+  // 动态计算固定头部高度
+  useEffect(() => {
+    const calculateHeaderHeight = () => {
+      if (fixedHeaderRef.current) {
+        const height = fixedHeaderRef.current.offsetHeight;
+        setHeaderHeight(height);
+        
+        // 更新CSS变量以便其他组件使用
+        document.documentElement.style.setProperty('--dress-health-header-height', `${height}px`);
+      }
+    };
+
+    // 初始计算
+    calculateHeaderHeight();
+
+    // 监听窗口大小变化
+    window.addEventListener('resize', calculateHeaderHeight);
+
+    // 清理事件监听器
+    return () => {
+      window.removeEventListener('resize', calculateHeaderHeight);
+    };
+  }, []);
 
   // 标签页配置
   const tabs = useMemo(() => [
@@ -44,7 +70,7 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 dress-health-scroll-container">
       {/* 固定顶部区域 - 包含五行道家养生风格的banner和标签导航 */}
-      <div className="dress-health-fixed-header">
+      <div ref={fixedHeaderRef} className="dress-health-fixed-header">
         {/* 五行道家养生风格banner - 固定定位 */}
         <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-700 to-blue-800 dark:from-gray-800 dark:via-gray-900 dark:to-black">
           {/* 五行渐变背景 */}
@@ -187,10 +213,11 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
             overscrollBehavior: 'contain',
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
-            willChange: 'scroll-position'
+            willChange: 'scroll-position',
+            background: 'linear-gradient(180deg, rgba(49, 49, 49, 0.95) 0%, rgba(69, 71, 72, 0.9) 100%)'
           }}
         >
-          <div className="container mx-auto px-3 py-3 md:px-4 md:py-4">
+          <div className="container mx-auto px-3 py-3 md:px-4 md:py-4 pt-4">
             {/* 标签页内容容器 - 独立滚动 */}
             <div className="mb-4">
               {activeTab === 'dress' && (

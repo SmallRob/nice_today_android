@@ -236,22 +236,22 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       </div>
       
       {/* 当日五行信息 */}
-      <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold flex items-center text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold flex items-center text-gray-900 dark:text-gray-100">
             <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
             {selectedDressInfo.date} {selectedDressInfo.weekday}
           </h3>
           <div className="flex items-center space-x-2">
             <span className="text-xs text-gray-500 dark:text-gray-300">当日主导五行:</span>
-            <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full text-xs font-medium shadow-md">
+            <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-600 dark:to-blue-600 text-white rounded-full text-xs font-medium shadow-md">
               {selectedDressInfo.daily_element}
             </span>
           </div>
         </div>
         
-        <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 border-l-4 border-purple-500 dark:border-purple-400 p-3 rounded-r-lg">
-          <p className="text-purple-800 dark:text-purple-300 text-xs leading-relaxed">
+        <div className="bg-purple-50 dark:bg-purple-900 border-l-4 border-purple-500 dark:border-purple-400 p-3 rounded-r-lg">
+          <p className="text-purple-800 dark:text-purple-200 text-xs leading-relaxed">
             <strong>五行穿衣原理：</strong>根据当日的五行属性，选择相生相助的颜色可以增强运势，
             避免相克相冲的颜色可以减少不利影响。
           </p>
@@ -260,38 +260,38 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
 
       {/* 吉祥颜色详细指南 */}
       {luckyColors.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold mb-3 flex items-center text-green-600 dark:text-green-400">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+          <h3 className="text-lg font-semibold mb-3 flex items-center text-green-600 dark:text-green-300">
             <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
             今日吉祥颜色搭配
           </h3>
           
           <div className="space-y-3">
             {luckyColors.map((colorSystem, index) => (
-              <div key={index} className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+              <div key={index} className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-600 rounded-lg p-3">
                 <div className="flex items-center mb-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 mr-3 flex-shrink-0 flex items-center justify-center shadow-md">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 mr-3 flex-shrink-0 flex items-center justify-center shadow-md">
                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-base font-semibold text-green-800 dark:text-green-300">{colorSystem.颜色系统}</h4>
-                    <p className="text-xs text-green-600 dark:text-green-400">推荐指数: ★★★★★</p>
+                    <h4 className="text-base font-semibold text-green-800 dark:text-green-200">{colorSystem.颜色系统}</h4>
+                    <p className="text-xs text-green-600 dark:text-green-300">推荐指数: ★★★★★</p>
                   </div>
                 </div>
                 <div className="ml-11">
                   <div className="mb-2">
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">具体颜色：</p>
+                    <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">具体颜色：</p>
                     <div className="flex flex-wrap gap-1">
                       {colorSystem.具体颜色.map((color, colorIndex) => (
-                        <span key={colorIndex} className="px-2 py-1 bg-white dark:bg-gray-700 border border-green-300 dark:border-green-600 rounded-full text-xs text-green-700 dark:text-green-300">
+                        <span key={colorIndex} className="px-2 py-1 bg-white dark:bg-gray-800 border border-green-300 dark:border-green-500 rounded-full text-xs text-green-700 dark:text-green-200">
                           {color}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{colorSystem.描述}</p>
+                  <p className="text-xs text-green-700 dark:text-green-300 leading-relaxed">{colorSystem.描述}</p>
                 </div>
               </div>
             ))}
@@ -301,38 +301,38 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
 
       {/* 不宜颜色警示 */}
       {unluckyColors.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold mb-3 flex items-center text-red-600 dark:text-red-400">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+          <h3 className="text-lg font-semibold mb-3 flex items-center text-red-600 dark:text-red-300">
             <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
             今日不宜颜色
           </h3>
           
           <div className="space-y-3">
             {unluckyColors.map((colorSystem, index) => (
-              <div key={index} className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-3">
+              <div key={index} className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-600 rounded-lg p-3">
                 <div className="flex items-center mb-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 mr-3 flex-shrink-0 flex items-center justify-center shadow-md">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 mr-3 flex-shrink-0 flex items-center justify-center shadow-md">
                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-base font-semibold text-red-800 dark:text-red-300">{colorSystem.颜色系统}</h4>
-                    <p className="text-xs text-red-600 dark:text-red-400">建议避免使用</p>
+                    <h4 className="text-base font-semibold text-red-800 dark:text-red-200">{colorSystem.颜色系统}</h4>
+                    <p className="text-xs text-red-600 dark:text-red-300">建议避免使用</p>
                   </div>
                 </div>
                 <div className="ml-11">
                   <div className="mb-2">
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">具体颜色：</p>
+                    <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">具体颜色：</p>
                     <div className="flex flex-wrap gap-1">
                       {colorSystem.具体颜色.map((color, colorIndex) => (
-                        <span key={colorIndex} className="px-2 py-1 bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 rounded-full text-xs text-red-700 dark:text-red-300">
+                        <span key={colorIndex} className="px-2 py-1 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-500 rounded-full text-xs text-red-700 dark:text-red-200">
                           {color}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{colorSystem.描述}</p>
+                  <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed">{colorSystem.描述}</p>
                 </div>
               </div>
             ))}
@@ -342,46 +342,46 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
 
       {/* 饮食养生指南 */}
       {selectedDressInfo.food_suggestions && (
-        <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+          <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-gray-100">
             <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
             今日饮食养生指南
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+            <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-600 rounded-lg p-3">
               <div className="flex items-center mb-2">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 mr-2 flex items-center justify-center shadow-md">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 mr-2 flex items-center justify-center shadow-md">
                   <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h4 className="text-base font-semibold text-green-800 dark:text-green-300">推荐食物</h4>
+                <h4 className="text-base font-semibold text-green-800 dark:text-green-200">推荐食物</h4>
               </div>
               <div className="space-y-1">
                 {selectedDressInfo.food_suggestions.宜.map((food, index) => (
-                  <div key={index} className="flex items-center p-1 bg-white dark:bg-gray-700 rounded border border-green-200 dark:border-green-600">
+                  <div key={index} className="flex items-center p-1 bg-white dark:bg-gray-800 rounded border border-green-200 dark:border-green-500">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 flex-shrink-0"></span>
-                    <span className="text-xs text-gray-800 dark:text-gray-300">{food}</span>
+                    <span className="text-xs text-gray-800 dark:text-gray-200">{food}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-3">
+            <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-600 rounded-lg p-3">
               <div className="flex items-center mb-2">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-400 to-red-600 mr-2 flex items-center justify-center shadow-md">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 mr-2 flex items-center justify-center shadow-md">
                   <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h4 className="text-base font-semibold text-red-800 dark:text-red-300">不宜食物</h4>
+                <h4 className="text-base font-semibold text-red-800 dark:text-red-200">不宜食物</h4>
               </div>
               <div className="space-y-1">
                 {selectedDressInfo.food_suggestions.忌.map((food, index) => (
-                  <div key={index} className="flex items-center p-1 bg-white dark:bg-gray-700 rounded border border-red-200 dark:border-red-600">
+                  <div key={index} className="flex items-center p-1 bg-white dark:bg-gray-800 rounded border border-red-200 dark:border-red-500">
                     <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2 flex-shrink-0"></span>
-                    <span className="text-xs text-gray-800 dark:text-gray-300">{food}</span>
+                    <span className="text-xs text-gray-800 dark:text-gray-200">{food}</span>
                   </div>
                 ))}
               </div>

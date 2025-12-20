@@ -279,6 +279,30 @@ function SettingsPage() {
                           <DarkModeToggle />
                         </div>
                         
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">切换应用版本以适应不同设备性能</p>
+                            <div className="flex space-x-4">
+                              <button 
+                                className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                                onClick={() => handleVersionSwitch('lite')}
+                              >
+                                轻量版
+                              </button>
+                              <button 
+                                className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                                onClick={() => handleVersionSwitch('full')}
+                              >
+                                炫彩版
+                              </button>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                              {getCurrentVersion() === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
+                            </p>
+                          </div>
+                        </div>
+                        
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">通知提醒</p>
@@ -347,30 +371,6 @@ function SettingsPage() {
                               <option value="600000">10分钟</option>
                               <option value="1800000">30分钟</option>
                             </select>
-                          </div>
-                        </div>
-                        
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">切换应用版本以适应不同设备性能</p>
-                            <div className="flex space-x-4">
-                              <button 
-                                className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                                onClick={() => handleVersionSwitch('lite')}
-                              >
-                                轻量版
-                              </button>
-                              <button 
-                                className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                                onClick={() => handleVersionSwitch('full')}
-                              >
-                                炫彩版
-                              </button>
-                            </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                              {getCurrentVersion() === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
-                            </p>
                           </div>
                         </div>
                       </div>
