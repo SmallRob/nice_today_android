@@ -29,30 +29,30 @@ ChartJS.register(
 
 const BiorhythmChart = ({ data, isMobile }) => {
   const { theme } = useTheme();
-  
+
   // 深色模式下的文字颜色
   const textColor = theme === 'dark' ? '#f3f4f6' : '#1f2937';
   const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-  
+
   // 优化的数据格式化函数 - 使用useMemo避免不必要的重新计算
   const formattedData = useMemo(() => {
     if (!data) return null;
-    
+
     // 如果是数组格式（本地计算返回的数据）
     if (Array.isArray(data)) {
       const dates = data.map(item => item.date);
       const physical = data.map(item => item.physical);
       const emotional = data.map(item => item.emotional);
       const intellectual = data.map(item => item.intellectual);
-      
+
       return { dates, physical, emotional, intellectual };
     }
-    
+
     // 如果是对象格式（API返回的数据）
     if (data.dates && data.physical && data.emotional && data.intellectual) {
       return data;
     }
-    
+
     return null;
   }, [data]);
 
@@ -62,12 +62,12 @@ const BiorhythmChart = ({ data, isMobile }) => {
     if (!formattedData) {
       return { todayIndex: -1, chartData: null };
     }
-    
-    // 找到今天的索引
-    const todayIndex = formattedData.dates.findIndex(date => {
-      const today = new Date().toISOString().split('T')[0];
-      return date === today;
-    });
+
+    // 找到今天的索引 - 使用本地时间
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    const todayIndex = formattedData.dates.findIndex(date => date === todayStr);
 
     // 准备图表数据
     const chartData = {
@@ -80,30 +80,30 @@ const BiorhythmChart = ({ data, isMobile }) => {
         {
           label: '体力节律',
           data: formattedData.physical,
-          borderColor: '#3b82f6', // 蓝色
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderColor: '#10b981', // 绿色
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
           borderWidth: 2,
           tension: 0.4,
         },
         {
           label: '情绪节律',
           data: formattedData.emotional,
-          borderColor: '#ef4444', // 红色
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          borderColor: '#3b82f6', // 蓝色
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
           borderWidth: 2,
           tension: 0.4,
         },
         {
           label: '智力节律',
           data: formattedData.intellectual,
-          borderColor: '#10b981', // 绿色
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderColor: '#8b5cf6', // 紫色
+          backgroundColor: 'rgba(139, 92, 246, 0.1)',
           borderWidth: 2,
           tension: 0.4,
         },
       ],
     };
-    
+
     return { todayIndex, chartData };
   }, [formattedData]);
 
@@ -127,8 +127,8 @@ const BiorhythmChart = ({ data, isMobile }) => {
             if (!items.length) return '';
             const index = items[0].dataIndex;
             // 确保data和dates存在
-            if (data && data.dates && data.dates[index]) {
-              return `日期: ${data.dates[index]}`;
+            if (formattedData && formattedData.dates && formattedData.dates[index]) {
+              return `日期: ${formattedData.dates[index]}`;
             }
             return '';
           },
@@ -146,15 +146,15 @@ const BiorhythmChart = ({ data, isMobile }) => {
             type: 'line',
             xMin: todayIndex,
             xMax: todayIndex,
-            borderColor: 'rgba(0, 0, 0, 0.7)',
+            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)',
             borderWidth: 2,
             borderDash: [6, 6], // 设置为虚线
             label: {
               display: true,
               content: '今天',
               position: 'start',
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              color: '#fff',
+              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)',
+              color: theme === 'dark' ? '#000' : '#fff',
               font: {
                 weight: 'bold',
                 size: isMobile ? 10 : 12
@@ -192,13 +192,13 @@ const BiorhythmChart = ({ data, isMobile }) => {
         },
       },
     },
-  }), [isMobile, textColor, gridColor, todayIndex, data]);
+  }), [isMobile, textColor, gridColor, todayIndex, formattedData, theme]);
 
   // 如果没有数据，显示空状态
   if (!chartData) {
     return <div className="text-center py-4 text-gray-900 dark:text-white">没有可用的图表数据</div>;
   }
-  
+
   return (
     <div className="w-full" style={{ height: isMobile ? '250px' : '400px' }}>
       <Line data={chartData} options={options} />
