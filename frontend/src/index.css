@@ -267,3 +267,114 @@ code {
     scroll-behavior: smooth;
   }
 }
+
+/* 玛雅历法页面banner滚动折叠效果 */
+.banner-collapse-enter {
+  transform: translateY(-100%);
+  opacity: 0;
+  height: 0;
+}
+
+.banner-collapse-enter-active {
+  transform: translateY(0);
+  opacity: 1;
+  height: auto;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, height 0.3s ease-in-out;
+}
+
+.banner-collapse-exit {
+  transform: translateY(0);
+  opacity: 1;
+  height: auto;
+}
+
+.banner-collapse-exit-active {
+  transform: translateY(-100%);
+  opacity: 0;
+  height: 0;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, height 0.3s ease-in-out;
+}
+
+/* 固定菜单栏的平滑过渡 */
+.menu-fixed-enter {
+  position: relative;
+  transform: translateY(0);
+}
+
+.menu-fixed-enter-active {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2rem);
+  max-width: 72rem;
+  transition: all 0.3s ease-in-out;
+  z-index: 9999;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.menu-fixed-exit {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2rem);
+  max-width: 72rem;
+}
+
+.menu-fixed-exit-active {
+  position: relative;
+  transform: translateY(0);
+  transition: all 0.3s ease-in-out;
+}
+
+/* 滚动阈值计算辅助类 */
+.scroll-threshold-detector {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  opacity: 0;
+}
+
+/* 优化滚动性能 */
+.optimized-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+/* 防抖滚动优化 */
+.scroll-debounced {
+  scroll-snap-type: y proximity;
+}
+
+/* 修复移动端滚动抖动 */
+@media (max-width: 768px) {
+  .optimized-scroll {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+}
+
+/* 安全区域适配的固定菜单 */
+.menu-fixed-safe {
+  top: max(var(--safe-area-inset-top), env(safe-area-inset-top));
+}
+
+/* 内容区域自适应调整 */
+.content-adjust-for-fixed-menu {
+  margin-top: 4rem;
+}
+
+@media (max-width: 768px) {
+  .content-adjust-for-fixed-menu {
+    margin-top: 3.5rem;
+  }
+}
