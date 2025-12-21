@@ -666,9 +666,9 @@ const HoroscopeTab = () => {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
       {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
-      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized bg-white dark:bg-black">
+      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized bg-white dark:bg-black -webkit-overflow-scrolling-touch">
         {/* Banner区域 - 随页面滚动 */}
-        <div className="horoscope-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-700 to-blue-800">
+        <div className="horoscope-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-700 to-blue-800 flex-shrink-0">
           {/* 星宿渐变背景 */}
           <div className="absolute inset-0 stars-gradient z-0">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 via-indigo-600/30 to-blue-700/30"></div>
@@ -739,13 +739,13 @@ const HoroscopeTab = () => {
         </div>
 
         {/* 内容展示区域 - 使用DressHealthTab的边距样式 */}
-        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black">
-          <div className="mb-4 mx-auto max-w-2xl">
+        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
+          <div className="mb-4 mx-auto max-w-2xl h-full">
             {/* 星座选择器 - 嵌入页面内容 */}
             {renderHoroscopeSelector()}
 
             {/* 内容区域 */}
-            <div className="space-y-4">
+            <div className="space-y-4 h-full">
             {/* 优化的加载状态 - 骨架屏 */}
             {loading && (
               <div className="space-y-5">

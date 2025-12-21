@@ -71,7 +71,7 @@ function DashboardPage() {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 animate-fade-in">
+    <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 animate-fade-in h-full">
       {appInfo.status === 'loading' && (
         <div className="flex justify-center items-center h-32">
           <div className="text-center">
@@ -93,7 +93,7 @@ function DashboardPage() {
       )}
 
       {appInfo.status === 'ready' && (
-        <div className="flex-1 flex flex-col pb-safe-bottom">
+        <div className="flex-1 flex flex-col overflow-hidden pb-safe-bottom -webkit-overflow-scrolling-touch">
           <BiorhythmDashboard appInfo={appInfo} />
         </div>
       )}

@@ -298,9 +298,9 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black">
+    <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
       {/* Banner区域 - 参考穿衣指南样式 */}
-      <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">
+      <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0">
         {/* 背景装饰 */}
         <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30"></div>
 
@@ -347,7 +347,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       </div>
 
       {/* 标签页选择器 - 参考穿衣指南样式 */}
-      <div className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700">
+      <div className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
         <div className="container mx-auto">
           <div className="flex">
             {tabs.map((tab) => {
@@ -386,9 +386,9 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       </div>
 
       {/* 内容展示区域 - 简化布局，移除不必要的容器嵌套 */}
-      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized">
-        <div className="container mx-auto px-4 py-4">
-          <div className="mb-4 mx-auto max-w-6xl">
+      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized -webkit-overflow-scrolling-touch">
+        <div className="container mx-auto px-4 py-4 h-full">
+          <div className="mb-4 mx-auto max-w-6xl h-full">
             {/* 错误显示 */}
             {error && (
               <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4">

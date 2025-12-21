@@ -480,60 +480,62 @@ const MayaCalendarTab = memo(() => {
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 pb-10 performance-optimized" style={{ touchAction: 'pan-y' }}>
-      {/* 优化的页面标题 - 添加日期状态指示 */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-b-lg shadow-lg">
-        <div className="container mx-auto px-3 py-4 md:px-4 md:py-6">
-          <div className="flex items-center justify-between mb-1">
-            <h1 className="text-xl md:text-2xl font-bold flex items-center">
-              <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
-              </svg>
-              玛雅历法
-            </h1>
-
-            {/* 日期状态指示器 */}
-            {selectedOffset !== 0 && (
-              <div className="flex items-center bg-white/20 rounded-full px-3 py-1">
-                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V6z" clipRule="evenodd" />
+    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
+      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized bg-white dark:bg-black -webkit-overflow-scrolling-touch">
+        {/* 优化的页面标题 - 添加日期状态指示 */}
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-b-lg shadow-lg flex-shrink-0">
+          <div className="container mx-auto px-3 py-4 md:px-4 md:py-6">
+            <div className="flex items-center justify-between mb-1">
+              <h1 className="text-xl md:text-2xl font-bold flex items-center">
+                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
                 </svg>
-                <span className="text-xs font-medium">
-                  {selectedOffset < 0 ? `查看${Math.abs(selectedOffset)}天前` : `查看${selectedOffset}天后`}
-                </span>
-              </div>
-            )}
-          </div>
+                玛雅历法
+              </h1>
 
-          <p className="text-purple-100 text-xs md:text-sm opacity-90">
-            {selectedOffset === 0
-              ? "古代玛雅人的神圣历法系统，揭示每日独特能量"
-              : selectedOffset < 0
-                ? `探索${Math.abs(selectedOffset)}天前的玛雅能量，了解历史周期`
-                : `预览${selectedOffset}天后的玛雅能量，为未来做好准备`
-            }
-          </p>
-        </div>
-      </div>
-
-      {/* 主内容区域 */}
-      <div className="container mx-auto px-3 py-4 md:px-4 md:py-6 space-y-4">
-        {/* 今日启示 - 使用与穿衣养生页面一致的样式 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="p-4 md:p-5">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-3">
-                <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white">今日启示</h3>
+              {/* 日期状态指示器 */}
+              {selectedOffset !== 0 && (
+                <div className="flex items-center bg-white/20 rounded-full px-3 py-1">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V6z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-xs font-medium">
+                    {selectedOffset < 0 ? `查看${Math.abs(selectedOffset)}天前` : `查看${selectedOffset}天后`}
+                  </span>
+                </div>
+              )}
             </div>
-            <p className="text-gray-700 dark:text-gray-200 leading-relaxed text-sm md:text-base">
-              玛雅历法提醒我们，每一天都有独特的能量和意义。通过关注当下的能量，我们可以更好地与宇宙节奏同步。
+
+            <p className="text-purple-100 text-xs md:text-sm opacity-90">
+              {selectedOffset === 0
+                ? "古代玛雅人的神圣历法系统，揭示每日独特能量"
+                : selectedOffset < 0
+                  ? `探索${Math.abs(selectedOffset)}天前的玛雅能量，了解历史周期`
+                  : `预览${selectedOffset}天后的玛雅能量，为未来做好准备`
+              }
             </p>
           </div>
         </div>
+
+        {/* 主内容区域 */}
+        <div className="container mx-auto px-3 py-4 md:px-4 md:py-6 space-y-4">
+          {/* 今日启示 - 使用与穿衣养生页面一致的样式 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="p-4 md:p-5">
+              <div className="flex items-center mb-3">
+                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-3">
+                  <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">今日启示</h3>
+              </div>
+              <p className="text-gray-700 dark:text-gray-200 leading-relaxed text-sm md:text-base">
+                玛雅历法提醒我们，每一天都有独特的能量和意义。通过关注当下的能量，我们可以更好地与宇宙节奏同步。
+              </p>
+            </div>
+          </div>
 
         {/* 优化的日期选择区域 - 添加清晰的视觉反馈和回到今天功能 */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">

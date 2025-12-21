@@ -356,9 +356,9 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
-      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized taoist-content-scroll bg-white dark:bg-black">
+      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized taoist-content-scroll bg-white dark:bg-black -webkit-overflow-scrolling-touch">
         {/* Banner区域 - 生物节律主题 */}
-        <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">
+        <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0">
           {/* 节律渐变背景 */}
           <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30"></div>
 
@@ -395,8 +395,8 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black">
-          <div className="mb-4 mx-auto max-w-2xl space-y-4">
+        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
+          <div className="mb-4 mx-auto max-w-2xl space-y-4 h-full">
             {/* 合并的用户信息与今日状态卡片 */}
             {todayData && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
