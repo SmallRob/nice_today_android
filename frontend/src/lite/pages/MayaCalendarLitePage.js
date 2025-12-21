@@ -25,14 +25,19 @@ class SimpleMayaCalendarUtils {
   static calculateMayaDate(gregorianDate) {
     try {
       const targetDate = new Date(gregorianDate);
+      
+      // 标准化日期，避免时区差异影响
+      const normalizedTargetDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+      const normalizedReferenceDate = new Date(this.REFERENCE_DATE.getFullYear(), this.REFERENCE_DATE.getMonth(), this.REFERENCE_DATE.getDate());
 
       // 计算从参考日期到目标日期的天数
-      const timeDiff = targetDate.getTime() - this.REFERENCE_DATE.getTime();
-      const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const timeDiff = normalizedTargetDate.getTime() - normalizedReferenceDate.getTime();
+      const daysDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24)); // 使用round确保精确计算
 
       // 计算KIN数（1-260的循环）
       let kin = this.REFERENCE_KIN + daysDiff;
       kin = ((kin - 1) % 260) + 1;
+      if (kin <= 0) kin += 260; // 确保KIN数在1-260范围内
 
       // 从KIN数计算调性和图腾
       const toneIndex = (kin - 1) % 13;

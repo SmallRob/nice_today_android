@@ -317,10 +317,15 @@ const MayaCalendarTab = memo(() => {
     if (!isNaN(newDate.getTime())) {
       setSelectedDate(newDate);
 
-      // 计算与今天的偏移量
+      // 计算与今天的偏移量 - 修复日期计算bug
       const today = getToday();
-      const timeDiff = newDate.getTime() - today.getTime();
-      const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      // 将日期标准化为午夜时间，避免时间差异影响计算结果
+      const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const normalizedNewDate = new Date(newDate.getFullYear(), newDate.getMonth(), newDate.getDate());
+      
+      const timeDiff = normalizedNewDate.getTime() - normalizedToday.getTime();
+      // 使用Math.round确保正确计算天数差异，避免昨天日期计算错误
+      const daysDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24));
       setSelectedOffset(daysDiff);
 
       // 立即加载新日期的数据，不需要防抖
