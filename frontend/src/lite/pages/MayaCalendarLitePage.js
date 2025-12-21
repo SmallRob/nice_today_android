@@ -434,18 +434,15 @@ const MayaCalendarLitePage = ({ userInfo }) => {
               <button className="mood-modal-close" onClick={() => setShowMoodModal(false)}>&times;</button>
             </div>
 
-            <div className="lite-mb-base">
-              <label className="lite-text-sm">记录日期</label>
-              <input
-                type="date"
-                className="lite-input"
-                value={writingMood.date}
-                disabled
-              />
+            <div style={{ marginBottom: '8px' }}>
+              <div className="lite-flex lite-justify-between lite-items-center">
+                <label className="lite-text-sm">记录日期</label>
+                <div className="lite-text-sm lite-text-bold">{writingMood.date}</div>
+              </div>
             </div>
 
-            <div className="lite-mb-base">
-              <label className="lite-text-sm">今日推荐状态</label>
+            <div style={{ marginBottom: '8px' }}>
+              <label className="lite-text-sm">今日状态</label>
               <div className="mood-icons-grid">
                 {MOOD_ICONS.map(item => (
                   <div
@@ -460,8 +457,8 @@ const MayaCalendarLitePage = ({ userInfo }) => {
               </div>
             </div>
 
-            <div className="lite-mb-base">
-              <label className="lite-text-sm">症状</label>
+            <div style={{ marginBottom: '8px' }}>
+              <label className="lite-text-sm">健康记录</label>
               <div className="symptoms-grid">
                 {SYMPTOMS.map(item => (
                   <div
@@ -475,14 +472,17 @@ const MayaCalendarLitePage = ({ userInfo }) => {
                       readOnly
                       disabled={!isEditingMood}
                     />
-                    <span className="lite-text-sm">{item.icon} {item.label}</span>
+                    <span className="lite-text-sm">{item.label}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="mood-level-container">
-              <label className="lite-text-sm">情绪状态 (1-5)</label>
+              <div className="lite-flex lite-justify-between">
+                <label className="lite-text-sm">情绪指数</label>
+                <span className="lite-text-bold lite-text-sm" style={{ color: 'var(--text-primary)' }}>{writingMood.moodLevel}</span>
+              </div>
               <input
                 type="range"
                 min="1"
@@ -495,39 +495,38 @@ const MayaCalendarLitePage = ({ userInfo }) => {
               />
               <div className="mood-level-display">
                 <span>低落</span>
-                <span className="lite-text-bold lite-text-lg" style={{ color: 'var(--primary-color)' }}>{writingMood.moodLevel}</span>
                 <span>极佳</span>
               </div>
             </div>
 
-            <div className="lite-mb-base">
+            <div style={{ marginBottom: '12px' }}>
               <label className="lite-text-sm">备注</label>
               <textarea
                 className="lite-input"
-                rows="3"
+                rows="2"
                 value={writingMood.note}
                 onChange={e => isEditingMood && setWritingMood(prev => ({ ...prev, note: e.target.value }))}
-                placeholder="记录今日其他心情信息..."
+                placeholder="添加备注..."
                 disabled={!isEditingMood}
-                style={{ resize: 'none' }}
+                style={{ resize: 'none', padding: '6px', fontSize: '13px' }}
               />
             </div>
 
             {isEditingMood && (
               <div className="lite-flex lite-gap-base">
                 <button
-                  className="lite-button"
-                  style={{ flex: 1, backgroundColor: 'transparent', border: '1px solid var(--border-color)' }}
+                  className="lite-button lite-button-sm"
+                  style={{ flex: 1, backgroundColor: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                   onClick={() => setShowMoodModal(false)}
                 >
                   取消
                 </button>
                 <button
-                  className="lite-button"
+                  className="lite-button lite-button-sm"
                   style={{ flex: 1 }}
                   onClick={handleSaveMood}
                 >
-                  保存
+                  保存记录
                 </button>
               </div>
             )}
