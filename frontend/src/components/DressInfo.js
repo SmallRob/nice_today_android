@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import IconLibrary from './IconLibrary';
 
 const WuxingEnergyTrend = ({ dailyElement }) => {
