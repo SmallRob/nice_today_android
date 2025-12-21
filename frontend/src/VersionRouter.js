@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import App from './App'; // 完整版应用
 import AppLite from './lite/AppLite'; // 轻量版应用
 import versionDetector from './utils/versionDetector'; // 版本检测器
