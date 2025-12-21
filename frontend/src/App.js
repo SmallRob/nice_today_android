@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { optimizeAppStartup } from './utils/startupOptimizer';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { useThemeColor } from './hooks/useThemeColor';
+import { useThemeColor } from './hooks/useThemeColor';
 import './index.css';
 
 // 懒加载页面组件
@@ -57,7 +58,7 @@ class ErrorBoundary extends React.Component {
               </details>
             )}
           </div>
-          <button 
+          <button
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
             onClick={() => window.location.reload()}
           >
@@ -75,7 +76,7 @@ class ErrorBoundary extends React.Component {
 const AppLayout = () => {
   // 使用主题颜色Hook
   useThemeColor();
-  
+
   return (
     <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
       <div className="flex-1 overflow-auto">
@@ -90,7 +91,7 @@ const AppLayout = () => {
           </Routes>
         </Suspense>
       </div>
-      
+
       <Suspense fallback={<div className="h-16 bg-gray-100 dark:bg-gray-800"></div>}>
         <TabNavigation />
       </Suspense>
@@ -103,13 +104,13 @@ function App() {
     initialized: false,
     error: null
   });
-  
+
   // 简化的初始化函数
   const initializeApp = async () => {
     try {
       // 延迟初始化，确保DOM已加载
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // 使用try-catch块导入和初始化每个模块
       let capacitorInit;
       try {
@@ -135,7 +136,7 @@ function App() {
         console.warn('Capacitor初始化失败:', error);
         // 继续执行，不阻止应用启动
       }
-      
+
       // 初始化用户配置管理器，确保在应用启动时加载配置
       try {
         const { userConfigManager } = await import('./utils/userConfigManager');
@@ -145,11 +146,12 @@ function App() {
         console.warn('用户配置管理器初始化失败:', error);
         // 继续执行，不阻止应用启动
       }
-      
+
       setAppState({
         initialized: true,
         error: null
       });
+
     } catch (error) {
       console.error('应用初始化错误:', error);
       setAppState({
@@ -176,7 +178,7 @@ function App() {
         <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-w-md">
           <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">{appState.error}</p>
         </div>
-        <button 
+        <button
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
           onClick={() => initializeApp()}
         >
@@ -187,13 +189,15 @@ function App() {
   }
 
   return (
-    <Router>
-      <ErrorBoundary>
-        <ThemeProvider>
-          <AppLayout />
-        </ThemeProvider>
-      </ErrorBoundary>
-    </Router>
+    <>
+      <Router>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <AppLayout />
+          </ThemeProvider>
+        </ErrorBoundary>
+      </Router>
+    </>
   );
 }
 

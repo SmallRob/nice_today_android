@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { userConfigManager } from '../../utils/userConfigManager';
+import { useNotification } from '../../context/NotificationContext';
+import versionDetector from '../../utils/versionDetector';
+import { restartApp } from '../../utils/restartApp';
 
 const SettingsLitePage = ({ userInfo, setUserInfo }) => {
   const [formData, setFormData] = useState({
@@ -8,6 +11,7 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
     birthDate: userInfo.birthDate || ''
   });
   const [saveStatus, setSaveStatus] = useState('');
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     setFormData({
@@ -32,7 +36,7 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
     try {
       // 获取当前配置索引
       const activeIndex = userConfigManager.getActiveConfigIndex();
-      
+
       // 更新配置
       const success = userConfigManager.updateConfig(activeIndex, {
         nickname: formData.nickname,
@@ -47,7 +51,7 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
           gender: formData.gender,
           birthDate: formData.birthDate
         });
-        
+
         setSaveStatus('success');
         setTimeout(() => setSaveStatus(''), 3000);
       } else {
@@ -61,20 +65,40 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
 
   // 切换到完整版
   const switchToFullVersion = () => {
-    // 设置版本标记
-    localStorage.setItem('appVersion', 'full');
-    
-    // 重新加载页面以切换到完整版
-    window.location.reload();
+    showNotification({
+      type: 'warning',
+      title: '版本切换确认',
+      message: '确定要切换到炫彩版吗？建议重启应用以加载完整功能。',
+      actions: [
+        {
+          label: '立即重启',
+          primary: true,
+          onClick: () => {
+            versionDetector.switchVersion('full');
+            restartApp();
+          }
+        },
+        {
+          label: '直接加载',
+          onClick: () => {
+            // 设置版本标记
+            localStorage.setItem('appVersion', 'full');
+            // 重新加载页面以切换到完整版
+            window.location.reload();
+          }
+        }
+      ]
+    });
   };
 
   // 切换到轻量版
   const switchToLiteVersion = () => {
-    // 设置版本标记
-    localStorage.setItem('appVersion', 'lite');
-    
-    // 重新加载页面以切换到轻量版
-    window.location.reload();
+    showNotification({
+      type: 'info',
+      title: '提示',
+      message: '您当前已处于轻量版。',
+      duration: 3000
+    });
   };
 
   return (
@@ -83,86 +107,86 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
         <h2 className="lite-page-title">设置</h2>
       </div>
       <div className="lite-settings-page">
-      
-      <div className="lite-card">
-        <h3>用户信息</h3>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="nickname">昵称:</label>
-            <input
-              type="text"
-              id="nickname"
-              name="nickname"
-              value={formData.nickname}
-              onChange={handleChange}
-              className="lite-input"
-              placeholder="请输入昵称"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="gender">性别:</label>
-            <select
-              id="gender"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="lite-input"
-            >
-              <option value="male">男</option>
-              <option value="female">女</option>
-              <option value="secret">保密</option>
-            </select>
-          </div>
-          
-          <div>
-            <label htmlFor="birthDate">出生日期:</label>
-            <input
-              type="date"
-              id="birthDate"
-              name="birthDate"
-              value={formData.birthDate}
-              onChange={handleChange}
-              className="lite-input"
-            />
-          </div>
-          
-          <button type="submit" className="lite-button">
-            保存信息
-          </button>
-          
-          {saveStatus === 'saving' && <p>保存中...</p>}
-          {saveStatus === 'success' && <p style={{color: 'green'}}>保存成功!</p>}
-          {saveStatus === 'error' && <p style={{color: 'red'}}>保存失败，请重试</p>}
-        </form>
-      </div>
-      
-      <div className="lite-card">
-        <h3>版本切换</h3>
-        <p>当前版本: 轻量版</p>
-        <div style={{display: 'flex', gap: '10px'}}>
-          <button 
-            className="lite-button"
-            onClick={switchToFullVersion}
-            style={{backgroundColor: '#e74c3c', flex: 1}}
-          >
-            切换到炫彩版
-          </button>
-          <button 
-            className="lite-button"
-            onClick={switchToLiteVersion}
-            style={{backgroundColor: '#3498db', flex: 1}}
-          >
-            保持轻量版
-          </button>
-        </div>
-      </div>
 
-      <div className="lite-card">
-        <h3>关于</h3>
-        <p>轻量版 v1.0.0</p>
-        <p>专为移动设备优化，提供更流畅的体验</p>
-      </div>
+        <div className="lite-card">
+          <h3>用户信息</h3>
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="nickname">昵称:</label>
+              <input
+                type="text"
+                id="nickname"
+                name="nickname"
+                value={formData.nickname}
+                onChange={handleChange}
+                className="lite-input"
+                placeholder="请输入昵称"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="gender">性别:</label>
+              <select
+                id="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className="lite-input"
+              >
+                <option value="male">男</option>
+                <option value="female">女</option>
+                <option value="secret">保密</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="birthDate">出生日期:</label>
+              <input
+                type="date"
+                id="birthDate"
+                name="birthDate"
+                value={formData.birthDate}
+                onChange={handleChange}
+                className="lite-input"
+              />
+            </div>
+
+            <button type="submit" className="lite-button">
+              保存信息
+            </button>
+
+            {saveStatus === 'saving' && <p>保存中...</p>}
+            {saveStatus === 'success' && <p style={{ color: 'green' }}>保存成功!</p>}
+            {saveStatus === 'error' && <p style={{ color: 'red' }}>保存失败，请重试</p>}
+          </form>
+        </div>
+
+        <div className="lite-card">
+          <h3>版本切换</h3>
+          <p>当前版本: 轻量版</p>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              className="lite-button"
+              onClick={switchToFullVersion}
+              style={{ backgroundColor: '#e74c3c', flex: 1 }}
+            >
+              切换到炫彩版
+            </button>
+            <button
+              className="lite-button"
+              onClick={switchToLiteVersion}
+              style={{ backgroundColor: '#3498db', flex: 1 }}
+            >
+              保持轻量版
+            </button>
+          </div>
+        </div>
+
+        <div className="lite-card">
+          <h3>关于</h3>
+          <p>轻量版 v1.0.0</p>
+          <p>专为移动设备优化，提供更流畅的体验</p>
+        </div>
       </div>
     </div>
   );

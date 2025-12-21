@@ -3,12 +3,13 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import VersionRouter from './VersionRouter';
 import { ThemeProvider } from './context/ThemeContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { initializeApp } from './utils/capacitorInit-simulated';
 import WelcomeScreen from './components/WelcomeScreen';
 import timeCacheManager from './utils/timeCache';
 
 // #region agent log
-fetch('http://127.0.0.1:7242/ingest/b3387138-a87a-4b03-a45b-f70781421b47',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'frontend/src/index.js:8',message:'React app starting',data:{hasElectronAPI:typeof window.electronAPI!=='undefined',electronAPIReady:window.electronAPI?.isReady?.()||false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+fetch('http://127.0.0.1:7242/ingest/b3387138-a87a-4b03-a45b-f70781421b47', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'frontend/src/index.js:8', message: 'React app starting', data: { hasElectronAPI: typeof window.electronAPI !== 'undefined', electronAPIReady: window.electronAPI?.isReady?.() || false }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A' }) }).catch(() => { });
 // #endregion
 
 // 初始化Capacitor应用
@@ -40,27 +41,27 @@ const initApp = async () => {
 // 启动应用
 const startApp = () => {
   const root = ReactDOM.createRoot(document.getElementById('root'));
-  
+
   // 使用AppWrapper组件管理欢迎界面
   const AppWrapper = () => {
     const [showWelcome, setShowWelcome] = useState(true);
     const [appReady, setAppReady] = useState(false);
-    
+
     useEffect(() => {
       // 初始化时间缓存
       timeCacheManager.update();
-      
+
       // 3秒后隐藏欢迎界面
       const timer = setTimeout(() => {
         setShowWelcome(false);
       }, 3000);
-      
+
       // 标记应用已准备就绪
       setAppReady(true);
-      
+
       return () => clearTimeout(timer);
     }, []);
-    
+
     // 添加加载屏幕
     const LoadingScreen = () => (
       <div style={{
@@ -90,7 +91,7 @@ const startApp = () => {
         `}</style>
       </div>
     );
-    
+
     return (
       <>
         {showWelcome ? (
@@ -98,7 +99,9 @@ const startApp = () => {
         ) : (
           <Suspense fallback={<LoadingScreen />}>
             <ThemeProvider>
-              <VersionRouter />
+              <NotificationProvider>
+                <VersionRouter />
+              </NotificationProvider>
             </ThemeProvider>
           </Suspense>
         )}
