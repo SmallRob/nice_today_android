@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { calculateBiorhythm } from '../utils/biorhythmCalculator';
 import { userConfigManager } from '../../utils/userConfigManager';
 import '../styles/globalLiteStyles.css';
@@ -32,10 +32,9 @@ const BiorhythmLitePage = () => {
     loadUserInfo();
   }, []);
 
-  // 计算生物节律 - 移除了通知检查以提高性能
+  // 计算生物节律 - 简化计算逻辑
   useEffect(() => {
     if (userInfo.birthDate) {
-      // 使用 useMemo 优化计算性能
       const calculated = calculateBiorhythm(userInfo.birthDate, currentDate);
       setBiorhythms(calculated);
     }
@@ -63,8 +62,8 @@ const BiorhythmLitePage = () => {
     setCurrentDate(newDate);
   };
 
-  // 获取简单的生活提醒 - 使用 useMemo 优化性能
-  const lifeTips = useMemo(() => {
+  // 获取简单的生活提醒
+  const getLifeTips = () => {
     if (!biorhythms) return [];
     
     const tips = [];
@@ -97,10 +96,10 @@ const BiorhythmLitePage = () => {
     }
     
     return tips;
-  }, [biorhythms]);
+  };
 
   // 生物节律知识卡片数据
-  const biorhythmKnowledge = useMemo(() => [
+  const biorhythmKnowledge = [
     {
       type: '体力节律',
       description: '反映了人的体力状况，影响运动能力、耐力和身体活力。',
@@ -119,28 +118,28 @@ const BiorhythmLitePage = () => {
       cycle: '周期为33天',
       color: '#9C27B0'
     }
-  ], []);
+  ];
 
   // 获取节律状态说明
-  const getBiorhythmStatusDescription = useMemo(() => (value) => {
+  const getBiorhythmStatusDescription = (value) => {
     if (value > 50) return '极佳状态';
     if (value > 20) return '良好状态';
     if (value > -20) return '普通状态';
     if (value > -50) return '较差状态';
     return '极差状态';
-  }, []);
+  };
 
   // 获取节律状态建议
-  const getBiorhythmStatusAdvice = useMemo(() => (value) => {
+  const getBiorhythmStatusAdvice = (value) => {
     if (value > 50) return '充分利用此状态，进行挑战性活动';
     if (value > 20) return '正常发挥，保持当前节奏';
     if (value > -20) return '适度活动，避免过度劳累';
     if (value > -50) return '注意休息，减少压力';
     return '充分休息，恢复精力';
-  }, []);
+  };
 
   // 获取综合状态
-  const overallStatus = useMemo(() => {
+  const getOverallStatus = () => {
     if (!biorhythms) return '';
     
     const avg = (biorhythms.physical + biorhythms.emotional + biorhythms.intellectual) / 3;
@@ -149,10 +148,10 @@ const BiorhythmLitePage = () => {
     if (avg > 0) return '状态平稳';
     if (avg > -30) return '状态一般';
     return '状态欠佳';
-  }, [biorhythms]);
+  };
 
   // 获取未来7天节律趋势
-  const futureTrends = useMemo(() => {
+  const getFutureTrends = () => {
     if (!biorhythms || !userInfo.birthDate) return [];
     
     const trends = [];
@@ -175,26 +174,26 @@ const BiorhythmLitePage = () => {
     }
     
     return trends;
-  }, [biorhythms, currentDate, userInfo.birthDate]);
+  };
 
   // 获取趋势符号
-  const getTrendSymbol = useMemo(() => (currentValue, futureValue) => {
+  const getTrendSymbol = (currentValue, futureValue) => {
     const diff = futureValue - currentValue;
     if (diff > 2) return '↑↑';
     if (diff > 0.5) return '↑';
     if (diff < -2) return '↓↓';
     if (diff < -0.5) return '↓';
     return '→';
-  }, []);
+  };
 
   // 获取趋势颜色
-  const getTrendColor = useMemo(() => (symbol) => {
+  const getTrendColor = (symbol) => {
     if (symbol === '↑↑') return 'trend-up-strong';
     if (symbol === '↑') return 'trend-up';
     if (symbol === '↓↓') return 'trend-down-strong';
     if (symbol === '↓') return 'trend-down';
     return 'trend-stable';
-  }, []);
+  };
 
   if (!userInfo.birthDate) {
     return (
@@ -287,7 +286,7 @@ const BiorhythmLitePage = () => {
             </div>
             
             <div className="biorhythm-summary lite-card">
-              <p className="lite-text-bold">综合状态: {overallStatus}</p>
+              <p className="lite-text-bold">综合状态: {getOverallStatus()}</p>
             </div>
           </div>
           
@@ -312,11 +311,11 @@ const BiorhythmLitePage = () => {
             </div>
           </div>
           
-          {lifeTips.length > 0 && (
+          {getLifeTips().length > 0 && (
             <div className="lite-card">
               <h3 className="lite-h3">今日提醒</h3>
               <ul className="life-tips-list">
-                {lifeTips.map((tip, index) => (
+                {getLifeTips().map((tip, index) => (
                   <li key={index} className="life-tip-item lite-text">
                     <span className="tip-type lite-text-bold">{tip.type}:</span> {tip.tip}
                   </li>
@@ -326,7 +325,7 @@ const BiorhythmLitePage = () => {
           )}
           
           {/* 未来7天节律趋势 */}
-          {futureTrends.length > 0 && (
+          {getFutureTrends().length > 0 && (
             <div className="lite-card">
               <h3 className="lite-h3">未来7天节律趋势</h3>
               <div className="trend-table">
@@ -336,7 +335,7 @@ const BiorhythmLitePage = () => {
                   <span>情绪</span>
                   <span>智力</span>
                 </div>
-                {futureTrends.map((trend, index) => (
+                {getFutureTrends().map((trend, index) => (
                   <div key={index} className="trend-row">
                     <span className="trend-day">{trend.day}</span>
                     <span className={`trend-value ${getTrendColor(trend.physical)}`}>

@@ -160,7 +160,7 @@
   min-height: 32px;
 }
 
-/* 模态框样式 */
+/* 模态框样式 - 低分辨率设备优化 */
 .mood-modal-overlay {
   position: fixed;
   top: 0;
@@ -170,28 +170,33 @@
   background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* 改为顶部对齐 */
   z-index: 1000;
-  padding: var(--spacing-base);
+  padding: 10px; /* 固定值提高兼容性 */
+  overflow-y: auto;
 }
 
 .mood-modal {
-  background-color: var(--card-background);
-  border-radius: var(--border-radius-lg);
+  background-color: #2a2a2a; /* 固定值替代CSS变量 */
+  border-radius: 12px; /* 固定值替代CSS变量 */
   width: 100%;
-  max-width: 400px;
-  max-height: 90vh;
+  max-width: 360px; /* 降低最大宽度适应小屏幕 */
+  max-height: 80vh; /* 降低最大高度 */
+  min-height: 200px; /* 确保最小高度 */
   overflow-y: auto;
   position: relative;
-  padding: var(--spacing-lg);
-  border: 1px solid var(--border-color);
+  padding: 16px; /* 固定值替代CSS变量 */
+  border: 1px solid #444444; /* 固定值替代CSS变量 */
+  margin-top: 20px; /* 确保顶部有间距 */
 }
 
 .mood-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-base);
+  margin-bottom: 16px; /* 固定值替代CSS变量 */
+  padding-bottom: 10px;
+  border-bottom: 1px solid #444444;
 }
 
 .mood-modal-close {
@@ -205,47 +210,53 @@
 .mood-icons-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-base);
+  gap: 8px; /* 固定值替代CSS变量 */
+  margin-bottom: 16px; /* 固定值替代CSS变量 */
 }
 
 .mood-icon-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--spacing-sm);
-  border-radius: var(--border-radius-base);
+  padding: 8px; /* 固定值替代CSS变量 */
+  border-radius: 8px; /* 固定值替代CSS变量 */
   cursor: pointer;
   border: 1px solid transparent;
+  min-height: 60px; /* 确保最小高度 */
 }
 
 .mood-icon-item.active {
   background-color: rgba(52, 152, 219, 0.2);
-  border-color: var(--primary-color);
+  border-color: #3498db; /* 固定值替代CSS变量 */
 }
 
 .mood-icon-item .emoji {
-  font-size: 24px;
+  font-size: 20px; /* 减小字体大小 */
   margin-bottom: 4px;
 }
 
 .mood-icon-item .label {
-  font-size: var(--font-size-xs);
-  color: var(--gray-color);
+  font-size: 12px; /* 固定值替代CSS变量 */
+  color: #cccccc; /* 固定值替代CSS变量 */
+  text-align: center;
+  line-height: 1.2;
 }
 
 .symptoms-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-base);
+  gap: 8px; /* 固定值替代CSS变量 */
+  margin-bottom: 16px; /* 固定值替代CSS变量 */
 }
 
 .symptom-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 8px; /* 固定值替代CSS变量 */
   cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .symptom-item input {
@@ -253,7 +264,7 @@
 }
 
 .mood-level-container {
-  margin-bottom: var(--spacing-base);
+  margin-bottom: 16px; /* 固定值替代CSS变量 */
 }
 
 .mood-slider {
@@ -264,8 +275,9 @@
 .mood-level-display {
   display: flex;
   justify-content: space-between;
-  color: var(--gray-color);
-  font-size: var(--font-size-sm);
+  color: #cccccc; /* 固定值替代CSS变量 */
+  font-size: 14px; /* 固定值替代CSS变量 */
+  align-items: center;
 }
 
 /* 玛雅信息网格 */
@@ -334,7 +346,7 @@
   line-height: 1.5;
 }
 
-/* 响应式设计 */
+/* 响应式设计 - 移动端优化 */
 @media (max-width: 768px) {
   .calendar .hd {
     font-size: 1.1rem;
@@ -359,5 +371,76 @@
 
   .daily-inspiration p {
     font-size: 0.9rem;
+  }
+
+  /* 移动端弹窗优化 */
+  .mood-modal-overlay {
+    padding: 5px; /* 减少边距 */
+    align-items: flex-start;
+  }
+
+  .mood-modal {
+    max-width: 100%; /* 在小屏幕上占满宽度 */
+    max-height: 85vh; /* 进一步降低高度 */
+    padding: 12px; /* 减少内边距 */
+    margin-top: 10px;
+  }
+
+  .mood-icons-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .mood-icon-item {
+    min-height: 50px;
+    padding: 6px;
+  }
+
+  .mood-icon-item .emoji {
+    font-size: 18px;
+  }
+
+  .mood-icon-item .label {
+    font-size: 11px;
+  }
+
+  .symptoms-grid {
+    grid-template-columns: 1fr; /* 单列布局 */
+    gap: 6px;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .mood-modal {
+    max-height: 80vh; /* 进一步降低高度 */
+    padding: 10px;
+    margin-top: 5px;
+  }
+
+  .mood-modal-header {
+    margin-bottom: 12px;
+  }
+
+  .mood-icons-grid {
+    grid-template-columns: repeat(2, 1fr); /* 两列布局 */
+  }
+
+  .mood-icon-item {
+    min-height: 45px;
+    padding: 4px;
+  }
+
+  .mood-icon-item .emoji {
+    font-size: 16px;
+  }
+
+  .mood-icon-item .label {
+    font-size: 10px;
+  }
+
+  /* 超小屏幕下隐藏部分内容 */
+  .mood-modal .lite-text-sm {
+    font-size: 12px;
   }
 }

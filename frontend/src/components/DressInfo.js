@@ -204,9 +204,9 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   }
 
   return (
-    <div className="space-y-4 performance-optimized pb-10">
+    <div className="space-y-5 performance-optimized pb-12">
       {/* 顶部综合卡片 */}
-      <div className="bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800 text-white rounded-2xl p-5 shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
         <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
         <div className="relative z-10 flex justify-between items-start">
           <div>
@@ -218,14 +218,14 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
           </div>
           <div className="text-right">
             <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
-              <span className="text-xs font-bold">主导能量：{selectedDressInfo.daily_element}</span>
+              <span className="text-xs font-bold">每日能量：{selectedDressInfo.daily_element}</span>
             </div>
           </div>
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-4">
           <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
-            <p className="text-[10px] uppercase tracking-wider text-indigo-200 mb-1">推荐风格</p>
+            <p className="text-[10px] uppercase tracking-wider text-indigo-200 mb-1">本季风格</p>
             <p className="text-sm font-bold">{seasonalStyles.style}</p>
           </div>
           <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
@@ -236,17 +236,17 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       </div>
 
       {/* 日期选择 */}
-      <div className="bg-white dark:bg-gray-800/90 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div className="flex overflow-x-auto no-scrollbar scroll-smooth">
+      <div className="bg-white dark:bg-gray-800/90 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="flex overflow-x-auto scroll-smooth">
           {dressInfoList.slice(0, 10).map((info, index) => (
             <div
               key={index}
               className={getDateTabClass(info.date)}
               onClick={() => handleDateChange(new Date(info.date))}
-              style={{ minWidth: '16.66%', flexShrink: 0 }}
+              style={{ minWidth: '20%', flexShrink: 0 }}
             >
               <div className="text-[10px] opacity-70 mb-0.5">{info.weekday.replace('星期', '')}</div>
-              <div className="text-sm">{formatDate(info.date)}</div>
+              <div className="text-sm font-bold">{formatDate(info.date)}</div>
             </div>
           ))}
         </div>

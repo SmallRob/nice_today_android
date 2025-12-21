@@ -70,7 +70,7 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 dress-health-scroll-container">
       {/* 固定顶部区域 - 包含五行道家养生风格的banner和标签导航 */}
-      <div ref={fixedHeaderRef} className="dress-health-fixed-header flex-shrink-0 z-20">
+      <div ref={fixedHeaderRef} className="dress-health-fixed-header">
         {/* 五行道家养生风格banner */}
         <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-700 to-blue-800 dark:from-gray-800 dark:via-gray-900 dark:to-black">
           {/* 五行渐变背景 */}
@@ -115,27 +115,27 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
             <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
           </div>
 
-          <div className="container mx-auto px-4 py-4 md:py-6 relative z-10">
+          <div className="container mx-auto px-4 py-3 md:py-6 relative z-10 text-center">
             <h1 className="text-xl md:text-2xl font-bold mb-1 text-shadow-lg taoist-title">
               <span className="inline-block transform hover:scale-105 transition-transform duration-300">
                 穿衣养生
               </span>
             </h1>
-            <p className="text-white text-sm md:text-base opacity-95 font-medium taoist-subtitle mb-2">
-              五行相生·阴阳调和·道法自然·养生延年
+            <p className="text-white text-xs md:text-base opacity-95 font-medium taoist-subtitle mb-2">
+              五行相生·阴阳调和·道法自然
             </p>
             <div className="flex items-center justify-center space-x-1 md:space-x-2">
-              <span className="text-[10px] md:text-xs bg-wood bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">木·生发</span>
-              <span className="text-[10px] md:text-xs bg-fire bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">火·炎上</span>
-              <span className="text-[10px] md:text-xs bg-earth bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">土·稼穑</span>
-              <span className="text-[10px] md:text-xs bg-metal bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">金·从革</span>
-              <span className="text-[10px] md:text-xs bg-water bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">水·润下</span>
+              <span className="text-[10px] md:text-xs bg-wood/40 text-white px-2 py-0.5 rounded-full border border-white/20">木</span>
+              <span className="text-[10px] md:text-xs bg-fire/40 text-white px-2 py-0.5 rounded-full border border-white/20">火</span>
+              <span className="text-[10px] md:text-xs bg-earth/40 text-white px-2 py-0.5 rounded-full border border-white/20">土</span>
+              <span className="text-[10px] md:text-xs bg-metal/40 text-white px-2 py-0.5 rounded-full border border-white/20">金</span>
+              <span className="text-[10px] md:text-xs bg-water/40 text-white px-2 py-0.5 rounded-full border border-white/20">水</span>
             </div>
           </div>
         </div>
 
         {/* 标签页导航 - 五行道家养生风格 */}
-        <div className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700 taoist-tab-navigation">
+        <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 taoist-tab-navigation">
           <div className="container mx-auto">
             <div className="flex">
               {tabs.map((tab, index) => {
@@ -148,22 +148,22 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 py-2 md:py-3 px-1 md:px-2 text-center transition-all duration-300 relative group touch-manipulation taoist-tab-button ${isActive
-                        ? `text-${currentColor} bg-gray-50 dark:bg-gray-900`
-                        : 'text-gray-500 dark:text-gray-400 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? `text-${currentColor} bg-gray-50/50 dark:bg-gray-900/50`
+                      : 'text-gray-400 dark:text-gray-500 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700'
                       }`}
                     aria-label={tab.label}
                   >
                     {/* 五行色彩活跃指示器 */}
                     {isActive && (
-                      <div className={`absolute bottom-0 left-0 w-full h-0.5 bg-${currentColor} rounded-t-full`}></div>
+                      <div className={`absolute bottom-0 left-0 w-full h-0.5 bg-${currentColor}`}></div>
                     )}
 
                     <div className="flex flex-col items-center justify-center">
-                      <div className={`w-5 h-5 md:w-6 md:h-6 mb-1 transition-colors duration-300 ${isActive ? `text-${currentColor}` : 'text-gray-400 dark:text-gray-500'
+                      <div className={`w-5 h-5 md:w-6 md:h-6 mb-0.5 transition-colors duration-300 ${isActive ? `text-${currentColor}` : 'text-gray-400 dark:text-gray-500'
                         }`}>
                         {isActive ? tab.activeIcon : tab.icon}
                       </div>
-                      <span className={`text-xs md:text-sm font-medium transition-all duration-300 ${isActive ? 'font-bold' : 'font-normal'
+                      <span className={`text-[11px] md:text-sm font-medium transition-all duration-300 ${isActive ? 'font-bold' : 'font-normal'
                         }`}>
                         {tab.label}
                       </span>
@@ -177,19 +177,14 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       </div>
 
       {/* 独立滚动的内容区域 - 五行道家养生风格优化 */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="dress-health-scroll-content">
         <div
           ref={scrollContainerRef}
-          className="absolute inset-0 overflow-y-auto optimized-scroll hide-scrollbar performance-optimized touch-optimized taoist-content-scroll bg-gray-50 dark:bg-gray-900"
-          style={{
-            WebkitOverflowScrolling: 'touch',
-            scrollBehavior: 'smooth',
-            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%)'
-          }}
+          className="taoist-content-scroll hide-scrollbar scroll-performance-optimized performance-optimized bg-gray-50 dark:bg-gray-900"
         >
-          <div className="container mx-auto px-3 py-3 md:px-4 md:py-4 pt-4">
+          <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 pt-4">
             {/* 标签页内容容器 - 独立滚动 */}
-            <div className="mb-4">
+            <div className="mb-4 mx-auto max-w-2xl">
               {activeTab === 'dress' && (
                 <DressInfo
                   apiBaseUrl={apiBaseUrl}
