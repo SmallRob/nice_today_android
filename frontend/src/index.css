@@ -682,7 +682,7 @@ code {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 50;
+  z-index: 40;
   background: inherit;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   /* 确保在light/dark模式下样式一致 */
@@ -702,7 +702,7 @@ code {
   top: 5rem;
   left: 0;
   right: 0;
-  z-index: 40;
+  z-index: 50;
   background: inherit;
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -758,7 +758,7 @@ code {
     position: fixed;
     left: 0;
     right: 0;
-    z-index: 50;
+    z-index: 40;
     /* 确保背景透明度和主题一致性 */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -776,7 +776,7 @@ code {
     position: fixed;
     left: 0;
     right: 0;
-    z-index: 40;
+    z-index: 50;
     /* 确保主题一致性 */
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
