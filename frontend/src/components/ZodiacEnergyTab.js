@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
