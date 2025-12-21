@@ -61,10 +61,55 @@ const MayaPage = memo(() => {
   return (
     <div className="h-full bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
       {/* 玛雅历法顶部标题区域 */}
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 shadow-sm border-b border-amber-200 dark:border-amber-800">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-white">玛雅历法</h1>
-          <p className="text-sm text-amber-100 dark:text-amber-200 mt-1">探索古老的玛雅智慧</p>
+      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 shadow-sm border-b border-amber-200 dark:border-amber-800 relative overflow-hidden">
+        {/* 玛雅文化装饰元素 */}
+        <div className="absolute inset-0 opacity-10">
+          {/* 装饰性金字塔图案 */}
+          <div className="absolute top-2 right-4 w-16 h-16">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <polygon points="50,10 80,70 20,70" fill="white" />
+              <rect x="45" y="70" width="10" height="20" fill="white" />
+            </svg>
+          </div>
+          
+          {/* 装饰性太阳图案 */}
+          <div className="absolute top-3 left-4 w-12 h-12">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <circle cx="50" cy="50" r="30" fill="white" />
+              <circle cx="50" cy="50" r="15" fill="none" stroke="white" strokeWidth="5" />
+              <line x1="50" y1="10" x2="50" y2="20" stroke="white" strokeWidth="3" />
+              <line x1="50" y1="80" x2="50" y2="90" stroke="white" strokeWidth="3" />
+              <line x1="10" y1="50" x2="20" y2="50" stroke="white" strokeWidth="3" />
+              <line x1="80" y1="50" x2="90" y2="50" stroke="white" strokeWidth="3" />
+              <line x1="25" y1="25" x2="32" y2="32" stroke="white" strokeWidth="3" />
+              <line x1="75" y1="25" x2="68" y2="32" stroke="white" strokeWidth="3" />
+              <line x1="25" y1="75" x2="32" y2="68" stroke="white" strokeWidth="3" />
+              <line x1="75" y1="75" x2="68" y2="68" stroke="white" strokeWidth="3" />
+            </svg>
+          </div>
+          
+          {/* 装饰性羽蛇神图案 */}
+          <div className="absolute bottom-1 right-20 w-14 h-14">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <path d="M20,50 Q40,30 60,50 T100,50" fill="none" stroke="white" strokeWidth="2" />
+              <path d="M20,50 Q40,70 60,50 T100,50" fill="none" stroke="white" strokeWidth="2" />
+              <circle cx="20" cy="50" r="4" fill="white" />
+            </svg>
+          </div>
+        </div>
+        
+        <div className="container mx-auto px-4 py-4 relative z-10">
+          <div className="flex items-center justify-center mb-1">
+            <div className="w-8 h-8 mr-2 flex items-center justify-center">
+              <svg viewBox="0 0 100 100" className="w-6 h-6 text-white">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="8" />
+                <circle cx="50" cy="30" r="10" fill="currentColor" />
+                <path d="M30,70 Q50,90 70,70" fill="none" stroke="currentColor" strokeWidth="8" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-white">玛雅历法</h1>
+          </div>
+          <p className="text-sm text-amber-100 dark:text-amber-200 text-center">探索古老的玛雅智慧</p>
         </div>
       </div>
       
