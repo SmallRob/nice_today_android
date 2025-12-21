@@ -34,12 +34,14 @@
   min-height: 44px;
   min-width: 44px;
   padding: 12px 16px;
-  font-size: 16px; /* 防止iOS缩放 */
+  font-size: 16px;
+  /* 防止iOS缩放 */
 }
 
 /* 移动端输入框优化 */
 .mobile-input {
-  font-size: 16px; /* 防止iOS缩放 */
+  font-size: 16px;
+  /* 防止iOS缩放 */
   min-height: 44px;
 }
 
@@ -122,12 +124,15 @@
 
 /* 移动端滚动条隐藏 */
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
+  display: none;
+  /* Chrome, Safari and Opera */
 }
 
 /* 移动端图片优化 */
@@ -143,7 +148,7 @@
   backface-visibility: hidden;
   perspective: 1000px;
   will-change: transform, scroll-position;
-  -webkit-transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0, 0, 0);
   -webkit-backface-visibility: hidden;
   contain: layout style paint;
 }
@@ -238,7 +243,7 @@
   backface-visibility: hidden;
   will-change: scroll-position;
   contain: layout style paint;
-  -webkit-transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
 
 /* 虚拟滚动容器 */
@@ -269,6 +274,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -277,8 +283,8 @@
 
 /* 防止滚动闪烁 */
 .prevent-scroll-flicker {
-  -webkit-transform: translate3d(0,0,0);
-  transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 /* 固定定位优化 */
@@ -312,6 +318,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -345,37 +352,61 @@
 .taoist-wuxing-banner {
   position: relative;
   min-height: 120px;
-  background: linear-gradient(135deg, 
-    #4caf50 0%,    /* 木 - 青色 */
-    #f44336 25%,   /* 火 - 赤色 */
-    #ff9800 50%,   /* 土 - 黄色 */
-    #2196f3 75%,   /* 金 - 白色 */
-    #3f51b5 100%   /* 水 - 黑色 */
-  );
+  background: linear-gradient(135deg,
+      #4caf50 0%,
+      /* 木 - 青色 */
+      #f44336 25%,
+      /* 火 - 赤色 */
+      #ff9800 50%,
+      /* 土 - 黄色 */
+      #2196f3 75%,
+      /* 金 - 白色 */
+      #3f51b5 100%
+      /* 水 - 黑色 */
+    );
   background-size: 400% 400%;
   animation: wuxingFlow 8s ease-in-out infinite;
 }
 
 .wuxing-gradient {
-  background: linear-gradient(45deg, 
-    rgba(76, 175, 80, 0.3) 0%,    /* 木 */
-    rgba(244, 67, 54, 0.3) 20%,   /* 火 */
-    rgba(255, 152, 0, 0.3) 40%,   /* 土 */
-    rgba(33, 150, 243, 0.3) 60%,  /* 金 */
-    rgba(63, 81, 181, 0.3) 80%    /* 水 */
-  );
+  background: linear-gradient(45deg,
+      rgba(76, 175, 80, 0.3) 0%,
+      /* 木 */
+      rgba(244, 67, 54, 0.3) 20%,
+      /* 火 */
+      rgba(255, 152, 0, 0.3) 40%,
+      /* 土 */
+      rgba(33, 150, 243, 0.3) 60%,
+      /* 金 */
+      rgba(63, 81, 181, 0.3) 80%
+      /* 水 */
+    );
   background-size: 200% 200%;
   animation: gradientShift 6s ease infinite;
 }
 
 @keyframes wuxingFlow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes gradientShift {
-  0%, 100% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
+
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+
+  50% {
+    background-position: 100% 100%;
+  }
 }
 
 .taoist-title {
@@ -390,30 +421,57 @@
 }
 
 /* 五行色彩定义 */
-.bg-wood { background-color: #4caf50; }    /* 木 - 青色 */
-.bg-fire { background-color: #f44336; }    /* 火 - 赤色 */
-.bg-earth { background-color: #ff9800; }   /* 土 - 黄色 */
-.bg-metal { background-color: #2196f3; }   /* 金 - 白色 */
-.bg-water { background-color: #3f51b5; }   /* 水 - 黑色 */
+.bg-wood {
+  background-color: #4caf50;
+}
 
-.text-wood { color: #4caf50; }
-.text-fire { color: #f44336; }
-.text-earth { color: #ff9800; }
-.text-metal { color: #2196f3; }
-.text-water { color: #3f51b5; }
+/* 木 - 青色 */
+.bg-fire {
+  background-color: #f44336;
+}
+
+/* 火 - 赤色 */
+.bg-earth {
+  background-color: #ff9800;
+}
+
+/* 土 - 黄色 */
+.bg-metal {
+  background-color: #2196f3;
+}
+
+/* 金 - 白色 */
+.bg-water {
+  background-color: #3f51b5;
+}
+
+/* 水 - 黑色 */
+
+.text-wood {
+  color: #4caf50;
+}
+
+.text-fire {
+  color: #f44336;
+}
+
+.text-earth {
+  color: #ff9800;
+}
+
+.text-metal {
+  color: #2196f3;
+}
+
+.text-water {
+  color: #3f51b5;
+}
 
 /* 固定定位优化 - 确保banner和菜单栏固定 */
 .dress-health-fixed-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform;
-  contain: layout style paint;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+  background-color: var(--color-background);
+  width: 100%;
 }
 
 /* 滚动容器优化 - 确保仅内容区域滚动 */
@@ -423,7 +481,7 @@
   flex-direction: column;
 }
 
-.dress-health-scroll-container > .flex-1 {
+.dress-health-scroll-container>.flex-1 {
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -445,12 +503,12 @@
   .taoist-wuxing-banner {
     min-height: 100px;
   }
-  
+
   .taoist-title {
     font-size: 1.25rem;
     letter-spacing: 0.05em;
   }
-  
+
   .taoist-subtitle {
     font-size: 0.875rem;
   }
@@ -460,11 +518,11 @@
   .taoist-wuxing-banner {
     min-height: 90px;
   }
-  
+
   .taoist-title {
     font-size: 1.125rem;
   }
-  
+
   .taoist-subtitle {
     font-size: 0.75rem;
   }
@@ -472,11 +530,12 @@
 
 /* 性能优化：减少动画复杂度 */
 @media (prefers-reduced-motion: reduce) {
+
   .taoist-wuxing-banner,
   .wuxing-gradient {
     animation: none;
   }
-  
+
   .taoist-wuxing-banner {
     background: linear-gradient(135deg, #4caf50, #3f51b5);
   }
@@ -511,7 +570,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transition: left 0.5s ease;
 }
 
@@ -524,25 +583,52 @@
 }
 
 /* 五行色彩动态效果 */
-.text-wood { color: #4caf50; }
-.text-fire { color: #f44336; }
-.text-earth { color: #ff9800; }
-.text-metal { color: #2196f3; }
-.text-water { color: #3f51b5; }
+.text-wood {
+  color: #4caf50;
+}
 
-.bg-wood { background-color: #4caf50; }
-.bg-fire { background-color: #f44336; }
-.bg-earth { background-color: #ff9800; }
-.bg-metal { background-color: #2196f3; }
-.bg-water { background-color: #3f51b5; }
+.text-fire {
+  color: #f44336;
+}
+
+.text-earth {
+  color: #ff9800;
+}
+
+.text-metal {
+  color: #2196f3;
+}
+
+.text-water {
+  color: #3f51b5;
+}
+
+.bg-wood {
+  background-color: #4caf50;
+}
+
+.bg-fire {
+  background-color: #f44336;
+}
+
+.bg-earth {
+  background-color: #ff9800;
+}
+
+.bg-metal {
+  background-color: #2196f3;
+}
+
+.bg-water {
+  background-color: #3f51b5;
+}
 
 /* 内容区域滚动优化 */
 .taoist-content-scroll {
-  background: linear-gradient(180deg, 
-    rgba(255,255,255,0.95) 0%, 
-    rgba(248,250,252,0.9) 30%, 
-    rgba(241,245,249,0.85) 100%
-  ) !important;
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(248, 250, 252, 0.9) 30%,
+      rgba(241, 245, 249, 0.85) 100%) !important;
   border-radius: 0;
 }
 
@@ -631,11 +717,11 @@
     font-size: 1.25rem;
     letter-spacing: 0.05em;
   }
-  
+
   .horoscope-subtitle {
     font-size: 0.875rem;
   }
-  
+
   .horoscope-zodiac-selector {
     grid-template-columns: repeat(3, 1fr);
     gap: 6px;
@@ -647,17 +733,17 @@
   .horoscope-title {
     font-size: 1.125rem;
   }
-  
+
   .horoscope-subtitle {
     font-size: 0.75rem;
   }
-  
+
   .horoscope-zodiac-selector {
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
     padding: 8px;
   }
-  
+
   .horoscope-zodiac-button {
     min-height: 44px;
     font-size: 0.875rem;
@@ -670,17 +756,16 @@
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
   }
-  
+
   .taoist-tab-button {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
   }
-  
+
   .taoist-content-scroll {
-    background: linear-gradient(180deg, 
-      rgba(255,255,255,0.98) 0%, 
-      rgba(248,250,252,0.95) 100%
-    ) !important;
+    background: linear-gradient(180deg,
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(248, 250, 252, 0.95) 100%) !important;
   }
 }
 

@@ -59,7 +59,7 @@ const zodiacEnergyConfigManager = new ZodiacEnergyConfigManager();
 const ZodiacEnergyTab = () => {
   // 使用主题管理
   const { theme, configManager: themeConfigManager } = useTheme();
-  
+
   // 状态管理
   const [userZodiac, setUserZodiac] = useState('');
   const [energyGuidance, setEnergyGuidance] = useState(null);
@@ -79,11 +79,11 @@ const ZodiacEnergyTab = () => {
 
   // 五行元素数据 - 使用useMemo缓存，避免重复创建
   const wuxingElements = React.useMemo(() => [
-    { 
-      name: '木', 
-      color: '#11998e', 
-      bgGradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', 
-      icon: '🌳', 
+    {
+      name: '木',
+      color: '#11998e',
+      bgGradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+      icon: '🌳',
       traits: '生长、向上',
       quickBoost: {
         method: '绿植触碰法',
@@ -95,11 +95,11 @@ const ZodiacEnergyTab = () => {
       timeSlot: '卯时（5-7点）',
       breathingMethod: '清凉呼吸法，清肺排浊，缓解春困秋燥'
     },
-    { 
-      name: '火', 
-      color: '#fc4a1a', 
-      bgGradient: 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)', 
-      icon: '🔥', 
+    {
+      name: '火',
+      color: '#fc4a1a',
+      bgGradient: 'linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%)',
+      icon: '🔥',
       traits: '温热、向上',
       quickBoost: {
         method: '晒太阳法',
@@ -111,11 +111,11 @@ const ZodiacEnergyTab = () => {
       timeSlot: '午时（11-13点）',
       breathingMethod: '蜂鸣调息法，降心火，缓解焦虑失眠'
     },
-    { 
-      name: '土', 
-      color: '#f7b733', 
-      bgGradient: 'linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%)', 
-      icon: '⛰', 
+    {
+      name: '土',
+      color: '#f7b733',
+      bgGradient: 'linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%)',
+      icon: '⛰',
       traits: '承载、中和',
       quickBoost: {
         method: '赤脚接地法',
@@ -127,11 +127,11 @@ const ZodiacEnergyTab = () => {
       timeSlot: '亥时（21-23点）',
       breathingMethod: '乌加依呼吸，固肾强腰，促进肾经流动'
     },
-    { 
-      name: '金', 
-      color: '#667db6', 
-      bgGradient: 'linear-gradient(135deg, #667db6 0%, #0082c8 100%)', 
-      icon: '⚙️', 
+    {
+      name: '金',
+      color: '#667db6',
+      bgGradient: 'linear-gradient(135deg, #667db6 0%, #0082c8 100%)',
+      icon: '⚙️',
       traits: '收敛、肃杀',
       quickBoost: {
         method: '金属摩擦法',
@@ -143,11 +143,11 @@ const ZodiacEnergyTab = () => {
       timeSlot: '卯时（5-7点）',
       breathingMethod: '清凉呼吸法，清肺排浊，缓解春困秋燥'
     },
-    { 
-      name: '水', 
-      color: '#2193b0', 
-      bgGradient: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)', 
-      icon: '💧', 
+    {
+      name: '水',
+      color: '#2193b0',
+      bgGradient: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)',
+      icon: '💧',
       traits: '滋润、向下',
       quickBoost: {
         method: '冷水敷腕法',
@@ -174,7 +174,7 @@ const ZodiacEnergyTab = () => {
     // 生肖计算规则：(年份 - 4) % 12
     const index = (year - 4) % 12;
     const zodiac = zodiacs[index];
-    
+
     if (zodiac) {
       setUserZodiac(zodiac);
     }
@@ -190,21 +190,21 @@ const ZodiacEnergyTab = () => {
     try {
       // 创建模拟数据
       const todayElement = wuxingElements[Math.floor(Math.random() * wuxingElements.length)];
-      
+
       // 根据生肖确定用户五行
       const zodiacElementMap = {
-        '鼠': '水', '牛': '土', '虎': '木', '兔': '木', 
-        '龙': '土', '蛇': '火', '马': '火', '羊': '土', 
+        '鼠': '水', '牛': '土', '虎': '木', '兔': '木',
+        '龙': '土', '蛇': '火', '马': '火', '羊': '土',
         '猴': '金', '鸡': '金', '狗': '土', '猪': '水'
       };
-      
+
       const userElement = zodiacElementMap[userZodiac] || '土';
       const userElementData = wuxingElements.find(el => el.name === userElement);
-      
+
       // 计算匹配度
       let matchScore = 50;
       let relation = '中性';
-      
+
       if (userElement === todayElement.name) {
         matchScore = 85;
         relation = '本日';
@@ -216,7 +216,7 @@ const ZodiacEnergyTab = () => {
         const overcomeMap = {
           '木': '土', '土': '水', '水': '火', '火': '金', '金': '木'
         };
-        
+
         if (generateMap[userElement] === todayElement.name) {
           matchScore = 75;
           relation = '相生';
@@ -231,7 +231,7 @@ const ZodiacEnergyTab = () => {
           relation = '被克';
         }
       }
-      
+
       const mockData = {
         energyMatch: {
           匹配度: matchScore,
@@ -241,61 +241,61 @@ const ZodiacEnergyTab = () => {
           当日五行: todayElement.name
         },
         生活建议: {
-          幸运颜色: userElementData.name === '木' ? ['绿色', '青色'] : 
-                   userElementData.name === '火' ? ['红色', '紫色'] :
-                   userElementData.name === '土' ? ['黄色', '棕色'] :
-                   userElementData.name === '金' ? ['白色', '银色'] : ['蓝色', '黑色'],
-          适合饰品: userElementData.name === '木' ? ['木质饰品', '绿色水晶'] : 
-                   userElementData.name === '火' ? ['红宝石', '玛瑙'] :
-                   userElementData.name === '土' ? ['玉石', '黄水晶'] :
-                   userElementData.name === '金' ? ['黄金', '白金首饰'] : ['水晶', '珍珠'],
-          适合行业: userElementData.name === '木' ? ['教育', '文化', '林业'] : 
-                   userElementData.name === '火' ? ['能源', '传媒', '表演'] :
-                   userElementData.name === '土' ? ['房地产', '建筑', '农业'] :
-                   userElementData.name === '金' ? ['金融', '机械', '珠宝'] : ['贸易', '航运', '旅游'],
-          幸运方位: userElementData.name === '木' ? ['正东', '东北方'] : 
-                   userElementData.name === '火' ? ['正南', '东南方'] :
-                   userElementData.name === '土' ? ['东北', '西南方'] :
-                   userElementData.name === '金' ? ['正西', '西北方'] : ['正北', '西北方'],
+          幸运颜色: userElementData.name === '木' ? ['绿色', '青色'] :
+            userElementData.name === '火' ? ['红色', '紫色'] :
+              userElementData.name === '土' ? ['黄色', '棕色'] :
+                userElementData.name === '金' ? ['白色', '银色'] : ['蓝色', '黑色'],
+          适合饰品: userElementData.name === '木' ? ['木质饰品', '绿色水晶'] :
+            userElementData.name === '火' ? ['红宝石', '玛瑙'] :
+              userElementData.name === '土' ? ['玉石', '黄水晶'] :
+                userElementData.name === '金' ? ['黄金', '白金首饰'] : ['水晶', '珍珠'],
+          适合行业: userElementData.name === '木' ? ['教育', '文化', '林业'] :
+            userElementData.name === '火' ? ['能源', '传媒', '表演'] :
+              userElementData.name === '土' ? ['房地产', '建筑', '农业'] :
+                userElementData.name === '金' ? ['金融', '机械', '珠宝'] : ['贸易', '航运', '旅游'],
+          幸运方位: userElementData.name === '木' ? ['正东', '东北方'] :
+            userElementData.name === '火' ? ['正南', '东南方'] :
+              userElementData.name === '土' ? ['东北', '西南方'] :
+                userElementData.name === '金' ? ['正西', '西北方'] : ['正北', '西北方'],
           能量提升: userElementData.quickBoost.description
         },
         饮食调理: {
-          宜: userElementData.name === '木' ? ['绿色蔬菜', '酸味食物', '新鲜水果'] : 
-              userElementData.name === '火' ? ['红色食物', '苦味食物', '辛辣食物'] :
+          宜: userElementData.name === '木' ? ['绿色蔬菜', '酸味食物', '新鲜水果'] :
+            userElementData.name === '火' ? ['红色食物', '苦味食物', '辛辣食物'] :
               userElementData.name === '土' ? ['黄色食物', '甘味食物', '温性食物'] :
-              userElementData.name === '金' ? ['白色食物', '辛味食物', '润肺食物'] : ['黑色食物', '咸味食物', '补肾食物'],
-          忌: userElementData.name === '木' ? ['过度油腻', '辛辣刺激'] : 
-              userElementData.name === '火' ? ['过度燥热', '油腻食物'] :
+                userElementData.name === '金' ? ['白色食物', '辛味食物', '润肺食物'] : ['黑色食物', '咸味食物', '补肾食物'],
+          忌: userElementData.name === '木' ? ['过度油腻', '辛辣刺激'] :
+            userElementData.name === '火' ? ['过度燥热', '油腻食物'] :
               userElementData.name === '土' ? ['生冷食物', '过度甜腻'] :
-              userElementData.name === '金' ? ['过度辛辣', '干燥食物'] : ['过度咸', '生冷食物']
+                userElementData.name === '金' ? ['过度辛辣', '干燥食物'] : ['过度咸', '生冷食物']
         },
         家居风水: {
-          家居布置: userElementData.name === '木' ? ['绿植', '木质家具', '花卉'] : 
-                    userElementData.name === '火' ? ['红色装饰', '暖色灯光', '蜡烛'] :
-                    userElementData.name === '土' ? ['陶瓷工艺品', '大地色系装饰', '黄色物件'] :
-                    userElementData.name === '金' ? ['金属制品', '白色装饰', '水晶'] : ['鱼缸', '水景装饰', '蓝色物件'],
-          摆放位置: userElementData.name === '木' ? ['东方', '东南方'] : 
-                    userElementData.name === '火' ? ['南方', '东南方'] :
-                    userElementData.name === '土' ? ['中央', '西南方', '东北方'] :
-                    userElementData.name === '金' ? ['西方', '西北方'] : ['北方', '西方'],
+          家居布置: userElementData.name === '木' ? ['绿植', '木质家具', '花卉'] :
+            userElementData.name === '火' ? ['红色装饰', '暖色灯光', '蜡烛'] :
+              userElementData.name === '土' ? ['陶瓷工艺品', '大地色系装饰', '黄色物件'] :
+                userElementData.name === '金' ? ['金属制品', '白色装饰', '水晶'] : ['鱼缸', '水景装饰', '蓝色物件'],
+          摆放位置: userElementData.name === '木' ? ['东方', '东南方'] :
+            userElementData.name === '火' ? ['南方', '东南方'] :
+              userElementData.name === '土' ? ['中央', '西南方', '东北方'] :
+                userElementData.name === '金' ? ['西方', '西北方'] : ['北方', '西方'],
           建议: `${userElementData.name}元素宜${userElementData.quickBoost.secondDescription}`
         },
         人际关系: {
-          适合交往的五行: userElementData.name === '木' ? ['火', '水'] : 
-                         userElementData.name === '火' ? ['土', '木'] :
-                         userElementData.name === '土' ? ['金', '火'] :
-                         userElementData.name === '金' ? ['水', '土'] : ['木', '金'],
-          适合交往的生肖: userElementData.name === '木' ? ['蛇', '马', '鼠', '猪'] : 
-                           userElementData.name === '火' ? ['牛', '龙', '羊', '狗'] :
-                           userElementData.name === '土' ? ['猴', '鸡', '蛇', '马'] :
-                           userElementData.name === '金' ? ['鼠', '猪', '牛', '龙'] : ['虎', '兔', '猴', '鸡'],
-          建议: `与${userElementData.name === '木' ? '火、水' : 
-                   userElementData.name === '火' ? '土、木' :
-                   userElementData.name === '土' ? '金、火' :
-                   userElementData.name === '金' ? '水、土' : '木、金'}五行的人相处最为和谐`
+          适合交往的五行: userElementData.name === '木' ? ['火', '水'] :
+            userElementData.name === '火' ? ['土', '木'] :
+              userElementData.name === '土' ? ['金', '火'] :
+                userElementData.name === '金' ? ['水', '土'] : ['木', '金'],
+          适合交往的生肖: userElementData.name === '木' ? ['蛇', '马', '鼠', '猪'] :
+            userElementData.name === '火' ? ['牛', '龙', '羊', '狗'] :
+              userElementData.name === '土' ? ['猴', '鸡', '蛇', '马'] :
+                userElementData.name === '金' ? ['鼠', '猪', '牛', '龙'] : ['虎', '兔', '猴', '鸡'],
+          建议: `与${userElementData.name === '木' ? '火、水' :
+            userElementData.name === '火' ? '土、木' :
+              userElementData.name === '土' ? '金、火' :
+                userElementData.name === '金' ? '水、土' : '木、金'}五行的人相处最为和谐`
         }
       };
-      
+
       setEnergyGuidance(mockData);
     } catch (error) {
       console.error('加载能量指引失败:', error);
@@ -308,19 +308,19 @@ const ZodiacEnergyTab = () => {
   // 初始化组件 - 优化为立即加载默认数据
   useEffect(() => {
     let isMounted = true;
-    const removeListener = () => {};
-    
+    const removeListener = () => { };
+
     const initialize = async () => {
       try {
         // 立即加载所有生肖，不等待
         await loadAllZodiacs();
-        
+
         if (!isMounted) return;
-        
+
         // 设置默认生肖为"鼠"，确保有数据可显示
         setUserZodiac('鼠');
         setTempZodiac('');
-        
+
         // 异步获取用户配置，但不阻塞界面
         setTimeout(async () => {
           try {
@@ -328,12 +328,12 @@ const ZodiacEnergyTab = () => {
             if (!userConfigManager.initialized) {
               await userConfigManager.initialize();
             }
-            
+
             // 获取用户配置
             const currentConfig = userConfigManager.getCurrentConfig();
             if (currentConfig && isMounted) {
               setUserInfo(currentConfig);
-              
+
               // 如果用户有配置的生肖，则更新显示
               if (currentConfig.zodiacAnimal && currentConfig.zodiacAnimal !== '鼠') {
                 setUserZodiac(currentConfig.zodiacAnimal);
@@ -352,40 +352,40 @@ const ZodiacEnergyTab = () => {
                 }
               }
             }
-            
+
             // 添加配置变更监听器
             const removeConfigListener = userConfigManager.addListener((configData) => {
               if (isMounted && configData.currentConfig) {
                 setUserInfo(configData.currentConfig);
-                
+
                 // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
-                if (configData.currentConfig.zodiacAnimal && 
-                    configData.currentConfig.zodiacAnimal !== userZodiac &&
-                    !tempZodiac) { // 仅在没有临时生肖时更新
+                if (configData.currentConfig.zodiacAnimal &&
+                  configData.currentConfig.zodiacAnimal !== userZodiac &&
+                  !tempZodiac) { // 仅在没有临时生肖时更新
                   setUserZodiac(configData.currentConfig.zodiacAnimal);
                   // 强制重新加载数据（包括配置切换和强制重载）
                   setDataLoaded(false);
                 }
-                
+
                 // 如果收到强制重载标志，确保重新加载数据
                 if (configData.forceReload) {
                   setDataLoaded(false);
                 }
               }
             });
-            
+
             removeListener.current = removeConfigListener;
           } catch (error) {
             console.warn('异步加载用户配置失败:', error);
           }
         }, 50); // 短延迟，确保界面先显示
-        
+
         if (isMounted) {
           setInitialized(true);
         }
       } catch (error) {
         console.error('初始化生肖能量组件失败:', error);
-        
+
         // 降级处理：使用默认逻辑
         await loadAllZodiacs();
         setUserZodiac('鼠');
@@ -395,9 +395,9 @@ const ZodiacEnergyTab = () => {
         }
       }
     };
-    
+
     initialize();
-    
+
     return () => {
       isMounted = false;
       if (removeListener.current) {
@@ -409,14 +409,14 @@ const ZodiacEnergyTab = () => {
   // 当生肖或日期变化时重新加载数据 - 优化加载逻辑
   useEffect(() => {
     if (!userZodiac || !initialized) return;
-    
+
     // 仅在首次默认加载或用户主动切换时执行数据请求
     if (!dataLoaded) {
       const timer = setTimeout(() => {
         loadEnergyGuidance();
         setDataLoaded(true);
       }, 200);
-      
+
       return () => clearTimeout(timer);
     }
   }, [userZodiac, selectedDate, loadEnergyGuidance, initialized, dataLoaded, userInfo.zodiacAnimal, tempZodiac]);
@@ -440,7 +440,7 @@ const ZodiacEnergyTab = () => {
         // 否则设置为临时生肖
         setTempZodiac(zodiac);
       }
-      
+
       setUserZodiac(zodiac);
       // 标记需要重新加载数据
       setDataLoaded(false);
@@ -468,7 +468,7 @@ const ZodiacEnergyTab = () => {
 
     const { 匹配度, 关系, 描述, 用户五行, 当日五行 } = energyGuidance.energyMatch;
     const elementData = wuxingElements.find(el => el.name === 当日五行);
-    
+
     // 根据匹配度设置颜色
     let colorClass = 'text-green-500';
     if (匹配度 < 40) colorClass = 'text-red-500';
@@ -505,7 +505,7 @@ const ZodiacEnergyTab = () => {
               </text>
             </svg>
           </div>
-          
+
           <div className="text-center md:text-left">
             <div className="flex items-center mb-2">
               <span className="text-xl mr-2">{elementData?.icon}</span>
@@ -532,49 +532,49 @@ const ZodiacEnergyTab = () => {
   // 渲染五行能量卡片
   const renderWuxingEnergyCard = () => {
     if (!energyGuidance?.energyMatch) return null;
-    
+
     const { 当日五行 } = energyGuidance.energyMatch;
     const elementData = wuxingElements.find(el => el.name === 当日五行);
-    
+
     if (!elementData) return null;
-    
+
     // 根据主题设置渐变背景
     const getGradientClass = (baseColors) => {
-      return theme === 'dark' 
-        ? 'dark:from-gray-700 dark:to-gray-600' 
+      return theme === 'dark'
+        ? 'dark:from-gray-700 dark:to-gray-600'
         : `from-${baseColors.from} to-${baseColors.to}`;
     };
-    
+
     return (
       <Card title={`${elementData.name}元素能量提升`} className="mb-4">
         <div className="space-y-3">
           {/* 快速能量提升方法 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className={`bg-gradient-to-r ${getGradientClass({from: 'blue-50', to: 'indigo-50'})} rounded p-3`}>
+            <div className={`bg-gradient-to-r ${getGradientClass({ from: 'blue-50', to: 'indigo-50' })} rounded p-3`}>
               <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
                 <span className="mr-2">⚡</span> {elementData.quickBoost.method}
               </h4>
               <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.description}</p>
             </div>
-            
-            <div className={`bg-gradient-to-r ${getGradientClass({from: 'purple-50', to: 'pink-50'})} rounded p-3`}>
+
+            <div className={`bg-gradient-to-r ${getGradientClass({ from: 'purple-50', to: 'pink-50' })} rounded p-3`}>
               <h4 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2 flex items-center">
                 <span className="mr-2">🌟</span> {elementData.quickBoost.secondMethod}
               </h4>
               <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.secondDescription}</p>
             </div>
           </div>
-          
+
           {/* 五行养生运动 */}
-          <div className={`bg-gradient-to-r ${getGradientClass({from: 'green-50', to: 'emerald-50'})} rounded p-3`}>
+          <div className={`bg-gradient-to-r ${getGradientClass({ from: 'green-50', to: 'emerald-50' })} rounded p-3`}>
             <h4 className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">
               <span className="mr-2">🏃</span> {elementData.name}行运动
             </h4>
             <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.exercise}</p>
           </div>
-          
+
           {/* 呼吸调息法 */}
-          <div className={`bg-gradient-to-r ${getGradientClass({from: 'orange-50', to: 'amber-50'})} rounded p-3`}>
+          <div className={`bg-gradient-to-r ${getGradientClass({ from: 'orange-50', to: 'amber-50' })} rounded p-3`}>
             <h4 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center">
               <span className="mr-2">🫁</span> {elementData.timeSlot} 呼吸调息
             </h4>
@@ -647,21 +647,24 @@ const ZodiacEnergyTab = () => {
 
     return (
       <Card title="饮食调理建议" className="mb-4">
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* 左侧：宜食食物 */}
-          <div className="flex-1">
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 rounded-lg p-4 border border-green-200 dark:border-green-700 shadow-sm">
-              <div className="flex items-center justify-center mb-4">
-                <div className="bg-green-100 dark:bg-green-800 w-8 h-8 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-green-600 dark:text-green-300">✅</span>
+          <div className="h-full">
+            <div className="h-full bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-xl p-4 border border-green-200 dark:border-green-800 shadow-sm">
+              <div className="flex items-center mb-3">
+                <div className="bg-green-100 dark:bg-green-900/50 w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <span className="text-green-600 dark:text-green-400">✅</span>
                 </div>
-                <h4 className="text-sm font-semibold text-green-700 dark:text-green-300">宜食食物</h4>
+                <div>
+                  <h4 className="text-sm font-bold text-green-800 dark:text-green-300">宜食食物</h4>
+                  <p className="text-[10px] text-green-600 dark:text-green-500 opacity-80">推荐增加摄入的类别</p>
+                </div>
               </div>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-2">
                 {宜.map((food, index) => (
-                  <div key={index} className="flex items-center bg-white dark:bg-gray-800 p-3 rounded-lg border border-green-100 dark:border-green-800 shadow-sm transition-all duration-200 hover:shadow-md">
-                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3 flex-shrink-0"></span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">{food}</span>
+                  <div key={index} className="flex items-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2.5 rounded-lg border border-green-100 dark:border-green-800/50 transition-all hover:translate-x-1">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2.5 flex-shrink-0"></span>
+                    <span className="text-xs text-gray-700 dark:text-gray-200 font-medium">{food}</span>
                   </div>
                 ))}
               </div>
@@ -669,26 +672,29 @@ const ZodiacEnergyTab = () => {
           </div>
 
           {/* 右侧：忌食食物 */}
-          <div className="flex-1">
-            <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900 dark:to-pink-900 rounded-lg p-4 border border-red-200 dark:border-red-700 shadow-sm">
-              <div className="flex items-center justify-center mb-4">
-                <div className="bg-red-100 dark:bg-red-800 w-8 h-8 rounded-full flex items-center justify-center mr-2">
-                  <span className="text-red-600 dark:text-red-300">❌</span>
+          <div className="h-full">
+            <div className="h-full bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950 dark:to-pink-950 rounded-xl p-4 border border-red-200 dark:border-red-800 shadow-sm">
+              <div className="flex items-center mb-3">
+                <div className="bg-red-100 dark:bg-red-900/50 w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <span className="text-red-600 dark:text-red-400">❌</span>
                 </div>
-                <h4 className="text-sm font-semibold text-red-700 dark:text-red-300">忌食食物</h4>
+                <div>
+                  <h4 className="text-sm font-bold text-red-800 dark:text-red-300">忌食食物</h4>
+                  <p className="text-[10px] text-red-600 dark:text-red-500 opacity-80">建议暂时避免摄入</p>
+                </div>
               </div>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-2">
                 {忌.map((food, index) => (
-                  <div key={index} className="flex items-center bg-white dark:bg-gray-800 p-3 rounded-lg border border-red-100 dark:border-red-800 shadow-sm transition-all duration-200 hover:shadow-md">
-                    <span className="w-2 h-2 bg-red-500 rounded-full mr-3 flex-shrink-0"></span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">{food}</span>
+                  <div key={index} className="flex items-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2.5 rounded-lg border border-red-100 dark:border-red-800/50 transition-all hover:translate-x-1">
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2.5 flex-shrink-0"></span>
+                    <span className="text-xs text-gray-700 dark:text-gray-200 font-medium">{food}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
         </div>
-        
+
         {/* 底部建议说明 */}
         <div className="mt-4 text-center">
           <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
@@ -799,36 +805,36 @@ const ZodiacEnergyTab = () => {
       const energyScores = [];
       const wealthScores = [];
       const careerScores = [];
-      
+
       for (let i = 6; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
         dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
-        
+
         // 基础能量分数（基于生肖和日期计算）
         const baseScore = 50 + (userZodiac.charCodeAt(0) % 20);
         const dayFactor = (date.getDay() + 1) * 5;
         const variation = Math.floor(Math.random() * 20) - 10;
         const energyScore = Math.max(20, Math.min(95, baseScore + dayFactor + variation));
-        
+
         // 财运分数（基于能量分数但有一定偏差）
         const wealthVariation = Math.floor(Math.random() * 25) - 12;
         const wealthScore = Math.max(15, Math.min(90, energyScore + wealthVariation));
-        
+
         // 事业分数（基于能量分数但有一定偏差）
         const careerVariation = Math.floor(Math.random() * 30) - 15;
         const careerScore = Math.max(10, Math.min(85, energyScore + careerVariation));
-        
+
         energyScores.push(energyScore);
         wealthScores.push(wealthScore);
         careerScores.push(careerScore);
       }
-      
+
       return { dates, energyScores, wealthScores, careerScores };
     };
-    
+
     const { dates, energyScores, wealthScores, careerScores } = generateWeeklyData();
-    
+
     // 图表配置
     const chartData = {
       labels: dates,
@@ -876,7 +882,7 @@ const ZodiacEnergyTab = () => {
         }
       ]
     };
-    
+
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
@@ -907,7 +913,7 @@ const ZodiacEnergyTab = () => {
           cornerRadius: 6,
           displayColors: true,
           callbacks: {
-            label: function(context) {
+            label: function (context) {
               let label = context.dataset.label || '';
               if (label) {
                 label += ': ';
@@ -943,14 +949,14 @@ const ZodiacEnergyTab = () => {
             font: {
               size: 11,
             },
-            callback: function(value) {
+            callback: function (value) {
               return value + '%';
             }
           }
         }
       }
     };
-    
+
     return (
       <Card title="近7日能量趋势分析" className="mb-4">
         <div className="h-80">
@@ -993,24 +999,45 @@ const ZodiacEnergyTab = () => {
         <div className="space-y-4">
           <div>
             {/* 当前用户信息 */}
-            {userInfo.zodiacAnimal && (
-              <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
-                <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">
-                  您的生肖类型：<span className="font-bold text-lg">{userInfo.zodiacAnimal}</span>
+            {(userInfo.zodiacAnimal || tempZodiac) && (
+              <div className="mb-4 p-4 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50 shadow-sm backdrop-blur-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-3">
+                      <span className="text-xl">🧬</span>
+                    </div>
+                    <div>
+                      <p className="text-blue-800 dark:text-blue-300 text-sm font-semibold">
+                        {userInfo.zodiacAnimal ? (
+                          <>我的生肖：<span className="text-lg font-black text-blue-600 dark:text-blue-400">{userInfo.zodiacAnimal}</span></>
+                        ) : (
+                          <span className="text-gray-500 dark:text-gray-400">尚未配置个人生肖</span>
+                        )}
+                      </p>
+                      {tempZodiac && tempZodiac !== userInfo.zodiacAnimal && (
+                        <p className="text-[10px] text-orange-600 dark:text-orange-400 font-medium">
+                          🔔 当前正在预览测试生肖能量
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
                   {tempZodiac && tempZodiac !== userInfo.zodiacAnimal && (
-                    <span className="ml-2 text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded-full">
-                      当前查看：{tempZodiac}
-                    </span>
+                    <div className="flex items-center bg-orange-100/80 dark:bg-orange-900/40 px-3 py-1.5 rounded-full border border-orange-200 dark:border-orange-800/50">
+                      <span className="text-xs font-bold text-orange-700 dark:text-orange-300">
+                        当前查看：{tempZodiac}
+                      </span>
+                    </div>
                   )}
-                </p>
+                </div>
               </div>
             )}
-            
+
             {/* 提示文本 */}
             <div className="mb-3 text-sm text-gray-600 dark:text-gray-400 text-center bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
               ✨ 点击任意生肖图标查看能量指引，临时查看不会保存配置
             </div>
-            
+
             {/* 炫彩生肖选择器 */}
             <div className="mb-4">
               <ChineseZodiacSelector
@@ -1022,7 +1049,7 @@ const ZodiacEnergyTab = () => {
                 className="chinese-zodiac-selector-energy"
               />
             </div>
-            
+
             {/* 日期选择器 */}
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1039,15 +1066,15 @@ const ZodiacEnergyTab = () => {
               />
             </div>
           </div>
-          
+
           {/* 重置按钮 */}
           {tempZodiac && tempZodiac !== userInfo.zodiacAnimal && (
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-2">
               <button
                 onClick={resetToDefaultZodiac}
-                className="text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-md hover:shadow-lg"
+                className="flex items-center gap-2 text-sm font-bold bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 px-6 py-2.5 rounded-full border-2 border-blue-100 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 shadow-sm hover:shadow-md active:scale-95"
               >
-                🔄 返回您的配置 ({userInfo.zodiacAnimal || '鼠'})
+                <span>🔄</span> 返回您的生肖 {userInfo.zodiacAnimal && `(${userInfo.zodiacAnimal})`}
               </button>
             </div>
           )}
@@ -1060,7 +1087,7 @@ const ZodiacEnergyTab = () => {
     <div className="space-y-3">
       {/* 生肖选择器 */}
       {renderZodiacSelector()}
-      
+
       {/* 加载状态 */}
       {loading && (
         <Card>
@@ -1085,18 +1112,18 @@ const ZodiacEnergyTab = () => {
         <div className="space-y-3">
           {/* 能量匹配度仪表板 */}
           {renderEnergyMatchDashboard()}
-          
+
           {/* 五行能量提升卡片 */}
           {renderWuxingEnergyCard()}
+
+          {/* 能量趋势图 */}
+          {renderEnergyTrendChart()}
 
           {/* 分类建议卡片 */}
           {renderLifestyleCard()}
           {renderFoodCard()}
           {renderFengshuiCard()}
           {renderRelationshipCard()}
-
-          {/* 能量趋势图 */}
-          {renderEnergyTrendChart()}
 
           {/* 底部信息 */}
           <Card>

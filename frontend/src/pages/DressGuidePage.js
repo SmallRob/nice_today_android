@@ -3,8 +3,8 @@ import DressHealthTab from '../components/DressHealthTab';
 
 function DressGuidePage() {
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900 dress-health-scroll-container">
-      <DressHealthTab 
+    <div className="h-full bg-gray-50 dark:bg-gray-900">
+      <DressHealthTab
         apiBaseUrl={null}
         serviceStatus={null}
         isDesktop={false}

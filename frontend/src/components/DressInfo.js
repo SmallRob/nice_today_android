@@ -15,7 +15,7 @@ const WuxingEnergyTrend = ({ dailyElement }) => {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-      <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-900 dark:text-gray-100">
+      <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-900 dark:text-white">
         <IconLibrary.Icon name="energy" size={20} className="mr-2 text-yellow-500" />
         五行能量趋势与关系
       </h3>
@@ -40,7 +40,7 @@ const WuxingEnergyTrend = ({ dailyElement }) => {
           })}
           {/* 中心说明 */}
           <div className="absolute inset-0 flex flex-center items-center justify-center">
-            <div className="text-[10px] text-gray-400 dark:text-gray-500 text-center leading-tight">
+            <div className="text-[10px] text-gray-400 dark:text-gray-400 text-center leading-tight">
               相生相克<br />能量流动
             </div>
           </div>
@@ -53,27 +53,27 @@ const WuxingEnergyTrend = ({ dailyElement }) => {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
-          <p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1 flex items-center">
+          <p className="text-xs font-semibold text-blue-800 dark:text-blue-200 mb-1 flex items-center">
             <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>
             能量相生 (生)
           </p>
-          <p className="text-[11px] text-blue-700 dark:text-blue-200">
+          <p className="text-[11px] text-blue-700 dark:text-blue-100">
             {dailyElement}生{current.generates}，{current.generatedBy}生{dailyElement}。相生如母子，助力能量稳步提升。
           </p>
         </div>
         <div className="bg-orange-50 dark:bg-orange-900/30 p-3 rounded-lg border border-orange-100 dark:border-orange-800">
-          <p className="text-xs font-semibold text-orange-800 dark:text-orange-300 mb-1 flex items-center">
+          <p className="text-xs font-semibold text-orange-800 dark:text-orange-200 mb-1 flex items-center">
             <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-1.5"></span>
             能量相克 (克)
           </p>
-          <p className="text-[11px] text-orange-700 dark:text-orange-200">
+          <p className="text-[11px] text-orange-700 dark:text-orange-100">
             {dailyElement}克{current.restricts}，{current.restrictedBy}克{dailyElement}。相克如制约，平衡过旺或过弱的能量。
           </p>
         </div>
       </div>
 
-      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed">
-        <strong className="text-gray-800 dark:text-gray-100">逻辑说明：</strong>
+      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-[11px] text-gray-600 dark:text-gray-200 leading-relaxed">
+        <strong className="text-gray-800 dark:text-white">逻辑说明：</strong>
         五行本无好坏，重在平衡。今日「{dailyElement}」气旺，穿着「{current.generatedBy}」或「{dailyElement}」色系可顺应天时；若感压力大，可尝试「{current.restricts}」色系以泄化平衡。
       </div>
     </div>
@@ -161,7 +161,7 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
     let className = "flex flex-col items-center justify-center cursor-pointer transition-all duration-300 py-2 border-r last:border-r-0 dark:border-gray-700 ";
     if (isSelected) className += "bg-indigo-600 text-white font-bold scale-100 shadow-inner ";
     else if (isToday) className += "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-b-2 border-indigo-500 ";
-    else className += "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 ";
+    else className += "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-300 ";
     return className;
   }, [selectedDressInfo]);
 
@@ -271,15 +271,15 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{colorItem.颜色系统}</span>
-                    <span className="text-[10px] bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">宜</span>
+                    <span className="text-sm font-bold text-gray-800 dark:text-white">{colorItem.颜色系统}</span>
+                    <span className="text-[10px] bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-200 px-2 py-0.5 rounded-full">宜</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-2">
                     {colorItem.具体颜色.map((c, ci) => (
-                      <span key={ci} className="text-[11px] px-2 py-0.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-gray-600 dark:text-gray-300 shadow-sm">{c}</span>
+                      <span key={ci} className="text-[11px] px-2 py-0.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-gray-600 dark:text-gray-200 shadow-sm">{c}</span>
                     ))}
                   </div>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight">{colorItem.描述}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-300 leading-tight">{colorItem.描述}</p>
                 </div>
               </div>
             ))}
@@ -297,7 +297,7 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
               {unluckyColors.map((colorItem, i) => (
                 <div key={i} className="flex items-center space-x-2 p-2 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-100 dark:border-red-800/30">
                   <div className={`w-4 h-4 rounded-full ${getColorHex(colorItem.颜色系统)}`}></div>
-                  <span className="text-xs text-red-800 dark:text-red-300">{colorItem.颜色系统}</span>
+                  <span className="text-xs text-red-800 dark:text-red-200">{colorItem.颜色系统}</span>
                 </div>
               ))}
             </div>
@@ -306,7 +306,7 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
 
         {/* 饮食养生 - 左右并列 */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-          <h3 className="text-base font-bold mb-4 flex items-center text-gray-900 dark:text-gray-100">
+          <h3 className="text-base font-bold mb-4 flex items-center text-gray-900 dark:text-white">
             <IconLibrary.Icon name="food" size={18} className="mr-2 text-orange-500" />
             饮食宜忌指南
           </h3>
@@ -314,22 +314,22 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
             <div className="flex-1 bg-green-50/50 dark:bg-green-900/10 p-3 rounded-xl border border-green-100/50 dark:border-green-800/30">
               <div className="flex items-center mb-3">
                 <IconLibrary.Icon name="success" size={14} className="text-green-500 mr-1.5" />
-                <span className="text-xs font-bold text-green-800 dark:text-green-300">宜食清补</span>
+                <span className="text-xs font-bold text-green-800 dark:text-green-200">宜食清补</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {selectedDressInfo.food_suggestions?.宜.map((f, i) => (
-                  <span key={i} className="text-[11px] px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm border border-green-50 dark:border-green-900/50">{f}</span>
+                  <span key={i} className="text-[11px] px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white rounded-lg shadow-sm border border-green-50 dark:border-green-900/50">{f}</span>
                 ))}
               </div>
             </div>
             <div className="flex-1 bg-red-50/50 dark:bg-red-900/10 p-3 rounded-xl border border-red-100/50 dark:border-red-800/30">
               <div className="flex items-center mb-3">
                 <IconLibrary.Icon name="error" size={14} className="text-red-500 mr-1.5" />
-                <span className="text-xs font-bold text-red-800 dark:text-red-300">少食油腻</span>
+                <span className="text-xs font-bold text-red-800 dark:text-red-200">少食油腻</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {selectedDressInfo.food_suggestions?.忌.map((f, i) => (
-                  <span key={i} className="text-[11px] px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm border border-red-50 dark:border-red-900/50">{f}</span>
+                  <span key={i} className="text-[11px] px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white rounded-lg shadow-sm border border-red-50 dark:border-red-900/50">{f}</span>
                 ))}
               </div>
             </div>

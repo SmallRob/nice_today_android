@@ -76,11 +76,11 @@ const SeasonalHealthTab = () => {
 
   // 季节颜色映射 - 增强暗黑模式对比度
   const seasonColors = {
-    "春": { bg: "bg-green-50 dark:bg-green-950/40", border: "border-green-200 dark:border-green-800", text: "text-green-800 dark:text-green-100" },
-    "夏": { bg: "bg-red-50 dark:bg-red-950/40", border: "border-red-200 dark:border-red-800", text: "text-red-800 dark:text-red-100" },
-    "长夏": { bg: "bg-yellow-50 dark:bg-yellow-950/40", border: "border-yellow-200 dark:border-yellow-800", text: "text-yellow-800 dark:text-yellow-100" },
-    "秋": { bg: "bg-gray-50 dark:bg-slate-900/40", border: "border-gray-200 dark:border-slate-800", text: "text-gray-800 dark:text-gray-100" },
-    "冬": { bg: "bg-blue-50 dark:bg-blue-950/40", border: "border-blue-200 dark:border-blue-800", text: "text-blue-800 dark:text-blue-100" }
+    "春": { bg: "bg-green-50 dark:bg-green-950/40", border: "border-green-200 dark:border-green-800", text: "text-green-800 dark:text-green-50" },
+    "夏": { bg: "bg-red-50 dark:bg-red-950/40", border: "border-red-200 dark:border-red-800", text: "text-red-800 dark:text-red-50" },
+    "长夏": { bg: "bg-yellow-50 dark:bg-yellow-950/40", border: "border-yellow-200 dark:border-yellow-800", text: "text-yellow-800 dark:text-yellow-50" },
+    "秋": { bg: "bg-gray-50 dark:bg-slate-900/40", border: "border-gray-200 dark:border-slate-800", text: "text-gray-800 dark:text-gray-50" },
+    "冬": { bg: "bg-blue-50 dark:bg-blue-950/40", border: "border-blue-200 dark:border-blue-800", text: "text-blue-800 dark:text-blue-50" }
   };
 
   // 五行颜色映射
@@ -141,8 +141,8 @@ const SeasonalHealthTab = () => {
 
             <div className="grid grid-cols-1 gap-4">
               <div className="bg-white/30 dark:bg-black/10 p-3 rounded-xl">
-                <h4 className="text-xs font-bold opacity-70 mb-1">特点</h4>
-                <p className="text-sm leading-relaxed">{getCurrentSeason.characteristics}</p>
+                <h4 className="text-xs font-bold opacity-70 mb-1 dark:text-gray-400">特点</h4>
+                <p className="text-sm leading-relaxed dark:text-white">{getCurrentSeason.characteristics}</p>
               </div>
               <div className="bg-white/30 dark:bg-black/10 p-3 rounded-xl">
                 <h4 className="text-xs font-bold opacity-70 mb-1">主令脏腑</h4>
@@ -156,7 +156,7 @@ const SeasonalHealthTab = () => {
                   {getCurrentSeason.advice.split('\n').map((line, index) => (
                     <div key={index} className="flex items-start">
                       <span className="text-teal-500 mr-2 mt-1">•</span>
-                      <span className="text-sm opacity-90">{line.replace(/^\d+\.\s*/, '')}</span>
+                      <span className="text-sm opacity-90 dark:text-white">{line.replace(/^\d+\.\s*/, '')}</span>
                     </div>
                   ))}
                 </div>
@@ -171,7 +171,7 @@ const SeasonalHealthTab = () => {
               {seasonGeneralTips.map((tip, index) => (
                 <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                   <span className="text-lg">✨</span>
-                  <span className="text-sm font-medium">{tip}</span>
+                  <span className="text-sm font-medium dark:text-white">{tip}</span>
                 </div>
               ))}
             </div>
@@ -204,11 +204,11 @@ const SeasonalHealthTab = () => {
             <div className="space-y-4">
               <div className="bg-purple-500/5 p-3 rounded-xl">
                 <h4 className="text-xs font-bold text-purple-800 dark:text-purple-300 mb-1">能量流转:</h4>
-                <p className="text-sm leading-relaxed">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).description}</p>
+                <p className="text-sm leading-relaxed dark:text-gray-100">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).description}</p>
               </div>
               <div className="bg-purple-500/5 p-3 rounded-xl">
                 <h4 className="text-xs font-bold text-purple-800 dark:text-purple-300 mb-1">建议行为:</h4>
-                <p className="text-sm leading-relaxed">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).suggestion}</p>
+                <p className="text-sm leading-relaxed dark:text-gray-100">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).suggestion}</p>
               </div>
               <div className="bg-purple-600 text-white p-4 rounded-xl shadow-md transform rotate-1">
                 <p className="text-xs font-bold opacity-80 mb-1">秘诀</p>
@@ -238,14 +238,14 @@ const SeasonalHealthTab = () => {
                     key={index}
                     onClick={() => setSelectedOrganIndex(index)}
                     className={`p-3 rounded-xl text-center transition-all duration-300 cursor-pointer border ${isSelected
-                        ? 'bg-purple-600 text-white border-purple-600 shadow-lg scale-105 z-10'
-                        : isCurrent
-                          ? 'bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-200 ring-2 ring-purple-500/50'
-                          : 'bg-gray-50 dark:bg-gray-900 border-transparent text-gray-600 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-700'
+                      ? 'bg-purple-600 text-white border-purple-600 shadow-lg scale-105 z-10'
+                      : isCurrent
+                        ? 'bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-200 ring-2 ring-purple-500/50'
+                        : 'bg-gray-50 dark:bg-gray-900 border-transparent text-gray-600 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-700'
                       }`}
                   >
                     <div className="text-[10px] font-medium opacity-60 truncate">{time}</div>
-                    <div className="text-xs font-black">{organRhythmTips.organs[index]}</div>
+                    <div className={`text-xs font-black ${isSelected ? 'text-white' : 'dark:text-white'}`}>{organRhythmTips.organs[index]}</div>
                   </div>
                 );
               })}

@@ -5,9 +5,9 @@ import '../styles/chinese-zodiac-icons.css';
  * 炫彩生肖选择器组件
  * 使用生肖第一个汉字生成图标，采用炫彩配色方案
  */
-const ChineseZodiacSelector = ({ 
-  selectedZodiac = '', 
-  onZodiacChange, 
+const ChineseZodiacSelector = ({
+  selectedZodiac = '',
+  onZodiacChange,
   size = 'md',
   showLabels = true,
   gridLayout = '4',
@@ -31,7 +31,14 @@ const ChineseZodiacSelector = ({
 
   // 本地选中状态管理
   const [localSelected, setLocalSelected] = useState(selectedZodiac);
-  
+
+  // 同步外部属性到本地状态
+  React.useEffect(() => {
+    if (selectedZodiac !== localSelected) {
+      setLocalSelected(selectedZodiac);
+    }
+  }, [selectedZodiac]);
+
   // 处理生肖选择
   const handleZodiacSelect = useCallback((zodiac) => {
     setLocalSelected(zodiac);
@@ -63,15 +70,15 @@ const ChineseZodiacSelector = ({
   const renderZodiacIcon = useCallback((zodiac) => {
     const isSelected = localSelected === zodiac.id;
     const sizeClass = getSizeClass(size);
-    
+
     return (
-      <div 
+      <div
         key={zodiac.id}
         className={`chinese-zodiac-icon-container ${isSelected ? 'selected' : ''}`}
         onClick={() => handleZodiacSelect(zodiac.id)}
         title={`${zodiac.name} - ${zodiac.description}`}
       >
-        <div 
+        <div
           className={`chinese-zodiac-icon ${sizeClass} chinese-zodiac-icon-${zodiac.id} ${isSelected ? 'selected' : ''}`}
           data-zodiac={zodiac.id}
           data-element={zodiac.element}
@@ -92,24 +99,39 @@ const ChineseZodiacSelector = ({
       <div className={getGridClass(gridLayout)}>
         {zodiacs.map(renderZodiacIcon)}
       </div>
-      
+
       {/* 选中生肖的详细信息 */}
       {localSelected && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg">
-          <div className="flex items-center justify-center space-x-3">
-            <div className={`chinese-zodiac-icon chinese-zodiac-icon-lg chinese-zodiac-icon-${localSelected} selected`}>
-              {zodiacs.find(z => z.id === localSelected)?.character}
+        <div className="mt-6 p-5 bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-900/30 shadow-lg shadow-blue-500/5 transition-all animate-fadeIn">
+          <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+              <div className={`relative chinese-zodiac-icon chinese-zodiac-icon-lg chinese-zodiac-icon-${localSelected} selected shadow-xl`}>
+                {zodiacs.find(z => z.id === localSelected)?.character}
+              </div>
             </div>
-            <div className="text-center">
-              <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-                {zodiacs.find(z => z.id === localSelected)?.name}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
+            <div className="flex-1 space-y-1">
+              <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-2">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
+                  {zodiacs.find(z => z.id === localSelected)?.name}
+                </h3>
+                <span className="px-2.5 py-0.5 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold rounded-full border border-blue-200/50 dark:border-blue-800/30 uppercase tracking-widest">
+                  {zodiacs.find(z => z.id === localSelected)?.element} 元素
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
                 {zodiacs.find(z => z.id === localSelected)?.description}
               </p>
-              <span className="inline-block mt-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                {zodiacs.find(z => z.id === localSelected)?.element} 元素
-              </span>
+              <div className="pt-2 flex items-center justify-center sm:justify-start gap-3 mt-1">
+                <div className="flex -space-x-1">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="w-5 h-5 rounded-full border-2 border-white dark:border-gray-800 bg-blue-400 dark:bg-blue-600 flex items-center justify-center">
+                      <div className="w-1 h-1 rounded-full bg-white"></div>
+                    </div>
+                  ))}
+                </div>
+                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase">Energy Level Optimized</span>
+              </div>
             </div>
           </div>
         </div>

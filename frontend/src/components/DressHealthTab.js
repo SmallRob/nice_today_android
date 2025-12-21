@@ -2,36 +2,20 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import DressInfo from './DressInfo';
 import SeasonalHealthTab from './SeasonalHealthTab';
 
-// 穿衣养生多标签页组件 - 简化滚动逻辑，确保顶部固定
+// 穿衣养生多标签页组件 - 统一滚动流逻辑，解决移动端遮挡问题
 const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   const [activeTab, setActiveTab] = useState('dress'); // 'dress' 或 'seasonal'
   const scrollContainerRef = useRef(null);
-  const fixedHeaderRef = useRef(null);
-  const [headerHeight, setHeaderHeight] = useState(220); // 默认高度
 
-  // 动态计算固定头部高度
+  // 初始滚动到顶部：进入页面或切换标签时触发
   useEffect(() => {
-    const calculateHeaderHeight = () => {
-      if (fixedHeaderRef.current) {
-        const height = fixedHeaderRef.current.offsetHeight;
-        setHeaderHeight(height);
-
-        // 更新CSS变量以便其他组件使用
-        document.documentElement.style.setProperty('--dress-health-header-height', `${height}px`);
+    const scrollToTop = () => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTo({ top: 0, behavior: 'instant' });
       }
     };
-
-    // 初始计算
-    calculateHeaderHeight();
-
-    // 监听窗口大小变化
-    window.addEventListener('resize', calculateHeaderHeight);
-
-    // 清理事件监听器
-    return () => {
-      window.removeEventListener('resize', calculateHeaderHeight);
-    };
-  }, []);
+    scrollToTop();
+  }, [activeTab]);
 
   // 标签页配置
   const tabs = useMemo(() => [
@@ -68,15 +52,18 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   ], []);
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 dress-health-scroll-container">
-      {/* 固定顶部区域 - 包含五行道家养生风格的banner和标签导航 */}
-      <div ref={fixedHeaderRef} className="dress-health-fixed-header">
-        {/* 五行道家养生风格banner */}
-        <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-700 to-blue-800 dark:from-gray-800 dark:via-gray-900 dark:to-black">
+    <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 overflow-hidden">
+      {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized taoist-content-scroll"
+      >
+        {/* Banner区域 - 随页面滚动 */}
+        <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-700 to-blue-800">
           {/* 五行渐变背景 */}
-          <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-purple-500/30 via-indigo-600/30 to-blue-700/30 dark:from-gray-700/30 dark:via-gray-800/30 dark:to-black/30"></div>
+          <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-purple-500/30 via-indigo-600/30 to-blue-700/30"></div>
 
-          {/* 道家太极八卦符号装饰 */}
+          {/* 道家装饰符号 */}
           <div className="absolute top-2 left-2 w-12 h-12 opacity-15">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -90,29 +77,6 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
               <path d="M50,10 L90,50 L50,90 L10,50 Z" fill="none" stroke="currentColor" strokeWidth="2" />
               <circle cx="50" cy="50" r="15" fill="currentColor" opacity="0.3" />
             </svg>
-          </div>
-
-          {/* 五行方位符号装饰 */}
-          <div className="absolute top-4 right-6 w-6 h-6 opacity-25">
-            <div className="w-full h-full rounded-full bg-wood shadow-lg"></div>
-          </div>
-          <div className="absolute bottom-6 left-6 w-5 h-5 opacity-25">
-            <div className="w-full h-full rounded-full bg-fire shadow-lg"></div>
-          </div>
-          <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-4 h-4 opacity-25">
-            <div className="w-full h-full rounded-full bg-earth shadow-lg"></div>
-          </div>
-          <div className="absolute bottom-4 right-1/4 w-5 h-5 opacity-25">
-            <div className="w-full h-full rounded-full bg-metal shadow-lg"></div>
-          </div>
-          <div className="absolute top-1/2 left-4 transform -translate-y-1/2 w-4 h-4 opacity-25">
-            <div className="w-full h-full rounded-full bg-water shadow-lg"></div>
-          </div>
-
-          {/* 流动的五行能量线 */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse"></div>
-            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
           </div>
 
           <div className="container mx-auto px-4 py-3 md:py-6 relative z-10 text-center">
@@ -134,8 +98,8 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
           </div>
         </div>
 
-        {/* 标签页导航 - 五行道家养生风格 */}
-        <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 taoist-tab-navigation">
+        {/* 标签页选择器 - Sticky固定在顶部 */}
+        <div className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 taoist-tab-navigation">
           <div className="container mx-auto">
             <div className="flex">
               {tabs.map((tab, index) => {
@@ -153,18 +117,17 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
                       }`}
                     aria-label={tab.label}
                   >
-                    {/* 五行色彩活跃指示器 */}
                     {isActive && (
                       <div className={`absolute bottom-0 left-0 w-full h-0.5 bg-${currentColor}`}></div>
                     )}
 
                     <div className="flex flex-col items-center justify-center">
-                      <div className={`w-5 h-5 md:w-6 md:h-6 mb-0.5 transition-colors duration-300 ${isActive ? `text-${currentColor}` : 'text-gray-400 dark:text-gray-500'
+                      <div className={`w-5 h-5 md:w-6 md:h-6 mb-0.5 transition-colors duration-300 ${isActive ? `text-${currentColor}` : 'text-gray-400 dark:text-gray-300'
                         }`}>
                         {isActive ? tab.activeIcon : tab.icon}
                       </div>
                       <span className={`text-[11px] md:text-sm font-medium transition-all duration-300 ${isActive ? 'font-bold' : 'font-normal'
-                        }`}>
+                        } ${isActive ? '' : 'dark:text-gray-300'}`}>
                         {tab.label}
                       </span>
                     </div>
@@ -174,97 +137,89 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 独立滚动的内容区域 - 五行道家养生风格优化 */}
-      <div className="dress-health-scroll-content">
-        <div
-          ref={scrollContainerRef}
-          className="taoist-content-scroll hide-scrollbar scroll-performance-optimized performance-optimized bg-gray-50 dark:bg-gray-900"
-        >
-          <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 pt-4">
-            {/* 标签页内容容器 - 独立滚动 */}
-            <div className="mb-4 mx-auto max-w-2xl">
-              {activeTab === 'dress' && (
-                <DressInfo
-                  apiBaseUrl={apiBaseUrl}
-                  serviceStatus={serviceStatus}
-                  isDesktop={isDesktop}
-                />
-              )}
+        {/* 内容展示区域 */}
+        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6">
+          <div className="mb-4 mx-auto max-w-2xl">
+            {activeTab === 'dress' && (
+              <DressInfo
+                apiBaseUrl={apiBaseUrl}
+                serviceStatus={serviceStatus}
+                isDesktop={isDesktop}
+              />
+            )}
 
-              {activeTab === 'seasonal' && (
-                <SeasonalHealthTab />
-              )}
-            </div>
+            {activeTab === 'seasonal' && (
+              <SeasonalHealthTab />
+            )}
+          </div>
 
-            {/* 功能介绍卡片 - 移动端优化 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
-              <div className="bg-white dark:bg-gray-800 dark:bg-opacity-95 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-600">
-                <div className="flex items-center mb-2">
-                  <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mr-2 md:mr-3 shadow-md">
-                    <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-50">五行穿衣</h3>
-                </div>
-                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-200">
-                  根据当日五行属性，为您推荐吉祥配色和饮食搭配，趋吉避凶，调和身心能量
-                </p>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 dark:bg-opacity-95 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-600">
-                <div className="flex items-center mb-2">
-                  <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mr-2 md:mr-3 shadow-md">
-                    <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-50">时令养生</h3>
-                </div>
-                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-200">
-                  结合四季五行规律和器官节律，提供个性化的养生建议，顺应自然，调和身心
-                </p>
-              </div>
-            </div>
-
-            {/* 使用说明 - 移动端优化 */}
+          {/* 辅助功能介绍 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="bg-white dark:bg-gray-800 dark:bg-opacity-95 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-600">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-50 mb-2 md:mb-3 flex items-center">
-                <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-                使用说明
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm text-gray-600 dark:text-gray-200">
-                <div className="space-y-1 md:space-y-2">
-                  <div className="flex items-start">
-                    <span className="text-purple-500 mr-2">•</span>
-                    <span>在"穿衣指南"标签页查看每日五行穿衣配色建议</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-purple-500 mr-2">•</span>
-                    <span>根据推荐颜色搭配日常着装，增强运势</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-purple-500 mr-2">•</span>
-                    <span>参考饮食建议，调和体内五行平衡</span>
-                  </div>
+              <div className="flex items-center mb-2">
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mr-2 md:mr-3 shadow-md">
+                  <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
                 </div>
-                <div className="space-y-1 md:space-y-2">
-                  <div className="flex items-start">
-                    <span className="text-green-500 mr-2">•</span>
-                    <span>在"时令养生"标签页了解当前季节养生要点</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-green-500 mr-2">•</span>
-                    <span>查看24小时器官节律，合理安排作息</span>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-green-500 mr-2">•</span>
-                    <span>根据养生建议调整生活方式，促进身心健康</span>
-                  </div>
+                <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">五行穿衣</h3>
+              </div>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-100">
+                根据当日五行属性，为您推荐吉祥配色和饮食搭配，趋吉避凶，调和身心能量
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 dark:bg-opacity-95 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-600">
+              <div className="flex items-center mb-2">
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mr-2 md:mr-3 shadow-md">
+                  <svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white">时令养生</h3>
+              </div>
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-100">
+                结合四季五行规律和器官节律，提供个性化的养生建议，顺应自然，调和身心
+              </p>
+            </div>
+          </div>
+
+          {/* 使用说明 */}
+          <div className="bg-white dark:bg-gray-800 dark:bg-opacity-95 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-600">
+            <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 md:mb-3 flex items-center">
+              <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              使用说明
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm text-gray-600 dark:text-gray-100">
+              <div className="space-y-1 md:space-y-2">
+                <div className="flex items-start">
+                  <span className="text-purple-500 mr-2">•</span>
+                  <span>在"穿衣指南"标签页查看每日五行穿衣配色建议</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-purple-500 mr-2">•</span>
+                  <span>根据推荐颜色搭配日常着装，增强运势</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-purple-500 mr-2">•</span>
+                  <span>参考饮食建议，调和体内五行平衡</span>
+                </div>
+              </div>
+              <div className="space-y-1 md:space-y-2">
+                <div className="flex items-start">
+                  <span className="text-green-500 mr-2">•</span>
+                  <span>在"时令养生"标签页了解当前季节养生要点</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-green-500 mr-2">•</span>
+                  <span>查看24小时器官节律，合理安排作息</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-green-500 mr-2">•</span>
+                  <span>根据养生建议调整生活方式，促进身心健康</span>
                 </div>
               </div>
             </div>
