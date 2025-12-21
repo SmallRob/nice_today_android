@@ -80,12 +80,13 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
           }
         },
         {
-          label: '直接加载',
+          label: '取消',
           onClick: () => {
-            // 设置版本标记
-            localStorage.setItem('appVersion', 'full');
-            // 重新加载页面以切换到完整版
-            window.location.reload();
+            
+            // // 设置版本标记
+            // localStorage.setItem('appVersion', 'full');
+            // // 重新加载页面以切换到完整版
+            // window.location.reload();
           }
         }
       ]
