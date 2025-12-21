@@ -15,7 +15,7 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       if (fixedHeaderRef.current) {
         const height = fixedHeaderRef.current.offsetHeight;
         setHeaderHeight(height);
-        
+
         // 更新CSS变量以便其他组件使用
         document.documentElement.style.setProperty('--dress-health-header-height', `${height}px`);
       }
@@ -70,28 +70,28 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 dress-health-scroll-container">
       {/* 固定顶部区域 - 包含五行道家养生风格的banner和标签导航 */}
-      <div ref={fixedHeaderRef} className="dress-health-fixed-header">
-        {/* 五行道家养生风格banner - 固定定位 */}
+      <div ref={fixedHeaderRef} className="dress-health-fixed-header flex-shrink-0 z-20">
+        {/* 五行道家养生风格banner */}
         <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-700 to-blue-800 dark:from-gray-800 dark:via-gray-900 dark:to-black">
           {/* 五行渐变背景 */}
           <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-purple-500/30 via-indigo-600/30 to-blue-700/30 dark:from-gray-700/30 dark:via-gray-800/30 dark:to-black/30"></div>
-          
+
           {/* 道家太极八卦符号装饰 */}
           <div className="absolute top-2 left-2 w-12 h-12 opacity-15">
             <svg viewBox="0 0 100 100" className="w-full h-full">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M50,5 A45,45 0 1,1 50,95 A45,45 0 1,1 50,5" fill="none" stroke="currentColor" strokeWidth="1"/>
-              <circle cx="50" cy="30" r="8" fill="currentColor"/>
-              <circle cx="50" cy="70" r="8" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M50,5 A45,45 0 1,1 50,95 A45,45 0 1,1 50,5" fill="none" stroke="currentColor" strokeWidth="1" />
+              <circle cx="50" cy="30" r="8" fill="currentColor" />
+              <circle cx="50" cy="70" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" />
             </svg>
           </div>
           <div className="absolute bottom-2 right-2 w-14 h-14 opacity-15">
             <svg viewBox="0 0 100 100" className="w-full h-full">
-              <path d="M50,10 L90,50 L50,90 L10,50 Z" fill="none" stroke="currentColor" strokeWidth="2"/>
-              <circle cx="50" cy="50" r="15" fill="currentColor" opacity="0.3"/>
+              <path d="M50,10 L90,50 L50,90 L10,50 Z" fill="none" stroke="currentColor" strokeWidth="2" />
+              <circle cx="50" cy="50" r="15" fill="currentColor" opacity="0.3" />
             </svg>
           </div>
-          
+
           {/* 五行方位符号装饰 */}
           <div className="absolute top-4 right-6 w-6 h-6 opacity-25">
             <div className="w-full h-full rounded-full bg-wood shadow-lg"></div>
@@ -108,92 +108,66 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
           <div className="absolute top-1/2 left-4 transform -translate-y-1/2 w-4 h-4 opacity-25">
             <div className="w-full h-full rounded-full bg-water shadow-lg"></div>
           </div>
-          
+
           {/* 流动的五行能量线 */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse"></div>
-            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
           </div>
-          
-          <div className="container mx-auto px-3 py-4 md:px-4 md:py-6 relative z-10">
-            <h1 className="text-xl md:text-2xl font-bold mb-2 text-shadow-lg taoist-title">
+
+          <div className="container mx-auto px-4 py-4 md:py-6 relative z-10">
+            <h1 className="text-xl md:text-2xl font-bold mb-1 text-shadow-lg taoist-title">
               <span className="inline-block transform hover:scale-105 transition-transform duration-300">
                 穿衣养生
               </span>
             </h1>
-            <p className="text-white text-sm md:text-base opacity-95 font-medium taoist-subtitle mb-3">
+            <p className="text-white text-sm md:text-base opacity-95 font-medium taoist-subtitle mb-2">
               五行相生·阴阳调和·道法自然·养生延年
             </p>
             <div className="flex items-center justify-center space-x-1 md:space-x-2">
-              <span className="text-xs bg-wood bg-opacity-30 text-white px-2 py-1 rounded-full border border-white border-opacity-20">木·生发</span>
-              <span className="text-xs bg-fire bg-opacity-30 text-white px-2 py-1 rounded-full border border-white border-opacity-20">火·炎上</span>
-              <span className="text-xs bg-earth bg-opacity-30 text-white px-2 py-1 rounded-full border border-white border-opacity-20">土·稼穑</span>
-              <span className="text-xs bg-metal bg-opacity-30 text-white px-2 py-1 rounded-full border border-white border-opacity-20">金·从革</span>
-              <span className="text-xs bg-water bg-opacity-30 text-white px-2 py-1 rounded-full border border-white border-opacity-20">水·润下</span>
+              <span className="text-[10px] md:text-xs bg-wood bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">木·生发</span>
+              <span className="text-[10px] md:text-xs bg-fire bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">火·炎上</span>
+              <span className="text-[10px] md:text-xs bg-earth bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">土·稼穑</span>
+              <span className="text-[10px] md:text-xs bg-metal bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">金·从革</span>
+              <span className="text-[10px] md:text-xs bg-water bg-opacity-30 text-white px-2 py-0.5 rounded-full border border-white border-opacity-20">水·润下</span>
             </div>
           </div>
         </div>
 
         {/* 标签页导航 - 五行道家养生风格 */}
-        <div className="bg-gradient-to-r from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 shadow-lg border-b border-gray-300 dark:border-gray-600 taoist-tab-navigation">
+        <div className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700 taoist-tab-navigation">
           <div className="container mx-auto">
             <div className="flex">
               {tabs.map((tab, index) => {
                 const isActive = activeTab === tab.id;
                 const wuxingColors = ['wood', 'fire', 'earth', 'metal', 'water'];
                 const currentColor = wuxingColors[index % wuxingColors.length];
-                
+
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 py-3 md:py-4 px-1 md:px-2 text-center transition-all duration-300 relative group touch-manipulation performance-optimized taoist-tab-button ${
-                      isActive
-                        ? `text-${currentColor} bg-white dark:bg-gray-900 shadow-inner`
-                        : 'text-gray-600 dark:text-gray-300 bg-transparent hover:bg-white dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600'
-                    }`}
+                    className={`flex-1 py-2 md:py-3 px-1 md:px-2 text-center transition-all duration-300 relative group touch-manipulation taoist-tab-button ${isActive
+                        ? `text-${currentColor} bg-gray-50 dark:bg-gray-900`
+                        : 'text-gray-500 dark:text-gray-400 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
                     aria-label={tab.label}
                   >
                     {/* 五行色彩活跃指示器 */}
                     {isActive && (
-                      <div className={`absolute bottom-0 left-0 w-full h-1 bg-${currentColor} rounded-t-full`}></div>
+                      <div className={`absolute bottom-0 left-0 w-full h-0.5 bg-${currentColor} rounded-t-full`}></div>
                     )}
-                    
-                    <div className="flex flex-col items-center space-y-1 md:space-y-2">
-                      {/* 图标 - 五行色彩装饰 */}
-                      <div className="relative">
-                        <div className={`w-5 h-5 md:w-6 md:h-6 transition-colors duration-300 ${
-                          isActive ? `text-${currentColor}` : 'text-gray-500 dark:text-gray-400'
+
+                    <div className="flex flex-col items-center justify-center">
+                      <div className={`w-5 h-5 md:w-6 md:h-6 mb-1 transition-colors duration-300 ${isActive ? `text-${currentColor}` : 'text-gray-400 dark:text-gray-500'
                         }`}>
-                          {isActive ? tab.activeIcon : tab.icon}
-                        </div>
-                        {/* 五行能量光环效果 */}
-                        <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                          isActive 
-                            ? `bg-${currentColor} opacity-20 scale-125` 
-                            : 'opacity-0 scale-0 group-hover:opacity-10 group-hover:scale-110 group-active:opacity-20 group-active:scale-110'
-                        }`}></div>
+                        {isActive ? tab.activeIcon : tab.icon}
                       </div>
-                      
-                      {/* 标签文字 - 道家书法风格 */}
-                      <span className={`text-sm md:text-base font-medium truncate max-w-full px-1 transition-all duration-300 ${
-                        isActive ? 'font-bold tracking-wider' : 'font-normal'
-                      }`}>
+                      <span className={`text-xs md:text-sm font-medium transition-all duration-300 ${isActive ? 'font-bold' : 'font-normal'
+                        }`}>
                         {tab.label}
                       </span>
-                      
-                      {/* 描述文字 - 移动端优化显示 */}
-                      <span className={`text-xs opacity-80 transition-all duration-500 ${
-                        isActive ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-                      }`}>
-                        {tab.description}
-                      </span>
                     </div>
-                    
-                    {/* 悬停时的五行能量流动效果 */}
-                    <div className={`absolute inset-0 rounded-lg transition-all duration-500 opacity-0 group-hover:opacity-100 ${
-                      isActive ? '' : 'border border-gray-200 dark:border-gray-600'
-                    }`}></div>
                   </button>
                 );
               })}
@@ -203,36 +177,32 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       </div>
 
       {/* 独立滚动的内容区域 - 五行道家养生风格优化 */}
-      <div className="dress-health-scroll-content">
-        <div 
+      <div className="flex-1 overflow-hidden relative">
+        <div
           ref={scrollContainerRef}
-          className="h-full overflow-y-auto optimized-scroll hide-scrollbar performance-optimized scroll-performance-optimized touch-optimized virtual-scroll-container taoist-content-scroll bg-gradient-to-b from-white/95 via-gray-50/90 to-gray-100/90 dark:from-gray-800/95 dark:via-gray-900/90 dark:to-black/90"
+          className="absolute inset-0 overflow-y-auto optimized-scroll hide-scrollbar performance-optimized touch-optimized taoist-content-scroll bg-gray-50 dark:bg-gray-900"
           style={{
             WebkitOverflowScrolling: 'touch',
             scrollBehavior: 'smooth',
-            overscrollBehavior: 'contain',
-            transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden',
-            willChange: 'scroll-position',
-            background: 'linear-gradient(180deg, rgba(49, 49, 49, 0.95) 0%, rgba(69, 71, 72, 0.9) 100%)'
+            background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%)'
           }}
         >
           <div className="container mx-auto px-3 py-3 md:px-4 md:py-4 pt-4">
             {/* 标签页内容容器 - 独立滚动 */}
             <div className="mb-4">
               {activeTab === 'dress' && (
-                <DressInfo 
+                <DressInfo
                   apiBaseUrl={apiBaseUrl}
                   serviceStatus={serviceStatus}
                   isDesktop={isDesktop}
                 />
               )}
-              
+
               {activeTab === 'seasonal' && (
                 <SeasonalHealthTab />
               )}
             </div>
-            
+
             {/* 功能介绍卡片 - 移动端优化 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
               <div className="bg-white dark:bg-gray-800 dark:bg-opacity-95 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-600">

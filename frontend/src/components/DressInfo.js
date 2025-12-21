@@ -1,8 +1,83 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { getDressInfoRange, getSpecificDateDressInfo, formatDateString } from '../services/localDataService';
-import { warmReminders } from '../config/healthTipsConfig';
+import IconLibrary from './IconLibrary';
 
-// 优化后的DressInfo组件
+const WuxingEnergyTrend = ({ dailyElement }) => {
+  const relationships = {
+    '木': { generates: '火', restricts: '土', generatedBy: '水', restrictedBy: '金', color: 'bg-green-500' },
+    '火': { generates: '土', restricts: '金', generatedBy: '木', restrictedBy: '水', color: 'bg-red-500' },
+    '土': { generates: '金', restricts: '水', generatedBy: '火', restrictedBy: '木', color: 'bg-yellow-600' },
+    '金': { generates: '水', restricts: '木', generatedBy: '土', restrictedBy: '火', color: 'bg-gray-400' },
+    '水': { generates: '木', restricts: '火', generatedBy: '金', restrictedBy: '土', color: 'bg-blue-500' }
+  };
+
+  const current = relationships[dailyElement] || relationships['木'];
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+      <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-900 dark:text-gray-100">
+        <IconLibrary.Icon name="energy" size={20} className="mr-2 text-yellow-500" />
+        五行能量趋势与关系
+      </h3>
+
+      <div className="relative h-48 mb-6 flex items-center justify-center">
+        {/* 五行环形图 */}
+        <div className="relative w-40 h-40">
+          {Object.entries(relationships).map(([el, data], i) => {
+            const angle = (i * 72 - 90) * (Math.PI / 180);
+            const x = 50 + 40 * Math.cos(angle);
+            const y = 50 + 40 * Math.sin(angle);
+            const isActive = el === dailyElement;
+            return (
+              <div
+                key={el}
+                className={`absolute w-10 h-10 -ml-5 -mt-5 rounded-full flex items-center justify-center text-white text-xs font-bold transition-all duration-500 ${data.color} ${isActive ? 'ring-4 ring-offset-2 ring-purple-500 scale-125 z-10' : 'opacity-60'}`}
+                style={{ left: `${x}%`, top: `${y}%` }}
+              >
+                {el}
+              </div>
+            );
+          })}
+          {/* 中心说明 */}
+          <div className="absolute inset-0 flex flex-center items-center justify-center">
+            <div className="text-[10px] text-gray-400 dark:text-gray-500 text-center leading-tight">
+              相生相克<br />能量流动
+            </div>
+          </div>
+          {/* 简易箭头指示 (SVG) */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="32" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" className="text-gray-300 dark:text-gray-600" />
+          </svg>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg border border-blue-100 dark:border-blue-800">
+          <p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1 flex items-center">
+            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>
+            能量相生 (生)
+          </p>
+          <p className="text-[11px] text-blue-700 dark:text-blue-200">
+            {dailyElement}生{current.generates}，{current.generatedBy}生{dailyElement}。相生如母子，助力能量稳步提升。
+          </p>
+        </div>
+        <div className="bg-orange-50 dark:bg-orange-900/30 p-3 rounded-lg border border-orange-100 dark:border-orange-800">
+          <p className="text-xs font-semibold text-orange-800 dark:text-orange-300 mb-1 flex items-center">
+            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-1.5"></span>
+            能量相克 (克)
+          </p>
+          <p className="text-[11px] text-orange-700 dark:text-orange-200">
+            {dailyElement}克{current.restricts}，{current.restrictedBy}克{dailyElement}。相克如制约，平衡过旺或过弱的能量。
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed">
+        <strong className="text-gray-800 dark:text-gray-100">逻辑说明：</strong>
+        五行本无好坏，重在平衡。今日「{dailyElement}」气旺，穿着「{current.generatedBy}」或「{dailyElement}」色系可顺应天时；若感压力大，可尝试「{current.restricts}」色系以泄化平衡。
+      </div>
+    </div>
+  );
+};
+
 const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   const [dressInfoList, setDressInfoList] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -11,7 +86,24 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   const [error, setError] = useState(null);
   const [dateRange, setDateRange] = useState({ start: null, end: null });
 
-  // 使用useMemo优化计算
+  const currentSeason = useMemo(() => {
+    const month = selectedDate.getMonth() + 1;
+    if (month >= 3 && month <= 5) return '春';
+    if (month >= 6 && month <= 8) return '夏';
+    if (month >= 9 && month <= 11) return '秋';
+    return '冬';
+  }, [selectedDate]);
+
+  const seasonalStyles = useMemo(() => {
+    const styles = {
+      '春': { style: '清新灵动', category: '薄款风衣、束口裤、针织开衫', icon: '🍃' },
+      '夏': { style: '轻盈透气', category: '亚麻衬衫、百慕大短裤、凉拖', icon: '☀️' },
+      '秋': { style: '复古叠穿', category: '休闲西装、直筒牛仔裤、薄卫衣', icon: '🍂' },
+      '冬': { style: '温暖质感', category: '毛呢大衣、羊绒衫、工装靴', icon: '❄️' }
+    };
+    return styles[currentSeason];
+  }, [currentSeason]);
+
   const luckyColors = useMemo(() => {
     return selectedDressInfo?.color_suggestions?.filter(cs => cs.吉凶 === "吉") || [];
   }, [selectedDressInfo]);
@@ -20,19 +112,14 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
     return selectedDressInfo?.color_suggestions?.filter(cs => cs.吉凶 === "不吉") || [];
   }, [selectedDressInfo]);
 
-  // 加载数据
   const loadDressInfoRange = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const result = await getDressInfoRange(1, 6);
-      
       if (result.success) {
         setDressInfoList(result.dressInfoList);
         setDateRange(result.dateRange);
-        
-        // 默认选择今天的数据
         const today = new Date().toISOString().split('T')[0];
         const todayInfo = result.dressInfoList.find(info => info.date === today);
         setSelectedDressInfo(todayInfo || result.dressInfoList[0]);
@@ -41,366 +128,224 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       }
     } catch (err) {
       setError('加载穿衣指南数据失败');
-      console.error('加载数据失败:', err);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // 处理日期选择
   const handleDateChange = useCallback(async (date) => {
     setSelectedDate(date);
-    
     const dateStr = formatDateString(date);
     const dateInfo = dressInfoList.find(info => info.date === dateStr);
-    
     if (dateInfo) {
       setSelectedDressInfo(dateInfo);
     } else {
-      // 如果在已加载数据中找不到，则请求特定日期的数据
       try {
         const result = await getSpecificDateDressInfo(dateStr);
         if (result.success) {
           setSelectedDressInfo(result.dressInfo);
-          // 将新获取的信息添加到列表中
-          setDressInfoList(prevList => {
-            const exists = prevList.some(info => info.date === dateStr);
-            if (exists) {
-              return prevList.map(info => info.date === dateStr ? result.dressInfo : info);
-            } else {
-              return [...prevList, result.dressInfo];
-            }
-          });
+          setDressInfoList(prev => [...prev.filter(i => i.date !== dateStr), result.dressInfo].sort((a, b) => a.date.localeCompare(b.date)));
         }
-      } catch (err) {
-        console.error('获取特定日期数据失败:', err);
-      }
+      } catch (err) { }
     }
   }, [dressInfoList]);
 
-  // 日期格式化函数
   const formatDate = useCallback((dateStr) => {
     const date = new Date(dateStr);
     return `${date.getMonth() + 1}/${date.getDate()}`;
   }, []);
 
-  // 获取日期标签类名
   const getDateTabClass = useCallback((dateStr) => {
     const isSelected = selectedDressInfo && selectedDressInfo.date === dateStr;
     const isToday = new Date().toISOString().split('T')[0] === dateStr;
-    
-    let className = "flex flex-col items-center justify-center cursor-pointer transition-colors duration-200 py-2 ";
-    
-    if (isSelected) {
-      className += "bg-blue-500 text-white font-medium ";
-    } else if (isToday) {
-      className += "bg-yellow-100 text-blue-700 border-b-2 border-blue-500 ";
-    } else {
-      className += "hover:bg-gray-100 ";
-    }
-    
+    let className = "flex flex-col items-center justify-center cursor-pointer transition-all duration-300 py-2 border-r last:border-r-0 dark:border-gray-700 ";
+    if (isSelected) className += "bg-indigo-600 text-white font-bold scale-100 shadow-inner ";
+    else if (isToday) className += "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-b-2 border-indigo-500 ";
+    else className += "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 ";
     return className;
   }, [selectedDressInfo]);
 
-  // 简化日期选择器组件
-  const SimpleDatePicker = ({ selectedDate, onDateChange, minDate, maxDate }) => {
-    const handleDateChange = useCallback((e) => {
-      const newDate = new Date(e.target.value);
-      if (!isNaN(newDate.getTime())) {
-        onDateChange(newDate);
-      }
-    }, [onDateChange]);
-
-    return (
-      <input
-        type="date"
-        value={selectedDate.toISOString().split('T')[0]}
-        onChange={handleDateChange}
-        min={minDate?.toISOString().split('T')[0]}
-        max={maxDate?.toISOString().split('T')[0]}
-        className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-sm dark:bg-gray-700 dark:text-white"
-      />
-    );
-  };
-
-  // 初始化加载数据
   useEffect(() => {
     loadDressInfoRange();
   }, [loadDressInfoRange]);
 
+  const getColorHex = (systemName) => {
+    if (systemName.includes('红')) return 'bg-red-500';
+    if (systemName.includes('绿')) return 'bg-green-500';
+    if (systemName.includes('蓝')) return 'bg-blue-500';
+    if (systemName.includes('黄')) return 'bg-yellow-500';
+    if (systemName.includes('白')) return 'bg-white border-gray-200';
+    if (systemName.includes('黑')) return 'bg-black';
+    if (systemName.includes('灰')) return 'bg-gray-500';
+    if (systemName.includes('紫')) return 'bg-purple-500';
+    if (systemName.includes('金')) return 'bg-amber-400';
+    if (systemName.includes('土') || systemName.includes('咖')) return 'bg-amber-800';
+    if (systemName.includes('青')) return 'bg-teal-500';
+    return 'bg-indigo-500';
+  };
+
   if (loading && !selectedDressInfo) {
     return (
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="flex flex-col items-center justify-center space-y-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-          <div className="text-center">
-            <p className="text-base font-medium text-gray-900 dark:text-white">正在为您分析今日五行能量...</p>
-          </div>
-        </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-8 flex flex-col items-center justify-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">正在解析五行能量...</p>
       </div>
     );
   }
 
   if (error && !selectedDressInfo) {
     return (
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="text-center py-4">
-          <div className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900 dark:bg-opacity-20 rounded-full flex items-center justify-center mb-3">
-            <svg className="w-6 h-6 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-red-800 dark:text-red-300 mb-2">加载失败</h3>
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-          <button 
-            onClick={loadDressInfoRange} 
-            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors duration-200"
-          >
-            重新加载
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!selectedDressInfo) {
-    return (
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="text-center py-4">
-          <div className="mx-auto w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
-            <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">暂无穿衣信息</h3>
-          <p className="text-gray-500 dark:text-gray-400">暂时无法获取穿衣建议数据</p>
-          <button 
-            onClick={loadDressInfoRange} 
-            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors duration-200"
-          >
-            重新加载
-          </button>
-        </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center">
+        <IconLibrary.Icon name="error" size={48} className="mx-auto text-red-500 mb-4" />
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">数据加载失败</h3>
+        <button onClick={loadDressInfoRange} className="px-6 py-2 bg-indigo-600 text-white rounded-full">重试</button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 performance-optimized">
-      {/* 页面标题和说明 */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg p-4 shadow-lg dark:from-purple-800 dark:to-blue-900">
-        <h2 className="text-xl font-bold mb-1">五行穿衣与饮食指南</h2>
-        <p className="text-purple-100 text-sm dark:text-purple-200">
-          根据传统五行理论，为您提供每日的穿衣配色和饮食建议
-        </p>
-      </div>
-
-      {/* 日期选择区域 */}
-      <div className="bg-white dark:bg-gray-800 dark:bg-opacity-90 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col sm:flex-row items-center justify-between mb-3">
-          <div className="mb-3 sm:mb-0">
-            <h3 className="text-base font-medium flex items-center text-gray-900 dark:text-white">
-              <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-              选择查询日期
-            </h3>
+    <div className="space-y-4 performance-optimized pb-10">
+      {/* 顶部综合卡片 */}
+      <div className="bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800 text-white rounded-2xl p-5 shadow-xl relative overflow-hidden">
+        <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+        <div className="relative z-10 flex justify-between items-start">
+          <div>
+            <div className="flex items-center space-x-2 mb-1">
+              <span className="text-2xl">{seasonalStyles.icon}</span>
+              <h2 className="text-2xl font-black tracking-tight">{selectedDressInfo.weekday}</h2>
+            </div>
+            <p className="text-indigo-100 text-sm font-medium opacity-90">{selectedDressInfo.date}</p>
           </div>
-          <div className="w-full sm:w-auto">
-            <SimpleDatePicker
-              selectedDate={selectedDate}
-              onDateChange={handleDateChange}
-              minDate={dateRange.start}
-              maxDate={dateRange.end}
-            />
+          <div className="text-right">
+            <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
+              <span className="text-xs font-bold">主导能量：{selectedDressInfo.daily_element}</span>
+            </div>
           </div>
         </div>
-        
-        {/* 日期快速选择标签 */}
-        <div className="flex border rounded-lg overflow-hidden shadow-sm dark:border-gray-600">
-          {dressInfoList.slice(0, 8).map((info, index) => (
+
+        <div className="mt-5 grid grid-cols-2 gap-4">
+          <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+            <p className="text-[10px] uppercase tracking-wider text-indigo-200 mb-1">推荐风格</p>
+            <p className="text-sm font-bold">{seasonalStyles.style}</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10">
+            <p className="text-[10px] uppercase tracking-wider text-indigo-200 mb-1">推荐品类</p>
+            <p className="text-sm font-bold truncate">{seasonalStyles.category}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 日期选择 */}
+      <div className="bg-white dark:bg-gray-800/90 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="flex overflow-x-auto no-scrollbar scroll-smooth">
+          {dressInfoList.slice(0, 10).map((info, index) => (
             <div
               key={index}
               className={getDateTabClass(info.date)}
               onClick={() => handleDateChange(new Date(info.date))}
-              style={{ width: `${100 / Math.min(dressInfoList.length, 8)}%` }}
+              style={{ minWidth: '16.66%', flexShrink: 0 }}
             >
-              <div className="text-xs opacity-75 dark:text-gray-300">{info.weekday.replace('星期', '')}</div>
-              <div className="font-medium dark:text-white">{formatDate(info.date)}</div>
-              {new Date().toISOString().split('T')[0] === info.date && (
-                <div className="flex items-center justify-center mt-1">
-                  <span className="inline-block w-1.5 h-1.5 bg-current rounded-full"></span>
-                </div>
-              )}
+              <div className="text-[10px] opacity-70 mb-0.5">{info.weekday.replace('星期', '')}</div>
+              <div className="text-sm">{formatDate(info.date)}</div>
             </div>
           ))}
         </div>
       </div>
-      
-      {/* 当日五行信息 */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold flex items-center text-gray-900 dark:text-gray-100">
-            <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-            {selectedDressInfo.date} {selectedDressInfo.weekday}
+
+      {/* 五行能量可视化 */}
+      <WuxingEnergyTrend dailyElement={selectedDressInfo.daily_element} />
+
+      {/* 色彩推荐 */}
+      <div className="grid grid-cols-1 gap-4">
+        {/* 吉祥色 */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <h3 className="text-base font-bold mb-4 flex items-center text-green-600 dark:text-green-400">
+            <IconLibrary.Icon name="color" size={18} className="mr-2" />
+            推荐吉祥配色
           </h3>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-500 dark:text-gray-300">当日主导五行:</span>
-            <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-600 dark:to-blue-600 text-white rounded-full text-xs font-medium shadow-md">
-              {selectedDressInfo.daily_element}
-            </span>
+          <div className="space-y-3">
+            {luckyColors.map((colorItem, i) => (
+              <div key={i} className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-700/40 rounded-xl group transition-all">
+                <div className={`w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-600 ${getColorHex(colorItem.颜色系统)}`}>
+                  <IconLibrary.Icon name="stylish" size={20} className={colorItem.颜色系统.includes('白') ? 'text-gray-400' : 'text-white'} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{colorItem.颜色系统}</span>
+                    <span className="text-[10px] bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">宜</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {colorItem.具体颜色.map((c, ci) => (
+                      <span key={ci} className="text-[11px] px-2 py-0.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-gray-600 dark:text-gray-300 shadow-sm">{c}</span>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight">{colorItem.描述}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        
-        <div className="bg-purple-50 dark:bg-purple-900 border-l-4 border-purple-500 dark:border-purple-400 p-3 rounded-r-lg">
-          <p className="text-purple-800 dark:text-purple-200 text-xs leading-relaxed">
-            <strong>五行穿衣原理：</strong>根据当日的五行属性，选择相生相助的颜色可以增强运势，
-            避免相克相冲的颜色可以减少不利影响。
-          </p>
+
+        {/* 不宜色 */}
+        {unluckyColors.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm opacity-80">
+            <h3 className="text-base font-bold mb-3 flex items-center text-red-500 dark:text-red-400">
+              <IconLibrary.Icon name="close" size={18} className="mr-2" />
+              今日避开颜色
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {unluckyColors.map((colorItem, i) => (
+                <div key={i} className="flex items-center space-x-2 p-2 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-100 dark:border-red-800/30">
+                  <div className={`w-4 h-4 rounded-full ${getColorHex(colorItem.颜色系统)}`}></div>
+                  <span className="text-xs text-red-800 dark:text-red-300">{colorItem.颜色系统}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 饮食养生 - 左右并列 */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <h3 className="text-base font-bold mb-4 flex items-center text-gray-900 dark:text-gray-100">
+            <IconLibrary.Icon name="food" size={18} className="mr-2 text-orange-500" />
+            饮食宜忌指南
+          </h3>
+          <div className="flex space-x-3">
+            <div className="flex-1 bg-green-50/50 dark:bg-green-900/10 p-3 rounded-xl border border-green-100/50 dark:border-green-800/30">
+              <div className="flex items-center mb-3">
+                <IconLibrary.Icon name="success" size={14} className="text-green-500 mr-1.5" />
+                <span className="text-xs font-bold text-green-800 dark:text-green-300">宜食清补</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedDressInfo.food_suggestions?.宜.map((f, i) => (
+                  <span key={i} className="text-[11px] px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm border border-green-50 dark:border-green-900/50">{f}</span>
+                ))}
+              </div>
+            </div>
+            <div className="flex-1 bg-red-50/50 dark:bg-red-900/10 p-3 rounded-xl border border-red-100/50 dark:border-red-800/30">
+              <div className="flex items-center mb-3">
+                <IconLibrary.Icon name="error" size={14} className="text-red-500 mr-1.5" />
+                <span className="text-xs font-bold text-red-800 dark:text-red-300">少食油腻</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedDressInfo.food_suggestions?.忌.map((f, i) => (
+                  <span key={i} className="text-[11px] px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm border border-red-50 dark:border-red-900/50">{f}</span>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 吉祥颜色详细指南 */}
-      {luckyColors.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-          <h3 className="text-lg font-semibold mb-3 flex items-center text-green-600 dark:text-green-300">
-            <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-            今日吉祥颜色搭配
-          </h3>
-          
-          <div className="space-y-3">
-            {luckyColors.map((colorSystem, index) => (
-              <div key={index} className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-600 rounded-lg p-3">
-                <div className="flex items-center mb-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 mr-3 flex-shrink-0 flex items-center justify-center shadow-md">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-base font-semibold text-green-800 dark:text-green-200">{colorSystem.颜色系统}</h4>
-                    <p className="text-xs text-green-600 dark:text-green-300">推荐指数: ★★★★★</p>
-                  </div>
-                </div>
-                <div className="ml-11">
-                  <div className="mb-2">
-                    <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">具体颜色：</p>
-                    <div className="flex flex-wrap gap-1">
-                      {colorSystem.具体颜色.map((color, colorIndex) => (
-                        <span key={colorIndex} className="px-2 py-1 bg-white dark:bg-gray-800 border border-green-300 dark:border-green-500 rounded-full text-xs text-green-700 dark:text-green-200">
-                          {color}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-xs text-green-700 dark:text-green-300 leading-relaxed">{colorSystem.描述}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 不宜颜色警示 */}
-      {unluckyColors.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-          <h3 className="text-lg font-semibold mb-3 flex items-center text-red-600 dark:text-red-300">
-            <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-            今日不宜颜色
-          </h3>
-          
-          <div className="space-y-3">
-            {unluckyColors.map((colorSystem, index) => (
-              <div key={index} className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-600 rounded-lg p-3">
-                <div className="flex items-center mb-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 mr-3 flex-shrink-0 flex items-center justify-center shadow-md">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-base font-semibold text-red-800 dark:text-red-200">{colorSystem.颜色系统}</h4>
-                    <p className="text-xs text-red-600 dark:text-red-300">建议避免使用</p>
-                  </div>
-                </div>
-                <div className="ml-11">
-                  <div className="mb-2">
-                    <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">具体颜色：</p>
-                    <div className="flex flex-wrap gap-1">
-                      {colorSystem.具体颜色.map((color, colorIndex) => (
-                        <span key={colorIndex} className="px-2 py-1 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-500 rounded-full text-xs text-red-700 dark:text-red-200">
-                          {color}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed">{colorSystem.描述}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 饮食养生指南 */}
-      {selectedDressInfo.food_suggestions && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-          <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-gray-100">
-            <span className="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
-            今日饮食养生指南
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-600 rounded-lg p-3">
-              <div className="flex items-center mb-2">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 mr-2 flex items-center justify-center shadow-md">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <h4 className="text-base font-semibold text-green-800 dark:text-green-200">推荐食物</h4>
-              </div>
-              <div className="space-y-1">
-                {selectedDressInfo.food_suggestions.宜.map((food, index) => (
-                  <div key={index} className="flex items-center p-1 bg-white dark:bg-gray-800 rounded border border-green-200 dark:border-green-500">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 flex-shrink-0"></span>
-                    <span className="text-xs text-gray-800 dark:text-gray-200">{food}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-600 rounded-lg p-3">
-              <div className="flex items-center mb-2">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 mr-2 flex items-center justify-center shadow-md">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <h4 className="text-base font-semibold text-red-800 dark:text-red-200">不宜食物</h4>
-              </div>
-              <div className="space-y-1">
-                {selectedDressInfo.food_suggestions.忌.map((food, index) => (
-                  <div key={index} className="flex items-center p-1 bg-white dark:bg-gray-800 rounded border border-red-200 dark:border-red-500">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2 flex-shrink-0"></span>
-                    <span className="text-xs text-gray-800 dark:text-gray-200">{food}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 温馨提示 */}
-      <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-lg p-4 shadow-lg dark:from-yellow-600 dark:to-orange-700">
-        <h4 className="text-base font-semibold mb-2 flex items-center">
-          <span className="w-4 h-4 mr-1">💡</span>
-          温馨提示
+      {/* 说明卡片 */}
+      <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-4 border border-indigo-100 dark:border-indigo-800 mb-6">
+        <h4 className="text-xs font-bold text-indigo-800 dark:text-indigo-300 mb-1 flex items-center">
+          <IconLibrary.Icon name="info" size={14} className="mr-1.5" />
+          五行穿衣逻辑
         </h4>
-        <div className="text-yellow-100 text-xs leading-relaxed space-y-1 dark:text-yellow-200">
-          {warmReminders.slice(0, 3).map((reminder, index) => (
-            <p key={index}>• {reminder}</p>
-          ))}
-        </div>
+        <p className="text-[11px] text-indigo-700/80 dark:text-indigo-400 leading-relaxed">
+          由于天干地支形成的每日五行能量场不同，选择与当日五行「相生」或「相同」的色系，能产生正向共鸣，有助于平复心境、提升办事效率。
+        </p>
       </div>
     </div>
   );

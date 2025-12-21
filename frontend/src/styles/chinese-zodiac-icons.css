@@ -254,12 +254,18 @@
   transition: all 0.3s ease;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
   letter-spacing: 0.5px;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 2px 6px;
+  border-radius: 12px;
+  backdrop-filter: blur(2px);
 }
 
 .chinese-zodiac-icon-container:hover .chinese-zodiac-icon-label {
   color: #3b82f6;
   font-weight: 700;
   transform: translateY(-1px);
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chinese-zodiac-icon-container.selected .chinese-zodiac-icon-label {
@@ -267,6 +273,8 @@
   font-weight: 800;
   text-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
   animation: textPulse 2s ease-in-out infinite;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
 }
 
 @keyframes textPulse {
@@ -287,6 +295,7 @@
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
 .chinese-zodiac-grid-3 {
@@ -368,6 +377,7 @@
   .chinese-zodiac-grid {
     background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    border: 1px solid #4b5563;
   }
   
   .chinese-zodiac-icon-label {
@@ -389,6 +399,7 @@
 .dark .chinese-zodiac-grid {
   background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  border: 1px solid #4b5563;
 }
 
 .dark .chinese-zodiac-icon-label {

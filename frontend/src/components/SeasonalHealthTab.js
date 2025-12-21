@@ -20,7 +20,7 @@ const SeasonalHealthTab = () => {
   const getCurrentSeason = useMemo(() => {
     const month = currentTime.getMonth() + 1;
     const day = currentTime.getDate();
-    
+
     if ((month === 2 && day >= 4) || month === 3 || month === 4 || (month === 5 && day < 5)) {
       return seasonHealthTips["春"];
     } else if ((month === 5 && day >= 5) || month === 6 || month === 7 || (month === 8 && day < 7)) {
@@ -51,7 +51,7 @@ const SeasonalHealthTab = () => {
     else if (hour >= 19 && hour <= 20) index = 9;  // 19:00-21:00
     else if (hour >= 21 && hour <= 22) index = 10; // 21:00-23:00
     else index = 11; // 23:00-01:00 (包括0点)
-    
+
     return {
       time: organRhythmTips.organTimes[index],
       organ: organRhythmTips.organs[index],
@@ -64,7 +64,7 @@ const SeasonalHealthTab = () => {
   // 获取选定的器官节律信息（用于临时查看）
   const getSelectedOrganInfo = useMemo(() => {
     if (selectedOrganIndex === null) return null;
-    
+
     return {
       time: organRhythmTips.organTimes[selectedOrganIndex],
       organ: organRhythmTips.organs[selectedOrganIndex],
@@ -86,7 +86,7 @@ const SeasonalHealthTab = () => {
   // 五行颜色映射
   const elementColors = {
     "木": "bg-green-500",
-    "火": "bg-red-500", 
+    "火": "bg-red-500",
     "土": "bg-yellow-500",
     "金": "bg-gray-500",
     "水": "bg-blue-500"
@@ -108,21 +108,19 @@ const SeasonalHealthTab = () => {
       <div className="flex bg-white dark:bg-gray-800 dark:bg-opacity-90 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setActiveTab('season')}
-          className={`flex-1 py-2 md:py-3 px-2 md:px-4 text-center transition-colors duration-200 touch-manipulation ${
-            activeTab === 'season'
+          className={`flex-1 py-2 md:py-3 px-2 md:px-4 text-center transition-colors duration-200 touch-manipulation ${activeTab === 'season'
               ? 'bg-teal-500 text-white font-medium'
               : 'text-gray-600 dark:text-gray-300 active:bg-gray-50 dark:active:bg-gray-700'
-          }`}
+            }`}
         >
           <span className="text-sm md:text-base">四季养生</span>
         </button>
         <button
           onClick={() => setActiveTab('organ')}
-          className={`flex-1 py-2 md:py-3 px-2 md:px-4 text-center transition-colors duration-200 touch-manipulation ${
-            activeTab === 'organ'
+          className={`flex-1 py-2 md:py-3 px-2 md:px-4 text-center transition-colors duration-200 touch-manipulation ${activeTab === 'organ'
               ? 'bg-purple-500 text-white font-medium'
               : 'text-gray-600 dark:text-gray-300 active:bg-gray-50 dark:active:bg-gray-700'
-          }`}
+            }`}
         >
           <span className="text-sm md:text-base">器官节律</span>
         </button>
@@ -134,39 +132,39 @@ const SeasonalHealthTab = () => {
           {/* 当前季节信息卡片 - 移动端优化 */}
           <div className={`${seasonColors[getCurrentSeason.name].bg} ${seasonColors[getCurrentSeason.name].border} border-l-4 border-teal-500 dark:border-teal-400 rounded-lg p-3 md:p-4`}>
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 md:mb-3">
-              <h3 className="text-base md:text-lg font-semibold ${seasonColors[getCurrentSeason.name].text} flex items-center mb-1 md:mb-0">
+              <h3 className={`text-base md:text-lg font-semibold ${seasonColors[getCurrentSeason.name].text} flex items-center mb-1 md:mb-0`}>
                 <span className={`w-2 h-2 md:w-3 md:h-3 ${elementColors[getCurrentSeason.element]} rounded-full mr-2`}></span>
                 {getCurrentSeason.name}季养生指南
               </h3>
-              <span className="px-2 py-1 md:px-3 md:py-1 bg-white dark:bg-gray-800 rounded-full text-xs md:text-sm font-medium text-teal-700 dark:text-teal-200">
+              <span className="px-2 py-1 md:px-3 md:py-1 bg-white/60 dark:bg-gray-800/60 rounded-full text-xs md:text-sm font-medium text-teal-700 dark:text-teal-200 backdrop-blur-sm">
                 {getCurrentSeason.element}行
               </span>
             </div>
-            
+
             {/* 季节特点 */}
             <div className="mb-2 md:mb-3">
-              <h4 className="text-xs md:text-sm font-medium ${seasonColors[getCurrentSeason.name].text} mb-1">季节特点：</h4>
-              <p className="text-xs md:text-sm ${seasonColors[getCurrentSeason.name].text} leading-relaxed opacity-90">
+              <h4 className={`text-xs md:text-sm font-medium ${seasonColors[getCurrentSeason.name].text} mb-1`}>季节特点：</h4>
+              <p className={`text-xs md:text-sm ${seasonColors[getCurrentSeason.name].text} leading-relaxed opacity-90`}>
                 {getCurrentSeason.characteristics}
               </p>
             </div>
 
             {/* 主令脏腑 */}
             <div className="flex items-center justify-between mb-2 md:mb-3">
-              <span className="text-xs md:text-sm font-medium ${seasonColors[getCurrentSeason.name].text}">主令脏腑：</span>
-              <span className="px-2 py-1 md:px-3 md:py-1 bg-white dark:bg-gray-800 rounded-full text-xs md:text-sm text-teal-700 dark:text-teal-200">
+              <span className={`text-xs md:text-sm font-medium ${seasonColors[getCurrentSeason.name].text}`}>主令脏腑：</span>
+              <span className="px-2 py-1 md:px-3 md:py-1 bg-white/60 dark:bg-gray-800/60 rounded-full text-xs md:text-sm text-teal-700 dark:text-teal-200 backdrop-blur-sm">
                 {getCurrentSeason.organs}
               </span>
             </div>
 
             {/* 养生建议 */}
             <div>
-              <h4 className="text-xs md:text-sm font-medium ${seasonColors[getCurrentSeason.name].text} mb-1 md:mb-2">养生建议：</h4>
+              <h4 className={`text-xs md:text-sm font-medium ${seasonColors[getCurrentSeason.name].text} mb-1 md:mb-2`}>养生建议：</h4>
               <div className="space-y-1 md:space-y-2">
                 {getCurrentSeason.advice.split('\n').map((line, index) => (
                   <div key={index} className="flex items-start">
                     <span className="text-teal-500 dark:text-teal-300 mr-2 text-xs">•</span>
-                    <span className="text-xs ${seasonColors[getCurrentSeason.name].text} opacity-90">{line.replace(/^\d+\.\s*/, '')}</span>
+                    <span className={`text-xs ${seasonColors[getCurrentSeason.name].text} opacity-90`}>{line.replace(/^\d+\.\s*/, '')}</span>
                   </div>
                 ))}
               </div>
@@ -234,14 +232,14 @@ const SeasonalHealthTab = () => {
                 {(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).healthTip}
               </p>
             </div>
-            
+
             {/* 临时查看提示 */}
             {selectedOrganIndex !== null && (
               <div className="mt-3 p-2 bg-blue-100 dark:bg-blue-800 rounded-lg text-center">
                 <p className="text-xs text-blue-700 dark:text-blue-200">
                   临时查看模式：点击其他时段可切换查看，当前时间节律会自动更新
                 </p>
-                <button 
+                <button
                   onClick={() => setSelectedOrganIndex(null)}
                   className="mt-1 text-xs text-blue-600 dark:text-blue-300 underline"
                 >
@@ -261,20 +259,19 @@ const SeasonalHealthTab = () => {
                 <div
                   key={index}
                   onClick={() => setSelectedOrganIndex(index)}
-                  className={`p-1 md:p-2 rounded-lg text-center transition-all duration-200 cursor-pointer touch-manipulation ${
-                    selectedOrganIndex === index
+                  className={`p-1 md:p-2 rounded-lg text-center transition-all duration-200 cursor-pointer touch-manipulation ${selectedOrganIndex === index
                       ? 'bg-blue-500 text-white shadow-md transform scale-105'
                       : getCurrentOrganInfo.organ === organRhythmTips.organs[index]
                         ? 'bg-purple-500 dark:bg-purple-600 text-white shadow-md'
                         : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600'
-                  }`}
+                    }`}
                 >
                   <div className="text-xs font-medium">{time}</div>
                   <div className="text-xs">{organRhythmTips.organs[index]}</div>
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-2 md:mt-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <p className="text-xs text-gray-600 dark:text-gray-300 text-center">
                 根据中医理论，人体器官在24小时内具有特定的活跃节律

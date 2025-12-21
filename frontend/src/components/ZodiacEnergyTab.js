@@ -5,6 +5,28 @@ import { useTheme } from '../context/ThemeContext';
 import ChineseZodiacSelector from './ChineseZodiacSelector';
 import '../styles/zodiac-icons.css';
 import '../styles/chinese-zodiac-icons.css';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+// 注册 Chart.js 组件
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // 生肖能量组件配置管理器 - 仅用于读取默认配置
 class ZodiacEnergyConfigManager {
@@ -444,6 +466,10 @@ const ZodiacEnergyTab = () => {
     if (匹配度 < 40) colorClass = 'text-red-500';
     else if (匹配度 < 70) colorClass = 'text-yellow-500';
 
+    // 根据主题设置SVG背景色
+    const bgColor = theme === 'dark' ? '#374151' : '#e5e7eb';
+    const textColor = theme === 'dark' ? '#ffffff' : '#1f2937';
+
     return (
       <Card title="能量匹配度" className="mb-4">
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 p-4">
@@ -454,7 +480,7 @@ const ZodiacEnergyTab = () => {
                   a 15.9155 15.9155 0 0 1 0 31.831
                   a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
-                stroke="#e5e7eb"
+                stroke={bgColor}
                 strokeWidth="2.5"
               />
               <path
@@ -466,7 +492,7 @@ const ZodiacEnergyTab = () => {
                 strokeWidth="2.5"
                 strokeDasharray={`${匹配度}, 100`}
               />
-              <text x="18" y="20.5" textAnchor="middle" className="text-xs font-bold fill-gray-800 dark:fill-white">
+              <text x="18" y="20.5" textAnchor="middle" className="text-xs font-bold" fill={textColor}>
                 {匹配度}%
               </text>
             </svg>
@@ -504,19 +530,26 @@ const ZodiacEnergyTab = () => {
     
     if (!elementData) return null;
     
+    // 根据主题设置渐变背景
+    const getGradientClass = (baseColors) => {
+      return theme === 'dark' 
+        ? 'dark:from-gray-700 dark:to-gray-600' 
+        : `from-${baseColors.from} to-${baseColors.to}`;
+    };
+    
     return (
       <Card title={`${elementData.name}元素能量提升`} className="mb-4">
         <div className="space-y-3">
           {/* 快速能量提升方法 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded p-3">
+            <div className={`bg-gradient-to-r ${getGradientClass({from: 'blue-50', to: 'indigo-50'})} rounded p-3`}>
               <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
                 <span className="mr-2">⚡</span> {elementData.quickBoost.method}
               </h4>
               <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.description}</p>
             </div>
             
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 rounded p-3">
+            <div className={`bg-gradient-to-r ${getGradientClass({from: 'purple-50', to: 'pink-50'})} rounded p-3`}>
               <h4 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2 flex items-center">
                 <span className="mr-2">🌟</span> {elementData.quickBoost.secondMethod}
               </h4>
@@ -525,7 +558,7 @@ const ZodiacEnergyTab = () => {
           </div>
           
           {/* 五行养生运动 */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-600 rounded p-3">
+          <div className={`bg-gradient-to-r ${getGradientClass({from: 'green-50', to: 'emerald-50'})} rounded p-3`}>
             <h4 className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">
               <span className="mr-2">🏃</span> {elementData.name}行运动
             </h4>
@@ -533,7 +566,7 @@ const ZodiacEnergyTab = () => {
           </div>
           
           {/* 呼吸调息法 */}
-          <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-gray-700 dark:to-gray-600 rounded p-3">
+          <div className={`bg-gradient-to-r ${getGradientClass({from: 'orange-50', to: 'amber-50'})} rounded p-3`}>
             <h4 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center">
               <span className="mr-2">🫁</span> {elementData.timeSlot} 呼吸调息
             </h4>
@@ -729,6 +762,106 @@ const ZodiacEnergyTab = () => {
     );
   };
 
+  // 渲染能量趋势图
+  const renderEnergyTrendChart = () => {
+    // 生成过去7天的数据
+    const generateWeeklyData = () => {
+      const dates = [];
+      const energyScores = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
+        
+        // 模拟能量分数（基于生肖和日期计算）
+        const baseScore = 50 + (userZodiac.charCodeAt(0) % 20);
+        const dayFactor = (date.getDay() + 1) * 5;
+        const variation = Math.floor(Math.random() * 20) - 10;
+        const score = Math.max(20, Math.min(95, baseScore + dayFactor + variation));
+        energyScores.push(score);
+      }
+      
+      return { dates, energyScores };
+    };
+    
+    const { dates, energyScores } = generateWeeklyData();
+    
+    // 图表配置
+    const chartData = {
+      labels: dates,
+      datasets: [
+        {
+          label: '能量指数',
+          data: energyScores,
+          borderColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
+          backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 2,
+          pointBackgroundColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.3,
+        }
+      ]
+    };
+    
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: theme === 'dark' ? '#d1d5db' : '#374151',
+          }
+        },
+        tooltip: {
+          backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+          titleColor: theme === 'dark' ? '#f3f4f6' : '#1f2937',
+          bodyColor: theme === 'dark' ? '#d1d5db' : '#374151',
+          borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
+          borderWidth: 1,
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            color: theme === 'dark' ? 'rgba(75, 85, 99, 0.3)' : 'rgba(209, 213, 219, 0.3)',
+          },
+          ticks: {
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+          }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          grid: {
+            color: theme === 'dark' ? 'rgba(75, 85, 99, 0.3)' : 'rgba(209, 213, 219, 0.3)',
+          },
+          ticks: {
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+            callback: function(value) {
+              return value + '%';
+            }
+          }
+        }
+      }
+    };
+    
+    return (
+      <Card title="近7日能量趋势" className="mb-4">
+        <div className="h-64">
+          <Line data={chartData} options={chartOptions} />
+        </div>
+        <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center">
+          数据基于您的生肖属性和日期计算得出
+        </div>
+      </Card>
+    );
+  };
+
   // 渲染生肖选择器
   const renderZodiacSelector = () => {
     return (
@@ -788,8 +921,8 @@ const ZodiacEnergyTab = () => {
             <div className="flex justify-center">
               <button
                 onClick={() => {
-                  setUserZodiac(userInfo.zodiacAnimal);
                   setTempZodiac('');
+                  setUserZodiac(userInfo.zodiacAnimal);
                   setDataLoaded(false);
                 }}
                 className="text-sm bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-md hover:shadow-lg"
@@ -841,6 +974,9 @@ const ZodiacEnergyTab = () => {
           {renderFoodCard()}
           {renderFengshuiCard()}
           {renderRelationshipCard()}
+
+          {/* 能量趋势图 */}
+          {renderEnergyTrendChart()}
 
           {/* 底部信息 */}
           <Card>

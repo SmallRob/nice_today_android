@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import BiorhythmChart from './BiorhythmChart';
 import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
@@ -23,7 +23,7 @@ const PRACTICE_ACTIVITIES = [
 
 
 const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
-  
+
   // 初始化数据迁移
   useEffect(() => {
     initDataMigration();
@@ -42,7 +42,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     const initConfigManager = async () => {
       await userConfigManager.initialize();
       setConfigManagerReady(true);
-      
+
       const currentConfig = userConfigManager.getCurrentConfig();
       if (currentConfig && currentConfig.birthDate) {
         setBirthDate(new Date(currentConfig.birthDate));
@@ -52,9 +52,9 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         });
       }
     };
-    
+
     initConfigManager();
-    
+
     // 添加配置变更监听器
     const removeListener = userConfigManager.addListener(({
       currentConfig
@@ -67,12 +67,12 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         });
       }
     });
-    
+
     return () => {
       removeListener();
     };
   }, []);
-  
+
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -112,15 +112,59 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
   // 简化的状态确定函数
   const getSimpleStatus = (score) => {
-    if (score > 0) return { text: '良好', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900 dark:bg-opacity-30' };
-    if (score < 0) return { text: '偏低', color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-30' };
+    if (score > 15) return { text: '极佳', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900 dark:bg-opacity-30' };
+    if (score > 0) return { text: '良好', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900 dark:bg-opacity-30' };
+    if (score < -15) return { text: '极低', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900 dark:bg-opacity-30' };
+    if (score < 0) return { text: '偏低', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900 dark:bg-opacity-30' };
     return { text: '平稳', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900 dark:bg-opacity-30' };
   };
+
+  // 获取趋向符号
+  const getTrendSymbol = (currentValue, futureValue) => {
+    const diff = futureValue - currentValue;
+    if (diff > 2) return '↑↑';
+    if (diff > 0.5) return '↑';
+    if (diff < -2) return '↓↓';
+    if (diff < -0.5) return '↓';
+    return '→';
+  };
+
+  // 获取趋势颜色
+  const getTrendColorClass = (symbol) => {
+    if (symbol === '↑↑') return 'text-green-600 dark:text-green-400 font-bold';
+    if (symbol === '↑') return 'text-green-500 dark:text-green-500';
+    if (symbol === '↓↓') return 'text-red-600 dark:text-red-400 font-bold';
+    if (symbol === '↓') return 'text-red-500 dark:text-red-500';
+    return 'text-gray-400 dark:text-gray-500';
+  };
+
+  // 计算未来7天趋势
+  const futureTrends = useMemo(() => {
+    if (!rhythmData || !todayData) return [];
+
+    const todayIndex = rhythmData.findIndex(item => item.date === todayData.date);
+    if (todayIndex === -1) return [];
+
+    const trends = [];
+    for (let i = 1; i <= 7; i++) {
+      const futureItem = rhythmData[todayIndex + i];
+      if (!futureItem) break;
+
+      trends.push({
+        day: i === 1 ? '明天' : `${i}天后`,
+        date: futureItem.date,
+        physical: getTrendSymbol(todayData.physical, futureItem.physical),
+        emotional: getTrendSymbol(todayData.emotional, futureItem.emotional),
+        intellectual: getTrendSymbol(todayData.intellectual, futureItem.intellectual)
+      });
+    }
+    return trends;
+  }, [rhythmData, todayData]);
 
   // 加载生物节律数据 - 本地化版本
   const loadBiorhythmData = useCallback(async (selectedDate = null) => {
     const dateToUse = selectedDate || birthDate;
-    
+
     if (!dateToUse) {
       setError("请选择出生日期");
       return;
@@ -130,21 +174,21 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     setError(null);
 
     try {
-      const birthDateStr = typeof dateToUse === 'string' 
-        ? dateToUse 
+      const birthDateStr = typeof dateToUse === 'string'
+        ? dateToUse
         : formatDateLocal(dateToUse);
-      
+
       // 使用本地数据服务
       const result = await getBiorhythmRange(birthDateStr, 10, 20);
-      
+
       if (result.success) {
         setRhythmData(result.rhythmData);
-        
+
         // 查找今日数据
         const today = formatDateLocal(new Date());
         const todayData = result.rhythmData.find(item => item.date === today);
         setTodayData(todayData);
-        
+
         // 如果是字符串日期，转换为Date对象并更新birthDate
         if (typeof dateToUse === 'string') {
           const dateObj = parseDateLocal(dateToUse);
@@ -157,7 +201,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
       setError("计算生物节律数据时出错");
       console.error('加载生物节律数据失败:', error);
     }
-    
+
     setLoading(false);
   }, [birthDate]);
 
@@ -166,21 +210,21 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     const loadDefaultData = async () => {
       // 等待配置管理器初始化完成
       if (!configManagerReady) return;
-      
+
       // 如果已有出生日期，则使用它
       if (birthDate) {
         await loadBiorhythmData(birthDate);
         return;
       }
-      
+
       // 否则使用默认日期
       const defaultDate = parseDateLocal(DEFAULT_BIRTH_DATE);
       setBirthDate(defaultDate);
       await loadBiorhythmData(defaultDate);
     };
-    
+
     loadDefaultData();
-    
+
     // 初始化实践活动
     setPracticeActivities(getRandomActivities());
   }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE, configManagerReady, getRandomActivities]);
@@ -204,31 +248,32 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     if (!todayData || todayData.physical === undefined || todayData.emotional === undefined || todayData.intellectual === undefined) {
       return null;
     }
-    
+
     // 获取今天的节律值
     const todayPhysical = todayData.physical;
     const todayEmotional = todayData.emotional;
     const todayIntellectual = todayData.intellectual;
-    
+
     // 计算综合累积值
     const totalScore = todayPhysical + todayEmotional + todayIntellectual;
-    
+
     // 使用简化的状态确定函数
     const totalStatus = getSimpleStatus(totalScore);
-    
+
     return (
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 border border-blue-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded-full ${totalScore > 0 ? 'bg-green-500' : totalScore < 0 ? 'bg-yellow-500' : 'bg-blue-500'}`}></div>
+            <div className={`w-3 h-3 rounded-full ${totalScore > 15 ? 'bg-green-500' : totalScore > 0 ? 'bg-emerald-500' : totalScore < -15 ? 'bg-red-500' : totalScore < 0 ? 'bg-amber-500' : 'bg-blue-500'}`}></div>
             <span className="text-base font-medium text-gray-900 dark:text-white">综合状态</span>
           </div>
-          <span className={`text-sm font-medium px-3 py-1 rounded-full ${
-            totalScore > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-400' : 
-            totalScore < 0 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-400' : 
-            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-400'
-          }`}>
-            {totalScore > 0 ? '😊 良好' : totalScore < 0 ? '⚠️ 偏低' : '😐 平稳'}
+          <span className={`text-sm font-medium px-3 py-1 rounded-full ${totalScore > 15 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-400' :
+            totalScore > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-400' :
+              totalScore < -15 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-400' :
+                totalScore < 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-400' :
+                  'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-400'
+            }`}>
+            {totalScore > 15 ? '🌟 极佳' : totalScore > 0 ? '😊 良好' : totalScore < -15 ? '😫 极低' : totalScore < 0 ? '⚠️ 偏低' : '😐 平稳'}
           </span>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -257,8 +302,8 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         </div>
         <h3 className="text-red-800 dark:text-red-300 text-sm font-medium mb-1">加载失败</h3>
         <p className="text-red-600 dark:text-red-400 text-xs">{error}</p>
-        <button 
-          onClick={() => loadBiorhythmData()} 
+        <button
+          onClick={() => loadBiorhythmData()}
           className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
         >
           重新加载
@@ -277,8 +322,8 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         </div>
         <h3 className="text-gray-800 dark:text-gray-300 text-sm font-medium mb-1">暂无数据</h3>
         <p className="text-gray-600 dark:text-gray-400 text-xs">暂时无法获取生物节律数据</p>
-        <button 
-          onClick={() => loadBiorhythmData()} 
+        <button
+          onClick={() => loadBiorhythmData()}
           className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
         >
           重新加载
@@ -306,38 +351,44 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
               本地计算
             </span>
           </div>
-          
+
           {/* 今日节律状态 */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-4 text-center">
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-green-100 dark:border-green-800 border-opacity-50 transition-all hover:shadow-md">
+              <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
                 {todayData.physical}%
               </div>
-              <div className="text-sm text-blue-800 dark:text-blue-300 font-medium">体力</div>
+              <div className="text-sm text-green-800 dark:text-green-300 font-medium">体力</div>
             </div>
-                  
-            <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 rounded-lg p-4 text-center">
-              <div className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">
+
+            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-blue-100 dark:border-blue-800 border-opacity-50 transition-all hover:shadow-md">
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                 {todayData.emotional}%
               </div>
-              <div className="text-sm text-red-800 dark:text-red-300 font-medium">情绪</div>
+              <div className="text-sm text-blue-800 dark:text-blue-300 font-medium">情绪</div>
             </div>
-                  
-            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-4 text-center">
-              <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
+
+            <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-800 border-opacity-50 transition-all hover:shadow-md">
+              <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                 {todayData.intellectual}%
               </div>
-              <div className="text-sm text-green-800 dark:text-green-300 font-medium">智力</div>
+              <div className="text-sm text-purple-800 dark:text-purple-300 font-medium">智力</div>
             </div>
           </div>
-                
+
           {/* 状态解读 */}
-          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-              {todayData.physical >= 0 ? '✓ 体力充沛' : '⚠ 体力偏低'} · 
-              {todayData.emotional >= 0 ? ' 情绪稳定' : ' 情绪波动'} · 
-              {todayData.intellectual >= 0 ? ' 思维清晰' : ' 思考需谨慎'}
-            </p>
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex flex-wrap justify-center gap-y-2 gap-x-4 text-sm">
+              <span className={`px-2 py-0.5 rounded ${todayData.physical >= 0 ? 'bg-green-50 text-green-700 dark:bg-green-900 dark:bg-opacity-30' : 'bg-red-50 text-red-700 dark:bg-red-900 dark:bg-opacity-30'}`}>
+                {todayData.physical >= 0 ? '✓ 体力充沛' : '⚠ 体力偏低'}
+              </span>
+              <span className={`px-2 py-0.5 rounded ${todayData.emotional >= 0 ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:bg-opacity-30' : 'bg-amber-50 text-amber-700 dark:bg-amber-900 dark:bg-opacity-30'}`}>
+                {todayData.emotional >= 0 ? '😊 情绪稳定' : '🌪️ 情绪波动'}
+              </span>
+              <span className={`px-2 py-0.5 rounded ${todayData.intellectual >= 0 ? 'bg-purple-50 text-purple-700 dark:bg-purple-900 dark:bg-opacity-30' : 'bg-orange-50 text-orange-700 dark:bg-orange-900 dark:bg-opacity-30'}`}>
+                {todayData.intellectual >= 0 ? '💡 思维清晰' : '🧠 思考需谨慎'}
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -351,7 +402,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
           <h3 className="text-base font-semibold text-purple-800 dark:text-purple-300">
             实践建议
           </h3>
-          <button 
+          <button
             onClick={refreshActivities}
             className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium flex items-center"
           >
@@ -361,15 +412,15 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             </svg>
           </button>
         </div>
-        
+
         <p className="text-sm text-purple-700 dark:text-purple-400 mb-3">
           根据节律状态推荐活动：
         </p>
-        
+
         <div className="space-y-2">
           {practiceActivities.map((activity, index) => (
-            <div 
-              key={activity.id} 
+            <div
+              key={activity.id}
               className="bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-lg p-3 flex items-start"
             >
               <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center mr-3 mt-0.5">
@@ -400,10 +451,10 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
           趋势图表
         </h3>
-          
+
         {rhythmData && rhythmData.length > 0 ? (
           <div className="h-64 mb-4">
-            <BiorhythmChart 
+            <BiorhythmChart
               data={rhythmData}
               isMobile={!isDesktop}
             />
@@ -413,23 +464,72 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             暂无图表数据
           </div>
         )}
-          
-        <div className="flex items-center justify-center space-x-4">
+
+        <div className="flex items-center justify-center space-x-6">
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+            <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
             <span className="text-sm text-gray-600 dark:text-gray-400">体力</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+            <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
             <span className="text-sm text-gray-600 dark:text-gray-400">情绪</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+            <div className="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
             <span className="text-sm text-gray-600 dark:text-gray-400">智力</span>
           </div>
         </div>
       </div>
-  
+
+      {/* 未来7天节律趋势 - 新增 */}
+      {futureTrends.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+            未来7天趋势预测
+          </h3>
+
+          <div className="overflow-hidden rounded-lg border dark:border-gray-700">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-900 dark:bg-opacity-50">
+                <tr>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">日期</th>
+                  <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider">体力</th>
+                  <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">情绪</th>
+                  <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider">智力</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                {futureTrends.map((trend, index) => (
+                  <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">{trend.day}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{trend.date.substring(5)}</div>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center">
+                      <span className={`text-base ${getTrendColorClass(trend.physical)}`}>{trend.physical}</span>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center">
+                      <span className={`text-base ${getTrendColorClass(trend.emotional)}`}>{trend.emotional}</span>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center">
+                      <span className={`text-base ${getTrendColorClass(trend.intellectual)}`}>{trend.intellectual}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+            <span>↑↑: 大幅上升</span>
+            <span>↑: 上升</span>
+            <span>→: 平稳</span>
+            <span>↓: 下降</span>
+            <span>↓↓: 大幅下降</span>
+          </div>
+        </div>
+      )}
+
       {/* 节律说明 - 优化间距 */}
       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 dark:bg-opacity-20 border border-blue-100 dark:border-blue-700 rounded-lg p-4">
         <h4 className="text-base font-semibold text-blue-800 dark:text-blue-300 mb-3">
