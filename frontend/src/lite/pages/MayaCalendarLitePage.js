@@ -88,6 +88,36 @@ class SimpleMayaCalendarUtils {
     const seed = kin % inspirations.length;
     return inspirations[seed];
   }
+
+  // 计算当日能量强度
+  static calculateEnergyLevel(kin, toneIndex, sealIndex) {
+    // 基于KIN数、调性和图腾计算能量强度 (0-100)
+    // 使用简单的算法：基于KIN数的周期性变化
+    const baseEnergy = (kin % 20) * 5; // 0-95
+    
+    // 根据调性调整能量
+    const toneModifier = toneIndex * 2; // 0-24
+    
+    // 根据图腾调整能量
+    const sealModifier = sealIndex * 1.5; // 0-28.5
+    
+    // 计算最终能量值 (0-100)
+    let energy = baseEnergy + toneModifier + sealModifier;
+    
+    // 确保能量值在0-100范围内
+    energy = Math.min(Math.max(energy, 0), 100);
+    
+    return Math.round(energy);
+  }
+
+  // 获取能量强度描述
+  static getEnergyDescription(energyLevel) {
+    if (energyLevel >= 80) return '高能量';
+    if (energyLevel >= 60) return '中高能量';
+    if (energyLevel >= 40) return '中等能量';
+    if (energyLevel >= 20) return '中低能量';
+    return '低能量';
+  }
 }
 
 const MOOD_ICONS = [
@@ -380,6 +410,30 @@ const MayaCalendarLitePage = ({ userInfo }) => {
             </div>
             <div className="lite-text-center lite-mt-base" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: '4px', backgroundColor: 'var(--bg-color)' }}>
               <div className="lite-text-xl lite-text-bold" style={{ letterSpacing: '2px' }}>{mayaData.fullName}</div>
+            </div>
+
+            {/* 当日能量强度提示条 */}
+            <div className="energy-bar-container">
+              <div className="energy-bar-header">
+                <h4 className="energy-bar-title">当日能量强度</h4>
+                <span className="energy-bar-value">
+                  {SimpleMayaCalendarUtils.calculateEnergyLevel(mayaData.kin, mayaData.toneIndex, mayaData.sealIndex)}% - 
+                  {SimpleMayaCalendarUtils.getEnergyDescription(SimpleMayaCalendarUtils.calculateEnergyLevel(mayaData.kin, mayaData.toneIndex, mayaData.sealIndex))}
+                </span>
+              </div>
+              <div className="energy-bar">
+                <div 
+                  className="energy-bar-fill energy-bar-pulse"
+                  style={{ 
+                    width: `${SimpleMayaCalendarUtils.calculateEnergyLevel(mayaData.kin, mayaData.toneIndex, mayaData.sealIndex)}%` 
+                  }}
+                ></div>
+              </div>
+              <div className="energy-bar-labels">
+                <span>低能量</span>
+                <span>中等能量</span>
+                <span>高能量</span>
+              </div>
             </div>
 
             {/* 每日启示 */}
