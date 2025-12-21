@@ -1,17 +1,18 @@
 import React from 'react';
+import versionData from '../version.json';
 
 /**
  * 统一的版本信息组件
  * 提供应用版本信息的统一管理
  */
-const VersionInfo = ({ 
-  className = "", 
-  showVersion = true, 
+const VersionInfo = ({
+  className = "",
+  showVersion = true,
   showLocalIndicator = true,
   customVersion = null
 }) => {
-  // 默认版本号
-  const defaultVersion = 'v1.0.12';
+  // 从 version.json 动态获取版本号
+  const defaultVersion = `v${versionData.versionName}`;
   const version = customVersion || defaultVersion;
 
   return (

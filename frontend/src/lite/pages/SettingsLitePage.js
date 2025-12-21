@@ -3,6 +3,7 @@ import { userConfigManager } from '../../utils/userConfigManager';
 import { useNotification } from '../../context/NotificationContext';
 import versionDetector from '../../utils/versionDetector';
 import { restartApp } from '../../utils/restartApp';
+import versionData from '../../version.json';
 
 const SettingsLitePage = ({ userInfo, setUserInfo }) => {
   const [formData, setFormData] = useState({
@@ -184,7 +185,7 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
 
         <div className="lite-card">
           <h3>关于</h3>
-          <p>轻量版 v1.0.0</p>
+          <p>轻量版 v{versionData.versionName}</p>
           <p>专为移动设备优化，提供更流畅的体验</p>
         </div>
       </div>

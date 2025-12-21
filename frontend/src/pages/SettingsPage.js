@@ -10,6 +10,7 @@ import updateCheckService from '../utils/updateCheckService';
 import { useNotification } from '../context/NotificationContext';
 import versionDetector from '../utils/versionDetector';
 import { restartApp } from '../utils/restartApp';
+import versionData from '../version.json';
 import '../index.css';
 
 function SettingsPage() {
@@ -17,7 +18,10 @@ function SettingsPage() {
   const urlParams = new URLSearchParams(window.location.search);
   const initialTab = urlParams.get('tab') || 'app';
 
-  const [appVersion, setAppVersion] = useState({ version: 'v1.0.0', build: 'web' });
+  const [appVersion, setAppVersion] = useState({
+    version: versionData.versionName,
+    build: 'web'
+  });
   const [platformInfo, setPlatformInfo] = useState({
     platform: 'web',
     isNative: false,
@@ -279,7 +283,7 @@ function SettingsPage() {
             // 保存当前标签页状态
             const currentTab = activeTab;
             localStorage.setItem('settingsActiveTab', currentTab);
-            
+
             // 刷新页面
             window.location.reload();
           }
@@ -439,8 +443,8 @@ function SettingsPage() {
             <div className="flex">
               <button
                 className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${activeTab === 'app'
-                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
                   } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTabChange('app')}
                 disabled={tabTransition}
@@ -452,8 +456,8 @@ function SettingsPage() {
               </button>
               <button
                 className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${activeTab === 'userConfigs'
-                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
                   } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTabChange('userConfigs')}
                 disabled={tabTransition}
@@ -465,8 +469,8 @@ function SettingsPage() {
               </button>
               <button
                 className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${activeTab === 'about'
-                    ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
                   } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTabChange('about')}
                 disabled={tabTransition}
