@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import '../styles/chinese-zodiac-icons.css';
 
 /**
@@ -140,4 +140,4 @@ const ChineseZodiacSelector = ({
   );
 };
 
-export default ChineseZodiacSelector;
+export default memo(ChineseZodiacSelector);

@@ -8,12 +8,9 @@
   width: 60px;
   height: 60px;
   border-radius: 12px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 3px solid transparent;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -21,7 +18,10 @@
   font-weight: bold;
   font-size: 24px;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
@@ -62,74 +62,68 @@
 /* 炫彩配色方案 - 每个生肖独特的渐变背景 */
 .chinese-zodiac-icon-鼠 {
   background: linear-gradient(135deg, #ff6b6b, #ff8e8e, #ffb8b8);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-牛 {
   background: linear-gradient(135deg, #4ecdc4, #88d3ce, #b8e0d2);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 0.5s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-虎 {
   background: linear-gradient(135deg, #ff9f43, #ffb142, #ffc857);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 1s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-兔 {
   background: linear-gradient(135deg, #a29bfe, #b8b5ff, #d0ceff);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 1.5s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-龙 {
   background: linear-gradient(135deg, #fd79a8, #ff8ab4, #ffa1c5);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 2s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-蛇 {
   background: linear-gradient(135deg, #00b894, #00d4a3, #00e9b2);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 2.5s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-马 {
   background: linear-gradient(135deg, #feca57, #ffd27a, #ffe0a3);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 3s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-羊 {
   background: linear-gradient(135deg, #54a0ff, #7eb6ff, #a8d0ff);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 3.5s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-猴 {
   background: linear-gradient(135deg, #5f27cd, #7e4cd4, #9d72db);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 4s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-鸡 {
   background: linear-gradient(135deg, #00d2d3, #4de3e4, #80f4f5);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 4.5s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-狗 {
   background: linear-gradient(135deg, #ff9ff3, #ffb8f6, #ffd1f9);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 5s;
+  background-size: 150% 150%;
 }
 
 .chinese-zodiac-icon-猪 {
   background: linear-gradient(135deg, #f368e0, #f581e6, #f89aec);
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite 5.5s;
+  background-size: 150% 150%;
+}
+
+/* 仅在选中或悬停时启用微弱渐变流动 */
+.chinese-zodiac-icon.selected,
+.chinese-zodiac-icon:hover {
+  animation: gradientShift 6s ease infinite;
 }
 
 /* 渐变流动动画 */
@@ -137,9 +131,11 @@
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -147,16 +143,10 @@
 
 /* 悬停效果 - 增强的视觉反馈 */
 .chinese-zodiac-icon:hover {
-  transform: 
-    scale(1.15) 
-    rotate(3deg) 
-    translateY(-2px);
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.2),
-    0 10px 10px -5px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  filter: brightness(1.1) saturate(1.2);
-  animation-duration: 1.5s;
+  transform:
+    scale(1.1) translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.05);
 }
 
 .chinese-zodiac-icon-sm:hover {
@@ -173,18 +163,9 @@
 
 /* 选中状态 - 强调效果 */
 .chinese-zodiac-icon.selected {
-  transform: 
-    scale(1.2) 
-    rotate(0deg) 
-    translateY(-3px);
+  transform: scale(1.15) translateY(-2px);
   border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.3),
-    0 0 0 3px rgba(255, 255, 255, 0.5),
-    inset 0 2px 0 rgba(255, 255, 255, 0.4);
-  animation: 
-    pulseGlow 2s ease-in-out infinite,
-    bounce 0.6s ease-in-out;
+  box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.3);
   z-index: 10;
 }
 
@@ -202,14 +183,17 @@
 
 /* 脉动光晕动画 */
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 
+
+  0%,
+  100% {
+    box-shadow:
       0 25px 50px -12px rgba(0, 0, 0, 0.3),
       0 0 0 3px rgba(255, 255, 255, 0.5),
       inset 0 2px 0 rgba(255, 255, 255, 0.4);
   }
+
   50% {
-    box-shadow: 
+    box-shadow:
       0 25px 50px -12px rgba(0, 0, 0, 0.4),
       0 0 0 4px rgba(255, 255, 255, 0.7),
       inset 0 3px 0 rgba(255, 255, 255, 0.6);
@@ -218,18 +202,27 @@
 
 /* 弹跳入场动画 */
 @keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
+
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
     animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
     transform: scale(1.2) translateY(-3px);
   }
-  40%, 43% {
+
+  40%,
+  43% {
     animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
     transform: scale(1.25) translateY(-5px);
   }
+
   70% {
     animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
     transform: scale(1.22) translateY(-4px);
   }
+
   90% {
     transform: scale(1.2) translateY(-3px);
   }
@@ -248,16 +241,15 @@
 }
 
 .chinese-zodiac-icon-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #374151;
-  transition: all 0.3s ease;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  transition: color 0.3s ease;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
   letter-spacing: 0.5px;
-  background-color: rgba(255, 255, 255, 0.7);
-  padding: 2px 6px;
-  border-radius: 12px;
-  backdrop-filter: blur(2px);
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 1px 5px;
+  border-radius: 10px;
 }
 
 .chinese-zodiac-icon-container:hover .chinese-zodiac-icon-label {
@@ -278,9 +270,12 @@
 }
 
 @keyframes textPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
@@ -313,7 +308,7 @@
     gap: 14px;
     padding: 16px;
   }
-  
+
   .chinese-zodiac-icon {
     width: 56px;
     height: 56px;
@@ -327,14 +322,14 @@
     gap: 12px;
     padding: 14px;
   }
-  
+
   .chinese-zodiac-icon {
     width: 52px;
     height: 52px;
     font-size: 20px;
     border-width: 2px;
   }
-  
+
   .chinese-zodiac-icon-label {
     font-size: 11px;
   }
@@ -346,13 +341,13 @@
     gap: 10px;
     padding: 12px;
   }
-  
+
   .chinese-zodiac-icon {
     width: 48px;
     height: 48px;
     font-size: 18px;
   }
-  
+
   .chinese-zodiac-icon-label {
     font-size: 10px;
   }
@@ -364,7 +359,7 @@
     gap: 8px;
     padding: 10px;
   }
-  
+
   .chinese-zodiac-icon {
     width: 44px;
     height: 44px;
@@ -379,16 +374,16 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
     border: 1px solid #4b5563;
   }
-  
+
   .chinese-zodiac-icon-label {
     color: #d1d5db;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
-  
+
   .chinese-zodiac-icon-container:hover .chinese-zodiac-icon-label {
     color: #60a5fa;
   }
-  
+
   .chinese-zodiac-icon-container.selected .chinese-zodiac-icon-label {
     color: #60a5fa;
     text-shadow: 0 2px 4px rgba(96, 165, 250, 0.3);
@@ -422,13 +417,13 @@
     animation: none;
     transition: none;
   }
-  
+
   .chinese-zodiac-icon:hover,
   .chinese-zodiac-icon.selected {
     transform: none;
     animation: none;
   }
-  
+
   .chinese-zodiac-icon-container.selected .chinese-zodiac-icon-label {
     animation: none;
   }
@@ -448,22 +443,57 @@
 /* 传统书法风格增强 */
 .chinese-zodiac-icon {
   font-family: 'KaiTi', 'STKaiti', 'SimSun', serif;
-  text-shadow: 
+  text-shadow:
     0 2px 4px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(0, 0, 0, 0.1);
   letter-spacing: -1px;
 }
 
 /* 五行色彩主题增强 */
-.chinese-zodiac-icon-鼠 { /* 水元素 */ }
-.chinese-zodiac-icon-牛 { /* 土元素 */ }
-.chinese-zodiac-icon-虎 { /* 木元素 */ }
-.chinese-zodiac-icon-兔 { /* 木元素 */ }
-.chinese-zodiac-icon-龙 { /* 土元素 */ }
-.chinese-zodiac-icon-蛇 { /* 火元素 */ }
-.chinese-zodiac-icon-马 { /* 火元素 */ }
-.chinese-zodiac-icon-羊 { /* 土元素 */ }
-.chinese-zodiac-icon-猴 { /* 金元素 */ }
-.chinese-zodiac-icon-鸡 { /* 金元素 */ }
-.chinese-zodiac-icon-狗 { /* 土元素 */ }
-.chinese-zodiac-icon-猪 { /* 水元素 */ }
+.chinese-zodiac-icon-鼠 {
+  /* 水元素 */
+}
+
+.chinese-zodiac-icon-牛 {
+  /* 土元素 */
+}
+
+.chinese-zodiac-icon-虎 {
+  /* 木元素 */
+}
+
+.chinese-zodiac-icon-兔 {
+  /* 木元素 */
+}
+
+.chinese-zodiac-icon-龙 {
+  /* 土元素 */
+}
+
+.chinese-zodiac-icon-蛇 {
+  /* 火元素 */
+}
+
+.chinese-zodiac-icon-马 {
+  /* 火元素 */
+}
+
+.chinese-zodiac-icon-羊 {
+  /* 土元素 */
+}
+
+.chinese-zodiac-icon-猴 {
+  /* 金元素 */
+}
+
+.chinese-zodiac-icon-鸡 {
+  /* 金元素 */
+}
+
+.chinese-zodiac-icon-狗 {
+  /* 土元素 */
+}
+
+.chinese-zodiac-icon-猪 {
+  /* 水元素 */
+}

@@ -56,7 +56,7 @@ class ZodiacEnergyConfigManager {
 // 创建配置管理器实例
 const zodiacEnergyConfigManager = new ZodiacEnergyConfigManager();
 
-const ZodiacEnergyTab = () => {
+const ZodiacEnergyTab = memo(({ onError }) => {
   // 使用主题管理
   const { theme, configManager: themeConfigManager } = useTheme();
 
@@ -798,31 +798,39 @@ const ZodiacEnergyTab = () => {
   };
 
   // 渲染能量趋势图 - 增强版（包含财运和事业趋势）
-  const renderEnergyTrendChart = () => {
-    // 生成过去7天的数据
+  // 优化的能量趋势图组件
+  const EnergyTrendChart = useMemo(() => {
+    if (!userZodiac) return null;
+
+    // 生成确定性的过去7天数据，避免因Math.random导致的频繁渲染
     const generateWeeklyData = () => {
       const dates = [];
       const energyScores = [];
       const wealthScores = [];
       const careerScores = [];
 
+      // 使用生肖和日期作为种子
+      const seedBase = userZodiac.charCodeAt(0);
+
       for (let i = 6; i >= 0; i--) {
-        const date = new Date();
+        const date = new Date(selectedDate);
         date.setDate(date.getDate() - i);
         dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
 
-        // 基础能量分数（基于生肖和日期计算）
-        const baseScore = 50 + (userZodiac.charCodeAt(0) % 20);
-        const dayFactor = (date.getDay() + 1) * 5;
-        const variation = Math.floor(Math.random() * 20) - 10;
-        const energyScore = Math.max(20, Math.min(95, baseScore + dayFactor + variation));
+        // 基础能量分数（基于生肖和日期偏移量计算，确保结果固定）
+        const daySeed = date.getDate() + date.getMonth() * 31;
+        const baseScore = 50 + (seedBase % 20);
+        const dayFactor = (date.getDay() + 1) * 3;
+        // 使用确定性算法代替随机数
+        const deterministicVariation = ((seedBase * daySeed) % 20) - 10;
+        const energyScore = Math.max(20, Math.min(95, baseScore + dayFactor + deterministicVariation));
 
-        // 财运分数（基于能量分数但有一定偏差）
-        const wealthVariation = Math.floor(Math.random() * 25) - 12;
+        // 财运分数（基于能量分数但有一定偏差，也是确定性的）
+        const wealthVariation = ((seedBase * daySeed * 2) % 25) - 12;
         const wealthScore = Math.max(15, Math.min(90, energyScore + wealthVariation));
 
-        // 事业分数（基于能量分数但有一定偏差）
-        const careerVariation = Math.floor(Math.random() * 30) - 15;
+        // 事业分数（基于能量分数但有一定偏差，也是确定性的）
+        const careerVariation = ((seedBase * daySeed * 3) % 30) - 15;
         const careerScore = Math.max(10, Math.min(85, energyScore + careerVariation));
 
         energyScores.push(energyScore);
@@ -835,7 +843,7 @@ const ZodiacEnergyTab = () => {
 
     const { dates, energyScores, wealthScores, careerScores } = generateWeeklyData();
 
-    // 图表配置
+    // 图表配置 - 仅依赖theme和数据
     const chartData = {
       labels: dates,
       datasets: [
@@ -886,6 +894,9 @@ const ZodiacEnergyTab = () => {
     const chartOptions = {
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        duration: 1000 // 增加动画时长，让体验更丝滑
+      },
       interaction: {
         mode: 'index',
         intersect: false,
@@ -896,10 +907,10 @@ const ZodiacEnergyTab = () => {
           labels: {
             color: theme === 'dark' ? '#d1d5db' : '#374151',
             font: {
-              size: 12,
+              size: 11,
               weight: '500',
             },
-            padding: 15,
+            padding: 10,
             usePointStyle: true,
           }
         },
@@ -909,7 +920,7 @@ const ZodiacEnergyTab = () => {
           bodyColor: theme === 'dark' ? '#d1d5db' : '#374151',
           borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
           borderWidth: 1,
-          padding: 10,
+          padding: 8,
           cornerRadius: 6,
           displayColors: true,
           callbacks: {
@@ -927,13 +938,13 @@ const ZodiacEnergyTab = () => {
       scales: {
         x: {
           grid: {
-            color: theme === 'dark' ? 'rgba(75, 85, 99, 0.3)' : 'rgba(209, 213, 219, 0.3)',
+            display: false,
             drawBorder: false,
           },
           ticks: {
             color: theme === 'dark' ? '#9ca3af' : '#6b7280',
             font: {
-              size: 11,
+              size: 10,
             }
           }
         },
@@ -941,13 +952,13 @@ const ZodiacEnergyTab = () => {
           min: 0,
           max: 100,
           grid: {
-            color: theme === 'dark' ? 'rgba(75, 85, 99, 0.3)' : 'rgba(209, 213, 219, 0.3)',
+            color: theme === 'dark' ? 'rgba(75, 85, 99, 0.2)' : 'rgba(209, 213, 219, 0.2)',
             drawBorder: false,
           },
           ticks: {
             color: theme === 'dark' ? '#9ca3af' : '#6b7280',
             font: {
-              size: 11,
+              size: 10,
             },
             callback: function (value) {
               return value + '%';
@@ -958,39 +969,36 @@ const ZodiacEnergyTab = () => {
     };
 
     return (
-      <Card title="近7日能量趋势分析" className="mb-4">
-        <div className="h-80">
+      <Card title="近7日能量趋势分析" className="mb-4 performance-optimized">
+        <div className="h-72">
           <Line data={chartData} options={chartOptions} />
         </div>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
-          <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
-            <div className="text-blue-600 dark:text-blue-300 text-sm font-semibold">能量指数</div>
-            <div className="text-lg font-bold text-blue-700 dark:text-blue-300">
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+          <div className="bg-blue-50/50 dark:bg-blue-900/10 p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
+            <div className="text-blue-600 dark:text-blue-400 text-[10px] font-bold">能量指数</div>
+            <div className="text-base font-black text-blue-700 dark:text-blue-300">
               {energyScores[energyScores.length - 1]}%
             </div>
-            <div className="text-xs text-blue-500 dark:text-blue-400">当前状态</div>
           </div>
-          <div className="bg-amber-50 dark:bg-amber-900 dark:bg-opacity-20 p-3 rounded-lg border border-amber-200 dark:border-amber-700">
-            <div className="text-amber-600 dark:text-amber-300 text-sm font-semibold">财运趋势</div>
-            <div className="text-lg font-bold text-amber-700 dark:text-amber-300">
+          <div className="bg-amber-50/50 dark:bg-amber-900/10 p-2 rounded-lg border border-amber-100 dark:border-amber-900/30">
+            <div className="text-amber-600 dark:text-amber-400 text-[10px] font-bold">财运趋势</div>
+            <div className="text-base font-black text-amber-700 dark:text-amber-300">
               {wealthScores[wealthScores.length - 1]}%
             </div>
-            <div className="text-xs text-amber-500 dark:text-amber-400">最新数据</div>
           </div>
-          <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 p-3 rounded-lg border border-green-200 dark:border-green-700">
-            <div className="text-green-600 dark:text-green-300 text-sm font-semibold">事业趋势</div>
-            <div className="text-lg font-bold text-green-700 dark:text-green-300">
+          <div className="bg-green-50/50 dark:bg-green-900/10 p-2 rounded-lg border border-green-100 dark:border-green-900/30">
+            <div className="text-green-600 dark:text-green-300 text-[10px] font-bold">事业趋势</div>
+            <div className="text-base font-black text-green-700 dark:text-green-300">
               {careerScores[careerScores.length - 1]}%
             </div>
-            <div className="text-xs text-green-500 dark:text-green-400">发展潜力</div>
           </div>
         </div>
-        <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center">
-          数据基于您的生肖属性、日期和五行相生相克原理综合计算得出
+        <div className="mt-3 text-[10px] text-gray-400 dark:text-gray-500 text-center italic">
+          注：数据基于个人生肖属性与当日五行气场精密计算得出
         </div>
       </Card>
     );
-  };
+  }, [userZodiac, selectedDate, theme]);
 
   // 渲染生肖选择器
   const renderZodiacSelector = () => {
@@ -1117,7 +1125,7 @@ const ZodiacEnergyTab = () => {
           {renderWuxingEnergyCard()}
 
           {/* 能量趋势图 */}
-          {renderEnergyTrendChart()}
+          {EnergyTrendChart}
 
           {/* 分类建议卡片 */}
           {renderLifestyleCard()}
@@ -1149,6 +1157,6 @@ const ZodiacEnergyTab = () => {
       )}
     </div>
   );
-};
+});
 
 export default ZodiacEnergyTab;
