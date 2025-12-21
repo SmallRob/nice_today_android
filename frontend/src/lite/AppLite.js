@@ -131,14 +131,17 @@ const AppLite = () => {
   }
 
   return (
-    <Router>
+    <Router basename="/lite">
       <ThemeProvider>
         <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
           <Routes>
             <Route path="/" element={<MayaCalendarLitePage userInfo={userInfo} />} />
+            <Route path="/maya" element={<MayaCalendarLitePage userInfo={userInfo} />} />
             <Route path="/biorhythm" element={<BiorhythmLitePage userInfo={userInfo} />} />
             <Route path="/dress" element={<DressGuideLitePage userInfo={userInfo} />} />
             <Route path="/settings" element={<SettingsLitePage userInfo={userInfo} setUserInfo={setUserInfo} />} />
+            {/* 兜底跳转，避免白屏 */}
+            <Route path="*" element={<MayaCalendarLitePage userInfo={userInfo} />} />
           </Routes>
         </AppLayout>
       </ThemeProvider>

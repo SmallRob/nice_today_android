@@ -255,58 +255,46 @@ const MayaCalendarLitePage = ({ userInfo }) => {
     const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
 
     return (
-      <div className="calendar">
-        <section>
-          <div className="hd hd-nav">
-            <button className="nav-btn" onClick={prevMonth}>&lt;</button>
-            <div>
-              <span className="year">{year}</span>
-              <span className="month">{month + 1}</span>
-            </div>
-            <button className="nav-btn" onClick={nextMonth}>&gt;</button>
-          </div>
-          <div className="bd">
-            <ol className="weeks">
-              {weekdays.map((day, index) => (
-                <li key={index} className={`week_${index}`}>
-                  {day}
-                </li>
-              ))}
-            </ol>
-            <ol className="days">
-              {dates.map((date, index) => {
-                const isCurrentMonth = date.getMonth() === month;
-                const isToday = date.toDateString() === today.toDateString();
-                const isSelected = date.toDateString() === selectedDate.toDateString();
-                const dateStr = formatDate(date);
-                const mood = moodRecords[dateStr];
+      <div className="calendar-content">
+        <ol className="weeks">
+          {weekdays.map((day, index) => (
+            <li key={index} className={`week_${index}`}>
+              {day}
+            </li>
+          ))}
+        </ol>
+        <ol className="days">
+          {dates.map((date, index) => {
+            const isCurrentMonth = date.getMonth() === month;
+            const isToday = date.toDateString() === today.toDateString();
+            const isSelected = date.toDateString() === selectedDate.toDateString();
+            const dateStr = formatDate(date);
+            const mood = moodRecords[dateStr];
 
-                let className = '';
-                if (!isCurrentMonth) className += 'other ';
-                if (isToday) className += 'now ';
-                if (isSelected) className += 'selected ';
+            let className = '';
+            if (!isCurrentMonth) className += 'other ';
+            if (isToday) className += 'now ';
+            if (isSelected) className += 'selected ';
 
-                // 高亮周末
-                const dayOfWeek = date.getDay();
-                if (dayOfWeek === 0) className += 'sun ';
-                if (dayOfWeek === 6) className += 'sat ';
+            // 高亮周末
+            const dayOfWeek = date.getDay();
+            if (dayOfWeek === 0) className += 'sun ';
+            if (dayOfWeek === 6) className += 'sat ';
 
-                return (
-                  <li
-                    key={index}
-                    className={className.trim()}
-                    onClick={() => handleDateSelect(date)}
-                  >
-                    <div className="item">
-                      <span className="num">{date.getDate()}</span>
-                      {mood && <span className="mood-dot">{mood.moodIcon}</span>}
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-        </section>
+            return (
+              <li
+                key={index}
+                className={className.trim()}
+                onClick={() => handleDateSelect(date)}
+              >
+                <div className="item">
+                  <span className="num">{date.getDate()}</span>
+                  {mood && <span className="mood-dot">{mood.moodIcon}</span>}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
       </div>
     );
   };
@@ -329,26 +317,37 @@ const MayaCalendarLitePage = ({ userInfo }) => {
 
         {/* 月历 */}
         <div className="lite-card">
-          <h3 className="lite-h3">选择日期</h3>
-          {renderCalendar()}
+          <div className="calendar">
+            <div className="hd-nav">
+              <button className="nav-btn" onClick={prevMonth}>&lt;</button>
+              <div>
+                <span className="year">{viewDate.getFullYear()}</span>
+                <span className="month">{viewDate.getMonth() + 1}</span>
+              </div>
+              <button className="nav-btn" onClick={nextMonth}>&gt;</button>
+            </div>
+            <div className="bd">
+              {renderCalendar()}
+            </div>
+          </div>
         </div>
 
         <div className="lite-card">
           <div className="lite-flex lite-justify-between lite-items-center">
             <div>
-              <h3 className="lite-h3">用户信息</h3>
+              <h3 className="lite-h3" style={{ margin: 0 }}>用户信息</h3>
               <p className="lite-text-sm lite-mb-0">昵称: {userInfo.nickname || '未设置'}</p>
               <p className="lite-text-sm lite-mb-0">出生日期: {userInfo.birthDate}</p>
             </div>
             <div>
               {formatDate(selectedDate) === formatDate(new Date()) ? (
                 <button className="lite-button lite-button-sm" onClick={handleOpenMoodModal}>
-                  {moodRecords[formatDate(new Date())] ? '修改心情' : '记录心情'}
+                  {moodRecords[formatDate(new Date())] ? '修改记录' : '记录健康'}
                 </button>
               ) : (
                 moodRecords[formatDate(selectedDate)] && (
                   <button className="lite-button lite-button-sm" onClick={() => handleViewMood(formatDate(selectedDate))}>
-                    查看心情
+                    查看记录
                   </button>
                 )
               )}
@@ -359,29 +358,31 @@ const MayaCalendarLitePage = ({ userInfo }) => {
         {/* 玛雅信息 */}
         {mayaData && (
           <div className="lite-card">
-            <h3 className="lite-h3">玛雅历法信息 - {selectedDate.toISOString().split('T')[0]}</h3>
+            <h3 className="lite-h3">玛雅历法信息 - {formatDate(selectedDate)}</h3>
             <div className="lite-grid lite-grid-cols-3">
-              <div className="lite-card lite-text-center">
-                <div className="lite-text-muted">KIN</div>
+              <div className="lite-text-center" style={{ border: '1px solid var(--border-color)', padding: '12px 0', borderRadius: '4px' }}>
+                <div className="lite-text-muted lite-text-sm">KIN</div>
                 <div className="lite-text-lg lite-text-bold">{mayaData.kin}</div>
               </div>
-              <div className="lite-card lite-text-center">
-                <div className="lite-text-muted">调性</div>
+              <div className="lite-text-center" style={{ border: '1px solid var(--border-color)', padding: '12px 0', borderRadius: '4px' }}>
+                <div className="lite-text-muted lite-text-sm">调性</div>
                 <div className="lite-text-lg lite-text-bold">{mayaData.tone}</div>
               </div>
-              <div className="lite-card lite-text-center">
-                <div className="lite-text-muted">图腾</div>
+              <div className="lite-text-center" style={{ border: '1px solid var(--border-color)', padding: '12px 0', borderRadius: '4px' }}>
+                <div className="lite-text-muted lite-text-sm">图腾</div>
                 <div className="lite-text-lg lite-text-bold">{mayaData.seal}</div>
               </div>
             </div>
-            <div className="lite-card lite-text-center lite-mt-base">
-              <div className="lite-text-xl lite-text-bold">{mayaData.fullName}</div>
+            <div className="lite-text-center lite-mt-base" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: '4px', backgroundColor: 'var(--bg-color)' }}>
+              <div className="lite-text-xl lite-text-bold" style={{ letterSpacing: '2px' }}>{mayaData.fullName}</div>
             </div>
 
             {/* 每日启示 */}
-            <div className="lite-card lite-mt-base">
+            <div className="lite-mt-base">
               <h4 className="lite-h4">今日启示</h4>
-              <p className="lite-text">{SimpleMayaCalendarUtils.getDailyInspiration(mayaData.kin)}</p>
+              <p className="lite-text" style={{ borderLeft: '2px solid var(--text-primary)', paddingLeft: '12px', fontStyle: 'italic', color: 'var(--text-secondary)' }}>
+                {SimpleMayaCalendarUtils.getDailyInspiration(mayaData.kin)}
+              </p>
             </div>
           </div>
         )}
@@ -392,7 +393,7 @@ const MayaCalendarLitePage = ({ userInfo }) => {
           <div className="knowledge-grid">
             <div className="knowledge-item">
               <div className="knowledge-header">
-                <span className="knowledge-type" style={{ color: '#9C27B0' }}>13种调性</span>
+                <span className="knowledge-type">13种调性</span>
                 <span className="knowledge-cycle">银河音调</span>
               </div>
               <p className="lite-text-sm knowledge-description">
@@ -402,7 +403,7 @@ const MayaCalendarLitePage = ({ userInfo }) => {
 
             <div className="knowledge-item">
               <div className="knowledge-header">
-                <span className="knowledge-type" style={{ color: '#2196F3' }}>20种图腾</span>
+                <span className="knowledge-type">20种图腾</span>
                 <span className="knowledge-cycle">太阳印记</span>
               </div>
               <p className="lite-text-sm knowledge-description">
@@ -412,7 +413,7 @@ const MayaCalendarLitePage = ({ userInfo }) => {
 
             <div className="knowledge-item">
               <div className="knowledge-header">
-                <span className="knowledge-type" style={{ color: '#4CAF50' }}>260天周期</span>
+                <span className="knowledge-type">260天周期</span>
                 <span className="knowledge-cycle">神圣历法</span>
               </div>
               <p className="lite-text-sm knowledge-description">

@@ -1,131 +1,183 @@
-/* 轻量版全局统一样式 - 极简设计，低配置设备优化 */
+/* 轻量版全局统一样式 - 极简黑白设计，低配置设备优化 */
 
-/* 基础样式 - 不使用CSS变量，提高兼容性 */
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg-color: #000000;
+  --card-bg: #111111;
+  --border-color: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --accent-color: #ffffff;
+  --danger-color: #ff4444;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   font-size: 16px;
   line-height: 1.5;
   margin: 0;
   padding: 0;
-  background-color: #1a1a1a;
-  color: #ffffff;
-}
-
-/* 全局重置 */
-* {
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-size: var(--font-size-base);
-  line-height: 1.5;
-  margin: 0;
-  padding: 0;
-  background-color: var(--background-color);
-  color: var(--dark-color); /* 所有文本默认白色 */
 }
 
-/* 页面容器 - 简化版本 */
+/* 页面容器 */
 .lite-page-container {
-  max-width: 100%;
-  margin: 0;
-  padding: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 12px;
   min-height: 100vh;
 }
 
-/* 页面标题栏 - 极简版本 */
+/* 页面标题栏 */
 .lite-page-header {
-  background-color: #2a2a2a;
-  height: 50px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 16px;
-  border-bottom: 1px solid #444444;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
 }
 
 .lite-page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0;
-  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  text-transform: uppercase;
 }
 
 /* 基础文本样式 */
 .lite-text {
-  font-size: 16px;
-  color: #ffffff;
-  margin: 0 0 16px;
-  line-height: 1.4;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
 }
 
 .lite-text-sm {
-  font-size: 14px;
-  color: #cccccc;
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
 .lite-text-bold {
-  font-weight: bold;
+  font-weight: 700;
+}
+
+.lite-text-muted {
+  color: var(--text-secondary);
 }
 
 /* 标题样式 */
 .lite-h3 {
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 20px 0 12px;
+  border-left: 3px solid var(--accent-color);
+  padding-left: 10px;
+}
+
+.lite-h4 {
+  font-size: 15px;
   font-weight: 600;
-  margin: 16px 0 4px;
-  color: #ffffff;
+  margin: 12px 0 8px;
 }
 
 /* 卡片样式 */
 .lite-card {
-  background-color: #2a2a2a;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  margin-bottom: 16px;
+  background-color: var(--card-bg);
+  border-radius: 4px;
   padding: 16px;
-  border: 1px solid #444444;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
 }
 
 /* 按钮样式 */
 .lite-button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 16px;
-  font-weight: 500;
+  background-color: var(--accent-color);
+  color: var(--bg-color);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  display: inline-block;
-  text-align: center;
-  text-decoration: none;
   min-height: 44px;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* 简单Flex布局 */
+.lite-button:active {
+  opacity: 0.8;
+}
+
+.lite-button-sm {
+  min-height: 32px;
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+/* 输入框样式 */
+.lite-input {
+  width: 100%;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+/* 简单布局工具 */
 .lite-flex {
   display: flex;
 }
 
-.lite-gap-base {
-  gap: 16px;
+.lite-justify-between {
+  justify-content: space-between;
 }
 
-/* 间距 */
-.lite-mb-base {
-  margin-bottom: 16px;
+.lite-items-center {
+  align-items: center;
+}
+
+.lite-gap-base {
+  gap: 12px;
+}
+
+.lite-mt-base {
+  margin-top: 16px;
+}
+
+.lite-mb-0 {
+  margin-bottom: 0;
+}
+
+.lite-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.lite-grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.lite-text-center {
+  text-align: center;
+}
+
+.lite-text-lg {
+  font-size: 18px;
+}
+
+.lite-text-xl {
+  font-size: 22px;
 }
 
 /* 生物节律页面特定样式 */
@@ -273,27 +325,27 @@ body {
   .lite-page-container {
     padding: 8px;
   }
-  
+
   .lite-page-header {
     height: 45px;
     padding: 0 12px;
   }
-  
+
   .lite-page-title {
     font-size: 16px;
   }
-  
+
   .lite-card {
     padding: 12px;
     margin-bottom: 12px;
   }
-  
+
   .lite-button {
     padding: 8px 12px;
     font-size: 15px;
     min-height: 40px;
   }
-  
+
   .trend-value {
     font-size: 16px;
   }
@@ -303,18 +355,18 @@ body {
   .lite-page-container {
     padding: 6px;
   }
-  
+
   .lite-card {
     padding: 10px;
     margin-bottom: 8px;
   }
-  
+
   .lite-button {
     padding: 6px 10px;
     font-size: 14px;
     min-height: 36px;
   }
-  
+
   .trend-value {
     font-size: 14px;
   }
@@ -379,17 +431,17 @@ body {
   .knowledge-grid {
     gap: var(--spacing-sm);
   }
-  
+
   .knowledge-item {
     padding: var(--spacing-sm);
   }
-  
+
   .knowledge-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-xs);
   }
-  
+
   .knowledge-cycle {
     align-self: flex-end;
   }
@@ -471,22 +523,22 @@ body {
     gap: var(--spacing-xs);
     padding: var(--spacing-xs) 0;
   }
-  
+
   .trend-row {
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
     gap: var(--spacing-xs);
     padding: var(--spacing-xs) 0;
   }
-  
+
   .trend-value {
     font-size: var(--font-size-base);
   }
-  
+
   .trend-legend {
     flex-direction: column;
     gap: var(--spacing-xs);
   }
-  
+
   .trend-legend span {
     justify-content: center;
   }
@@ -496,11 +548,11 @@ body {
   .trend-header {
     grid-template-columns: 1.2fr 1fr 1fr 1fr;
   }
-  
+
   .trend-row {
     grid-template-columns: 1.2fr 1fr 1fr 1fr;
   }
-  
+
   .trend-value {
     font-size: var(--font-size-sm);
   }

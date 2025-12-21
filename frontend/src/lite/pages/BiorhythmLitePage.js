@@ -222,18 +222,27 @@ const BiorhythmLitePage = ({ userInfo: propsUserInfo }) => {
       <div className="lite-biorhythm-page">
 
         <div className="lite-card">
-          <h3 className="lite-h3">当前日期: {currentDate.toISOString().split('T')[0]}</h3>
-          <div className="date-navigation lite-flex lite-gap-base">
-            <button className="lite-button" onClick={() => handleDateChange(-1)}>前一天</button>
-            <button className="lite-button" onClick={() => setCurrentDate(new Date())}>今天</button>
-            <button className="lite-button" onClick={() => handleDateChange(1)}>后一天</button>
+          <div className="lite-flex lite-justify-between lite-items-center">
+            <h3 className="lite-h3" style={{ margin: 0 }}>当前日期</h3>
+            <span className="lite-text-bold" style={{ fontSize: '18px' }}>{currentDate.toISOString().split('T')[0]}</span>
+          </div>
+          <div className="date-navigation lite-flex lite-gap-base lite-mt-base">
+            <button className="lite-button" style={{ flex: 1 }} onClick={() => handleDateChange(-1)}>前一天</button>
+            <button className="lite-button" style={{ flex: 1 }} onClick={() => setCurrentDate(new Date())}>今天</button>
+            <button className="lite-button" style={{ flex: 1 }} onClick={() => handleDateChange(1)}>后一天</button>
           </div>
         </div>
 
         <div className="lite-card">
-          <h3 className="lite-h3">用户信息</h3>
-          <p className="lite-text">昵称: {userInfo.nickname || '未设置'}</p>
-          <p className="lite-text">出生日期: {userInfo.birthDate}</p>
+          <div className="lite-flex lite-justify-between lite-items-center">
+            <div>
+              <h3 className="lite-h3" style={{ margin: 0 }}>用户信息</h3>
+              <p className="lite-text-sm lite-mb-0">{userInfo.nickname || '未设置'} | {userInfo.birthDate}</p>
+            </div>
+            <div className="lite-text-center" style={{ padding: '8px 12px', background: 'var(--text-primary)', color: 'var(--bg-color)', borderRadius: '4px' }}>
+              <div className="lite-text-sm" style={{ fontWeight: 700 }}>{getOverallStatus()}</div>
+            </div>
+          </div>
         </div>
 
         {biorhythms && (
@@ -242,133 +251,123 @@ const BiorhythmLitePage = ({ userInfo: propsUserInfo }) => {
               <h3 className="lite-h3">节律指数</h3>
 
               {/* 体力节律 */}
-              <div className="biorhythm-item lite-mb-base">
-                <p className="lite-text">
-                  <span className="lite-text-bold">体力节律:</span> {biorhythms.physical.toFixed(2)}
-                  <span className="lite-text-sm">({getBiorhythmStatusDescription(biorhythms.physical)})</span>
-                </p>
-                <p className="lite-text-sm">建议: {getBiorhythmStatusAdvice(biorhythms.physical)}</p>
-                <div className="progress-bar">
+              <div className="biorhythm-item lite-mb-base" style={{ padding: '12px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
+                <div className="lite-flex lite-justify-between lite-items-center lite-mb-0">
+                  <span className="lite-text-bold" style={{ color: '#4CAF50' }}>体力节律</span>
+                  <span className="lite-text-lg lite-text-bold">{biorhythms.physical.toFixed(1)}%</span>
+                </div>
+                <div className="lite-text-sm lite-mb-base" style={{ color: 'var(--text-secondary)' }}>{getBiorhythmStatusDescription(biorhythms.physical)}</div>
+                <div className="progress-bar" style={{ height: '6px', background: '#222' }}>
                   <div
                     className="progress-fill"
                     style={{
                       width: `${Math.abs(biorhythms.physical)}%`,
-                      backgroundColor: biorhythms.physical >= 0 ? '#4CAF50' : '#F44336'
+                      backgroundColor: '#4CAF50',
+                      boxShadow: '0 0 10px rgba(76, 175, 80, 0.4)'
                     }}
                   ></div>
                 </div>
+                <p className="lite-text-sm lite-mt-base" style={{ fontSize: '12px', margin: '8px 0 0' }}>💡 {getBiorhythmStatusAdvice(biorhythms.physical)}</p>
               </div>
 
               {/* 情绪节律 */}
-              <div className="biorhythm-item lite-mb-base">
-                <p className="lite-text">
-                  <span className="lite-text-bold">情绪节律:</span> {biorhythms.emotional.toFixed(2)}
-                  <span className="lite-text-sm">({getBiorhythmStatusDescription(biorhythms.emotional)})</span>
-                </p>
-                <p className="lite-text-sm">建议: {getBiorhythmStatusAdvice(biorhythms.emotional)}</p>
-                <div className="progress-bar">
+              <div className="biorhythm-item lite-mb-base" style={{ padding: '12px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
+                <div className="lite-flex lite-justify-between lite-items-center lite-mb-0">
+                  <span className="lite-text-bold" style={{ color: '#2196F3' }}>情绪节律</span>
+                  <span className="lite-text-lg lite-text-bold">{biorhythms.emotional.toFixed(1)}%</span>
+                </div>
+                <div className="lite-text-sm lite-mb-base" style={{ color: 'var(--text-secondary)' }}>{getBiorhythmStatusDescription(biorhythms.emotional)}</div>
+                <div className="progress-bar" style={{ height: '6px', background: '#222' }}>
                   <div
                     className="progress-fill"
                     style={{
                       width: `${Math.abs(biorhythms.emotional)}%`,
-                      backgroundColor: biorhythms.emotional >= 0 ? '#2196F3' : '#FF9800'
+                      backgroundColor: '#2196F3',
+                      boxShadow: '0 0 10px rgba(33, 150, 243, 0.4)'
                     }}
                   ></div>
                 </div>
+                <p className="lite-text-sm lite-mt-base" style={{ fontSize: '12px', margin: '8px 0 0' }}>💡 {getBiorhythmStatusAdvice(biorhythms.emotional)}</p>
               </div>
 
               {/* 智力节律 */}
-              <div className="biorhythm-item lite-mb-base">
-                <p className="lite-text">
-                  <span className="lite-text-bold">智力节律:</span> {biorhythms.intellectual.toFixed(2)}
-                  <span className="lite-text-sm">({getBiorhythmStatusDescription(biorhythms.intellectual)})</span>
-                </p>
-                <p className="lite-text-sm">建议: {getBiorhythmStatusAdvice(biorhythms.intellectual)}</p>
-                <div className="progress-bar">
+              <div className="biorhythm-item lite-mb-base" style={{ padding: '12px', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
+                <div className="lite-flex lite-justify-between lite-items-center lite-mb-0">
+                  <span className="lite-text-bold" style={{ color: '#9C27B0' }}>智力节律</span>
+                  <span className="lite-text-lg lite-text-bold">{biorhythms.intellectual.toFixed(1)}%</span>
+                </div>
+                <div className="lite-text-sm lite-mb-base" style={{ color: 'var(--text-secondary)' }}>{getBiorhythmStatusDescription(biorhythms.intellectual)}</div>
+                <div className="progress-bar" style={{ height: '6px', background: '#222' }}>
                   <div
                     className="progress-fill"
                     style={{
                       width: `${Math.abs(biorhythms.intellectual)}%`,
-                      backgroundColor: biorhythms.intellectual >= 0 ? '#9C27B0' : '#795548'
+                      backgroundColor: '#9C27B0',
+                      boxShadow: '0 0 10px rgba(156, 39, 176, 0.4)'
                     }}
                   ></div>
                 </div>
-              </div>
-
-              <div className="biorhythm-summary lite-card">
-                <p className="lite-text-bold">综合状态: {getOverallStatus()}</p>
+                <p className="lite-text-sm lite-mt-base" style={{ fontSize: '12px', margin: '8px 0 0' }}>💡 {getBiorhythmStatusAdvice(biorhythms.intellectual)}</p>
               </div>
             </div>
 
-            {/* 生物节律知识卡片 */}
-            <div className="lite-card knowledge-card">
-              <h3 className="knowledge-card-title">生物节律知识</h3>
-              <div className="knowledge-grid">
-                {biorhythmKnowledge.map((item, index) => (
-                  <div key={index} className="knowledge-item">
-                    <div className="knowledge-header">
-                      <span
-                        className="knowledge-type"
-                        style={{ color: item.color }}
-                      >
-                        {item.type}
-                      </span>
-                      <span className="knowledge-cycle">{item.cycle}</span>
+            {/* 今日提醒 */}
+            {getLifeTips().length > 0 && (
+              <div className="lite-card" style={{ borderLeft: '4px solid var(--text-primary)' }}>
+                <h3 className="lite-h3" style={{ border: 'none', padding: 0 }}>今日建议</h3>
+                <div className="life-tips-list">
+                  {getLifeTips().map((tip, index) => (
+                    <div key={index} className="life-tip-item lite-text-sm lite-mt-base" style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                      <span style={{ color: tip.type === '体力' ? '#4CAF50' : tip.type === '情绪' ? '#2196F3' : '#9C27B0' }}>•</span>
+                      <span><span className="lite-text-bold">{tip.type}:</span> {tip.tip}</span>
                     </div>
-                    <p className="lite-text-sm knowledge-description">{item.description}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 未来趋势 */}
+            <div className="lite-card">
+              <h3 className="lite-h3">未来7天趋势</h3>
+              <div className="trend-table">
+                <div className="trend-header lite-text-bold" style={{ fontSize: '13px', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  <span>日期</span>
+                  <span style={{ textAlign: 'center' }}>体力</span>
+                  <span style={{ textAlign: 'center' }}>情绪</span>
+                  <span style={{ textAlign: 'center' }}>智力</span>
+                </div>
+                {getFutureTrends().map((trend, index) => (
+                  <div key={index} className="trend-row" style={{ alignItems: 'center' }}>
+                    <span className="trend-day">{trend.day}</span>
+                    <span className={`trend-value ${getTrendColor(trend.physical)}`} style={{ textAlign: 'center' }}>
+                      {trend.physical}
+                    </span>
+                    <span className={`trend-value ${getTrendColor(trend.emotional)}`} style={{ textAlign: 'center' }}>
+                      {trend.emotional}
+                    </span>
+                    <span className={`trend-value ${getTrendColor(trend.intellectual)}`} style={{ textAlign: 'center' }}>
+                      {trend.intellectual}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {getLifeTips().length > 0 && (
-              <div className="lite-card">
-                <h3 className="lite-h3">今日提醒</h3>
-                <ul className="life-tips-list">
-                  {getLifeTips().map((tip, index) => (
-                    <li key={index} className="life-tip-item lite-text">
-                      <span className="tip-type lite-text-bold">{tip.type}:</span> {tip.tip}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* 未来7天节律趋势 */}
-            {getFutureTrends().length > 0 && (
-              <div className="lite-card">
-                <h3 className="lite-h3">未来7天节律趋势</h3>
-                <div className="trend-table">
-                  <div className="trend-header lite-text-bold">
-                    <span>日期</span>
-                    <span>体力</span>
-                    <span>情绪</span>
-                    <span>智力</span>
-                  </div>
-                  {getFutureTrends().map((trend, index) => (
-                    <div key={index} className="trend-row">
-                      <span className="trend-day">{trend.day}</span>
-                      <span className={`trend-value ${getTrendColor(trend.physical)}`}>
-                        {trend.physical}
-                      </span>
-                      <span className={`trend-value ${getTrendColor(trend.emotional)}`}>
-                        {trend.emotional}
-                      </span>
-                      <span className={`trend-value ${getTrendColor(trend.intellectual)}`}>
-                        {trend.intellectual}
-                      </span>
+            {/* 知识广角 */}
+            <div className="lite-card knowledge-card">
+              <h3 className="knowledge-card-title">节律小知识</h3>
+              <div className="knowledge-grid">
+                {biorhythmKnowledge.map((item, index) => (
+                  <div key={index} className="knowledge-item" style={{ borderLeft: `4px solid ${item.color}`, background: 'rgba(255,255,255,0.03)' }}>
+                    <div className="knowledge-header">
+                      <span className="knowledge-type" style={{ color: item.color }}>{item.type}</span>
+                      <span className="knowledge-cycle" style={{ backgroundColor: item.color, color: '#fff' }}>{item.cycle}</span>
                     </div>
-                  ))}
-                </div>
-                <div className="trend-legend lite-text-sm">
-                  <span>↑↑: 大幅上升</span>
-                  <span>↑: 上升</span>
-                  <span>→: 平稳</span>
-                  <span>↓: 下降</span>
-                  <span>↓↓: 大幅下降</span>
-                </div>
+                    <p className="lite-text-sm knowledge-description" style={{ opacity: 0.8 }}>{item.description}</p>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
           </>
         )}
       </div>
