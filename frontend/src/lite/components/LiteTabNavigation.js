@@ -14,14 +14,14 @@ const LiteTabNavigation = ({ activeTab, onTabChange }) => {
 
   const handleTabClick = (tabId) => {
     onTabChange(tabId);
-    
+
     // 导航到相应页面
     switch (tabId) {
-      case 'biorhythm':
+      case 'maya':
         navigate('/');
         break;
-      case 'maya':
-        navigate('/maya');
+      case 'biorhythm':
+        navigate('/biorhythm');
         break;
       case 'dress':
         navigate('/dress');
@@ -38,9 +38,9 @@ const LiteTabNavigation = ({ activeTab, onTabChange }) => {
   const getActiveTab = () => {
     switch (location.pathname) {
       case '/':
-        return 'biorhythm';
-      case '/maya':
         return 'maya';
+      case '/biorhythm':
+        return 'biorhythm';
       case '/dress':
         return 'dress';
       case '/settings':

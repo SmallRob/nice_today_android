@@ -34,7 +34,7 @@ const mbtiConfigManager = new MBTIConfigManager();
 const MBTIPersonalityTabHome = () => {
   // 使用主题管理
   const { theme } = useTheme();
-  
+
   // 状态管理
   const [userMBTI, setUserMBTI] = useState('');
   const [personalityAnalysis, setPersonalityAnalysis] = useState(null);
@@ -52,9 +52,9 @@ const MBTIPersonalityTabHome = () => {
 
   // MBTI人格类型数据 - 使用useMemo缓存
   const mbtiTypes = useMemo(() => [
-    { 
-      type: 'ISTJ', 
-      name: '物流师', 
+    {
+      type: 'ISTJ',
+      name: '物流师',
       description: '务实、可靠、注重细节',
       color: '#3b82f6',
       bgGradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
@@ -67,9 +67,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '直接、具体、注重事实，不擅长表达情感',
       growthTips: '尝试接受新想法，学习表达情感，培养灵活性'
     },
-    { 
-      type: 'ISFJ', 
-      name: '守护者', 
+    {
+      type: 'ISFJ',
+      name: '守护者',
       description: '体贴、尽责、保护欲强',
       color: '#10b981',
       bgGradient: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
@@ -82,9 +82,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '温和、体贴、注重他人感受，避免冲突',
       growthTips: '学习设定界限，表达自己的需求，接受建设性批评'
     },
-    { 
-      type: 'INFJ', 
-      name: '倡导者', 
+    {
+      type: 'INFJ',
+      name: '倡导者',
       description: '理想主义、有洞察力、富有同情心',
       color: '#8b5cf6',
       bgGradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
@@ -97,9 +97,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '深刻、富有洞察力、隐喻丰富，注重深层次交流',
       growthTips: '学会接受不完美，平衡理想与现实，保护个人能量'
     },
-    { 
-      type: 'INTJ', 
-      name: '建筑师', 
+    {
+      type: 'INTJ',
+      name: '建筑师',
       description: '战略思维、独立、追求效率',
       color: '#6366f1',
       bgGradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
@@ -112,9 +112,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '逻辑清晰、直接、注重效率，不绕弯子',
       growthTips: '学习表达情感，考虑他人感受，培养耐心'
     },
-    { 
-      type: 'ISTP', 
-      name: '鉴赏家', 
+    {
+      type: 'ISTP',
+      name: '鉴赏家',
       description: '实用、灵活、擅长解决问题',
       color: '#ef4444',
       bgGradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
@@ -127,9 +127,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '直接、务实、注重行动，不擅长情感交流',
       growthTips: '培养长期目标意识，学习情感表达，考虑未来规划'
     },
-    { 
-      type: 'ISFP', 
-      name: '探险家', 
+    {
+      type: 'ISFP',
+      name: '探险家',
       description: '艺术、敏感、活在当下',
       color: '#f59e0b',
       bgGradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
@@ -142,9 +142,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '温和、艺术化、注重感受，避免直接冲突',
       growthTips: '学习规划未来，面对建设性批评，表达自己的需求'
     },
-    { 
-      type: 'INFP', 
-      name: '调停者', 
+    {
+      type: 'INFP',
+      name: '调停者',
       description: '理想主义、富有同情心、创意无限',
       color: '#ec4899',
       bgGradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
@@ -157,9 +157,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '隐喻丰富、富有诗意、注重价值观，避免直接对抗',
       growthTips: '平衡理想与现实，学习做决定，建立自信心'
     },
-    { 
-      type: 'INTP', 
-      name: '逻辑学家', 
+    {
+      type: 'INTP',
+      name: '逻辑学家',
       description: '逻辑思维、创新、好奇心强',
       color: '#06b6d4',
       bgGradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
@@ -172,9 +172,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '逻辑严密、理论性强、注重概念，可能显得抽象',
       growthTips: '培养执行力，学习社交技巧，平衡理论与实际'
     },
-    { 
-      type: 'ESTP', 
-      name: '企业家', 
+    {
+      type: 'ESTP',
+      name: '企业家',
       description: '活力四射、务实、善于交际',
       color: '#f97316',
       bgGradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
@@ -187,9 +187,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '直接、生动、注重行动，善于即兴发挥',
       growthTips: '培养耐心，注重细节，考虑长远影响'
     },
-    { 
-      type: 'ESFP', 
-      name: '表演者', 
+    {
+      type: 'ESFP',
+      name: '表演者',
       description: '热情、友善、享受生活',
       color: '#84cc16',
       bgGradient: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)',
@@ -202,9 +202,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '生动有趣、热情洋溢、注重当下体验',
       growthTips: '学习规划未来，培养专注力，面对复杂问题'
     },
-    { 
-      type: 'ENFP', 
-      name: '竞选者', 
+    {
+      type: 'ENFP',
+      name: '竞选者',
       description: '热情、创意、鼓舞人心',
       color: '#fbbf24',
       bgGradient: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
@@ -217,9 +217,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '热情洋溢、富有感染力、注重可能性',
       growthTips: '培养专注力，学习管理时间，注重细节'
     },
-    { 
-      type: 'ENTP', 
-      name: '辩论家', 
+    {
+      type: 'ENTP',
+      name: '辩论家',
       description: '机智、创新、喜欢挑战',
       color: '#a855f7',
       bgGradient: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
@@ -232,9 +232,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '机智幽默、善于辩论、注重思想交流',
       growthTips: '培养耐心，学习坚持，考虑他人感受'
     },
-    { 
-      type: 'ESTJ', 
-      name: '执行官', 
+    {
+      type: 'ESTJ',
+      name: '执行官',
       description: '务实、果断、注重效率',
       color: '#0ea5e9',
       bgGradient: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
@@ -247,9 +247,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '直接、务实、注重效率，可能显得生硬',
       growthTips: '培养灵活性，学习情感表达，考虑他人感受'
     },
-    { 
-      type: 'ESFJ', 
-      name: '执政官', 
+    {
+      type: 'ESFJ',
+      name: '执政官',
       description: '友善、尽责、善于交际',
       color: '#22c55e',
       bgGradient: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
@@ -262,9 +262,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '友善、体贴、注重和谐，避免冲突',
       growthTips: '学习设定界限，表达自己的需求，接受不同意见'
     },
-    { 
-      type: 'ENFJ', 
-      name: '主人公', 
+    {
+      type: 'ENFJ',
+      name: '主人公',
       description: '魅力四射、鼓舞人心、富有同情心',
       color: '#eab308',
       bgGradient: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
@@ -277,9 +277,9 @@ const MBTIPersonalityTabHome = () => {
       communicationStyle: '鼓舞人心、富有感染力、注重他人感受',
       growthTips: '学习保护个人能量，接受建设性批评，平衡理想与现实'
     },
-    { 
-      type: 'ENTJ', 
-      name: '指挥官', 
+    {
+      type: 'ENTJ',
+      name: '指挥官',
       description: '战略思维、果断、领导力强',
       color: '#d946ef',
       bgGradient: 'linear-gradient(135deg, #d946ef 0%, #c026d3 100%)',
@@ -312,11 +312,11 @@ const MBTIPersonalityTabHome = () => {
     try {
       // 查找对应的MBTI类型数据
       const typeData = mbtiTypes.find(t => t.type === mbtiType);
-      
+
       if (!typeData) {
         throw new Error(`未找到${mbtiType}类型的分析数据`);
       }
-      
+
       // 生成兼容类型（相似的MBTI类型）
       const getCompatibleTypes = (type) => {
         const compatibilityMap = {
@@ -337,10 +337,10 @@ const MBTIPersonalityTabHome = () => {
           'ENFJ': ['INFJ', 'ESFJ', 'ENFP'],
           'ENTJ': ['INTJ', 'ESTJ', 'ENTP']
         };
-        
+
         return compatibilityMap[type] || ['INFJ', 'ENFJ', 'ENFP'];
       };
-      
+
       // 生成不兼容类型
       const getIncompatibleTypes = (type) => {
         const incompatibilityMap = {
@@ -361,10 +361,10 @@ const MBTIPersonalityTabHome = () => {
           'ENFJ': ['ISTP', 'ESTP', 'ISTJ'],
           'ENTJ': ['ISFP', 'INFP', 'ESFP']
         };
-        
+
         return incompatibilityMap[type] || ['ISTJ', 'ESTJ', 'ISTP'];
       };
-      
+
       // 生成职业建议详情
       const getCareerDetails = (type) => {
         const careerMap = {
@@ -380,18 +380,18 @@ const MBTIPersonalityTabHome = () => {
           },
           // 其他类型的职业详情...
         };
-        
+
         return careerMap[type] || {
           idealEnvironments: ['支持性环境', '清晰的目标', '合作氛围'],
           workStyle: '平衡、适应性强、注重结果',
           avoidCareers: ['高度竞争环境', '模糊的任务', '孤立工作']
         };
       };
-      
+
       const compatibleTypes = getCompatibleTypes(mbtiType);
       const incompatibleTypes = getIncompatibleTypes(mbtiType);
       const careerDetails = getCareerDetails(mbtiType);
-      
+
       // 构建分析数据
       const analysisData = {
         basicInfo: {
@@ -428,7 +428,7 @@ const MBTIPersonalityTabHome = () => {
           mindfulness: `注意避免${typeData.weaknesses.slice(0, 2).join('和')}的倾向`
         }
       };
-      
+
       setPersonalityAnalysis(analysisData);
     } catch (error) {
       console.error('加载MBTI分析失败:', error);
@@ -441,14 +441,14 @@ const MBTIPersonalityTabHome = () => {
   // 初始化组件 - 优化为立即加载默认数据
   useEffect(() => {
     let isMounted = true;
-    
+
     const initialize = async () => {
       try {
         // 立即加载所有MBTI类型和默认MBTI，不等待用户配置
         setAllMBTIs(mbtiList);
         setUserMBTI('INFP');
         setTempMBTI('');
-        
+
         // 异步获取用户配置，但不阻塞界面
         setTimeout(async () => {
           try {
@@ -456,7 +456,7 @@ const MBTIPersonalityTabHome = () => {
             if (!userConfigManager.initialized) {
               await userConfigManager.initialize();
             }
-            
+
             // 获取用户配置
             const currentConfig = userConfigManager.getCurrentConfig();
             if (currentConfig && isMounted) {
@@ -465,7 +465,7 @@ const MBTIPersonalityTabHome = () => {
                 birthDate: currentConfig.birthDate || '',
                 mbti: currentConfig.mbti || ''
               });
-              
+
               // 如果用户有配置的MBTI且不是默认值，则更新显示
               if (currentConfig.mbti && currentConfig.mbti !== 'INFP') {
                 setUserMBTI(currentConfig.mbti);
@@ -473,7 +473,7 @@ const MBTIPersonalityTabHome = () => {
                 setDataLoaded(false);
               }
             }
-            
+
             // 添加配置变更监听器
             const removeConfigListener = userConfigManager.addListener((configData) => {
               if (isMounted && configData.currentConfig) {
@@ -482,18 +482,18 @@ const MBTIPersonalityTabHome = () => {
                   birthDate: configData.currentConfig.birthDate || '',
                   mbti: configData.currentConfig.mbti || ''
                 });
-                
+
                 // 仅在没有临时MBTI时更新MBTI信息，避免覆盖用户临时选择
-                if (configData.currentConfig.mbti && 
-                    configData.currentConfig.mbti !== userMBTI &&
-                    !tempMBTI) { // 仅在没有临时MBTI时更新
+                if (configData.currentConfig.mbti &&
+                  configData.currentConfig.mbti !== userMBTI &&
+                  !tempMBTI) { // 仅在没有临时MBTI时更新
                   setUserMBTI(configData.currentConfig.mbti);
                   // 标记需要重新加载数据
                   setDataLoaded(false);
                 }
               }
             });
-            
+
             if (removeConfigListener) {
               removeConfigListener();
             }
@@ -501,13 +501,13 @@ const MBTIPersonalityTabHome = () => {
             console.warn('异步加载用户配置失败:', error);
           }
         }, 50); // 短延迟，确保界面先显示
-        
+
         if (isMounted) {
           setInitialized(true);
         }
       } catch (error) {
         console.error('初始化MBTI组件失败:', error);
-        
+
         // 降级处理
         setAllMBTIs(mbtiList);
         setUserMBTI('INFP');
@@ -517,9 +517,9 @@ const MBTIPersonalityTabHome = () => {
         }
       }
     };
-    
+
     initialize();
-    
+
     return () => {
       isMounted = false;
     };
@@ -528,14 +528,14 @@ const MBTIPersonalityTabHome = () => {
   // 当MBTI类型变化时重新加载数据
   useEffect(() => {
     if (!userMBTI || !initialized) return;
-    
+
     // 仅在首次默认加载或用户主动切换时执行数据请求
     if (!dataLoaded) {
       const timer = setTimeout(() => {
         loadPersonalityAnalysis(userMBTI);
         setDataLoaded(true);
       }, 200);
-      
+
       return () => clearTimeout(timer);
     }
   }, [userMBTI, initialized, dataLoaded]);
@@ -550,7 +550,7 @@ const MBTIPersonalityTabHome = () => {
         // 否则设置为临时MBTI
         setTempMBTI(mbti);
       }
-      
+
       setUserMBTI(mbti);
       // 标记需要重新加载数据
       setDataLoaded(false);
@@ -565,44 +565,45 @@ const MBTIPersonalityTabHome = () => {
     const typeData = mbtiTypes.find(t => t.type === type);
 
     return (
-      <Card className="mb-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-            {/* 图标和类型 */}
-            <div 
-              className="flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-2xl shadow"
-              style={{ background: typeData?.bgGradient || color }}
-            >
-              {icon}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-700 dark:to-purple-900 rounded-2xl p-6 text-white shadow-lg mb-4 transition-all duration-300">
+        <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+        <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-purple-400/20 rounded-full blur-2xl"></div>
+
+        <div className="relative flex flex-col md:flex-row items-center md:items-start gap-5">
+          {/* 图标和类型 */}
+          <div
+            className="flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center text-3xl shadow-inner backdrop-blur-md bg-white/20 border border-white/20 ring-1 ring-white/30"
+          >
+            <span className="mb-1">{icon}</span>
+            <span className="text-[10px] uppercase font-black tracking-tighter opacity-80">{type}</span>
+          </div>
+
+          {/* 基本信息 */}
+          <div className="flex-1 text-center md:text-left">
+            <div className="mb-3">
+              <div className="flex flex-col md:flex-row md:items-baseline md:gap-3 mb-1 justify-center md:justify-start">
+                <h1 className="text-2xl font-black tracking-tight">{name}</h1>
+                <span className="text-xs font-bold px-2 py-0.5 bg-white/20 rounded-full backdrop-blur-sm tracking-widest uppercase">{type}</span>
+              </div>
+              <p className="text-sm text-white/80 font-medium leading-relaxed tracking-wide italic">
+                "{description}"
+              </p>
             </div>
-            
-            {/* 基本信息 */}
-            <div className="flex-1 text-center md:text-left">
-              <div className="mb-2">
-                <h1 className="text-xl font-bold text-gray-800 dark:text-white mb-1">
-                  {type} - {name}
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{description}</p>
-              </div>
-              
-              {/* 核心特质标签 */}
-              <div className="mb-2">
-                <div className="flex flex-wrap gap-1 justify-center md:justify-start">
-                  {personalityAnalysis.traits.coreTraits.slice(0, 3).map((trait, index) => (
-                    <span 
-                      key={index}
-                      className="px-2 py-1 rounded-full text-xs font-medium text-white"
-                      style={{ backgroundColor: color }}
-                    >
-                      {trait}
-                    </span>
-                  ))}
-                </div>
-              </div>
+
+            {/* 核心特质标签 */}
+            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+              {personalityAnalysis.traits.coreTraits.slice(0, 4).map((trait, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 bg-white/15 dark:bg-black/20 border border-white/10 rounded-lg text-[11px] font-bold tracking-wider text-white/90 shadow-sm"
+                >
+                  {trait}
+                </span>
+              ))}
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
@@ -613,33 +614,35 @@ const MBTIPersonalityTabHome = () => {
     const { strengths, weaknesses } = personalityAnalysis.traits;
 
     return (
-      <Card title="核心特质" className="mb-4">
-        <div className="grid grid-cols-2 gap-4">
+      <Card title="特质潜力分析" className="mb-4 shadow-sm border-gray-100 dark:border-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* 优势 */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 p-3 rounded-lg border border-green-100 dark:border-gray-700">
-            <h3 className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">
-              <span className="mr-1">✅</span> 优势
+          <div className="bg-emerald-50/40 dark:bg-emerald-950/20 p-4 rounded-xl border border-emerald-100/50 dark:border-emerald-800/30 transition-all hover:shadow-md">
+            <h3 className="text-[13px] font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center tracking-wide">
+              <span className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mr-2 text-xs">💎</span>
+              核心优势
             </h3>
-            <ul className="space-y-1">
-              {strengths.slice(0, 3).map((strength, index) => (
+            <ul className="space-y-2.5">
+              {strengths.slice(0, 4).map((strength, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                  <span className="text-xs text-gray-700 dark:text-gray-300">{strength}</span>
+                  <div className="mt-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2.5 flex-shrink-0 animate-pulse"></div>
+                  <span className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-tight">{strength}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* 需要注意 */}
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 p-3 rounded-lg border border-amber-100 dark:border-gray-700">
-            <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2 flex items-center">
-              <span className="mr-1">⚠️</span> 注意
+          <div className="bg-rose-50/40 dark:bg-rose-950/20 p-4 rounded-xl border border-rose-100/50 dark:border-rose-800/30 transition-all hover:shadow-md">
+            <h3 className="text-[13px] font-bold text-rose-800 dark:text-rose-400 mb-3 flex items-center tracking-wide">
+              <span className="w-6 h-6 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center mr-2 text-xs">⚖️</span>
+              注意与挑战
             </h3>
-            <ul className="space-y-1">
-              {weaknesses.slice(0, 3).map((weakness, index) => (
+            <ul className="space-y-2.5">
+              {weaknesses.slice(0, 4).map((weakness, index) => (
                 <li key={index} className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
-                  <span className="text-xs text-gray-700 dark:text-gray-300">{weakness}</span>
+                  <div className="mt-1.5 w-1.5 h-1.5 bg-rose-400 rounded-full mr-2.5 flex-shrink-0"></div>
+                  <span className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-tight">{weakness}</span>
                 </li>
               ))}
             </ul>
@@ -649,43 +652,43 @@ const MBTIPersonalityTabHome = () => {
     );
   };
 
+
   // 渲染人际关系卡片
   const renderRelationshipsCard = () => {
     if (!personalityAnalysis?.relationships) return null;
 
     const { compatibleTypes, advice } = personalityAnalysis.relationships;
-    const typeData = mbtiTypes.find(t => t.type === userMBTI);
 
     return (
-      <Card title="人际交往" className="mb-4">
-        <div className="space-y-3">
+      <Card title="社交与情感共鸣" className="mb-4 shadow-sm border-gray-100 dark:border-gray-700">
+        <div className="space-y-4">
           {/* 兼容类型 */}
           <div>
-            <h3 className="text-sm font-semibold text-green-700 dark:text-green-300 mb-2 flex items-center">
-              <span className="mr-1">🤝</span> 相处融洽的类型
+            <h3 className="text-[13px] font-bold text-gray-700 dark:text-gray-300 mb-2.5 flex items-center">
+              <span className="w-6 h-6 bg-pink-50 dark:bg-pink-900/40 rounded-full flex items-center justify-center mr-2 text-xs">💖</span>
+              灵魂共鸣类型
             </h3>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-2">
               {compatibleTypes.slice(0, 4).map((type, index) => {
                 const compatTypeData = mbtiTypes.find(t => t.type === type);
                 return (
-                  <span 
+                  <div
                     key={index}
-                    className="px-2 py-1 bg-green-100 dark:bg-green-900 rounded-full text-xs text-gray-700 dark:text-gray-200 border border-green-200 dark:border-green-700 flex items-center"
+                    className="group px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-sm flex items-center transition-all hover:border-pink-200 dark:hover:border-pink-900/50 hover:shadow-md"
                   >
-                    <span className="mr-1">{compatTypeData?.icon}</span>
-                    {type}
-                  </span>
+                    <span className="text-sm mr-2 group-hover:scale-125 transition-transform">{compatTypeData?.icon}</span>
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{type}</span>
+                  </div>
                 );
               })}
             </div>
           </div>
-          
+
           {/* 关系建议 */}
-          <div>
-            <h3 className="text-sm font-semibold text-pink-700 dark:text-pink-300 mb-2 flex items-center">
-              <span className="mr-1">💡</span> 建议
-            </h3>
-            <p className="text-xs text-gray-700 dark:text-gray-300 bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-2 rounded">
+          <div className="relative p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-xl border border-pink-100/50 dark:border-pink-900/30">
+            <div className="absolute top-3 right-4 opacity-10 text-3xl">�</div>
+            <h3 className="text-[11px] font-black text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1.5">Communication Advice</h3>
+            <p className="text-[12px] text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
               {advice}
             </p>
           </div>
@@ -701,25 +704,67 @@ const MBTIPersonalityTabHome = () => {
     const { suggestions } = personalityAnalysis.career;
 
     return (
-      <Card title="职业方向" className="mb-4">
-        <div>
-          <h3 className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-2 flex items-center">
-            <span className="mr-1">💼</span> 适合职业
+      <Card title="天赋使命与职业" className="mb-4 shadow-sm border-gray-100 dark:border-gray-700">
+        <div className="p-1">
+          <h3 className="text-[13px] font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+            <span className="w-6 h-6 bg-blue-50 dark:bg-blue-900/40 rounded-full flex items-center justify-center mr-2 text-xs">�</span>
+            高匹配度职业
           </h3>
-          <div className="flex flex-wrap gap-1">
+          <div className="grid grid-cols-2 gap-2">
             {suggestions.slice(0, 6).map((career, index) => (
-              <span 
+              <div
                 key={index}
-                className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-xs text-gray-700 dark:text-gray-200 border border-blue-200 dark:border-blue-700"
+                className="px-3 py-2.5 bg-blue-50/30 dark:bg-blue-950/20 border border-blue-100/50 dark:border-blue-900/20 rounded-xl text-[12px] text-blue-800 dark:text-blue-300 font-bold text-center tracking-wide"
               >
                 {career}
-              </span>
+              </div>
             ))}
           </div>
         </div>
       </Card>
     );
   };
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
 
   // 渲染个人成长卡片
   const renderPersonalGrowthCard = () => {
@@ -728,131 +773,157 @@ const MBTIPersonalityTabHome = () => {
     const { tips, potential } = personalityAnalysis.personalGrowth;
 
     return (
-      <Card title="成长建议" className="mb-4">
-        <div className="space-y-3">
+      <Card title="成长与进化指南" className="mb-4 shadow-sm border-gray-100 dark:border-gray-700">
+        <div className="space-y-4">
           {/* 成长潜力 */}
-          <div>
-            <h3 className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-2 flex items-center">
-              <span className="mr-1">🚀</span> 潜力
+          <div className="p-4 bg-indigo-50/30 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30">
+            <h3 className="text-[11px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest mb-2 flex items-center">
+              <span className="mr-2">✨</span> Potential Analysis
             </h3>
-            <p className="text-xs text-gray-700 dark:text-gray-300 bg-emerald-50 dark:bg-emerald-900 dark:bg-opacity-20 p-2 rounded">
+            <p className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-relaxed tracking-wide">
               {potential}
             </p>
           </div>
 
           {/* 成长建议 */}
-          <div>
-            <h3 className="text-sm font-semibold text-lime-700 dark:text-lime-300 mb-2 flex items-center">
-              <span className="mr-1">🌱</span> 建议
-            </h3>
-            <div className="grid grid-cols-1 gap-1">
-              {tips.slice(0, 2).map((tip, index) => (
-                <div key={index} className="flex items-start bg-lime-50 dark:bg-lime-900 dark:bg-opacity-20 p-2 rounded">
-                  <span className="text-lime-600 dark:text-lime-400 mr-1">✓</span>
-                  <span className="text-xs text-gray-700 dark:text-gray-300">{tip}</span>
+          <div className="grid grid-cols-1 gap-3">
+            {tips.slice(0, 3).map((tip, index) => (
+              <div key={index} className="flex items-center p-3.5 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-transform hover:translate-x-1">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 flex items-center justify-center mr-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                  <span className="text-sm font-bold">{index + 1}</span>
                 </div>
-              ))}
-            </div>
+                <span className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-tight">{tip}</span>
+              </div>
+            ))}
           </div>
         </div>
       </Card>
     );
   };
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
+  Broadway;
 
   // 渲染MBTI选择器
   const renderMBTISelector = () => {
     return (
-      <Card title="选择人格类型" className="mb-4">
-        <div className="space-y-3">
+      <Card title="深度人格探索" className="mb-4 shadow-sm">
+        <div className="space-y-4">
           <div>
             {/* 当前用户信息 */}
             {userInfo.mbti && (
-              <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded border border-blue-200 dark:border-blue-700">
-                <p className="text-blue-700 dark:text-blue-300 text-xs">
-                  您的MBTI类型：<span className="font-bold">{userInfo.mbti}</span>
-                  {tempMBTI && tempMBTI !== userInfo.mbti && (
-                    <span className="ml-1 text-xs">（当前查看：{tempMBTI}）</span>
-                  )}
-                </p>
+              <div className="mb-4 p-3 bg-indigo-50/50 dark:bg-indigo-900/30 rounded-2xl border border-indigo-100/50 dark:border-indigo-800/50 flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="mr-2 text-lg">💡</span>
+                  <div>
+                    <p className="text-indigo-800 dark:text-indigo-300 text-[11px] font-bold uppercase tracking-widest leading-none">Your Configuration</p>
+                    <p className="text-gray-800 dark:text-white text-xs font-black mt-1">{userInfo.mbti}</p>
+                  </div>
+                </div>
+                {tempMBTI && tempMBTI !== userInfo.mbti && (
+                  <div className="px-2.5 py-1 bg-orange-100 dark:bg-orange-900/40 rounded-full">
+                    <p className="text-orange-700 dark:text-orange-300 text-[10px] font-bold">查看中: {tempMBTI}</p>
+                  </div>
+                )}
               </div>
             )}
-            
+
             {/* 提示文本 */}
-            <div className="mb-2 text-xs text-gray-600 dark:text-gray-400">
-              点击任意MBTI类型查看分析，临时查看不会保存配置
-            </div>
-            
+            <p className="mb-3 text-[11px] text-gray-400 dark:text-gray-500 font-medium px-1 flex items-center">
+              <span className="mr-1.5 opacity-50">✦</span> 点击下方任意类型探索深度分析
+            </p>
+
             {/* MBTI类型网格 */}
-            <div className="mb-3">
-              <div className="grid grid-cols-8 gap-1">
+            <div className="mb-4">
+              <div className="grid grid-cols-4 gap-2">
                 {allMBTIs.map((mbti) => {
                   const typeData = mbtiTypes.find(t => t.type === mbti);
-                  const isTempSelected = tempMBTI === mbti && tempMBTI !== userInfo.mbti;
+                  const isSelected = userMBTI === mbti;
                   const isUserConfig = userInfo.mbti === mbti;
-                  
+
                   return (
                     <button
                       key={mbti}
                       onClick={() => handleMBTIChange(mbti)}
-                      className={`p-1.5 rounded text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center relative overflow-hidden ${
-                        userMBTI === mbti
-                          ? 'ring-2 ring-offset-1 shadow-sm transform scale-110'
-                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
-                      }`}
-                      style={{
-                        backgroundColor: userMBTI === mbti ? typeData?.color : undefined,
-                        color: userMBTI === mbti ? 'white' : undefined,
-                        borderColor: typeData?.color,
-                        borderWidth: userMBTI === mbti ? '2px' : '1px'
-                      }}
-                      title={
-                        isUserConfig 
-                          ? '您的配置MBTI类型' 
-                          : isTempSelected 
-                            ? '临时查看的MBTI类型' 
-                            : `查看${mbti}类型分析`
-                      }
+                      className={`group relative py-3 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center overflow-hidden border ${isSelected
+                          ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-transparent shadow-lg scale-[1.02]'
+                          : 'bg-white dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-800 hover:shadow-md'
+                        }`}
                     >
-                      {/* 选中状态的高亮效果 */}
-                      {userMBTI === mbti && (
-                        <>
-                          <span 
-                            className="absolute inset-0 rounded animate-pulse opacity-30"
-                            style={{ backgroundColor: typeData?.color }}
-                          ></span>
-                          <span 
-                            className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-white animate-ping"
-                          ></span>
-                        </>
+                      {/* 选中光晕效果 */}
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
                       )}
-                      <span className="relative z-10 text-sm mb-0.5">{typeData?.icon}</span>
-                      <span className="relative z-10 font-bold">{mbti}</span>
-                      {/* 用户配置标记 */}
+
+                      <span className={`text-lg mb-0.5 transition-transform group-hover:scale-125 ${isSelected ? 'scale-110' : ''}`}>
+                        {typeData?.icon}
+                      </span>
+                      <span className={`text-[11px] font-black tracking-tighter ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-300'
+                        }`}>
+                        {mbti}
+                      </span>
+
+                      {/* 状态标记 */}
                       {isUserConfig && (
-                        <span className="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full animate-pulse" title="您的配置"></span>
-                      )}
-                      {/* 临时查看标记 */}
-                      {isTempSelected && (
-                        <span className="absolute top-0 right-0 w-2 h-2 bg-orange-500 rounded-full animate-pulse" title="临时查看"></span>
+                        <div className={`absolute top-1.5 right-1.5 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-indigo-500'} shadow-sm`}></div>
                       )}
                     </button>
                   );
                 })}
               </div>
             </div>
-            
+
             {/* 重置按钮 */}
             {tempMBTI && tempMBTI !== userInfo.mbti && (
-              <div className="flex justify-center">
+              <div className="flex justify-center mt-2">
                 <button
                   onClick={() => {
                     setUserMBTI(userInfo.mbti);
                     setTempMBTI('');
                     setDataLoaded(false);
                   }}
-                  className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="flex items-center space-x-1.5 px-4 py-1.5 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold rounded-full border border-indigo-100 dark:border-indigo-900 shadow-sm transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
                 >
-                  返回您的配置 ({userInfo.mbti})
+                  <span>↩</span>
+                  <span>回归我的配置: {userInfo.mbti}</span>
                 </button>
               </div>
             )}
@@ -900,16 +971,16 @@ const MBTIPersonalityTabHome = () => {
         <div className="space-y-3">
           {/* 基本信息卡片 */}
           {renderBasicInfoCard()}
-          
+
           {/* 特质分析卡片 */}
           {renderTraitsCard()}
-          
+
           {/* 人际关系卡片 */}
           {renderRelationshipsCard()}
-          
+
           {/* 职业发展卡片 */}
           {renderCareerCard()}
-          
+
           {/* 个人成长卡片 */}
           {renderPersonalGrowthCard()}
         </div>
@@ -932,7 +1003,7 @@ const MBTIPersonalityTabHome = () => {
                     key={mbti}
                     onClick={() => handleMBTIChange(mbti)}
                     className="px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 hover:shadow"
-                    style={{ 
+                    style={{
                       backgroundColor: typeData?.color,
                       color: 'white'
                     }}
