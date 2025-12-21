@@ -724,47 +724,6 @@ const MBTIPersonalityTabHome = () => {
       </Card>
     );
   };
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
 
   // 渲染个人成长卡片
   const renderPersonalGrowthCard = () => {
@@ -800,47 +759,6 @@ const MBTIPersonalityTabHome = () => {
       </Card>
     );
   };
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
-  Broadway;
 
   // 渲染MBTI选择器
   const renderMBTISelector = () => {
@@ -884,8 +802,8 @@ const MBTIPersonalityTabHome = () => {
                       key={mbti}
                       onClick={() => handleMBTIChange(mbti)}
                       className={`group relative py-3 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center overflow-hidden border ${isSelected
-                          ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-transparent shadow-lg scale-[1.02]'
-                          : 'bg-white dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-800 hover:shadow-md'
+                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-transparent shadow-lg scale-[1.02]'
+                        : 'bg-white dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-800 hover:shadow-md'
                         }`}
                     >
                       {/* 选中光晕效果 */}

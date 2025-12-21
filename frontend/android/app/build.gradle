@@ -2,7 +2,9 @@ apply plugin: 'com.android.application'
 // apply plugin: 'com.google.gms.google-services'
 
 def versionFile = file('../../src/version.json')
-def versionJson = new groovy.json.JsonSlurper().parseText(versionFile.text)
+def versionText = versionFile.text
+def versionName = (versionText =~ /"versionName":\s*"([^"]+)"/)[0][1]
+def versionCode = (versionText =~ /"versionCode":\s*(\d+)/)[0][1].toInteger()
 
 android {
     namespace "com.nicetoday.app"
@@ -11,8 +13,8 @@ android {
         applicationId "com.nicetoday.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode versionJson.versionCode
-        versionName versionJson.versionName
+        versionCode versionCode
+        versionName versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
