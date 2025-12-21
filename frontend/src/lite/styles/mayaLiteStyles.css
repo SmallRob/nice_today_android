@@ -3,7 +3,8 @@
 /* 月历样式 - 引用zencalendar的样式 */
 .calendar {
   position: relative;
-  color: var(--dark-color); /* 白色 */
+  color: var(--dark-color);
+  /* 白色 */
   text-align: center;
   margin: 0 var(--spacing-sm);
 }
@@ -30,7 +31,7 @@
   margin-left: 0.2em;
 }
 
-.calendar .hd span + span {
+.calendar .hd span+span {
   margin-left: 0.5em;
 }
 
@@ -40,6 +41,29 @@
 
 .calendar .hd .month:after {
   content: '月';
+}
+
+.calendar .hd-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.calendar .nav-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: var(--font-size-xl);
+  padding: 0 var(--spacing-base);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar .nav-btn:active {
+  opacity: 0.6;
 }
 
 .calendar .bd {
@@ -69,7 +93,8 @@
   font-weight: bold;
   font-size: var(--font-size-sm);
   line-height: 24px;
-  color: var(--dark-color); /* 白色 */
+  color: var(--dark-color);
+  /* 白色 */
 }
 
 .calendar .weeks li:before {
@@ -91,7 +116,8 @@
 
 .calendar .days .num {
   font-size: var(--font-size-base);
-  color: var(--dark-color); /* 白色 */
+  color: var(--dark-color);
+  /* 白色 */
 }
 
 .calendar .days .sat {
@@ -114,6 +140,132 @@
 
 .calendar .days .other .item {
   opacity: 0.4;
+}
+
+.calendar .days .mood-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+}
+
+.calendar .days .selected .mood-dot {
+  color: white;
+}
+
+/* 记录心情按钮样式 */
+.lite-button-sm {
+  padding: 4px 10px;
+  font-size: var(--font-size-sm);
+  min-height: 32px;
+}
+
+/* 模态框样式 */
+.mood-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: var(--spacing-base);
+}
+
+.mood-modal {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+}
+
+.mood-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-base);
+}
+
+.mood-modal-close {
+  background: none;
+  border: none;
+  color: var(--gray-color);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.mood-icons-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-base);
+}
+
+.mood-icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-base);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.mood-icon-item.active {
+  background-color: rgba(52, 152, 219, 0.2);
+  border-color: var(--primary-color);
+}
+
+.mood-icon-item .emoji {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.mood-icon-item .label {
+  font-size: var(--font-size-xs);
+  color: var(--gray-color);
+}
+
+.symptoms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-base);
+}
+
+.symptom-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.symptom-item input {
+  margin: 0;
+}
+
+.mood-level-container {
+  margin-bottom: var(--spacing-base);
+}
+
+.mood-slider {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.mood-level-display {
+  display: flex;
+  justify-content: space-between;
+  color: var(--gray-color);
+  font-size: var(--font-size-sm);
 }
 
 /* 玛雅信息网格 */
@@ -141,7 +293,8 @@
 .maya-value {
   font-size: var(--font-size-lg);
   font-weight: bold;
-  color: var(--dark-color); /* 白色 */
+  color: var(--dark-color);
+  /* 白色 */
 }
 
 /* 玛雅全名 */
@@ -168,13 +321,15 @@
 
 .daily-inspiration h4 {
   margin-top: 0;
-  color: var(--secondary-color); /* 白色 */
+  color: var(--secondary-color);
+  /* 白色 */
   font-size: var(--font-size-base);
 }
 
 .daily-inspiration p {
   margin-bottom: 0;
-  color: var(--dark-color); /* 白色 */
+  color: var(--dark-color);
+  /* 白色 */
   font-size: var(--font-size-base);
   line-height: 1.5;
 }
@@ -185,23 +340,23 @@
     font-size: 1.1rem;
     padding: 10px;
   }
-  
+
   .calendar .days .num {
     font-size: 0.9rem;
   }
-  
+
   .maya-info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .maya-full-name {
     font-size: 1.1rem;
   }
-  
+
   .daily-inspiration h4 {
     font-size: 1rem;
   }
-  
+
   .daily-inspiration p {
     font-size: 0.9rem;
   }
