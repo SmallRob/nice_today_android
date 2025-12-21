@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import IconLibrary from './IconLibrary';
+import { fetchDressInfoRange, fetchSpecificDateDressInfo, formatDateString } from '../services/apiServiceRefactored';
 
 const WuxingEnergyTrend = ({ dailyElement }) => {
   const relationships = {
@@ -85,7 +86,6 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
   const [selectedDressInfo, setSelectedDressInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [dateRange, setDateRange] = useState({ start: null, end: null });
 
   const currentSeason = useMemo(() => {
     const month = selectedDate.getMonth() + 1;
@@ -117,10 +117,9 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await getDressInfoRange(1, 6);
+      const result = await fetchDressInfoRange(apiBaseUrl);
       if (result.success) {
         setDressInfoList(result.dressInfoList);
-        setDateRange(result.dateRange);
         const today = new Date().toISOString().split('T')[0];
         const todayInfo = result.dressInfoList.find(info => info.date === today);
         setSelectedDressInfo(todayInfo || result.dressInfoList[0]);
@@ -132,7 +131,7 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiBaseUrl]);
 
   const handleDateChange = useCallback(async (date) => {
     setSelectedDate(date);
@@ -142,14 +141,14 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
       setSelectedDressInfo(dateInfo);
     } else {
       try {
-        const result = await getSpecificDateDressInfo(dateStr);
+        const result = await fetchSpecificDateDressInfo(apiBaseUrl, dateStr);
         if (result.success) {
           setSelectedDressInfo(result.dressInfo);
           setDressInfoList(prev => [...prev.filter(i => i.date !== dateStr), result.dressInfo].sort((a, b) => a.date.localeCompare(b.date)));
         }
       } catch (err) { }
     }
-  }, [dressInfoList]);
+  }, [dressInfoList, apiBaseUrl]);
 
   const formatDate = useCallback((dateStr) => {
     const date = new Date(dateStr);
