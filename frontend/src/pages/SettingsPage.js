@@ -363,7 +363,8 @@ function SettingsPage() {
                           </div>
                         </div>
                         
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        {/* 通知设置 - 暂时隐藏以避免闪退问题 */}
+                        {/* <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                           <div className="mb-4">
                             <h4 className="font-medium text-gray-900 dark:text-white mb-2">通知设置</h4>
                             
@@ -445,7 +446,7 @@ function SettingsPage() {
                               </div>
                             )}
                           </div>
-                        </div>
+                        </div> */}
                         
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                           <div className="mb-4">

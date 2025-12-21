@@ -390,36 +390,110 @@ const SOUL_ANSWERS = {
   }
 };
 
-// 幸运物品数据库
+// 幸运物品数据库 - 增强版
+// 幸运物品数据库 - 增强版 (包含生活用品与配饰)
 const LUCKY_ITEMS = {
   fire: [
     { name: '红色笔记本', icon: '📓', description: '记录灵感，提升创造力' },
     { name: '玛瑙手链', icon: '🔴', description: '增强勇气，保护能量' },
     { name: '香薰蜡烛', icon: '🕯️', description: '净化环境，提升热情' },
     { name: '运动手环', icon: '🏃', description: '记录活力，激励行动' },
-    { name: '太阳镜', icon: '🕶️', description: '保护视力，增强自信' }
+    { name: '太阳镜', icon: '🕶️', description: '保护视力，增强自信' },
+    { name: '火焰项链', icon: '🔥', description: '点燃热情，释放潜力' },
+    { name: '红色领带', icon: '👔', description: '职场助推，增强气场' },
+    { name: '黑曜石', icon: '🌑', description: '吸收负能量，保持专注' },
+    { name: '金丝边眼镜', icon: '👓', description: '睿智冷静，捕捉机遇' },
+    { name: '红色钥匙扣', icon: '🔑', description: '开启好运，守护平安' },
+    { name: '便携咖啡杯', icon: '☕', description: '随时活力，社交核心' },
+    { name: '红宝石耳钉', icon: '👂', description: '精致魅力，吸引贵人' },
+    { name: '复古打火机', icon: '🔥', description: '灵光乍现，指引方向' },
+    { name: '运动跑鞋', icon: '👟', description: '大步向前，无畏挑战' }
   ],
   earth: [
     { name: '皮质钱包', icon: '👝', description: '聚财守财，增强稳定' },
     { name: '绿植盆栽', icon: '🌱', description: '净化空气，带来生机' },
     { name: '实木书签', icon: '📖', description: '辅助学习，增强耐心' },
     { name: '陶瓷杯', icon: '☕', description: '温暖人心，促进交流' },
-    { name: '玉石挂件', icon: '💎', description: '稳定情绪，增强耐力' }
+    { name: '玉石挂件', icon: '💎', description: '稳定情绪，增强耐力' },
+    { name: '大地色系抱枕', icon: '🛋️', description: '家和万事兴，提升自愈力' },
+    { name: '石英钟', icon: '🕒', description: '精准控制，提高效率' },
+    { name: '黄水晶', icon: '💛', description: '吸纳财富，增强意志' },
+    { name: '真皮腰带', icon: '🎫', description: '约束自我，坚持原则' },
+    { name: '帆布购物袋', icon: '🛍️', description: '环保生活，积攒福气' },
+    { name: '紫砂壶', icon: '🍵', description: '沉淀心性，细品人生' },
+    { name: '琥珀戒指', icon: '💍', description: '凝聚时光，增强定力' },
+    { name: '陶瓷香薰炉', icon: '🪔', description: '安神助眠，稳固内心' },
+    { name: '实木笔记本夹', icon: '📁', description: '井然有序，规划未来' }
   ],
   air: [
     { name: '智能手机', icon: '📱', description: '便捷沟通，获取信息' },
     { name: '水晶饰品', icon: '🔮', description: '净化思维，增强灵感' },
     { name: '羽毛笔', icon: '✒️', description: '激发创意，提升表达' },
     { name: '风铃', icon: '🎐', description: '带来好运，净化环境' },
-    { name: '蓝牙耳机', icon: '🎧', description: '专注学习，避免干扰' }
+    { name: '蓝牙耳机', icon: '🎧', description: '专注学习，避免干扰' },
+    { name: '电风扇', icon: '🌀', description: '流通能量，扫除沉闷' },
+    { name: '望远镜', icon: '🔭', description: '高瞻远瞩，开拓眼界' },
+    { name: '纸飞机饰品', icon: '✈️', description: '追逐自由，释放压力' },
+    { name: '拼图挂画', icon: '🖼️', description: '拼凑智慧，逻辑清晰' },
+    { name: '白色绸缎围巾', icon: '🧣', description: '随风而动，灵活应变' },
+    { name: '电子书阅读器', icon: '📖', description: '知识海洋，思维飞翔' },
+    { name: '银色长项链', icon: '⛓️', description: '连接沟通，优雅灵动' },
+    { name: '迷你无人机', icon: '🛸', description: '不同视角，发现奇迹' },
+    { name: '清冷香水', icon: '🧴', description: '独树一帜，保持清醒' }
   ],
   water: [
     { name: '海洋香薰', icon: '🌊', description: '平静心灵，增强直觉' },
     { name: '蓝色水晶', icon: '💧', description: '净化情感，带来宁静' },
     { name: '鱼形挂饰', icon: '🐠', description: '带来好运，增强感性' },
     { name: '茶具套装', icon: '🍵', description: '促进交流，平静内心' },
-    { name: '珍珠项链', icon: '⚪', description: '增强魅力，保护情感' }
+    { name: '珍珠项链', icon: '⚪', description: '增强魅力，保护情感' },
+    { name: '贝壳装饰', icon: '🐚', description: '和谐包容，温柔以待' },
+    { name: '雨伞', icon: '☂️', description: '未雨绸缪，安全保护' },
+    { name: '圆镜', icon: '🪞', description: '反射智慧，看清自我' },
+    { name: '雾化加湿器', icon: '🌫️', description: '滋润身心，缓解干燥' },
+    { name: '海蓝宝石手链', icon: '📿', description: '疗愈心灵，增强沟通' },
+    { name: '波浪形发贴', icon: '🎀', description: '柔美顺滑，顺势而为' },
+    { name: '透明水杯', icon: '🥛', description: '心如止水，清澈明见' },
+    { name: '月亮石挂坠', icon: '🌙', description: '梦境启示，感知未来' },
+    { name: '蓝色帆布鞋', icon: '👟', description: '温柔足迹，流淌好运' }
   ]
+};
+
+// 幸运颜色数据库
+const LUCKY_COLORS = [
+  { name: '正红色', value: '#FF0000' },
+  { name: '橘黄色', value: '#FFA500' },
+  { name: '明黄色', value: '#FFFF00' },
+  { name: '草绿色', value: '#7CFC00' },
+  { name: '天蓝色', value: '#87CEEB' },
+  { name: '靛青色', value: '#000080' },
+  { name: '紫罗兰', value: '#EE82EE' },
+  { name: '珍珠白', value: '#FFFFFF' },
+  { name: '金闪色', value: '#FFD700' },
+  { name: '银灰色', value: '#C0C0C0' },
+  { name: '珊瑚粉', value: '#FF7F50' },
+  { name: '薄荷绿', value: '#98FB98' },
+  { name: '咖啡棕', value: '#A52A2A' },
+  { name: '酒红色', value: '#800000' },
+  { name: '丁香紫', value: '#E6E6FA' },
+  { name: '奶油白', value: '#FFFDD0' },
+  { name: '香槟金', value: '#F7E7CE' },
+  { name: '玫瑰金', value: '#B76E79' },
+  { name: '松石绿', value: '#40E0D0' },
+  { name: '橄榄绿', value: '#808000' },
+  { name: '午夜蓝', value: '#191970' },
+  { name: '樱花粉', value: '#FFB7C5' },
+  { name: '杏黄色', value: '#FBCEB1' },
+  { name: '焦糖色', value: '#AF6E4D' },
+  { name: '莫兰迪灰', value: '#929292' }
+];
+
+// 幸运食物数据库
+const LUCKY_FOODS = {
+  fire: ['麻辣烫', '红烩牛肉', '石榴', '草莓', '红辣椒', '炭烤牛排', '番茄炒蛋', '枸杞茶', '红烧肉', '火辣鸡翅', '鲜果披萨', '热可可', '红石榴汁', '烤羊排', '麻辣火锅'],
+  earth: ['土豆泥', '玉米', '南瓜派', '糙米饭', '花生', '地瓜', '面包', '蜂蜜', '栗子', '松子', '燕麦片', '黑芝麻糊', '全麦饼干', '核桃', '糯米滋'],
+  air: ['棉花糖', '柠檬片', '薄荷糖', '爆米花', '蔬菜沙拉', '气泡水', '面条', '果冻', '苏打饼干', '水果拼盘', '爆汁橙', '马卡龙', '气泡鸡尾酒', '三明治', '松餅'],
+  water: ['海鲜大餐', '西瓜', '酸奶', '银耳汤', '黑豆', '海带丝', '冬瓜汤', '椰子水', '鲜草莓派', '三文鱼', '豆腐汤', '莲藕汁', '雪梨炖冰糖', '蓝莓汁', '清蒸鱼']
 };
 
 // 生成每日唯一ID（基于日期和星座）
@@ -445,7 +519,7 @@ const dailyRandom = (horoscopeName, seed = 'horoscope') => {
 // 计算行星位置影响（简化版）
 const calculatePlanetaryInfluence = (date = new Date()) => {
   const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-  
+
   // 简化的行星位置计算
   return {
     sun: Math.sin(dayOfYear / 365 * 2 * Math.PI) * 0.5 + 0.5,
@@ -465,20 +539,20 @@ export const calculateDailyHoroscopeScore = (horoscopeName, date = new Date()) =
 
   const planetaryInfluence = calculatePlanetaryInfluence(date);
   const randomFactor = dailyRandom(horoscopeName, 'score');
-  
+
   // 基础分数（基于星座元素特性）
   let baseScore = 50;
-  
+
   // 行星影响计算
   Object.keys(planetaryInfluence).forEach(planet => {
     const influence = planetaryInfluence[planet];
     const weight = PLANETARY_INFLUENCES[planet]?.[horoscope.element.toLowerCase().replace('象', '')] || 5;
     baseScore += (influence - 0.5) * weight;
   });
-  
+
   // 随机因素（-10到+10）
   baseScore += (randomFactor - 0.5) * 20;
-  
+
   // 限制在0-100范围内
   return Math.max(0, Math.min(100, Math.round(baseScore)));
 };
@@ -492,22 +566,22 @@ export const generateSoulQuestion = (horoscopeName, date = new Date()) => {
 
   const element = horoscope.element.toLowerCase().replace('象', '');
   const random = dailyRandom(horoscopeName, 'question');
-  
+
   // 选择问题类型
   const categories = Object.keys(SOUL_QUESTIONS);
   const categoryIndex = Math.floor(random * categories.length);
   const category = categories[categoryIndex];
-  
+
   // 选择具体问题
   const questions = SOUL_QUESTIONS[category];
   const questionIndex = Math.floor(dailyRandom(horoscopeName, category) * questions.length);
   const question = questions[questionIndex];
-  
+
   // 生成答案（基于星座特性）
   const answers = SOUL_ANSWERS[element]?.[category] || ["保持积极心态，一切都会好起来"];
   const answerIndex = Math.floor(dailyRandom(horoscopeName, 'answer') * answers.length);
   const answer = answers[answerIndex];
-  
+
   return {
     question,
     answer,
@@ -525,7 +599,7 @@ export const generateLuckyItem = (horoscopeName, date = new Date()) => {
 
   const element = horoscope.element.toLowerCase().replace('象', '');
   const items = LUCKY_ITEMS[element] || LUCKY_ITEMS.fire;
-  
+
   if (!items || items.length === 0) {
     return {
       name: '幸运护身符',
@@ -536,10 +610,10 @@ export const generateLuckyItem = (horoscopeName, date = new Date()) => {
       date: date.toISOString().split('T')[0]
     };
   }
-  
+
   const random = dailyRandom(horoscopeName, 'item');
   const itemIndex = Math.floor(random * items.length);
-  
+
   return {
     ...items[itemIndex],
     element: horoscope.element,
@@ -557,8 +631,7 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
 
   const overallScore = calculateDailyHoroscopeScore(horoscopeName, date);
   const soulQuestion = generateSoulQuestion(horoscopeName, date);
-  const luckyItem = generateLuckyItem(horoscopeName, date);
-  
+
   // 生成各领域分数（基于总体分数和星座特性）
   const random = dailyRandom(horoscopeName, 'detailed');
   const baseScores = {
@@ -567,7 +640,7 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
     career: overallScore * 0.9 + random * 10,
     study: overallScore * 0.6 + random * 40
   };
-  
+
   // 根据星座特性调整分数
   switch (horoscopeName) {
     case '白羊座':
@@ -598,12 +671,12 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
       // 默认情况下不做额外调整
       break;
   }
-  
+
   // 确保分数在合理范围内
   Object.keys(baseScores).forEach(key => {
     baseScores[key] = Math.max(0, Math.min(100, Math.round(baseScores[key])));
   });
-  
+
   // 确保所有函数调用都返回字符串值，而不是函数引用
   const dailyForecast = {
     love: {
@@ -628,18 +701,37 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
     }
   };
 
+  const element = horoscope.element.toLowerCase().replace('象', '');
+  const items = LUCKY_ITEMS[element] || LUCKY_ITEMS.fire;
+  const itemRandom = dailyRandom(horoscopeName, 'item');
+  const accessoryRandom = dailyRandom(horoscopeName, 'accessory');
+
+  const luckyItem = items[Math.floor(itemRandom * items.length)];
+  const luckyAccessory = items[Math.floor(accessoryRandom * items.length)];
+
+  // 幸运颜色算法优化
+  const colorRandom = dailyRandom(horoscopeName, 'color');
+  const selectedColor = LUCKY_COLORS[Math.floor(colorRandom * LUCKY_COLORS.length)];
+
+  // 幸运食物算法优化
+  const foodRandom = dailyRandom(horoscopeName, 'food');
+  const foodPool = LUCKY_FOODS[element] || LUCKY_FOODS.fire;
+  const selectedFood = foodPool[Math.floor(foodRandom * foodPool.length)];
+
   const recommendations = {
-    luckyColors: Array.isArray(horoscope.luckyColor) ? horoscope.luckyColor : [horoscope.luckyColor || '#FF6B6B'],
+    luckyColors: [selectedColor.value],
+    luckyColorNames: [selectedColor.name],
     luckyNumbers: Array.isArray(horoscope.luckyNumber) ? horoscope.luckyNumber : [horoscope.luckyNumber || 7],
     compatibleSigns: Array.isArray(horoscope.compatible) ? horoscope.compatible : [horoscope.compatible || '未知星座'],
     todayMoonSign: String(getRandomMoonSign(horoscopeName) || '白羊座'),
     soulQuestion: soulQuestion,
     luckyItem: String(luckyItem?.name || '幸运物品'),
-    luckyAccessory: String(luckyItem?.name || '幸运配饰'),
-    luckyTime: '上午9-11点',
-    luckyDirection: '东方',
-    luckyFood: '水果',
-    luckyFlower: '向日葵',
+    luckyAccessory: String(luckyAccessory?.name || '幸运配饰'),
+    luckyTime: ['清晨', '上午', '中午', '下午', '傍晚', '深夜'][Math.floor(dailyRandom(horoscopeName, 'time') * 6)] +
+      Math.floor(dailyRandom(horoscopeName, 'hour') * 12 + 1) + '点',
+    luckyDirection: ['东方', '南方', '西方', '北方', '东南', '东北', '西南', '西北'][Math.floor(dailyRandom(horoscopeName, 'dir') * 8)],
+    luckyFood: selectedFood,
+    luckyFlower: ['向日葵', '郁金香', '玫瑰', '百合', '康乃馨', '雏菊', '薰衣草', '风铃草'][Math.floor(dailyRandom(horoscopeName, 'flower') * 8)],
     positiveAdvice: String(generatePositiveAdvice(horoscopeName) || '保持积极心态'),
     avoidAdvice: String(generateAvoidAdvice(horoscopeName) || '避免消极思维'),
     dailyReminder: String(generateDailyReminder(horoscopeName) || '今天会是美好的一天')
@@ -685,8 +777,8 @@ const getTrend = (score) => {
 
 const getRandomMoonSign = (horoscopeName) => {
   const random = dailyRandom(horoscopeName, 'moon');
-  const moonSigns = ['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', 
-                    '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'];
+  const moonSigns = ['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座',
+    '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'];
   return moonSigns[Math.floor(random * moonSigns.length)];
 };
 
@@ -761,7 +853,7 @@ const generateOverallDescription = (score, horoscopeName) => {
  */
 export const validateHoroscopeUniqueness = (horoscopeData1, horoscopeData2) => {
   if (!horoscopeData1 || !horoscopeData2) return false;
-  
+
   return (
     horoscopeData1.dailyId === horoscopeData2.dailyId &&
     horoscopeData1.horoscopeInfo.name === horoscopeData2.horoscopeInfo.name &&

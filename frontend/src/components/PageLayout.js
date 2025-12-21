@@ -74,12 +74,12 @@ const PageLayout = ({
               
               <div className="flex-1">
                 {title && (
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white" style={{ color: 'var(--color-text)' }}>
                     {title}
                   </h1>
                 )}
                 {subtitle && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                     {subtitle}
                   </p>
                 )}
@@ -124,12 +124,12 @@ export const Card = ({
           <div className="flex items-center justify-between">
             <div>
               {title && (
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white" style={{ color: 'var(--color-text)' }}>
                   {title}
                 </h3>
               )}
               {subtitle && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                   {subtitle}
                 </p>
               )}

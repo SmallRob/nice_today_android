@@ -21,7 +21,13 @@ class AndroidNotificationService {
       
       if (this.isNativeApp) {
         // 原生应用：使用Capacitor通知
-        await this.initCapacitorNotifications();
+        try {
+          await this.initCapacitorNotifications();
+        } catch (capacitorError) {
+          console.warn('Capacitor通知初始化失败，降级到Web通知:', capacitorError);
+          this.isNativeApp = false;
+          await this.initWebNotifications();
+        }
       } else {
         // Web应用：使用浏览器通知（兼容模式）
         await this.initWebNotifications();
@@ -33,12 +39,26 @@ class AndroidNotificationService {
       console.log('通知服务初始化完成，模式:', this.isNativeApp ? 'Android原生' : 'Web浏览器');
     } catch (error) {
       console.error('通知服务初始化失败:', error);
+      // 确保即使初始化失败也不会影响应用其他功能
+      try {
+        // 最后的降级措施
+        this.isNativeApp = false;
+        this.permissionGranted = false;
+        this.notificationEnabled = false;
+      } catch (fallbackError) {
+        console.error('通知服务降级措施失败:', fallbackError);
+      }
     }
   }
 
   // 检查是否为Capacitor原生应用
   checkIsNativeApp() {
-    return window.Capacitor && window.Capacitor.isNative;
+    try {
+      return window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+    } catch (error) {
+      console.warn('检查Capacitor原生应用状态失败:', error);
+      return false;
+    }
   }
 
   // 初始化Capacitor通知
@@ -58,21 +78,29 @@ class AndroidNotificationService {
       this.permissionGranted = permission.display === 'granted';
       
       // 监听通知点击事件
-      await LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
-        console.log('通知被点击:', notification);
-        this.handleNotificationClick(notification);
-      });
+      try {
+        await LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
+          console.log('通知被点击:', notification);
+          this.handleNotificationClick(notification);
+        });
+      } catch (listenerError) {
+        console.warn('添加通知点击监听器失败:', listenerError);
+      }
       
       // 配置通知渠道（Android 8.0+）
-      await LocalNotifications.createChannel({
-        id: 'biorhythm_channel',
-        name: '生物节律提醒',
-        description: '生物节律应用的通知频道',
-        importance: 4, // IMPORTANCE_HIGH
-        visibility: 1, // VISIBILITY_PUBLIC
-        sound: 'default',
-        vibration: true
-      });
+      try {
+        await LocalNotifications.createChannel({
+          id: 'biorhythm_channel',
+          name: '生物节律提醒',
+          description: '生物节律应用的通知频道',
+          importance: 4, // IMPORTANCE_HIGH
+          visibility: 1, // VISIBILITY_PUBLIC
+          sound: 'default',
+          vibration: true
+        });
+      } catch (channelError) {
+        console.warn('创建通知渠道失败:', channelError);
+      }
       
     } catch (error) {
       console.error('Capacitor通知初始化失败:', error);
@@ -84,13 +112,18 @@ class AndroidNotificationService {
 
   // 初始化Web通知（兼容模式）
   async initWebNotifications() {
-    if ('Notification' in window) {
-      this.permissionGranted = Notification.permission === 'granted';
-      
-      if (!this.permissionGranted && Notification.permission === 'default') {
-        const permission = await Notification.requestPermission();
-        this.permissionGranted = permission === 'granted';
+    try {
+      if ('Notification' in window) {
+        this.permissionGranted = Notification.permission === 'granted';
+        
+        if (!this.permissionGranted && Notification.permission === 'default') {
+          const permission = await Notification.requestPermission();
+          this.permissionGranted = permission === 'granted';
+        }
       }
+    } catch (error) {
+      console.warn('Web通知初始化失败:', error);
+      this.permissionGranted = false;
     }
   }
 
@@ -292,8 +325,16 @@ class AndroidNotificationService {
 
   // 发送Android原生通知
   async sendAndroidNotification(title, body, options = {}) {
-    if (!this.LocalNotifications || typeof this.LocalNotifications.schedule !== 'function') {
-      console.warn('LocalNotifications插件不可用，降级到Web通知');
+    // 安全检查
+    if (!this.LocalNotifications) {
+      console.warn('LocalNotifications插件未初始化，降级到Web通知');
+      this.sendWebNotification(title, body, options);
+      return Date.now();
+    }
+    
+    // 检查schedule方法是否存在
+    if (typeof this.LocalNotifications.schedule !== 'function') {
+      console.warn('LocalNotifications.schedule方法不可用，降级到Web通知');
       this.sendWebNotification(title, body, options);
       return Date.now();
     }
@@ -301,23 +342,27 @@ class AndroidNotificationService {
     const notificationId = Date.now();
     
     try {
+      // 构建通知对象
+      const notification = {
+        id: notificationId,
+        title: title,
+        body: body,
+        schedule: { at: new Date(Date.now() + 100) }, // 立即发送
+        sound: 'default',
+        attachments: null,
+        actionTypeId: '',
+        extra: {
+          ...options,
+          timestamp: Date.now()
+        },
+        channelId: 'biorhythm_channel',
+        smallIcon: 'ic_stat_icon',
+        largeIcon: 'ic_launcher'
+      };
+      
+      // 发送通知
       await this.LocalNotifications.schedule({
-        notifications: [{
-          id: notificationId,
-          title: title,
-          body: body,
-          schedule: { at: new Date(Date.now() + 100) }, // 立即发送
-          sound: 'default',
-          attachments: null,
-          actionTypeId: '',
-          extra: {
-            ...options,
-            timestamp: Date.now()
-          },
-          channelId: 'biorhythm_channel',
-          smallIcon: 'ic_stat_icon',
-          largeIcon: 'ic_launcher'
-        }]
+        notifications: [notification]
       });
       
       return notificationId;
@@ -405,17 +450,32 @@ class AndroidNotificationService {
 
   // 手动请求权限
   async requestPermission() {
-    if (!('Notification' in window)) {
-      console.warn('浏览器不支持通知功能');
-      return false;
-    }
-
     try {
+      // 检查浏览器是否支持通知功能
+      if (!('Notification' in window)) {
+        console.warn('浏览器不支持通知功能');
+        return false;
+      }
+
+      // 在原生应用中使用Capacitor权限请求
+      if (this.isNativeApp && this.LocalNotifications) {
+        try {
+          const permission = await this.LocalNotifications.requestPermissions();
+          this.permissionGranted = permission.display === 'granted';
+          return this.permissionGranted;
+        } catch (nativeError) {
+          console.warn('原生通知权限请求失败，降级到Web通知:', nativeError);
+        }
+      }
+
+      // Web通知权限请求
       const permission = await Notification.requestPermission();
       this.permissionGranted = permission === 'granted';
       return this.permissionGranted;
     } catch (error) {
       console.error('请求通知权限失败:', error);
+      // 确保即使出错也不会导致应用崩溃
+      this.permissionGranted = false;
       return false;
     }
   }

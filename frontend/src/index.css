@@ -8,7 +8,7 @@
     --color-secondary: #f9fafb;
     --color-accent: #ef4444;
     --color-background: #ffffff;
-    --color-text: #1f2937;
+    --color-text: #0f172a; /* 增强对比度 */
     --color-border: #e5e7eb;
     /* 增强对比度的颜色变量 */
     --color-card-bg: #ffffff;
@@ -17,7 +17,7 @@
     --color-warning-bg: #fef3c7;
     --color-success-bg: #d1fae5;
     --color-danger-bg: #fee2e2;
-    --color-text-secondary: #6b7280;
+    --color-text-secondary: #334155; /* 增强对比度 */
   }
   
   .dark {
