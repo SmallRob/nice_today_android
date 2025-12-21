@@ -298,12 +298,23 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 safe-area-inset-top">
-      {/* 固定顶部区域 */}
-      <div className="sticky top-0 z-10 space-y-3 p-2 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-        {/* Nice Today 应用banner */}
-        <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
-          <div className="p-3 flex items-center justify-between">
+    <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black">
+      {/* Banner区域 - 参考穿衣指南样式 */}
+      <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700">
+        {/* 背景装饰 */}
+        <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30"></div>
+
+        {/* 装饰符号 - 简化版 */}
+        <div className="absolute top-2 left-2 w-12 h-12 opacity-15">
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="50" cy="30" r="8" fill="currentColor" />
+            <circle cx="50" cy="70" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
+        </div>
+
+        <div className="container mx-auto px-4 py-4 relative z-10">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {/* 应用图标 */}
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden">
@@ -322,7 +333,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 </svg>
               </div>
               <div>
-                <h1 className="text-lg font-bold text-white">Nice Today</h1>
+                <h1 className="text-xl font-bold text-white">Nice Today</h1>
                 <p className="text-blue-100 text-xs">您的个性化健康助手</p>
               </div>
             </div>
@@ -333,91 +344,68 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* 紧凑型标签导航 - 移动端优化 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border-0 dark:border dark:border-gray-700 overflow-hidden">
-          {/* 标签导航栏 - 紧凑设计 */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-2 py-1.5 border-b dark:border-gray-700">
-            <div className="grid grid-cols-4 gap-1">
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.id;
-                const colorMap = {
-                  'blue': 'bg-blue-500',
-                  'purple': 'bg-purple-500',
-                  'indigo': 'bg-indigo-500',
-                  'pink': 'bg-pink-500'
-                };
+      {/* 标签页选择器 - 参考穿衣指南样式 */}
+      <div className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700">
+        <div className="container mx-auto">
+          <div className="flex">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const colorMap = {
+                'blue': 'text-blue-600 dark:text-blue-400',
+                'purple': 'text-purple-600 dark:text-purple-400',
+                'indigo': 'text-indigo-600 dark:text-indigo-400',
+                'pink': 'text-pink-600 dark:text-pink-400'
+              };
 
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`py-2 px-1 text-center font-medium transition-all duration-200 rounded-md relative overflow-hidden touch-manipulation performance-optimized ${isActive
-                        ? 'bg-white dark:bg-gray-700 shadow-sm transform scale-105'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-gray-700/70'
-                      } ${tabTransition ? 'pointer-events-none' : ''}`}
-                    style={{ touchAction: 'manipulation' }}
-                  >
-                    {/* 活跃指示器 - 增强高亮效果 */}
-                    {isActive && (
-                      <>
-                        {/* 背景高亮 */}
-                        <div className={`absolute top-0 left-0 w-full h-full ${colorMap[tab.color]} opacity-20 rounded-md -z-10 animate-pulse`}></div>
-                        {/* 顶部指示器 */}
-                        <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 ${colorMap[tab.color]} rounded-t-full`}></div>
-                        {/* 底部指示器 */}
-                        <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 ${colorMap[tab.color]} rounded-b-full`}></div>
-                      </>
-                    )}
-                    <div className="flex flex-col items-center space-y-1">
-                      <div className={`p-1 rounded-md transition-all duration-200 ${isActive
-                          ? `${colorMap[tab.color]} text-white shadow-md`
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                        }`}>
-                        <tab.icon size={16} />
-                      </div>
-                      <span className={`text-xs font-medium truncate w-full transition-all duration-200 ${isActive ? 'font-bold' : 'font-medium'
-                        }`}>{tab.label}</span>
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`flex-1 py-3 px-2 text-center font-medium transition-all duration-300 relative ${
+                    isActive
+                      ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700`
+                      : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {isActive && (
+                    <div className={`absolute bottom-0 left-0 w-full h-0.5 ${colorMap[tab.color]}`}></div>
+                  )}
+                  <div className="flex flex-col items-center justify-center space-y-1">
+                    <div className={`w-5 h-5 transition-colors duration-300 ${isActive ? colorMap[tab.color] : 'text-gray-400 dark:text-gray-500'}`}>
+                      <tab.icon size={20} />
                     </div>
-                    {/* 点击涟漪效果容器 */}
-                    <span className="absolute inset-0 rounded-md overflow-hidden pointer-events-none">
-                      {isActive && (
-                        <span className={`absolute inset-0 ${colorMap[tab.color]} opacity-0 animate-ping`}></span>
-                      )}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                    <span className="text-xs font-medium">{tab.label}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* 可滚动内容区域 - 性能优化 */}
-      <div className="flex-1 overflow-y-auto optimized-scroll scroll-performance-optimized p-2"
-        style={{
-          WebkitOverflowScrolling: 'touch',
-          overscrollBehavior: 'contain'
-        }}>
-        <div className="max-w-6xl mx-auto space-y-3">
-          {/* 错误显示 */}
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4">
-              <div className="flex items-center">
-                <span className="text-red-500 mr-2">⚠️</span>
-                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
-                <button
-                  onClick={() => setError(null)}
-                  className="ml-auto text-red-500 hover:text-red-700"
-                >
-                  ✕
-                </button>
+      {/* 内容展示区域 - 简化布局，移除不必要的容器嵌套 */}
+      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized">
+        <div className="container mx-auto px-4 py-4">
+          <div className="mb-4 mx-auto max-w-6xl">
+            {/* 错误显示 */}
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4">
+                <div className="flex items-center">
+                  <span className="text-red-500 mr-2">⚠️</span>
+                  <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+                  <button
+                    onClick={() => setError(null)}
+                    className="ml-auto text-red-500 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* 标签内容 - 高性能渲染优化 */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border-0 dark:border dark:border-gray-700 overflow-hidden p-3">
+            {/* 标签内容 - 直接显示，不再包裹在额外的容器中 */}
             {fallbackMode ? (
               <FallbackComponent />
             ) : (

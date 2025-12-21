@@ -565,9 +565,9 @@ const MBTIPersonalityTabHome = () => {
     const typeData = mbtiTypes.find(t => t.type === type);
 
     return (
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-700 dark:to-purple-900 rounded-2xl p-6 text-white shadow-lg mb-4 transition-all duration-300">
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-600 to-emerald-700 dark:from-green-700 dark:to-emerald-900 rounded-2xl p-6 text-white shadow-lg mb-4 transition-all duration-300">
         <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-        <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-purple-400/20 rounded-full blur-2xl"></div>
+        <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl"></div>
 
         <div className="relative flex flex-col md:flex-row items-center md:items-start gap-5">
           {/* 图标和类型 */}
@@ -614,7 +614,13 @@ const MBTIPersonalityTabHome = () => {
     const { strengths, weaknesses } = personalityAnalysis.traits;
 
     return (
-      <Card title="特质潜力分析" className="mb-4 shadow-sm border-gray-100 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+          <svg className="w-4 h-4 md:w-5 md:h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+          </svg>
+          特质潜力分析
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* 优势 */}
           <div className="bg-emerald-50/40 dark:bg-emerald-950/20 p-4 rounded-xl border border-emerald-100/50 dark:border-emerald-800/30 transition-all hover:shadow-md">
@@ -648,7 +654,7 @@ const MBTIPersonalityTabHome = () => {
             </ul>
           </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
@@ -660,7 +666,13 @@ const MBTIPersonalityTabHome = () => {
     const { compatibleTypes, advice } = personalityAnalysis.relationships;
 
     return (
-      <Card title="社交与情感共鸣" className="mb-4 shadow-sm border-gray-100 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+          <svg className="w-4 h-4 md:w-5 md:h-5 text-pink-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+          </svg>
+          社交与情感共鸣
+        </h3>
         <div className="space-y-4">
           {/* 兼容类型 */}
           <div>
@@ -684,16 +696,16 @@ const MBTIPersonalityTabHome = () => {
             </div>
           </div>
 
-          {/* 关系建议 */}
-          <div className="relative p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-xl border border-pink-100/50 dark:border-pink-900/30">
-            <div className="absolute top-3 right-4 opacity-10 text-3xl">�</div>
-            <h3 className="text-[11px] font-black text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1.5">Communication Advice</h3>
-            <p className="text-[12px] text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-              {advice}
-            </p>
-          </div>
+            {/* 关系建议 */}
+            <div className="relative p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-xl border border-pink-100/50 dark:border-pink-900/30">
+              <div className="absolute top-3 right-4 opacity-10 text-3xl">💬</div>
+              <h3 className="text-[11px] font-black text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1.5">沟通建议</h3>
+              <p className="text-[12px] text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                {advice}
+              </p>
+            </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
@@ -704,10 +716,16 @@ const MBTIPersonalityTabHome = () => {
     const { suggestions } = personalityAnalysis.career;
 
     return (
-      <Card title="天赋使命与职业" className="mb-4 shadow-sm border-gray-100 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+          <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1h2V3a1 1 0 011-1h1a1 1 0 011 1v1h2a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 001-1z" clipRule="evenodd" />
+          </svg>
+          天赋使命与职业
+        </h3>
         <div className="p-1">
           <h3 className="text-[13px] font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-            <span className="w-6 h-6 bg-blue-50 dark:bg-blue-900/40 rounded-full flex items-center justify-center mr-2 text-xs">�</span>
+            <span className="w-6 h-6 bg-blue-50 dark:bg-blue-900/40 rounded-full flex items-center justify-center mr-2 text-xs">💼</span>
             高匹配度职业
           </h3>
           <div className="grid grid-cols-2 gap-2">
@@ -721,7 +739,7 @@ const MBTIPersonalityTabHome = () => {
             ))}
           </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
@@ -732,7 +750,13 @@ const MBTIPersonalityTabHome = () => {
     const { tips, potential } = personalityAnalysis.personalGrowth;
 
     return (
-      <Card title="成长与进化指南" className="mb-4 shadow-sm border-gray-100 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+          <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+          </svg>
+          成长与进化指南
+        </h3>
         <div className="space-y-4">
           {/* 成长潜力 */}
           <div className="p-4 bg-indigo-50/30 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30">
@@ -756,14 +780,20 @@ const MBTIPersonalityTabHome = () => {
             ))}
           </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
   // 渲染MBTI选择器
   const renderMBTISelector = () => {
     return (
-      <Card title="深度人格探索" className="mb-4 shadow-sm">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+          <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          深度人格探索
+        </h3>
         <div className="space-y-4">
           <div>
             {/* 当前用户信息 */}
@@ -847,28 +877,96 @@ const MBTIPersonalityTabHome = () => {
             )}
           </div>
         </div>
-      </Card>
+      </div>
     );
   };
 
   return (
-    <div className="space-y-3">
+    <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
+      {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
+      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized bg-white dark:bg-black">
+        {/* Banner区域 - 随页面滚动 */}
+        <div className="nature-harmony-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-green-800 via-emerald-700 to-teal-900">
+          {/* 自然渐变背景 */}
+          <div className="absolute inset-0 nature-gradient z-0 bg-gradient-to-r from-green-600/20 via-emerald-500/20 to-teal-700/20"></div>
+
+          {/* 自然元素装饰 */}
+          <div className="absolute top-2 left-2 w-12 h-12 opacity-20">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <path d="M30,40 Q50,20 70,40" fill="none" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
+              <circle cx="30" cy="40" r="2" fill="currentColor" className="animate-pulse" />
+              <circle cx="50" cy="20" r="1.5" fill="currentColor" className="animate-pulse" style={{animationDelay: '0.5s'}} />
+              <circle cx="70" cy="40" r="1.8" fill="currentColor" className="animate-pulse" style={{animationDelay: '1s'}} />
+              <path d="M40,60 Q50,80 60,60" fill="none" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.5" />
+              <circle cx="40" cy="60" r="2.2" fill="currentColor" className="animate-pulse" style={{animationDelay: '1.5s'}} />
+              <circle cx="60" cy="60" r="1.6" fill="currentColor" className="animate-pulse" style={{animationDelay: '2s'}} />
+            </svg>
+          </div>
+          <div className="absolute bottom-2 right-2 w-14 h-14 opacity-20">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <path d="M20,30 Q40,10 60,30" fill="none" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+              <circle cx="20" cy="30" r="1.8" fill="currentColor" className="animate-pulse" />
+              <circle cx="40" cy="10" r="2" fill="currentColor" className="animate-pulse" style={{animationDelay: '0.3s'}} />
+              <circle cx="60" cy="30" r="1.5" fill="currentColor" className="animate-pulse" style={{animationDelay: '0.6s'}} />
+              <path d="M80,40 Q70,60 60,50" fill="none" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.4" />
+            </svg>
+          </div>
+
+          {/* 动态自然元素效果 */}
+          <div className="absolute inset-0 overflow-hidden">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-2 h-2 bg-white/30 rounded-full animate-pulse"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 4}s`,
+                  opacity: Math.random() * 0.4 + 0.1
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="container mx-auto px-4 py-3 md:py-6 relative z-10 text-center">
+            <h1 className="text-xl md:text-2xl font-bold mb-1 text-shadow-lg nature-title">
+              <span className="inline-block transform hover:scale-105 transition-transform duration-300">
+                MBTI人格分析
+              </span>
+            </h1>
+            <p className="text-white text-xs md:text-base opacity-95 font-medium nature-subtitle mb-2">
+              性格探索·天赋发现·成长指南
+            </p>
+            <div className="flex items-center justify-center space-x-1 md:space-x-2">
+              <span className="text-[10px] md:text-xs bg-green-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌿</span>
+              <span className="text-[10px] md:text-xs bg-emerald-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌱</span>
+              <span className="text-[10px] md:text-xs bg-teal-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🍃</span>
+              <span className="text-[10px] md:text-xs bg-green-400/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌳</span>
+              <span className="text-[10px] md:text-xs bg-emerald-400/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌲</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 内容展示区域 - 使用DressHealthTab的边距样式 */}
+        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black">
+          <div className="mb-4 mx-auto max-w-2xl">
+            <div className="space-y-3">
       {/* MBTI选择器 */}
       {renderMBTISelector()}
 
       {/* 加载状态 */}
       {loading && (
-        <Card>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
           <div className="text-center py-6">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500 mx-auto mb-2"></div>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto mb-2"></div>
             <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载人格分析数据...</p>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* 错误显示 */}
       {error && (
-        <Card>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
           <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
             <p className="text-red-700 dark:text-red-300 text-xs">{error}</p>
             <button
@@ -881,7 +979,7 @@ const MBTIPersonalityTabHome = () => {
               重试
             </button>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* 人格分析内容 */}
@@ -906,7 +1004,7 @@ const MBTIPersonalityTabHome = () => {
 
       {/* 未选择MBTI时的提示 */}
       {!loading && !error && !userMBTI && (
-        <Card>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
           <div className="text-center py-6">
             <div className="text-3xl mb-2">🧩</div>
             <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择MBTI类型</h3>
@@ -932,8 +1030,12 @@ const MBTIPersonalityTabHome = () => {
               })}
             </div>
           </div>
-        </Card>
+        </div>
       )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

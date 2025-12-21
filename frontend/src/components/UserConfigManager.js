@@ -43,6 +43,9 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
   const [hasChanges, setHasChanges] = useState(false);
   const formRef = useRef(null);
 
+  // 检查是否是新建配置
+  const isNewConfig = !config.nickname && !config.birthDate;
+
   // 检测表单是否有变化
   useEffect(() => {
     const changed =
@@ -108,12 +111,17 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
             )}
             <h3 className="font-medium text-gray-900 dark:text-white">
-              {formData.nickname || `配置 ${index + 1}`}
+              {isNewConfig ? '新建配置' : (formData.nickname || `配置 ${index + 1}`)}
             </h3>
           </div>
           {hasChanges && (
             <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-20 text-yellow-600 dark:text-yellow-400 text-xs rounded-full">
               有未保存更改
+            </span>
+          )}
+          {isNewConfig && (
+            <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 dark:bg-opacity-20 text-blue-600 dark:text-blue-400 text-xs rounded-full">
+              新建
             </span>
           )}
         </div>
@@ -284,21 +292,21 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               variant="primary"
               size="sm"
               onClick={handleSave}
-              disabled={!hasChanges}
+              disabled={!hasChanges || (isNewConfig && (!formData.nickname || !formData.birthDate))}
             >
-              保存
+              {isNewConfig ? '创建配置' : '保存'}
             </Button>
 
             <Button
               variant="secondary"
               size="sm"
               onClick={handleReset}
-              disabled={!hasChanges}
+              disabled={!hasChanges || isNewConfig}
             >
               重置
             </Button>
 
-            {!isActive && (
+            {!isActive && !isNewConfig && (
               <Button
                 variant="outline"
                 size="sm"
@@ -308,7 +316,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               </Button>
             )}
 
-            {index > 0 && (
+            {(index > 0 || isNewConfig) && (
               <Button
                 variant="danger"
                 size="sm"
@@ -396,7 +404,19 @@ const UserConfigManagerComponent = () => {
 
   // 处理配置保存
   const handleSaveConfig = useCallback((index, configData) => {
-    const success = userConfigManager.updateConfig(index, configData);
+    // 检查是否是新建配置（检查存储中是否存在）
+    const storedConfigs = userConfigManager.getAllConfigs();
+    const isNewConfig = index >= storedConfigs.length;
+    
+    let success;
+    if (isNewConfig) {
+      // 新建配置，添加到存储
+      success = userConfigManager.addConfig(configData);
+    } else {
+      // 现有配置，更新存储
+      success = userConfigManager.updateConfig(index, configData);
+    }
+    
     if (success) {
       // 更新本地状态
       setConfigs(prev => {
@@ -404,6 +424,12 @@ const UserConfigManagerComponent = () => {
         newConfigs[index] = configData;
         return newConfigs;
       });
+
+      // 如果是新建配置，设置为活跃配置
+      if (isNewConfig) {
+        setActiveConfigIndex(index);
+        userConfigManager.setActiveConfig(index);
+      }
 
       // 强制重新加载所有组件，确保数据同步
       setTimeout(() => {
@@ -415,31 +441,26 @@ const UserConfigManagerComponent = () => {
     }
   }, [showMessage]);
 
-  // 处理添加新配置
+  // 处理添加新配置 - 只创建临时配置，不直接保存
   const handleAddConfig = useCallback(() => {
     const newConfig = {
-      nickname: `用户${configs.length + 1}`,
-      birthDate: '1991-01-01',
-      zodiac: '摩羯座',
-      zodiacAnimal: '羊',
+      nickname: '', // 留空让用户填写
+      birthDate: '',
+      zodiac: '',
+      zodiacAnimal: '',
       gender: 'secret',
-      mbti: 'ISFP'
+      mbti: ''
     };
 
-    const success = userConfigManager.addConfig(newConfig);
-    if (success) {
-      // 更新本地状态
-      setConfigs(prev => {
-        const newConfigs = [...prev, newConfig];
-        // 展开新添加的配置
-        setExpandedIndex(newConfigs.length - 1);
-        return newConfigs;
-      });
-      showMessage('添加配置成功', 'success');
-    } else {
-      showMessage('添加配置失败，请重试', 'error');
-    }
-  }, [configs.length, showMessage]);
+    // 只添加到本地状态，不保存到存储
+    setConfigs(prev => {
+      const newConfigs = [...prev, newConfig];
+      // 展开新添加的配置
+      setExpandedIndex(newConfigs.length - 1);
+      return newConfigs;
+    });
+    showMessage('请填写配置信息并点击保存', 'info');
+  }, [showMessage]);
 
   // 处理删除配置
   const handleDeleteConfig = useCallback((index) => {
@@ -448,17 +469,32 @@ const UserConfigManagerComponent = () => {
       return;
     }
 
+    // 检查是否是新建配置（检查存储中是否存在）
+    const storedConfigs = userConfigManager.getAllConfigs();
+    const isNewConfig = index >= storedConfigs.length;
+    
     // 使用自定义确认对话框替代window.confirm
     if (window.confirm('确定要删除这个配置吗？')) {
-      const success = userConfigManager.removeConfig(index);
-      if (success) {
-        // 更新本地状态
+      let success;
+      if (isNewConfig) {
+        // 新建配置，只需从本地状态移除
         setConfigs(prev => prev.filter((_, i) => i !== index));
         // 调整展开索引
         setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
         showMessage('删除配置成功', 'success');
+        return;
       } else {
-        showMessage('删除配置失败，请重试', 'error');
+        // 存储中的配置，需要从存储中移除
+        success = userConfigManager.removeConfig(index);
+        if (success) {
+          // 更新本地状态
+          setConfigs(prev => prev.filter((_, i) => i !== index));
+          // 调整展开索引
+          setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
+          showMessage('删除配置成功', 'success');
+        } else {
+          showMessage('删除配置失败，请重试', 'error');
+        }
       }
     }
   }, [configs.length, showMessage]);

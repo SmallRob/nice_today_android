@@ -34,7 +34,6 @@ function SettingsPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
   const { showNotification } = useNotification();
-  const [tabTransition, setTabTransition] = useState(false);
   const [error, setError] = useState(null);
 
   // 通知设置状态
@@ -63,11 +62,9 @@ function SettingsPage() {
     }
   }, []);
 
-  // 优化标签切换函数
+  // 简化的标签切换函数，提高移动端兼容性
   const handleTabChange = useCallback((tab) => {
-    if (tab === activeTab || tabTransition) return;
-
-    setTabTransition(true);
+    if (tab === activeTab) return;
 
     // 更新URL参数
     const newUrl = new URL(window.location);
@@ -77,12 +74,9 @@ function SettingsPage() {
     // 滚动到顶部
     scrollToTop();
 
-    // 延迟切换标签，添加动画效果
-    setTimeout(() => {
-      setActiveTab(tab);
-      setTabTransition(false);
-    }, 150);
-  }, [activeTab, tabTransition, scrollToTop]);
+    // 直接切换标签，移除动画效果提高兼容性
+    setActiveTab(tab);
+  }, [activeTab, scrollToTop]);
 
   // 标签切换时自动滚动到顶部
   useEffect(() => {
@@ -388,32 +382,39 @@ function SettingsPage() {
 
   if (!isLoaded) {
     return (
-      <PageLayout title="设置">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-center items-center py-20">
-            <div className="text-center space-y-4">
-              <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-8 w-8 bg-blue-500 rounded-full animate-pulse"></div>
-                </div>
+      <div className="h-full bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-4">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4">设置</h1>
+        </div>
+        <div className="flex justify-center items-center py-20">
+          <div className="text-center space-y-4">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-8 w-8 bg-blue-500 rounded-full animate-pulse"></div>
               </div>
-              <div>
-                <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">正在加载设置...</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">请稍候，正在初始化应用配置</p>
-              </div>
+            </div>
+            <div>
+              <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">正在加载设置...</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">请稍候，正在初始化应用配置</p>
             </div>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   return (
-    <PageLayout title="设置">
-      <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
-        {/* 固定顶部区域 - 包含错误提示和标签导航 */}
-        <div className="flex-shrink-0 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+      {/* 顶部标题区域 */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="container mx-auto px-4 py-4">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">设置</h1>
+        </div>
+      </div>
+      
+      {/* 固定顶部区域 - 包含错误提示和标签导航 */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-800">
           {/* 错误提示 */}
           {error && (
             <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4">
@@ -438,47 +439,35 @@ function SettingsPage() {
             </div>
           )}
 
-          {/* 标签导航 */}
-          <div className="max-w-4xl mx-auto">
-            <div className="flex">
+          {/* 标签导航 - 传统矩形圆角风格 */}
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 max-w-md mx-auto">
               <button
-                className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${activeTab === 'app'
-                  ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'app'
+                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                  }`}
                 onClick={() => handleTabChange('app')}
-                disabled={tabTransition}
               >
                 应用设置
-                {activeTab === 'app' && (
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-                )}
               </button>
               <button
-                className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${activeTab === 'userConfigs'
-                  ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'userConfigs'
+                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                  }`}
                 onClick={() => handleTabChange('userConfigs')}
-                disabled={tabTransition}
               >
                 用户配置
-                {activeTab === 'userConfigs' && (
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-                )}
               </button>
               <button
-                className={`flex-1 py-3 px-4 text-center font-medium text-sm transition-all duration-200 relative ${activeTab === 'about'
-                  ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-b-2 border-blue-500 dark:border-blue-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-                  } ${tabTransition ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'about'
+                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                  }`}
                 onClick={() => handleTabChange('about')}
-                disabled={tabTransition}
               >
                 关于
-                {activeTab === 'about' && (
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-                )}
               </button>
             </div>
           </div>
@@ -488,15 +477,14 @@ function SettingsPage() {
         <div className="flex-1 overflow-hidden">
           <div
             ref={scrollContainerRef}
-            className="h-full overflow-y-auto optimized-scroll hide-scrollbar performance-optimized scroll-performance-optimized touch-optimized"
+            className="h-full overflow-y-auto"
             style={{
               WebkitOverflowScrolling: 'touch',
-              overscrollBehaviorY: 'contain',
-              scrollBehavior: 'smooth'
+              overscrollBehaviorY: 'contain'
             }}
           >
-            <div className="max-w-4xl mx-auto p-4 settings-content-wrapper">
-              <div className={`transition-all duration-300 ${tabTransition ? 'opacity-50' : 'opacity-100'}`}>
+            <div className="container mx-auto px-4 py-4 max-w-4xl">
+              <div>
                 {activeTab === 'app' && (
                   <div className="space-y-6">
                     {/* 应用设置部分 */}
@@ -788,13 +776,13 @@ function SettingsPage() {
                 )}
 
                 {activeTab === 'userConfigs' && (
-                  <div className="transition-all duration-300 transform">
+                  <div>
                     <UserConfigManager />
                   </div>
                 )}
 
                 {activeTab === 'about' && (
-                  <div className="transition-all duration-300 transform">
+                  <div>
                     <Card title="关于">
                       <div className="space-y-4">
                         <div className="flex items-center justify-between py-2">
@@ -840,7 +828,6 @@ function SettingsPage() {
           </div>
         </div>
       </div>
-    </PageLayout>
   );
 }
 
