@@ -818,7 +818,8 @@
 .dietary-guidance-enhanced,
 .friendly-reminder-enhanced {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--border-radius);
   padding: 2rem;
@@ -826,20 +827,12 @@
   box-shadow: var(--card-shadow);
 }
 
-.color-recommendations-enhanced {
-  animation: slideInUp 0.5s ease-out 0.4s;
-}
-
-.color-warnings-enhanced {
-  animation: slideInUp 0.5s ease-out 0.6s;
-}
-
-.dietary-guidance-enhanced {
-  animation: slideInUp 0.5s ease-out 0.8s;
-}
-
+.color-recommendations-enhanced,
+.color-warnings-enhanced,
+.dietary-guidance-enhanced,
 .friendly-reminder-enhanced {
-  animation: slideInUp 0.5s ease-out 1s;
+  /* 移除了复杂的逐个加载动画以提升滚动流畅度 */
+  opacity: 1;
 }
 
 .color-principles-enhanced,

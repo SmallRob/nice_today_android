@@ -4,6 +4,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -15,6 +16,7 @@
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -26,6 +28,7 @@
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -33,9 +36,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -85,7 +91,6 @@
 .app-scroll-container {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
 }
 
 /* 优化渲染性能 */
@@ -119,6 +124,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -144,7 +150,8 @@
 
 /* 优化移动端输入框 */
 .mobile-input {
-  font-size: 16px; /* 防止iOS缩放 */
+  font-size: 16px;
+  /* 防止iOS缩放 */
 }
 
 /* 防止页面滚动穿透 */
@@ -200,11 +207,11 @@
   .mobile-hide {
     display: none !important;
   }
-  
+
   .mobile-full-width {
     width: 100% !important;
   }
-  
+
   .mobile-center {
     text-align: center;
     justify-content: center;
@@ -213,7 +220,10 @@
 
 /* 优化动画性能 */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

@@ -37,17 +37,16 @@ const TabContentLoader = memo(() => (
 ));
 
 // 使用memo优化Tab按钮组件 - 玛雅风格
-const TabButton = memo(({ 
-  isActive, 
-  onClick, 
-  children 
+const TabButton = memo(({
+  isActive,
+  onClick,
+  children
 }) => (
   <button
-    className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-all duration-300 relative overflow-hidden ${
-      isActive
+    className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-all duration-300 relative overflow-hidden ${isActive
         ? 'bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-700 text-white shadow-lg transform scale-105'
         : 'text-amber-800 dark:text-amber-200 bg-white/80 dark:bg-gray-700/80 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-900 dark:hover:text-amber-100'
-    }`}
+      }`}
     onClick={onClick}
   >
     {/* 玛雅纹样装饰 */}
@@ -86,14 +85,14 @@ const MayaPage = memo(() => {
     scrollY: 0,
     lastScrollY: 0
   });
-  
+
   // 使用useRef管理不需要触发重渲染的状态
   const timeoutRef = React.useRef(null);
   const bannerRef = React.useRef(null);
   const menuRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const scrollThresholdRef = React.useRef(0);
-  
+
   // 优化的显示出生图函数
   const handleShowBirthChart = useCallback(() => {
     // 使用requestIdleCallback推迟非紧急状态更新
@@ -128,84 +127,65 @@ const MayaPage = memo(() => {
     }
   }, []);
 
-  // 滚动事件处理函数 - 防抖优化
-  const handleScroll = useCallback(() => {
+  // 滚动事件处理函数 - 使用 requestAnimationFrame 优化
+  const handleScroll = useCallback((e) => {
     if (!bannerRef.current || !menuRef.current) return;
-    
-    const currentScrollY = window.scrollY;
+
+    const currentScrollY = e.currentTarget.scrollTop;
     const bannerHeight = bannerRef.current.offsetHeight;
     const menuHeight = menuRef.current.offsetHeight;
-    
-    // 计算滚动阈值 - banner高度减去菜单高度，确保最小值为0
+
+    // 计算滚动阈值
     if (scrollThresholdRef.current === 0) {
       scrollThresholdRef.current = Math.max(0, bannerHeight - menuHeight);
     }
-    
+
     const threshold = scrollThresholdRef.current;
-    
+
     setScrollState(prev => {
-      // 使用更精确的滚动方向判断，避免小幅度抖动
       const scrollDelta = currentScrollY - prev.lastScrollY;
-      const isScrollingDown = scrollDelta > 2; // 设置最小滚动阈值
+      const isScrollingDown = scrollDelta > 2;
       const isScrollingUp = scrollDelta < -2;
-      
-      let newState = { 
-        ...prev, 
-        scrollY: currentScrollY, 
-        lastScrollY: currentScrollY 
+
+      let newState = {
+        ...prev,
+        scrollY: currentScrollY,
+        lastScrollY: currentScrollY
       };
-      
-      // 滚动到顶部时确保banner显示，菜单不固定
+
+      // 达到阈值或滚动到顶部时的状态切换
       if (currentScrollY <= 0) {
         newState.isMenuFixed = false;
         newState.isBannerVisible = true;
-        return newState;
-      }
-      
-      // 向下滚动：当滚动超过阈值时固定菜单，隐藏banner
-      if (isScrollingDown && currentScrollY > threshold) {
+      } else if (isScrollingDown && currentScrollY > threshold) {
         newState.isMenuFixed = true;
         newState.isBannerVisible = false;
-      }
-      
-      // 向上滚动：当滚动回到阈值位置时显示banner，取消固定
-      if (isScrollingUp && currentScrollY <= threshold) {
+      } else if (isScrollingUp && currentScrollY <= threshold) {
         newState.isMenuFixed = false;
         newState.isBannerVisible = true;
       }
-      
+
       return newState;
     });
   }, []);
-
-  // 防抖滚动处理函数
-  const debouncedScrollHandler = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    timeoutRef.current = setTimeout(() => {
-      handleScroll();
-    }, 16); // 约60fps的帧率
-  }, [handleScroll]);
 
   // 组件挂载时的优化加载
   useEffect(() => {
     // 预加载两个组件以提升切换性能
     preloadMayaCalendar();
     preloadMayaBirthChart();
-    
+
     // 使用较短的延迟时间，提升用户体验
     timeoutRef.current = setTimeout(() => {
       setIsLoaded(true);
-      
+
       // 组件加载完成后设置滚动阈值
       setTimeout(() => {
         if (bannerRef.current && menuRef.current) {
           const bannerHeight = bannerRef.current.offsetHeight;
           const menuHeight = menuRef.current.offsetHeight;
           scrollThresholdRef.current = Math.max(0, bannerHeight - menuHeight);
-          
+
           // 初始状态检查
           if (window.scrollY > scrollThresholdRef.current) {
             setScrollState(prev => ({
@@ -219,10 +199,17 @@ const MayaPage = memo(() => {
         }
       }, 100);
     }, 200);
-    
-    // 添加防抖滚动事件监听
-    window.addEventListener('scroll', debouncedScrollHandler, { passive: true });
-    
+
+    // 组件加载完成后设置滚动阈值
+    const initTimer = setTimeout(() => {
+      setIsLoaded(true);
+      if (bannerRef.current && menuRef.current) {
+        const bannerHeight = bannerRef.current.offsetHeight;
+        const menuHeight = menuRef.current.offsetHeight;
+        scrollThresholdRef.current = Math.max(0, bannerHeight - menuHeight);
+      }
+    }, 200);
+
     // 窗口大小变化时重新计算阈值
     const handleResize = () => {
       if (bannerRef.current && menuRef.current) {
@@ -231,17 +218,17 @@ const MayaPage = memo(() => {
         scrollThresholdRef.current = Math.max(0, bannerHeight - menuHeight);
       }
     };
-    
+
     window.addEventListener('resize', handleResize);
-    
+
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      window.removeEventListener('scroll', debouncedScrollHandler);
+      clearTimeout(initTimer);
       window.removeEventListener('resize', handleResize);
     };
-  }, [debouncedScrollHandler]);
+  }, []);
 
   // 优化的Tab切换区域 - 玛雅风格
   const TabNavigation = useMemo(() => (
@@ -265,7 +252,7 @@ const MayaPage = memo(() => {
   const renderContent = useMemo(() => {
     // 使用CSS过渡而不是JS动画，提升性能
     const contentClass = "animate-fadeIn";
-    
+
     if (activeTab === 'calendar') {
       return (
         <div className={contentClass}>
@@ -275,7 +262,7 @@ const MayaPage = memo(() => {
         </div>
       );
     }
-    
+
     if (activeTab === 'birthChart') {
       return (
         <div className="space-y-6">
@@ -296,14 +283,16 @@ const MayaPage = memo(() => {
         </div>
       );
     }
-    
+
     return null;
   }, [activeTab, handleShowBirthChart, handleBackToCalendar]);
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 relative overflow-hidden safe-area-inset-top optimized-scroll performance-optimized"
+      onScroll={handleScroll}
+      className="h-full flex flex-col bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 relative overflow-y-auto safe-area-inset-top optimized-scroll performance-optimized"
+      style={{ touchAction: 'pan-y' }}
     >
       {/* 玛雅金字塔背景装饰 */}
       <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
@@ -329,13 +318,12 @@ const MayaPage = memo(() => {
 
       <div className="relative z-10">
         {/* 玛雅历法顶部标题区域 - 可折叠banner */}
-        <div 
+        <div
           ref={bannerRef}
-          className={`bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 relative overflow-hidden transition-all duration-300 ease-in-out ${
-            scrollState.isBannerVisible 
-              ? 'translate-y-0 opacity-100 pt-8 pb-6' 
+          className={`bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 relative overflow-hidden transition-all duration-300 ease-in-out ${scrollState.isBannerVisible
+              ? 'translate-y-0 opacity-100 pt-8 pb-6'
               : '-translate-y-full opacity-0 h-0'
-          }`}
+            }`}
         >
           {/* 玛雅象形文字装饰 */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -351,10 +339,10 @@ const MayaPage = memo(() => {
               <span className="bg-gradient-to-r from-yellow-200 to-amber-200 bg-clip-text text-transparent">玛雅历法</span>
               <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-yellow-300 to-amber-300 rounded-full"></div>
             </h1>
-            
+
             {/* 副标题 */}
             <p className="text-base md:text-lg text-amber-100 mb-3 italic">探索古老的玛雅智慧</p>
-            
+
             {/* 玛雅太阳历装饰 */}
             <div className="flex justify-center items-center space-x-3">
               <div className="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-300 to-orange-400 animate-spin"></div>
@@ -367,36 +355,27 @@ const MayaPage = memo(() => {
         {/* 主要内容区域 */}
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="space-y-6">
-            {/* Tab切换按钮 - 智能固定 */}
-            <div 
+            <div
               ref={menuRef}
-              className={`z-30 bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 rounded-xl shadow-lg border-2 border-amber-200 dark:border-amber-800 p-2 transition-all duration-300 ${
-                scrollState.isMenuFixed 
-                  ? 'fixed top-0 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] max-w-6xl mt-0 shadow-xl menu-fixed-safe' 
-                  : 'relative'
-              }`}
-              style={scrollState.isMenuFixed ? {
-                top: 'max(var(--safe-area-inset-top), env(safe-area-inset-top))'
-              } : {}}
+              className={`z-30 bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 rounded-xl shadow-lg border-2 border-amber-200 dark:border-amber-800 p-2 transition-all duration-300 sticky top-0 ${scrollState.isMenuFixed ? 'shadow-xl menu-fixed-safe' : ''
+                }`}
             >
               {TabNavigation}
             </div>
 
             {/* 滚动阈值检测器 - 用于精确计算 */}
-            <div 
-              className="scroll-threshold-detector" 
-              style={{ 
+            <div
+              className="scroll-threshold-detector"
+              style={{
                 top: scrollThresholdRef.current + 'px',
-                backgroundColor: 'transparent' 
+                backgroundColor: 'transparent'
               }}
             />
 
-            {/* 内容区域 - 优化滚动性能 */}
-            <div className={`optimized-scroll overflow-y-auto transition-all duration-300 ${
-              scrollState.isMenuFixed 
-                ? 'content-adjust-for-fixed-menu' 
+            <div className={`transition-all duration-300 ${scrollState.isMenuFixed
+                ? 'content-adjust-for-fixed-menu'
                 : ''
-            }`}>
+              }`}>
               {renderContent}
             </div>
           </div>

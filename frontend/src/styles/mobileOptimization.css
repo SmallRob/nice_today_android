@@ -228,12 +228,11 @@
 /* 滚动容器性能优化 */
 .scroll-container-optimized {
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
   overscroll-behavior: contain;
   transform: translateZ(0);
   backface-visibility: hidden;
-  will-change: scroll-position;
-  contain: layout style paint;
+  contain: layout style;
+  touch-action: pan-y;
 }
 
 /* 滚动性能优化类 - 移除了 will-change: scroll-position 和 scroll-behavior: smooth */

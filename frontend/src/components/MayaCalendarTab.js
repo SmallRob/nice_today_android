@@ -182,6 +182,13 @@ const EmptyState = memo(({ onRetry }) => (
   </div>
 ));
 
+// 优化的渲染组件 - 移到外部以避免重复创建
+const MayaInfoCard = memo(({ children, className = "" }) => (
+  <div className={`maya-card ${className}`}>
+    {children}
+  </div>
+));
+
 // 主组件 - 使用memo优化性能
 const MayaCalendarTab = memo(() => {
   // 使用useRef管理不需要触发重渲染的状态
@@ -380,12 +387,7 @@ const MayaCalendarTab = memo(() => {
     };
   }, []);
 
-  // 优化的渲染组件 - 使用全局样式
-  const MayaInfoCard = useMemo(() => memo(({ children, className = "" }) => (
-    <div className={`maya-card ${className}`}>
-      {children}
-    </div>
-  )), []);
+
 
   // 玛雅历法知识卡片组件
   const MayaKnowledgeCard = useMemo(() => {
@@ -422,7 +424,7 @@ const MayaCalendarTab = memo(() => {
     };
 
     return (
-      <div className={`${knowledge.color} border maya-rounded-lg maya-padding-md animate-fade-in transition-all duration-300 hover:shadow-md`}>
+      <div className={`${knowledge.color} border maya-rounded-lg maya-padding-md animate-fade-in transition-all duration-300`}>
         <h4 className="maya-body font-semibold mb-3 flex items-center">
           {knowledge.icon}
           {knowledge.title}
@@ -478,7 +480,7 @@ const MayaCalendarTab = memo(() => {
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 pb-10 performance-optimized">
+    <div className="bg-gray-50 dark:bg-gray-900 pb-10 performance-optimized" style={{ touchAction: 'pan-y' }}>
       {/* 优化的页面标题 - 添加日期状态指示 */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-b-lg shadow-lg">
         <div className="container mx-auto px-3 py-4 md:px-4 md:py-6">
@@ -545,8 +547,8 @@ const MayaCalendarTab = memo(() => {
                 {/* 日期状态标签 */}
                 {selectedOffset !== 0 && (
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedOffset < 0
-                      ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                      : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                    : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                     }`}>
                     {selectedOffset < 0 ? '查看过去' : '查看未来'}
                   </span>
@@ -587,19 +589,19 @@ const MayaCalendarTab = memo(() => {
                   key={offset}
                   onClick={() => handleQuickSelect(offset)}
                   className={`px-4 py-2 md:px-5 md:py-2.5 rounded-lg font-medium transition-all duration-200 relative group touch-manipulation text-sm ${selectedOffset === offset
-                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 active:shadow-inner'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 active:shadow-inner'
                     }`}
                 >
                   {/* 增强高亮反馈效果 */}
                   <div className={`absolute inset-0 rounded-lg transition-all duration-150 ${selectedOffset === offset
-                      ? 'bg-white opacity-30'
-                      : 'bg-white opacity-0 group-active:opacity-30'
+                    ? 'bg-white opacity-30'
+                    : 'bg-white opacity-0 group-active:opacity-30'
                     }`}></div>
                   {/* 添加光晕效果 */}
                   <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${selectedOffset === offset
-                      ? 'bg-gradient-to-r from-purple-400/20 to-blue-400/20'
-                      : 'opacity-0 group-hover:bg-gradient-to-r group-hover:from-purple-400/10 group-hover:to-blue-400/10'
+                    ? 'bg-gradient-to-r from-purple-400/20 to-blue-400/20'
+                    : 'opacity-0 group-hover:bg-gradient-to-r group-hover:from-purple-400/10 group-hover:to-blue-400/10'
                     }`}></div>
                   <span className="relative font-medium">{offset === -1 ? '昨天' : offset === 0 ? '今天' : '明天'}</span>
                 </button>
@@ -734,8 +736,8 @@ const MayaCalendarTab = memo(() => {
                     <div
                       key={index}
                       className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full text-xs font-medium ${index === mayaData?.toneIndex
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                         }`}
                     >
                       {index + 1}
@@ -824,8 +826,8 @@ const MayaCalendarTab = memo(() => {
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">今日能量强度</h4>
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${mayaData?.level === '高' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      mayaData?.level === '中' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    mayaData?.level === '中' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                     }`}>
                     {mayaData?.level || '中'}
                   </span>
@@ -833,8 +835,8 @@ const MayaCalendarTab = memo(() => {
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all duration-500 ${mayaData?.level === '高' ? 'bg-gradient-to-r from-green-500 to-teal-500 w-4/5' :
-                        mayaData?.level === '中' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 w-3/5' :
-                          'bg-gradient-to-r from-yellow-500 to-orange-500 w-2/5'
+                      mayaData?.level === '中' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 w-3/5' :
+                        'bg-gradient-to-r from-yellow-500 to-orange-500 w-2/5'
                       }`}
                   ></div>
                 </div>

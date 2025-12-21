@@ -354,21 +354,21 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
           {/* 今日节律状态 */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-green-100 dark:border-green-800 border-opacity-50 transition-all hover:shadow-md">
+            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-green-100 dark:border-green-800 border-opacity-50">
               <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
                 {todayData.physical}%
               </div>
               <div className="text-sm text-green-800 dark:text-green-300 font-medium">体力</div>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-blue-100 dark:border-blue-800 border-opacity-50 transition-all hover:shadow-md">
+            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-blue-100 dark:border-blue-800 border-opacity-50">
               <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                 {todayData.emotional}%
               </div>
               <div className="text-sm text-blue-800 dark:text-blue-300 font-medium">情绪</div>
             </div>
 
-            <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-800 border-opacity-50 transition-all hover:shadow-md">
+            <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-800 border-opacity-50">
               <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                 {todayData.intellectual}%
               </div>

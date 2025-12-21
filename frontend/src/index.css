@@ -423,7 +423,7 @@ code {
 .optimized-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  scroll-behavior: smooth;
+  touch-action: pan-y;
 }
 
 /* 防抖滚动优化 */
