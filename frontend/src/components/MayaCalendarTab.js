@@ -936,6 +936,7 @@ const MayaCalendarTab = memo(() => {
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
   );
