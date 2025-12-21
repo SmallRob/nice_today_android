@@ -18,8 +18,10 @@
 /* 滚动优化 */
 .optimized-scroll {
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  /* 移除全局 smooth scroll 以避免移动端惯性滚动冲突 */
   overscroll-behavior: contain;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* 移动端字体优化 */
@@ -145,12 +147,12 @@
 /* 移动端性能优化类 */
 .performance-optimized {
   transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-  will-change: transform, scroll-position;
   -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  contain: layout style paint;
+  /* 仅对 transform 和 opacity 使用 will-change */
+  will-change: transform, opacity;
+  contain: layout style;
 }
 
 /* 减少重绘优化 */
@@ -234,16 +236,16 @@
   contain: layout style paint;
 }
 
-/* 滚动性能优化类 */
+/* 滚动性能优化类 - 移除了 will-change: scroll-position 和 scroll-behavior: smooth */
 .scroll-performance-optimized {
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
   overscroll-behavior: contain;
   transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: scroll-position;
-  contain: layout style paint;
   -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* 移除 scroll-behavior: smooth 和 will-change: scroll-position */
+  contain: layout style;
 }
 
 /* 虚拟滚动容器 */
@@ -303,7 +305,6 @@
   height: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
   overscroll-behavior: contain;
 }
 
@@ -490,12 +491,10 @@
 /* 移动端触摸滚动优化 */
 .taoist-scroll-area {
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
   overscroll-behavior: contain;
   transform: translateZ(0);
   backface-visibility: hidden;
-  will-change: scroll-position;
-  contain: layout style paint;
+  contain: layout style;
 }
 
 /* 响应式调整 */
@@ -541,17 +540,27 @@
   }
 }
 
-/* 五行道家养生风格标签导航 */
+/* 五行道家养生风格标签导航 - 优化 backdrop-filter 性能 */
 .taoist-tab-navigation {
   position: sticky;
   top: 0;
   z-index: 90;
   transform: translateZ(0);
   backface-visibility: hidden;
-  will-change: transform;
-  contain: layout style paint;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  contain: layout style;
+  /* 仅在性能好的设备上使用模糊 */
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.dark .taoist-tab-navigation {
+  background: rgba(31, 41, 55, 0.9);
+}
+
+@media (min-resolution: 2dppx) {
+  .taoist-tab-navigation {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
 }
 
 .taoist-tab-button {

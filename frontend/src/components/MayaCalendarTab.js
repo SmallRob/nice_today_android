@@ -10,49 +10,49 @@ class MayaCalendarUtils {
     '磁性', '月亮', '电力', '自我存在', '超频', '韵律', '共振',
     '银河', '太阳', '行星', '光谱', '水晶', '宇宙'
   ];
-  
+
   static SEALS = [
     '红龙', '白风', '蓝夜', '黄种子', '红蛇', '白世界桥', '蓝手', '黄星星',
     '红月', '白狗', '蓝猴', '黄人', '红天行者', '白巫师', '蓝鹰', '黄战士',
     '红地球', '白镜', '蓝风暴', '黄太阳'
   ];
-  
+
   // 缓存参考日期对象，避免重复创建
   static REFERENCE_DATE = new Date('2025-09-23');
   static REFERENCE_KIN = 183;
-  
+
   // 缓存计算结果
   static calculationCache = new Map();
   static maxCacheSize = 100;
-  
+
   // 标准玛雅历法计算（基于KIN 183校准）
   static calculateMayaDate(gregorianDate) {
     try {
       const dateString = gregorianDate.toISOString().split('T')[0]; // 使用日期字符串作为缓存键
-      
+
       // 检查缓存
       if (this.calculationCache.has(dateString)) {
         return this.calculationCache.get(dateString);
       }
-      
+
       // 计算目标日期
       const targetDate = new Date(gregorianDate);
-      
+
       // 计算从参考日期到目标日期的天数
       const timeDiff = targetDate.getTime() - this.REFERENCE_DATE.getTime();
       const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-      
+
       // 计算KIN数（1-260的循环）
       let kin = this.REFERENCE_KIN + daysDiff;
       kin = ((kin - 1) % 260) + 1;
-      
+
       // 从KIN数计算调性和图腾
       const toneIndex = (kin - 1) % 13;
       const sealIndex = (kin - 1) % 20;
-      
+
       const tone = this.TONES[toneIndex];
       const seal = this.SEALS[sealIndex];
-      
+
       const result = {
         kin: kin,
         tone: tone,
@@ -62,16 +62,16 @@ class MayaCalendarUtils {
         toneIndex: toneIndex,
         sealIndex: sealIndex
       };
-      
+
       // 更新缓存
       this.calculationCache.set(dateString, result);
-      
+
       // 限制缓存大小
       if (this.calculationCache.size > this.maxCacheSize) {
         const firstKey = this.calculationCache.keys().next().value;
         this.calculationCache.delete(firstKey);
       }
-      
+
       return result;
     } catch (error) {
       console.error('计算玛雅日期失败:', error);
@@ -86,12 +86,12 @@ class MayaCalendarUtils {
       };
     }
   }
-  
+
   // 获取能量提示 - 使用缓存优化
   static getTip(kin) {
     try {
       const energyScore = (kin % 100) + 1;
-      
+
       if (energyScore >= 80) {
         return {
           tip: "今日能量充沛，是行动的好时机！保持积极心态，勇敢追求目标。",
@@ -151,8 +151,8 @@ const ErrorDisplay = memo(({ error, onRetry }) => (
     <h3 className="maya-subtitle mb-2">加载失败</h3>
     <p className="maya-body-sm mb-3">{error}</p>
     {onRetry && (
-      <button 
-        onClick={onRetry} 
+      <button
+        onClick={onRetry}
         className="maya-button-base maya-error-bg"
       >
         重新加载
@@ -172,8 +172,8 @@ const EmptyState = memo(({ onRetry }) => (
     <h3 className="maya-subtitle mb-2">暂无数据</h3>
     <p className="maya-body-sm mb-3">暂时无法获取玛雅历法数据</p>
     {onRetry && (
-      <button 
-        onClick={onRetry} 
+      <button
+        onClick={onRetry}
         className="maya-button-base maya-primary-bg"
       >
         重新加载
@@ -187,7 +187,7 @@ const MayaCalendarTab = memo(() => {
   // 使用useRef管理不需要触发重渲染的状态
   const abortControllerRef = useRef(null);
   const animationFrameRef = useRef(null);
-  
+
   // useState管理需要触发重渲染的状态
   const [selectedDate, setSelectedDate] = useState(() => getToday());
   const [mayaData, setMayaData] = useState(null);
@@ -199,32 +199,32 @@ const MayaCalendarTab = memo(() => {
   // 优化的日期格式化函数 - 使用缓存
   const formatDateLocal = useCallback((date) => {
     if (!date) return null;
-    
+
     // 使用缓存的格式化结果
     const cacheKey = date.toISOString().split('T')[0];
     if (formatDateLocal.cache && formatDateLocal.cache.has(cacheKey)) {
       return formatDateLocal.cache.get(cacheKey);
     }
-    
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const result = `${year}-${month}-${day}`;
-    
+
     // 初始化缓存
     if (!formatDateLocal.cache) {
       formatDateLocal.cache = new Map();
     }
-    
+
     // 更新缓存
     formatDateLocal.cache.set(cacheKey, result);
-    
+
     // 限制缓存大小
     if (formatDateLocal.cache.size > 30) {
       const firstKey = formatDateLocal.cache.keys().next().value;
       formatDateLocal.cache.delete(firstKey);
     }
-    
+
     return result;
   }, []);
 
@@ -239,10 +239,10 @@ const MayaCalendarTab = memo(() => {
             resolve(null);
             return;
           }
-          
+
           const mayaResult = MayaCalendarUtils.calculateMayaDate(date);
           const energyTip = MayaCalendarUtils.getTip(mayaResult.kin);
-          
+
           resolve({
             ...mayaResult,
             ...energyTip,
@@ -265,22 +265,22 @@ const MayaCalendarTab = memo(() => {
   // 优化的加载函数
   const loadMayaData = useCallback(async (date) => {
     if (loading) return;
-    
+
     // 创建新的AbortController
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
-    
+
     setLoading(true);
     setError(null);
 
     try {
       const mayaResult = await calculateMayaDataAsync(date);
-      
+
       // 检查是否已取消
       if (abortControllerRef.current?.signal.aborted) return;
-      
+
       if (mayaResult) {
         // 使用requestAnimationFrame确保流畅的UI更新
         requestAnimationFrame(() => {
@@ -309,13 +309,13 @@ const MayaCalendarTab = memo(() => {
     const newDate = new Date(e.target.value);
     if (!isNaN(newDate.getTime())) {
       setSelectedDate(newDate);
-      
+
       // 计算与今天的偏移量
       const today = getToday();
       const timeDiff = newDate.getTime() - today.getTime();
       const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
       setSelectedOffset(daysDiff);
-      
+
       // 立即加载新日期的数据，不需要防抖
       loadMayaData(newDate);
     }
@@ -327,7 +327,7 @@ const MayaCalendarTab = memo(() => {
     newDate.setDate(newDate.getDate() + daysOffset);
     setSelectedDate(newDate);
     setSelectedOffset(daysOffset); // 更新选中的偏移量
-    
+
     // 使用setTimeout避免阻塞
     setTimeout(() => {
       loadMayaData(newDate);
@@ -339,7 +339,7 @@ const MayaCalendarTab = memo(() => {
     const today = getToday();
     setSelectedDate(today);
     setSelectedOffset(0);
-    
+
     // 使用setTimeout确保UI更新完成后再加载数据
     setTimeout(() => {
       loadMayaData(today);
@@ -360,7 +360,7 @@ const MayaCalendarTab = memo(() => {
         loadMayaData(selectedDate);
       }
     }, 100);
-    
+
     return () => {
       clearTimeout(timer);
     };
@@ -369,7 +369,7 @@ const MayaCalendarTab = memo(() => {
   // 组件卸载时清理
   useEffect(() => {
     const animationFrameId = animationFrameRef.current;
-    
+
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -402,14 +402,14 @@ const MayaCalendarTab = memo(() => {
         ),
         color: "bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 border-indigo-200 dark:border-indigo-700"
       };
-      
+
       // 根据KIN选择不同的知识内容
       const knowledgeOptions = [basicKnowledge];
       const selectedKnowledge = knowledgeOptions[kin % knowledgeOptions.length];
-      
+
       return selectedKnowledge;
     };
-    
+
     const knowledge = mayaData ? getMayaKnowledge(mayaData.kin) : {
       title: "玛雅历法简介",
       content: "玛雅13月亮历是古代玛雅人使用的神圣历法系统，基于260天的循环周期。",
@@ -420,7 +420,7 @@ const MayaCalendarTab = memo(() => {
       ),
       color: "bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 border-indigo-200 dark:border-indigo-700"
     };
-    
+
     return (
       <div className={`${knowledge.color} border maya-rounded-lg maya-padding-md animate-fade-in transition-all duration-300 hover:shadow-md`}>
         <h4 className="maya-body font-semibold mb-3 flex items-center">
@@ -430,7 +430,7 @@ const MayaCalendarTab = memo(() => {
         <p className="maya-body-sm leading-relaxed mb-3">
           {knowledge.content}
         </p>
-        
+
         {/* 添加互动元素 - 基于当前KIN的实践提示 */}
         <div className="bg-white dark:bg-gray-800 maya-rounded maya-padding-sm mt-3">
           <h5 className="maya-body-sm font-semibold mb-2 flex items-center">
@@ -445,7 +445,7 @@ const MayaCalendarTab = memo(() => {
             记住，玛雅历法提醒我们与自然周期同步，在每个当下保持觉知。
           </p>
         </div>
-        
+
         {/* 添加探索链接 */}
         <div className="mt-3 flex justify-between items-center">
           <div className="maya-body-sm">
@@ -478,18 +478,18 @@ const MayaCalendarTab = memo(() => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+    <div className="bg-gray-50 dark:bg-gray-900 pb-10 performance-optimized">
       {/* 优化的页面标题 - 添加日期状态指示 */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-b-lg shadow-lg">
         <div className="container mx-auto px-3 py-4 md:px-4 md:py-6">
           <div className="flex items-center justify-between mb-1">
             <h1 className="text-xl md:text-2xl font-bold flex items-center">
               <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
               </svg>
               玛雅历法
             </h1>
-            
+
             {/* 日期状态指示器 */}
             {selectedOffset !== 0 && (
               <div className="flex items-center bg-white/20 rounded-full px-3 py-1">
@@ -502,12 +502,12 @@ const MayaCalendarTab = memo(() => {
               </div>
             )}
           </div>
-          
+
           <p className="text-purple-100 text-xs md:text-sm opacity-90">
-            {selectedOffset === 0 
-              ? "古代玛雅人的神圣历法系统，揭示每日独特能量" 
-              : selectedOffset < 0 
-                ? `探索${Math.abs(selectedOffset)}天前的玛雅能量，了解历史周期` 
+            {selectedOffset === 0
+              ? "古代玛雅人的神圣历法系统，揭示每日独特能量"
+              : selectedOffset < 0
+                ? `探索${Math.abs(selectedOffset)}天前的玛雅能量，了解历史周期`
                 : `预览${selectedOffset}天后的玛雅能量，为未来做好准备`
             }
           </p>
@@ -517,7 +517,7 @@ const MayaCalendarTab = memo(() => {
       {/* 主内容区域 */}
       <div className="container mx-auto px-3 py-4 md:px-4 md:py-6 space-y-4">
         {/* 今日启示 - 使用与穿衣养生页面一致的样式 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="p-4 md:p-5">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mr-3">
@@ -534,7 +534,7 @@ const MayaCalendarTab = memo(() => {
         </div>
 
         {/* 优化的日期选择区域 - 添加清晰的视觉反馈和回到今天功能 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="p-4 md:p-5">
             {/* 日期状态指示器 */}
             <div className="flex items-center justify-between mb-4">
@@ -544,16 +544,15 @@ const MayaCalendarTab = memo(() => {
                 </h3>
                 {/* 日期状态标签 */}
                 {selectedOffset !== 0 && (
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    selectedOffset < 0 
-                      ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' 
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedOffset < 0
+                      ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
                       : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  }`}>
+                    }`}>
                     {selectedOffset < 0 ? '查看过去' : '查看未来'}
                   </span>
                 )}
               </div>
-              
+
               {/* 回到今天按钮 - 仅在非今天时显示 */}
               {selectedOffset !== 0 && (
                 <button
@@ -567,7 +566,7 @@ const MayaCalendarTab = memo(() => {
                 </button>
               )}
             </div>
-            
+
             {/* 日期选择器 */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -580,36 +579,33 @@ const MayaCalendarTab = memo(() => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-all duration-200 hover:border-purple-300 dark:hover:border-purple-500"
               />
             </div>
-            
+
             {/* 快速选择按钮 - 增强视觉反馈 */}
             <div className="flex justify-center space-x-2 md:space-x-3">
               {[-1, 0, 1].map((offset) => (
                 <button
                   key={offset}
                   onClick={() => handleQuickSelect(offset)}
-                  className={`px-4 py-2 md:px-5 md:py-2.5 rounded-lg font-medium transition-all duration-200 relative group touch-manipulation text-sm ${
-                    selectedOffset === offset
+                  className={`px-4 py-2 md:px-5 md:py-2.5 rounded-lg font-medium transition-all duration-200 relative group touch-manipulation text-sm ${selectedOffset === offset
                       ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 active:shadow-inner'
-                  }`}
+                    }`}
                 >
                   {/* 增强高亮反馈效果 */}
-                  <div className={`absolute inset-0 rounded-lg transition-all duration-150 ${
-                    selectedOffset === offset 
-                      ? 'bg-white opacity-30' 
+                  <div className={`absolute inset-0 rounded-lg transition-all duration-150 ${selectedOffset === offset
+                      ? 'bg-white opacity-30'
                       : 'bg-white opacity-0 group-active:opacity-30'
-                  }`}></div>
+                    }`}></div>
                   {/* 添加光晕效果 */}
-                  <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${
-                    selectedOffset === offset 
-                      ? 'bg-gradient-to-r from-purple-400/20 to-blue-400/20' 
+                  <div className={`absolute inset-0 rounded-lg transition-all duration-300 ${selectedOffset === offset
+                      ? 'bg-gradient-to-r from-purple-400/20 to-blue-400/20'
                       : 'opacity-0 group-hover:bg-gradient-to-r group-hover:from-purple-400/10 group-hover:to-blue-400/10'
-                  }`}></div>
+                    }`}></div>
                   <span className="relative font-medium">{offset === -1 ? '昨天' : offset === 0 ? '今天' : '明天'}</span>
                 </button>
               ))}
             </div>
-            
+
             {/* 当前查看日期提示 */}
             <div className="mt-3 text-center">
               <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -626,7 +622,7 @@ const MayaCalendarTab = memo(() => {
         </div>
 
         {/* 玛雅历法核心信息 - 使用与穿衣养生页面一致的卡片样式 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="p-4 md:p-5">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               {/* KIN数 */}
@@ -636,7 +632,7 @@ const MayaCalendarTab = memo(() => {
                 </div>
                 <div className="text-xs md:text-sm text-purple-800 dark:text-purple-300 font-medium">能量编号</div>
               </div>
-              
+
               {/* 调性 */}
               <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 md:p-4 text-center">
                 <div className="text-sm md:text-base font-bold text-blue-600 dark:text-blue-400 mb-1">
@@ -644,7 +640,7 @@ const MayaCalendarTab = memo(() => {
                 </div>
                 <div className="text-xs md:text-sm text-blue-800 dark:text-blue-300 font-medium">银河音调</div>
               </div>
-              
+
               {/* 图腾 */}
               <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3 md:p-4 text-center">
                 <div className="text-sm md:text-base font-bold text-green-600 dark:text-green-400 mb-1">
@@ -698,7 +694,7 @@ const MayaCalendarTab = memo(() => {
             <p className="text-gray-700 dark:text-gray-200 leading-relaxed mb-4 text-sm md:text-base">
               玛雅13月亮历是古代玛雅人使用的神圣历法系统，基于260天的循环周期。它由13个银河音调（调性）和20个太阳印记（图腾）组合而成，共260个不同的能量组合。
             </p>
-            
+
             {/* 互动元素 - 基于当前KIN的实践提示 */}
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4">
               <div className="flex items-center mb-2">
@@ -713,15 +709,15 @@ const MayaCalendarTab = memo(() => {
                 记住，玛雅历法提醒我们与自然周期同步，在每个当下保持觉知。
               </p>
             </div>
-            
+
             {/* 扩展信息部分 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               {/* 周期进度 */}
               <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
                 <h4 className="text-base font-semibold text-gray-800 dark:text-white mb-2">周期进度</h4>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                  <div 
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full" 
+                  <div
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full"
                     style={{ width: `${(mayaData?.kin / 260) * 100}%` }}
                   ></div>
                 </div>
@@ -729,19 +725,18 @@ const MayaCalendarTab = memo(() => {
                   KIN {mayaData?.kin} / 260天周期第{mayaData?.kin}天 ({Math.round((mayaData?.kin / 260) * 100)}%)
                 </p>
               </div>
-              
+
               {/* 调性图解 */}
               <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
                 <h4 className="text-base font-semibold text-gray-800 dark:text-white mb-2">调性图解</h4>
                 <div className="flex flex-wrap gap-1">
                   {MayaCalendarUtils.TONES.map((tone, index) => (
-                    <div 
+                    <div
                       key={index}
-                      className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full text-xs font-medium ${
-                        index === mayaData?.toneIndex
+                      className={`w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full text-xs font-medium ${index === mayaData?.toneIndex
                           ? 'bg-purple-600 text-white'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                      }`}
+                        }`}
                     >
                       {index + 1}
                     </div>
@@ -752,7 +747,7 @@ const MayaCalendarTab = memo(() => {
                 </p>
               </div>
             </div>
-            
+
             {/* 学习资源链接 */}
             <div className="flex justify-between items-center">
               <div className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
@@ -771,7 +766,7 @@ const MayaCalendarTab = memo(() => {
         </div>
 
         {/* 增强功能：玛雅能量与个人计划结合 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="p-4 md:p-5">
             <div className="flex items-center mb-4">
               <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mr-3 shadow-md">
@@ -791,9 +786,9 @@ const MayaCalendarTab = memo(() => {
                     重点行动
                   </h4>
                   <p className="text-xs text-purple-600 dark:text-purple-400">
-                    {mayaData?.level === '高' ? '开启新项目，做出重要决策' : 
-                     mayaData?.level === '中' ? '推进计划，保持平衡' : 
-                     '休息调整，内省规划'}
+                    {mayaData?.level === '高' ? '开启新项目，做出重要决策' :
+                      mayaData?.level === '中' ? '推进计划，保持平衡' :
+                        '休息调整，内省规划'}
                   </p>
                 </div>
                 <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
@@ -804,9 +799,9 @@ const MayaCalendarTab = memo(() => {
                     能量时段
                   </h4>
                   <p className="text-xs text-blue-600 dark:text-blue-400">
-                    {mayaData?.level === '高' ? '上午9-11点，下午2-4点' : 
-                     mayaData?.level === '中' ? '上午10-12点，下午3-5点' : 
-                     '全时段保持轻松节奏'}
+                    {mayaData?.level === '高' ? '上午9-11点，下午2-4点' :
+                      mayaData?.level === '中' ? '上午10-12点，下午3-5点' :
+                        '全时段保持轻松节奏'}
                   </p>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-100 dark:border-green-800">
@@ -817,32 +812,30 @@ const MayaCalendarTab = memo(() => {
                     能量等级
                   </h4>
                   <p className="text-xs text-green-600 dark:text-green-400">
-                    {mayaData?.level === '高' ? '高能量日 - 积极行动' : 
-                     mayaData?.level === '中' ? '中等能量 - 稳步推进' : 
-                     '低能量日 - 调整节奏'}
+                    {mayaData?.level === '高' ? '高能量日 - 积极行动' :
+                      mayaData?.level === '中' ? '中等能量 - 稳步推进' :
+                        '低能量日 - 调整节奏'}
                   </p>
                 </div>
               </div>
-              
+
               {/* 新增：能量强度指示器 */}
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">今日能量强度</h4>
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                    mayaData?.level === '高' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                    mayaData?.level === '中' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                  }`}>
+                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${mayaData?.level === '高' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      mayaData?.level === '中' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    }`}>
                     {mayaData?.level || '中'}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full transition-all duration-500 ${
-                      mayaData?.level === '高' ? 'bg-gradient-to-r from-green-500 to-teal-500 w-4/5' :
-                      mayaData?.level === '中' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 w-3/5' :
-                      'bg-gradient-to-r from-yellow-500 to-orange-500 w-2/5'
-                    }`}
+                  <div
+                    className={`h-2 rounded-full transition-all duration-500 ${mayaData?.level === '高' ? 'bg-gradient-to-r from-green-500 to-teal-500 w-4/5' :
+                        mayaData?.level === '中' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 w-3/5' :
+                          'bg-gradient-to-r from-yellow-500 to-orange-500 w-2/5'
+                      }`}
                   ></div>
                 </div>
               </div>
@@ -869,7 +862,7 @@ const MayaCalendarTab = memo(() => {
                   <span className="text-xs text-gray-500 dark:text-gray-400">第{mayaData?.kin || 1}天</span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${((mayaData?.kin || 1) / 260) * 100}%` }}
                   ></div>
@@ -880,7 +873,7 @@ const MayaCalendarTab = memo(() => {
                   <span className="text-xs text-gray-500 dark:text-gray-400">260</span>
                 </div>
               </div>
-              
+
               {/* 13天周期进度 */}
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -888,13 +881,13 @@ const MayaCalendarTab = memo(() => {
                   <span className="text-xs text-gray-500 dark:text-gray-400">第{(mayaData?.kin || 1) % 13 || 13}天</span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${(((mayaData?.kin || 1) % 13 || 13) / 13) * 100}%` }}
                   ></div>
                 </div>
               </div>
-              
+
               {/* 20天周期进度 */}
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -902,7 +895,7 @@ const MayaCalendarTab = memo(() => {
                   <span className="text-xs text-gray-500 dark:text-gray-400">第{(mayaData?.kin || 1) % 20 || 20}天</span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${(((mayaData?.kin || 1) % 20 || 20) / 20) * 100}%` }}
                   ></div>
@@ -925,11 +918,11 @@ const MayaCalendarTab = memo(() => {
             </div>
             <div className="space-y-2">
               <p className="text-sm leading-relaxed opacity-90">
-                {mayaData?.level === '高' ? 
+                {mayaData?.level === '高' ?
                   '今天宇宙能量充沛，是行动和创造的好时机。勇敢追求目标，相信你的直觉。' :
-                mayaData?.level === '中' ?
-                  '保持平衡的节奏，稳步推进计划。倾听内在声音，找到和谐的生活方式。' :
-                  '放慢脚步，关注内在需求。休息和反思能带来新的洞察和方向。'
+                  mayaData?.level === '中' ?
+                    '保持平衡的节奏，稳步推进计划。倾听内在声音，找到和谐的生活方式。' :
+                    '放慢脚步，关注内在需求。休息和反思能带来新的洞察和方向。'
                 }
               </p>
               <div className="flex items-center text-xs opacity-75">

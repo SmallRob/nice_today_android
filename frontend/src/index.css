@@ -193,10 +193,15 @@ code {
 }
 
 .glassmorphism {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@media (min-resolution: 2dppx) {
+  .glassmorphism {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 
 .dark .glassmorphism {
@@ -429,12 +434,10 @@ code {
 /* 修复移动端滚动抖动 */
 @media (max-width: 768px) {
   .optimized-scroll {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    -webkit-perspective: 1000;
-    perspective: 1000;
   }
 }
 
@@ -487,36 +490,32 @@ code {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  scroll-behavior: smooth;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem);
 }
 
 /* 性能优化类 - 增强版 */
 .performance-optimized {
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  perspective: 1000px;
-  -webkit-perspective: 1000px;
-  will-change: transform, scroll-position;
+  will-change: transform, opacity;
   /* 防止重排重绘 */
-  contain: layout style paint;
+  contain: layout style;
 }
 
 /* 滚动容器性能优化 */
 .scroll-performance-optimized {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  scroll-behavior: smooth;
   /* 硬件加速 */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
   /* 防止滚动抖动 */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   /* 优化滚动性能 */
-  will-change: transform, scroll-position;
+  contain: layout style;
 }
 
 /* 隐藏滚动条优化 */
@@ -593,10 +592,9 @@ code {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  scroll-behavior: smooth;
   /* 优化滚动性能 */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
   /* 确保底部内容可见 */
   padding-bottom: 2rem;
 }

@@ -572,7 +572,7 @@ const MBTIPersonalityTabHome = () => {
         <div className="relative flex flex-col md:flex-row items-center md:items-start gap-5">
           {/* 图标和类型 */}
           <div
-            className="flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center text-3xl shadow-inner backdrop-blur-md bg-white/20 border border-white/20 ring-1 ring-white/30"
+            className="flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center text-3xl shadow-sm backdrop-blur-sm bg-white/20 border border-white/20 ring-1 ring-white/10"
           >
             <span className="mb-1">{icon}</span>
             <span className="text-[10px] uppercase font-black tracking-tighter opacity-80">{type}</span>
@@ -625,7 +625,7 @@ const MBTIPersonalityTabHome = () => {
             <ul className="space-y-2.5">
               {strengths.slice(0, 4).map((strength, index) => (
                 <li key={index} className="flex items-start">
-                  <div className="mt-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2.5 flex-shrink-0 animate-pulse"></div>
+                  <div className="mt-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2.5 flex-shrink-0"></div>
                   <span className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-tight">{strength}</span>
                 </li>
               ))}
@@ -747,7 +747,7 @@ const MBTIPersonalityTabHome = () => {
           {/* 成长建议 */}
           <div className="grid grid-cols-1 gap-3">
             {tips.slice(0, 3).map((tip, index) => (
-              <div key={index} className="flex items-center p-3.5 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-transform hover:translate-x-1">
+              <div key={index} className="flex items-center p-3.5 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-transform duration-200">
                 <div className="w-8 h-8 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 flex items-center justify-center mr-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0">
                   <span className="text-sm font-bold">{index + 1}</span>
                 </div>

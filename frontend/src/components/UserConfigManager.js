@@ -42,10 +42,10 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
   const [formData, setFormData] = useState({ ...config });
   const [hasChanges, setHasChanges] = useState(false);
   const formRef = useRef(null);
-  
+
   // 检测表单是否有变化
   useEffect(() => {
-    const changed = 
+    const changed =
       formData.nickname !== config.nickname ||
       formData.birthDate !== config.birthDate ||
       formData.zodiac !== config.zodiac ||
@@ -53,15 +53,15 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
       formData.gender !== config.gender ||
       formData.mbti !== config.mbti;
     setHasChanges(changed);
-    
+
     // 不再自动保存，只有用户点击保存按钮时才保存
   }, [formData, config]);
-  
+
   // 处理表单字段变化
   const handleFieldChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
-  
+
   // 保存配置
   const handleSave = useCallback(() => {
     // 基本验证
@@ -69,37 +69,36 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
       showMessage('请输入昵称', 'error');
       return;
     }
-    
+
     if (!formData.birthDate) {
       showMessage('请选择出生日期', 'error');
       return;
     }
-    
+
     // 检查昵称是否已存在
-    const isNicknameExists = configs.some((config, i) => 
+    const isNicknameExists = configs.some((config, i) =>
       i !== index && config.nickname === formData.nickname
     );
-    
+
     if (isNicknameExists) {
       showMessage('该昵称已存在，请重新输入', 'error');
       return;
     }
-    
+
     onSave(index, formData);
     showMessage('配置保存成功', 'success');
   }, [formData, index, onSave, configs, showMessage]);
-  
+
   // 重置表单
   const handleReset = useCallback(() => {
     setFormData({ ...config });
   }, [config]);
-  
+
   return (
-    <div className={`border rounded-lg overflow-hidden transition-all duration-200 ${
-      isActive ? 'border-blue-500 dark:border-blue-400 shadow-md' : 'border-gray-200 dark:border-gray-700'
-    }`}>
+    <div className={`border rounded-lg overflow-hidden transition-shadow duration-200 performance-optimized ${isActive ? 'border-blue-500 dark:border-blue-400 shadow-md' : 'border-gray-200 dark:border-gray-700'
+      }`}>
       {/* 标题区域 */}
-      <div 
+      <div
         className="bg-gray-50 dark:bg-gray-800 px-4 py-3 flex items-center justify-between cursor-pointer"
         onClick={() => onToggleExpand(index)}
       >
@@ -124,18 +123,18 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               当前使用
             </span>
           )}
-          <svg 
-            className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`} 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24" 
+          <svg
+            className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
-      
+
       {/* 表单内容 */}
       {isExpanded && (
         <div className="p-4 space-y-4" ref={formRef}>
@@ -152,7 +151,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               placeholder="输入您的昵称"
             />
           </div>
-          
+
           {/* 出生日期 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -165,7 +164,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          
+
           {/* 性别 - 移动到出生日期后面 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -176,11 +175,10 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
                 <button
                   key={option.value}
                   type="button"
-                  className={`p-2 rounded-md text-center transition-all duration-200 text-sm font-medium ${
-                    formData.gender === option.value
+                  className={`p-2 rounded-md text-center transition-all duration-200 text-sm font-medium ${formData.gender === option.value
                       ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-sm'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
+                    }`}
                   onClick={() => handleFieldChange('gender', option.value)}
                 >
                   {option.label}
@@ -188,7 +186,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               ))}
             </div>
           </div>
-          
+
           {/* 星座 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -199,12 +197,12 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             </div>
             <div className="selector-grid grid grid-cols-4 gap-2">
               {ZODIAC_OPTIONS.map((zodiac) => (
-                <div 
+                <div
                   key={zodiac}
-                  className={`selector-item ${formData.zodiac === zodiac ? 'selected' : ''}`}
+                  className={`selector-item performance-optimized ${formData.zodiac === zodiac ? 'selected' : ''}`}
                   onClick={() => handleFieldChange('zodiac', zodiac)}
                 >
-                  <div 
+                  <div
                     className={`selector-icon zodiac-sign-icon zodiac-sign-icon-sm zodiac-sign-icon-${zodiac} ${formData.zodiac === zodiac ? 'selected' : ''}`}
                     data-symbol=""
                   ></div>
@@ -218,7 +216,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               </div>
             )}
           </div>
-          
+
           {/* 生肖 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -229,12 +227,12 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             </div>
             <div className="selector-grid grid grid-cols-4 gap-2">
               {ZODIAC_ANIMAL_OPTIONS.map((animal) => (
-                <div 
+                <div
                   key={animal}
-                  className={`selector-item ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
+                  className={`selector-item performance-optimized ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
                   onClick={() => handleFieldChange('zodiacAnimal', animal)}
                 >
-                  <div 
+                  <div
                     className={`selector-icon zodiac-icon zodiac-icon-sm zodiac-icon-${animal} ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
                   ></div>
                   <span className="selector-label">{animal}</span>
@@ -247,9 +245,9 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               </div>
             )}
           </div>
-          
 
-          
+
+
           {/* MBTI类型 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -260,12 +258,12 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             </div>
             <div className="selector-grid grid grid-cols-4 gap-2">
               {MBTI_OPTIONS.map((type) => (
-                <div 
+                <div
                   key={type}
-                  className={`selector-item ${formData.mbti === type ? 'selected' : ''}`}
+                  className={`selector-item performance-optimized ${formData.mbti === type ? 'selected' : ''}`}
                   onClick={() => handleFieldChange('mbti', type)}
                 >
-                  <div 
+                  <div
                     className={`selector-icon mbti-icon mbti-icon-sm mbti-icon-${type} ${formData.mbti === type ? 'selected' : ''}`}
                     data-type={type}
                   ></div>
@@ -279,40 +277,40 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               </div>
             )}
           </div>
-          
+
           {/* 操作按钮 */}
           <div className="flex flex-wrap gap-2 pt-2">
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               size="sm"
               onClick={handleSave}
               disabled={!hasChanges}
             >
               保存
             </Button>
-            
-            <Button 
-              variant="secondary" 
+
+            <Button
+              variant="secondary"
               size="sm"
               onClick={handleReset}
               disabled={!hasChanges}
             >
               重置
             </Button>
-            
+
             {!isActive && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => onSetActive(index)}
               >
                 设为当前配置
               </Button>
             )}
-            
+
             {index > 0 && (
-              <Button 
-                variant="danger" 
+              <Button
+                variant="danger"
                 size="sm"
                 onClick={() => onDelete(index)}
               >
@@ -336,27 +334,27 @@ const UserConfigManagerComponent = () => {
   const [isSwitching, setIsSwitching] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null); // 用于显示提示信息
-  
+
   // 初始化配置管理器 - 优化异步加载
   useEffect(() => {
     const init = async () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // 异步初始化配置管理器
         await new Promise(resolve => setTimeout(resolve, 100)); // 延迟加载避免卡顿
         await userConfigManager.initialize();
         setIsInitialized(true);
-        
+
         // 异步加载配置
         await new Promise(resolve => setTimeout(resolve, 50));
         const allConfigs = userConfigManager.getAllConfigs();
         const activeIndex = userConfigManager.getActiveConfigIndex();
-        
+
         setConfigs(allConfigs);
         setActiveConfigIndex(activeIndex);
-        
+
         // 默认展开当前配置
         setExpandedIndex(activeIndex);
         setLoading(false);
@@ -366,14 +364,14 @@ const UserConfigManagerComponent = () => {
         setLoading(false);
       }
     };
-    
+
     init();
   }, []);
-  
+
   // 添加配置变更监听器
   useEffect(() => {
     if (!isInitialized) return;
-    
+
     const removeListener = userConfigManager.addListener(({
       configs: updatedConfigs,
       activeConfigIndex: updatedActiveIndex
@@ -381,12 +379,12 @@ const UserConfigManagerComponent = () => {
       setConfigs([...updatedConfigs]);
       setActiveConfigIndex(updatedActiveIndex);
     });
-    
+
     return () => {
       removeListener();
     };
   }, [isInitialized]);
-  
+
   // 显示提示信息
   const showMessage = useCallback((text, type = 'info') => {
     setMessage({ text, type });
@@ -406,7 +404,7 @@ const UserConfigManagerComponent = () => {
         newConfigs[index] = configData;
         return newConfigs;
       });
-      
+
       // 强制重新加载所有组件，确保数据同步
       setTimeout(() => {
         userConfigManager.forceReloadAll();
@@ -416,7 +414,7 @@ const UserConfigManagerComponent = () => {
       showMessage('保存配置失败，请重试', 'error');
     }
   }, [showMessage]);
-  
+
   // 处理添加新配置
   const handleAddConfig = useCallback(() => {
     const newConfig = {
@@ -427,7 +425,7 @@ const UserConfigManagerComponent = () => {
       gender: 'secret',
       mbti: 'ISFP'
     };
-    
+
     const success = userConfigManager.addConfig(newConfig);
     if (success) {
       // 更新本地状态
@@ -442,14 +440,14 @@ const UserConfigManagerComponent = () => {
       showMessage('添加配置失败，请重试', 'error');
     }
   }, [configs.length, showMessage]);
-  
+
   // 处理删除配置
   const handleDeleteConfig = useCallback((index) => {
     if (configs.length <= 1) {
       showMessage('至少需要保留一个配置', 'error');
       return;
     }
-    
+
     // 使用自定义确认对话框替代window.confirm
     if (window.confirm('确定要删除这个配置吗？')) {
       const success = userConfigManager.removeConfig(index);
@@ -464,28 +462,28 @@ const UserConfigManagerComponent = () => {
       }
     }
   }, [configs.length, showMessage]);
-  
+
   // 优化处理设置活跃配置 - 异步切换避免卡顿
   const handleSetActiveConfig = useCallback(async (index) => {
     if (isSwitching) return;
-    
+
     try {
       setIsSwitching(true);
       setError(null);
-      
+
       // 显示切换状态
       setActiveConfigIndex(index);
-      
+
       // 异步设置活跃配置
       await new Promise(resolve => setTimeout(resolve, 50));
       const success = userConfigManager.setActiveConfig(index);
-      
+
       if (success) {
         // 异步强制重新加载所有组件，确保新配置生效
         setTimeout(() => {
           userConfigManager.forceReloadAll();
         }, 200);
-        
+
         // 延迟更新状态，确保UI流畅
         setTimeout(() => {
           setIsSwitching(false);
@@ -497,29 +495,29 @@ const UserConfigManagerComponent = () => {
       console.error('切换配置失败:', error);
       setError('切换配置失败: ' + error.message);
       setIsSwitching(false);
-      
+
       // 恢复之前的状态
       const activeIndex = userConfigManager.getActiveConfigIndex();
       setActiveConfigIndex(activeIndex);
     }
   }, [isSwitching]);
-  
+
   // 处理展开/折叠
   const handleToggleExpand = useCallback((index) => {
     setExpandedIndex(prev => prev === index ? -1 : index);
   }, []);
-  
+
   // 处理导入配置
   const handleImportConfigs = useCallback(() => {
     try {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.json';
-      
+
       input.onchange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
@@ -534,16 +532,16 @@ const UserConfigManagerComponent = () => {
             showMessage('读取文件失败: ' + error.message, 'error');
           }
         };
-        
+
         reader.readAsText(file);
       };
-      
+
       input.click();
     } catch (error) {
       showMessage('导入失败: ' + error.message, 'error');
     }
   }, [showMessage]);
-  
+
   // 处理导出配置
   const handleExportConfigs = useCallback(() => {
     try {
@@ -552,24 +550,24 @@ const UserConfigManagerComponent = () => {
         showMessage('导出配置失败', 'error');
         return;
       }
-      
+
       const blob = new Blob([jsonData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
+
       const a = document.createElement('a');
       a.href = url;
       a.download = `nice-today-configs-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      
+
       URL.revokeObjectURL(url);
       showMessage('导出配置成功', 'success');
     } catch (error) {
       showMessage('导出配置失败: ' + error.message, 'error');
     }
   }, [showMessage]);
-  
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -590,8 +588,8 @@ const UserConfigManagerComponent = () => {
           </svg>
           <p className="text-red-700 dark:text-red-300">{error}</p>
         </div>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="mt-2 text-red-600 dark:text-red-400 text-sm hover:underline"
         >
           重新加载
@@ -599,7 +597,7 @@ const UserConfigManagerComponent = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-4">
       {/* 消息提示 */}
@@ -647,14 +645,14 @@ const UserConfigManagerComponent = () => {
           )}
         </div>
       </Card>
-      
+
       <Card title="用户配置管理" className="mb-6">
         <div className="space-y-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             在这里管理您的个人信息配置，包括昵称、出生日期、星座和生肖。
             您可以创建多个配置，并随时切换使用哪个配置。
           </p>
-          
+
           <div className="flex flex-wrap gap-2">
             <Button variant="primary" onClick={handleAddConfig}>
               添加新配置
@@ -668,7 +666,7 @@ const UserConfigManagerComponent = () => {
           </div>
         </div>
       </Card>
-      
+
       {/* 配置列表 */}
       <div className="space-y-3">
         {configs.map((config, index) => (
@@ -687,7 +685,7 @@ const UserConfigManagerComponent = () => {
           />
         ))}
       </div>
-      
+
 
     </div>
   );
