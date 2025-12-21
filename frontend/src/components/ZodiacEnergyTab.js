@@ -1092,13 +1092,13 @@ const ZodiacEnergyTab = memo(({ onError }) => {
               ✨ 点击任意生肖图标查看能量指引，临时查看不会保存配置
             </div>
 
-            {/* 炫彩生肖选择器 */}
+            {/* 炫彩生肖选择器 - 优化为紧凑布局 */}
             <div className="mb-4">
               <ChineseZodiacSelector
                 selectedZodiac={userZodiac}
                 onZodiacChange={handleZodiacChange}
                 size="md"
-                showLabels={true}
+                showLabels={false}
                 gridLayout="4"
                 className="chinese-zodiac-selector-energy"
               />

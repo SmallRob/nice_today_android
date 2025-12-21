@@ -28,7 +28,7 @@ const PageLayout = ({
   // 加载状态
   if (loading) {
     return (
-      <div className={`flex-1 overflow-auto ${bgClass} pb-safe-bottom`}>
+      <div className={`flex-1 overflow-auto ${bgClass} pb-safe-bottom safe-area-theme-adaptive`}>
         <div className="flex flex-col items-center justify-center h-64">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">正在加载...</p>
@@ -40,7 +40,7 @@ const PageLayout = ({
   // 错误状态
   if (error) {
     return (
-      <div className={`flex-1 overflow-auto ${bgClass} pb-safe-bottom`}>
+      <div className={`flex-1 overflow-auto ${bgClass} pb-safe-bottom safe-area-theme-adaptive`}>
         <div className="flex flex-col items-center justify-center h-64 p-4">
           <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mb-4">
             <svg className="w-8 h-8 text-red-500 dark:text-red-300" fill="currentColor" viewBox="0 0 20 20">
@@ -55,7 +55,7 @@ const PageLayout = ({
   }
 
   return (
-    <div className={`flex-1 overflow-auto ${bgClass} pb-safe-bottom`}>
+    <div className={`flex-1 overflow-auto ${bgClass} pb-safe-bottom safe-area-theme-adaptive`}>
       {/* 页面头部 */}
       {(title || subtitle || showBackButton || headerAction) && (
         <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">

@@ -59,9 +59,9 @@ const MayaPage = memo(() => {
 
 
   return (
-    <div className="h-full bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
-      {/* 玛雅历法顶部标题区域 */}
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 shadow-sm border-b border-amber-200 dark:border-amber-800 relative overflow-hidden">
+    <div className="maya-scroll-container bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700">
+      {/* 玛雅历法顶部标题区域 - 固定定位 */}
+      <div className="maya-fixed-header bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 shadow-sm border-b border-amber-200 dark:border-amber-800 overflow-hidden">
         {/* 玛雅文化装饰元素 */}
         <div className="absolute inset-0 opacity-10">
           {/* 装饰性金字塔图案 */}
@@ -113,34 +113,36 @@ const MayaPage = memo(() => {
         </div>
       </div>
       
-      {/* 标签导航 */}
-      <div className="container mx-auto px-4 py-2">
-        <div className="flex bg-amber-100 dark:bg-amber-900 rounded-lg p-1 max-w-md mx-auto">
-          <button
-            className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'calendar'
-              ? 'bg-white dark:bg-gray-700 text-amber-700 dark:text-amber-300 shadow-sm'
-              : 'text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100'
-              }`}
-            onClick={handleBackToCalendar}
-          >
-            玛雅历法
-          </button>
-          <button
-            className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'birthChart'
-              ? 'bg-white dark:bg-gray-700 text-amber-700 dark:text-amber-300 shadow-sm'
-              : 'text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100'
-              }`}
-            onClick={handleShowBirthChart}
-          >
-            出生星盘
-          </button>
+      {/* 标签导航 - 固定定位 */}
+      <div className="maya-fixed-tabs">
+        <div className="container mx-auto px-4 py-2">
+          <div className="flex bg-amber-100 dark:bg-amber-900 rounded-lg p-1 max-w-md mx-auto">
+            <button
+              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'calendar'
+                ? 'bg-white dark:bg-gray-700 text-amber-700 dark:text-amber-300 shadow-sm'
+                : 'text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100'
+                }`}
+              onClick={handleBackToCalendar}
+            >
+              玛雅历法
+            </button>
+            <button
+              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'birthChart'
+                ? 'bg-white dark:bg-gray-700 text-amber-700 dark:text-amber-300 shadow-sm'
+                : 'text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100'
+                }`}
+              onClick={handleShowBirthChart}
+            >
+              出生星盘
+            </button>
+          </div>
         </div>
       </div>
       
-      {/* 内容区域 */}
+      {/* 内容区域 - 优化滚动性能 */}
       <div
         ref={containerRef}
-        className="container mx-auto px-4 py-4 max-w-4xl"
+        className="maya-scroll-content container mx-auto px-4 py-4 max-w-4xl maya-scroll-optimized maya-scroll-stable"
       >
         {activeTab === 'calendar' && (
           <div>

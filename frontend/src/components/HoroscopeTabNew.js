@@ -12,6 +12,7 @@ import performanceMonitor from '../utils/performanceMonitor';
 import { getToday } from '../utils/timeCache';
 import '../styles/mobileOptimization.css';
 import '../styles/animations.css';
+import '../styles/config-selectors.css';
 import { Card } from './PageLayout';
 import { Line } from 'react-chartjs-2';
 import {
@@ -619,22 +620,20 @@ const HoroscopeTab = () => {
           选择您的星座，获取每日运势指引
         </div>
 
-          <div className="grid grid-cols-4 gap-3 mb-2">
+          <div className="selector-grid">
             {getHoroscopeData() && Array.isArray(getHoroscopeData()) ? getHoroscopeData().map((horoscope, index) => {
               const isActive = userHoroscope === horoscope.name;
-              // 为了更好地实现3行4列布局，我们需要对12个星座进行合理排列
               return (
-                <button
+                <div
                   key={horoscope.name}
+                  className={`selector-item performance-optimized ${isActive ? 'selected' : ''}`}
                   onClick={() => handleHoroscopeChange(horoscope.name)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all duration-200 ${isActive
-                    ? 'bg-blue-500 text-white shadow-md transform scale-105'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-sm'}`}
-                  style={{ touchAction: 'manipulation' }}
                 >
-                  <span className="text-2xl mb-1">{horoscope.icon}</span>
-                  <span className="text-xs font-bold horoscope-subtitle">{horoscope.name.replace('座', '')}</span>
-                </button>
+                  <div className="selector-icon">
+                    <span className="text-lg">{horoscope.icon}</span>
+                  </div>
+                  <span className="selector-label">{horoscope.name.replace('座', '')}</span>
+                </div>
               );
             }) : null}
           </div>

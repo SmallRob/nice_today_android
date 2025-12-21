@@ -93,7 +93,7 @@ function DashboardPage() {
       )}
 
       {appInfo.status === 'ready' && (
-        <div className="flex-1 flex flex-col overflow-hidden pb-safe-bottom -webkit-overflow-scrolling-touch">
+        <div className="flex-1 flex flex-col overflow-hidden pb-safe-bottom -webkit-overflow-scrolling-touch safe-area-theme-adaptive">
           <BiorhythmDashboard appInfo={appInfo} />
         </div>
       )}

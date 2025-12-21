@@ -66,7 +66,7 @@ const ChineseZodiacSelector = ({
     }
   }, []);
 
-  // 渲染单个生肖图标
+  // 渲染单个生肖图标 - 移除文字标签
   const renderZodiacIcon = useCallback((zodiac) => {
     const isSelected = localSelected === zodiac.id;
     const sizeClass = getSizeClass(size);
@@ -85,14 +85,9 @@ const ChineseZodiacSelector = ({
         >
           {zodiac.character}
         </div>
-        {showLabels && (
-          <span className="chinese-zodiac-icon-label">
-            {zodiac.name}
-          </span>
-        )}
       </div>
     );
-  }, [localSelected, size, showLabels, getSizeClass, handleZodiacSelect]);
+  }, [localSelected, size, getSizeClass, handleZodiacSelect]);
 
   return (
     <div className={`chinese-zodiac-selector ${className}`}>

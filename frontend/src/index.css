@@ -48,21 +48,25 @@
   --safe-area-inset-left: 0px;
 }
 
-/* 应用于安全区域的类 */
+/* 应用于安全区域的类 - 优化为主题适配 */
 .pt-safe-top {
   padding-top: max(var(--safe-area-inset-top), env(safe-area-inset-top));
+  background-color: inherit;
 }
 
 .pb-safe-bottom {
   padding-bottom: max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom));
+  background-color: inherit;
 }
 
 .pl-safe-left {
   padding-left: max(var(--safe-area-inset-left), env(safe-area-inset-left));
+  background-color: inherit;
 }
 
 .pr-safe-right {
   padding-right: max(var(--safe-area-inset-right), env(safe-area-inset-right));
+  background-color: inherit;
 }
 
 .mt-safe-top {
@@ -81,9 +85,63 @@
   margin-right: max(var(--safe-area-inset-right), env(safe-area-inset-right));
 }
 
-/* 防止内容被底部导航栏遮挡 */
+/* 防止内容被底部导航栏遮挡 - 优化为主题适配 */
 .main-content {
   padding-bottom: calc(max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)) + 4rem);
+  background-color: inherit;
+}
+
+/* 安全区域主题适配类 - 新增专用样式 */
+.safe-area-theme-adaptive {
+  background-color: inherit;
+  position: relative;
+}
+
+.safe-area-theme-adaptive::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: inherit;
+  z-index: -1;
+}
+
+/* 底部安全区域主题适配 */
+.bottom-safe-area-theme {
+  padding-bottom: max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom));
+  background-color: inherit;
+  position: relative;
+}
+
+.bottom-safe-area-theme::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom));
+  background-color: inherit;
+  z-index: -1;
+}
+
+/* 顶部安全区域主题适配 */
+.top-safe-area-theme {
+  padding-top: max(var(--safe-area-inset-top), env(safe-area-inset-top));
+  background-color: inherit;
+  position: relative;
+}
+
+.top-safe-area-theme::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: max(var(--safe-area-inset-top), env(safe-area-inset-top));
+  background-color: inherit;
+  z-index: -1;
 }
 
 /* 基础样式 */
@@ -604,6 +662,147 @@ code {
   min-height: calc(100vh - 120px);
   padding-bottom: 4rem;
   /* 为底部按钮留出空间 */
+}
+
+/* 玛雅日历页面滚动优化 - 新增专用样式 */
+.maya-scroll-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  /* 防止页面缩放导致的布局问题 */
+  -webkit-text-size-adjust: 100%;
+}
+
+.maya-fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: inherit;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.maya-fixed-tabs {
+  position: fixed;
+  top: 5rem;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: white;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .maya-fixed-tabs {
+  background: #1f2937;
+  border-bottom-color: #374151;
+}
+
+.maya-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  margin-top: 7rem;
+  /* 为固定头部留出空间 */
+  padding-bottom: 2rem;
+  /* 硬件加速优化 */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  /* 防止重排重绘 */
+  contain: layout style;
+}
+
+/* 移动端玛雅页面滚动优化 */
+@media (max-width: 768px) {
+  .maya-scroll-container {
+    height: 100vh;
+    min-height: -webkit-fill-available;
+    /* 移动端安全区域适配 */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .maya-fixed-header {
+    top: env(safe-area-inset-top);
+    padding-top: 0.5rem;
+  }
+
+  .maya-fixed-tabs {
+    top: calc(5rem + env(safe-area-inset-top));
+  }
+
+  .maya-scroll-content {
+    margin-top: calc(7rem + env(safe-area-inset-top));
+    padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);
+    /* 移动端滚动性能优化 */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    /* 防止滚动抖动 */
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .maya-fixed-tabs {
+    top: 4.5rem;
+  }
+
+  .maya-scroll-content {
+    margin-top: 6.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .maya-fixed-header {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* 滚动性能优化类 - 增强版 */
+.maya-scroll-optimized {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* 硬件加速 */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  /* 防止滚动抖动 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* 优化滚动性能 */
+  contain: layout style;
+  /* 触摸操作优化 */
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 防止内容跳动 */
+.maya-scroll-stable {
+  contain: layout style paint;
+  content-visibility: auto;
+  /* 防止布局抖动 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 滚动防抖优化 */
+.maya-scroll-debounced {
+  scroll-snap-type: y proximity;
+  scroll-padding: 0;
 }
 
 /* 移动端设置页面滚动优化 */

@@ -3,6 +3,7 @@ import PageLayout, { Card, Button } from './PageLayout';
 import { userConfigManager } from '../utils/userConfigManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
+import '../styles/config-selectors.css';
 
 // 星座选项
 const ZODIAC_OPTIONS = [
@@ -203,7 +204,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
               点击选择您的星座
             </div>
-            <div className="selector-grid grid grid-cols-4 gap-2">
+            <div className="selector-grid">
               {ZODIAC_OPTIONS.map((zodiac) => (
                 <div
                   key={zodiac}
@@ -233,7 +234,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
               点击选择您的生肖
             </div>
-            <div className="selector-grid grid grid-cols-4 gap-2">
+            <div className="selector-grid">
               {ZODIAC_ANIMAL_OPTIONS.map((animal) => (
                 <div
                   key={animal}
@@ -264,7 +265,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
               点击选择您的MBTI类型
             </div>
-            <div className="selector-grid grid grid-cols-4 gap-2">
+            <div className="selector-grid">
               {MBTI_OPTIONS.map((type) => (
                 <div
                   key={type}
