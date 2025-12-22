@@ -420,6 +420,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
 const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, isExpanded, onToggleExpand, configs, showMessage }) => {
   const [formData, setFormData] = useState({ ...config });
   const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false); // 保存状态
   const [isScoreModalOpen, setIsScoreModalOpen] = useState(false); // 评分弹窗状态
   const [isPersonalScoring, setIsPersonalScoring] = useState(true); // 是否为个人评分
   // 位置输入框状态
@@ -428,6 +429,13 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
 
   // 检查是否是新建配置
   const isNewConfig = !config.nickname && !config.birthDate;
+
+  // 组件挂载状态
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
 
   // 检测表单是否有变化
   useEffect(() => {
@@ -564,7 +572,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
   };
 
   // 保存配置
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     // 基本验证
     if (!formData.nickname.trim()) {
       showMessage('请输入昵称', 'error');
@@ -575,6 +583,10 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
       showMessage('请选择出生日期', 'error');
       return;
     }
+
+    // 设置保存状态
+    setIsSaving(true);
+    await new Promise(resolve => setTimeout(resolve, 500)); // 模拟延迟，改善体验
 
     // 检查昵称是否已存在
     const isNicknameExists = configs.some((config, i) =>
@@ -675,8 +687,11 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
     };
 
     onSave(index, finalData);
-    showMessage('配置保存成功', 'success');
-  }, [formData, index, onSave, configs, showMessage]);
+
+    if (isMounted.current) {
+      setIsSaving(false);
+    }
+  }, [formData, index, onSave, configs, showMessage, locationInput]);
 
   // 重置表单
   const handleReset = useCallback(() => {
@@ -1055,9 +1070,9 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               variant="primary"
               size="sm"
               onClick={handleSave}
-              disabled={isNewConfig && (!formData.nickname || !formData.birthDate)}
+              disabled={isSaving || (isNewConfig && (!formData.nickname || !formData.birthDate))}
             >
-              {isNewConfig ? '创建配置' : '更新配置'}
+              {isSaving ? '保存中...' : (isNewConfig ? '创建配置' : '更新配置')}
             </Button>
 
             <Button
@@ -1197,6 +1212,9 @@ const UserConfigManagerComponent = () => {
         userConfigManager.forceReloadAll();
       }, 100);
       showMessage('保存配置成功', 'success');
+
+      // 保存成功后折叠面板
+      setExpandedIndex(-1);
     } else {
       showMessage('保存配置失败，请重试', 'error');
     }
