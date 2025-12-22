@@ -200,6 +200,17 @@ export const HOROSCOPE_DATA_ENHANCED = [
   }
 ];
 
+// 映射函数确保元素名称正确对应到内置键名
+const getElementKey = (element) => {
+  const map = {
+    '火象': 'fire',
+    '土象': 'earth',
+    '风象': 'air',
+    '水象': 'water'
+  };
+  return map[element] || 'fire';
+};
+
 // 星象数据（基于日期的星象影响）
 const PLANETARY_INFLUENCES = {
   // 行星位置对星座的影响权重
@@ -546,9 +557,14 @@ export const calculateDailyHoroscopeScore = (horoscopeName, date = new Date()) =
   // 行星影响计算
   Object.keys(planetaryInfluence).forEach(planet => {
     const influence = planetaryInfluence[planet];
-    const weight = PLANETARY_INFLUENCES[planet]?.[horoscope.element.toLowerCase().replace('象', '')] || 5;
+    const elementKey = getElementKey(horoscope.element);
+    const weight = PLANETARY_INFLUENCES[planet]?.[elementKey] || 5;
     baseScore += (influence - 0.5) * weight;
   });
+
+  // 增加星座字符偏移，确保不同星座分数即使在同一天也具有差异性
+  const nameHash = (horoscopeName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 10) - 5;
+  baseScore += nameHash;
 
   // 随机因素（-10到+10）
   baseScore += (randomFactor - 0.5) * 20;
@@ -638,8 +654,17 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
     love: overallScore * 0.8 + random * 20,
     wealth: overallScore * 0.7 + (1 - random) * 30,
     career: overallScore * 0.9 + random * 10,
-    study: overallScore * 0.6 + random * 40
+    study: overallScore * 0.6 + random * 40,
+    social: overallScore * 0.75 + (random * 0.5 + 0.25) * 25
   };
+
+  // 增加更精细的偏移量，确保即使是相邻星座分数也不同
+  const nameOffset = horoscopeName.length * 2;
+  baseScores.love += (dailyRandom(horoscopeName, 'love_offset') - 0.5) * 10 + nameOffset % 5;
+  baseScores.wealth += (dailyRandom(horoscopeName, 'wealth_offset') - 0.5) * 10 + (nameOffset * 3) % 5;
+  baseScores.career += (dailyRandom(horoscopeName, 'career_offset') - 0.5) * 10 + (nameOffset * 7) % 5;
+  baseScores.study += (dailyRandom(horoscopeName, 'study_offset') - 0.5) * 10 + (nameOffset * 11) % 5;
+  baseScores.social += (dailyRandom(horoscopeName, 'social_offset') - 0.5) * 10 + (nameOffset * 13) % 5;
 
   // 根据星座特性调整分数
   switch (horoscopeName) {
@@ -672,9 +697,11 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
       break;
   }
 
-  // 确保分数在合理范围内
+  // 确保分数在合理范围内且保持独特性
   Object.keys(baseScores).forEach(key => {
-    baseScores[key] = Math.max(0, Math.min(100, Math.round(baseScores[key])));
+    // 再次通过微调确保独特性
+    const finalMod = (horoscopeName.charCodeAt(0) + key.length) % 5;
+    baseScores[key] = Math.max(5, Math.min(100, Math.round(baseScores[key] + finalMod)));
   });
 
   // 确保所有函数调用都返回字符串值，而不是函数引用
@@ -698,6 +725,11 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
       score: baseScores.study,
       description: getScoreDescription(baseScores.study),
       trend: getTrend(baseScores.study)
+    },
+    social: {
+      score: baseScores.social,
+      description: getScoreDescription(baseScores.social),
+      trend: getTrend(baseScores.social)
     }
   };
 

@@ -4,6 +4,8 @@ import { userConfigManager } from '../utils/userConfigManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
+import { getShichen, calculateTrueSolarTime } from '../utils/astronomy';
+import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
 
 // 星座选项
 const ZODIAC_OPTIONS = [
@@ -55,7 +57,9 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
       formData.zodiac !== config.zodiac ||
       formData.zodiacAnimal !== config.zodiacAnimal ||
       formData.gender !== config.gender ||
-      formData.mbti !== config.mbti;
+      formData.mbti !== config.mbti ||
+      formData.birthTime !== config.birthTime ||
+      formData.birthLocation?.district !== config.birthLocation?.district;
     setHasChanges(changed);
 
     // 不再自动保存，只有用户点击保存按钮时才保存
@@ -65,6 +69,65 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
   const handleFieldChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
+
+  // 计算真太阳时和时辰
+  const [calculatedInfo, setCalculatedInfo] = useState({
+    shichen: '',
+    trueSolarTime: ''
+  });
+
+  useEffect(() => {
+    const shichen = getShichen(formData.birthTime || '12:30');
+    // 获取经度，默认北京朝阳
+    const lng = formData.birthLocation?.lng || DEFAULT_REGION.lng;
+    const trueSolarTime = calculateTrueSolarTime(formData.birthDate, formData.birthTime || '12:30', lng);
+
+    setCalculatedInfo({
+      shichen,
+      trueSolarTime
+    });
+  }, [formData.birthDate, formData.birthTime, formData.birthLocation]);
+
+  // 处理地区变化
+  const handleRegionChange = (type, value) => {
+    const currentLoc = formData.birthLocation || { ...DEFAULT_REGION };
+    let newLoc = { ...currentLoc };
+
+    if (type === 'province') {
+      const provData = REGION_DATA.find(p => p.name === value);
+      if (provData) {
+        newLoc.province = value;
+        // 默认选择第一个城市
+        const firstCity = provData.children[0];
+        newLoc.city = firstCity.name;
+        // 默认选择第一个区县
+        const firstDistrict = firstCity.children[0];
+        newLoc.district = firstDistrict.name;
+        newLoc.lng = firstDistrict.lng;
+        newLoc.lat = firstDistrict.lat;
+      }
+    } else if (type === 'city') {
+      const provData = REGION_DATA.find(p => p.name === newLoc.province);
+      const cityData = provData?.children.find(c => c.name === value);
+      if (cityData) {
+        newLoc.city = value;
+        const firstDistrict = cityData.children[0];
+        newLoc.district = firstDistrict.name;
+        newLoc.lng = firstDistrict.lng;
+        newLoc.lat = firstDistrict.lat;
+      }
+    } else if (type === 'district') {
+      const provData = REGION_DATA.find(p => p.name === newLoc.province);
+      const cityData = provData?.children.find(c => c.name === newLoc.city);
+      const distData = cityData?.children.find(d => d.name === value);
+      if (distData) {
+        newLoc.district = value;
+        newLoc.lng = distData.lng;
+        newLoc.lat = distData.lat;
+      }
+    }
+    setFormData(prev => ({ ...prev, birthLocation: newLoc }));
+  };
 
   // 保存配置
   const handleSave = useCallback(() => {
@@ -174,6 +237,99 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             />
           </div>
 
+          {/* 出生时间 */}
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              出生具体时间
+            </label>
+            <div className="flex items-center space-x-2 mb-2">
+              <select
+                value={(formData.birthTime || '12:30').split(':')[0]}
+                onChange={(e) => {
+                  const hour = e.target.value;
+                  const minute = (formData.birthTime || '12:30').split(':')[1];
+                  handleFieldChange('birthTime', `${hour}:${minute}`);
+                }}
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <option key={i} value={i.toString().padStart(2, '0')}>
+                    {i.toString().padStart(2, '0')}时
+                  </option>
+                ))}
+              </select>
+              <span className="text-gray-500">:</span>
+              <select
+                value={(formData.birthTime || '12:30').split(':')[1]}
+                onChange={(e) => {
+                  const minute = e.target.value;
+                  const hour = (formData.birthTime || '12:30').split(':')[0];
+                  handleFieldChange('birthTime', `${hour}:${minute}`);
+                }}
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="00">00分</option>
+                <option value="15">15分</option>
+                <option value="30">30分</option>
+                <option value="45">45分</option>
+              </select>
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 flex justify-between bg-white dark:bg-gray-800 p-2 rounded border border-dashed border-gray-300 dark:border-gray-600">
+              <span>时辰：<span className="font-medium text-blue-600 dark:text-blue-400">{calculatedInfo.shichen}</span></span>
+              <span>真太阳时：<span className="font-medium text-purple-600 dark:text-purple-400">{calculatedInfo.trueSolarTime}</span></span>
+            </div>
+          </div>
+
+          {/* 出生地点 - 三级联动 */}
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              出生地点 (用于校准真太阳时)
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {/* 省份 */}
+              <select
+                value={formData.birthLocation?.province || DEFAULT_REGION.province}
+                onChange={(e) => handleRegionChange('province', e.target.value)}
+                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                {REGION_DATA.map(p => (
+                  <option key={p.code} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+
+              {/* 城市 */}
+              <select
+                value={formData.birthLocation?.city || DEFAULT_REGION.city}
+                onChange={(e) => handleRegionChange('city', e.target.value)}
+                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                {REGION_DATA.find(p => p.name === (formData.birthLocation?.province || DEFAULT_REGION.province))?.children.map(c => (
+                  <option key={c.code} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+
+              {/* 区县 */}
+              <select
+                value={formData.birthLocation?.district || DEFAULT_REGION.district}
+                onChange={(e) => handleRegionChange('district', e.target.value)}
+                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                {REGION_DATA.find(p => p.name === (formData.birthLocation?.province || DEFAULT_REGION.province))
+                  ?.children.find(c => c.name === (formData.birthLocation?.city || DEFAULT_REGION.city))
+                  ?.children.map(d => (
+                    <option key={d.code} value={d.name}>{d.name}</option>
+                  ))
+                }
+              </select>
+            </div>
+            {formData.birthLocation?.lng && (
+              <div className="mt-2 text-xs text-gray-500 flex justify-between">
+                <span>经度: {formData.birthLocation.lng.toFixed(2)}°</span>
+                <span>纬度: {formData.birthLocation.lat.toFixed(2)}°</span>
+              </div>
+            )}
+          </div>
+
           {/* 性别 - 移动到出生日期后面 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -185,8 +341,8 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
                   key={option.value}
                   type="button"
                   className={`p-2 rounded-md text-center transition-all duration-200 text-sm font-medium ${formData.gender === option.value
-                      ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-sm'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-sm'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
                   onClick={() => handleFieldChange('gender', option.value)}
                 >
@@ -408,7 +564,7 @@ const UserConfigManagerComponent = () => {
     // 检查是否是新建配置（检查存储中是否存在）
     const storedConfigs = userConfigManager.getAllConfigs();
     const isNewConfig = index >= storedConfigs.length;
-    
+
     let success;
     if (isNewConfig) {
       // 新建配置，添加到存储
@@ -417,7 +573,7 @@ const UserConfigManagerComponent = () => {
       // 现有配置，更新存储
       success = userConfigManager.updateConfig(index, configData);
     }
-    
+
     if (success) {
       // 更新本地状态
       setConfigs(prev => {
@@ -447,6 +603,8 @@ const UserConfigManagerComponent = () => {
     const newConfig = {
       nickname: '', // 留空让用户填写
       birthDate: '',
+      birthTime: '12:30',
+      birthLocation: { ...DEFAULT_REGION },
       zodiac: '',
       zodiacAnimal: '',
       gender: 'secret',
@@ -473,7 +631,7 @@ const UserConfigManagerComponent = () => {
     // 检查是否是新建配置（检查存储中是否存在）
     const storedConfigs = userConfigManager.getAllConfigs();
     const isNewConfig = index >= storedConfigs.length;
-    
+
     // 使用自定义确认对话框替代window.confirm
     if (window.confirm('确定要删除这个配置吗？')) {
       let success;
@@ -657,6 +815,21 @@ const UserConfigManagerComponent = () => {
               <div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生日期：</span>
                 <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].birthDate}</span>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生时间：</span>
+                <span className="ml-2 text-gray-900 dark:text-white">
+                  {configs[activeConfigIndex].birthTime || '12:30'}
+                  <span className="text-xs text-gray-500 ml-1">
+                    ({getShichen(configs[activeConfigIndex].birthTime || '12:30')})
+                  </span>
+                </span>
+              </div>
+              <div className="col-span-1 md:col-span-2">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生地点：</span>
+                <span className="ml-2 text-gray-900 dark:text-white">
+                  {configs[activeConfigIndex].birthLocation?.province || '北京市'} {configs[activeConfigIndex].birthLocation?.city || '北京市'} {configs[activeConfigIndex].birthLocation?.district || '朝阳区'}
+                </span>
               </div>
               <div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">星座：</span>

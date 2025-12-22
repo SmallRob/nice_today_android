@@ -81,11 +81,11 @@ const HoroscopeTab = () => {
     initOptimizations();
   }, []);
 
-  // 计算综合分数（基于增强版算法）
+  // 计算综合分数（基于五维增强版算法）
   const calculateOverallScore = useCallback((dailyForecast) => {
     if (!dailyForecast) return 77; // 默认分数
-    const { love, wealth, career, study } = dailyForecast;
-    const total = (love.score + wealth.score + career.score + study.score) / 4;
+    const { love, wealth, career, study, social } = dailyForecast;
+    const total = (love.score + wealth.score + career.score + study.score + (social?.score || 75)) / 5;
     return Math.round(total);
   }, []);
 
@@ -405,10 +405,11 @@ const HoroscopeTab = () => {
 
     // 分数项
     const scores = [
-      { name: '爱情', score: dailyForecast.love.score, icon: '❤️' },
-      { name: '财富', score: dailyForecast.wealth.score, icon: '💰' },
-      { name: '事业', score: dailyForecast.career.score, icon: '💼' },
-      { name: '学业', score: dailyForecast.study.score, icon: '📚' }
+      { name: '爱情', score: dailyForecast.love.score, icon: '❤️', color: 'bg-pink-500' },
+      { name: '财富', score: dailyForecast.wealth.score, icon: '💰', color: 'bg-yellow-500' },
+      { name: '事业', score: dailyForecast.career.score, icon: '💼', color: 'bg-blue-500' },
+      { name: '学业', score: dailyForecast.study.score, icon: '📚', color: 'bg-green-500' },
+      { name: '人脉', score: (dailyForecast.social?.score || 77), icon: '🤝', color: 'bg-purple-500' }
     ];
 
     const sortedScores = [...scores].sort((a, b) => b.score - a.score);
@@ -416,48 +417,53 @@ const HoroscopeTab = () => {
     return (
       <div className="space-y-5">
         {/* 综合分数卡片 - 采用统一风格 */}
-        <div className="horoscope-score-container rounded-xl p-5 text-white shadow-lg bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-purple-800 dark:to-indigo-900">
-          <div className="text-center mb-4">
-            <h3 className="horoscope-title text-lg md:text-xl font-bold mb-1 opacity-90">今日运势指数</h3>
-            <div className="text-5xl md:text-6xl font-bold mb-2 drop-shadow-md">{overallScore}<span className="text-xl md:text-2xl opacity-75 ml-1">分</span></div>
-            <p className="horoscope-subtitle text-white/90 font-medium text-lg">{overallScore > 75 ? '运势极佳' : overallScore > 60 ? '运势良好' : overallScore > 45 ? '运势平稳' : '运势一般'}</p>
+        <div className="horoscope-score-container rounded-2xl p-6 text-white shadow-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 dark:from-indigo-900 dark:via-purple-950 dark:to-black relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+
+          <div className="relative z-10 flex flex-col items-center mb-6">
+            <h3 className="text-sm font-bold opacity-80 uppercase tracking-widest mb-1">今日运势指数</h3>
+            <div className="flex items-baseline mb-1">
+              <span className="text-6xl font-black drop-shadow-lg">{overallScore}</span>
+              <span className="text-xl ml-1 font-bold opacity-70">pts</span>
+            </div>
+            <div className="px-4 py-1 bg-white/20 backdrop-blur-md rounded-full text-sm font-bold">
+              {overallScore > 85 ? '星光熠熠' : overallScore > 70 ? '势不可挡' : overallScore > 50 ? '厚积薄发' : '静待时机'}
+            </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-2">
+          {/* 优化为能量条图 */}
+          <div className="space-y-4 relative z-10 max-w-md mx-auto w-full">
             {scores.map((item, index) => (
-              <div key={index} className="text-center bg-white/15 dark:bg-white/10 rounded-xl p-2 backdrop-blur-sm border border-white/10">
-                <div className="text-xl mb-1">{item.icon}</div>
-                <div className="text-lg font-bold">{item.score}</div>
-                <div className="horoscope-subtitle text-[10px] opacity-80 mt-0.5">{item.name}</div>
+              <div key={index} className="space-y-1">
+                <div className="flex justify-between items-center text-xs font-bold px-1">
+                  <div className="flex items-center">
+                    <span className="mr-2 text-sm">{item.icon}</span>
+                    <span className="uppercase tracking-tighter opacity-90">{item.name}</span>
+                  </div>
+                  <span className="font-black">{item.score}%</span>
+                </div>
+                <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden backdrop-blur-sm border border-white/10">
+                  <div
+                    className={`h-full ${item.color} shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-out rounded-full`}
+                    style={{ width: `${item.score}%` }}
+                  ></div>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* 分数提示 */}
-          <div className="mt-4 flex justify-center items-center text-sm bg-black/20 dark:bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
-            <span className="mr-2 font-medium horoscope-subtitle opacity-90">今日核心:</span>
-            <span className="flex items-center font-bold text-yellow-300">
-              <span className="mr-1 text-base">{sortedScores[0].icon}</span>
-              <span className="text-sm">{sortedScores[0].name}运特别旺</span>
+          {/* 今日核心提醒 */}
+          <div className="mt-6 flex justify-center items-center text-sm bg-white/15 dark:bg-black/30 rounded-xl px-4 py-3 backdrop-blur-md border border-white/10">
+            <span className="mr-2 font-bold text-yellow-300">🔥 核心焦点:</span>
+            <span className="font-medium text-white/90">
+              今日<span className="mx-1 underline decoration-yellow-400 decoration-2 underline-offset-4 font-black">{sortedScores[0].name}</span>能量处于峰值
             </span>
           </div>
         </div>
 
-        {/* 趋势图表 - 新增功能 */}
+        {/* 趋势图表 */}
         {renderTrendChart()}
 
-        {/* 今日解读 */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-          <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-            <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-            今日运势解读
-          </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-            {overallDescription}
-          </p>
-        </div>
 
         {/* 爱情提醒 */}
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
@@ -606,56 +612,69 @@ const HoroscopeTab = () => {
     );
   };
 
-  // 统一风格的星座选择器 - 采用嵌入式布局
+  // 统一风格的星座选择器 - 采用 MBTI 式的高级网格布局
   const renderHoroscopeSelector = () => {
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm p-4 md:p-5 border border-gray-100 dark:border-gray-800 mb-6 transition-all duration-300">
+        <h3 className="text-base font-black text-gray-900 dark:text-white mb-4 flex items-center uppercase tracking-widest">
+          <svg className="w-5 h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
           </svg>
-          星座选择
+          星象定位
         </h3>
-        <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300 mb-3">
-          选择您的星座，获取每日运势指引
-        </div>
 
-          <div className="selector-grid">
-            {getHoroscopeData() && Array.isArray(getHoroscopeData()) ? getHoroscopeData().map((horoscope, index) => {
-              const isActive = userHoroscope === horoscope.name;
-              return (
-                <div
-                  key={horoscope.name}
-                  className={`selector-item performance-optimized ${isActive ? 'selected' : ''}`}
-                  onClick={() => handleHoroscopeChange(horoscope.name)}
-                >
-                  <div className="selector-icon">
-                    <span className="text-lg">{horoscope.icon}</span>
-                  </div>
-                  <span className="selector-label">{horoscope.name.replace('座', '')}</span>
-                </div>
-              );
-            }) : null}
-          </div>
+        <div className="grid grid-cols-4 gap-3">
+          {getHoroscopeData() && Array.isArray(getHoroscopeData()) ? getHoroscopeData().map((horoscope, index) => {
+            const isActive = userHoroscope === horoscope.name;
+            const isUserConfig = getUserZodiac() === horoscope.name;
+
+            return (
+              <button
+                key={horoscope.name}
+                onClick={() => handleHoroscopeChange(horoscope.name)}
+                className={`group relative py-3 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center overflow-hidden border ${isActive
+                  ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-transparent shadow-lg scale-[1.02]'
+                  : 'bg-white dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-800 hover:shadow-md'
+                  }`}
+              >
+                {/* 选中光晕效果 */}
+                {isActive && (
+                  <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+                )}
+
+                <span className={`text-xl mb-1 transition-transform group-hover:scale-125 ${isActive ? 'scale-110' : ''}`}>
+                  {horoscope.icon}
+                </span>
+                <span className={`text-[10px] md:text-[11px] font-black tracking-tighter ${isActive ? 'text-white' : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                  {horoscope.name.replace('座', '')}
+                </span>
+
+                {/* 状态标记 - 用户实际配置的星座 */}
+                {isUserConfig && (
+                  <div className={`absolute top-1.5 right-1.5 w-1 h-1 rounded-full ${isActive ? 'bg-white' : 'bg-indigo-500'} shadow-sm animate-ping`}></div>
+                )}
+              </button>
+            );
+          }) : null}
+        </div>
 
         {/* 临时查看提示 */}
         {isTemporaryHoroscope && (
-          <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center">
-                <span className="text-yellow-500 mr-2 text-lg">⚠️</span>
-                <span className="text-yellow-700 dark:text-yellow-300 text-sm horoscope-subtitle">
-                  临时查看 {userHoroscope} 的运势
-                </span>
+          <div className="mt-5 p-3.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="mr-3 text-lg">✨</span>
+              <div>
+                <p className="text-indigo-800 dark:text-indigo-300 text-[10px] font-black uppercase tracking-widest leading-none">正在预览</p>
+                <p className="text-gray-800 dark:text-white text-xs font-bold mt-1">{userHoroscope} 运势资料</p>
               </div>
-              <button
-                onClick={handleRestoreUserHoroscope}
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 whitespace-nowrap"
-                style={{ touchAction: 'manipulation' }}
-              >
-                恢复我的星座
-              </button>
             </div>
+            <button
+              onClick={handleRestoreUserHoroscope}
+              className="px-4 py-2 bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold rounded-xl border border-indigo-100 dark:border-indigo-900 shadow-sm transition-all hover:bg-indigo-50 active:scale-95"
+            >
+              返回我的配置
+            </button>
           </div>
         )}
       </div>
@@ -740,93 +759,107 @@ const HoroscopeTab = () => {
         {/* 内容展示区域 - 使用DressHealthTab的边距样式 */}
         <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
           <div className="mb-4 mx-auto max-w-2xl h-full">
+
             {/* 星座选择器 - 嵌入页面内容 */}
             {renderHoroscopeSelector()}
 
+            {/* 今日运势深度解读 - 移动到页面最顶层展示 */}
+            {!loading && !error && horoscopeGuidance && (
+              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm p-4 border border-gray-100 dark:border-gray-800 mb-4 transition-all duration-500 animate-in fade-in slide-in-from-top-4">
+                <h3 className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 flex items-center">
+                  <span className="mr-2">✨</span>
+                  Current Interpretation / 今日解读
+                </h3>
+                <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-bold italic">
+                  "{horoscopeGuidance.overallDescription}"
+                </p>
+              </div>
+            )}
+
             {/* 内容区域 */}
             <div className="space-y-4 h-full">
-            {/* 优化的加载状态 - 骨架屏 */}
-            {loading && (
-              <div className="space-y-5">
-                {/* 综合分数骨架屏 */}
-                <div className="horoscope-score-container rounded-xl p-5 text-white shadow bg-gradient-to-r from-purple-600/20 to-indigo-700/20 dark:from-purple-800/20 dark:to-indigo-900/20">
-                  <div className="text-center mb-4">
-                    <div className="h-5 bg-white/20 rounded w-32 mx-auto mb-3 animate-pulse"></div>
-                    <div className="h-14 w-24 bg-white/20 rounded mx-auto mb-3 animate-pulse"></div>
-                    <div className="h-4 bg-white/10 rounded w-40 mx-auto animate-pulse"></div>
+              {/* 优化的加载状态 - 骨架屏 */}
+              {loading && (
+                <div className="space-y-5">
+                  {/* 综合分数骨架屏 */}
+                  <div className="horoscope-score-container rounded-xl p-5 text-white shadow bg-gradient-to-r from-purple-600/20 to-indigo-700/20 dark:from-purple-800/20 dark:to-indigo-900/20">
+                    <div className="text-center mb-4">
+                      <div className="h-5 bg-white/20 rounded w-32 mx-auto mb-3 animate-pulse"></div>
+                      <div className="h-14 w-24 bg-white/20 rounded mx-auto mb-3 animate-pulse"></div>
+                      <div className="h-4 bg-white/10 rounded w-40 mx-auto animate-pulse"></div>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-3">
+                      {[0, 1, 2, 3].map((i) => (
+                        <div key={i} className="text-center">
+                          <div className="h-8 w-8 bg-white/20 rounded-full mx-auto mb-2 animate-pulse"></div>
+                          <div className="h-8 w-10 bg-white/20 rounded mx-auto mb-2 animate-pulse"></div>
+                          <div className="h-3 w-12 bg-white/10 rounded mx-auto animate-pulse"></div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-3">
-                    {[0, 1, 2, 3].map((i) => (
-                      <div key={i} className="text-center">
-                        <div className="h-8 w-8 bg-white/20 rounded-full mx-auto mb-2 animate-pulse"></div>
-                        <div className="h-8 w-10 bg-white/20 rounded mx-auto mb-2 animate-pulse"></div>
-                        <div className="h-3 w-12 bg-white/10 rounded mx-auto animate-pulse"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 运势描述骨架屏 */}
-                <div className="horoscope-card rounded-xl p-4 bg-gray-100 dark:bg-gray-700/50 shadow border border-gray-200 dark:border-gray-700">
-                  <div className="h-5 w-20 bg-gray-200 dark:bg-gray-600 rounded mb-3 animate-pulse"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-full animate-pulse"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-5/6 animate-pulse"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-4/6 animate-pulse"></div>
-                  </div>
-                </div>
-
-                {/* 建议骨架屏 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 运势描述骨架屏 */}
                   <div className="horoscope-card rounded-xl p-4 bg-gray-100 dark:bg-gray-700/50 shadow border border-gray-200 dark:border-gray-700">
-                    <div className="h-4 w-12 bg-green-200 dark:bg-green-800 rounded mb-3 animate-pulse"></div>
-                    <div className="h-12 bg-green-100 dark:bg-green-900/50 rounded animate-pulse"></div>
+                    <div className="h-5 w-20 bg-gray-200 dark:bg-gray-600 rounded mb-3 animate-pulse"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-full animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-5/6 animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-4/6 animate-pulse"></div>
+                    </div>
                   </div>
-                  <div className="horoscope-card rounded-xl p-4 bg-gray-100 dark:bg-gray-700/50 shadow border border-gray-200 dark:border-gray-700">
-                    <div className="h-4 w-12 bg-red-200 dark:bg-red-800 rounded mb-3 animate-pulse"></div>
-                    <div className="h-12 bg-red-100 dark:bg-red-900/50 rounded animate-pulse"></div>
+
+                  {/* 建议骨架屏 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="horoscope-card rounded-xl p-4 bg-gray-100 dark:bg-gray-700/50 shadow border border-gray-200 dark:border-gray-700">
+                      <div className="h-4 w-12 bg-green-200 dark:bg-green-800 rounded mb-3 animate-pulse"></div>
+                      <div className="h-12 bg-green-100 dark:bg-green-900/50 rounded animate-pulse"></div>
+                    </div>
+                    <div className="horoscope-card rounded-xl p-4 bg-gray-100 dark:bg-gray-700/50 shadow border border-gray-200 dark:border-gray-700">
+                      <div className="h-4 w-12 bg-red-200 dark:bg-red-800 rounded mb-3 animate-pulse"></div>
+                      <div className="h-12 bg-red-100 dark:bg-red-900/50 rounded animate-pulse"></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* 错误显示 */}
-            {error && (
-              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
-                <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
-                  <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              {/* 错误显示 */}
+              {error && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
+                  <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
+                    <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* 运势内容 */}
-            {!loading && !error && horoscopeGuidance && userHoroscope ? (
-              renderHoroscopeCard()
-            ) : !loading && !error && !userHoroscope ? (
-              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
-                <div className="text-center py-6">
-                  <div className="text-3xl mb-2">🔮</div>
-                  <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择您的星座</h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs">
-                    选择您的星座，获取每日运势指引
-                  </p>
+              {/* 运势内容 */}
+              {!loading && !error && horoscopeGuidance && userHoroscope ? (
+                renderHoroscopeCard()
+              ) : !loading && !error && !userHoroscope ? (
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
+                  <div className="text-center py-6">
+                    <div className="text-3xl mb-2">🔮</div>
+                    <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择您的星座</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs">
+                      选择您的星座，获取每日运势指引
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ) : null}
+              ) : null}
 
-            {/* 底部信息 */}
-            {!loading && !error && horoscopeGuidance && (
-              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
-                <div className="text-center text-gray-500 dark:text-gray-400 text-xs p-3">
-                  <p>数据更新时间：{new Date().toLocaleString()}</p>
-                  <p className="mt-1">星座运势仅供参考，请理性看待</p>
+              {/* 底部信息 */}
+              {!loading && !error && horoscopeGuidance && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
+                  <div className="text-center text-gray-500 dark:text-gray-400 text-xs p-3">
+                    <p>数据更新时间：{new Date().toLocaleString()}</p>
+                    <p className="mt-1">星座运势仅供参考，请理性看待</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
