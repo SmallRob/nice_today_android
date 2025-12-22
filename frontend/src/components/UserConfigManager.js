@@ -1170,12 +1170,9 @@ const UserConfigManagerComponent = () => {
     }
 
     if (success) {
-      // 更新本地状态
-      setConfigs(prev => {
-        const newConfigs = [...prev];
-        newConfigs[index] = configData;
-        return newConfigs;
-      });
+      // 立即从userConfigManager重新加载所有配置，确保数据同步
+      const freshConfigs = userConfigManager.getAllConfigs();
+      setConfigs([...freshConfigs]);
 
       // 如果是新建配置，设置为活跃配置
       if (isNewConfig) {
@@ -1316,6 +1313,11 @@ const UserConfigManagerComponent = () => {
             const jsonData = e.target.result;
             const success = userConfigManager.importConfigs(jsonData);
             if (success) {
+              // 重新加载配置
+              const freshConfigs = userConfigManager.getAllConfigs();
+              const activeIndex = userConfigManager.getActiveConfigIndex();
+              setConfigs([...freshConfigs]);
+              setActiveConfigIndex(activeIndex);
               showMessage('导入配置成功', 'success');
             } else {
               showMessage('导入配置失败，请检查文件格式', 'error');
@@ -1409,6 +1411,20 @@ const UserConfigManagerComponent = () => {
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">昵称：</span>
                 <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].nickname}</span>
               </div>
+              {configs[activeConfigIndex].realName && (
+                <div>
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">真实姓名：</span>
+                  <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].realName}</span>
+                  {configs[activeConfigIndex].nameScore && (
+                    <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${configs[activeConfigIndex].nameScore.mainType === '吉' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      configs[activeConfigIndex].nameScore.mainType === '半吉' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                      {configs[activeConfigIndex].nameScore.mainType}
+                    </span>
+                  )}
+                </div>
+              )}
               <div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生日期：</span>
                 <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].birthDate}</span>
@@ -1432,6 +1448,11 @@ const UserConfigManagerComponent = () => {
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生地点：</span>
                 <span className="ml-2 text-gray-900 dark:text-white">
                   {configs[activeConfigIndex].birthLocation?.province || '北京市'} {configs[activeConfigIndex].birthLocation?.city || '北京市'} {configs[activeConfigIndex].birthLocation?.district || '朝阳区'}
+                  {configs[activeConfigIndex].birthLocation?.lng && configs[activeConfigIndex].birthLocation?.lat && (
+                    <span className="text-xs text-gray-500 ml-2">
+                      (经度: {configs[activeConfigIndex].birthLocation.lng.toFixed(2)}, 纬度: {configs[activeConfigIndex].birthLocation.lat.toFixed(2)})
+                    </span>
+                  )}
                 </span>
               </div>
               <div>
