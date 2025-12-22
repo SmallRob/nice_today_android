@@ -5,6 +5,7 @@ import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
 import { getShichen, calculateTrueSolarTime } from '../utils/astronomy';
+import { calculateFiveGrids, getCharStrokes, getMeaning } from '../utils/nameScoring';
 
 import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
 
@@ -61,10 +62,220 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// 姓名评分模态框
+const NameScoringModal = ({ isOpen, onClose, name }) => {
+  const [step, setStep] = useState('input'); // input, result
+  const [splitName, setSplitName] = useState({ surname: '', firstName: '' });
+  const [strokes, setStrokes] = useState({ surname: [], firstName: [] });
+  const [analysisResult, setAnalysisResult] = useState(null);
+
+  // 初始化拆解姓名
+  useEffect(() => {
+    if (isOpen && name) {
+      // 简单启发式拆分：假设第一个字是姓 (绝大多数情况)
+      // 复姓逻辑可在此扩展或用户手动调整
+      const surname = name.substring(0, 1);
+      const firstName = name.substring(1);
+
+      setSplitName({ surname, firstName });
+
+      // 初始笔画获取
+      setStrokes({
+        surname: [getCharStrokes(surname)],
+        firstName: firstName.split('').map(c => getCharStrokes(c))
+      });
+      setStep('input');
+    }
+  }, [isOpen, name]);
+
+  const handleCalculate = () => {
+    const res = calculateFiveGrids(
+      splitName.surname,
+      splitName.firstName,
+      strokes.surname.map(s => parseInt(s) || 1), // 默认值为1防错
+      strokes.firstName.map(s => parseInt(s) || 1)
+    );
+    setAnalysisResult(res);
+    setStep('result');
+  };
+
+  const getScoreColor = (type) => {
+    if (type === '吉') return 'text-green-600 dark:text-green-400';
+    if (type === '半吉') return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-red-600 dark:text-red-400';
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+            <span className="mr-2">🔮</span> 姓名五格剖象评分
+          </h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 flex-1">
+          {step === 'input' && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm text-blue-800 dark:text-blue-200">
+                请确认姓名的拆分和康熙笔画数。系统已自动预填，如遇生僻字或不准，请手动修改。
+              </div>
+
+              {/* 姓氏设置 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">姓氏 (Surname)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={splitName.surname}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSplitName(prev => ({ ...prev, surname: val }));
+                      setStrokes(prev => ({ ...prev, surname: val.split('').map(c => getCharStrokes(c)) }));
+                    }}
+                    className="flex-1 px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="输入姓"
+                  />
+                  {splitName.surname.split('').map((char, idx) => (
+                    <input
+                      key={`s-${idx}`}
+                      type="number"
+                      value={strokes.surname[idx] || ''}
+                      onChange={(e) => {
+                        const newStrokes = [...strokes.surname];
+                        newStrokes[idx] = e.target.value;
+                        setStrokes(prev => ({ ...prev, surname: newStrokes }));
+                      }}
+                      className="w-16 px-2 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center"
+                      placeholder="笔画"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* 名字设置 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">名字 (Name)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={splitName.firstName}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSplitName(prev => ({ ...prev, firstName: val }));
+                      setStrokes(prev => ({ ...prev, firstName: val.split('').map(c => getCharStrokes(c)) }));
+                    }}
+                    className="flex-1 px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="输入名"
+                  />
+                  {splitName.firstName.split('').map((char, idx) => (
+                    <input
+                      key={`n-${idx}`}
+                      type="number"
+                      value={strokes.firstName[idx] || ''}
+                      onChange={(e) => {
+                        const newStrokes = [...strokes.firstName];
+                        newStrokes[idx] = e.target.value;
+                        setStrokes(prev => ({ ...prev, firstName: newStrokes }));
+                      }}
+                      className="w-16 px-2 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center"
+                      placeholder="笔画"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <Button variant="primary" onClick={handleCalculate} className="w-full">
+                  开始评分
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 'result' && analysisResult && (
+            <div className="space-y-6">
+              {/* 总评卡片 */}
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-xl font-bold">{splitName.surname}{splitName.firstName}</h4>
+                  <span className="text-sm bg-white/20 px-2 py-1 rounded">五格剖象</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="text-center bg-white/10 rounded p-2">
+                    <div className="text-xs opacity-80">总格 (后运)</div>
+                    <div className="text-2xl font-bold">{analysisResult.zong}</div>
+                    <div className="text-sm font-medium">{getMeaning(analysisResult.zong).type}</div>
+                  </div>
+                  <div className="text-center bg-white/10 rounded p-2">
+                    <div className="text-xs opacity-80">人格 (主运)</div>
+                    <div className="text-2xl font-bold">{analysisResult.ren}</div>
+                    <div className="text-sm font-medium">{getMeaning(analysisResult.ren).type}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 详细列表 */}
+              <div className="space-y-3">
+                {[
+                  { label: '天格 (祖运)', score: analysisResult.tian, desc: '代表祖先、长辈运势' },
+                  { label: '人格 (主运)', score: analysisResult.ren, desc: '代表性格与核心运势' },
+                  { label: '地格 (前运)', score: analysisResult.di, desc: '代表青年时期运势' },
+                  { label: '外格 (副运)', score: analysisResult.wai, desc: '代表社交与外部关系' },
+                  { label: '总格 (后运)', score: analysisResult.zong, desc: '代表一生整体运势' },
+                ].map((item, idx) => {
+                  const meaning = getMeaning(item.score);
+                  return (
+                    <div key={idx} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+                      <div className="flex justify-between items-start mb-1">
+                        <div>
+                          <span className="font-bold text-gray-800 dark:text-gray-200">{item.label}</span>
+                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{item.desc}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-lg font-mono font-bold mr-2 text-gray-700 dark:text-gray-300">{item.score}</span>
+                          <span className={`px-2 py-0.5 text-xs rounded font-bold ${meaning.type === '吉' ? 'bg-green-100 text-green-700' :
+                            meaning.type === '半吉' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                            {meaning.type}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 pl-1 border-l-2 border-gray-300 dark:border-gray-600">
+                        {meaning.desc}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="pt-2">
+                <Button variant="outline" onClick={() => setStep('input')} className="w-full">
+                  重新调整
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // 配置表单组件
 const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, isExpanded, onToggleExpand, configs, showMessage }) => {
   const [formData, setFormData] = useState({ ...config });
   const [hasChanges, setHasChanges] = useState(false);
+  const [isScoreModalOpen, setIsScoreModalOpen] = useState(false); // 评分弹窗状态
   // 位置输入框状态
   const [locationInput, setLocationInput] = useState(() => formatLocationString(config.birthLocation || DEFAULT_REGION));
   const formRef = useRef(null);
@@ -76,6 +287,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
   useEffect(() => {
     const changed =
       formData.nickname !== config.nickname ||
+      formData.realName !== config.realName ||
       formData.birthDate !== config.birthDate ||
       formData.zodiac !== config.zodiac ||
       formData.zodiacAnimal !== config.zodiacAnimal ||
@@ -336,16 +548,59 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
           {/* 昵称 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              昵称
+              昵称 <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={formData.nickname}
               onChange={(e) => handleFieldChange('nickname', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="输入您的昵称"
+              className="w-full px-3 py-2 border border-blue-300 dark:border-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="用于应用内展示 (必需)"
             />
           </div>
+
+          {/* 真实姓名 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              真实姓名 (选填)
+            </label>
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={formData.realName || ''}
+                onChange={(e) => handleFieldChange('realName', e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                placeholder="用于五格评分与八字测算 (可选)"
+              />
+              <Button
+                variant="outline"
+                size="md"
+                className="whitespace-nowrap px-3"
+                disabled={!formData.realName}
+                onClick={() => {
+                  if (!formData.realName) {
+                    return;
+                  }
+                  if (!/[\u4e00-\u9fa5]/.test(formData.realName)) {
+                    showMessage('评分功能主要针对中文姓名', 'info');
+                  }
+                  setIsScoreModalOpen(true);
+                }}
+              >
+                💯 评分
+              </Button>
+            </div>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              注：若不想保留真实姓名，请留空。留空将无法使用五格评分功能。
+            </p>
+          </div>
+
+          {/* 评分弹窗 */}
+          <NameScoringModal
+            isOpen={isScoreModalOpen}
+            onClose={() => setIsScoreModalOpen(false)}
+            name={formData.realName}
+          />
 
           {/* 出生日期 */}
           <div>
@@ -740,6 +995,7 @@ const UserConfigManagerComponent = () => {
   const handleAddConfig = useCallback(() => {
     const newConfig = {
       nickname: '', // 留空让用户填写
+      realName: '', // 真实姓名
       birthDate: '',
       birthTime: '12:30',
       shichen: '午时二刻',
