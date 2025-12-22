@@ -7,21 +7,43 @@
 // 默认配置模板
 const DEFAULT_CONFIG = {
   nickname: '叉子',
+  realName: '', // 真实姓名（用于五格评分和八字测算）
   birthDate: '1991-04-30',
+  birthTime: '12:30',
+  shichen: '午时二刻',
+  birthLocation: {
+    province: '北京市',
+    city: '北京市',
+    district: '朝阳区',
+    lng: 116.48,
+    lat: 39.95
+  },
   zodiac: '金牛座',
   zodiacAnimal: '羊',
   gender: 'male',
-  mbti: 'INFP'
+  mbti: 'INFP',
+  nameScore: null // 姓名评分结果
 };
 
 // 空配置默认值
 const EMPTY_CONFIG_DEFAULTS = {
   nickname: '新用户',
+  realName: '',
   birthDate: '1991-04-21',
+  birthTime: '12:30',
+  shichen: '午时二刻',
+  birthLocation: {
+    province: '北京市',
+    city: '北京市',
+    district: '朝阳区',
+    lng: 116.48,
+    lat: 39.95
+  },
   zodiac: '金牛座',
   zodiacAnimal: '羊',
   gender: 'male',
-  mbti: 'ISFP'
+  mbti: 'ISFP',
+  nameScore: null
 };
 
 // 本地存储键名
@@ -46,30 +68,30 @@ class UserConfigManager {
       // 从本地存储加载配置
       const storedConfigs = localStorage.getItem(STORAGE_KEYS.USER_CONFIGS);
       const storedIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
-      
+
       // 解析配置数据
       this.configs = storedConfigs ? JSON.parse(storedConfigs) : [DEFAULT_CONFIG];
       this.activeConfigIndex = storedIndex ? parseInt(storedIndex, 10) : 0;
-      
+
       // 确保至少有一组配置
       if (this.configs.length === 0) {
         this.configs = [DEFAULT_CONFIG];
         this.activeConfigIndex = 0;
       }
-      
+
       // 确保索引在有效范围内
       this.activeConfigIndex = Math.max(0, Math.min(this.activeConfigIndex, this.configs.length - 1));
-      
+
       this.initialized = true;
-      
+
       // 通知监听器
       this.notifyListeners();
-      
+
       console.log('用户配置管理器初始化完成', {
         configCount: this.configs.length,
         activeIndex: this.activeConfigIndex
       });
-      
+
       return true;
     } catch (error) {
       console.error('初始化用户配置管理器失败:', error);
@@ -89,16 +111,16 @@ class UserConfigManager {
       return DEFAULT_CONFIG;
     }
     const currentConfig = this.configs[this.activeConfigIndex];
-    
+
     // 如果是空配置，返回默认值
-    if (!currentConfig || 
-        !currentConfig.nickname || 
-        !currentConfig.birthDate || 
-        !currentConfig.zodiac || 
-        !currentConfig.zodiacAnimal) {
+    if (!currentConfig ||
+      !currentConfig.nickname ||
+      !currentConfig.birthDate ||
+      !currentConfig.zodiac ||
+      !currentConfig.zodiacAnimal) {
       return { ...EMPTY_CONFIG_DEFAULTS, ...currentConfig };
     }
-    
+
     return currentConfig;
   }
 
@@ -131,7 +153,7 @@ class UserConfigManager {
       console.error('配置对象无效');
       return false;
     }
-    
+
     // 确保配置包含必要字段
     const newConfig = {
       nickname: config.nickname || `用户${this.configs.length + 1}`,
@@ -142,11 +164,11 @@ class UserConfigManager {
       mbti: config.mbti || 'ISFP',
       ...config
     };
-    
+
     this.configs.push(newConfig);
     this.saveToStorage();
     this.notifyListeners();
-    
+
     console.log('添加新配置成功', newConfig);
     return true;
   }
@@ -158,24 +180,24 @@ class UserConfigManager {
    * @returns {Boolean} 是否更新成功
    */
   updateConfig(index, updates) {
-    if (!this.initialized || 
-        index < 0 || 
-        index >= this.configs.length || 
-        !updates || 
-        typeof updates !== 'object') {
+    if (!this.initialized ||
+      index < 0 ||
+      index >= this.configs.length ||
+      !updates ||
+      typeof updates !== 'object') {
       console.error('无效的参数');
       return false;
     }
-    
+
     // 更新配置
     this.configs[index] = { ...this.configs[index], ...updates };
-    
+
     // 保存到本地存储
     this.saveToStorage();
-    
+
     // 通知监听器
     this.notifyListeners();
-    
+
     console.log(`更新配置 ${index} 成功`, this.configs[index]);
     return true;
   }
@@ -186,30 +208,30 @@ class UserConfigManager {
    * @returns {Boolean} 是否删除成功
    */
   removeConfig(index) {
-    if (!this.initialized || 
-        index < 0 || 
-        index >= this.configs.length || 
-        this.configs.length <= 1) {
+    if (!this.initialized ||
+      index < 0 ||
+      index >= this.configs.length ||
+      this.configs.length <= 1) {
       console.error('无法删除配置：索引无效或只剩一个配置');
       return false;
     }
-    
+
     // 删除配置
     this.configs.splice(index, 1);
-    
+
     // 调整活跃索引
     if (index === this.activeConfigIndex) {
       this.activeConfigIndex = Math.max(0, this.activeConfigIndex - 1);
     } else if (index < this.activeConfigIndex) {
       this.activeConfigIndex--;
     }
-    
+
     // 保存到本地存储
     this.saveToStorage();
-    
+
     // 通知监听器
     this.notifyListeners();
-    
+
     console.log(`删除配置 ${index} 成功，当前活跃索引 ${this.activeConfigIndex}`);
     return true;
   }
@@ -224,15 +246,15 @@ class UserConfigManager {
       console.error('无效的配置索引');
       return false;
     }
-    
+
     this.activeConfigIndex = index;
-    
+
     // 保存到本地存储
     this.saveToStorage();
-    
+
     // 通知监听器
     this.notifyListeners();
-    
+
     console.log(`设置活跃配置为 ${index} 成功`);
     return true;
   }
@@ -259,11 +281,11 @@ class UserConfigManager {
   addListener(listener) {
     if (typeof listener !== 'function') {
       console.error('监听器必须是函数');
-      return () => {};
+      return () => { };
     }
-    
+
     this.listeners.push(listener);
-    
+
     // 返回移除监听器的函数
     return () => {
       const index = this.listeners.indexOf(listener);
@@ -280,14 +302,14 @@ class UserConfigManager {
    */
   findConfigIndex(config) {
     if (!config || typeof config !== 'object') return -1;
-    
+
     return this.configs.findIndex(existingConfig => {
       return existingConfig &&
-             existingConfig.nickname === config.nickname &&
-             existingConfig.birthDate === config.birthDate &&
-             existingConfig.zodiac === config.zodiac &&
-             existingConfig.zodiacAnimal === config.zodiacAnimal &&
-             existingConfig.mbti === config.mbti;
+        existingConfig.nickname === config.nickname &&
+        existingConfig.birthDate === config.birthDate &&
+        existingConfig.zodiac === config.zodiac &&
+        existingConfig.zodiacAnimal === config.zodiacAnimal &&
+        existingConfig.mbti === config.mbti;
     });
   }
 
@@ -301,7 +323,7 @@ class UserConfigManager {
       console.error('配置对象无效');
       return false;
     }
-    
+
     // 确保配置包含必要字段
     const normalizedConfig = {
       nickname: config.nickname || EMPTY_CONFIG_DEFAULTS.nickname,
@@ -310,10 +332,10 @@ class UserConfigManager {
       zodiacAnimal: config.zodiacAnimal || EMPTY_CONFIG_DEFAULTS.zodiacAnimal,
       mbti: config.mbti || EMPTY_CONFIG_DEFAULTS.mbti
     };
-    
+
     // 检查是否已存在相同配置
     const existingIndex = this.findConfigIndex(normalizedConfig);
-    
+
     if (existingIndex !== -1) {
       // 如果已存在，直接设置为活跃配置
       this.activeConfigIndex = existingIndex;
@@ -322,13 +344,13 @@ class UserConfigManager {
       console.log('配置已存在，直接设置为活跃配置', existingIndex);
       return true;
     }
-    
+
     // 如果不存在，添加新配置
     this.configs.push(normalizedConfig);
     this.activeConfigIndex = this.configs.length - 1;
     this.saveToStorage();
     this.notifyListeners();
-    
+
     console.log('保存新配置成功', normalizedConfig);
     return true;
   }
@@ -395,31 +417,31 @@ class UserConfigManager {
   importConfigs(jsonData) {
     try {
       const data = JSON.parse(jsonData);
-      
+
       if (!data.configs || !Array.isArray(data.configs)) {
         throw new Error('无效的配置数据格式');
       }
-      
+
       this.configs = data.configs;
       this.activeConfigIndex = data.activeConfigIndex || 0;
-      
+
       // 确保至少有一组配置
       if (this.configs.length === 0) {
         this.configs = [DEFAULT_CONFIG];
         this.activeConfigIndex = 0;
       }
-      
+
       // 确保索引在有效范围内
       this.activeConfigIndex = Math.max(0, Math.min(this.activeConfigIndex, this.configs.length - 1));
-      
+
       this.saveToStorage();
       this.notifyListeners();
-      
+
       console.log('导入配置成功', {
         configCount: this.configs.length,
         activeIndex: this.activeConfigIndex
       });
-      
+
       return true;
     } catch (error) {
       console.error('导入配置失败:', error);

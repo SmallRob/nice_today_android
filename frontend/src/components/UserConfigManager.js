@@ -70,22 +70,87 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
   const [strokes, setStrokes] = useState({ surname: [], firstName: [] });
   const [analysisResult, setAnalysisResult] = useState(null);
 
+  // 智能拆分中文姓名
+  const smartSplitName = (fullName) => {
+    if (!fullName) return { surname: '', firstName: '' };
+
+    // 常见复姓列表
+    const compoundSurnames = [
+      '欧阳', '太史', '端木', '上官', '司马', '东方', '独孤', '南宫', '万俟', '闻人',
+      '夏侯', '诸葛', '尉迟', '公羊', '赫连', '澹台', '皇甫', '宗政', '濮阳', '公冶',
+      '太叔', '申屠', '公孙', '慕容', '仲孙', '钟离', '长孙', '宇文', '司徒', '鲜于',
+      '司空', '闾丘', '子车', '亓官', '司寇', '巫马', '公西', '颛孙', '壤驷', '公良',
+      '漆雕', '乐正', '宰父', '谷梁', '拓跋', '夹谷', '轩辕', '令狐', '段干', '百里',
+      '呼延', '东郭', '南门', '羊舌', '微生', '公户', '公玉', '公仪', '梁丘', '公仲',
+      '公上', '公门', '公山', '公坚', '左丘', '公伯', '西门', '公祖', '第五', '公乘',
+      '贯丘', '公皙', '南荣', '东里', '东宫', '仲长', '子书', '子桑', '即墨', '达奚',
+      '褚师'
+    ];
+
+    // 检查是否包含中文圆点（少数民族姓名分隔符）
+    if (fullName.includes('·') || fullName.includes('•')) {
+      const parts = fullName.split(/[·•]/);
+      return {
+        surname: parts[0] || '',
+        firstName: parts.slice(1).join('') || ''
+      };
+    }
+
+    // 检查是否是复姓
+    for (const compoundSurname of compoundSurnames) {
+      if (fullName.startsWith(compoundSurname)) {
+        return {
+          surname: compoundSurname,
+          firstName: fullName.substring(compoundSurname.length)
+        };
+      }
+    }
+
+    // 根据姓名长度判断
+    const nameLength = fullName.length;
+    if (nameLength === 2) {
+      // 两个字：第一个是姓
+      return {
+        surname: fullName.substring(0, 1),
+        firstName: fullName.substring(1)
+      };
+    } else if (nameLength === 3) {
+      // 三个字：第一个是姓，后两个是名
+      return {
+        surname: fullName.substring(0, 1),
+        firstName: fullName.substring(1)
+      };
+    } else if (nameLength >= 4) {
+      // 四个字及以上：默认前两个是姓（可能是复姓）
+      return {
+        surname: fullName.substring(0, 2),
+        firstName: fullName.substring(2)
+      };
+    }
+
+    // 默认情况
+    return {
+      surname: fullName.substring(0, 1),
+      firstName: fullName.substring(1) || ''
+    };
+  };
+
   // 初始化拆解姓名
   useEffect(() => {
     if (isOpen) {
       const nameToUse = tempName || name || '';
       if (nameToUse) {
-        // 简单启发式拆分：假设第一个字是姓 (绝大多数情况)
-        // 复姓逻辑可在此扩展或用户手动调整
-        const surname = nameToUse.substring(0, 1);
-        const firstName = nameToUse.substring(1);
-
-        setSplitName({ surname, firstName });
+        // 使用智能拆分
+        const split = smartSplitName(nameToUse);
+        setSplitName(split);
 
         // 初始笔画获取
+        const surnameChars = split.surname.split('');
+        const firstNameChars = split.firstName.split('');
+
         setStrokes({
-          surname: [getCharStrokes(surname)],
-          firstName: firstName.split('').map(c => getCharStrokes(c))
+          surname: surnameChars.map(c => getCharStrokes(c)),
+          firstName: firstNameChars.map(c => getCharStrokes(c))
         });
       }
       setStep('input');
@@ -144,13 +209,47 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {isPersonal ? '您的姓名' : '输入姓名'}
                 </label>
-                <input
-                  type="text"
-                  value={tempName || name || ''}
-                  onChange={(e) => setTempName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="输入中文姓名"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={tempName || name || ''}
+                    onChange={(e) => {
+                      const newName = e.target.value;
+                      setTempName(newName);
+                      // 自动重新拆分
+                      if (newName) {
+                        const split = smartSplitName(newName);
+                        setSplitName(split);
+                        const surnameChars = split.surname.split('');
+                        const firstNameChars = split.firstName.split('');
+                        setStrokes({
+                          surname: surnameChars.map(c => getCharStrokes(c)),
+                          firstName: firstNameChars.map(c => getCharStrokes(c))
+                        });
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    placeholder="输入中文姓名"
+                  />
+                  <button
+                    onClick={() => {
+                      const nameToSplit = tempName || name || '';
+                      if (nameToSplit) {
+                        const split = smartSplitName(nameToSplit);
+                        setSplitName(split);
+                        const surnameChars = split.surname.split('');
+                        const firstNameChars = split.firstName.split('');
+                        setStrokes({
+                          surname: surnameChars.map(c => getCharStrokes(c)),
+                          firstName: firstNameChars.map(c => getCharStrokes(c))
+                        });
+                      }
+                    }}
+                    className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors whitespace-nowrap text-sm"
+                  >
+                    重新拆分
+                  </button>
+                </div>
                 {!isPersonal && (
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     可为他人临时评分，结果不会保存
@@ -159,7 +258,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
               </div>
 
               <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm text-blue-800 dark:text-blue-200">
-                请确认姓名的拆分和康熙笔画数。系统已自动预填，如遇生僻字或不准，请手动修改。
+                系统已智能拆分姓名和笔画数。如有错误，可手动调整或点击"重新拆分"。
               </div>
 
               {/* 姓氏设置 */}
