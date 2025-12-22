@@ -108,8 +108,8 @@ const NameScoringModal = ({ isOpen, onClose, name }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" style={{ touchAction: 'none' }}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
@@ -443,42 +443,85 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
     }
 
     // 校验位置信息
-    // 再次尝试解析 locationInput 确保最终保存的数据与输入框一致
-    let finalLocation = formData.birthLocation;
+    // 逻辑更新：优先信任经纬度解析，解析失败则尝试保留用户输入，只要有地址即可
+    let finalLocation = { ...formData.birthLocation };
+
+    // 1. 尝试从 locationInput 解析经纬度
+    // 允许宽松格式，比如直接输入 "39.9, 116.4"
     try {
-      const lngMatch = locationInput.match(/经度[:：]\s*(\d+(\.\d+)?)/);
-      const latMatch = locationInput.match(/纬度[:：]\s*(\d+(\.\d+)?)/);
+      const lngMatch = locationInput.match(/经度[:：]\s*([-+]?\d+(\.\d+)?)/) || locationInput.match(/lng[:：]\s*([-+]?\d+(\.\d+)?)/);
+      const latMatch = locationInput.match(/纬度[:：]\s*([-+]?\d+(\.\d+)?)/) || locationInput.match(/lat[:：]\s*([-+]?\d+(\.\d+)?)/);
+
+      let parsedLng, parsedLat;
 
       if (lngMatch && latMatch) {
-        const lng = parseFloat(lngMatch[1]);
-        const lat = parseFloat(latMatch[1]);
-        // 简单的范围校验
-        if (lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90) {
-          const regionPart = locationInput.split(/[(\uff08]/)[0].trim();
-          const parts = regionPart.split(/\s+/);
-
-          finalLocation = {
-            province: parts[0] || finalLocation.province || DEFAULT_REGION.province,
-            city: parts[1] || finalLocation.city || DEFAULT_REGION.city,
-            district: parts[2] || finalLocation.district || DEFAULT_REGION.district,
-            lng,
-            lat
-          };
-        } else {
-          throw new Error('Coordinates out of range');
+        parsedLng = parseFloat(lngMatch[1]);
+        parsedLat = parseFloat(latMatch[1]);
+      } else {
+        // 尝试匹配纯数字对，例如 "116.48, 39.95" (经度在前)
+        const pairMatch = locationInput.match(/([-+]?\d+(\.\d+)?)[,\s]+([-+]?\d+(\.\d+)?)/);
+        if (pairMatch) {
+          // 默认假设前者是经度，后者是纬度 (中国习惯)
+          const v1 = parseFloat(pairMatch[1]);
+          const v3 = parseFloat(pairMatch[3]);
+          // 简单判断范围: 纬度-90~90, 经度-180~180. 中国纬度大概 3~53, 经度 73~135
+          // 如果第一个数 > 90，那肯定是经度。
+          if (Math.abs(v1) > 90) { parsedLng = v1; parsedLat = v3; }
+          else if (Math.abs(v3) > 90) { parsedLng = v3; parsedLat = v1; }
+          else { parsedLng = v1; parsedLat = v3; } // 默认顺序
         }
       }
+
+      if (parsedLng !== undefined && parsedLat !== undefined && !isNaN(parsedLng) && !isNaN(parsedLat)) {
+        // 校验范围
+        if (parsedLng >= -180 && parsedLng <= 180 && parsedLat >= -90 && parsedLat <= 90) {
+          finalLocation.lng = parsedLng;
+          finalLocation.lat = parsedLat;
+        } else {
+          // 经纬度超出范围，暂不更新
+          console.warn('Coordinates out of range', parsedLng, parsedLat);
+        }
+      }
+
+      // 更新地址文本部分
+      // 如果输入包含括号，取括号前部分；否则整个作为地址
+      const addressPart = locationInput.split(/[(\uff08]/)[0].trim();
+      if (addressPart) {
+        // 尝试简单拆分，如果拆分不出，就放在 District 或 Province 里作为兜底
+        // 这里的 RegionData 只是 helper，不是 validator
+        const parts = addressPart.split(/\s+/);
+        if (parts.length === 3) {
+          finalLocation.province = parts[0];
+          finalLocation.city = parts[1];
+          finalLocation.district = parts[2];
+        } else if (parts.length === 2) {
+          finalLocation.province = parts[0];
+          finalLocation.city = parts[1];
+          finalLocation.district = ''; // 或者保留原 District
+        } else {
+          // 无法拆分，直接保存到 province 字段作为通用地址字段使用，或者不做处理保留原样
+          // 为了兼容显示，尽量保留结构。如果完全不匹配，就不更新结构化字段，只依靠 locationInput 的显示
+          // 但我们需要保存结构化数据以便 astronomy.js 使用 (其实 astronomy.js 主要用 lng/lat)
+          // 所以这里只要 lng/lat 对了就行。
+          // 如果用户修改了文字但没改坐标，我们信任文字
+        }
+      }
+
+      // 如果最终没有有效坐标，且是新建配置/或被用户清空，给予默认值 (北京)
+      if (finalLocation.lng === undefined || finalLocation.lng === null) {
+        finalLocation.lng = 116.40;
+        finalLocation.lat = 39.90;
+        finalLocation.province = '北京市';
+        finalLocation.city = '北京市';
+        finalLocation.district = '东城区';
+        showMessage('未检测到有效经纬度，已默认设置为北京', 'info');
+      }
+
     } catch (e) {
-      // 校验失败，回退到默认值或保持当前有效值（如果当前formData里的值是合法的）
-      // 根据需求"若检验错误或保存的数据有误则以默认值为准"
-      if (!finalLocation || !finalLocation.lng) {
+      console.error("Location parse error", e);
+      // 出错时不阻断保存，保留原值或默认值
+      if (!finalLocation.lng) {
         finalLocation = { ...DEFAULT_REGION };
-        setLocationInput(formatLocationString(DEFAULT_REGION));
-        showMessage('位置格式有误，已重置为默认值', 'warning');
-      } else {
-        // 恢复输入框为当前的有效值
-        setLocationInput(formatLocationString(finalLocation));
-        showMessage('位置输入格式有误，已自动修正', 'warning');
       }
     }
 
@@ -512,6 +555,33 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <h3 className="font-medium text-gray-900 dark:text-white">
               {isNewConfig ? '新建配置' : (formData.nickname || `配置 ${index + 1}`)}
             </h3>
+            {formData.realName && (
+              <div className="flex items-center ml-2 space-x-2">
+                <span className="text-gray-500 text-xs">|</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{formData.realName}</span>
+                <button
+                  className="p-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-800/50 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleExpand(index); // Ensure it's expanded if not? Actually no, modal can open directly.
+                    // But maybe we want to make sure the user knows which config they are scoring.
+                    // Let's just open the modal.
+                    // Warning: isScoreModalOpen is state inside ConfigForm.
+                    // If we click this button in header, we need to make sure we can trigger it.
+                    // The state is local to ConfigForm, so yes, we can call setIsScoreModalOpen(true).
+                    if (formData.realName && /[\u4e00-\u9fa5]/.test(formData.realName)) {
+                      setIsScoreModalOpen(true);
+                    } else if (formData.realName) {
+                      showMessage('评分功能主要针对中文姓名', 'info');
+                      setIsScoreModalOpen(true);
+                    }
+                  }}
+                  title="五格评分"
+                >
+                  💯
+                </button>
+              </div>
+            )}
           </div>
           {hasChanges && (
             <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-20 text-yellow-600 dark:text-yellow-400 text-xs rounded-full">
@@ -569,26 +639,9 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
                 type="text"
                 value={formData.realName || ''}
                 onChange={(e) => handleFieldChange('realName', e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 placeholder="用于五格评分与八字测算 (可选)"
               />
-              <Button
-                variant="outline"
-                size="md"
-                className="whitespace-nowrap px-3"
-                disabled={!formData.realName}
-                onClick={() => {
-                  if (!formData.realName) {
-                    return;
-                  }
-                  if (!/[\u4e00-\u9fa5]/.test(formData.realName)) {
-                    showMessage('评分功能主要针对中文姓名', 'info');
-                  }
-                  setIsScoreModalOpen(true);
-                }}
-              >
-                💯 评分
-              </Button>
             </div>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               注：若不想保留真实姓名，请留空。留空将无法使用五格评分功能。
