@@ -5,7 +5,28 @@ import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
 import { getShichen, calculateTrueSolarTime } from '../utils/astronomy';
+import { getShichen, calculateTrueSolarTime } from '../utils/astronomy';
 import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
+
+// 格式化位置字符串
+const formatLocationString = (loc) => {
+  if (!loc) return '';
+  const { province, city, district, lng, lat } = loc;
+  // 过滤掉空值
+  const parts = [province, city, district].filter(Boolean);
+  let str = parts.join(' ');
+
+  // 只有当经纬度都存在时才添加
+  if (lng !== undefined && lat !== undefined && lng !== null && lat !== null) {
+    // 保留部分小数位，避免过长
+    const fmtLng = typeof lng === 'number' ? lng : parseFloat(lng);
+    const fmtLat = typeof lat === 'number' ? lat : parseFloat(lat);
+    if (!isNaN(fmtLng) && !isNaN(fmtLat)) {
+      str += ` (经度: ${fmtLng}, 纬度: ${fmtLat})`;
+    }
+  }
+  return str;
+};
 
 // 星座选项
 const ZODIAC_OPTIONS = [
@@ -44,6 +65,8 @@ const LoadingSpinner = () => (
 const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, isExpanded, onToggleExpand, configs, showMessage }) => {
   const [formData, setFormData] = useState({ ...config });
   const [hasChanges, setHasChanges] = useState(false);
+  // 位置输入框状态
+  const [locationInput, setLocationInput] = useState(() => formatLocationString(config.birthLocation || DEFAULT_REGION));
   const formRef = useRef(null);
 
   // 检查是否是新建配置
@@ -134,6 +157,54 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
       }
     }
     setFormData(prev => ({ ...prev, birthLocation: newLoc }));
+    // 同步更新输入框
+    setLocationInput(formatLocationString(newLoc));
+  };
+
+  // 处理位置输入框变化
+  const handleLocationInputChange = (e) => {
+    const value = e.target.value;
+    setLocationInput(value);
+
+    // 尝试解析输入内容中的经纬度和地区名
+    // 匹配格式: "省 市 区 (经度: 116.xxx, 纬度: 39.xxx)" 
+    // 或者宽松格式，只要包含 "经度:数字" 和 "纬度:数字"
+
+    try {
+      // 提取经纬度
+      const lngMatch = value.match(/经度[:：]\s*(\d+(\.\d+)?)/);
+      const latMatch = value.match(/纬度[:：]\s*(\d+(\.\d+)?)/);
+
+      if (lngMatch && latMatch) {
+        const lng = parseFloat(lngMatch[1]);
+        const lat = parseFloat(latMatch[1]);
+
+        if (!isNaN(lng) && !isNaN(lat)) {
+          // 尝试提取地区名（括号前的部分）
+          const regionPart = value.split(/[(\uff08]/)[0].trim();
+          const parts = regionPart.split(/\s+/);
+
+          setFormData(prev => {
+            const currentLoc = prev.birthLocation || { ...DEFAULT_REGION };
+            return {
+              ...prev,
+              birthLocation: {
+                ...currentLoc,
+                // 如果能解析出地区名则更新，否则保留原样或仅更新经纬度
+                province: parts[0] || currentLoc.province,
+                city: parts[1] || currentLoc.city,
+                district: parts[2] || currentLoc.district,
+                lng: lng,
+                lat: lat
+              }
+            };
+          });
+        }
+      }
+    } catch (err) {
+      // 解析失败暂不处理，等待用户调整或保存时校验
+      console.debug('Location parse error:', err);
+    }
   };
 
   // 保存配置
@@ -159,7 +230,52 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
       return;
     }
 
-    onSave(index, formData);
+    // 校验位置信息
+    // 再次尝试解析 locationInput 确保最终保存的数据与输入框一致
+    let finalLocation = formData.birthLocation;
+    try {
+      const lngMatch = locationInput.match(/经度[:：]\s*(\d+(\.\d+)?)/);
+      const latMatch = locationInput.match(/纬度[:：]\s*(\d+(\.\d+)?)/);
+
+      if (lngMatch && latMatch) {
+        const lng = parseFloat(lngMatch[1]);
+        const lat = parseFloat(latMatch[1]);
+        // 简单的范围校验
+        if (lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90) {
+          const regionPart = locationInput.split(/[(\uff08]/)[0].trim();
+          const parts = regionPart.split(/\s+/);
+
+          finalLocation = {
+            province: parts[0] || finalLocation.province || DEFAULT_REGION.province,
+            city: parts[1] || finalLocation.city || DEFAULT_REGION.city,
+            district: parts[2] || finalLocation.district || DEFAULT_REGION.district,
+            lng,
+            lat
+          };
+        } else {
+          throw new Error('Coordinates out of range');
+        }
+      }
+    } catch (e) {
+      // 校验失败，回退到默认值或保持当前有效值（如果当前formData里的值是合法的）
+      // 根据需求"若检验错误或保存的数据有误则以默认值为准"
+      if (!finalLocation || !finalLocation.lng) {
+        finalLocation = { ...DEFAULT_REGION };
+        setLocationInput(formatLocationString(DEFAULT_REGION));
+        showMessage('位置格式有误，已重置为默认值', 'warning');
+      } else {
+        // 恢复输入框为当前的有效值
+        setLocationInput(formatLocationString(finalLocation));
+        showMessage('位置输入格式有误，已自动修正', 'warning');
+      }
+    }
+
+    const finalData = {
+      ...formData,
+      birthLocation: finalLocation
+    };
+
+    onSave(index, finalData);
     showMessage('配置保存成功', 'success');
   }, [formData, index, onSave, configs, showMessage]);
 
@@ -314,6 +430,21 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               出生地点 (用于校准真太阳时)
             </label>
+
+            {/* 自由输入框 */}
+            <div className="mb-3">
+              <input
+                type="text"
+                value={locationInput}
+                onChange={handleLocationInputChange}
+                className="w-full px-3 py-2 border border-blue-300 dark:border-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white text-sm"
+                placeholder="例如: 北京市 北京市 朝阳区 (经度: 116.48, 纬度: 39.95)"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                可在上方直接修改经纬度，或使用下方选项快速填充
+              </p>
+            </div>
+
             <div className="grid grid-cols-3 gap-2">
               {/* 省份 */}
               <select

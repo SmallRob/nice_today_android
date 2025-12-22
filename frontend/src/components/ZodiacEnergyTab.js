@@ -3,7 +3,6 @@ import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
 import ChineseZodiacSelector from './ChineseZodiacSelector';
-import TraditionalZodiacBackground from './TraditionalZodiacBackground';
 import '../styles/zodiac-icons.css';
 import '../styles/chinese-zodiac-icons.css';
 import '../styles/traditional-zodiac-background.css';
@@ -1260,10 +1259,9 @@ const ZodiacEnergyTab = memo(({ onError }) => {
   };
 
   return (
-    <TraditionalZodiacBackground className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col">
       {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
-      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized -webkit-overflow-scrolling-touch">
-        {/* 传统风格Banner区域 - 随页面滚动 */}
+      <div className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch">        {/* 传统风格Banner区域 - 随页面滚动 */}
         <div className="traditional-zodiac-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 flex-shrink-0">
           {/* 传统生肖装饰符号 */}
           <div className="absolute top-2 left-2 w-12 h-12 opacity-20">
@@ -1321,9 +1319,8 @@ const ZodiacEnergyTab = memo(({ onError }) => {
 
         {/* 内容展示区域 - 调整背景色以匹配传统风格 */}
         <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-transparent flex-1">
-          <div className="mb-4 mx-auto max-w-2xl h-full">
-            <div className="space-y-3 h-full">
-              {/* 生肖选择器 */}
+          <div className="mb-4 mx-auto max-w-2xl">
+            <div className="space-y-3">              {/* 生肖选择器 */}
               {renderZodiacSelector()}
 
               {/* 加载状态 */}
@@ -1392,9 +1389,8 @@ const ZodiacEnergyTab = memo(({ onError }) => {
             </div>
           </div>
         </div>
-      </div>
-    </TraditionalZodiacBackground>
+            </div>
+    </div>
   );
 });
-
 export default ZodiacEnergyTab;

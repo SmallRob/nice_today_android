@@ -201,14 +201,15 @@ export const HOROSCOPE_DATA_ENHANCED = [
 ];
 
 // 映射函数确保元素名称正确对应到内置键名
+// 映射函数确保元素名称正确对应到内置键名
 const getElementKey = (element) => {
-  const map = {
-    '火象': 'fire',
-    '土象': 'earth',
-    '风象': 'air',
-    '水象': 'water'
-  };
-  return map[element] || 'fire';
+  if (!element) return 'fire';
+  const el = String(element).toLowerCase();
+  if (el.includes('火') || el.includes('fire')) return 'fire';
+  if (el.includes('土') || el.includes('earth')) return 'earth';
+  if (el.includes('风') || el.includes('air')) return 'air';
+  if (el.includes('水') || el.includes('water')) return 'water';
+  return 'fire';
 };
 
 // 星象数据（基于日期的星象影响）
@@ -580,23 +581,29 @@ export const generateSoulQuestion = (horoscopeName, date = new Date()) => {
   const horoscope = HOROSCOPE_DATA_ENHANCED.find(h => h.name === horoscopeName);
   if (!horoscope) return null;
 
-  const element = horoscope.element.toLowerCase().replace('象', '');
+  const element = getElementKey(horoscope.element);
   const random = dailyRandom(horoscopeName, 'question');
 
   // 选择问题类型
   const categories = Object.keys(SOUL_QUESTIONS);
+  if (categories.length === 0) return null;
+
   const categoryIndex = Math.floor(random * categories.length);
   const category = categories[categoryIndex];
 
   // 选择具体问题
   const questions = SOUL_QUESTIONS[category];
+  if (!questions || questions.length === 0) return null;
+
   const questionIndex = Math.floor(dailyRandom(horoscopeName, category) * questions.length);
-  const question = questions[questionIndex];
+  const question = questions[Math.min(questionIndex, questions.length - 1)];
 
   // 生成答案（基于星座特性）
   const answers = SOUL_ANSWERS[element]?.[category] || ["保持积极心态，一切都会好起来"];
+  if (answers.length === 0) return { question, answer: "保持积极", category, timestamp: date.getTime() };
+
   const answerIndex = Math.floor(dailyRandom(horoscopeName, 'answer') * answers.length);
-  const answer = answers[answerIndex];
+  const answer = answers[Math.min(answerIndex, answers.length - 1)];
 
   return {
     question,
@@ -613,7 +620,7 @@ export const generateLuckyItem = (horoscopeName, date = new Date()) => {
   const horoscope = HOROSCOPE_DATA_ENHANCED.find(h => h.name === horoscopeName);
   if (!horoscope) return null;
 
-  const element = horoscope.element.toLowerCase().replace('象', '');
+  const element = getElementKey(horoscope.element);
   const items = LUCKY_ITEMS[element] || LUCKY_ITEMS.fire;
 
   if (!items || items.length === 0) {
@@ -631,7 +638,7 @@ export const generateLuckyItem = (horoscopeName, date = new Date()) => {
   const itemIndex = Math.floor(random * items.length);
 
   return {
-    ...items[itemIndex],
+    ...items[Math.min(itemIndex, items.length - 1)],
     element: horoscope.element,
     horoscope: horoscopeName,
     date: date.toISOString().split('T')[0]
@@ -733,22 +740,27 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
     }
   };
 
-  const element = horoscope.element.toLowerCase().replace('象', '');
+  const element = getElementKey(horoscope.element);
   const items = LUCKY_ITEMS[element] || LUCKY_ITEMS.fire;
   const itemRandom = dailyRandom(horoscopeName, 'item');
   const accessoryRandom = dailyRandom(horoscopeName, 'accessory');
 
-  const luckyItem = items[Math.floor(itemRandom * items.length)];
-  const luckyAccessory = items[Math.floor(accessoryRandom * items.length)];
+  // 防御性处理：确保 items 存在且不为空
+  const safeItems = (items && items.length > 0) ? items : LUCKY_ITEMS.fire;
+
+  const luckyItem = safeItems[Math.floor(itemRandom * safeItems.length) % safeItems.length];
+  const luckyAccessory = safeItems[Math.floor(accessoryRandom * safeItems.length) % safeItems.length];
 
   // 幸运颜色算法优化
   const colorRandom = dailyRandom(horoscopeName, 'color');
-  const selectedColor = LUCKY_COLORS[Math.floor(colorRandom * LUCKY_COLORS.length)];
+  const selectedColor = LUCKY_COLORS[Math.floor(colorRandom * LUCKY_COLORS.length) % LUCKY_COLORS.length];
 
   // 幸运食物算法优化
   const foodRandom = dailyRandom(horoscopeName, 'food');
   const foodPool = LUCKY_FOODS[element] || LUCKY_FOODS.fire;
-  const selectedFood = foodPool[Math.floor(foodRandom * foodPool.length)];
+  // 防御性处理：确保 foodPool 存在且不为空
+  const safeFoodPool = (foodPool && foodPool.length > 0) ? foodPool : LUCKY_FOODS.fire;
+  const selectedFood = safeFoodPool[Math.floor(foodRandom * safeFoodPool.length) % safeFoodPool.length];
 
   const recommendations = {
     luckyColors: [selectedColor.value],
