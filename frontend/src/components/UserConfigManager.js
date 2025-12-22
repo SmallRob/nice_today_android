@@ -63,30 +63,37 @@ const LoadingSpinner = () => (
 );
 
 // 姓名评分模态框
-const NameScoringModal = ({ isOpen, onClose, name }) => {
+const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveScore }) => {
   const [step, setStep] = useState('input'); // input, result
+  const [tempName, setTempName] = useState(''); // 临时输入的姓名
   const [splitName, setSplitName] = useState({ surname: '', firstName: '' });
   const [strokes, setStrokes] = useState({ surname: [], firstName: [] });
   const [analysisResult, setAnalysisResult] = useState(null);
 
   // 初始化拆解姓名
   useEffect(() => {
-    if (isOpen && name) {
-      // 简单启发式拆分：假设第一个字是姓 (绝大多数情况)
-      // 复姓逻辑可在此扩展或用户手动调整
-      const surname = name.substring(0, 1);
-      const firstName = name.substring(1);
+    if (isOpen) {
+      const nameToUse = tempName || name || '';
+      if (nameToUse) {
+        // 简单启发式拆分：假设第一个字是姓 (绝大多数情况)
+        // 复姓逻辑可在此扩展或用户手动调整
+        const surname = nameToUse.substring(0, 1);
+        const firstName = nameToUse.substring(1);
 
-      setSplitName({ surname, firstName });
+        setSplitName({ surname, firstName });
 
-      // 初始笔画获取
-      setStrokes({
-        surname: [getCharStrokes(surname)],
-        firstName: firstName.split('').map(c => getCharStrokes(c))
-      });
+        // 初始笔画获取
+        setStrokes({
+          surname: [getCharStrokes(surname)],
+          firstName: firstName.split('').map(c => getCharStrokes(c))
+        });
+      }
       setStep('input');
+    } else {
+      // 关闭时重置临时姓名
+      setTempName('');
     }
-  }, [isOpen, name]);
+  }, [isOpen, name, tempName]);
 
   const handleCalculate = () => {
     const res = calculateFiveGrids(
@@ -96,6 +103,12 @@ const NameScoringModal = ({ isOpen, onClose, name }) => {
       strokes.firstName.map(s => parseInt(s) || 1)
     );
     setAnalysisResult(res);
+
+    // 如果是个人评分且有回调，保存评分结果
+    if (isPersonal && onSaveScore && !tempName) {
+      onSaveScore(res);
+    }
+
     setStep('result');
   };
 
@@ -126,6 +139,25 @@ const NameScoringModal = ({ isOpen, onClose, name }) => {
         <div className="p-4 flex-1">
           {step === 'input' && (
             <div className="space-y-4">
+              {/* 姓名输入框 - 允许临时输入他人姓名 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {isPersonal ? '您的姓名' : '输入姓名'}
+                </label>
+                <input
+                  type="text"
+                  value={tempName || name || ''}
+                  onChange={(e) => setTempName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="输入中文姓名"
+                />
+                {!isPersonal && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    可为他人临时评分，结果不会保存
+                  </p>
+                )}
+              </div>
+
               <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm text-blue-800 dark:text-blue-200">
                 请确认姓名的拆分和康熙笔画数。系统已自动预填，如遇生僻字或不准，请手动修改。
               </div>
@@ -276,6 +308,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
   const [formData, setFormData] = useState({ ...config });
   const [hasChanges, setHasChanges] = useState(false);
   const [isScoreModalOpen, setIsScoreModalOpen] = useState(false); // 评分弹窗状态
+  const [isPersonalScoring, setIsPersonalScoring] = useState(true); // 是否为个人评分
   // 位置输入框状态
   const [locationInput, setLocationInput] = useState(() => formatLocationString(config.birthLocation || DEFAULT_REGION));
   const formRef = useRef(null);
@@ -559,20 +592,24 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
               <div className="flex items-center ml-2 space-x-2">
                 <span className="text-gray-500 text-xs">|</span>
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{formData.realName}</span>
+                {formData.nameScore && (
+                  <span className={`px-2 py-0.5 text-xs rounded font-bold ${formData.nameScore.mainType === '吉' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                    formData.nameScore.mainType === '半吉' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                      'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                    }`}>
+                    {formData.nameScore.mainType}
+                  </span>
+                )}
                 <button
                   className="p-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-800/50 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onToggleExpand(index); // Ensure it's expanded if not? Actually no, modal can open directly.
-                    // But maybe we want to make sure the user knows which config they are scoring.
-                    // Let's just open the modal.
-                    // Warning: isScoreModalOpen is state inside ConfigForm.
-                    // If we click this button in header, we need to make sure we can trigger it.
-                    // The state is local to ConfigForm, so yes, we can call setIsScoreModalOpen(true).
                     if (formData.realName && /[\u4e00-\u9fa5]/.test(formData.realName)) {
+                      setIsPersonalScoring(true); // Set to personal scoring
                       setIsScoreModalOpen(true);
                     } else if (formData.realName) {
                       showMessage('评分功能主要针对中文姓名', 'info');
+                      setIsPersonalScoring(true); // Set to personal scoring
                       setIsScoreModalOpen(true);
                     }
                   }}
@@ -651,8 +688,20 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
           {/* 评分弹窗 */}
           <NameScoringModal
             isOpen={isScoreModalOpen}
-            onClose={() => setIsScoreModalOpen(false)}
+            onClose={() => {
+              setIsScoreModalOpen(false);
+              setIsPersonalScoring(true);
+            }}
             name={formData.realName}
+            isPersonal={isPersonalScoring}
+            onSaveScore={(scoreResult) => {
+              // 保存个人评分到配置
+              const mainMeaning = getMeaning(scoreResult.ren);
+              handleFieldChange('nameScore', {
+                ...scoreResult,
+                mainType: mainMeaning.type
+              });
+            }}
           />
 
           {/* 出生日期 */}
@@ -945,6 +994,7 @@ const UserConfigManagerComponent = () => {
   const [isSwitching, setIsSwitching] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null); // 用于显示提示信息
+  const [isTempScoringOpen, setIsTempScoringOpen] = useState(false); // 临时评分弹窗状态
 
   // 初始化配置管理器 - 优化异步加载
   useEffect(() => {
@@ -1315,6 +1365,14 @@ const UserConfigManagerComponent = () => {
             <Button variant="primary" onClick={handleAddConfig}>
               添加新配置
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsTempScoringOpen(true)}
+              className="flex items-center space-x-1"
+            >
+              <span>💯</span>
+              <span>为他人评分</span>
+            </Button>
             <Button variant="outline" onClick={handleImportConfigs}>
               导入配置
             </Button>
@@ -1324,6 +1382,14 @@ const UserConfigManagerComponent = () => {
           </div>
         </div>
       </Card>
+
+      {/* 临时评分弹窗 */}
+      <NameScoringModal
+        isOpen={isTempScoringOpen}
+        onClose={() => setIsTempScoringOpen(false)}
+        name=""
+        isPersonal={false}
+      />
 
       {/* 配置列表 */}
       <div className="space-y-3">
