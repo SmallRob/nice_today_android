@@ -1,5 +1,6 @@
+import React, { useState, useEffect, useMemo } from 'react';
 import { getSolarTermState } from '../utils/solarTerms';
-import { solarTermHealthTips } from '../config/healthTipsConfig';
+import { solarTermHealthTips, seasonHealthTips, organRhythmTips, seasonGeneralTips } from '../config/healthTipsConfig';
 
 // 时令养生标签页组件
 const SeasonalHealthTab = () => {
