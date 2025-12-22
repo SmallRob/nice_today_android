@@ -59,6 +59,7 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
       formData.gender !== config.gender ||
       formData.mbti !== config.mbti ||
       formData.birthTime !== config.birthTime ||
+      formData.shichen !== config.shichen ||
       formData.birthLocation?.district !== config.birthLocation?.district;
     setHasChanges(changed);
 
@@ -67,7 +68,13 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
 
   // 处理表单字段变化
   const handleFieldChange = useCallback((field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      if (field === 'birthTime') {
+        newData.shichen = getShichen(value);
+      }
+      return newData;
+    });
   }, []);
 
   // 计算真太阳时和时辰
@@ -237,10 +244,32 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
             />
           </div>
 
-          {/* 出生时间 */}
+          {/* 性别 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              性别
+            </label>
+            <div className="gender-options grid grid-cols-3 gap-2">
+              {GENDER_OPTIONS.map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`p-2 rounded-md text-center transition-all duration-200 text-sm font-medium ${formData.gender === option.value
+                    ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-sm'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  onClick={() => handleFieldChange('gender', option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 出生时间 - 移动到性别后面 */}
           <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              出生具体时间
+              出生具体时间 (出生时辰)
             </label>
             <div className="flex items-center space-x-2 mb-2">
               <select
@@ -328,28 +357,6 @@ const ConfigForm = ({ config, index, isActive, onSave, onDelete, onSetActive, is
                 <span>纬度: {formData.birthLocation.lat.toFixed(2)}°</span>
               </div>
             )}
-          </div>
-
-          {/* 性别 - 移动到出生日期后面 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              性别
-            </label>
-            <div className="gender-options grid grid-cols-3 gap-2">
-              {GENDER_OPTIONS.map(option => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`p-2 rounded-md text-center transition-all duration-200 text-sm font-medium ${formData.gender === option.value
-                    ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-sm'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  onClick={() => handleFieldChange('gender', option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* 星座 */}
@@ -604,6 +611,7 @@ const UserConfigManagerComponent = () => {
       nickname: '', // 留空让用户填写
       birthDate: '',
       birthTime: '12:30',
+      shichen: '午时二刻',
       birthLocation: { ...DEFAULT_REGION },
       zodiac: '',
       zodiacAnimal: '',
@@ -817,11 +825,17 @@ const UserConfigManagerComponent = () => {
                 <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].birthDate}</span>
               </div>
               <div>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">性别：</span>
+                <span className="ml-2 text-gray-900 dark:text-white">
+                  {GENDER_OPTIONS.find(opt => opt.value === (configs[activeConfigIndex].gender || 'secret'))?.label || '保密'}
+                </span>
+              </div>
+              <div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生时间：</span>
                 <span className="ml-2 text-gray-900 dark:text-white">
                   {configs[activeConfigIndex].birthTime || '12:30'}
                   <span className="text-xs text-gray-500 ml-1">
-                    ({getShichen(configs[activeConfigIndex].birthTime || '12:30')})
+                    ({configs[activeConfigIndex].shichen || getShichen(configs[activeConfigIndex].birthTime || '12:30')})
                   </span>
                 </span>
               </div>
@@ -838,12 +852,6 @@ const UserConfigManagerComponent = () => {
               <div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">生肖：</span>
                 <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiacAnimal}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">性别：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">
-                  {GENDER_OPTIONS.find(opt => opt.value === (configs[activeConfigIndex].gender || 'secret'))?.label || '保密'}
-                </span>
               </div>
               <div>
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">MBTI类型：</span>
