@@ -286,10 +286,10 @@ const HoroscopeTab = () => {
 
         // 使用算法生成当天的模拟数据
         const dayData = generateDailyHoroscope(userHoroscope, date);
-        if (dayData) {
-          loveData.push(dayData.dailyForecast.love.score);
-          wealthData.push(dayData.dailyForecast.wealth.score);
-          careerData.push(dayData.dailyForecast.career.score);
+        if (dayData && dayData.dailyForecast) {
+          loveData.push(dayData.dailyForecast.love?.score || 70);
+          wealthData.push(dayData.dailyForecast.wealth?.score || 70);
+          careerData.push(dayData.dailyForecast.career?.score || 70);
         } else {
           loveData.push(70);
           wealthData.push(70);

@@ -178,7 +178,8 @@ export const getMonthlyBaziFortune = (pillars) => {
     };
 
     const masterElement = elements[dayMaster];
-    const monthElement = elements[currentMonthG.charAt(0)];
+    // 增加对 currentMonthG 的非空检查
+    const monthElement = currentMonthG ? elements[currentMonthG.charAt(0)] : null;
 
     const relations = {
         '木': { '木': '比劫', '火': '食伤', '土': '财星', '金': '官杀', '水': '印星' },
@@ -188,10 +189,13 @@ export const getMonthlyBaziFortune = (pillars) => {
         '水': { '木': '食伤', '火': '财星', '土': '官杀', '金': '印星', '水': '比劫' }
     };
 
-    if (!masterElement || !relations[masterElement]) {
+    // 严谨的空值检查
+    if (!masterElement || !monthElement || !relations[masterElement] || !relations[masterElement][monthElement]) {
         return {
-            summary: '八字信息加载失败，请检查配置。',
-            score: 0
+            summary: '暂无法分析当前运势，请稍后再试。',
+            score: 75,
+            relation: '未知',
+            dayMaster: dayMaster || '?'
         };
     }
 

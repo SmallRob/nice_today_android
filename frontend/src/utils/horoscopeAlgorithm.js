@@ -746,14 +746,20 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
   const accessoryRandom = dailyRandom(horoscopeName, 'accessory');
 
   // 防御性处理：确保 items 存在且不为空
-  const safeItems = (items && items.length > 0) ? items : LUCKY_ITEMS.fire;
+  // 即使数据库出现异常，也保证有一个默认项
+  const fallbackItem = { name: '幸运石头', icon: '🪨', description: '虽然平凡但坚固' };
+  const safeItems = (items && items.length > 0)
+    ? items
+    : (LUCKY_ITEMS.fire && LUCKY_ITEMS.fire.length > 0 ? LUCKY_ITEMS.fire : [fallbackItem]);
 
-  const luckyItem = safeItems[Math.floor(itemRandom * safeItems.length) % safeItems.length];
-  const luckyAccessory = safeItems[Math.floor(accessoryRandom * safeItems.length) % safeItems.length];
+  // 确保索引访问安全
+  const luckyItem = safeItems[Math.floor(itemRandom * safeItems.length) % safeItems.length] || safeItems[0] || fallbackItem;
+  const luckyAccessory = safeItems[Math.floor(accessoryRandom * safeItems.length) % safeItems.length] || safeItems[0] || fallbackItem;
 
   // 幸运颜色算法优化
   const colorRandom = dailyRandom(horoscopeName, 'color');
-  const selectedColor = LUCKY_COLORS[Math.floor(colorRandom * LUCKY_COLORS.length) % LUCKY_COLORS.length];
+  const safeColors = (LUCKY_COLORS && LUCKY_COLORS.length > 0) ? LUCKY_COLORS : [{ name: '正红色', value: '#FF0000' }];
+  const selectedColor = safeColors[Math.floor(colorRandom * safeColors.length) % safeColors.length] || { name: '正红色', value: '#FF0000' };
 
   // 幸运食物算法优化
   const foodRandom = dailyRandom(horoscopeName, 'food');
@@ -763,8 +769,8 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
   const selectedFood = safeFoodPool[Math.floor(foodRandom * safeFoodPool.length) % safeFoodPool.length];
 
   const recommendations = {
-    luckyColors: [selectedColor.value],
-    luckyColorNames: [selectedColor.name],
+    luckyColors: [selectedColor?.value || '#FF0000'],
+    luckyColorNames: [selectedColor?.name || '正红色'],
     luckyNumbers: Array.isArray(horoscope.luckyNumber) ? horoscope.luckyNumber : [horoscope.luckyNumber || 7],
     compatibleSigns: Array.isArray(horoscope.compatible) ? horoscope.compatible : [horoscope.compatible || '未知星座'],
     todayMoonSign: String(getRandomMoonSign(horoscopeName) || '白羊座'),
