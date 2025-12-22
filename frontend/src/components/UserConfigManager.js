@@ -5,7 +5,7 @@ import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
 import { getShichen, calculateTrueSolarTime } from '../utils/astronomy';
-import { getShichen, calculateTrueSolarTime } from '../utils/astronomy';
+
 import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
 
 // 格式化位置字符串

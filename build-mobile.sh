@@ -31,6 +31,142 @@ log_debug() {
     fi
 }
 
+# Android特定函数
+check_android_environment() {
+    log_debug "检查Android环境..."
+    
+    if [ -z "$ANDROID_HOME" ]; then
+        log_warn "ANDROID_HOME环境变量未设置，尝试查找Android SDK..."
+        
+        # 常见Android SDK位置
+        POSSIBLE_SDK_LOCATIONS=(
+            "$HOME/Library/Android/sdk"
+            "$HOME/Android/Sdk"
+            "/usr/local/android-sdk"
+            "/opt/android-sdk"
+        )
+        
+        for location in "${POSSIBLE_SDK_LOCATIONS[@]}"; do
+            if [ -d "$location" ]; then
+                export ANDROID_HOME="$location"
+                log_info "找到Android SDK: $ANDROID_HOME"
+                break
+            fi
+        done
+        
+        if [ -z "$ANDROID_HOME" ]; then
+            log_error "未找到Android SDK，请设置ANDROID_HOME环境变量"
+            exit 1
+        fi
+    fi
+    
+    # 检查Java环境
+    if ! command -v java &> /dev/null; then
+        log_error "Java未安装，请先安装Java"
+        exit 1
+    fi
+    
+    log_debug "Android环境检查完成"
+}
+
+build_android_app() {
+    log_debug "开始构建Android应用..."
+    cd android
+    
+    if [ "$BUILD_TYPE" = "release" ]; then
+        log_info "正在构建发布版Android应用..."
+        ./gradlew assembleRelease
+        
+        if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            log_info "发布版APK构建成功: app/build/outputs/apk/release/app-release.apk"
+        else
+            log_error "发布版APK构建失败"
+            exit 1
+        fi
+    else
+        log_info "正在构建调试版Android应用..."
+        ./gradlew assembleDebug
+        
+        if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+            log_info "调试版APK构建成功: app/build/outputs/apk/debug/app-debug.apk"
+        else
+            log_error "调试版APK构建失败"
+            exit 1
+        fi
+    fi
+    
+    # 安装到设备（如果指定了设备）
+    if [ "$TARGET" != "all" ]; then
+        log_info "正在安装APK到设备: $TARGET"
+        
+        if [ "$BUILD_TYPE" = "release" ]; then
+            adb -s "$TARGET" install -r app/build/outputs/apk/release/app-release.apk
+        else
+            adb -s "$TARGET" install -r app/build/outputs/apk/debug/app-debug.apk
+        fi
+        
+        log_info "APK已安装到设备"
+    fi
+    
+    # 列出可用的设备
+    echo ""
+    log_info "可用的设备:"
+    adb devices
+}
+
+# iOS特定函数
+check_ios_environment() {
+    log_debug "检查iOS环境..."
+    
+    # 检查Xcode
+    if ! command -v xcodebuild &> /dev/null; then
+        log_error "Xcode未安装，请先安装Xcode"
+        exit 1
+    fi
+    
+    # 检查Xcode命令行工具
+    xcode_version=$(xcodebuild -version 2>&1 | head -1)
+    log_info "Xcode版本: $xcode_version"
+    
+    # 检查iOS模拟器
+    if ! command -v simctl &> /dev/null; then
+        log_error "iOS模拟器不可用"
+        exit 1
+    fi
+    
+    log_debug "iOS环境检查完成"
+}
+
+build_ios_app() {
+    log_debug "开始构建iOS应用..."
+    
+    if [ "$BUILD_TYPE" = "release" ]; then
+        log_info "正在构建发布版iOS应用..."
+        xcodebuild -workspace ios/App/App.xcworkspace \
+                   -scheme App \
+                   -configuration Release \
+                   -destination generic/platform=iOS \
+                   -archivePath ios/App/App.xcarchive \
+                   archive
+        
+        log_info "发布版应用构建完成: ios/App/App.xcarchive"
+    else
+        log_info "正在构建调试版iOS应用..."
+        xcodebuild -workspace ios/App/App.xcworkspace \
+                   -scheme App \
+                   -configuration Debug \
+                   -destination generic/platform=iOS \
+                   build
+                   
+        log_info "调试版应用构建完成"
+    fi
+    
+    # 列出可用的设备
+    echo ""
+    log_info "可用的设备:"
+    xcrun simctl list devices | grep -E "iPhone|iPad" | grep -E "Booted|Shutdown"
+}
+
 # 脚本开始
 log_info "开始构建移动应用..."
 
@@ -212,139 +348,3 @@ elif [ "$PLATFORM" = "ios" ]; then
     echo "2. 要在Xcode中打开项目，使用: npx cap open ios"
     echo "3. 要运行到特定设备，使用: npx cap run ios --target=<设备ID>"
 fi
-
-# Android特定函数
-check_android_environment() {
-    log_debug "检查Android环境..."
-    
-    if [ -z "$ANDROID_HOME" ]; then
-        log_warn "ANDROID_HOME环境变量未设置，尝试查找Android SDK..."
-        
-        # 常见Android SDK位置
-        POSSIBLE_SDK_LOCATIONS=(
-            "$HOME/Library/Android/sdk"
-            "$HOME/Android/Sdk"
-            "/usr/local/android-sdk"
-            "/opt/android-sdk"
-        )
-        
-        for location in "${POSSIBLE_SDK_LOCATIONS[@]}"; do
-            if [ -d "$location" ]; then
-                export ANDROID_HOME="$location"
-                log_info "找到Android SDK: $ANDROID_HOME"
-                break
-            fi
-        done
-        
-        if [ -z "$ANDROID_HOME" ]; then
-            log_error "未找到Android SDK，请设置ANDROID_HOME环境变量"
-            exit 1
-        fi
-    fi
-    
-    # 检查Java环境
-    if ! command -v java &> /dev/null; then
-        log_error "Java未安装，请先安装Java"
-        exit 1
-    fi
-    
-    log_debug "Android环境检查完成"
-}
-
-build_android_app() {
-    log_debug "开始构建Android应用..."
-    cd android
-    
-    if [ "$BUILD_TYPE" = "release" ]; then
-        log_info "正在构建发布版Android应用..."
-        ./gradlew assembleRelease
-        
-        if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
-            log_info "发布版APK构建成功: app/build/outputs/apk/release/app-release.apk"
-        else
-            log_error "发布版APK构建失败"
-            exit 1
-        fi
-    else
-        log_info "正在构建调试版Android应用..."
-        ./gradlew assembleDebug
-        
-        if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
-            log_info "调试版APK构建成功: app/build/outputs/apk/debug/app-debug.apk"
-        else
-            log_error "调试版APK构建失败"
-            exit 1
-        fi
-    fi
-    
-    # 安装到设备（如果指定了设备）
-    if [ "$TARGET" != "all" ]; then
-        log_info "正在安装APK到设备: $TARGET"
-        
-        if [ "$BUILD_TYPE" = "release" ]; then
-            adb -s "$TARGET" install -r app/build/outputs/apk/release/app-release.apk
-        else
-            adb -s "$TARGET" install -r app/build/outputs/apk/debug/app-debug.apk
-        fi
-        
-        log_info "APK已安装到设备"
-    fi
-    
-    # 列出可用的设备
-    echo ""
-    log_info "可用的设备:"
-    adb devices
-}
-
-# iOS特定函数
-check_ios_environment() {
-    log_debug "检查iOS环境..."
-    
-    # 检查Xcode
-    if ! command -v xcodebuild &> /dev/null; then
-        log_error "Xcode未安装，请先安装Xcode"
-        exit 1
-    fi
-    
-    # 检查Xcode命令行工具
-    xcode_version=$(xcodebuild -version 2>&1 | head -1)
-    log_info "Xcode版本: $xcode_version"
-    
-    # 检查iOS模拟器
-    if ! command -v simctl &> /dev/null; then
-        log_error "iOS模拟器不可用"
-        exit 1
-    fi
-    
-    log_debug "iOS环境检查完成"
-}
-
-build_ios_app() {
-    log_debug "开始构建iOS应用..."
-    
-    if [ "$BUILD_TYPE" = "release" ]; then
-        log_info "正在构建发布版iOS应用..."
-        xcodebuild -workspace ios/App/App.xcworkspace \
-                   -scheme App \
-                   -configuration Release \
-                   -destination generic/platform=iOS \
-                   -archivePath ios/App/App.xcarchive \
-                   archive
-        
-        log_info "发布版应用构建完成: ios/App/App.xcarchive"
-    else
-        log_info "正在构建调试版iOS应用..."
-        xcodebuild -workspace ios/App/App.xcworkspace \
-                   -scheme App \
-                   -configuration Debug \
-                   -destination generic/platform=iOS \
-                   build
-                   
-        log_info "调试版应用构建完成"
-    fi
-    
-    # 列出可用的设备
-    echo ""
-    log_info "可用的设备:"
-    xcrun simctl list devices | grep -E "iPhone|iPad" | grep -E "Booted|Shutdown"
-}
