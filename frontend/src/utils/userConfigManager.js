@@ -157,11 +157,22 @@ class UserConfigManager {
     // 确保配置包含必要字段
     const newConfig = {
       nickname: config.nickname || `用户${this.configs.length + 1}`,
+      realName: config.realName || '',
       birthDate: config.birthDate || '1991-01-01',
+      birthTime: config.birthTime || '12:30',
+      shichen: config.shichen || '午时二刻',
+      birthLocation: config.birthLocation || {
+        province: '北京市',
+        city: '北京市',
+        district: '朝阳区',
+        lng: 116.48,
+        lat: 39.95
+      },
       zodiac: config.zodiac || '未知',
       zodiacAnimal: config.zodiacAnimal || '未知',
       gender: config.gender || 'male',
       mbti: config.mbti || 'ISFP',
+      nameScore: config.nameScore || null,
       ...config
     };
 
