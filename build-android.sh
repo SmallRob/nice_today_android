@@ -8,7 +8,7 @@ export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH
 
 # 进入前端目录 (Windows兼容路径)
-cd "e:/WorkSource/nice_today_android/frontend" || { echo "无法进入前端目录"; exit 1; }
+cd "./frontend" || { echo "无法进入前端目录"; exit 1; }
 
 # 同步Web资源到Android项目
 echo "同步Web资源到Android项目..."
