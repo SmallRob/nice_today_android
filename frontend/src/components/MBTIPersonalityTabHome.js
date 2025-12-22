@@ -55,10 +55,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ISTJ',
       name: '物流师',
+      nickname: '内敛蜜蜂',
+      tags: ['细节控', '责任担当', '秩序守护者'],
+      motto: '“言必行，行必果”',
+      summary: '诚实可靠的执行者，以严谨的态度和高度的责任感守护规则与秩序。',
       description: '务实、可靠、注重细节',
       color: '#3b82f6',
       bgGradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-      icon: '📋',
+      icon: '�',
       traits: ['可靠', '有条理', '务实', '传统', '忠诚'],
       strengths: ['责任感强', '注重细节', '逻辑清晰', '遵守规则', '执行力强'],
       weaknesses: ['缺乏灵活性', '过于保守', '不擅长表达情感', '抗拒变化', '容易固执'],
@@ -70,10 +74,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ISFJ',
       name: '守护者',
+      nickname: '温顺小鹿',
+      tags: ['体贴入微', '温和坚定', '幕后英雄'],
+      motto: '“照顾他人是我的本能”',
+      summary: '细心周到的照顾者，以谦逊和奉献的精神为身边人提供最坚实的依靠。',
       description: '体贴、尽责、保护欲强',
       color: '#10b981',
       bgGradient: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
-      icon: '🛡️',
+      icon: '🦌',
       traits: ['体贴', '保护欲强', '尽责', '传统', '支持性'],
       strengths: ['有责任心', '体贴他人', '注重细节', '忠诚可靠', '务实'],
       weaknesses: ['过于敏感', '难以拒绝他人', '抗拒变化', '过度自我批评', '隐藏需求'],
@@ -85,25 +93,33 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'INFJ',
       name: '倡导者',
+      nickname: '利他长颈鹿',
+      tags: ['灵魂导师', '理想主义者', '洞察之眼'],
+      motto: '“世界可以变得更美好”',
+      summary: '富有远见的坚守者，在深邃的洞察中寻找人生的意义并默默感化他人。',
       description: '理想主义、有洞察力、富有同情心',
       color: '#8b5cf6',
       bgGradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-      icon: '🌟',
+      icon: '🦒',
       traits: ['理想主义', '有洞察力', '富有同情心', '创意', '神秘'],
       strengths: ['深刻洞察力', '富有同情心', '创造力强', '理想主义', '坚持原则'],
       weaknesses: ['过于完美主义', '容易过度思考', '难以表达需求', '容易疲惫', '过于敏感'],
       careerAdvice: ['心理咨询师', '作家', '艺术家', '教师', '社工'],
-      relationship: 'INFJ寻求深刻的精神连接，是理解和支持性的伴侣',
+      relationship: 'INFJ寻求深刻的精神连接，是理解 and 支持性的伴侣',
       communicationStyle: '深刻、富有洞察力、隐喻丰富，注重深层次交流',
       growthTips: '学会接受不完美，平衡理想与现实，保护个人能量'
     },
     {
       type: 'INTJ',
       name: '建筑师',
+      nickname: '冷静的鹰',
+      tags: ['反讽大师', '理性且机智', '真理探索家'],
+      motto: '“一切皆在计划之中”',
+      summary: '高效的规划者和深思熟虑的创新者，以周密的规划面对挑战。',
       description: '战略思维、独立、追求效率',
       color: '#6366f1',
       bgGradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-      icon: '🏗️',
+      icon: '🦅',
       traits: ['战略思维', '独立', '逻辑性强', '有远见', '自信'],
       strengths: ['战略思维', '逻辑分析', '独立思考', '执行力强', '有远见'],
       weaknesses: ['过于批判', '不擅长情感表达', '显得冷漠', '固执己见', '完美主义'],
@@ -115,10 +131,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ISTP',
       name: '鉴赏家',
+      nickname: '傲娇猫猫',
+      tags: ['冷面笑匠', '生存专家', '硬核玩家'],
+      motto: '“凡事都有其运作之道”',
+      summary: '冷静务实的探索者，在观察与实践中洞察事物的本质并能迅速化解难题。',
       description: '实用、灵活、擅长解决问题',
       color: '#ef4444',
       bgGradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-      icon: '🔧',
+      icon: '�',
       traits: ['实用', '灵活', '冷静', '独立', '冒险'],
       strengths: ['解决问题能力强', '动手能力强', '适应力强', '冷静沉着', '务实'],
       weaknesses: ['缺乏长期规划', '容易感到无聊', '不擅长表达情感', '冲动', '抗拒承诺'],
@@ -130,10 +150,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ISFP',
       name: '探险家',
+      nickname: '灵活小熊',
+      tags: ['唯美主义', '自由灵魂', '感官大师'],
+      motto: '“生活是一件艺术品”',
+      summary: '细腻敏感的创造者，用独特的审美和温和的态度去感悟与点缀这个世界。',
       description: '艺术、敏感、活在当下',
       color: '#f59e0b',
       bgGradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-      icon: '🎨',
+      icon: '🐻',
       traits: ['艺术', '敏感', '活在当下', '灵活', '温和'],
       strengths: ['艺术感强', '敏感细腻', '适应力强', '活在当下', '温和友善'],
       weaknesses: ['缺乏规划', '过度敏感', '难以应对批评', '逃避冲突', '容易冲动'],
@@ -145,10 +169,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'INFP',
       name: '调停者',
+      nickname: '反骨小蝴蝶',
+      tags: ['精神隐士', '温柔力量', '脑回路奇特'],
+      motto: '“愿每个灵魂都被温柔以待”',
+      summary: '怀揣梦想的治愈者，在坚持自我价值的同时默默传递着希望与爱。',
       description: '理想主义、富有同情心、创意无限',
       color: '#ec4899',
       bgGradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-      icon: '🕊️',
+      icon: '🦋',
       traits: ['理想主义', '富有同情心', '创意无限', '价值观驱动', '灵活'],
       strengths: ['富有同情心', '创造力强', '理想主义', '价值观坚定', '适应力强'],
       weaknesses: ['过于理想化', '容易感到压力', '难以做决定', '逃避冲突', '自我怀疑'],
@@ -160,10 +188,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'INTP',
       name: '逻辑学家',
+      nickname: '睿智猫头鹰',
+      tags: ['好奇宝宝', '逻辑狂人', '学术独行侠'],
+      motto: '“宇宙的真相就在这里”',
+      summary: '深奥理论的构建者，对知识充满渴望，习惯于在逻辑思考中发现世界的规律。',
       description: '逻辑思维、创新、好奇心强',
       color: '#06b6d4',
       bgGradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-      icon: '🔬',
+      icon: '🦉',
       traits: ['逻辑思维', '创新', '好奇心强', '独立', '分析性'],
       strengths: ['逻辑思维强', '创新能力强', '好奇心旺盛', '独立思考', '分析能力强'],
       weaknesses: ['过于理论化', '缺乏执行力', '社交困难', '显得冷漠', '容易分心'],
@@ -175,10 +207,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ESTP',
       name: '企业家',
+      nickname: '敏锐雪豹',
+      tags: ['即兴大师', '能量泵', '现实派玩家'],
+      motto: '“活在当下，立即行动”',
+      summary: '机敏果敢的开拓者，以极强的适应力和敏锐的洞察力在快节奏的生活中游刃有余。',
       description: '活力四射、务实、善于交际',
       color: '#f97316',
       bgGradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-      icon: '💼',
+      icon: '�',
       traits: ['活力四射', '务实', '善于交际', '灵活', '冒险'],
       strengths: ['行动力强', '善于交际', '适应力强', '务实高效', '充满活力'],
       weaknesses: ['缺乏耐心', '容易冲动', '不注重细节', '抗拒规则', '缺乏长期规划'],
@@ -190,10 +226,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ESFP',
       name: '表演者',
+      nickname: '乐天鹦鹉',
+      tags: ['快乐瀑布', '社交C位', '颜值担当'],
+      motto: '“世界是我的舞台”',
+      summary: '热力四射的感染者，用无穷的活力和幽默感将快乐传递给身边的每一个人。',
       description: '热情、友善、享受生活',
       color: '#84cc16',
       bgGradient: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)',
-      icon: '🎭',
+      icon: '🦜',
       traits: ['热情', '友善', '享受生活', '乐观', '善于交际'],
       strengths: ['热情洋溢', '善于交际', '适应力强', '乐观积极', '享受当下'],
       weaknesses: ['缺乏规划', '容易分心', '难以处理复杂问题', '逃避冲突', '冲动'],
@@ -205,10 +245,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ENFP',
       name: '竞选者',
+      nickname: '快乐小狗',
+      tags: ['灵感泉涌', '社交牛杂症', '自由追逐者'],
+      motto: '“生活处处是惊喜”',
+      summary: '创意无限的追梦者，在不断探索新可能性的过程中为世界注入活力与热情。',
       description: '热情、创意、鼓舞人心',
       color: '#fbbf24',
       bgGradient: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-      icon: '🎉',
+      icon: '🐶',
       traits: ['热情', '创意', '鼓舞人心', '乐观', '善于交际'],
       strengths: ['热情洋溢', '创造力强', '善于鼓舞他人', '适应力强', '乐观积极'],
       weaknesses: ['缺乏专注', '容易过度承诺', '难以完成项目', '逃避细节', '容易分心'],
@@ -220,10 +264,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ENTP',
       name: '辩论家',
+      nickname: '机敏赤狐',
+      tags: ['嘴炮王者', '点子大王', '破局者'],
+      motto: '“为什么要按照常理出牌”',
+      summary: '机智多变的挑战者，喜欢在思想碰撞中探索真理，总能提出令人赞叹的新奇见解。',
       description: '机智、创新、喜欢挑战',
       color: '#a855f7',
       bgGradient: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
-      icon: '💡',
+      icon: '🦊',
       traits: ['机智', '创新', '喜欢挑战', '善于辩论', '好奇心强'],
       strengths: ['思维敏捷', '创新能力强', '善于辩论', '适应力强', '好奇心旺盛'],
       weaknesses: ['容易争论', '缺乏耐心', '难以坚持', '忽视细节', '容易厌倦'],
@@ -235,10 +283,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ESTJ',
       name: '执行官',
+      nickname: '果断小狼',
+      tags: ['天生管理者', '时间管理大师', '公平正义'],
+      motto: '“秩序是成功的基石”',
+      summary: '高效果断的统筹者，以强大的执行力和组织能力确保每一项计划都能被完美达成。',
       description: '务实、果断、注重效率',
       color: '#0ea5e9',
       bgGradient: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
-      icon: '👔',
+      icon: '�',
       traits: ['务实', '果断', '注重效率', '有条理', '传统'],
       strengths: ['执行力强', '组织能力强', '务实高效', '果断决策', '责任感强'],
       weaknesses: ['缺乏灵活性', '过于直接', '不擅长情感表达', '抗拒变化', '显得专制'],
@@ -250,10 +302,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ESFJ',
       name: '执政官',
+      nickname: '靠谱大象',
+      tags: ['和谐使者', '社交润滑剂', '家庭支柱'],
+      motto: '“大家开心我就开心”',
+      summary: '热情友善的连接者，致力于维护群体的和谐与稳定，是身边人最温暖的港湾。',
       description: '友善、尽责、善于交际',
       color: '#22c55e',
       bgGradient: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-      icon: '🤝',
+      icon: '🐘',
       traits: ['友善', '尽责', '善于交际', '传统', '支持性'],
       strengths: ['善于交际', '有责任心', '体贴他人', '组织能力强', '务实'],
       weaknesses: ['过于在意他人看法', '难以拒绝他人', '抗拒变化', '过度自我批评', '容易焦虑'],
@@ -265,10 +321,14 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ENFJ',
       name: '主人公',
+      nickname: '真诚白鸽',
+      tags: ['魅力领袖', '共情大师', '理想向导'],
+      motto: '“只要我们站在一起”',
+      summary: '极具魅力的领导者，以满腔的热情和真诚的同情心感召他人共同走向光明的未来。',
       description: '魅力四射、鼓舞人心、富有同情心',
       color: '#eab308',
       bgGradient: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-      icon: '🎤',
+      icon: '🕊️',
       traits: ['魅力四射', '鼓舞人心', '富有同情心', '理想主义', '善于交际'],
       strengths: ['领导力强', '善于鼓舞他人', '富有同情心', '沟通能力强', '理想主义'],
       weaknesses: ['过度投入', '容易疲惫', '过于理想化', '难以接受批评', '容易过度承诺'],
@@ -280,15 +340,19 @@ const MBTIPersonalityTabHome = () => {
     {
       type: 'ENTJ',
       name: '指挥官',
+      nickname: '霸气狮子',
+      tags: ['战略奇才', '意志之王', '无畏统帅'],
+      motto: '“我的字典里没有不可能”',
+      summary: '雄心勃勃的开拓者，以无与伦比的意志力和长远的战略眼光征服一个又一个目标。',
       description: '战略思维、果断、领导力强',
       color: '#d946ef',
       bgGradient: 'linear-gradient(135deg, #d946ef 0%, #c026d3 100%)',
-      icon: '👑',
+      icon: '🦁',
       traits: ['战略思维', '果断', '领导力强', '自信', '有远见'],
       strengths: ['领导力强', '战略思维', '果断决策', '执行力强', '有远见'],
       weaknesses: ['过于强势', '缺乏耐心', '不擅长情感表达', '显得傲慢', '过于批判'],
       careerAdvice: ['CEO', '律师', '投资银行家', '政治家', '军事指挥官'],
-      relationship: 'ENTJ是强大的伴侣，重视目标和成就的共享',
+      relationship: 'ENTJ是强大的伴侣，重视目标 and 成就的共享',
       communicationStyle: '直接、果断、注重效率，可能显得强势',
       growthTips: '培养耐心，学习情感表达，考虑他人感受'
     }
@@ -397,6 +461,10 @@ const MBTIPersonalityTabHome = () => {
         basicInfo: {
           type: typeData.type,
           name: typeData.name,
+          nickname: typeData.nickname,
+          tags: typeData.tags,
+          motto: typeData.motto,
+          summary: typeData.summary,
           description: typeData.description,
           icon: typeData.icon,
           color: typeData.color
@@ -561,47 +629,134 @@ const MBTIPersonalityTabHome = () => {
   const renderBasicInfoCard = () => {
     if (!personalityAnalysis?.basicInfo) return null;
 
-    const { type, name, description, icon, color } = personalityAnalysis.basicInfo;
-    const typeData = mbtiTypes.find(t => t.type === type);
+    const { type, name, nickname, tags, motto, summary, icon, color } = personalityAnalysis.basicInfo;
 
     return (
-      <div className="relative overflow-hidden bg-gradient-to-br from-green-600 to-emerald-700 dark:from-green-700 dark:to-emerald-900 rounded-2xl p-6 text-white shadow-lg mb-4 transition-all duration-300">
-        <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-        <div className="absolute -left-6 -bottom-6 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl"></div>
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-800 dark:to-purple-950 rounded-2xl p-6 text-white shadow-lg mb-4 transition-all duration-300">
+        <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-400/20 rounded-full blur-3xl"></div>
 
-        <div className="relative flex flex-col md:flex-row items-center md:items-start gap-5">
+        <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
           {/* 图标和类型 */}
-          <div
-            className="flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center text-3xl shadow-sm backdrop-blur-sm bg-white/20 border border-white/20 ring-1 ring-white/10"
-          >
-            <span className="mb-1">{icon}</span>
-            <span className="text-[10px] uppercase font-black tracking-tighter opacity-80">{type}</span>
+          <div className="flex flex-col items-center gap-2">
+            <div
+              className="flex-shrink-0 w-24 h-24 rounded-3xl flex flex-col items-center justify-center text-5xl shadow-xl backdrop-blur-md bg-white/20 border border-white/30 ring-1 ring-white/20 transform hover:rotate-3 transition-transform duration-500"
+            >
+              <span className="mb-1">{icon}</span>
+            </div>
+            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] font-black uppercase tracking-widest border border-white/10">
+              {type}
+            </div>
           </div>
 
           {/* 基本信息 */}
           <div className="flex-1 text-center md:text-left">
-            <div className="mb-3">
-              <div className="flex flex-col md:flex-row md:items-baseline md:gap-3 mb-1 justify-center md:justify-start">
-                <h1 className="text-2xl font-black tracking-tight">{name}</h1>
-                <span className="text-xs font-bold px-2 py-0.5 bg-white/20 rounded-full backdrop-blur-sm tracking-widest uppercase">{type}</span>
+            <div className="mb-4">
+              <div className="flex flex-col md:flex-row md:items-center md:gap-3 mb-2 justify-center md:justify-start">
+                <h1 className="text-3xl font-black tracking-tight">{nickname}</h1>
+                <div className="h-6 w-[2px] bg-white/30 hidden md:block"></div>
+                <span className="text-lg font-bold opacity-90">{name}</span>
               </div>
-              <p className="text-sm text-white/80 font-medium leading-relaxed tracking-wide italic">
-                "{description}"
+              <p className="text-sm text-indigo-100 font-bold mb-3 tracking-wide bg-black/10 inline-block px-3 py-1 rounded-lg backdrop-blur-sm">
+                {motto}
+              </p>
+              <p className="text-xs text-white/80 font-medium leading-relaxed max-w-lg mx-auto md:mx-0">
+                {summary}
               </p>
             </div>
 
             {/* 核心特质标签 */}
             <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-              {personalityAnalysis.traits.coreTraits.slice(0, 4).map((trait, index) => (
+              {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 bg-white/15 dark:bg-black/20 border border-white/10 rounded-lg text-[11px] font-bold tracking-wider text-white/90 shadow-sm"
+                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] font-black tracking-wider text-white shadow-inner"
                 >
-                  {trait}
+                  #{tag}
                 </span>
               ))}
             </div>
           </div>
+        </div>
+      </div>
+    );
+  };
+
+  // 渲染人格特质二维坐标图
+  const renderTraitsCoordinateMap = () => {
+    if (!userMBTI) return null;
+
+    const dimensions = [
+      { key: 'E_I', left: '内向', leftCode: 'I', right: '外向', rightCode: 'E' },
+      { key: 'S_N', left: '感觉', leftCode: 'S', right: '直觉', rightCode: 'N' },
+      { key: 'T_F', left: '思维', leftCode: 'T', right: '情感', rightCode: 'F' },
+      { key: 'J_P', left: '判断', leftCode: 'J', right: '感知', rightCode: 'P' },
+    ];
+
+    return (
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+          <svg width="120" height="120" viewBox="0 0 100 100">
+            <path d="M 10 50 L 90 50 M 50 10 L 50 90" stroke="currentColor" strokeWidth="2" fill="none" />
+            <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="1" fill="none" />
+          </svg>
+        </div>
+
+        <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+          <span className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-3 text-indigo-600 dark:text-indigo-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </span>
+          核心倾向坐标维度
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 px-2">
+          {dimensions.map((dim, index) => {
+            const isRight = userMBTI.includes(dim.rightCode);
+            return (
+              <div key={index} className="relative py-2">
+                <div className="flex justify-between items-end mb-4 px-1">
+                  <div className={`flex flex-col items-center ${!isRight ? 'opacity-100 scale-110' : 'opacity-40'}`}>
+                    <span className="text-[10px] uppercase font-black text-indigo-500 mb-1">{dim.leftCode}</span>
+                    <span className="text-xs font-bold text-gray-900 dark:text-white">{dim.left}</span>
+                  </div>
+                  <div className={`flex flex-col items-center ${isRight ? 'opacity-100 scale-110' : 'opacity-40'}`}>
+                    <span className="text-[10px] uppercase font-black text-indigo-500 mb-1">{dim.rightCode}</span>
+                    <span className="text-xs font-bold text-gray-900 dark:text-white">{dim.right}</span>
+                  </div>
+                </div>
+
+                <div className="relative h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700 shadow-inner">
+                  {/* 中心线 */}
+                  <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gray-300 dark:bg-gray-600 z-10"></div>
+
+                  {/* 进度条 */}
+                  <div
+                    className={`absolute top-0 bottom-0 transition-all duration-1000 ease-out flex items-center justify-center ${isRight
+                      ? 'right-0 left-1/2 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-r-full shadow-[0_0_8px_rgba(99,102,241,0.5)]'
+                      : 'left-0 right-1/2 bg-gradient-to-l from-indigo-400 to-indigo-600 rounded-l-full shadow-[0_0_8px_rgba(99,102,241,0.5)]'
+                      }`}
+                  >
+                  </div>
+                </div>
+
+                {/* 装饰性光点 */}
+                <div className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-indigo-300 shadow-md border-2 border-indigo-500 z-20 transition-all duration-1000 ease-out`}
+                  style={{
+                    left: isRight ? '75%' : '25%',
+                    transform: 'translate(-50%, 0)'
+                  }}
+                ></div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed italic text-center">
+            基于人格维度的动态平衡，呈现出独一无二的性格能量分布
+          </p>
         </div>
       </div>
     );
@@ -696,14 +851,14 @@ const MBTIPersonalityTabHome = () => {
             </div>
           </div>
 
-            {/* 关系建议 */}
-            <div className="relative p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-xl border border-pink-100/50 dark:border-pink-900/30">
-              <div className="absolute top-3 right-4 opacity-10 text-3xl">💬</div>
-              <h3 className="text-[11px] font-black text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1.5">沟通建议</h3>
-              <p className="text-[12px] text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
-                {advice}
-              </p>
-            </div>
+          {/* 关系建议 */}
+          <div className="relative p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-xl border border-pink-100/50 dark:border-pink-900/30">
+            <div className="absolute top-3 right-4 opacity-10 text-3xl">💬</div>
+            <h3 className="text-[11px] font-black text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1.5">沟通建议</h3>
+            <p className="text-[12px] text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+              {advice}
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -895,19 +1050,19 @@ const MBTIPersonalityTabHome = () => {
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <path d="M30,40 Q50,20 70,40" fill="none" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
               <circle cx="30" cy="40" r="2" fill="currentColor" className="animate-pulse" />
-              <circle cx="50" cy="20" r="1.5" fill="currentColor" className="animate-pulse" style={{animationDelay: '0.5s'}} />
-              <circle cx="70" cy="40" r="1.8" fill="currentColor" className="animate-pulse" style={{animationDelay: '1s'}} />
+              <circle cx="50" cy="20" r="1.5" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0.5s' }} />
+              <circle cx="70" cy="40" r="1.8" fill="currentColor" className="animate-pulse" style={{ animationDelay: '1s' }} />
               <path d="M40,60 Q50,80 60,60" fill="none" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.5" />
-              <circle cx="40" cy="60" r="2.2" fill="currentColor" className="animate-pulse" style={{animationDelay: '1.5s'}} />
-              <circle cx="60" cy="60" r="1.6" fill="currentColor" className="animate-pulse" style={{animationDelay: '2s'}} />
+              <circle cx="40" cy="60" r="2.2" fill="currentColor" className="animate-pulse" style={{ animationDelay: '1.5s' }} />
+              <circle cx="60" cy="60" r="1.6" fill="currentColor" className="animate-pulse" style={{ animationDelay: '2s' }} />
             </svg>
           </div>
           <div className="absolute bottom-2 right-2 w-14 h-14 opacity-20">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <path d="M20,30 Q40,10 60,30" fill="none" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
               <circle cx="20" cy="30" r="1.8" fill="currentColor" className="animate-pulse" />
-              <circle cx="40" cy="10" r="2" fill="currentColor" className="animate-pulse" style={{animationDelay: '0.3s'}} />
-              <circle cx="60" cy="30" r="1.5" fill="currentColor" className="animate-pulse" style={{animationDelay: '0.6s'}} />
+              <circle cx="40" cy="10" r="2" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0.3s' }} />
+              <circle cx="60" cy="30" r="1.5" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0.6s' }} />
               <path d="M80,40 Q70,60 60,50" fill="none" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.4" />
             </svg>
           </div>
@@ -951,87 +1106,90 @@ const MBTIPersonalityTabHome = () => {
         <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
           <div className="mb-4 mx-auto max-w-2xl h-full">
             <div className="space-y-3 h-full">
-      {/* MBTI选择器 */}
-      {renderMBTISelector()}
+              {/* MBTI选择器 */}
+              {renderMBTISelector()}
 
-      {/* 加载状态 */}
-      {loading && (
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-          <div className="text-center py-6">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto mb-2"></div>
-            <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载人格分析数据...</p>
-          </div>
-        </div>
-      )}
+              {/* 加载状态 */}
+              {loading && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
+                  <div className="text-center py-6">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto mb-2"></div>
+                    <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载人格分析数据...</p>
+                  </div>
+                </div>
+              )}
 
-      {/* 错误显示 */}
-      {error && (
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-          <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
-            <p className="text-red-700 dark:text-red-300 text-xs">{error}</p>
-            <button
-              onClick={() => {
-                setError(null);
-                setDataLoaded(false);
-              }}
-              className="mt-2 text-xs bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 px-2 py-1 rounded hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
-            >
-              重试
-            </button>
-          </div>
-        </div>
-      )}
+              {/* 错误显示 */}
+              {error && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
+                  <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
+                    <p className="text-red-700 dark:text-red-300 text-xs">{error}</p>
+                    <button
+                      onClick={() => {
+                        setError(null);
+                        setDataLoaded(false);
+                      }}
+                      className="mt-2 text-xs bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 px-2 py-1 rounded hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
+                    >
+                      重试
+                    </button>
+                  </div>
+                </div>
+              )}
 
-      {/* 人格分析内容 */}
-      {!loading && !error && personalityAnalysis && userMBTI && (
-        <div className="space-y-3">
-          {/* 基本信息卡片 */}
-          {renderBasicInfoCard()}
+              {/* 人格分析内容 */}
+              {!loading && !error && personalityAnalysis && userMBTI && (
+                <div className="space-y-3">
+                  {/* 基本信息卡片 */}
+                  {renderBasicInfoCard()}
 
-          {/* 特质分析卡片 */}
-          {renderTraitsCard()}
+                  {/* 特质维度分布图 */}
+                  {renderTraitsCoordinateMap()}
 
-          {/* 人际关系卡片 */}
-          {renderRelationshipsCard()}
+                  {/* 特质分析卡片 */}
+                  {renderTraitsCard()}
 
-          {/* 职业发展卡片 */}
-          {renderCareerCard()}
+                  {/* 人际关系卡片 */}
+                  {renderRelationshipsCard()}
 
-          {/* 个人成长卡片 */}
-          {renderPersonalGrowthCard()}
-        </div>
-      )}
+                  {/* 职业发展卡片 */}
+                  {renderCareerCard()}
 
-      {/* 未选择MBTI时的提示 */}
-      {!loading && !error && !userMBTI && (
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
-          <div className="text-center py-6">
-            <div className="text-3xl mb-2">🧩</div>
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择MBTI类型</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-xs max-w-xs mx-auto mb-3">
-              选择一种MBTI类型，探索人格特质与发展建议
-            </p>
-            <div className="inline-flex flex-wrap gap-1 justify-center">
-              {mbtiList.slice(0, 4).map(mbti => {
-                const typeData = mbtiTypes.find(t => t.type === mbti);
-                return (
-                  <button
-                    key={mbti}
-                    onClick={() => handleMBTIChange(mbti)}
-                    className="px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 hover:shadow"
-                    style={{
-                      backgroundColor: typeData?.color,
-                      color: 'white'
-                    }}
-                  >
-                    {mbti}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+                  {/* 个人成长卡片 */}
+                  {renderPersonalGrowthCard()}
+                </div>
+              )}
+
+              {/* 未选择MBTI时的提示 */}
+              {!loading && !error && !userMBTI && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
+                  <div className="text-center py-6">
+                    <div className="text-3xl mb-2">🧩</div>
+                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择MBTI类型</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs max-w-xs mx-auto mb-3">
+                      选择一种MBTI类型，探索人格特质与发展建议
+                    </p>
+                    <div className="inline-flex flex-wrap gap-1 justify-center">
+                      {mbtiList.slice(0, 4).map(mbti => {
+                        const typeData = mbtiTypes.find(t => t.type === mbti);
+                        return (
+                          <button
+                            key={mbti}
+                            onClick={() => handleMBTIChange(mbti)}
+                            className="px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 hover:shadow"
+                            style={{
+                              backgroundColor: typeData?.color,
+                              color: 'white'
+                            }}
+                          >
+                            {mbti}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
