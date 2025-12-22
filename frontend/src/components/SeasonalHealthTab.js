@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { seasonHealthTips, organRhythmTips, seasonGeneralTips } from '../config/healthTipsConfig';
+import { getSolarTermState } from '../utils/solarTerms';
+import { solarTermHealthTips } from '../config/healthTipsConfig';
 
 // 时令养生标签页组件
 const SeasonalHealthTab = () => {
@@ -15,6 +15,90 @@ const SeasonalHealthTab = () => {
 
     return () => clearInterval(timer);
   }, []);
+
+  // 获取节气状态
+  const solarTermState = useMemo(() => {
+    return getSolarTermState(currentTime);
+  }, [currentTime]);
+
+  // 获取节气配色
+  const getSolarTermColor = (state) => {
+    if (!state) return "from-gray-500 to-gray-600";
+    // 简单根据季节/月份映射，或者直接使用通用高亮色
+    return "from-amber-500 to-orange-600";
+  };
+
+  // 渲染节气Banner
+  const renderSolarTermBanner = () => {
+    if (!solarTermState) return null;
+
+    const tip = solarTermHealthTips[solarTermState.name] || {
+      desc: "节气更替，顺时养生",
+      advice: "注意起居规律，调养身心。",
+      action: "保持心情舒畅。"
+    };
+
+    // 活跃状态 (前后3天)
+    if (solarTermState.active) {
+      let dayText = "";
+      if (solarTermState.diff === 0) dayText = "今日";
+      else if (solarTermState.diff === -1) dayText = "明日";
+      else if (solarTermState.diff === 1) dayText = "昨日";
+      else if (solarTermState.diff < 0) dayText = `${Math.abs(solarTermState.diff)}天后`;
+      else dayText = `${solarTermState.diff}天前`;
+
+      return (
+        <div className="mb-4 rounded-2xl overflow-hidden shadow-md bg-white dark:bg-gray-800 border-2 border-amber-200 dark:border-amber-800 animate-fade-in-down">
+          <div className={`bg-gradient-to-r ${getSolarTermColor(solarTermState)} p-3 text-white flex justify-between items-center`}>
+            <div className="flex items-center space-x-2">
+              <span className="text-xl">📅</span>
+              <span className="font-bold text-lg">{solarTermState.name} · {dayText}</span>
+            </div>
+            <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+              {solarTermState.date}
+            </span>
+          </div>
+          <div className="p-4 space-y-3">
+            <div className="text-center">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1">{tip.desc}</h3>
+            </div>
+            <div className="flex flex-col space-y-2 text-sm">
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-lg border border-amber-100 dark:border-amber-800">
+                <span className="font-bold text-amber-600 dark:text-amber-400">宜:</span>
+                <span className="ml-2 text-gray-700 dark:text-gray-300">{tip.advice}</span>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded-lg border border-green-100 dark:border-green-800">
+                <span className="font-bold text-green-600 dark:text-green-400">行:</span>
+                <span className="ml-2 text-gray-700 dark:text-gray-300">{tip.action}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 提醒状态 (下一个节气预告)
+    else {
+      return (
+        <div className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 p-3 rounded-2xl flex justify-between items-center shadow-sm border border-blue-100 dark:border-slate-700">
+          <div className="flex flex-col">
+            <span className="text-xs text-gray-500 dark:text-gray-400">下一个节气</span>
+            <div className="flex items-center space-x-2">
+              <span className="font-bold text-indigo-700 dark:text-indigo-300">{solarTermState.name}</span>
+              <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-0.5 rounded-full">
+                {solarTermState.date}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center text-indigo-600 dark:text-indigo-400">
+            <span className="text-xs mr-1">还有</span>
+            <span className="text-xl font-bold font-mono">{Math.abs(solarTermState.diff)}</span>
+            <span className="text-xs ml-1">天</span>
+          </div>
+        </div>
+      );
+    }
+  };
 
   // 获取当前季节信息
   const getCurrentSeason = useMemo(() => {
@@ -101,6 +185,11 @@ const SeasonalHealthTab = () => {
           五行相应·天人合一·顺时守中
         </p>
       </div>
+
+      {/* 24节气提醒/Banner */}
+      {renderSolarTermBanner()}
+
+      {/* 标签切换 - 移动端优化 */}
 
       {/* 标签切换 - 移动端优化 */}
       <div className="flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700 p-1">
