@@ -687,14 +687,23 @@ code {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   /* 确保在light/dark模式下样式一致 */
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 
 .dark .maya-fixed-header {
   border-bottom-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+}
+
+/* 仅在桌面端使用backdrop-filter */
+@media (min-width: 769px) {
+  .maya-fixed-header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .dark .maya-fixed-header {
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+  }
 }
 
 .maya-fixed-tabs {
@@ -706,15 +715,23 @@ code {
   background: inherit;
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  /* 确保主题一致性 */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .dark .maya-fixed-tabs {
   border-bottom-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 仅在桌面端使用backdrop-filter */
+@media (min-width: 769px) {
+  .maya-fixed-tabs {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .dark .maya-fixed-tabs {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 .maya-scroll-content {
@@ -726,16 +743,19 @@ code {
   /* 为固定头部留出空间 */
   padding-top: 0.5rem;
   padding-bottom: 2rem;
-  /* 硬件加速优化 */
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  will-change: transform;
-  /* 防止重排重绘 */
-  contain: layout style;
   /* 确保滚动内容从顶部开始 */
   scroll-padding-top: 0.5rem;
+}
+
+/* 仅在桌面端使用硬件加速 */
+@media (min-width: 769px) {
+  .maya-scroll-content {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    contain: layout style;
+  }
 }
 
 /* 移动端玛雅页面滚动优化 - 增强版 */
@@ -759,15 +779,12 @@ code {
     left: 0;
     right: 0;
     z-index: 40;
-    /* 确保背景透明度和主题一致性 */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    background: inherit;
+    /* 移动端使用纯色背景以提升性能 */
+    background: rgb(245 158 11);
   }
 
   .dark .maya-fixed-header {
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
+    background: rgb(180 83 9);
   }
 
   .maya-fixed-tabs {
@@ -777,15 +794,7 @@ code {
     left: 0;
     right: 0;
     z-index: 50;
-    /* 确保主题一致性 */
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    background: inherit;
-  }
-
-  .dark .maya-fixed-tabs {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* 移动端使用纯色背景以提升性能 */
   }
 
   .maya-scroll-content {
@@ -793,17 +802,8 @@ code {
     padding-top: 0.5rem;
     padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);
     /* 移动端滚动性能优化 */
-    scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
-    /* 防止滚动抖动 */
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    /* 优化滚动性能 */
-    will-change: transform;
-    contain: layout style;
     /* 确保内容正确显示 */
     scroll-padding-top: 0.5rem;
   }
@@ -831,30 +831,17 @@ code {
 .maya-scroll-optimized {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  /* 硬件加速 */
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
-  /* 防止滚动抖动 */
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  /* 优化滚动性能 */
-  contain: layout style;
   /* 触摸操作优化 */
   touch-action: pan-y;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-  /* 防止滚动闪烁 */
-  -webkit-perspective: 1000;
-  -webkit-transform-style: preserve-3d;
-  perspective: 1000;
-  transform-style: preserve-3d;
+  /* 移动端性能优化 */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* 防止内容跳动 */
 .maya-scroll-stable {
-  contain: layout style paint;
-  content-visibility: auto;
   /* 防止布局抖动 */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
