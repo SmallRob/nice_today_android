@@ -16,7 +16,7 @@ import '../index.css';
 function SettingsPage() {
   // 从URL查询参数获取当前标签
   const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab') || 'app';
+  const initialTab = urlParams.get('tab') || 'userConfigs';
 
   const [appVersion, setAppVersion] = useState({
     version: versionData.versionName,
@@ -412,129 +412,129 @@ function SettingsPage() {
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">设置</h1>
         </div>
       </div>
-      
+
       {/* 固定顶部区域 - 包含错误提示和标签导航 */}
       <div className="flex-shrink-0 bg-white dark:bg-gray-800">
-          {/* 错误提示 */}
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <p className="text-red-700 dark:text-red-300">{error}</p>
-              </div>
-            </div>
-          )}
-
-          {/* 成功提示 */}
-          {error && !error.includes('失败') && (
-            <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-400 p-4">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <p className="text-green-700 dark:text-green-300">{error}</p>
-              </div>
-            </div>
-          )}
-
-          {/* 标签导航 - 传统矩形圆角风格 */}
-          <div className="container mx-auto px-4 py-2">
-            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 max-w-md mx-auto">
-              <button
-                className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'app'
-                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                onClick={() => handleTabChange('app')}
-              >
-                应用设置
-              </button>
-              <button
-                className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'userConfigs'
-                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                onClick={() => handleTabChange('userConfigs')}
-              >
-                用户配置
-              </button>
-              <button
-                className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'about'
-                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                onClick={() => handleTabChange('about')}
-              >
-                关于
-              </button>
+        {/* 错误提示 */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <p className="text-red-700 dark:text-red-300">{error}</p>
             </div>
           </div>
+        )}
+
+        {/* 成功提示 */}
+        {error && !error.includes('失败') && (
+          <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-400 p-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <p className="text-green-700 dark:text-green-300">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* 标签导航 - 传统矩形圆角风格 */}
+        <div className="container mx-auto px-4 py-2">
+          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 max-w-md mx-auto">
+            <button
+              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'app'
+                ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              onClick={() => handleTabChange('app')}
+            >
+              应用设置
+            </button>
+            <button
+              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'userConfigs'
+                ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              onClick={() => handleTabChange('userConfigs')}
+            >
+              用户配置
+            </button>
+            <button
+              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'about'
+                ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              onClick={() => handleTabChange('about')}
+            >
+              关于
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* 独立滚动的内容区域 */}
-        <div className="flex-1 overflow-hidden">
-          <div
-            ref={scrollContainerRef}
-            className="h-full overflow-y-auto"
-            style={{
-              WebkitOverflowScrolling: 'touch',
-              overscrollBehaviorY: 'contain'
-            }}
-          >
-            <div className="container mx-auto px-4 py-4 max-w-4xl">
-              <div>
-                {activeTab === 'app' && (
-                  <div className="space-y-6">
-                    {/* 应用设置部分 */}
-                    <Card title="应用设置">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between py-3">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
-                          </div>
-                          <DarkModeToggle />
+      {/* 独立滚动的内容区域 */}
+      <div className="flex-1 overflow-hidden">
+        <div
+          ref={scrollContainerRef}
+          className="h-full overflow-y-auto"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorY: 'contain'
+          }}
+        >
+          <div className="container mx-auto px-4 py-4 max-w-4xl">
+            <div>
+              {activeTab === 'app' && (
+                <div className="space-y-6">
+                  {/* 应用设置部分 */}
+                  <Card title="应用设置">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
                         </div>
+                        <DarkModeToggle />
+                      </div>
 
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">切换应用版本以适应不同设备性能</p>
-                            <div className="flex space-x-4 mb-3">
-                              <button
-                                className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                                onClick={() => handleVersionSwitch('lite')}
-                              >
-                                轻量版
-                              </button>
-                              <button
-                                className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                                onClick={() => handleVersionSwitch('full')}
-                              >
-                                炫彩版
-                              </button>
-                            </div>
-                            <div className="flex space-x-2">
-                              <button
-                                className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm transition-colors flex items-center justify-center space-x-2"
-                                onClick={() => handleReloadCurrentVersion()}
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                <span>重新加载当前版本</span>
-                              </button>
-                            </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                              {getCurrentVersion() === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
-                            </p>
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">切换应用版本以适应不同设备性能</p>
+                          <div className="flex space-x-4 mb-3">
+                            <button
+                              className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                              onClick={() => handleVersionSwitch('lite')}
+                            >
+                              轻量版
+                            </button>
+                            <button
+                              className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                              onClick={() => handleVersionSwitch('full')}
+                            >
+                              炫彩版
+                            </button>
                           </div>
+                          <div className="flex space-x-2">
+                            <button
+                              className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm transition-colors flex items-center justify-center space-x-2"
+                              onClick={() => handleReloadCurrentVersion()}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                              <span>重新加载当前版本</span>
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            {getCurrentVersion() === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
+                          </p>
                         </div>
+                      </div>
 
-                        {/* 通知设置 - 暂时隐藏以避免闪退问题 */}
-                        {/* <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                      {/* 通知设置 - 暂时隐藏以避免闪退问题 */}
+                      {/* <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                           <div className="mb-4">
                             <h4 className="font-medium text-gray-900 dark:text-white mb-2">通知设置</h4>
                             
@@ -618,216 +618,216 @@ function SettingsPage() {
                           </div>
                         </div> */}
 
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                          <div className="mb-4">
-                            <p className="font-medium text-gray-900 dark:text-white">API服务地址</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置后端服务地址</p>
-                            <input
-                              type="text"
-                              value={apiBaseUrl}
-                              onChange={handleApiBaseUrlChange}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                              placeholder="https://nice-mcp.leansoftx.com/api"
-                            />
-                          </div>
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div className="mb-4">
+                          <p className="font-medium text-gray-900 dark:text-white">API服务地址</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置后端服务地址</p>
+                          <input
+                            type="text"
+                            value={apiBaseUrl}
+                            onChange={handleApiBaseUrlChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="https://nice-mcp.leansoftx.com/api"
+                          />
+                        </div>
 
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">使用本地计算</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">启用后将使用本地JavaScript计算代替API调用</p>
+                          </div>
+                          <label className="inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={useLocalCalculation}
+                              onChange={handleUseLocalCalculationChange}
+                            />
+                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">数据同步</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">自动备份您的数据</p>
+                        </div>
+                        <label className="inline-flex items-center cursor-pointer">
+                          <input type="checkbox" className="sr-only peer" defaultChecked={true} />
+                          <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                        </label>
+                      </div>
+
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">缓存超时时间</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置数据缓存的有效时间</p>
+                          <select
+                            value={cacheTimeout}
+                            onChange={handleCacheTimeoutChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          >
+                            <option value="60000">1分钟</option>
+                            <option value="120000">2分钟</option>
+                            <option value="180000">3分钟</option>
+                            <option value="300000">5分钟</option>
+                            <option value="600000">10分钟</option>
+                            <option value="1800000">30分钟</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* 更新检查设置 */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="font-medium text-gray-900 dark:text-white">使用本地计算</p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">启用后将使用本地JavaScript计算代替API调用</p>
+                              <p className="font-medium text-gray-900 dark:text-white">启用自动更新检查</p>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">自动检查新版本并提示更新</p>
                             </div>
                             <label className="inline-flex items-center cursor-pointer">
                               <input
                                 type="checkbox"
                                 className="sr-only peer"
-                                checked={useLocalCalculation}
-                                onChange={handleUseLocalCalculationChange}
+                                checked={updateCheckSettings.enabled}
+                                onChange={(e) => handleUpdateCheckChange('enabled', e.target.checked)}
                               />
                               <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                             </label>
                           </div>
-                        </div>
 
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">数据同步</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">自动备份您的数据</p>
-                          </div>
-                          <label className="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" className="sr-only peer" defaultChecked={true} />
-                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                          </label>
-                        </div>
-
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">缓存超时时间</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置数据缓存的有效时间</p>
-                            <select
-                              value={cacheTimeout}
-                              onChange={handleCacheTimeoutChange}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            >
-                              <option value="60000">1分钟</option>
-                              <option value="120000">2分钟</option>
-                              <option value="180000">3分钟</option>
-                              <option value="300000">5分钟</option>
-                              <option value="600000">10分钟</option>
-                              <option value="1800000">30分钟</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* 更新检查设置 */}
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
+                          {updateCheckSettings.enabled && (
+                            <div className="space-y-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-lg">
                               <div>
-                                <p className="font-medium text-gray-900 dark:text-white">启用自动更新检查</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">自动检查新版本并提示更新</p>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                  检查频率:
+                                </label>
+                                <select
+                                  value={updateCheckSettings.checkFrequency}
+                                  onChange={(e) => handleUpdateCheckChange('checkFrequency', e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                >
+                                  <option value="startup">启动时检查</option>
+                                  <option value="daily">每天检查</option>
+                                  <option value="weekly">每周检查</option>
+                                </select>
                               </div>
-                              <label className="inline-flex items-center cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  className="sr-only peer"
-                                  checked={updateCheckSettings.enabled}
-                                  onChange={(e) => handleUpdateCheckChange('enabled', e.target.checked)}
-                                />
-                                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                              </label>
+
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={handleManualCheckUpdate}
+                                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors"
+                                >
+                                  立即检查更新
+                                </button>
+                                <button
+                                  onClick={handleClearCheckRecords}
+                                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors"
+                                >
+                                  清除记录
+                                </button>
+                              </div>
+
+                              {updateCheckSettings.lastCheckTime && (
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  上次检查: {new Date(updateCheckSettings.lastCheckTime).toLocaleString()}
+                                </div>
+                              )}
+
+                              {updateCheckSettings.checkRecords.length > 0 && (
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  检查记录: {updateCheckSettings.checkRecords.length} 条
+                                </div>
+                              )}
                             </div>
-
-                            {updateCheckSettings.enabled && (
-                              <div className="space-y-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-lg">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    检查频率:
-                                  </label>
-                                  <select
-                                    value={updateCheckSettings.checkFrequency}
-                                    onChange={(e) => handleUpdateCheckChange('checkFrequency', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                  >
-                                    <option value="startup">启动时检查</option>
-                                    <option value="daily">每天检查</option>
-                                    <option value="weekly">每周检查</option>
-                                  </select>
-                                </div>
-
-                                <div className="flex space-x-2">
-                                  <button
-                                    onClick={handleManualCheckUpdate}
-                                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors"
-                                  >
-                                    立即检查更新
-                                  </button>
-                                  <button
-                                    onClick={handleClearCheckRecords}
-                                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors"
-                                  >
-                                    清除记录
-                                  </button>
-                                </div>
-
-                                {updateCheckSettings.lastCheckTime && (
-                                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                                    上次检查: {new Date(updateCheckSettings.lastCheckTime).toLocaleString()}
-                                  </div>
-                                )}
-
-                                {updateCheckSettings.checkRecords.length > 0 && (
-                                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                                    检查记录: {updateCheckSettings.checkRecords.length} 条
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
-                    </Card>
+                    </div>
+                  </Card>
 
-                    {/* 其他设置 */}
-                    <Card title="其他">
-                      <div className="space-y-1">
-                        <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                          <span className="font-medium text-gray-900 dark:text-white">用户协议</span>
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
+                  {/* 其他设置 */}
+                  <Card title="其他">
+                    <div className="space-y-1">
+                      <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                        <span className="font-medium text-gray-900 dark:text-white">用户协议</span>
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
 
-                        <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                          <span className="font-medium text-gray-900 dark:text-white">隐私政策</span>
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
+                      <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                        <span className="font-medium text-gray-900 dark:text-white">隐私政策</span>
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
 
-                        <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                          <span className="font-medium text-gray-900 dark:text-white">意见反馈</span>
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
+                      <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                        <span className="font-medium text-gray-900 dark:text-white">意见反馈</span>
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              {activeTab === 'userConfigs' && (
+                <div>
+                  <UserConfigManager />
+                </div>
+              )}
+
+              {activeTab === 'about' && (
+                <div>
+                  <Card title="关于">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-2">
+                        <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
                       </div>
-                    </Card>
-                  </div>
-                )}
 
-                {activeTab === 'userConfigs' && (
-                  <div>
-                    <UserConfigManager />
-                  </div>
-                )}
-
-                {activeTab === 'about' && (
-                  <div>
-                    <Card title="关于">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between py-2">
-                          <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
-                        </div>
-
-                        <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                          <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-                            {platformInfo.isNative ?
-                              (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
-                              'Web'
-                            }
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                          <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
-                        </div>
-
-                        {/* 性能测试工具 */}
-                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <PerformanceTestTool />
-                        </div>
+                      <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
+                        <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                          {platformInfo.isNative ?
+                            (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
+                            'Web'
+                          }
+                        </p>
                       </div>
-                    </Card>
-                  </div>
-                )}
-              </div>
 
-              {/* 仅在原生应用中显示的重置按钮 */}
-              {platformInfo.isNative && (
-                <Button
-                  variant="danger"
-                  className="w-full py-3 mt-6"
-                >
-                  重置应用数据
-                </Button>
+                      <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
+                        <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
+                      </div>
+
+                      {/* 性能测试工具 */}
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <PerformanceTestTool />
+                      </div>
+                    </div>
+                  </Card>
+                </div>
               )}
             </div>
+
+            {/* 仅在原生应用中显示的重置按钮 */}
+            {platformInfo.isNative && (
+              <Button
+                variant="danger"
+                className="w-full py-3 mt-6"
+              >
+                重置应用数据
+              </Button>
+            )}
           </div>
         </div>
       </div>
+    </div>
   );
 }
 
