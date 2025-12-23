@@ -1,10 +1,17 @@
 /* 星座运势组件样式 */
 .horoscope-container {
   height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #ffffff, #f9fafb, #f3f4f6);
   overflow: hidden;
+}
+
+.horoscope-main-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .dark .horoscope-container {

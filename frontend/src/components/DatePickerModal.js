@@ -47,11 +47,22 @@ const DatePickerModal = ({ onClose, selectedYear, selectedMonth, selectedDate, s
     onTempCalc(tempYear, tempMonth, tempDate, tempHour, tempLongitude, tempLatitude);
   };
 
+  // 取消操作，重置临时状态
+  const handleCancel = () => {
+    setTempYear(selectedYear);
+    setTempMonth(selectedMonth);
+    setTempDate(selectedDate);
+    setTempHour(selectedHour);
+    setTempLatitude(latitude || 30);
+    setTempLongitude(longitude || 110);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div
         className={`absolute inset-0 ${theme === 'dark' ? 'bg-black/70' : 'bg-black/50'} backdrop-blur-sm`}
-        onClick={onClose}
+        onClick={handleCancel}
       />
       <div
         className={`relative w-full max-w-md rounded-t-3xl p-6 transform transition-transform ${
@@ -72,7 +83,7 @@ const DatePickerModal = ({ onClose, selectedYear, selectedMonth, selectedDate, s
             选择日期与时辰
           </h4>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
               theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
             }`}
@@ -252,7 +263,7 @@ const DatePickerModal = ({ onClose, selectedYear, selectedMonth, selectedDate, s
         {/* 按钮 */}
         <div className="flex gap-3">
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className={`flex-1 py-3.5 rounded-xl font-medium transition-colors ${
               theme === 'dark'
                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'

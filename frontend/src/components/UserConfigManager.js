@@ -252,7 +252,7 @@ const LoadingSpinner = () => (
 );
 
 // 姓名评分模态框
-const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveScore, existingScore, configIndex, showMessage }) => {
+const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveScore, existingScore, configIndex, showMessage, isValidNameScore }) => {
   const [step, setStep] = useState('input'); // input, result
   const [tempName, setTempName] = useState(''); // 临时输入的姓名
   const [splitName, setSplitName] = useState({ surname: '', firstName: '' });
@@ -349,15 +349,15 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
         if (configIndex !== undefined && configIndex >= 0) {
           // 从配置中获取评分数据
           const config = userConfigManager.getConfigByIndex(configIndex);
-          if (config && config.nameScore) {
+          if (config && config.nameScore && isValidNameScore(config.nameScore)) {
             setAnalysisResult(config.nameScore);
             setStep('result');
           } else {
-            // 没有缓存评分，需要动态计算
+            // 没有缓存评分或评分无效，需要动态计算
             setStep('input');
           }
-        } else if (existingScore) {
-          // 如果有已有评分，直接显示结果
+        } else if (existingScore && isValidNameScore(existingScore)) {
+          // 如果有已有评分且有效，直接显示结果
           setAnalysisResult(existingScore);
           setStep('result');
         } else {
@@ -421,7 +421,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
       );
       
       // 检查返回结果是否有效
-      if (res && (res.tian || res.ren || res.di || res.wai || res.zong)) {
+      if (res && isValidNameScore(res)) {
         setAnalysisResult(res);
 
         // 如果是个人评分且有回调，保存评分结果
@@ -617,7 +617,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
             </div>
           )}
 
-          {step === 'result' && analysisResult && (
+          {step === 'result' && analysisResult && isValidNameScore(analysisResult) ? (
             <div className="space-y-6">
               {/* 综合评分卡片 */}
               <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
@@ -687,6 +687,19 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
                   重新调整
                 </Button>
               </div>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <div className="text-red-500 mb-4">
+                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+              </div>
+              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">评分数据无效</h4>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">当前评分数据格式不正确，无法正常显示结果。</p>
+              <Button variant="primary" onClick={() => setStep('input')} className="w-full">
+                重新评分
+              </Button>
             </div>
           )}
         </div>
@@ -945,6 +958,20 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     // 如果没有评分但有真实姓名，保留现有评分
     if (!finalConfigData.nameScore && formData.nameScore) {
       finalConfigData.nameScore = formData.nameScore;
+    }
+  
+    // 计算八字信息
+    if (formData.birthDate && formData.birthTime) {
+      try {
+        const longitude = formData.birthLocation?.lng || 116.40;
+        const baziInfo = calculateDetailedBazi(formData.birthDate, formData.birthTime, longitude);
+        if (baziInfo) {
+          finalConfigData.bazi = baziInfo;
+        }
+      } catch (error) {
+        console.error('八字计算失败:', error);
+        // 即使八字计算失败也不影响保存其他信息
+      }
     }
   
     // 校验位置信息
@@ -1413,6 +1440,17 @@ const UserConfigManagerComponent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 编辑弹窗状态
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
 
+  // 验证姓名评分结果是否有效
+  const isValidNameScore = (score) => {
+    if (!score) return false;
+    // 检查是否包含必要的五格评分字段
+    return score.tian !== undefined &&
+           score.ren !== undefined &&
+           score.di !== undefined &&
+           score.wai !== undefined &&
+           score.zong !== undefined;
+  };
+
   // 初始化配置管理器 - 优化异步加载
   useEffect(() => {
     const init = async () => {
@@ -1477,10 +1515,10 @@ const UserConfigManagerComponent = () => {
     // 检查是否是新建配置（检查存储中是否存在）
     const storedConfigs = userConfigManager.getAllConfigs();
     const isNewConfig = index >= storedConfigs.length;
-
+  
     // 自动为中文姓名打分
     let finalConfigData = { ...configData };
-    if (configData.realName && /[\u4e00-\u9fa5]/.test(configData.realName)) {
+    if (configData.realName && /[一-龥]/.test(configData.realName)) {
       try {
         // 智能拆分姓名
         const compoundSurnames = [
@@ -1494,10 +1532,10 @@ const UserConfigManagerComponent = () => {
           '贯丘', '公皙', '南荣', '东里', '东宫', '仲长', '子书', '子桑', '即墨', '达奚',
           '褚师'
         ];
-
+  
         let surname = '', firstName = '';
         const name = configData.realName.trim();
-
+  
         // 检查是否包含中文圆点
         if (name.includes('·') || name.includes('•')) {
           const parts = name.split(/[·•]/);
@@ -1514,7 +1552,7 @@ const UserConfigManagerComponent = () => {
               break;
             }
           }
-
+  
           if (!isCompound) {
             const nameLength = name.length;
             if (nameLength === 2) {
@@ -1529,20 +1567,20 @@ const UserConfigManagerComponent = () => {
             }
           }
         }
-
+  
         // 计算五格评分
         const surnameChars = surname.split('').filter(c => c);
         const firstNameChars = firstName.split('').filter(c => c);
         const surnameStrokes = surnameChars.map(c => getCharStrokes(c));
         const firstNameStrokes = firstNameChars.map(c => getCharStrokes(c));
-
+  
         const scoreResult = calculateFiveGrids(
           surname,
           firstName,
           surnameStrokes.map(s => parseInt(s) || 1),
           firstNameStrokes.map(s => parseInt(s) || 1)
         );
-
+  
         const mainMeaning = getMeaning(scoreResult.ren);
         finalConfigData.nameScore = {
           ...scoreResult,
@@ -1553,7 +1591,98 @@ const UserConfigManagerComponent = () => {
         // 失败时不中断保存流程
       }
     }
-
+  
+    // 如果评分结果无效，重新计算评分
+    if (finalConfigData.nameScore && !isValidNameScore(finalConfigData.nameScore)) {
+      console.warn('检测到无效的姓名评分数据，正在重新计算...');
+      if (finalConfigData.realName && /[一-龥]/.test(finalConfigData.realName)) {
+        try {
+          // 智能拆分姓名
+          const compoundSurnames = [
+            '欧阳', '太史', '端木', '上官', '司马', '东方', '独孤', '南宫', '万俟', '闻人',
+            '夏侯', '诸葛', '尉迟', '公羊', '赫连', '澹台', '皇甫', '宗政', '濮阳', '公冶',
+            '太叔', '申屠', '公孙', '慕容', '仲孙', '钟离', '长孙', '宇文', '司徒', '鲜于',
+            '司空', '闾丘', '子车', '亓官', '司寇', '巫马', '公西', '颛孙', '壤驷', '公良',
+            '漆雕', '乐正', '宰父', '谷梁', '拓跋', '夹谷', '轩辕', '令狐', '段干', '百里',
+            '呼延', '东郭', '南门', '羊舌', '微生', '公户', '公玉', '公仪', '梁丘', '公仲',
+            '公上', '公门', '公山', '公坚', '左丘', '公伯', '西门', '公祖', '第五', '公乘',
+            '贯丘', '公皙', '南荣', '东里', '东宫', '仲长', '子书', '子桑', '即墨', '达奚',
+            '褚师'
+          ];
+  
+          let surname = '', firstName = '';
+          const name = finalConfigData.realName.trim();
+  
+          // 检查是否包含中文圆点
+          if (name.includes('·') || name.includes('•')) {
+            const parts = name.split(/[·•]/);
+            surname = parts[0] || '';
+            firstName = parts.slice(1).join('') || '';
+          } else {
+            // 检查是否是复姓
+            let isCompound = false;
+            for (const compoundSurname of compoundSurnames) {
+              if (name.startsWith(compoundSurname)) {
+                surname = compoundSurname;
+                firstName = name.substring(compoundSurname.length);
+                isCompound = true;
+                break;
+              }
+            }
+  
+            if (!isCompound) {
+              const nameLength = name.length;
+              if (nameLength === 2) {
+                surname = name.substring(0, 1);
+                firstName = name.substring(1);
+              } else if (nameLength === 3) {
+                surname = name.substring(0, 1);
+                firstName = name.substring(1);
+              } else if (nameLength >= 4) {
+                surname = name.substring(0, 2);
+                firstName = name.substring(2);
+              }
+            }
+          }
+  
+          // 重新计算五格评分
+          const surnameChars = surname.split('').filter(c => c);
+          const firstNameChars = firstName.split('').filter(c => c);
+          const surnameStrokes = surnameChars.map(c => getCharStrokes(c));
+          const firstNameStrokes = firstNameChars.map(c => getCharStrokes(c));
+  
+          const scoreResult = calculateFiveGrids(
+            surname,
+            firstName,
+            surnameStrokes.map(s => parseInt(s) || 1),
+            firstNameStrokes.map(s => parseInt(s) || 1)
+          );
+  
+          const mainMeaning = getMeaning(scoreResult.ren);
+          finalConfigData.nameScore = {
+            ...scoreResult,
+            mainType: mainMeaning.type
+          };
+        } catch (e) {
+          console.error('重新计算评分失败:', e);
+        }
+      }
+    }
+  
+    // 计算八字信息
+    if (configData.birthDate && configData.birthTime) {
+      try {
+        const longitude = configData.birthLocation?.lng || 116.40;
+        const baziInfo = calculateDetailedBazi(configData.birthDate, configData.birthTime, longitude);
+        if (baziInfo) {
+          finalConfigData.bazi = baziInfo;
+        }
+      } catch (error) {
+        console.error('八字计算失败:', error);
+        // 即使八字计算失败也不影响保存其他信息
+      }
+    }
+  
     let success;
     if (isNewConfig) {
       // 新建配置，添加到存储
@@ -1562,30 +1691,30 @@ const UserConfigManagerComponent = () => {
       // 现有配置，更新存储
       success = userConfigManager.updateConfig(index, finalConfigData);
     }
-
+  
     if (success) {
       // 立即从userConfigManager重新加载所有配置，确保数据同步
       const freshConfigs = userConfigManager.getAllConfigs();
       setConfigs([...freshConfigs]);
-
+  
       // 如果是新建配置，设置为活跃配置
       if (isNewConfig) {
         setActiveConfigIndex(index);
         userConfigManager.setActiveConfig(index);
       }
-
+  
       // 强制重新加载所有组件，确保数据同步
       setTimeout(() => {
         userConfigManager.forceReloadAll();
       }, 100);
       showMessage('保存配置成功', 'success');
-
+  
       // 保存成功后折叠面板
       setExpandedIndex(-1);
     } else {
       showMessage('保存配置失败，请重试', 'error');
     }
-  }, [showMessage]);
+  }, [showMessage, isValidNameScore]);
 
   // 处理添加新配置 - 只创建临时配置，不直接保存
   const handleAddConfig = useCallback(() => {
@@ -1960,6 +2089,7 @@ const UserConfigManagerComponent = () => {
           }
         }}
         showMessage={showMessage}
+        isValidNameScore={isValidNameScore}
       />
 
       {/* 配置编辑弹窗 */}

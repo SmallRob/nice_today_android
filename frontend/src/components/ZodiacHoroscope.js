@@ -422,7 +422,7 @@ const HoroscopeTab = () => {
   return (
     <div className="horoscope-container">
       {/* Banner区域 - 简化布局 */}
-      <div className="horoscope-banner relative overflow-hidden">
+      <div className="horoscope-banner relative overflow-hidden flex-shrink-0">
         {/* 星宿渐变背景 - 合并容器 */}
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 via-indigo-600/30 to-blue-700/30">
           {/* 动态星点效果 - 简化布局 */}
@@ -494,51 +494,53 @@ const HoroscopeTab = () => {
         </div>
       </div>
 
-      {/* 内容展示区域 - 合并多个容器 */}
-      <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black">
-        {/* 星座选择器 */}
-        {renderHoroscopeSelector()}
+      {/* 滚动内容容器 - 为移动设备添加滚动支持 */}
+      <div className="horoscope-main-content">
+        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black">
+          {/* 星座选择器 */}
+          {renderHoroscopeSelector()}
 
-        {/* 内容区域 - 简化布局 */}
-        <div className="space-y-4 mx-auto max-w-2xl">
-          {/* 加载状态 */}
-          {loading && <SkeletonLoader />}
+          {/* 内容区域 - 简化布局 */}
+          <div className="space-y-4 mx-auto max-w-2xl">
+            {/* 加载状态 */}
+            {loading && <SkeletonLoader />}
 
-          {/* 错误显示 */}
-          {error && <ErrorDisplay error={error} />}
+            {/* 错误显示 */}
+            {error && <ErrorDisplay error={error} />}
 
-          {/* 运势内容 */}
-          {!loading && !error && horoscopeGuidance && userHoroscope ? (
-            renderHoroscopeCard()
-          ) : !loading && !error && !userHoroscope ? (
-            <EmptyState />
-          ) : null}
+            {/* 运势内容 */}
+            {!loading && !error && horoscopeGuidance && userHoroscope ? (
+              renderHoroscopeCard()
+            ) : !loading && !error && !userHoroscope ? (
+              <EmptyState />
+            ) : null}
 
-          {/* 心灵问答 - 合并到运势卡片中 */}
-          {horoscopeGuidance && horoscopeGuidance.recommendations && horoscopeGuidance.recommendations.soulQuestion && (
-            <div className="horoscope-card">
-              <h3 className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">❓ 心灵启发</h3>
-              <p className="text-gray-800 dark:text-gray-200 text-xs font-medium mb-2">
-                {String(horoscopeGuidance.recommendations.soulQuestion.question)}
-              </p>
-              <div className="text-blue-600 dark:text-blue-400 text-xs italic bg-white/50 dark:bg-black/20 p-2 rounded">
-                "{String(horoscopeGuidance.recommendations.soulQuestion.answer)}"
+            {/* 心灵问答 - 合并到运势卡片中 */}
+            {horoscopeGuidance && horoscopeGuidance.recommendations && horoscopeGuidance.recommendations.soulQuestion && (
+              <div className="horoscope-card">
+                <h3 className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">❓ 心灵启发</h3>
+                <p className="text-gray-800 dark:text-gray-200 text-xs font-medium mb-2">
+                  {String(horoscopeGuidance.recommendations.soulQuestion.question)}
+                </p>
+                <div className="text-blue-600 dark:text-blue-400 text-xs italic bg-white/50 dark:bg-black/20 p-2 rounded">
+                  "{String(horoscopeGuidance.recommendations.soulQuestion.answer)}"
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* 星座综合特质展示 */}
-          {!loading && !error && userHoroscope && (
-            <ZodiacTraitsDisplay currentHoroscope={userHoroscope} />
-          )}
+            {/* 星座综合特质展示 */}
+            {!loading && !error && userHoroscope && (
+              <ZodiacTraitsDisplay currentHoroscope={userHoroscope} />
+            )}
 
-          {/* 底部信息 */}
-          {!loading && !error && horoscopeGuidance && (
-            <div className="horoscope-card text-center text-gray-500 dark:text-gray-400 text-xs p-3">
-              <p>数据更新时间：{new Date().toLocaleString()}</p>
-              <p className="mt-1">星座运势仅供参考，请理性看待</p>
-            </div>
-          )}
+            {/* 底部信息 */}
+            {!loading && !error && horoscopeGuidance && (
+              <div className="horoscope-card text-center text-gray-500 dark:text-gray-400 text-xs p-3">
+                <p>数据更新时间：{new Date().toLocaleString()}</p>
+                <p className="mt-1">星座运势仅供参考，请理性看待</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

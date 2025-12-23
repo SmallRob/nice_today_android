@@ -5,8 +5,8 @@ import RadarChart from '../components/RadarChart';
 import DatePickerModal from '../components/DatePickerModal';
 import { storageManager } from '../utils/storageManager';
 import { userConfigManager } from '../utils/userConfigManager';
-import LunarCalendar from '../utils/lunarCalendar';
-import BaziCalculator from '../utils/baziCalculator';
+import { calculateDetailedBazi } from '../utils/baziHelper';
+import { Solar, Lunar } from 'lunar-javascript';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
@@ -36,8 +36,9 @@ const LifeTrendPage = () => {
   // 从用户配置加载出生日期和八字
   useEffect(() => {
     let isMounted = true;
-    const loadUserConfig = () => {
+    const loadUserConfig = async () => {
       try {
+        setLoading(true); // 开始加载
         const config = userConfigManager.getCurrentConfig();
         if (config && config.birthDate && isMounted) {
           const birthDate = new Date(config.birthDate);
@@ -59,7 +60,15 @@ const LifeTrendPage = () => {
 
           // 加载八字（如果存在）
           if (config.bazi) {
+            // 直接使用已存储的八字数据
             setCurrentBazi(config.bazi);
+          } else {
+            // 如果没有存储的八字，根据出生日期计算
+            const birthDateStr = config.birthDate;
+            const birthTimeStr = config.birthTime || '12:00';
+            const longitude = config.birthLocation?.lng || 110;
+            const calculatedBazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
+            setCurrentBazi(calculatedBazi);
           }
         }
       } catch (error) {
@@ -72,6 +81,10 @@ const LifeTrendPage = () => {
           setSelectedHour(12);
           setTempLatitude(39.95);
           setTempLongitude(116.48);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false); // 结束加载
         }
       }
     };
@@ -95,10 +108,16 @@ const LifeTrendPage = () => {
       const configIndex = userConfigManager.getActiveConfigIndex();
 
       // 计算八字
-      const bazi = BaziCalculator.calculateBazi(year, month, date, hour, 0, longitude);
+      const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+      const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
+      const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
 
       // 计算时辰
-      const shichenInfo = LunarCalendar.getShichen(hour);
+      const solar = Solar.fromYmdHms(year, month, date, hour, 0, 0);
+      const lunar = solar.getLunar();
+      const shichenInfo = {
+        name: lunar.getTimeInGanZhi().slice(-1) + '时' // 获取时柱的天干地支并加上'时'
+      };
 
       const updates = {
         birthDate: newBirthDate,
@@ -116,10 +135,13 @@ const LifeTrendPage = () => {
 
       userConfigManager.updateConfig(configIndex, updates);
       setCurrentBazi(bazi);
+      setIsTempCalcMode(false); // 保存后退出临时计算模式
+      setLoading(false); // 保存完成后停止加载
 
       console.log('保存日期和八字到配置成功:', updates);
     } catch (error) {
       console.warn('保存日期到配置失败:', error);
+      setLoading(false); // 出错时也停止加载
     }
   };
 
@@ -165,7 +187,6 @@ const LifeTrendPage = () => {
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
-      setLoading(true);
 
       // 确定使用的八字（用于生成不同的数据）
       const usedBazi = isTempCalcMode ? tempBazi : currentBazi;
@@ -178,7 +199,6 @@ const LifeTrendPage = () => {
       if (cachedData) {
         if (isMounted) {
           setKlineData(cachedData);
-          setLoading(false);
         }
       } else {
         const newData = generateKlineData(selectedYear, selectedMonth, selectedDate);
@@ -186,7 +206,6 @@ const LifeTrendPage = () => {
           setKlineData(newData);
           // 缓存数据
           storageManager.setGlobalCache(cacheKey, newData);
-          setLoading(false);
         }
       }
     };
@@ -197,8 +216,17 @@ const LifeTrendPage = () => {
 
   // 计算农历日期
   useEffect(() => {
-    const lunar = LunarCalendar.solarToLunar(selectedYear, selectedMonth, selectedDate);
-    setLunarData(lunar);
+    const solar = Solar.fromYmd(selectedYear, selectedMonth, selectedDate);
+    const lunar = solar.getLunar();
+    setLunarData({
+      lunarYear: lunar.getYear(),
+      lunarMonth: lunar.getMonth(),
+      lunarDay: lunar.getDay(),
+      lunarYearStr: lunar.getYearInGanZhi() + '年',
+      lunarMonthStr: lunar.getMonthInChinese() + '月',
+      lunarDayStr: lunar.getDayInChinese(),
+      lunarFullStr: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`
+    });
   }, [selectedYear, selectedMonth, selectedDate]);
 
   // 获取当前选中年份的数据（用于雷达图）
@@ -206,6 +234,7 @@ const LifeTrendPage = () => {
 
   // 日期选择处理（永久保存）
   const handleDateChange = (year, month, date, hour, longitude, latitude, isSaveToConfig = true) => {
+    setLoading(true);
     setSelectedYear(year);
     setSelectedMonth(month);
     setSelectedDate(date);
@@ -220,13 +249,17 @@ const LifeTrendPage = () => {
     } else {
       // 仅保存到localStorage，不影响永久配置
       saveDateToLocalStorage(year, month, date);
+      setLoading(false);
     }
   };
 
   // 临时计算处理（不保存到配置）
   const handleTempCalculation = (year, month, date, hour, longitude, latitude) => {
     // 计算临时八字
-    const bazi = BaziCalculator.calculateBazi(year, month, date, hour, 0, longitude);
+    setLoading(true);
+    const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+    const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
+    const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
     setTempBazi(bazi);
     setIsTempCalcMode(true);
     setSelectedYear(year);
@@ -236,6 +269,7 @@ const LifeTrendPage = () => {
     setTempLongitude(longitude);
     setTempLatitude(latitude);
     setIsCalendarOpen(false);
+    setLoading(false);
 
     console.log('临时计算八字:', bazi);
   };
@@ -249,15 +283,23 @@ const LifeTrendPage = () => {
       return currentBazi;
     }
     // 如果没有八字，则实时计算
-    return BaziCalculator.calculateBazi(selectedYear, selectedMonth, selectedDate, selectedHour, 0, tempLongitude);
+    const birthDateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
+    const birthTimeStr = `${String(selectedHour).padStart(2, '0')}:00`;
+    return calculateDetailedBazi(birthDateStr, birthTimeStr, tempLongitude);
   };
 
   const displayBazi = getDisplayBazi();
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
-        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>加载中...</p>
+            <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>正在计算您的八字和人生能量轨迹</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -299,7 +341,7 @@ const LifeTrendPage = () => {
             )}
             {/* 时辰 */}
             <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-              时辰：{displayBazi.shichen || '未知'}
+              时辰：{displayBazi.shichen?.ganzhi || displayBazi.bazi?.hour?.slice(-1) + '时' || '未知'}
             </div>
             <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
               {isTempCalcMode ? '点击返回永久配置' : '点击修改日期 / 临时计算'}
@@ -308,10 +350,10 @@ const LifeTrendPage = () => {
 
           <div className="grid grid-cols-4 gap-2 mt-4">
             {[
-              { label: '年柱', value: displayBazi.year },
-              { label: '月柱', value: displayBazi.month },
-              { label: '日柱', value: displayBazi.day },
-              { label: '时柱', value: displayBazi.hour },
+              { label: '年柱', value: displayBazi.bazi ? displayBazi.bazi.year : displayBazi.year },
+              { label: '月柱', value: displayBazi.bazi ? displayBazi.bazi.month : displayBazi.month },
+              { label: '日柱', value: displayBazi.bazi ? displayBazi.bazi.day : displayBazi.day },
+              { label: '时柱', value: displayBazi.bazi ? displayBazi.bazi.hour : displayBazi.hour },
             ].map((item, index) => (
               <div key={index} className="text-center">
                 <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</div>
