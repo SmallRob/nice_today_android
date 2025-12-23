@@ -77,47 +77,59 @@ const initCapacitorApp = async (options = {}) => {
     try {
       // 尝试初始化状态栏（如果可用）
       if (Capacitor.isPluginAvailable('StatusBar')) {
-        const { StatusBar } = await import('@capacitor/status-bar');
-        await StatusBar.setStyle({ style: statusBarStyle });
-        if (statusBarBackgroundColor && platform !== 'ios') {
-          await StatusBar.setBackgroundColor({ color: statusBarBackgroundColor });
+        try {
+          const { StatusBar } = await import('@capacitor/status-bar');
+          await StatusBar.setStyle({ style: statusBarStyle });
+          if (statusBarBackgroundColor && platform !== 'ios') {
+            await StatusBar.setBackgroundColor({ color: statusBarBackgroundColor });
+          }
+        } catch (error) {
+          console.warn('StatusBar 初始化失败（可能不支持当前平台）:', error);
         }
       }
       
       // 尝试初始化键盘监听器（如果可用）
       if (enableKeyboardListeners && Capacitor.isPluginAvailable('Keyboard')) {
-        const { Keyboard } = await import('@capacitor/keyboard');
-        Keyboard.addListener('keyboardWillShow', (info) => {
-          console.log('keyboard will show with height:', info.keyboardHeight);
-          document.body.style.setProperty('--keyboard-height', `${info.keyboardHeight}px`);
-          document.body.classList.add('keyboard-open');
-        });
-        
-        Keyboard.addListener('keyboardWillHide', () => {
-          console.log('keyboard will hide');
-          document.body.style.removeProperty('--keyboard-height');
-          document.body.classList.remove('keyboard-open');
-        });
+        try {
+          const { Keyboard } = await import('@capacitor/keyboard');
+          Keyboard.addListener('keyboardWillShow', (info) => {
+            console.log('keyboard will show with height:', info.keyboardHeight);
+            document.body.style.setProperty('--keyboard-height', `${info.keyboardHeight}px`);
+            document.body.classList.add('keyboard-open');
+          });
+
+          Keyboard.addListener('keyboardWillHide', () => {
+            console.log('keyboard will hide');
+            document.body.style.removeProperty('--keyboard-height');
+            document.body.classList.remove('keyboard-open');
+          });
+        } catch (error) {
+          console.debug('Keyboard 插件不可用:', error.message);
+        }
       }
-      
+
       // 尝试初始化网络监听器（如果可用）
       if (enableNetworkListener && Capacitor.isPluginAvailable('Network')) {
-        const { Network } = await import('@capacitor/network');
-        const handler = Network.addListener('networkStatusChange', (status) => {
+        try {
+          const { Network } = await import('@capacitor/network');
+          const handler = Network.addListener('networkStatusChange', (status) => {
+            if (networkCallback) networkCallback(status);
+          });
+
+          // 获取初始网络状态
+          const status = await Network.getStatus();
           if (networkCallback) networkCallback(status);
-        });
-        
-        // 获取初始网络状态
-        const status = await Network.getStatus();
-        if (networkCallback) networkCallback(status);
-        
-        // 返回清理函数
-        return {
-          ...deviceInfo,
-          cleanup: () => {
-            handler.remove();
-          }
-        };
+
+          // 返回清理函数
+          return {
+            ...deviceInfo,
+            cleanup: () => {
+              handler.remove();
+            }
+          };
+        } catch (error) {
+          console.debug('Network 插件不可用:', error.message);
+        }
       }
     } catch (error) {
       console.warn('Error initializing Capacitor features:', error);

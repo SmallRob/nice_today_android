@@ -365,7 +365,10 @@ const MayaCalendarTab = memo(() => {
 
   // 组件挂载时延迟加载数据 - 使用当前选择的日期
   useEffect(() => {
+    let isMounted = true;
+
     const timer = setTimeout(() => {
+      if (!isMounted) return;
       setIsVisible(true);
       // 仅在初始加载时设置偏移量为0（今天）
       if (selectedOffset === 0) {
@@ -374,6 +377,7 @@ const MayaCalendarTab = memo(() => {
     }, 100);
 
     return () => {
+      isMounted = false;
       clearTimeout(timer);
     };
   }, [loadMayaData, selectedDate, selectedOffset]);

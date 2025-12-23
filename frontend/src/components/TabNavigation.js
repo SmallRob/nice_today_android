@@ -102,6 +102,21 @@ const TabNavigation = () => {
       )
     },
     {
+      id: 'trend',
+      label: '人生趋势',
+      path: '/trend',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M3 21h18" />
+        </svg>
+      )
+    },
+    {
       id: 'dress',
       label: '穿衣养生',
       path: '/dress',
@@ -142,6 +157,9 @@ const TabNavigation = () => {
     } else if (path === '/maya') {
       // 清除玛雅页面相关缓存
       storageManager.removeGlobalCache('maya_data');
+    } else if (path === '/trend') {
+      // 清除人生趋势页面相关缓存
+      storageManager.removeGlobalCache('lifeTrend_data');
     } else if (path === '/dress') {
       // 清除穿衣指南页面相关缓存
       storageManager.removeGlobalCache('dress_data');

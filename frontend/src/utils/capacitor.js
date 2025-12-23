@@ -4,13 +4,35 @@
  */
 
 import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
-import { SplashScreen } from '@capacitor/splash-screen';
-import { StatusBar } from '@capacitor/status-bar';
-import { Device } from '@capacitor/device';
-import { Network } from '@capacitor/network';
-import { Keyboard } from '@capacitor/keyboard';
-import { Haptics } from '@capacitor/haptics';
+// 使用动态导入避免在 Web 平台上直接导入不可用的插件
+let App, SplashScreen, StatusBar, Device, Network, Keyboard, Haptics;
+
+const initPlugins = async () => {
+  if (!App) {
+    try {
+      const modules = await Promise.all([
+        import('@capacitor/app'),
+        import('@capacitor/splash-screen'),
+        import('@capacitor/status-bar'),
+        import('@capacitor/device'),
+        import('@capacitor/network'),
+        import('@capacitor/keyboard'),
+        import('@capacitor/haptics')
+      ]);
+      App = modules[0].App;
+      SplashScreen = modules[1].SplashScreen;
+      StatusBar = modules[2].StatusBar;
+      Device = modules[3].Device;
+      Network = modules[4].Network;
+      Keyboard = modules[5].Keyboard;
+      Haptics = modules[6].Haptics;
+    } catch (error) {
+      console.debug('Failed to initialize Capacitor plugins:', error.message);
+      return false;
+    }
+  }
+  return true;
+};
 
 // 检测当前平台
 export const isNative = Capacitor.isNativePlatform();
@@ -20,6 +42,18 @@ export const isWeb = Capacitor.getPlatform() === 'web';
 
 // 获取平台信息
 export const getPlatformInfo = async () => {
+  await initPlugins();
+  if (!Device) {
+    return {
+      isNative,
+      isAndroid,
+      isIOS,
+      isWeb,
+      platform: Capacitor.getPlatform(),
+      model: 'web',
+      name: 'web'
+    };
+  }
   const info = await Device.getInfo();
   return {
     ...info,
@@ -36,29 +70,49 @@ export const initApp = async () => {
   if (!isNative) return;
 
   try {
+    await initPlugins();
+    
     // 设置状态栏
-    await StatusBar.setStyle({ style: isIOS ? 'DARK' : 'LIGHT' });
-    await StatusBar.setBackgroundColor({ color: '#ffffff' });
+    if (StatusBar) {
+      try {
+        await StatusBar.setStyle({ style: isIOS ? 'DARK' : 'LIGHT' });
+        await StatusBar.setBackgroundColor({ color: '#ffffff' });
+      } catch (error) {
+        console.debug('StatusBar not available:', error.message);
+      }
+    }
 
     // 隐藏启动画面
-    await SplashScreen.hide();
+    if (SplashScreen) {
+      try {
+        await SplashScreen.hide();
+      } catch (error) {
+        console.debug('SplashScreen not available:', error.message);
+      }
+    }
 
     // 添加应用状态监听
-    App.addListener('appStateChange', ({ isActive }) => {
-      console.log('App state changed. Is active?', isActive);
-      // 可以在这里处理应用进入前台/后台的逻辑
-    });
+    if (App) {
+      try {
+        App.addListener('appStateChange', ({ isActive }) => {
+          console.log('App state changed. Is active?', isActive);
+          // 可以在这里处理应用进入前台/后台的逻辑
+        });
 
-    // 添加返回按钮处理（Android）
-    if (isAndroid) {
-      App.addListener('backButton', async ({ canGoBack }) => {
-        if (!canGoBack) {
-          // 在根页面时，双击返回退出应用
-          App.exitApp();
-        } else {
-          window.history.back();
+        // 添加返回按钮处理（Android）
+        if (isAndroid) {
+          App.addListener('backButton', async ({ canGoBack }) => {
+            if (!canGoBack) {
+              // 在根页面时，双击返回退出应用
+              App.exitApp();
+            } else {
+              window.history.back();
+            }
+          });
         }
-      });
+      } catch (error) {
+        console.debug('App listeners setup failed:', error.message);
+      }
     }
 
   } catch (error) {
@@ -67,41 +121,59 @@ export const initApp = async () => {
 };
 
 // 处理键盘事件
-export const setupKeyboardListeners = () => {
+export const setupKeyboardListeners = async () => {
   if (!isNative) return;
 
-  Keyboard.addListener('keyboardWillShow', (info) => {
-    console.log('keyboard will show with height:', info.keyboardHeight);
-    // 可以调整UI布局
-    document.body.style.setProperty('--keyboard-height', `${info.keyboardHeight}px`);
-    document.body.classList.add('keyboard-open');
-  });
+  await initPlugins();
+  if (!Keyboard) return;
 
-  Keyboard.addListener('keyboardWillHide', () => {
-    console.log('keyboard will hide');
-    // 恢复UI布局
-    document.body.style.removeProperty('--keyboard-height');
-    document.body.classList.remove('keyboard-open');
-  });
+  try {
+    Keyboard.addListener('keyboardWillShow', (info) => {
+      console.log('keyboard will show with height:', info.keyboardHeight);
+      // 可以调整UI布局
+      document.body.style.setProperty('--keyboard-height', `${info.keyboardHeight}px`);
+      document.body.classList.add('keyboard-open');
+    });
+
+    Keyboard.addListener('keyboardWillHide', () => {
+      console.log('keyboard will hide');
+      // 恢复UI布局
+      document.body.style.removeProperty('--keyboard-height');
+      document.body.classList.remove('keyboard-open');
+    });
+  } catch (error) {
+    console.debug('Keyboard setup failed:', error.message);
+  }
 };
 
 // 网络状态监控
-export const setupNetworkListener = (callback) => {
+export const setupNetworkListener = async (callback) => {
   if (!isNative) return;
 
-  const handler = Network.addListener('networkStatusChange', (status) => {
-    callback(status);
-  });
+  await initPlugins();
+  if (!Network) return;
 
-  // 获取初始网络状态
-  Network.getStatus().then(callback);
+  try {
+    const handler = Network.addListener('networkStatusChange', (status) => {
+      callback(status);
+    });
 
-  return handler;
+    // 获取初始网络状态
+    Network.getStatus().then(callback);
+
+    return handler;
+  } catch (error) {
+    console.debug('Network setup failed:', error.message);
+    return null;
+  }
 };
 
 // 触觉反馈
 export const triggerHaptics = async (type = 'impact') => {
   if (!isNative) return;
+
+  await initPlugins();
+  if (!Haptics) return;
 
   try {
     switch (type) {
@@ -119,13 +191,16 @@ export const triggerHaptics = async (type = 'impact') => {
         await Haptics.impact({ style: 'medium' });
     }
   } catch (error) {
-    console.error('Error triggering haptics:', error);
+    console.debug('Haptics failed:', error.message);
   }
 };
 
 // 获取应用版本信息
 export const getAppVersion = async () => {
   if (!isNative) return { version: 'web', build: 'web' };
+
+  await initPlugins();
+  if (!App) return { version: 'web', build: 'web' };
 
   try {
     const info = await App.getInfo();
@@ -134,42 +209,52 @@ export const getAppVersion = async () => {
       build: info.build
     };
   } catch (error) {
-    console.error('Error getting app version:', error);
+    console.debug('Error getting app version:', error.message);
     return { version: 'unknown', build: 'unknown' };
   }
 };
 
 // 处理应用生命周期
-export const setupAppLifecycle = (callbacks) => {
+export const setupAppLifecycle = async (callbacks) => {
   if (!isNative) return;
+
+  await initPlugins();
+  if (!App) return;
 
   const { onAppStateChange, onUrlOpen } = callbacks;
 
-  // 应用状态变化
-  if (onAppStateChange) {
-    App.addListener('appStateChange', onAppStateChange);
-  }
+  try {
+    // 应用状态变化
+    if (onAppStateChange) {
+      App.addListener('appStateChange', onAppStateChange);
+    }
 
-  // URL打开事件
-  if (onUrlOpen) {
-    App.addListener('appUrlOpen', onUrlOpen);
-  }
+    // URL打开事件
+    if (onUrlOpen) {
+      App.addListener('appUrlOpen', onUrlOpen);
+    }
 
-  // 内存警告
-  App.addListener('memoryWarning', () => {
-    console.warn('Received memory warning');
-    // 可以在这里执行清理操作
-  });
+    // 内存警告
+    App.addListener('memoryWarning', () => {
+      console.warn('Received memory warning');
+      // 可以在这里执行清理操作
+    });
+  } catch (error) {
+    console.debug('App lifecycle setup failed:', error.message);
+  }
 };
 
 // 设置状态栏样式
 export const setStatusBarStyle = async (style) => {
   if (!isNative) return;
 
+  await initPlugins();
+  if (!StatusBar) return;
+
   try {
     await StatusBar.setStyle({ style });
   } catch (error) {
-    console.error('Error setting status bar style:', error);
+    console.debug('Status bar not available:', error.message);
   }
 };
 
@@ -177,10 +262,13 @@ export const setStatusBarStyle = async (style) => {
 export const setStatusBarBackgroundColor = async (color) => {
   if (!isNative || isIOS) return; // iOS不支持设置状态栏背景色
 
+  await initPlugins();
+  if (!StatusBar) return;
+
   try {
     await StatusBar.setBackgroundColor({ color });
   } catch (error) {
-    console.error('Error setting status bar background color:', error);
+    console.debug('Status bar not available:', error.message);
   }
 };
 
@@ -188,10 +276,13 @@ export const setStatusBarBackgroundColor = async (color) => {
 export const setStatusBarVisibility = async (visible) => {
   if (!isNative) return;
 
+  await initPlugins();
+  if (!StatusBar) return;
+
   try {
     await StatusBar.show({ visible });
   } catch (error) {
-    console.error('Error setting status bar visibility:', error);
+    console.debug('Status bar not available:', error.message);
   }
 };
 
@@ -221,10 +312,14 @@ export const initializeApp = async (options = {}) => {
   // 初始化应用
   await initApp();
 
-  // 设置状态栏
-  await setStatusBarStyle(statusBarStyle);
-  if (statusBarBackgroundColor) {
-    await setStatusBarBackgroundColor(statusBarBackgroundColor);
+  // 设置状态栏（仅原生平台）
+  try {
+    await setStatusBarStyle(statusBarStyle);
+    if (statusBarBackgroundColor) {
+      await setStatusBarBackgroundColor(statusBarBackgroundColor);
+    }
+  } catch (error) {
+    console.debug('Status bar setup skipped:', error.message);
   }
 
   // 设置键盘监听

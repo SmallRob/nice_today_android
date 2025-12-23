@@ -1,7 +1,6 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { optimizeAppStartup } from './utils/startupOptimizer';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { useThemeColor } from './hooks/useThemeColor';
 import './index.css';
 
@@ -9,6 +8,7 @@ import './index.css';
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
 const MayaPage = React.lazy(() => import('./pages/MayaPage_optimized'));
 const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
+const LifeTrendPage = React.lazy(() => import('./pages/LifeTrendPage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
 const TabNavigation = React.lazy(() => import('./components/TabNavigation'));
 
@@ -32,9 +32,8 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('应用错误:', error, errorInfo);
+    console.error('应用错误:', error.message || error, errorInfo);
     this.setState({
-      error: error,
       errorInfo: errorInfo
     });
   }
@@ -77,8 +76,8 @@ const AppLayout = () => {
   useThemeColor();
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-gray-900 overflow-hidden">
-      <div className="flex-1 relative overflow-hidden">
+    <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
+      <div className="flex-1 relative overflow-y-auto overflow-x-hidden">
         <Suspense fallback={<div className="flex items-center justify-center h-full">
           <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
         </div>}>
@@ -86,6 +85,7 @@ const AppLayout = () => {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/maya" element={<MayaPage />} />
             <Route path="/dress" element={<DressGuidePage />} />
+            <Route path="/trend" element={<LifeTrendPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </Suspense>

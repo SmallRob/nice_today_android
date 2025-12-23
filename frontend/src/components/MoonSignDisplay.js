@@ -130,7 +130,7 @@ const MoonSignDisplay = memo(({ date = new Date() }) => {
             月亮周期位置
           </div>
           <div className="text-sm font-semibold text-purple-700 dark:text-purple-300">
-            {Math.round((new Date().getDate() % 28) / 28 * 100)}%
+            {Math.round((date.getDate() % 28) / 28 * 100)}%
           </div>
         </div>
       </div>
