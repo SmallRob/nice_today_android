@@ -10,7 +10,7 @@ const DEFAULT_CONFIG = {
   realName: '', // 真实姓名（用于五格评分和八字测算）
   birthDate: '1991-04-30',
   birthTime: '12:30',
-  shichen: '午时二刻',
+  shichen: '午时',
   birthLocation: {
     province: '北京市',
     city: '北京市',
@@ -22,7 +22,8 @@ const DEFAULT_CONFIG = {
   zodiacAnimal: '羊',
   gender: 'male',
   mbti: 'INFP',
-  nameScore: null // 姓名评分结果
+  nameScore: null, // 姓名评分结果
+  bazi: null // 八字命格信息（包含四柱、时辰、经纬度等）
 };
 
 // 空配置默认值
@@ -31,7 +32,7 @@ const EMPTY_CONFIG_DEFAULTS = {
   realName: '',
   birthDate: '1991-04-21',
   birthTime: '12:30',
-  shichen: '午时二刻',
+  shichen: '午时',
   birthLocation: {
     province: '北京市',
     city: '北京市',
@@ -43,7 +44,8 @@ const EMPTY_CONFIG_DEFAULTS = {
   zodiacAnimal: '羊',
   gender: 'male',
   mbti: 'ISFP',
-  nameScore: null
+  nameScore: null,
+  bazi: null
 };
 
 // 本地存储键名

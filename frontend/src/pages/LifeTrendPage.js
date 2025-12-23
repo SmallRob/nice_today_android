@@ -5,6 +5,8 @@ import RadarChart from '../components/RadarChart';
 import DatePickerModal from '../components/DatePickerModal';
 import { storageManager } from '../utils/storageManager';
 import { userConfigManager } from '../utils/userConfigManager';
+import LunarCalendar from '../utils/lunarCalendar';
+import BaziCalculator from '../utils/baziCalculator';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
@@ -14,13 +16,24 @@ const LifeTrendPage = () => {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [selectedMonth, setSelectedMonth] = useState(12);
   const [selectedDate, setSelectedDate] = useState(23);
+  const [selectedHour, setSelectedHour] = useState(12); // 新增：时辰（小时）
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [klineData, setKlineData] = useState([]);
   const [hoveredAge, setHoveredAge] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentAge, setCurrentAge] = useState(34);
 
-  // 从用户配置加载出生日期
+  // 新增：临时计算相关状态
+  const [isTempCalcMode, setIsTempCalcMode] = useState(false);
+  const [tempBazi, setTempBazi] = useState(null);
+  const [tempLatitude, setTempLatitude] = useState(30); // 默认北纬30度
+  const [tempLongitude, setTempLongitude] = useState(110); // 默认东经110度
+
+  // 新增：农历数据
+  const [lunarData, setLunarData] = useState(null);
+  const [currentBazi, setCurrentBazi] = useState(null);
+
+  // 从用户配置加载出生日期和八字
   useEffect(() => {
     let isMounted = true;
     const loadUserConfig = () => {
@@ -31,6 +44,23 @@ const LifeTrendPage = () => {
           setSelectedYear(birthDate.getFullYear());
           setSelectedMonth(birthDate.getMonth() + 1);
           setSelectedDate(birthDate.getDate());
+
+          // 加载出生时间（小时）
+          if (config.birthTime) {
+            const [hours] = config.birthTime.split(':').map(Number);
+            setSelectedHour(hours || 12);
+          }
+
+          // 加载经纬度
+          if (config.birthLocation) {
+            setTempLatitude(config.birthLocation.lat || 30);
+            setTempLongitude(config.birthLocation.lng || 110);
+          }
+
+          // 加载八字（如果存在）
+          if (config.bazi) {
+            setCurrentBazi(config.bazi);
+          }
         }
       } catch (error) {
         console.warn('加载用户配置失败，使用默认值:', error);
@@ -39,6 +69,9 @@ const LifeTrendPage = () => {
           setSelectedYear(1991);
           setSelectedMonth(1);
           setSelectedDate(1);
+          setSelectedHour(12);
+          setTempLatitude(39.95);
+          setTempLongitude(116.48);
         }
       }
     };
@@ -54,16 +87,48 @@ const LifeTrendPage = () => {
     setCurrentAge(Math.max(0, Math.min(100, age)));
   }, [selectedYear, selectedMonth, selectedDate]);
 
-  // 保存用户选择的日期
-  const saveDate = (year, month, date) => {
+  // 保存用户选择的日期到永久配置
+  const saveDateToConfig = (year, month, date, hour, longitude, latitude) => {
+    try {
+      const newBirthDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+      const newBirthTime = `${String(hour).padStart(2, '0')}:00`;
+      const configIndex = userConfigManager.getActiveConfigIndex();
+
+      // 计算八字
+      const bazi = BaziCalculator.calculateBazi(year, month, date, hour, 0, longitude);
+
+      // 计算时辰
+      const shichenInfo = LunarCalendar.getShichen(hour);
+
+      const updates = {
+        birthDate: newBirthDate,
+        birthTime: newBirthTime,
+        shichen: shichenInfo.name,
+        birthLocation: {
+          province: '默认',
+          city: '默认',
+          district: '默认',
+          lng: longitude,
+          lat: latitude
+        },
+        bazi: bazi
+      };
+
+      userConfigManager.updateConfig(configIndex, updates);
+      setCurrentBazi(bazi);
+
+      console.log('保存日期和八字到配置成功:', updates);
+    } catch (error) {
+      console.warn('保存日期到配置失败:', error);
+    }
+  };
+
+  // 保存到localStorage（用于临时计算）
+  const saveDateToLocalStorage = (year, month, date) => {
     try {
       localStorage.setItem('lifeTrend_birthDate', JSON.stringify({ year, month, date }));
-      // 同时更新用户配置
-      const newBirthDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-      const configIndex = userConfigManager.getActiveConfigIndex();
-      userConfigManager.updateConfig(configIndex, { birthDate: newBirthDate });
     } catch (error) {
-      console.warn('保存日期失败:', error);
+      console.warn('保存日期到localStorage失败:', error);
     }
   };
 
@@ -96,13 +161,18 @@ const LifeTrendPage = () => {
     return data;
   };
 
-  // 生成数据
+  // 生成数据（临时计算模式使用临时八字，永久模式使用配置八字）
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
       setLoading(true);
-      // 从缓存加载数据
-      const cacheKey = `lifeTrend_data_${selectedYear}_${selectedMonth}_${selectedDate}`;
+
+      // 确定使用的八字（用于生成不同的数据）
+      const usedBazi = isTempCalcMode ? tempBazi : currentBazi;
+
+      // 从缓存加载数据（包含八字信息）
+      const baziKey = usedBazi ? `${usedBazi.year}${usedBazi.month}${usedBazi.day}${usedBazi.hour}` : 'default';
+      const cacheKey = `lifeTrend_data_${selectedYear}_${selectedMonth}_${selectedDate}_${selectedHour}_${tempLongitude}_${baziKey}`;
       const cachedData = storageManager.getGlobalCache(cacheKey);
 
       if (cachedData) {
@@ -123,44 +193,66 @@ const LifeTrendPage = () => {
 
     loadData();
     return () => { isMounted = false; };
+  }, [selectedYear, selectedMonth, selectedDate, selectedHour, tempBazi, currentBazi, isTempCalcMode, tempLongitude]);
+
+  // 计算农历日期
+  useEffect(() => {
+    const lunar = LunarCalendar.solarToLunar(selectedYear, selectedMonth, selectedDate);
+    setLunarData(lunar);
   }, [selectedYear, selectedMonth, selectedDate]);
 
   // 获取当前选中年份的数据（用于雷达图）
   const currentYearData = klineData.find(d => d.age === currentAge) || klineData[0];
 
-  // 日期选择处理
-  const handleDateChange = (year, month, date) => {
+  // 日期选择处理（永久保存）
+  const handleDateChange = (year, month, date, hour, longitude, latitude, isSaveToConfig = true) => {
     setSelectedYear(year);
     setSelectedMonth(month);
     setSelectedDate(date);
-    saveDate(year, month, date);
+    setSelectedHour(hour);
+    setTempLongitude(longitude);
+    setTempLatitude(latitude);
+    setIsTempCalcMode(false);
     setIsCalendarOpen(false);
+
+    if (isSaveToConfig) {
+      saveDateToConfig(year, month, date, hour, longitude, latitude);
+    } else {
+      // 仅保存到localStorage，不影响永久配置
+      saveDateToLocalStorage(year, month, date);
+    }
   };
 
-  // 生成八字
-  const generateBazi = (year, month, date) => {
-    const heavenlyStems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-    const earthlyBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-    
-    // 简化的八字计算（实际应用中需要更复杂的算法）
-    const yearGan = heavenlyStems[(year - 4) % 10];
-    const yearZhi = earthlyBranches[(year - 4) % 12];
-    const monthGan = heavenlyStems[(month + year * 5) % 10];
-    const monthZhi = earthlyBranches[(month - 1) % 12];
-    const dayGan = heavenlyStems[(date + year * 3 + month * 2) % 10];
-    const dayZhi = earthlyBranches[(date - 1) % 12];
-    const hourGan = heavenlyStems[(year + month + date) % 10];
-    const hourZhi = earthlyBranches[(month + date) % 12];
-    
-    return {
-      year: `${yearGan}${yearZhi}`,
-      month: `${monthGan}${monthZhi}`,
-      day: `${dayGan}${dayZhi}`,
-      hour: `${hourGan}${hourZhi}`
-    };
+  // 临时计算处理（不保存到配置）
+  const handleTempCalculation = (year, month, date, hour, longitude, latitude) => {
+    // 计算临时八字
+    const bazi = BaziCalculator.calculateBazi(year, month, date, hour, 0, longitude);
+    setTempBazi(bazi);
+    setIsTempCalcMode(true);
+    setSelectedYear(year);
+    setSelectedMonth(month);
+    setSelectedDate(date);
+    setSelectedHour(hour);
+    setTempLongitude(longitude);
+    setTempLatitude(latitude);
+    setIsCalendarOpen(false);
+
+    console.log('临时计算八字:', bazi);
   };
 
-  const bazi = generateBazi(selectedYear, selectedMonth, selectedDate);
+  // 获取当前八字（优先使用临时计算，否则使用配置八字）
+  const getDisplayBazi = () => {
+    if (isTempCalcMode && tempBazi) {
+      return tempBazi;
+    }
+    if (currentBazi) {
+      return currentBazi;
+    }
+    // 如果没有八字，则实时计算
+    return BaziCalculator.calculateBazi(selectedYear, selectedMonth, selectedDate, selectedHour, 0, tempLongitude);
+  };
+
+  const displayBazi = getDisplayBazi();
 
   if (loading) {
     return (
@@ -188,25 +280,38 @@ const LifeTrendPage = () => {
 
         {/* 日期卡片 */}
         <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 shadow-sm`}>
-          <div 
+          <div
             className={`text-center py-3 px-4 rounded-xl cursor-pointer transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'}`}
             onClick={() => setIsCalendarOpen(true)}
           >
-            <div className={`text-xs mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>生辰八字</div>
+            <div className={`text-xs mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              {isTempCalcMode ? '🔮 临时计算' : '生辰八字'}
+            </div>
+            {/* 公历日期 */}
             <div className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               {selectedYear}年 {selectedMonth}月 {selectedDate}日
             </div>
+            {/* 农历日期 */}
+            {lunarData && (
+              <div className={`text-sm mt-1 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                农历{lunarData.lunarMonthStr}{lunarData.lunarDayStr}
+              </div>
+            )}
+            {/* 时辰 */}
             <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-              点击修改日期
+              时辰：{displayBazi.shichen || '未知'}
+            </div>
+            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              {isTempCalcMode ? '点击返回永久配置' : '点击修改日期 / 临时计算'}
             </div>
           </div>
 
           <div className="grid grid-cols-4 gap-2 mt-4">
             {[
-              { label: '年柱', value: bazi.year },
-              { label: '月柱', value: bazi.month },
-              { label: '日柱', value: bazi.day },
-              { label: '时柱', value: bazi.hour },
+              { label: '年柱', value: displayBazi.year },
+              { label: '月柱', value: displayBazi.month },
+              { label: '日柱', value: displayBazi.day },
+              { label: '时柱', value: displayBazi.hour },
             ].map((item, index) => (
               <div key={index} className="text-center">
                 <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</div>
@@ -216,6 +321,15 @@ const LifeTrendPage = () => {
               </div>
             ))}
           </div>
+
+          {/* 临时计算指示器 */}
+          {isTempCalcMode && (
+            <div className={`mt-3 text-center p-2 rounded-lg ${theme === 'dark' ? 'bg-purple-900/30 border-purple-700' : 'bg-purple-50 border-purple-200'} border`}>
+              <span className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
+                🔮 临时计算模式 - 不影响永久配置
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -436,7 +550,11 @@ const LifeTrendPage = () => {
         selectedYear={selectedYear}
         selectedMonth={selectedMonth}
         selectedDate={selectedDate}
-        onChange={handleDateChange}
+        selectedHour={selectedHour}
+        latitude={tempLatitude}
+        longitude={tempLongitude}
+        onConfirm={handleDateChange}
+        onTempCalc={handleTempCalculation}
         theme={theme}
       />
     </div>

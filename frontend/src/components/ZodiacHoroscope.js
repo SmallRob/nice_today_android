@@ -906,6 +906,6 @@ const HoroscopeTab = () => {
       </div>
     </div>
   );
-};
+}
 
 export default HoroscopeTab;
