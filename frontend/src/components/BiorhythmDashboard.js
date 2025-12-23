@@ -8,8 +8,8 @@ import '../styles/animations.css';
 // 懒加载组件 - 提升初始加载性能
 const BiorhythmTab = lazy(() => import('./BiorhythmTab'));
 const ZodiacEnergyTab = lazy(() => import('./ZodiacEnergyTab'));
-const HoroscopeTabNew = lazy(() => import('./HoroscopeTabNew'));
-const MBTIPersonalityTabHome = lazy(() => import('./MBTIPersonalityTabHome'));
+const HoroscopeTab = lazy(() => import('./ZodiacHoroscope'));
+const MBTIPersonalityTab = lazy(() => import('./MBTIPersonalityTabHome'));
 const MayaCalendarTab = lazy(() => import('./MayaCalendarTab'));
 
 // 加载占位符组件
@@ -428,13 +428,13 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                   />
                 )}
                 {activeTab === 'horoscope' && loadedTabs.has('horoscope') && (
-                  <HoroscopeTabNew
-                    onError={(error) => handleError(error, 'HoroscopeTabNew')}
+                  <HoroscopeTab
+                    onError={(error) => handleError(error, 'HoroscopeTab')}
                   />
                 )}
                 {activeTab === 'mbti' && loadedTabs.has('mbti') && (
-                  <MBTIPersonalityTabHome
-                    onError={(error) => handleError(error, 'MBTIPersonalityTabHome')}
+                  <MBTIPersonalityTab
+                    onError={(error) => handleError(error, 'MBTIPersonalityTab')}
                   />
                 )}
               </Suspense>

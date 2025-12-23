@@ -252,12 +252,13 @@ const LoadingSpinner = () => (
 );
 
 // 姓名评分模态框
-const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveScore, existingScore }) => {
+const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveScore, existingScore, configIndex, showMessage }) => {
   const [step, setStep] = useState('input'); // input, result
   const [tempName, setTempName] = useState(''); // 临时输入的姓名
   const [splitName, setSplitName] = useState({ surname: '', firstName: '' });
   const [strokes, setStrokes] = useState({ surname: [], firstName: [] });
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // 智能拆分中文姓名
   const smartSplitName = (fullName) => {
@@ -344,8 +345,19 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
           firstName: firstNameStrokes
         });
 
-        // 如果有已有评分，直接显示结果
-        if (existingScore) {
+        // 优化：优先从配置中加载缓存评分，如果没有则动态计算
+        if (configIndex !== undefined && configIndex >= 0) {
+          // 从配置中获取评分数据
+          const config = userConfigManager.getConfigByIndex(configIndex);
+          if (config && config.nameScore) {
+            setAnalysisResult(config.nameScore);
+            setStep('result');
+          } else {
+            // 没有缓存评分，需要动态计算
+            setStep('input');
+          }
+        } else if (existingScore) {
+          // 如果有已有评分，直接显示结果
           setAnalysisResult(existingScore);
           setStep('result');
         } else {
@@ -361,7 +373,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
         setTempName('');
       }
     }
-  }, [isOpen, name, isPersonal, existingScore]);
+  }, [isOpen, name, isPersonal, existingScore, configIndex]);
 
   // 处理姓名输入变化
   const handleNameChange = (newName) => {
@@ -400,25 +412,79 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
   };
 
   const handleCalculate = () => {
-    const res = calculateFiveGrids(
-      splitName.surname,
-      splitName.firstName,
-      strokes.surname.map(s => parseInt(s) || 1), // 默认值为1防错
-      strokes.firstName.map(s => parseInt(s) || 1)
-    );
-    setAnalysisResult(res);
+    try {
+      const res = calculateFiveGrids(
+        splitName.surname,
+        splitName.firstName,
+        strokes.surname.map(s => parseInt(s) || 1), // 默认值为1防错
+        strokes.firstName.map(s => parseInt(s) || 1)
+      );
+      
+      // 检查返回结果是否有效
+      if (res && (res.tian || res.ren || res.di || res.wai || res.zong)) {
+        setAnalysisResult(res);
 
-    // 如果是个人评分且有回调，保存评分结果
-    if (isPersonal && onSaveScore && !tempName) {
-      onSaveScore(res);
+        // 如果是个人评分且有回调，保存评分结果
+        if (isPersonal && onSaveScore && !tempName) {
+          onSaveScore(res);
+        }
+
+        setStep('result');
+      } else {
+        // 评分结果无效，显示错误信息
+        setErrorMessage('姓名评分计算失败，请检查输入信息');
+      }
+    } catch (error) {
+      console.error('姓名评分计算出错:', error);
+      setErrorMessage('姓名评分计算失败: ' + error.message);
     }
-
-    setStep('result');
   };
 
   const getScoreColor = (type) => {
     if (type === '吉') return 'text-green-600 dark:text-green-400';
     if (type === '半吉') return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-red-600 dark:text-red-400';
+  };
+
+  // 将五格评分转换为100分制综合评分
+  const convertTo100PointScore = (analysisResult) => {
+    if (!analysisResult) return 0;
+    
+    // 计算每个格子的分数：吉=20分，半吉=15分，凶=5分
+    const calculateGridScore = (gridValue) => {
+      const meaning = getMeaning(gridValue);
+      if (meaning.type === '吉') return 20;
+      if (meaning.type === '半吉') return 15;
+      return 5; // 凶
+    };
+    
+    const tianScore = calculateGridScore(analysisResult.tian);
+    const renScore = calculateGridScore(analysisResult.ren); // 人格最重要，可考虑权重
+    const diScore = calculateGridScore(analysisResult.di);
+    const waiScore = calculateGridScore(analysisResult.wai);
+    const zongScore = calculateGridScore(analysisResult.zong);
+    
+    // 计算总分 (满分100分)
+    const totalScore = tianScore + renScore + diScore + waiScore + zongScore;
+    
+    return Math.round(totalScore);
+  };
+
+  // 根据100分制分数获取等级评价
+  const getScoreLevel = (score) => {
+    if (score >= 90) return '优秀';
+    if (score >= 80) return '良好';
+    if (score >= 70) return '一般';
+    if (score >= 60) return '需改进';
+    return '待提升';
+  };
+
+  // 根据100分制分数获取等级颜色
+  const getScoreLevelColor = (score) => {
+    if (score >= 90) return 'text-green-600 dark:text-green-400';
+    if (score >= 80) return 'text-blue-600 dark:text-blue-400';
+    if (score >= 70) return 'text-yellow-600 dark:text-yellow-400';
+    if (score >= 60) return 'text-orange-600 dark:text-orange-400';
     return 'text-red-600 dark:text-red-400';
   };
 
@@ -441,6 +507,11 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
 
         {/* Content */}
         <div className="p-4 flex-1">
+          {errorMessage && (
+            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-sm">
+              {errorMessage}
+            </div>
+          )}
           {step === 'input' && (
             <div className="space-y-4">
               {/* 姓名输入框 - 允许临时输入他人姓名 */}
@@ -548,12 +619,21 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
 
           {step === 'result' && analysisResult && (
             <div className="space-y-6">
-              {/* 总评卡片 */}
+              {/* 综合评分卡片 */}
               <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="text-xl font-bold">{splitName.surname}{splitName.firstName}</h4>
                   <span className="text-sm bg-white/20 px-2 py-1 rounded">五格剖象</span>
                 </div>
+                
+                {/* 100分制总评分 */}
+                <div className="text-center mb-4">
+                  <div className="text-4xl font-bold mb-1">{convertTo100PointScore(analysisResult)}<span className="text-lg">分</span></div>
+                  <div className={`text-lg font-semibold ${getScoreLevelColor(convertTo100PointScore(analysisResult))}`}>
+                    {getScoreLevel(convertTo100PointScore(analysisResult))}
+                  </div>
+                </div>
+                
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div className="text-center bg-white/10 rounded p-2">
                     <div className="text-xs opacity-80">总格 (后运)</div>
@@ -782,18 +862,18 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       showMessage('请输入昵称', 'error');
       return;
     }
-
+  
     if (!formData.birthDate) {
       showMessage('请选择出生日期', 'error');
       return;
     }
-
+  
     setIsSaving(true);
     await new Promise(resolve => setTimeout(resolve, 500));
-
+    
     // 自动为中文姓名打分
     let finalConfigData = { ...formData };
-    if (formData.realName && /[\u4e00-\u9fa5]/.test(formData.realName)) {
+    if (formData.realName && /[一-龥]/.test(formData.realName)) {
       try {
         const compoundSurnames = [
           '欧阳', '太史', '端木', '上官', '司马', '东方', '独孤', '南宫', '万俟', '闻人',
@@ -806,10 +886,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           '贯丘', '公皙', '南荣', '东里', '东宫', '仲长', '子书', '子桑', '即墨', '达奚',
           '褚师'
         ];
-
+  
         let surname = '', firstName = '';
         const name = formData.realName.trim();
-
+  
         if (name.includes('·') || name.includes('•')) {
           const parts = name.split(/[·•]/);
           surname = parts[0] || '';
@@ -824,7 +904,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               break;
             }
           }
-
+  
           if (!isCompound) {
             const nameLength = name.length;
             if (nameLength === 2) {
@@ -839,19 +919,19 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             }
           }
         }
-
+  
         const surnameChars = surname.split('').filter(c => c);
         const firstNameChars = firstName.split('').filter(c => c);
         const surnameStrokes = surnameChars.map(c => getCharStrokes(c));
         const firstNameStrokes = firstNameChars.map(c => getCharStrokes(c));
-
+  
         const scoreResult = calculateFiveGrids(
           surname,
           firstName,
           surnameStrokes.map(s => parseInt(s) || 1),
           firstNameStrokes.map(s => parseInt(s) || 1)
         );
-
+  
         const mainMeaning = getMeaning(scoreResult.ren);
         finalConfigData.nameScore = {
           ...scoreResult,
@@ -861,16 +941,21 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         console.error('自动评分失败:', e);
       }
     }
-
+  
+    // 如果没有评分但有真实姓名，保留现有评分
+    if (!finalConfigData.nameScore && formData.nameScore) {
+      finalConfigData.nameScore = formData.nameScore;
+    }
+  
     // 校验位置信息
     let finalLocation = { ...formData.birthLocation };
-
+  
     try {
       const lngMatch = locationInput.match(/经度[:：]\s*([-+]?\d+(\.\d+)?)/) || locationInput.match(/lng[:：]\s*([-+]?\d+(\.\d+)?)/);
       const latMatch = locationInput.match(/纬度[:：]\s*([-+]?\d+(\.\d+)?)/) || locationInput.match(/lat[:：]\s*([-+]?\d+(\.\d+)?)/);
-
+  
       let parsedLng, parsedLat;
-
+  
       if (lngMatch && latMatch) {
         parsedLng = parseFloat(lngMatch[1]);
         parsedLat = parseFloat(latMatch[1]);
@@ -884,14 +969,14 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           else { parsedLng = v1; parsedLat = v3; }
         }
       }
-
+  
       if (parsedLng !== undefined && parsedLat !== undefined && !isNaN(parsedLng) && !isNaN(parsedLat)) {
         if (parsedLng >= -180 && parsedLng <= 180 && parsedLat >= -90 && parsedLat <= 90) {
           finalLocation.lng = parsedLng;
           finalLocation.lat = parsedLat;
         }
       }
-
+  
       const addressPart = locationInput.split(/[(\uff08]/)[0].trim();
       if (addressPart) {
         const parts = addressPart.split(/\s+/);
@@ -905,7 +990,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           finalLocation.district = '';
         }
       }
-
+  
       if (finalLocation.lng === undefined || finalLocation.lng === null) {
         finalLocation.lng = 116.40;
         finalLocation.lat = 39.90;
@@ -914,14 +999,14 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         finalLocation.district = '东城区';
         showMessage('未检测到有效经纬度，已默认设置为北京', 'info');
       }
-
+  
     } catch (e) {
       console.error("Location parse error", e);
       if (!finalLocation.lng) {
         finalLocation = { ...DEFAULT_REGION };
       }
     }
-
+  
     onSave(index, { ...finalConfigData, birthLocation: finalLocation });
     setIsSaving(false);
     onClose();
@@ -1226,7 +1311,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive }) 
               <div className="flex items-center ml-2 space-x-2">
                 <span className="text-gray-500 text-xs">|</span>
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{config.realName}</span>
-                {config.nameScore && (
+                {config?.nameScore && (
                   <span className={`px-2 py-0.5 text-xs rounded font-bold ${config.nameScore.mainType === '吉' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                     config.nameScore.mainType === '半吉' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
                       'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
@@ -1323,6 +1408,7 @@ const UserConfigManagerComponent = () => {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null); // 用于显示提示信息
   const [isTempScoringOpen, setIsTempScoringOpen] = useState(false); // 临时评分弹窗状态
+  const [tempScoringConfigIndex, setTempScoringConfigIndex] = useState(null); // 临时评分使用的配置索引
   const [baziKey, setBaziKey] = useState(0); // 八字计算刷新键
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 编辑弹窗状态
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
@@ -1715,7 +1801,7 @@ const UserConfigManagerComponent = () => {
                 <div>
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-400">真实姓名：</span>
                   <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].realName}</span>
-                  {configs[activeConfigIndex].nameScore && (
+                  {configs[activeConfigIndex]?.nameScore && (
                     <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${configs[activeConfigIndex].nameScore.mainType === '吉' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                       configs[activeConfigIndex].nameScore.mainType === '半吉' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
                         'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
@@ -1723,10 +1809,14 @@ const UserConfigManagerComponent = () => {
                       {configs[activeConfigIndex].nameScore.mainType}
                     </span>
                   )}
-                  {/[\u4e00-\u9fa5]/.test(configs[activeConfigIndex].realName) && (
+                  {/[一-龥]/.test(configs[activeConfigIndex].realName) && (
                     <button
                       className="ml-2 px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
-                      onClick={() => setIsTempScoringOpen(true)}
+                      onClick={() => {
+                        // 传递当前配置索引以加载缓存的评分
+                        setTempScoringConfigIndex(activeConfigIndex);
+                        setIsTempScoringOpen(true);
+                      }}
                     >
                       查看评分
                     </button>
@@ -1837,7 +1927,11 @@ const UserConfigManagerComponent = () => {
             </Button>
             <Button
               variant="outline"
-              onClick={() => setIsTempScoringOpen(true)}
+              onClick={() => {
+                // 为他人评分时，不使用配置索引
+                setTempScoringConfigIndex(null);
+                setIsTempScoringOpen(true);
+              }}
               className="flex items-center space-x-1"
             >
               <span>💯</span>
@@ -1850,10 +1944,22 @@ const UserConfigManagerComponent = () => {
       {/* 临时评分弹窗 */}
       <NameScoringModal
         isOpen={isTempScoringOpen}
-        onClose={() => setIsTempScoringOpen(false)}
-        name=""
-        isPersonal={false}
-        existingScore={null}
+        onClose={() => {
+          setIsTempScoringOpen(false);
+          setTempScoringConfigIndex(null); // 关闭时重置配置索引
+        }}
+        name={configs[tempScoringConfigIndex]?.realName || ''}
+        isPersonal={tempScoringConfigIndex !== null}
+        existingScore={configs[tempScoringConfigIndex]?.nameScore || null}
+        configIndex={tempScoringConfigIndex}
+        onSaveScore={(score) => {
+          // 保存评分到配置
+          if (tempScoringConfigIndex !== null) {
+            const updatedConfig = { ...configs[tempScoringConfigIndex], nameScore: score };
+            handleSaveConfig(tempScoringConfigIndex, updatedConfig);
+          }
+        }}
+        showMessage={showMessage}
       />
 
       {/* 配置编辑弹窗 */}

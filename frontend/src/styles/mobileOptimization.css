@@ -855,3 +855,17 @@
     padding-right: max(16px, env(safe-area-inset-right));
   }
 }
+
+/* 触摸优化 */
+.touch-optimized {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+/* 防止弹性滚动 */
+.prevent-bounce-scroll {
+  overscroll-behavior: none;
+}
