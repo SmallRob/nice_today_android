@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { userConfigManager } from '../utils/userConfigManager';
 import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
 import {
   initializeHoroscopeCache
 } from '../utils/horoscopeCache';
 import {
-  debounce,
   initializePerformanceOptimization
 } from '../utils/performanceOptimization';
 import performanceMonitor from '../utils/performanceMonitor';
@@ -13,8 +12,10 @@ import { getToday } from '../utils/timeCache';
 import '../styles/mobileOptimization.css';
 import '../styles/animations.css';
 import '../styles/config-selectors.css';
-import { Card } from './PageLayout';
 import { Line } from 'react-chartjs-2';
+import CompatibilityDisplay from './CompatibilityDisplay';
+import MoonSignDisplay from './MoonSignDisplay';
+import ZodiacTraitsDisplay from './ZodiacTraitsDisplay';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -57,6 +58,7 @@ const HoroscopeTab = () => {
   const [initialized, setInitialized] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [isTemporaryHoroscope, setIsTemporaryHoroscope] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const isTemporaryRef = useRef(false);
 
   // 初始化缓存管理器和性能优化
@@ -133,11 +135,11 @@ const HoroscopeTab = () => {
   }, []);
 
   // 优化的加载函数 - 使用时间缓存确保准确性
-  const loadHoroscopeGuidance = useCallback(async (horoscope = userHoroscope, date) => {
+  const loadHoroscopeGuidance = useCallback(async (horoscope = userHoroscope, date = selectedDate) => {
     if (!horoscope) return Promise.resolve();
 
-    // 使用缓存的当前时间，确保所有组件使用一致的日期
-    const currentDate = date || getToday();
+    // 使用选择的日期或缓存的当前时间
+    const currentDate = date || selectedDate || getToday();
 
     // 确保性能监控函数存在再调用
     if (typeof performanceMonitor?.start === 'function') {
@@ -163,13 +165,13 @@ const HoroscopeTab = () => {
         performanceMonitor.end('加载星座运势数据');
       }
     }
-  }, [calculateHoroscopeData]);
+  }, [calculateHoroscopeData, selectedDate]);
 
   // 防抖版本的加载函数，用于用户快速切换时避免多次请求
-  const debouncedLoadHoroscopeGuidance = useMemo(
-    () => debounce(loadHoroscopeGuidance, 300),
-    [loadHoroscopeGuidance]
-  );
+  // const debouncedLoadHoroscopeGuidance = useMemo(
+  //   () => debounce(loadHoroscopeGuidance, 300),
+  //   [loadHoroscopeGuidance]
+  // );
 
   // 初始化组件 - 优化为优先获取用户数据
   useEffect(() => {
@@ -220,14 +222,14 @@ const HoroscopeTab = () => {
     isTemporaryRef.current = isTemporaryHoroscope;
   }, [isTemporaryHoroscope]);
 
-  // 当星座变化时重新加载数据 - 使用时间缓存确保一致性
+  // 当星座或日期变化时重新加载数据
   useEffect(() => {
     if (!userHoroscope || !initialized) return;
 
     // 立即加载数据，不使用防抖，确保实时响应
     if (!dataLoaded) {
       // 直接调用，不使用防抖，确保立即计算新数据
-      loadHoroscopeGuidance(userHoroscope, getToday())
+      loadHoroscopeGuidance(userHoroscope, selectedDate)
         .then(() => {
           if (typeof setDataLoaded === 'function') {
             setDataLoaded(true);
@@ -238,7 +240,7 @@ const HoroscopeTab = () => {
           setError('加载失败: ' + error.message);
         });
     }
-  }, [userHoroscope, loadHoroscopeGuidance, initialized, dataLoaded]);
+  }, [userHoroscope, selectedDate, loadHoroscopeGuidance, initialized, dataLoaded]);
 
   // 处理星座选择 - 实时计算，不缓存旧数据
   const handleHoroscopeChange = useCallback((horoscope) => {
@@ -267,21 +269,31 @@ const HoroscopeTab = () => {
     }
   }, [userHoroscope, getUserZodiac]);
 
+  // 处理日期变化
+  const handleDateChange = useCallback((newDate) => {
+    setSelectedDate(newDate);
+    // 立即重置数据，确保不会显示旧数据
+    setHoroscopeGuidance(null);
+    setError(null);
+    // 标记需要重新加载数据
+    setDataLoaded(false);
+  }, []);
+
   // 渲染趋势图表
   const renderTrendChart = () => {
     if (!userHoroscope) return null;
 
-    // 生成过去7天的数据（模拟趋势）
+    // 生成过去7天的数据（基于选择的日期）
     const generateTrendData = () => {
       const labels = [];
       const loveData = [];
       const wealthData = [];
       const careerData = [];
 
-      const today = new Date();
+      const baseDate = selectedDate;
       for (let i = 6; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
+        const date = new Date(baseDate);
+        date.setDate(baseDate.getDate() - i);
         labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
 
         // 使用算法生成当天的模拟数据
@@ -403,6 +415,25 @@ const HoroscopeTab = () => {
       {/* 内容展示区域 */}
       <div className="container mx-auto px-4 py-4 max-w-2xl">
 
+        {/* 日期选择器 */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 mb-4 border border-gray-100 dark:border-gray-800">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center">
+            <span className="mr-2">📅</span> 选择日期
+          </h3>
+          <input
+            type="date"
+            value={selectedDate.toISOString().split('T')[0]}
+            onChange={(e) => handleDateChange(new Date(e.target.value))}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <button
+            onClick={() => handleDateChange(new Date())}
+            className="mt-2 w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors duration-200"
+          >
+            今天
+          </button>
+        </div>
+
         {/* 星座选择器 - 简化版 */}
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 mb-4 border border-gray-100 dark:border-gray-800">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center">
@@ -443,11 +474,22 @@ const HoroscopeTab = () => {
           )}
         </div>
 
+        {/* 速配星座和月亮星座 - 并排显示 */}
+        {!loading && !error && userHoroscope && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* 速配星座 */}
+            <CompatibilityDisplay currentHoroscope={userHoroscope} />
+            
+            {/* 月亮星座 */}
+            <MoonSignDisplay date={selectedDate} />
+          </div>
+        )}
+
         {/* 今日运势深度解读 */}
         {!loading && !error && horoscopeGuidance && (
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-800 mb-4">
             <h3 className="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-2 uppercase tracking-wide">
-              今日能量
+              {selectedDate.toDateString() === new Date().toDateString() ? '今日' : '当日'}能量
             </h3>
             <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
               "{horoscopeGuidance.overallDescription}"
@@ -559,6 +601,11 @@ const HoroscopeTab = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* 星座综合特质展示 - 页面底部 */}
+        {!loading && !error && userHoroscope && (
+          <ZodiacTraitsDisplay currentHoroscope={userHoroscope} />
         )}
       </div>
     </div>

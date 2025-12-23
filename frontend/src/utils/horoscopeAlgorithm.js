@@ -544,34 +544,52 @@ const calculatePlanetaryInfluence = (date = new Date()) => {
 
 /**
  * 计算每日运势分数（0-100分）
+ * 优化算法，避免分数偏低，提供更积极的运势评分
  */
 export const calculateDailyHoroscopeScore = (horoscopeName, date = new Date()) => {
   const horoscope = HOROSCOPE_DATA_ENHANCED.find(h => h.name === horoscopeName);
-  if (!horoscope) return 77;
+  if (!horoscope) return 82; // 提高默认分数
 
   const planetaryInfluence = calculatePlanetaryInfluence(date);
   const randomFactor = dailyRandom(horoscopeName, 'score');
 
-  // 基础分数（基于星座元素特性）
-  let baseScore = 50;
+  // 提高基础分数，确保整体分数更积极
+  let baseScore = 65; // 从50提高到65
 
-  // 行星影响计算
+  // 行星影响计算 - 优化权重分配
   Object.keys(planetaryInfluence).forEach(planet => {
     const influence = planetaryInfluence[planet];
     const elementKey = getElementKey(horoscope.element);
     const weight = PLANETARY_INFLUENCES[planet]?.[elementKey] || 5;
-    baseScore += (influence - 0.5) * weight;
+    
+    // 优化：增加正向偏移，减少负向影响
+    if (influence > 0.5) {
+      baseScore += (influence - 0.5) * weight * 1.2; // 正向影响增强20%
+    } else {
+      baseScore += (influence - 0.5) * weight * 0.8; // 负向影响减弱20%
+    }
   });
 
   // 增加星座字符偏移，确保不同星座分数即使在同一天也具有差异性
-  const nameHash = (horoscopeName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 10) - 5;
+  const nameHash = (horoscopeName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 15) - 3; // 减小负向偏移
   baseScore += nameHash;
 
-  // 随机因素（-10到+10）
-  baseScore += (randomFactor - 0.5) * 20;
+  // 优化随机因素：减少负向波动，增加正向波动
+  const optimizedRandom = (randomFactor - 0.3) * 25; // 调整随机范围，减少负向波动
+  baseScore += optimizedRandom;
 
-  // 限制在0-100范围内
-  return Math.max(0, Math.min(100, Math.round(baseScore)));
+  // 基于星座元素特性的额外加分
+  const elementBonus = {
+    'fire': 8,   // 火象星座：积极、热情
+    'earth': 5,  // 土象星座：稳定、务实  
+    'air': 7,    // 风象星座：灵活、聪明
+    'water': 6   // 水象星座：感性、直觉
+  }[getElementKey(horoscope.element)] || 0;
+  
+  baseScore += elementBonus;
+
+  // 确保分数在合理范围内且更积极
+  return Math.max(55, Math.min(98, Math.round(baseScore))); // 提高最低分限制
 };
 
 /**
@@ -825,11 +843,60 @@ const getTrend = (score) => {
   return '大幅下降';
 };
 
-const getRandomMoonSign = (horoscopeName) => {
-  const random = dailyRandom(horoscopeName, 'moon');
-  const moonSigns = ['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座',
-    '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'];
-  return moonSigns[Math.floor(random * moonSigns.length)];
+/**
+ * 计算今日月亮星座
+ * 基于月亮周期（约27.3天）和当前日期计算
+ */
+export const calculateMoonSign = (date = new Date()) => {
+  // 月亮周期约27.3天，每个星座停留约2.275天
+  const moonCycleDays = 27.3;
+  const signsPerCycle = 12;
+  const daysPerSign = moonCycleDays / signsPerCycle;
+  
+  // 参考点：假设某个日期月亮在白羊座开始
+  const referenceDate = new Date('2024-01-01'); // 月亮在白羊座开始
+  
+  // 计算天数差
+  const timeDiff = date.getTime() - referenceDate.getTime();
+  const daysDiff = Math.abs(timeDiff / (1000 * 60 * 60 * 24));
+  
+  // 计算当前月亮在周期中的位置
+  const cyclePosition = daysDiff % moonCycleDays;
+  const currentSignIndex = Math.floor(cyclePosition / daysPerSign);
+  
+  const moonSigns = [
+    '白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座',
+    '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'
+  ];
+  
+  return moonSigns[currentSignIndex % moonSigns.length];
+};
+
+/**
+ * 获取月亮星座的影响描述
+ */
+export const getMoonSignInfluence = (moonSign) => {
+  const influences = {
+    '白羊座': '今日月亮在白羊座，带来冲动的能量和新的开始。适合采取行动，但要注意控制脾气。',
+    '金牛座': '今日月亮在金牛座，增强稳定性和物质享受。适合处理财务问题，享受美食。',
+    '双子座': '今日月亮在双子座，促进沟通和学习。适合社交活动、学习和信息交流。',
+    '巨蟹座': '今日月亮在巨蟹座，强化情感和家庭关系。适合与家人相处，关注内心感受。',
+    '狮子座': '今日月亮在狮子座，激发创造力和自信。适合展现自我，追求个人目标。',
+    '处女座': '今日月亮在处女座，注重细节和健康。适合整理环境，关注身体健康。',
+    '天秤座': '今日月亮在天秤座，强调平衡和人际关系。适合社交活动，寻求和谐。',
+    '天蝎座': '今日月亮在天蝎座，加深直觉和洞察力。适合深度思考，探索隐秘。',
+    '射手座': '今日月亮在射手座，带来乐观和冒险精神。适合旅行学习，扩展视野。',
+    '摩羯座': '今日月亮在摩羯座，增强责任感和目标导向。适合工作规划，追求成就。',
+    '水瓶座': '今日月亮在水瓶座，激发创新和独立思想。适合科技探索，社会活动。',
+    '双鱼座': '今日月亮在双鱼座，强化直觉和同情心。适合艺术创作，冥想放松。'
+  };
+  
+  return influences[moonSign] || '月亮星座带来神秘的能量影响。';
+};
+
+// 保持向后兼容性
+const getRandomMoonSign = () => {
+  return calculateMoonSign(new Date());
 };
 
 const generatePositiveAdvice = (horoscopeName) => {

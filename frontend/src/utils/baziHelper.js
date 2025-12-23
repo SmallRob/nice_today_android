@@ -107,28 +107,48 @@ export const calculateBazi = (birthDateStr, birthTimeStr, longitude) => {
 };
 
 /**
- * 保持兼容: 获取指定日期的月份干支
+ * 获取指定日期的月份干支
+ * @param {Date} date 日期对象
+ * @returns {string} 月份干支
  */
-export const getCurrentMonthGanzhi = () => {
-    const lunar = Lunar.fromDate(new Date());
+export const getMonthGanzhi = (date = new Date()) => {
+    const lunar = Lunar.fromDate(date);
     return lunar.getEightChar().getMonth();
 };
 
 /**
- * 保持兼容: 获取简易八字运势描述
+ * 保持兼容: 获取当前月份干支
  */
-export const getMonthlyBaziFortune = (pillars) => {
+export const getCurrentMonthGanzhi = () => {
+    return getMonthGanzhi(new Date());
+};
+
+/**
+ * 获取指定月份的八字运势描述
+ * @param {Array} pillars 八字四柱
+ * @param {Date} targetDate 目标日期（默认为当前日期）
+ * @returns {Object} 运势信息
+ */
+export const getMonthlyBaziFortune = (pillars, targetDate = new Date()) => {
     // 复用之前的逻辑
     if (!pillars || pillars.length < 3 || pillars[2] === '未知' || pillars[2].includes('未知')) {
         return {
             summary: '出生日期信息不全，目前的分析仅供参考。',
             score: 70,
-            details: []
+            relation: '未知',
+            dayMaster: '?',
+            masterElement: '未知',
+            monthGanzhi: '未知',
+            monthText: '未知月份'
         };
     }
 
     const dayMaster = pillars[2].charAt(0); // 日主
-    const currentMonthG = getCurrentMonthGanzhi();
+    const targetMonthG = getMonthGanzhi(targetDate);
+    
+    // 获取月份名称
+    const lunar = Lunar.fromDate(targetDate);
+    const monthText = `${lunar.getMonthInChinese()}月`;
 
     const elements = {
         '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
@@ -136,7 +156,7 @@ export const getMonthlyBaziFortune = (pillars) => {
     };
 
     const masterElement = elements[dayMaster];
-    const monthElement = currentMonthG ? elements[currentMonthG.charAt(0)] : null;
+    const monthElement = targetMonthG ? elements[targetMonthG.charAt(0)] : null;
 
     const relations = {
         '木': { '木': '比劫', '火': '食伤', '土': '财星', '金': '官杀', '水': '印星' },
@@ -151,7 +171,10 @@ export const getMonthlyBaziFortune = (pillars) => {
             summary: '暂无法分析当前运势。',
             score: 75,
             relation: '未知',
-            dayMaster: dayMaster || '?'
+            dayMaster: dayMaster || '?',
+            masterElement: masterElement || '未知',
+            monthGanzhi: targetMonthG || '未知',
+            monthText
         };
     }
 
@@ -171,7 +194,8 @@ export const getMonthlyBaziFortune = (pillars) => {
         relation,
         dayMaster,
         masterElement,
-        monthGanzhi: currentMonthG
+        monthGanzhi: targetMonthG,
+        monthText
     };
 };
 

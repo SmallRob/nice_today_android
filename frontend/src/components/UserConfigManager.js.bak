@@ -324,44 +324,40 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
     };
   };
 
-  // 初始化拆解姓名 - 只在个人评分时加载用户信息
+  // 初始化拆解姓名 - 只在打开时或name变化时触发
   useEffect(() => {
-    if (isOpen) {
-      if (isPersonal && name) {
-        // 个人评分：使用智能拆分
-        const split = smartSplitName(name);
-        setSplitName(split);
+    if (isOpen && name) {
+      // 使用智能拆分
+      const split = smartSplitName(name);
+      setSplitName(split);
 
-        // 初始笔画获取
-        const surnameChars = split.surname.split('').filter(c => c);
-        const firstNameChars = split.firstName.split('').filter(c => c);
+      // 初始笔画获取
+      const surnameChars = split.surname.split('').filter(c => c);
+      const firstNameChars = split.firstName.split('').filter(c => c);
 
-        const surnameStrokes = surnameChars.map(c => getCharStrokes(c));
-        const firstNameStrokes = firstNameChars.map(c => getCharStrokes(c));
+      const surnameStrokes = surnameChars.map(c => getCharStrokes(c));
+      const firstNameStrokes = firstNameChars.map(c => getCharStrokes(c));
 
-        setStrokes({
-          surname: surnameStrokes,
-          firstName: firstNameStrokes
-        });
+      setStrokes({
+        surname: surnameStrokes,
+        firstName: firstNameStrokes
+      });
 
-        // 如果有已有评分，直接显示结果
-        if (existingScore) {
-          setAnalysisResult(existingScore);
-          setStep('result');
-        } else {
-          setStep('input');
-        }
-        setTempName(''); // 重置临时姓名
+      // 如果有已有评分，直接显示结果
+      if (existingScore) {
+        setAnalysisResult(existingScore);
+        setStep('result');
       } else {
-        // 为他人评分或没有姓名：清空所有状态
-        setSplitName({ surname: '', firstName: '' });
-        setStrokes({ surname: [], firstName: [] });
-        setAnalysisResult(null);
         setStep('input');
-        setTempName('');
       }
+      setTempName(''); // 重置临时姓名
+    } else if (isOpen && !name) {
+      // 如果没有姓名，设置空值
+      setSplitName({ surname: '', firstName: '' });
+      setStrokes({ surname: [], firstName: [] });
+      setStep('input');
     }
-  }, [isOpen, name, isPersonal, existingScore]);
+  }, [isOpen, name, existingScore]);
 
   // 处理姓名输入变化
   const handleNameChange = (newName) => {
@@ -1313,6 +1309,251 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive }) 
     </div>
   );
 };
+
+// 主组件
+const UserConfigManagerComponent = () => {
+                  onClick={() => handleFieldChange('gender', option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 出生时间 - 移动到性别后面 */}
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              出生具体时间 (出生时辰)
+            </label>
+            <div className="flex items-center space-x-2 mb-2">
+              <select
+                value={(formData.birthTime || '12:30').split(':')[0]}
+                onChange={(e) => {
+                  const hour = e.target.value;
+                  const minute = (formData.birthTime || '12:30').split(':')[1];
+                  handleFieldChange('birthTime', `${hour}:${minute}`);
+                }}
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <option key={i} value={i.toString().padStart(2, '0')}>
+                    {i.toString().padStart(2, '0')}时
+                  </option>
+                ))}
+              </select>
+              <span className="text-gray-500">:</span>
+              <select
+                value={(formData.birthTime || '12:30').split(':')[1]}
+                onChange={(e) => {
+                  const minute = e.target.value;
+                  const hour = (formData.birthTime || '12:30').split(':')[0];
+                  handleFieldChange('birthTime', `${hour}:${minute}`);
+                }}
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="00">00分</option>
+                <option value="15">15分</option>
+                <option value="30">30分</option>
+                <option value="45">45分</option>
+              </select>
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 flex justify-between bg-white dark:bg-gray-800 p-2 rounded border border-dashed border-gray-300 dark:border-gray-600">
+              <span>时辰：<span className="font-medium text-blue-600 dark:text-blue-400">{calculatedInfo.shichen}</span></span>
+              <span>真太阳时：<span className="font-medium text-purple-600 dark:text-purple-400">{calculatedInfo.trueSolarTime}</span></span>
+            </div>
+          </div>
+
+          {/* 出生地点 - 三级联动 */}
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              出生地点 (用于校准真太阳时)
+            </label>
+
+            {/* 自由输入框 */}
+            <div className="mb-3">
+              <input
+                type="text"
+                value={locationInput}
+                onChange={handleLocationInputChange}
+                className="w-full px-3 py-2 border border-blue-300 dark:border-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white text-sm"
+                placeholder="例如: 北京市 北京市 朝阳区 (经度: 116.48, 纬度: 39.95)"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                可在上方直接修改经纬度，或使用下方选项快速填充
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {/* 省份 */}
+              <select
+                value={formData.birthLocation?.province || DEFAULT_REGION.province}
+                onChange={(e) => handleRegionChange('province', e.target.value)}
+                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                {REGION_DATA.map(p => (
+                  <option key={p.code} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+
+              {/* 城市 */}
+              <select
+                value={formData.birthLocation?.city || DEFAULT_REGION.city}
+                onChange={(e) => handleRegionChange('city', e.target.value)}
+                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                {REGION_DATA.find(p => p.name === (formData.birthLocation?.province || DEFAULT_REGION.province))?.children.map(c => (
+                  <option key={c.code} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+
+              {/* 区县 */}
+              <select
+                value={formData.birthLocation?.district || DEFAULT_REGION.district}
+                onChange={(e) => handleRegionChange('district', e.target.value)}
+                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                {REGION_DATA.find(p => p.name === (formData.birthLocation?.province || DEFAULT_REGION.province))
+                  ?.children.find(c => c.name === (formData.birthLocation?.city || DEFAULT_REGION.city))
+                  ?.children.map(d => (
+                    <option key={d.code} value={d.name}>{d.name}</option>
+                  ))
+                }
+              </select>
+            </div>
+            {formData.birthLocation?.lng && (
+              <div className="mt-2 text-xs text-gray-500 flex justify-between">
+                <span>经度: {formData.birthLocation.lng.toFixed(2)}°</span>
+                <span>纬度: {formData.birthLocation.lat.toFixed(2)}°</span>
+              </div>
+            )}
+          </div>
+
+          {/* 星座 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              星座
+            </label>
+            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+              点击选择您的星座
+            </div>
+            <div className="selector-grid">
+              {ZODIAC_OPTIONS.map((zodiac) => (
+                <div
+                  key={zodiac}
+                  className={`selector-item performance-optimized ${formData.zodiac === zodiac ? 'selected' : ''}`}
+                  onClick={() => handleFieldChange('zodiac', zodiac)}
+                >
+                  <div
+                    className={`selector-icon zodiac-sign-icon zodiac-sign-icon-sm zodiac-sign-icon-${zodiac} ${formData.zodiac === zodiac ? 'selected' : ''}`}
+                    data-symbol=""
+                  ></div>
+                  <span className="selector-label">{zodiac}</span>
+                </div>
+              ))}
+            </div>
+            {formData.zodiac && (
+              <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                已选择：<span className="font-medium">{formData.zodiac}</span>
+              </div>
+            )}
+          </div>
+
+          {/* 生肖 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              生肖
+            </label>
+            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+              点击选择您的生肖
+            </div>
+            <div className="selector-grid">
+              {ZODIAC_ANIMAL_OPTIONS.map((animal) => (
+                <div
+                  key={animal}
+                  className={`selector-item performance-optimized ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
+                  onClick={() => handleFieldChange('zodiacAnimal', animal)}
+                >
+                  <div
+                    className={`selector-icon zodiac-icon zodiac-icon-sm zodiac-icon-${animal} ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
+                  ></div>
+                  <span className="selector-label">{animal}</span>
+                </div>
+              ))}
+            </div>
+            {formData.zodiacAnimal && (
+              <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                已选择：<span className="font-medium">{formData.zodiacAnimal}</span>
+              </div>
+            )}
+          </div>
+
+
+
+          {/* MBTI类型 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              MBTI类型
+            </label>
+            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+              点击选择您的MBTI类型
+            </div>
+            <div className="selector-grid">
+              {MBTI_OPTIONS.map((type) => (
+                <div
+                  key={type}
+                  className={`selector-item performance-optimized ${formData.mbti === type ? 'selected' : ''}`}
+                  onClick={() => handleFieldChange('mbti', type)}
+                >
+                  <div
+                    className={`selector-icon mbti-icon mbti-icon-sm mbti-icon-${type} ${formData.mbti === type ? 'selected' : ''}`}
+                    data-type={type}
+                  ></div>
+                  <span className="selector-label">{type}</span>
+                </div>
+              ))}
+            </div>
+            {formData.mbti && (
+              <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                已选择：<span className="font-medium">{formData.mbti}</span>
+              </div>
+            )}
+          </div>
+
+          {/* 操作按钮 */}
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSave}
+              disabled={isSaving || (isNewConfig && (!formData.nickname || !formData.birthDate))}
+            >
+              {isSaving ? '保存中...' : '创建配置'}
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleReset}
+              disabled={!hasChanges}
+            >
+              重置
+            </Button>
+
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => onDelete(index)}
+            >
+              取消新建
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 主组件
 const UserConfigManagerComponent = () => {
   const [configs, setConfigs] = useState([]);
   const [activeConfigIndex, setActiveConfigIndex] = useState(0);
@@ -1851,9 +2092,9 @@ const UserConfigManagerComponent = () => {
       <NameScoringModal
         isOpen={isTempScoringOpen}
         onClose={() => setIsTempScoringOpen(false)}
-        name=""
+        name={configs[activeConfigIndex]?.realName || ''}
         isPersonal={false}
-        existingScore={null}
+        existingScore={configs[activeConfigIndex]?.nameScore || null}
       />
 
       {/* 配置编辑弹窗 */}

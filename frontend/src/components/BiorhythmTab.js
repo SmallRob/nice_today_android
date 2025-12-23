@@ -9,16 +9,294 @@ import notificationService from '../utils/notificationService';
 
 // 实践活动数据
 const PRACTICE_ACTIVITIES = [
-  { id: 1, title: "10分钟冥想", description: "专注呼吸，平静思绪", energy: "medium", duration: "10分钟" },
-  { id: 2, title: "户外散步", description: "接触自然，呼吸新鲜空气", energy: "high", duration: "15分钟" },
-  { id: 3, title: "感恩日记", description: "写下三件感恩的事", energy: "low", duration: "5分钟" },
-  { id: 4, title: "深呼吸练习", description: "5-5-5呼吸法", energy: "low", duration: "3分钟" },
-  { id: 5, title: "能量伸展", description: "简单拉伸，唤醒身体", energy: "medium", duration: "8分钟" },
-  { id: 6, title: "积极肯定语", description: "对自己说积极的话", energy: "low", duration: "2分钟" },
-  { id: 7, title: "饮水提醒", description: "喝一杯温水", energy: "low", duration: "1分钟" },
-  { id: 8, title: "短暂静坐", description: "闭眼静坐，放松身心", energy: "medium", duration: "7分钟" },
-  { id: 9, title: "能量音乐", description: "听一首提升能量的音乐", energy: "low", duration: "4分钟" }
+  { id: 1, title: "10分钟冥想", description: "专注呼吸，平静思绪", energy: "medium", duration: "10分钟", type: "all" },
+  { id: 2, title: "户外散步", description: "接触自然，呼吸新鲜空气", energy: "high", duration: "15分钟", type: "physical" },
+  { id: 3, title: "感恩日记", description: "写下三件感恩的事", energy: "low", duration: "5分钟", type: "emotional" },
+  { id: 4, title: "深呼吸练习", description: "5-5-5呼吸法", energy: "low", duration: "3分钟", type: "all" },
+  { id: 5, title: "能量伸展", description: "简单拉伸，唤醒身体", energy: "medium", duration: "8分钟", type: "physical" },
+  { id: 6, title: "积极肯定语", description: "对自己说积极的话", energy: "low", duration: "2分钟", type: "emotional" },
+  { id: 7, title: "饮水提醒", description: "喝一杯温水", energy: "low", duration: "1分钟", type: "all" },
+  { id: 8, title: "短暂静坐", description: "闭眼静坐，放松身心", energy: "medium", duration: "7分钟", type: "all" },
+  { id: 9, title: "能量音乐", description: "听一首提升能量的音乐", energy: "low", duration: "4分钟", type: "emotional" },
+  { id: 10, title: "阅读小憩", description: "读几页轻松的书", energy: "low", duration: "10分钟", type: "intellectual" },
+  { id: 11, title: "简单瑜伽", description: "几个基础瑜伽动作", energy: "medium", duration: "10分钟", type: "physical" },
+  { id: 12, title: "听轻音乐", description: "舒缓旋律放松心情", energy: "low", duration: "5分钟", type: "emotional" }
 ];
+
+// 动态暖心提示库
+const DAILY_TIPS = {
+  // 早晨提示 (6:00-11:00)
+  morning: {
+    goodPhysical: [
+      "美好的早晨！喝一杯温水开启活力满满的一天吧！",
+      "清晨阳光正好，趁着体力充沛，快起来伸展一下身体！",
+      "早安！今天的体力状态不错，适合晨练或快走哦！"
+    ],
+    moderatePhysical: [
+      "早起的鸟儿有虫吃，喝杯热牛奶暖暖身体，慢慢来。",
+      "早上好！先做几个简单的伸展动作，唤醒身体吧！",
+      "美好的早晨开始了，深呼吸几次，感受今天的到来！"
+    ],
+    lowPhysical: [
+      "早安~ 今天身体可能有点累，多给自己一点时间苏醒吧。",
+      "早起的身体还在休息呢，喝杯温水，慢慢开始新的一天。",
+      "早上好！不妨先赖个床，等身体准备好了再起来也没关系。"
+    ],
+    goodEmotional: [
+      "清晨的好心情！今天是个美好的开始，保持这份愉悦吧！",
+      "早安！心情不错呢，可以哼首歌给自己听！",
+      "美好的早晨从好心情开始，今天会有好事发生哦！"
+    ],
+    moderateEmotional: [
+      "早安！新的一天，给自己一个微笑吧！",
+      "早晨的时光很珍贵，不妨深呼吸，感受当下！",
+      "早上好！今天也可以成为不错的一天，相信自己！"
+    ],
+    lowEmotional: [
+      "早安~ 今天可能有点低落，没关系，允许自己慢慢来。",
+      "早上好！情绪低落时，喝杯热饮，抱抱自己吧。",
+      "新的一天开始了，给自己一点耐心，一切都会好起来的。"
+    ],
+    goodIntellectual: [
+      "清晨思维清晰！适合安排一些需要专注的工作哦！",
+      "早安！头脑清醒的状态下，可以规划一下今天的目标！",
+      "美好的早晨，脑子特别清楚，是个学习的好时机！"
+    ],
+    moderateIntellectual: [
+      "早安！先理一理今天的待办事项吧！",
+      "早上好！用几分钟思考一下今天要完成的任务！",
+      "新的一天开始了，写下今天的小目标吧！"
+    ],
+    lowIntellectual: [
+      "早安~ 今天思维可能有点迟钝，先做一些简单的事情吧！",
+      "早上好！思考累的时候，不妨先做些机械性的工作！",
+      "早安，今天可能不太适合做复杂的决策，保持简单就好。"
+    ]
+  },
+  // 中午提示 (11:00-14:00)
+  noon: {
+    goodPhysical: [
+      "午饭时间到了！吃饱后可以散散步，保持充沛精力！",
+      "午休时间，体力不错的话可以做个小运动！",
+      "中午了！利用午休时间活动活动身体吧！"
+    ],
+    moderatePhysical: [
+      "午饭过后散散步，适当休息保存精力才有动力工作。",
+      "中午啦！吃顿营养的午餐，给身体补充能量吧！",
+      "午休时间到了，短暂休息一下，下午继续加油！"
+    ],
+    lowPhysical: [
+      "中午了，身体有点累吧？午休时小睡一会儿吧！",
+      "午饭时间，先让自己好好休息一下，别勉强！",
+      "中午啦！今天有点辛苦，午休时好好充电！"
+    ],
+    goodEmotional: [
+      "午间好！心情不错的话，和同事朋友聊聊吧！",
+      "中午了！趁着心情好，和身边人分享快乐吧！",
+      "午饭时光愉快！保持这份好心情到下午！"
+    ],
+    moderateEmotional: [
+      "午休时间到了，放空一下，调整情绪吧！",
+      "中午啦！给自己一点喘息的空间！",
+      "午间小憩，让心情放松一下！"
+    ],
+    lowEmotional: [
+      "午休时间到了，偶尔摆烂一下也挺好，不要被他人评价左右。",
+      "中午啦！情绪不好时，找个人聊聊或者自己静静！",
+      "午休时间，给自己一个独处的空间，整理一下心情！"
+    ],
+    goodIntellectual: [
+      "午饭时光，思维清晰！可以规划下午的工作！",
+      "中午了！趁着头脑清醒，整理一下下午的安排！",
+      "午休时间！思考一下今天还没完成的事项！"
+    ],
+    moderateIntellectual: [
+      "中午啦！整理一下上午的思路，准备下午的工作！",
+      "午休时，简单回顾一下上午的内容！",
+      "中午了，给大脑也放个假吧！"
+    ],
+    lowIntellectual: [
+      "中午了！思考累的时候，就休息一下吧！",
+      "午休时间到了，别让大脑过度劳累！",
+      "午饭时间！今天不适合高强度思考，轻松一点吧！"
+    ]
+  },
+  // 下午提示 (14:00-18:00)
+  afternoon: {
+    goodPhysical: [
+      "下午好！体力充沛，可以处理一些需要体力的任务！",
+      "下午时光！状态不错，动起来吧！",
+      "下午好！趁着精力充足，完成一些体力活吧！"
+    ],
+    moderatePhysical: [
+      "下午了！适当休息保存精力才有动力工作。",
+      "下午好！累了就站起来活动一下！",
+      "下午时光，注意节奏，别让自己太累！"
+    ],
+    lowPhysical: [
+      "下午啦！今天挺辛苦的，注意休息哦！",
+      "下午好！身体有点累，不如做点轻松的事！",
+      "下午了！可以适当放慢节奏，照顾好自己！"
+    ],
+    goodEmotional: [
+      "下午好！心情不错，可以和朋友同事聊聊天！",
+      "下午时光！保持这份好心情！",
+      "下午好！趁着心情好，完成一些愉快的任务吧！"
+    ],
+    moderateEmotional: [
+      "下午了！累了就休息一下，调整心情！",
+      "下午好！保持平和的心态！",
+      "下午时光，给自己一些放松的时间！"
+    ],
+    lowEmotional: [
+      "下午啦！情绪不好时，允许自己暂停一下，没关系。",
+      "下午好！偶尔摆烂一下也挺好，不要被他人评价左右。",
+      "下午了！心情不好就找点让自己开心的事情做！"
+    ],
+    goodIntellectual: [
+      "下午好！思维清晰，是处理复杂任务的好时机！",
+      "下午时光！头脑清醒，抓紧时间工作吧！",
+      "下午好！趁着思维活跃，完成重要的工作吧！"
+    ],
+    moderateIntellectual: [
+      "下午了！整理一下今天的工作进度吧！",
+      "下午好！合理安排时间，提高效率！",
+      "下午时光！给大脑一些挑战！"
+    ],
+    lowIntellectual: [
+      "下午啦！思考累的时候，就处理一些简单的事情吧！",
+      "下午好！今天不太适合做复杂决策，保持简单就好！",
+      "下午了！大脑有点累，就别勉强自己思考太难的问题！"
+    ]
+  },
+  // 晚上提示 (18:00-22:00)
+  evening: {
+    goodPhysical: [
+      "晚上好！体力不错，可以去做点喜欢的运动！",
+      "晚上时光！状态好就动起来吧！",
+      "晚上好！趁着精力不错，做点让自己开心的事！"
+    ],
+    moderatePhysical: [
+      "晚上啦！适当休息保存精力，为明天做准备！",
+      "晚上好！放松一下身体，准备迎接美好的夜晚！",
+      "晚上时光，做一些轻松的活动吧！"
+    ],
+    lowPhysical: [
+      "晚上啦！今天辛苦了，早点休息吧！",
+      "晚上好！身体有点累，不如早点休息！",
+      "晚上了！好好休息，明天又是新的一天！"
+    ],
+    goodEmotional: [
+      "晚上好！心情不错，可以和亲友分享今天的快乐！",
+      "晚上时光！保持这份好心情！",
+      "晚上好！趁着心情好，和家人朋友多聊聊！"
+    ],
+    moderateEmotional: [
+      "晚上啦！给自己一些放松的时间！",
+      "晚上好！整理一下今天的心情，准备迎接明天！",
+      "晚上时光，做一些让自己开心的事情吧！"
+    ],
+    lowEmotional: [
+      "晚上啦！情绪不好时，允许自己休息，一切都会好起来的。",
+      "晚上好！偶尔摆烂一下也挺好，不要被他人评价左右，好好休息吧！",
+      "晚上了！心情不好就早点休息，明天又是新的一天！"
+    ],
+    goodIntellectual: [
+      "晚上好！思维清晰，可以规划明天的事情！",
+      "晚上时光！整理一下今天的收获吧！",
+      "晚上好！趁着头脑清醒，为明天做好准备！"
+    ],
+    moderateIntellectual: [
+      "晚上啦！总结一下今天的事情吧！",
+      "晚上好！放松大脑，准备休息！",
+      "晚上时光！做一些轻松的阅读或思考！"
+    ],
+    lowIntellectual: [
+      "晚上啦！思考累了就早点休息吧！",
+      "晚上好！今天不太适合思考复杂的事情，放松一下！",
+      "晚上了！别让大脑太累，早点休息！"
+    ]
+  },
+  // 深夜提示 (22:00-6:00)
+  lateNight: {
+    goodPhysical: [
+      "还在熬夜吗？虽然体力不错，但还是早点休息吧！",
+      "深夜时光！如果还不困，可以做点放松的事！",
+      "凌晨了！身体状态不错，但还是要早睡哦！"
+    ],
+    moderatePhysical: [
+      "深夜啦！身体需要休息了，早点睡吧！",
+      "凌晨了！该休息了，身体会感谢你的！",
+      "深夜时光！照顾好自己，早点休息！"
+    ],
+    lowPhysical: [
+      "深夜啦！今天辛苦了，快去休息吧！",
+      "凌晨了！身体已经累了吧，好好睡一觉！",
+      "深夜了！别熬夜了，好好休息才能恢复体力！"
+    ],
+    goodEmotional: [
+      "深夜时光！心情不错的话，可以写写今天的收获！",
+      "凌晨了！保持这份好心情，明天会更好！",
+      "深夜啦！心情好的时候，可以和自己好好聊聊天！"
+    ],
+    moderateEmotional: [
+      "深夜啦！放松心情，准备休息吧！",
+      "凌晨了！整理一下思绪，好好睡一觉！",
+      "深夜时光！给自己一些温暖！"
+    ],
+    lowEmotional: [
+      "深夜啦！情绪不好时，早点休息吧，明天会更好的！",
+      "凌晨了！偶尔摆烂一下也挺好，不要被他人评价左右，好好休息吧！",
+      "深夜了！心情不好就早点睡，一切都会好的！"
+    ],
+    goodIntellectual: [
+      "深夜时光！思维清晰的话，可以规划明天！",
+      "凌晨了！整理一下今天的想法吧！",
+      "深夜啦！思考完就早点休息，别熬夜！"
+    ],
+    moderateIntellectual: [
+      "深夜啦！给大脑也放个假吧！",
+      "凌晨了！休息之前简单回顾一下今天！",
+      "深夜时光！放松大脑，准备睡觉！"
+    ],
+    lowIntellectual: [
+      "深夜啦！思考累了就早点休息吧！",
+      "凌晨了！今天不适合思考了，好好休息！",
+      "深夜了！别让大脑太累，早点睡觉！"
+    ]
+  }
+};
+
+// 根据节律缓解的食物/物品推荐
+const REMEDY_RECOMMENDATIONS = {
+  physicalLow: [
+    "喝一杯热牛奶或蜂蜜水，温暖身体！",
+    "吃点香蕉补充钾元素，缓解疲劳！",
+    "来一杯姜茶，驱寒暖身！",
+    "泡个热水澡或泡脚，放松身体！",
+    "吃点坚果补充能量！"
+  ],
+  emotionalLow: [
+    "听听喜欢的音乐，放松心情！",
+    "吃点巧克力，甜食能让人心情变好！",
+    "泡一杯玫瑰花茶，舒缓情绪！",
+    "看一部轻松的喜剧或动漫！",
+    "和信任的朋友聊聊天！"
+  ],
+  intellectualLow: [
+    "喝一杯绿茶或乌龙茶，提神醒脑！",
+    "吃点核桃或蓝莓，补充脑力！",
+    "深呼吸几次，放松大脑！",
+    "做个简单的冥想，清空思绪！",
+    "听白噪音或轻音乐，帮助专注！"
+  ],
+  allLow: [
+    "今天状态不太好，好好休息最重要！",
+    "允许自己放松一下，明天会更好！",
+    "做点简单的事情，别给自己压力！",
+    "好好吃一顿，睡个好觉，明天重新开始！"
+  ]
+};
 
 const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
@@ -34,6 +312,10 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     nickname: '',
     birthDate: ''
   });
+
+  // 动态提示相关状态
+  const [dailyTip, setDailyTip] = useState('');
+  const [lastTipRefresh, setLastTipRefresh] = useState(0);
 
   // 初始化配置管理器并获取用户配置
   useEffect(() => {
@@ -102,19 +384,161 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     return new Date(dateStr);
   };
 
-  // 随机选择实践活动
-  const getRandomActivities = useCallback(() => {
-    const shuffled = [...PRACTICE_ACTIVITIES].sort(() => 0.5 - Math.random());
+  // 随机选择实践活动 - 根据节律动态推荐
+  const getRandomActivities = useCallback((physical, emotional, intellectual) => {
+    // 根据节律状态筛选合适的活动
+    let filteredActivities = [];
+
+    // 如果体力低，优先推荐低能量活动
+    if (physical < -10) {
+      filteredActivities = PRACTICE_ACTIVITIES.filter(a => a.energy === 'low');
+    }
+    // 如果情绪低，优先推荐情绪相关活动
+    else if (emotional < -10) {
+      filteredActivities = PRACTICE_ACTIVITIES.filter(a => a.type === 'emotional' || a.energy === 'low');
+    }
+    // 如果智力低，优先推荐简单活动
+    else if (intellectual < -10) {
+      filteredActivities = PRACTICE_ACTIVITIES.filter(a => a.energy === 'low');
+    }
+    // 如果体力好，可以推荐高能量活动
+    else if (physical > 20) {
+      filteredActivities = PRACTICE_ACTIVITIES.filter(a => a.type === 'physical' || a.energy === 'medium');
+    }
+    // 否则随机选择
+    else {
+      filteredActivities = [...PRACTICE_ACTIVITIES];
+    }
+
+    // 随机打乱并取前3个
+    const shuffled = filteredActivities.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 3);
   }, []);
 
-  // 简化的状态确定函数
+  // 简化的状态确定函数 - 柔化暗黑主题颜色
   const getSimpleStatus = (score) => {
-    if (score > 15) return { text: '极佳', color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900 dark:bg-opacity-30' };
-    if (score > 0) return { text: '良好', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900 dark:bg-opacity-30' };
-    if (score < -15) return { text: '极低', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900 dark:bg-opacity-30' };
-    if (score < 0) return { text: '偏低', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900 dark:bg-opacity-30' };
-    return { text: '平稳', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900 dark:bg-opacity-30' };
+    if (score > 15) return { text: '极佳', color: 'text-green-600 dark:text-green-300', bg: 'bg-green-100 dark:bg-green-900/20' };
+    if (score > 0) return { text: '良好', color: 'text-emerald-600 dark:text-emerald-300', bg: 'bg-emerald-100 dark:bg-emerald-900/20' };
+    if (score < -15) return { text: '极低', color: 'text-rose-600 dark:text-rose-300', bg: 'bg-rose-100 dark:bg-rose-900/20' };
+    if (score < 0) return { text: '偏低', color: 'text-amber-600 dark:text-amber-300', bg: 'bg-amber-100 dark:bg-amber-900/20' };
+    return { text: '平稳', color: 'text-sky-600 dark:text-sky-300', bg: 'bg-sky-100 dark:bg-sky-900/20' };
+  };
+
+  // 获取当前时间段
+  const getTimeOfDay = () => {
+    const hour = new Date().getHours();
+    if (hour >= 6 && hour < 11) return 'morning';
+    if (hour >= 11 && hour < 14) return 'noon';
+    if (hour >= 14 && hour < 18) return 'afternoon';
+    if (hour >= 18 && hour < 22) return 'evening';
+    return 'lateNight';
+  };
+
+  // 获取季节
+  const getSeason = () => {
+    const month = new Date().getMonth();
+    if (month >= 2 && month <= 4) return 'spring';
+    if (month >= 5 && month <= 7) return 'summer';
+    if (month >= 8 && month <= 10) return 'autumn';
+    return 'winter';
+  };
+
+  // 获取体力状态等级
+  const getPhysicalStatusLevel = (physical) => {
+    if (physical > 20) return 'goodPhysical';
+    if (physical >= -10) return 'moderatePhysical';
+    return 'lowPhysical';
+  };
+
+  // 获取情绪状态等级
+  const getEmotionalStatusLevel = (emotional) => {
+    if (emotional > 20) return 'goodEmotional';
+    if (emotional >= -10) return 'moderateEmotional';
+    return 'lowEmotional';
+  };
+
+  // 获取智力状态等级
+  const getIntellectualStatusLevel = (intellectual) => {
+    if (intellectual > 20) return 'goodIntellectual';
+    if (intellectual >= -10) return 'moderateIntellectual';
+    return 'lowIntellectual';
+  };
+
+  // 生成动态暖心提示
+  const generateDailyTip = useCallback(() => {
+    if (!todayData) return '';
+
+    const timeOfDay = getTimeOfDay();
+    const season = getSeason();
+    const physicalStatus = getPhysicalStatusLevel(todayData.physical);
+    const emotionalStatus = getEmotionalStatusLevel(todayData.emotional);
+    const intellectualStatus = getIntellectualStatusLevel(todayData.intellectual);
+
+    // 获取该时间段的所有提示
+    const tips = DAILY_TIPS[timeOfDay] || {};
+
+    // 优先显示最低状态对应的提示
+    let allTips = [];
+    if (physicalStatus === 'lowPhysical') {
+      allTips = allTips.concat(tips[physicalStatus] || []);
+      // 添加缓解推荐
+      const remedy = REMEDY_RECOMMENDATIONS.physicalLow[
+        Math.floor(Math.random() * REMEDY_RECOMMENDATIONS.physicalLow.length)
+      ];
+      if (remedy) allTips.push(remedy);
+    }
+    if (emotionalStatus === 'lowEmotional') {
+      allTips = allTips.concat(tips[emotionalStatus] || []);
+      const remedy = REMEDY_RECOMMENDATIONS.emotionalLow[
+        Math.floor(Math.random() * REMEDY_RECOMMENDATIONS.emotionalLow.length)
+      ];
+      if (remedy) allTips.push(remedy);
+    }
+    if (intellectualStatus === 'lowIntellectual') {
+      allTips = allTips.concat(tips[intellectualStatus] || []);
+      const remedy = REMEDY_RECOMMENDATIONS.intellectualLow[
+        Math.floor(Math.random() * REMEDY_RECOMMENDATIONS.intellectualLow.length)
+      ];
+      if (remedy) allTips.push(remedy);
+    }
+
+    // 如果没有低状态，随机选择一个状态的提示
+    if (allTips.length === 0) {
+      const randomStatus = [physicalStatus, emotionalStatus, intellectualStatus][
+        Math.floor(Math.random() * 3)
+      ];
+      allTips = tips[randomStatus] || [];
+    }
+
+    // 如果所有状态都很低，添加综合提示
+    if (physicalStatus === 'lowPhysical' && emotionalStatus === 'lowEmotional' && intellectualStatus === 'lowIntellectual') {
+      const allLowTip = REMEDY_RECOMMENDATIONS.allLow[
+        Math.floor(Math.random() * REMEDY_RECOMMENDATIONS.allLow.length)
+      ];
+      if (allLowTip) allTips.push(allLowTip);
+    }
+
+    // 添加季节特色提示
+    const seasonalTips = {
+      spring: ['春暖花开，出去踏青吧！', '春天到了，感受万物复苏！', '春日阳光正好，不妨出去走走！'],
+      summer: ['夏天炎热，注意多喝水！', '夏日炎炎，记得避暑！', '夏夜凉爽，可以出去纳凉！'],
+      autumn: ['秋高气爽，适合户外活动！', '秋天来了，注意保暖！', '秋日美景，别错过！'],
+      winter: ['冬天寒冷，注意保暖！', '冬日暖阳，晒晒太阳吧！', '冬夜漫长，早点休息！']
+    };
+    if (Math.random() < 0.3) {
+      const seasonTip = seasonalTips[season] || seasonalTips.winter;
+      allTips.push(seasonTip[Math.floor(Math.random() * seasonTip.length)]);
+    }
+
+    // 随机选择一条提示
+    const randomIndex = Math.floor(Math.random() * allTips.length);
+    return allTips[randomIndex] || '今天也要保持好心情哦！';
+  }, [todayData]);
+
+  // 刷新提示
+  const refreshTip = () => {
+    setDailyTip(generateDailyTip());
+    setLastTipRefresh(Date.now());
   };
 
   // 获取趋向符号
@@ -127,12 +551,12 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     return '→';
   };
 
-  // 获取趋势颜色
+  // 获取趋势颜色 - 柔化暗黑主题颜色
   const getTrendColorClass = (symbol) => {
-    if (symbol === '↑↑') return 'text-green-600 dark:text-green-400 font-bold';
-    if (symbol === '↑') return 'text-green-500 dark:text-green-500';
-    if (symbol === '↓↓') return 'text-red-600 dark:text-red-400 font-bold';
-    if (symbol === '↓') return 'text-red-500 dark:text-red-500';
+    if (symbol === '↑↑') return 'text-green-600 dark:text-green-300 font-bold';
+    if (symbol === '↑') return 'text-green-500 dark:text-green-400';
+    if (symbol === '↓↓') return 'text-rose-600 dark:text-rose-300 font-bold';
+    if (symbol === '↓') return 'text-rose-500 dark:text-rose-400';
     return 'text-gray-400 dark:text-gray-500';
   };
 
@@ -224,23 +648,38 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     loadDefaultData();
 
     // 初始化实践活动
-    setPracticeActivities(getRandomActivities());
+    setPracticeActivities(getRandomActivities(0, 0, 0));
   }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE, configManagerReady, getRandomActivities]);
 
-  // 检测节律极值并发送通知
+  // 检测节律极值并发送通知，同时生成动态提示
   useEffect(() => {
     if (todayData) {
       // 检查节律极值
       notificationService.checkBiorhythmCritical(todayData);
+
+      // 生成动态提示
+      const now = Date.now();
+      // 首次加载或距离上次刷新超过3小时则更新提示
+      if (lastTipRefresh === 0 || now - lastTipRefresh > 3 * 60 * 60 * 1000) {
+        setDailyTip(generateDailyTip());
+        setLastTipRefresh(now);
+      }
+
+      // 更新实践活动（根据节律动态推荐）
+      setPracticeActivities(getRandomActivities(todayData.physical, todayData.emotional, todayData.intellectual));
     }
-  }, [todayData]);
+  }, [todayData, generateDailyTip, lastTipRefresh, getRandomActivities]);
 
   // 更换实践活动
   const refreshActivities = () => {
-    setPracticeActivities(getRandomActivities());
+    if (todayData) {
+      setPracticeActivities(getRandomActivities(todayData.physical, todayData.emotional, todayData.intellectual));
+    } else {
+      setPracticeActivities(getRandomActivities(0, 0, 0));
+    }
   };
 
-  // 生成今日节律总结 - 简化版本
+  // 生成今日节律总结 - 简化版本，添加动态提示
   const renderTodaySummary = () => {
     // 确保todayData存在且包含必要的数据
     if (!todayData || todayData.physical === undefined || todayData.emotional === undefined || todayData.intellectual === undefined) {
@@ -259,24 +698,48 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     const totalStatus = getSimpleStatus(totalScore);
 
     return (
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 border border-blue-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800/30 dark:to-gray-900/30 border border-blue-200 dark:border-gray-700/50 rounded-lg p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded-full ${totalScore > 15 ? 'bg-green-500' : totalScore > 0 ? 'bg-emerald-500' : totalScore < -15 ? 'bg-red-500' : totalScore < 0 ? 'bg-amber-500' : 'bg-blue-500'}`}></div>
+            <div className={`w-3 h-3 rounded-full ${totalScore > 15 ? 'bg-green-500' : totalScore > 0 ? 'bg-emerald-500' : totalScore < -15 ? 'bg-rose-500' : totalScore < 0 ? 'bg-amber-500' : 'bg-sky-500'}`}></div>
             <span className="text-base font-medium text-gray-900 dark:text-white">综合状态</span>
           </div>
-          <span className={`text-sm font-medium px-3 py-1 rounded-full ${totalScore > 15 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-400' :
-            totalScore > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-400' :
-              totalScore < -15 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-400' :
-                totalScore < 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-400' :
-                  'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-400'
+          <span className={`text-sm font-medium px-3 py-1 rounded-full ${totalScore > 15 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300' :
+            totalScore > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300' :
+              totalScore < -15 ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/20 dark:text-rose-300' :
+                totalScore < 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300' :
+                  'bg-sky-100 text-sky-800 dark:bg-sky-900/20 dark:text-sky-300'
             }`}>
             {totalScore > 15 ? '🌟 极佳' : totalScore > 0 ? '😊 良好' : totalScore < -15 ? '😫 极低' : totalScore < 0 ? '⚠️ 偏低' : '😐 平稳'}
           </span>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
           今日综合得分: <span className="font-medium">{totalScore}%</span> - {totalStatus.text}
         </p>
+
+        {/* 动态暖心提示 */}
+        {dailyTip && (
+          <div className="bg-white/60 dark:bg-gray-700/30 rounded-lg p-3 border border-blue-100 dark:border-gray-600/50">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-2">
+                <span className="text-lg">💬</span>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed flex-1">
+                  {dailyTip}
+                </p>
+              </div>
+              <button
+                onClick={refreshTip}
+                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center ml-2 whitespace-nowrap"
+                title="换一换"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="ml-1">换一换</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -417,22 +880,22 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
                 {/* 今日节律状态 */}
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-green-100 dark:border-green-800 border-opacity-50">
-                    <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center border border-green-100 dark:border-green-800/40">
+                    <div className="text-xl font-bold text-green-600 dark:text-green-300 mb-2">
                       {todayData.physical}%
                     </div>
                     <div className="text-sm text-green-800 dark:text-green-300 font-medium">体力</div>
                   </div>
 
-                  <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-blue-100 dark:border-blue-800 border-opacity-50">
-                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center border border-blue-100 dark:border-blue-800/40">
+                    <div className="text-xl font-bold text-blue-600 dark:text-blue-300 mb-2">
                       {todayData.emotional}%
                     </div>
                     <div className="text-sm text-blue-800 dark:text-blue-300 font-medium">情绪</div>
                   </div>
 
-                  <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-800 border-opacity-50">
-                    <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-800/40">
+                    <div className="text-xl font-bold text-purple-600 dark:text-purple-300 mb-2">
                       {todayData.intellectual}%
                     </div>
                     <div className="text-sm text-purple-800 dark:text-purple-300 font-medium">智力</div>
@@ -442,13 +905,13 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                 {/* 状态解读 */}
                 <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
                   <div className="flex flex-wrap justify-center gap-y-2 gap-x-4 text-sm">
-                    <span className={`px-2 py-0.5 rounded ${todayData.physical >= 0 ? 'bg-green-50 text-green-700 dark:bg-green-900 dark:bg-opacity-30' : 'bg-red-50 text-red-700 dark:bg-red-900 dark:bg-opacity-30'}`}>
+                    <span className={`px-2 py-0.5 rounded ${todayData.physical >= 0 ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'}`}>
                       {todayData.physical >= 0 ? '✓ 体力充沛' : '⚠ 体力偏低'}
                     </span>
-                    <span className={`px-2 py-0.5 rounded ${todayData.emotional >= 0 ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:bg-opacity-30' : 'bg-amber-50 text-amber-700 dark:bg-amber-900 dark:bg-opacity-30'}`}>
+                    <span className={`px-2 py-0.5 rounded ${todayData.emotional >= 0 ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'}`}>
                       {todayData.emotional >= 0 ? '😊 情绪稳定' : '🌪️ 情绪波动'}
                     </span>
-                    <span className={`px-2 py-0.5 rounded ${todayData.intellectual >= 0 ? 'bg-purple-50 text-purple-700 dark:bg-purple-900 dark:bg-opacity-30' : 'bg-orange-50 text-orange-700 dark:bg-orange-900 dark:bg-opacity-30'}`}>
+                    <span className={`px-2 py-0.5 rounded ${todayData.intellectual >= 0 ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300' : 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300'}`}>
                       {todayData.intellectual >= 0 ? '💡 思维清晰' : '🧠 思考需谨慎'}
                     </span>
                   </div>
@@ -460,7 +923,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             {renderTodaySummary()}
 
             {/* 今日实践建议卡片 */}
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 dark:bg-opacity-20 border border-purple-100 dark:border-purple-700 rounded-lg shadow-sm p-4">
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-100 dark:border-purple-700/50 rounded-lg shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-base font-semibold text-purple-800 dark:text-purple-300">
                   实践建议
@@ -476,17 +939,20 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                 </button>
               </div>
 
-              <p className="text-sm text-purple-700 dark:text-purple-400 mb-3">
-                根据节律状态推荐活动：
+              <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
+                {todayData && todayData.physical < -10 ? '今日体力偏低，建议做些轻松的活动：' :
+                 todayData && todayData.emotional < -10 ? '今日情绪波动，建议做些放松心情的活动：' :
+                 todayData && todayData.intellectual < -10 ? '今日思考需要谨慎，建议做些简单的活动：' :
+                 '根据节律状态推荐活动：'}
               </p>
 
               <div className="space-y-2">
                 {practiceActivities.map((activity, index) => (
                   <div
                     key={activity.id}
-                    className="bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-70 rounded-lg p-3 flex items-start"
+                    className="bg-white dark:bg-gray-800/40 bg-opacity-70 dark:bg-opacity-70 rounded-lg p-3 flex items-start"
                   >
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center mr-3 mt-0.5">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-800/40 flex items-center justify-center mr-3 mt-0.5">
                       <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
                         {index + 1}
                       </span>
@@ -500,7 +966,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                           {activity.duration}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
                         {activity.description}
                       </p>
                     </div>
@@ -556,9 +1022,9 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                     <thead className="bg-gray-50 dark:bg-gray-900 dark:bg-opacity-50">
                       <tr>
                         <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">日期</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider">体力</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">情绪</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider">智力</th>
+                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-green-600 dark:text-green-300 uppercase tracking-wider">体力</th>
+                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-blue-600 dark:text-blue-300 uppercase tracking-wider">情绪</th>
+                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-purple-600 dark:text-purple-300 uppercase tracking-wider">智力</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
@@ -594,11 +1060,11 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             )}
 
             {/* 节律说明 - 优化间距 */}
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 dark:bg-opacity-20 border border-blue-100 dark:border-blue-700 rounded-lg p-4">
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-100 dark:border-blue-700/50 rounded-lg p-4">
               <h4 className="text-base font-semibold text-blue-800 dark:text-blue-300 mb-3">
                 节律知识
               </h4>
-              <p className="text-sm text-blue-700 dark:text-blue-400 leading-relaxed">
+              <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
                 生物节律理论包含23天体力周期、28天情绪周期和33天智力周期。正值表示能量充沛，负值表示能量偏低。每日节律状态可作为参考，帮助您合理安排活动。
               </p>
             </div>

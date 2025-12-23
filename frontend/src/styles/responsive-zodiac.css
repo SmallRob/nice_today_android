@@ -1,0 +1,173 @@
+/* 生肖能量页面的响应式样式 */
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .month-selector-energy {
+    margin: 0.5rem 0;
+  }
+  
+  .month-selector-energy .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  
+  .month-selector-energy button {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .chinese-zodiac-selector-energy-mobile .chinese-zodiac-grid-3 {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+  
+  .chinese-zodiac-selector-energy-mobile .chinese-zodiac-icon-container {
+    margin: 0.25rem !important;
+  }
+  
+  .chinese-zodiac-selector-energy-mobile .chinese-zodiac-icon {
+    width: 3rem !important;
+    height: 3rem !important;
+    font-size: 1.25rem !important;
+  }
+  
+  .energy-match-dashboard {
+    padding: 1rem !important;
+  }
+  
+  .energy-match-dashboard .flex {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .energy-match-dashboard .w-28 {
+    width: 6rem !important;
+    height: 6rem !important;
+  }
+  
+  .bazi-fortune-card {
+    padding: 1rem !important;
+  }
+  
+  .bazi-fortune-card .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+  
+  .energy-trend-chart {
+    padding: 1rem !important;
+  }
+  
+  .energy-trend-chart .h-72 {
+    height: 16rem !important;
+  }
+  
+  .lifestyle-advice-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+}
+
+/* 平板端优化 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .month-selector-energy .grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+  
+  .chinese-zodiac-selector-energy .chinese-zodiac-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  .energy-match-dashboard .flex {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  
+  .bazi-fortune-card .grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .chinese-zodiac-icon-container {
+    min-height: 4rem !important;
+    min-width: 4rem !important;
+  }
+  
+  .chinese-zodiac-icon {
+    transition: transform 0.1s ease !important;
+  }
+  
+  .chinese-zodiac-icon:active {
+    transform: scale(0.95) !important;
+  }
+  
+  .month-selector-energy button {
+    min-height: 3rem !important;
+    min-width: 5rem !important;
+    touch-action: manipulation !important;
+  }
+  
+  .month-selector-energy button:active {
+    transform: scale(0.98) !important;
+  }
+}
+
+/* 高DPI屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .chinese-zodiac-icon {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+  }
+  
+  .energy-match-dashboard svg {
+    shape-rendering: geometricPrecision !important;
+  }
+}
+
+/* 深色模式优化 */
+@media (prefers-color-scheme: dark) {
+  .month-selector-energy {
+    background: rgba(17, 24, 39, 0.8) !important;
+    border-color: rgba(55, 65, 81, 0.5) !important;
+  }
+  
+  .month-selector-energy button {
+    background: rgba(31, 41, 55, 0.8) !important;
+    border-color: rgba(55, 65, 81, 0.5) !important;
+    color: rgba(209, 213, 219, 0.9) !important;
+  }
+  
+  .month-selector-energy button:hover {
+    background: rgba(55, 65, 81, 0.8) !important;
+  }
+}
+
+/* 动画性能优化 */
+@media (prefers-reduced-motion: reduce) {
+  .chinese-zodiac-icon,
+  .month-selector-energy button,
+  .energy-match-dashboard svg {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* 打印样式优化 */
+@media print {
+  .month-selector-energy,
+  .chinese-zodiac-selector {
+    display: none !important;
+  }
+  
+  .energy-match-dashboard,
+  .bazi-fortune-card {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}

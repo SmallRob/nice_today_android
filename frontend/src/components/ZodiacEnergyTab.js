@@ -3,9 +3,11 @@ import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
 import ChineseZodiacSelector from './ChineseZodiacSelector';
+import TraditionalZodiacBackground from './TraditionalZodiacBackground';
 import '../styles/zodiac-icons.css';
 import '../styles/chinese-zodiac-icons.css';
 import '../styles/traditional-zodiac-background.css';
+import '../styles/responsive-zodiac.css';
 import { calculateBazi, getMonthlyBaziFortune, solarToLunarDescription } from '../utils/baziHelper';
 import { Line } from 'react-chartjs-2';
 import {
@@ -193,8 +195,11 @@ const ZodiacEnergyTab = memo(({ onError }) => {
     setError(null);
 
     try {
-      // 创建模拟数据
-      const todayElement = wuxingElements[Math.floor(Math.random() * wuxingElements.length)];
+      // 根据选择的日期计算当日五行元素（确定性算法，相同日期返回相同结果）
+      const date = selectedDate || new Date();
+      const seed = date.getDate() + date.getMonth() * 31 + date.getFullYear() * 372;
+      const elementIndex = Math.abs(seed) % wuxingElements.length;
+      const todayElement = wuxingElements[elementIndex];
 
       // 根据生肖确定用户五行
       const zodiacElementMap = {
@@ -852,12 +857,22 @@ const ZodiacEnergyTab = memo(({ onError }) => {
     );
   };
 
-  // 渲染八字运势卡片
+  // 渲染八字运势卡片（支持动态月份）
   const renderBaziFortuneCard = () => {
     if (!baziInfo) return null;
 
-    const monthlyFortune = getMonthlyBaziFortune(baziInfo.pillars);
+    // 根据选择的日期计算运势
+    const monthlyFortune = getMonthlyBaziFortune(baziInfo.pillars, selectedDate);
     const lunarDesc = userInfo.birthDate ? solarToLunarDescription(userInfo.birthDate) : '';
+    
+    // 检查是否是当前月份
+    const isCurrentMonth = selectedDate.getMonth() === new Date().getMonth() && 
+                          selectedDate.getFullYear() === new Date().getFullYear();
+    
+    // 获取月份名称
+    const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', 
+                       '七月', '八月', '九月', '十月', '十一月', '十二月'];
+    const selectedMonthName = monthNames[selectedDate.getMonth()];
 
     return (
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-xl p-5 border border-amber-200/50 dark:border-amber-700/50 mb-4 overflow-hidden relative group">
@@ -869,14 +884,38 @@ const ZodiacEnergyTab = memo(({ onError }) => {
             <span className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white mr-3 shadow-lg shadow-amber-500/20 text-sm">
               ☯️
             </span>
-            <span>本月八字运势</span>
-          </div>
-          {baziInfo.isApproximate && (
-            <span className="text-[10px] font-normal bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800">
-              数据不全
+            <span>
+              {isCurrentMonth ? '本月' : selectedMonthName}八字运势
+              <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
+                ({selectedDate.getFullYear()}年)
+              </span>
             </span>
-          )}
+          </div>
+          <div className="flex items-center space-x-2">
+            {baziInfo.isApproximate && (
+              <span className="text-[10px] font-normal bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800">
+                数据不全
+              </span>
+            )}
+            {!isCurrentMonth && (
+              <span className="text-[10px] font-normal bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                历史月份
+              </span>
+            )}
+          </div>
         </h3>
+
+        {/* 月份信息提示 */}
+        {!isCurrentMonth && (
+          <div className="mb-4 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
+            <div className="flex items-center text-blue-700 dark:text-blue-300 text-xs">
+              <span className="mr-2">💡</span>
+              <span>
+                正在查看 <span className="font-semibold">{selectedDate.getFullYear()}年{selectedMonthName}</span> 的运势分析
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* 八字展示 */}
         <div className="grid grid-cols-4 gap-2 mb-6">
@@ -931,10 +970,10 @@ const ZodiacEnergyTab = memo(({ onError }) => {
               <div className="absolute top-0 right-0 p-1 opacity-10">
                 <span className="text-2xl">📅</span>
               </div>
-              <div className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-bold">年份干支</div>
+              <div className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-bold">月份干支</div>
               <div className="text-[10px] font-black text-gray-800 dark:text-white mt-1.5 flex items-center">
                 <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded">
-                  {lunarDesc}
+                  {monthlyFortune.monthGanzhi || '未知'}
                 </span>
               </div>
             </div>
@@ -946,7 +985,7 @@ const ZodiacEnergyTab = memo(({ onError }) => {
           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
           </svg>
-          注：基于日干与流月干支的生克关系计算
+          注：基于日干与{selectedDate.getFullYear()}年{selectedMonthName}干支的生克关系计算
         </div>
       </div>
     );
@@ -1213,32 +1252,57 @@ const ZodiacEnergyTab = memo(({ onError }) => {
               ✨ 点击任意生肖图标查看能量指引，临时查看不会保存配置
             </div>
 
-            {/* 炫彩生肖选择器 - 优化为紧凑布局 */}
+            {/* 炫彩生肖选择器 - 响应式布局优化 */}
             <div className="mb-4">
-              <ChineseZodiacSelector
-                selectedZodiac={userZodiac}
-                onZodiacChange={handleZodiacChange}
-                size="md"
-                showLabels={false}
-                gridLayout="4"
-                className="chinese-zodiac-selector-energy"
-              />
+              <div className="lg:hidden">
+                {/* 移动端：3列布局 */}
+                <ChineseZodiacSelector
+                  selectedZodiac={userZodiac}
+                  onZodiacChange={handleZodiacChange}
+                  size="md"
+                  showLabels={false}
+                  gridLayout="3"
+                  className="chinese-zodiac-selector-energy-mobile"
+                />
+              </div>
+              <div className="hidden lg:block">
+                {/* 桌面端：4列布局 */}
+                <ChineseZodiacSelector
+                  selectedZodiac={userZodiac}
+                  onZodiacChange={handleZodiacChange}
+                  size="md"
+                  showLabels={false}
+                  gridLayout="4"
+                  className="chinese-zodiac-selector-energy"
+                />
+              </div>
             </div>
 
             {/* 日期选择器 */}
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                查看指定日期的能量指引
-              </label>
-              <input
-                type="date"
-                value={selectedDate ? formatDateLocal(selectedDate) : ''}
-                onChange={(e) => {
-                  const newDate = e.target.value ? new Date(e.target.value) : new Date();
-                  handleDateChange(newDate);
-                }}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm transition-colors"
-              />
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  <span className="flex items-center">
+                    <span className="mr-2">📅</span>
+                    选择日期
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-normal block mt-1">
+                    选择日期查看生肖运势和当月八字运势分析
+                  </span>
+                </label>
+                <input
+                  type="date"
+                  value={selectedDate.toISOString().split('T')[0]}
+                  onChange={(e) => handleDateChange(new Date(e.target.value))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button
+                  onClick={() => handleDateChange(new Date())}
+                  className="mt-2 w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors duration-200"
+                >
+                  今天
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1261,7 +1325,8 @@ const ZodiacEnergyTab = memo(({ onError }) => {
   return (
     <div className="h-full flex flex-col">
       {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
-      <div className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch">        {/* 传统风格Banner区域 - 随页面滚动 */}
+      <div className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch scroll-smooth">
+        {/* 传统风格Banner区域 - 随页面滚动 */}
         <div className="traditional-zodiac-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 flex-shrink-0">
           {/* 传统生肖装饰符号 */}
           <div className="absolute top-2 left-2 w-12 h-12 opacity-20">
