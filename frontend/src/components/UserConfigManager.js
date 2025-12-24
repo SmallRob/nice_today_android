@@ -273,28 +273,6 @@ const calculateTotalScore = (scoreResult) => {
   return Math.round(totalScore);
 };
 
-// 将五格评分转换为100分制综合评分
-const calculateTotalScore = (scoreResult) => {
-  if (!scoreResult) return 0;
-
-  const calculateGridScore = (gridValue) => {
-    const meaning = getMeaning(gridValue);
-    if (meaning.type === '吉') return 20;
-    if (meaning.type === '半吉') return 15;
-    return 5;
-  };
-
-  const tianScore = calculateGridScore(scoreResult.tian);
-  const renScore = calculateGridScore(scoreResult.ren);
-  const diScore = calculateGridScore(scoreResult.di);
-  const waiScore = calculateGridScore(scoreResult.wai);
-  const zongScore = calculateGridScore(scoreResult.zong);
-
-  const totalScore = tianScore + renScore + diScore + waiScore + zongScore;
-
-  return Math.round(totalScore);
-};
-
 // 姓名评分模态框
 const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveScore, showMessage }) => {
   const [step, setStep] = useState('input'); // input, result
@@ -303,6 +281,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
   const [strokes, setStrokes] = useState({ surname: [], firstName: [] });
   const [analysisResult, setAnalysisResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [hasCalculatedBefore, setHasCalculatedBefore] = useState(false); // 是否已经计算过
 
   // 智能拆分中文姓名
   const smartSplitName = (fullName) => {
@@ -448,11 +427,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
 
       if (res && res.tian !== undefined && res.ren !== undefined && res.di !== undefined && res.wai !== undefined && res.zong !== undefined) {
         setAnalysisResult(res);
-
-        // 如果是个人评分且有回调，保存评分结果
-        if (isPersonal && !tempName && onSaveScore) {
-          onSaveScore(res);
-        }
+        setHasCalculatedBefore(true);
 
         setStep('result');
       } else {
@@ -635,7 +610,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
 
               <div className="pt-4">
                 <Button variant="primary" onClick={handleCalculate} className="w-full">
-                  开始评分
+                  {hasCalculatedBefore ? '重新评分' : '开始评分'}
                 </Button>
               </div>
             </div>
@@ -649,7 +624,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
                   <h4 className="text-xl font-bold">{splitName.surname}{splitName.firstName}</h4>
                   <span className="text-sm bg-white/20 px-2 py-1 rounded">五格剖象</span>
                 </div>
-                
+
                 {/* 100分制总评分 */}
                 <div className="text-center mb-4">
                   <div className="text-4xl font-bold mb-1">{convertTo100PointScore(analysisResult)}<span className="text-lg">分</span></div>
@@ -657,7 +632,7 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
                     {getScoreLevel(convertTo100PointScore(analysisResult))}
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div className="text-center bg-white/10 rounded p-2">
                     <div className="text-xs opacity-80">总格 (后运)</div>
@@ -706,26 +681,27 @@ const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveSco
                 })}
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 space-y-2">
+                {isPersonal && (
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      if (onSaveScore) {
+                        onSaveScore(analysisResult);
+                        showMessage && showMessage('评分已保存', 'success');
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    保存评分
+                  </Button>
+                )}
                 <Button variant="outline" onClick={() => setStep('input')} className="w-full">
                   重新调整
                 </Button>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-6">
-              <div className="text-red-500 mb-4">
-                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-              </div>
-              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">评分数据无效</h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">当前评分数据格式不正确，无法正常显示结果。</p>
-              <Button variant="primary" onClick={() => setStep('input')} className="w-full">
-                重新评分
-              </Button>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -899,116 +875,24 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       showMessage('请输入昵称', 'error');
       return;
     }
-  
+
     if (!formData.birthDate) {
       showMessage('请选择出生日期', 'error');
       return;
     }
-  
+
     setIsSaving(true);
     await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // 自动为中文姓名打分
-    let finalConfigData = { ...formData };
-    if (formData.realName && /[一-龥]/.test(formData.realName)) {
-      try {
-        const compoundSurnames = [
-          '欧阳', '太史', '端木', '上官', '司马', '东方', '独孤', '南宫', '万俟', '闻人',
-          '夏侯', '诸葛', '尉迟', '公羊', '赫连', '澹台', '皇甫', '宗政', '濮阳', '公冶',
-          '太叔', '申屠', '公孙', '慕容', '仲孙', '钟离', '长孙', '宇文', '司徒', '鲜于',
-          '司空', '闾丘', '子车', '亓官', '司寇', '巫马', '公西', '颛孙', '壤驷', '公良',
-          '漆雕', '乐正', '宰父', '谷梁', '拓跋', '夹谷', '轩辕', '令狐', '段干', '百里',
-          '呼延', '东郭', '南门', '羊舌', '微生', '公户', '公玉', '公仪', '梁丘', '公仲',
-          '公上', '公门', '公山', '公坚', '左丘', '公伯', '西门', '公祖', '第五', '公乘',
-          '贯丘', '公皙', '南荣', '东里', '东宫', '仲长', '子书', '子桑', '即墨', '达奚',
-          '褚师'
-        ];
-  
-        let surname = '', firstName = '';
-        const name = formData.realName.trim();
-  
-        if (name.includes('·') || name.includes('•')) {
-          const parts = name.split(/[·•]/);
-          surname = parts[0] || '';
-          firstName = parts.slice(1).join('') || '';
-        } else {
-          let isCompound = false;
-          for (const compoundSurname of compoundSurnames) {
-            if (name.startsWith(compoundSurname)) {
-              surname = compoundSurname;
-              firstName = name.substring(compoundSurname.length);
-              isCompound = true;
-              break;
-            }
-          }
-  
-          if (!isCompound) {
-            const nameLength = name.length;
-            if (nameLength === 2) {
-              surname = name.substring(0, 1);
-              firstName = name.substring(1);
-            } else if (nameLength === 3) {
-              surname = name.substring(0, 1);
-              firstName = name.substring(1);
-            } else if (nameLength >= 4) {
-              surname = name.substring(0, 2);
-              firstName = name.substring(2);
-            }
-          }
-        }
-  
-        const surnameChars = surname.split('').filter(c => c);
-        const firstNameChars = firstName.split('').filter(c => c);
-        const surnameStrokes = surnameChars.map(c => getCharStrokes(c));
-        const firstNameStrokes = firstNameChars.map(c => getCharStrokes(c));
-  
-        const scoreResult = calculateFiveGrids(
-          surname,
-          firstName,
-          surnameStrokes.map(s => parseInt(s) || 1),
-          firstNameStrokes.map(s => parseInt(s) || 1)
-        );
 
-        const mainMeaning = getMeaning(scoreResult.ren);
-        const totalScore = calculateTotalScore(scoreResult);
-        finalConfigData.nameScore = {
-          ...scoreResult,
-          mainType: mainMeaning.type,
-          totalScore: totalScore
-        };
-      } catch (e) {
-        console.error('自动评分失败:', e);
-      }
-    }
-  
-    // 如果没有评分但有真实姓名，保留现有评分
-    if (!finalConfigData.nameScore && formData.nameScore) {
-      finalConfigData.nameScore = formData.nameScore;
-    }
-  
-    // 计算八字信息
-    if (formData.birthDate && formData.birthTime) {
-      try {
-        const longitude = formData.birthLocation?.lng || 116.40;
-        const baziInfo = calculateDetailedBazi(formData.birthDate, formData.birthTime, longitude);
-        if (baziInfo) {
-          finalConfigData.bazi = baziInfo;
-        }
-      } catch (error) {
-        console.error('八字计算失败:', error);
-        // 即使八字计算失败也不影响保存其他信息
-      }
-    }
-  
     // 校验位置信息
     let finalLocation = { ...formData.birthLocation };
-  
+
     try {
       const lngMatch = locationInput.match(/经度[:：]\s*([-+]?\d+(\.\d+)?)/) || locationInput.match(/lng[:：]\s*([-+]?\d+(\.\d+)?)/);
       const latMatch = locationInput.match(/纬度[:：]\s*([-+]?\d+(\.\d+)?)/) || locationInput.match(/lat[:：]\s*([-+]?\d+(\.\d+)?)/);
-  
+
       let parsedLng, parsedLat;
-  
+
       if (lngMatch && latMatch) {
         parsedLng = parseFloat(lngMatch[1]);
         parsedLat = parseFloat(latMatch[1]);
@@ -1022,14 +906,14 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           else { parsedLng = v1; parsedLat = v3; }
         }
       }
-  
+
       if (parsedLng !== undefined && parsedLat !== undefined && !isNaN(parsedLng) && !isNaN(parsedLat)) {
         if (parsedLng >= -180 && parsedLng <= 180 && parsedLat >= -90 && parsedLat <= 90) {
           finalLocation.lng = parsedLng;
           finalLocation.lat = parsedLat;
         }
       }
-  
+
       const addressPart = locationInput.split(/[(\uff08]/)[0].trim();
       if (addressPart) {
         const parts = addressPart.split(/\s+/);
@@ -1043,7 +927,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           finalLocation.district = '';
         }
       }
-  
+
       if (finalLocation.lng === undefined || finalLocation.lng === null) {
         finalLocation.lng = 116.40;
         finalLocation.lat = 39.90;
@@ -1052,15 +936,16 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         finalLocation.district = '东城区';
         showMessage('未检测到有效经纬度，已默认设置为北京', 'info');
       }
-  
+
     } catch (e) {
       console.error("Location parse error", e);
       if (!finalLocation.lng) {
         finalLocation = { ...DEFAULT_REGION };
       }
     }
-  
-    onSave(index, { ...finalConfigData, birthLocation: finalLocation });
+
+    // 将表单数据传递给父组件处理（姓名评分、八字计算由父组件完成）
+    onSave(index, { ...formData, birthLocation: finalLocation });
     setIsSaving(false);
     onClose();
   }, [formData, index, onSave, showMessage, locationInput, onClose]);
@@ -1341,7 +1226,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 };
 
 // 配置列表项组件
-const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive }) => {
+const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -1418,6 +1303,45 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive }) 
             </div>
           </div>
 
+          {/* 姓名评分入口 */}
+          {config.realName && /[一-龥]/.test(config.realName) ? (
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400 text-sm">姓名评分：</span>
+                  {config.nameScore && (
+                    <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${config.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      config.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                      config.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                      config.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                      {config.nameScore.totalScore || 0}分
+                    </span>
+                  )}
+                </div>
+                <button
+                  className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
+                  onClick={() => onScoreName && onScoreName(index)}
+                >
+                  {config.nameScore ? '重新评分' : '评分'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center">
+                <span className="text-gray-500 dark:text-gray-400 text-sm">姓名评分：</span>
+                <button
+                  className="ml-2 px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
+                  onClick={() => onEdit && onEdit(index)}
+                >
+                  填写姓名并评分
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* 操作按钮 */}
           <div className="flex flex-wrap gap-2 mt-4">
             {!isActive && (
@@ -1438,15 +1362,13 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive }) 
                 编辑
               </Button>
             )}
-            {index > 0 && (
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => onDelete(index)}
-              >
-                删除
-              </Button>
-            )}
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => onDelete(index)}
+            >
+              删除
+            </Button>
           </div>
         </div>
       )}
@@ -1467,17 +1389,6 @@ const UserConfigManagerComponent = () => {
   const [baziKey, setBaziKey] = useState(0); // 八字计算刷新键
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 编辑弹窗状态
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
-
-  // 验证姓名评分结果是否有效
-  const isValidNameScore = (score) => {
-    if (!score) return false;
-    // 检查是否包含必要的五格评分字段
-    return score.tian !== undefined &&
-           score.ren !== undefined &&
-           score.di !== undefined &&
-           score.wai !== undefined &&
-           score.zong !== undefined;
-  };
 
   // 初始化配置管理器 - 优化异步加载
   useEffect(() => {
@@ -1539,14 +1450,14 @@ const UserConfigManagerComponent = () => {
   }, []);
 
   // 处理配置保存
-  const handleSaveConfig = useCallback((index, configData) => {
-    // 检查是否是新建配置（检查存储中是否存在）
+  const handleSaveConfig = useCallback(async (index, configData) => {
+    // 检查是否是新建配置（index < 0 表示新建，或 index 超出存储范围）
     const storedConfigs = userConfigManager.getAllConfigs();
-    const isNewConfig = index >= storedConfigs.length;
-  
-    // 自动为中文姓名打分
+    const isNewConfig = index < 0 || index >= storedConfigs.length;
+
+    // 自动为中文姓名打分（只有当 nameScore 不存在时才计算）
     let finalConfigData = { ...configData };
-    if (configData.realName && /[一-龥]/.test(configData.realName)) {
+    if (configData.realName && /[一-龥]/.test(configData.realName) && !configData.nameScore) {
       try {
         // 智能拆分姓名
         const compoundSurnames = [
@@ -1560,10 +1471,10 @@ const UserConfigManagerComponent = () => {
           '贯丘', '公皙', '南荣', '东里', '东宫', '仲长', '子书', '子桑', '即墨', '达奚',
           '褚师'
         ];
-  
+
         let surname = '', firstName = '';
         const name = configData.realName.trim();
-  
+
         // 检查是否包含中文圆点
         if (name.includes('·') || name.includes('•')) {
           const parts = name.split(/[·•]/);
@@ -1580,7 +1491,7 @@ const UserConfigManagerComponent = () => {
               break;
             }
           }
-  
+
           if (!isCompound) {
             const nameLength = name.length;
             if (nameLength === 2) {
@@ -1595,13 +1506,13 @@ const UserConfigManagerComponent = () => {
             }
           }
         }
-  
+
         // 计算五格评分
         const surnameChars = surname.split('').filter(c => c);
         const firstNameChars = firstName.split('').filter(c => c);
         const surnameStrokes = surnameChars.map(c => getCharStrokes(c));
         const firstNameStrokes = firstNameChars.map(c => getCharStrokes(c));
-  
+
         const scoreResult = calculateFiveGrids(
           surname,
           firstName,
@@ -1620,6 +1531,11 @@ const UserConfigManagerComponent = () => {
         console.error('自动评分失败:', e);
         // 失败时不中断保存流程
       }
+    }
+    // 如果 nameScore 存在但缺少 totalScore，则计算 totalScore
+    else if (finalConfigData.nameScore && finalConfigData.nameScore.totalScore === undefined) {
+      const totalScore = calculateTotalScore(finalConfigData.nameScore);
+      finalConfigData.nameScore.totalScore = totalScore;
     }
   
     // 计算八字信息
@@ -1640,22 +1556,40 @@ const UserConfigManagerComponent = () => {
     if (isNewConfig) {
       // 新建配置，添加到存储
       success = userConfigManager.addConfig(finalConfigData);
+      
+      // 新建配置成功后，立即获取新配置的索引并设为活跃配置
+      if (success) {
+        const currentConfigs = userConfigManager.getAllConfigs();
+        const newIndex = currentConfigs.length - 1; // 新配置的索引是最后一个
+        console.log('新建配置成功，索引:', newIndex);
+        
+        // 立即将新配置设为活跃配置（这会更新 isused 状态）
+        const setActiveSuccess = userConfigManager.setActiveConfig(newIndex);
+        console.log('设置新配置为活跃配置:', setActiveSuccess);
+      }
     } else {
       // 现有配置，更新存储
       success = userConfigManager.updateConfig(index, finalConfigData);
     }
   
     if (success) {
+      // 等待一小段时间确保存储完成
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       // 立即从userConfigManager重新加载所有配置，确保数据同步
       const freshConfigs = userConfigManager.getAllConfigs();
+      const freshActiveIndex = userConfigManager.getActiveConfigIndex();
+      
+      console.log('保存后配置状态:', {
+        configCount: freshConfigs.length,
+        activeIndex: freshActiveIndex,
+        activeConfig: freshConfigs[freshActiveIndex]
+      });
+      
+      // 更新本地状态
       setConfigs([...freshConfigs]);
-  
-      // 如果是新建配置，设置为活跃配置
-      if (isNewConfig) {
-        setActiveConfigIndex(index);
-        userConfigManager.setActiveConfig(index);
-      }
-  
+      setActiveConfigIndex(freshActiveIndex);
+
       // 强制重新加载所有组件，确保数据同步
       setTimeout(() => {
         userConfigManager.forceReloadAll();
@@ -1667,7 +1601,7 @@ const UserConfigManagerComponent = () => {
     } else {
       showMessage('保存配置失败，请重试', 'error');
     }
-  }, [showMessage, isValidNameScore]);
+  }, [showMessage]);
 
   // 处理添加新配置 - 只创建临时配置，不直接保存
   const handleAddConfig = useCallback(() => {
@@ -1684,28 +1618,27 @@ const UserConfigManagerComponent = () => {
       return;
     }
 
-    // 检查是否是新建配置（检查存储中是否存在）
+    // 检查是否是临时配置（不在存储中）
     const storedConfigs = userConfigManager.getAllConfigs();
-    const isNewConfig = index >= storedConfigs.length;
+    const isTempConfig = index >= storedConfigs.length;
 
     // 使用自定义确认对话框替代window.confirm
     if (window.confirm('确定要删除这个配置吗？')) {
-      let success;
-      if (isNewConfig) {
-        // 新建配置，只需从本地状态移除
+      if (isTempConfig) {
+        // 临时配置，只需从本地状态移除
         setConfigs(prev => prev.filter((_, i) => i !== index));
         // 调整展开索引
         setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
         showMessage('删除配置成功', 'success');
-        return;
       } else {
         // 存储中的配置，需要从存储中移除
-        success = userConfigManager.removeConfig(index);
+        const success = userConfigManager.removeConfig(index);
         if (success) {
           // 更新本地状态
-          setConfigs(prev => prev.filter((_, i) => i !== index));
+          const freshConfigs = userConfigManager.getAllConfigs();
+          setConfigs([...freshConfigs]);
           // 调整展开索引
-          setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
+          setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
           showMessage('删除配置成功', 'success');
         } else {
           showMessage('删除配置失败，请重试', 'error');
@@ -1718,6 +1651,12 @@ const UserConfigManagerComponent = () => {
   const handleEditConfig = useCallback((index) => {
     setEditingConfigIndex(index);
     setIsEditModalOpen(true);
+  }, []);
+
+  // 处理姓名评分
+  const handleScoreName = useCallback((index) => {
+    setTempScoringConfigIndex(index);
+    setIsTempScoringOpen(true);
   }, []);
 
   // 优化处理设置活跃配置 - 异步切换避免卡顿
@@ -1879,7 +1818,8 @@ const UserConfigManagerComponent = () => {
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">昵称：</span>
                 <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].nickname}</span>
               </div>
-              {configs[activeConfigIndex].realName && (
+              {/* 真实姓名或姓名评分入口 */}
+              {configs[activeConfigIndex].realName ? (
                 <div>
                   <span className="text-sm font-medium text-gray-600 dark:text-gray-400">真实姓名：</span>
                   <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].realName}</span>
@@ -1904,6 +1844,20 @@ const UserConfigManagerComponent = () => {
                       {configs[activeConfigIndex]?.nameScore ? '重新计算评分' : '计算评分'}
                     </button>
                   )}
+                </div>
+              ) : (
+                <div>
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">姓名评分：</span>
+                  <button
+                    className="ml-2 px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
+                    onClick={() => {
+                      setTempScoringConfigIndex(activeConfigIndex);
+                      setIsTempScoringOpen(true);
+                    }}
+                  >
+                    填写姓名并评分
+                  </button>
+                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">（可选，用于五格评分与八字测算）</span>
                 </div>
               )}
               <div>
@@ -2034,12 +1988,14 @@ const UserConfigManagerComponent = () => {
         name={configs[tempScoringConfigIndex]?.realName || ''}
         isPersonal={tempScoringConfigIndex !== null}
         onSaveScore={(score) => {
-          // 保存评分到配置
+          // 保存评分到配置（仅个人评分）
           if (tempScoringConfigIndex !== null && score) {
             const totalScore = calculateTotalScore(score);
-            const updatedConfig = { ...configs[tempScoringConfigIndex], nameScore: { ...score, totalScore } };
-            handleSaveConfig(tempScoringConfigIndex, updatedConfig);
+            // 直接更新配置的 nameScore 字段，updateConfig 会自动通知监听器更新状态
+            userConfigManager.updateConfig(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
+            console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
           }
+          // 临时为他人评分时不保存
         }}
         showMessage={showMessage}
       />
@@ -2073,6 +2029,7 @@ const UserConfigManagerComponent = () => {
             onDelete={handleDeleteConfig}
             onSetActive={handleSetActiveConfig}
             onEdit={handleEditConfig}
+            onScoreName={handleScoreName}
           />
         ))}
       </div>

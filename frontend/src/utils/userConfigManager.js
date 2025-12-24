@@ -23,7 +23,8 @@ const DEFAULT_CONFIG = {
   gender: 'male',
   mbti: 'INFP',
   nameScore: null, // 姓名评分结果
-  bazi: null // 八字命格信息（包含四柱、时辰、经纬度等）
+  bazi: null, // 八字命格信息（包含四柱、时辰、经纬度等）
+  isused: false // 是否为当前使用的配置
 };
 
 // 空配置默认值
@@ -45,7 +46,8 @@ const EMPTY_CONFIG_DEFAULTS = {
   gender: 'male',
   mbti: 'ISFP',
   nameScore: null,
-  bazi: null
+  bazi: null,
+  isused: false
 };
 
 // 本地存储键名
@@ -71,6 +73,12 @@ class UserConfigManager {
       const storedConfigs = localStorage.getItem(STORAGE_KEYS.USER_CONFIGS);
       const storedIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
 
+      console.log('从本地存储加载配置:', {
+        hasConfigs: !!storedConfigs,
+        hasIndex: !!storedIndex,
+        configsLength: storedConfigs ? storedConfigs.length : 0
+      });
+
       // 解析配置数据
       this.configs = storedConfigs ? JSON.parse(storedConfigs) : [DEFAULT_CONFIG];
       this.activeConfigIndex = storedIndex ? parseInt(storedIndex, 10) : 0;
@@ -80,6 +88,41 @@ class UserConfigManager {
         this.configs = [DEFAULT_CONFIG];
         this.activeConfigIndex = 0;
       }
+
+      // 确保每个配置都有必要的字段，包括 isused
+      this.configs = this.configs.map(config => ({
+        nickname: config.nickname || DEFAULT_CONFIG.nickname,
+        realName: config.realName || '',
+        birthDate: config.birthDate || DEFAULT_CONFIG.birthDate,
+        birthTime: config.birthTime || DEFAULT_CONFIG.birthTime,
+        shichen: config.shichen || DEFAULT_CONFIG.shichen,
+        birthLocation: config.birthLocation || DEFAULT_CONFIG.birthLocation,
+        zodiac: config.zodiac || DEFAULT_CONFIG.zodiac,
+        zodiacAnimal: config.zodiacAnimal || DEFAULT_CONFIG.zodiacAnimal,
+        gender: config.gender || DEFAULT_CONFIG.gender,
+        mbti: config.mbti || DEFAULT_CONFIG.mbti,
+        nameScore: config.nameScore || null,
+        bazi: config.bazi || null,
+        isused: config.isused || false, // 确保 isused 字段存在
+        ...config
+      }));
+
+      // 确保 activeConfigIndex 与 isused 状态一致
+      // 检查是否有配置的 isused 为 true
+      const hasUsedConfig = this.configs.some(c => c.isused === true);
+      if (hasUsedConfig) {
+        // 如果有 isused 为 true 的配置，使用第一个 isused 为 true 的配置索引
+        const usedIndex = this.configs.findIndex(c => c.isused === true);
+        this.activeConfigIndex = usedIndex >= 0 ? usedIndex : 0;
+      } else {
+        // 如果没有 isused 为 true 的配置，将当前 activeConfigIndex 对应的配置设为 isused = true
+        this.configs[this.activeConfigIndex].isused = true;
+      }
+
+      // 确保只有一个配置的 isused 为 true
+      this.configs.forEach((config, idx) => {
+        config.isused = idx === this.activeConfigIndex;
+      });
 
       // 确保索引在有效范围内
       this.activeConfigIndex = Math.max(0, Math.min(this.activeConfigIndex, this.configs.length - 1));
@@ -175,6 +218,7 @@ class UserConfigManager {
       gender: config.gender || 'male',
       mbti: config.mbti || 'ISFP',
       nameScore: config.nameScore || null,
+      isused: false, // 新配置默认不使用
       ...config
     };
 
@@ -202,8 +246,12 @@ class UserConfigManager {
       return false;
     }
 
+    // 保留原配置的 isused 状态（除非明确指定）
+    const keepIsused = this.configs[index].isused && updates.isused === undefined;
+    const configUpdates = keepIsused ? updates : { ...updates };
+
     // 更新配置
-    this.configs[index] = { ...this.configs[index], ...updates };
+    this.configs[index] = { ...this.configs[index], ...configUpdates };
 
     // 保存到本地存储
     this.saveToStorage();
@@ -211,7 +259,7 @@ class UserConfigManager {
     // 通知监听器
     this.notifyListeners();
 
-    console.log(`更新配置 ${index} 成功`, this.configs[index]);
+    console.log(`更新配置 ${index} 成功，isused: ${this.configs[index].isused}`, this.configs[index]);
     return true;
   }
 
@@ -239,6 +287,14 @@ class UserConfigManager {
       this.activeConfigIndex--;
     }
 
+    // 确保有一个配置被设置为 isused = true
+    if (this.configs.length > 0 && this.activeConfigIndex >= 0) {
+      // 更新所有配置的 isused 状态
+      this.configs.forEach((config, idx) => {
+        config.isused = idx === this.activeConfigIndex;
+      });
+    }
+
     // 保存到本地存储
     this.saveToStorage();
 
@@ -260,6 +316,11 @@ class UserConfigManager {
       return false;
     }
 
+    // 更新所有配置的 isused 状态
+    this.configs.forEach((config, idx) => {
+      config.isused = idx === index;
+    });
+
     this.activeConfigIndex = index;
 
     // 保存到本地存储
@@ -268,7 +329,7 @@ class UserConfigManager {
     // 通知监听器
     this.notifyListeners();
 
-    console.log(`设置活跃配置为 ${index} 成功`);
+    console.log(`设置活跃配置为 ${index} 成功，isused 状态已更新`);
     return true;
   }
 
@@ -277,8 +338,23 @@ class UserConfigManager {
    */
   saveToStorage() {
     try {
-      localStorage.setItem(STORAGE_KEYS.USER_CONFIGS, JSON.stringify(this.configs));
+      const configsJson = JSON.stringify(this.configs);
+      localStorage.setItem(STORAGE_KEYS.USER_CONFIGS, configsJson);
       localStorage.setItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX, this.activeConfigIndex.toString());
+      
+      // 验证保存是否成功
+      const verifyConfigs = localStorage.getItem(STORAGE_KEYS.USER_CONFIGS);
+      const verifyIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
+      
+      if (verifyConfigs !== configsJson) {
+        console.error('保存配置验证失败：存储的数据与预期不符');
+        return false;
+      }
+      
+      console.log('配置已成功保存到本地存储', {
+        configCount: this.configs.length,
+        activeIndex: this.activeConfigIndex
+      });
       return true;
     } catch (error) {
       console.error('保存配置到本地存储失败:', error);

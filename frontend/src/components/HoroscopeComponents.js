@@ -6,13 +6,13 @@ import '../styles/horoscope.css';
 export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleHoroscopeChange, handleRestoreUserHoroscope, getHoroscopeData }) => {
   return (
     <div className="horoscope-card">
-      <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-        <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+        <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
         </svg>
         星座选择
       </h3>
-      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300 mb-3">
+      <div className="text-sm text-gray-600 dark:text-gray-300 mb-3">
         选择您的星座，获取每日运势指引
       </div>
 
@@ -38,7 +38,7 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center">
               <span className="text-yellow-500 mr-2 text-lg">⚠️</span>
-              <span className="text-yellow-700 dark:text-yellow-300 text-sm horoscope-subtitle">
+              <span className="text-yellow-700 dark:text-yellow-300 text-sm">
                 临时查看 {userHoroscope} 的运势
               </span>
             </div>
@@ -170,8 +170,8 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
 
   return (
     <div className="horoscope-card">
-      <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-        <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+        <svg className="w-4 h-4 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
           <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
         </svg>
         近期能量趋势
@@ -189,9 +189,9 @@ export const ScoreCard = ({ overallScore, scores, sortedScores }) => {
   return (
     <div className="horoscope-score-container">
       <div className="text-center mb-4">
-        <h3 className="horoscope-title text-lg md:text-xl font-bold mb-1 opacity-90">今日运势指数</h3>
-        <div className="text-5xl md:text-6xl font-bold mb-2 drop-shadow-md">{overallScore}<span className="text-xl md:text-2xl opacity-75 ml-1">分</span></div>
-        <p className="horoscope-subtitle text-white/90 font-medium text-lg">
+        <h3 className="horoscope-title text-lg font-bold mb-1 opacity-90">今日运势指数</h3>
+        <div className="text-5xl font-bold mb-2 drop-shadow-md">{overallScore}<span className="text-xl opacity-75 ml-1">分</span></div>
+        <p className="horoscope-subtitle text-white/90 font-medium text-base">
           {overallScore > 75 ? '运势极佳' : overallScore > 60 ? '运势良好' : overallScore > 45 ? '运势平稳' : '运势一般'}
         </p>
       </div>
@@ -201,13 +201,13 @@ export const ScoreCard = ({ overallScore, scores, sortedScores }) => {
           <div key={index} className="text-center bg-white/15 dark:bg-white/10 rounded-xl p-2 backdrop-blur-sm border border-white/10">
             <div className="text-xl mb-1">{item.icon}</div>
             <div className="text-lg font-bold">{item.score}</div>
-            <div className="horoscope-subtitle text-[10px] opacity-80 mt-0.5">{item.name}</div>
+            <div className="horoscope-subtitle text-xs opacity-80 mt-0.5">{item.name}</div>
           </div>
         ))}
       </div>
 
       <div className="mt-4 flex justify-center items-center text-sm bg-black/20 dark:bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
-        <span className="mr-2 font-medium horoscope-subtitle opacity-90">今日核心:</span>
+        <span className="mr-2 font-medium opacity-90 text-sm">今日核心:</span>
         <span className="flex items-center font-bold text-yellow-300">
           <span className="mr-1 text-base">{sortedScores[0].icon}</span>
           <span className="text-sm">{sortedScores[0].name}运特别旺</span>
@@ -221,8 +221,8 @@ export const ScoreCard = ({ overallScore, scores, sortedScores }) => {
 export const LuckyItemsGrid = ({ recommendations }) => {
   return (
     <div className="horoscope-card">
-      <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-        <svg className="w-4 h-4 md:w-5 md:h-5 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+        <svg className="w-4 h-4 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
         今日幸运能量
@@ -233,48 +233,48 @@ export const LuckyItemsGrid = ({ recommendations }) => {
             className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-600 shadow-sm mb-2"
             style={{ backgroundColor: (Array.isArray(recommendations.luckyColors) && recommendations.luckyColors[0]) ? recommendations.luckyColors[0] : '#FF6B6B' }}
           ></div>
-          <span className="text-[10px] text-gray-500">幸运色</span>
-          <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-1">
+          <span className="text-xs text-gray-500">幸运色</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {String((Array.isArray(recommendations.luckyColorNames) && recommendations.luckyColorNames[0]) ? recommendations.luckyColorNames[0] : '魅力红')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">💎</div>
-          <span className="text-[10px] text-gray-500">幸运配饰</span>
-          <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
+          <span className="text-xs text-gray-500">幸运配饰</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
             {String(recommendations.luckyAccessory || '宝石')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🍱</div>
-          <span className="text-[10px] text-gray-500">幸运食物</span>
-          <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
+          <span className="text-xs text-gray-500">幸运食物</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
             {String(recommendations.luckyFood || '美食')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🔢</div>
-          <span className="text-[10px] text-gray-500">幸运数字</span>
-          <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-1">
+          <span className="text-xs text-gray-500">幸运数字</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {Array.isArray(recommendations.luckyNumbers) ? recommendations.luckyNumbers.join('/') : String(recommendations.luckyNumbers || '7')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🕓</div>
-          <span className="text-[10px] text-gray-500">幸运时辰</span>
-          <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-1 text-center whitespace-normal">
+          <span className="text-xs text-gray-500">幸运时辰</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center whitespace-normal">
             {String(recommendations.luckyTime || '午后')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🧭</div>
-          <span className="text-[10px] text-gray-500">幸运方位</span>
-          <span className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-1">
+          <span className="text-xs text-gray-500">幸运方位</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {String(recommendations.luckyDirection || '东方')}
           </span>
         </div>

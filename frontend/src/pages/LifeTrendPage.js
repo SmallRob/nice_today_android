@@ -1,96 +1,103 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import KlineChart from '../components/KlineChart';
 import RadarChart from '../components/RadarChart';
 import DatePickerModal from '../components/DatePickerModal';
 import { storageManager } from '../utils/storageManager';
 import { userConfigManager } from '../utils/userConfigManager';
-import { calculateDetailedBazi } from '../utils/baziHelper';
-import { Solar, Lunar } from 'lunar-javascript';
+import { calculateDetailedBazi, calculateLiuNianDaYun } from '../utils/baziHelper';
+import { calculateBaziWithWorker } from '../utils/workerManager';
+import { Solar } from 'lunar-javascript';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
-  const [selectedView, setSelectedView] = useState('kline'); // 'kline' 或 'radar'
-  const [chartType, setChartType] = useState('kline'); // 'kline' 或 'line'
-  const [timeDimension, setTimeDimension] = useState('year'); // 'year', 'month', 'day'
+
+  // 视图和图表状态
+  const [selectedView, setSelectedView] = useState('kline');
+  const [chartType, setChartType] = useState('kline');
+  const [timeDimension, setTimeDimension] = useState('year');
+
+  // 日期和时间状态
   const [selectedYear, setSelectedYear] = useState(2025);
   const [selectedMonth, setSelectedMonth] = useState(12);
   const [selectedDate, setSelectedDate] = useState(23);
-  const [selectedHour, setSelectedHour] = useState(12); // 新增：时辰（小时）
+  const [selectedHour, setSelectedHour] = useState(12);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  // 数据状态
   const [klineData, setKlineData] = useState([]);
   const [hoveredAge, setHoveredAge] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [currentAge, setCurrentAge] = useState(34);
 
-  // 新增：临时计算相关状态
+  // 加载和错误状态
+  const [loading, setLoading] = useState(true);
+  const [calculating, setCalculating] = useState(false);
+  const [error, setError] = useState(null);
+
+  // 临时计算相关状态
   const [isTempCalcMode, setIsTempCalcMode] = useState(false);
   const [tempBazi, setTempBazi] = useState(null);
-  const [tempLatitude, setTempLatitude] = useState(30); // 默认北纬30度
-  const [tempLongitude, setTempLongitude] = useState(110); // 默认东经110度
+  const [tempLatitude, setTempLatitude] = useState(30);
+  const [tempLongitude, setTempLongitude] = useState(110);
 
-  // 新增：农历数据
+  // 农历和八字数据
   const [lunarData, setLunarData] = useState(null);
   const [currentBazi, setCurrentBazi] = useState(null);
+  const [liuNianData, setLiuNianData] = useState(null);
 
-  // 从用户配置加载出生日期和八字
-  useEffect(() => {
+  // 加载用户配置的函数（提取出来以便重试）
+  const loadUserConfig = useCallback(() => {
     let isMounted = true;
-    const loadUserConfig = async () => {
-      try {
-        setLoading(true); // 开始加载
-        const config = userConfigManager.getCurrentConfig();
-        if (config && config.birthDate && isMounted) {
-          const birthDate = new Date(config.birthDate);
-          setSelectedYear(birthDate.getFullYear());
-          setSelectedMonth(birthDate.getMonth() + 1);
-          setSelectedDate(birthDate.getDate());
+    try {
+      setLoading(true);
+      setError(null);
 
-          // 加载出生时间（小时）
-          if (config.birthTime) {
-            const [hours] = config.birthTime.split(':').map(Number);
-            setSelectedHour(hours || 12);
-          }
+      // 步骤1：加载用户配置
+      const config = userConfigManager.getCurrentConfig();
+      if (!config || !config.birthDate) {
+        throw new Error('用户配置不完整');
+      }
 
-          // 加载经纬度
-          if (config.birthLocation) {
-            setTempLatitude(config.birthLocation.lat || 30);
-            setTempLongitude(config.birthLocation.lng || 110);
-          }
+      if (isMounted) {
+        const birthDate = new Date(config.birthDate);
+        setSelectedYear(birthDate.getFullYear());
+        setSelectedMonth(birthDate.getMonth() + 1);
+        setSelectedDate(birthDate.getDate());
+        setSelectedHour(config.birthTime ? parseInt(config.birthTime.split(':')[0]) : 12);
+        setTempLatitude(config.birthLocation?.lat || 30);
+        setTempLongitude(config.birthLocation?.lng || 110);
 
-          // 加载八字（如果存在）
-          if (config.bazi) {
-            // 直接使用已存储的八字数据
-            setCurrentBazi(config.bazi);
-          } else {
-            // 如果没有存储的八字，根据出生日期计算
-            const birthDateStr = config.birthDate;
-            const birthTimeStr = config.birthTime || '12:00';
-            const longitude = config.birthLocation?.lng || 110;
-            const calculatedBazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
-            setCurrentBazi(calculatedBazi);
-          }
-        }
-      } catch (error) {
-        console.warn('加载用户配置失败，使用默认值:', error);
-        // 使用默认值：1991年1月1日12:30，北京朝阳区
-        if (isMounted) {
-          setSelectedYear(1991);
-          setSelectedMonth(1);
-          setSelectedDate(1);
-          setSelectedHour(12);
-          setTempLatitude(39.95);
-          setTempLongitude(116.48);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false); // 结束加载
+        // 步骤2：直接使用配置中的八字，不重复计算
+        if (config.bazi) {
+          setCurrentBazi(config.bazi);
+          console.log('直接使用用户配置中的八字数据，避免重复计算');
         }
       }
-    };
-    loadUserConfig();
-    return () => { isMounted = false; };
+
+    } catch (error) {
+      console.error('加载用户配置失败:', error);
+      setError(error.message);
+
+      // 使用默认值
+      if (isMounted) {
+        setSelectedYear(1991);
+        setSelectedMonth(1);
+        setSelectedDate(1);
+        setSelectedHour(12);
+        setTempLatitude(30);
+        setTempLongitude(110);
+      }
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }
   }, []);
+
+  // 初始化加载用户配置
+  useEffect(() => {
+    loadUserConfig();
+  }, [loadUserConfig]);
 
   // 计算当前年龄
   useEffect(() => {
@@ -100,25 +107,60 @@ const LifeTrendPage = () => {
     setCurrentAge(Math.max(0, Math.min(100, age)));
   }, [selectedYear, selectedMonth, selectedDate]);
 
-  // 保存用户选择的日期到永久配置
-  const saveDateToConfig = (year, month, date, hour, longitude, latitude) => {
+  // 保存用户选择的日期到永久配置（异步计算，立即关闭弹窗）
+  const saveDateToConfig = async (year, month, date, hour, longitude, latitude) => {
     try {
       const newBirthDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
       const newBirthTime = `${String(hour).padStart(2, '0')}:00`;
       const configIndex = userConfigManager.getActiveConfigIndex();
 
-      // 计算八字
-      const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-      const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
-      const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
+      // 立即更新UI状态
+      setSelectedYear(year);
+      setSelectedMonth(month);
+      setSelectedDate(date);
+      setSelectedHour(hour);
+      setTempLongitude(longitude);
+      setTempLatitude(latitude);
+      setIsTempCalcMode(false);
 
-      // 计算时辰
+      // 检查配置中是否已有该日期的八字数据
+      const currentConfig = userConfigManager.getCurrentConfig();
+      const needsRecalc = !currentConfig.bazi || 
+                        currentConfig.birthDate !== newBirthDate ||
+                        currentConfig.birthTime !== newBirthTime ||
+                        currentConfig.birthLocation?.lng !== longitude ||
+                        currentConfig.birthLocation?.lat !== latitude;
+
+      let bazi;
+      if (needsRecalc) {
+        // 只有当八字数据不存在或日期变化时才重新计算
+        setCalculating(true);
+        setError(null);
+
+        try {
+          bazi = await calculateBaziWithWorker(newBirthDate, newBirthTime, longitude);
+        } catch (workerError) {
+          console.warn('Worker计算失败，使用同步计算:', workerError);
+          bazi = calculateDetailedBazi(newBirthDate, newBirthTime, longitude);
+        }
+
+        if (!bazi) {
+          throw new Error('八字计算失败');
+        }
+      } else {
+        // 使用已有八字数据，避免重复计算
+        bazi = currentConfig.bazi;
+        console.log('使用配置中已有的八字数据，避免重复计算');
+      }
+
+      // 计算时辰（快速计算，不阻塞）
       const solar = Solar.fromYmdHms(year, month, date, hour, 0, 0);
       const lunar = solar.getLunar();
       const shichenInfo = {
-        name: lunar.getTimeInGanZhi().slice(-1) + '时' // 获取时柱的天干地支并加上'时'
+        name: lunar.getTimeInGanZhi().slice(-1) + '时'
       };
 
+      // 保存配置
       const updates = {
         birthDate: newBirthDate,
         birthTime: newBirthTime,
@@ -135,24 +177,16 @@ const LifeTrendPage = () => {
 
       userConfigManager.updateConfig(configIndex, updates);
       setCurrentBazi(bazi);
-      setIsTempCalcMode(false); // 保存后退出临时计算模式
-      setLoading(false); // 保存完成后停止加载
 
       console.log('保存日期和八字到配置成功:', updates);
     } catch (error) {
-      console.warn('保存日期到配置失败:', error);
-      setLoading(false); // 出错时也停止加载
+      console.error('保存日期到配置失败:', error);
+      setError(error.message);
+    } finally {
+      setCalculating(false);
     }
   };
 
-  // 保存到localStorage（用于临时计算）
-  const saveDateToLocalStorage = (year, month, date) => {
-    try {
-      localStorage.setItem('lifeTrend_birthDate', JSON.stringify({ year, month, date }));
-    } catch (error) {
-      console.warn('保存日期到localStorage失败:', error);
-    }
-  };
 
   // 模拟数据 - 基于生辰八字的运势数据
   const generateKlineData = (year, month, date) => {
@@ -229,49 +263,113 @@ const LifeTrendPage = () => {
     });
   }, [selectedYear, selectedMonth, selectedDate]);
 
+  // 计算流年大运（基于当前八字和当前年份）
+  useEffect(() => {
+    // 优先使用配置中的八字数据
+    const config = userConfigManager.getCurrentConfig();
+    const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
+    
+    if (usedBazi && usedBazi.bazi) {
+      const currentYear = new Date().getFullYear();
+      const liuNian = calculateLiuNianDaYun(usedBazi, currentYear);
+      setLiuNianData(liuNian);
+      console.log('使用已有八字计算流年大运');
+    }
+  }, [isTempCalcMode, tempBazi, selectedYear, selectedMonth, selectedDate, selectedHour, tempLongitude]);
+
   // 获取当前选中年份的数据（用于雷达图）
   const currentYearData = klineData.find(d => d.age === currentAge) || klineData[0];
 
-  // 日期选择处理（永久保存）
-  const handleDateChange = (year, month, date, hour, longitude, latitude, isSaveToConfig = true) => {
-    setLoading(true);
-    setSelectedYear(year);
-    setSelectedMonth(month);
-    setSelectedDate(date);
-    setSelectedHour(hour);
-    setTempLongitude(longitude);
-    setTempLatitude(latitude);
-    setIsTempCalcMode(false);
+  // 日期选择处理（永久保存 - 异步）
+  const handleDateChange = async (year, month, date, hour, longitude, latitude, isSaveToConfig = true) => {
     setIsCalendarOpen(false);
 
     if (isSaveToConfig) {
-      saveDateToConfig(year, month, date, hour, longitude, latitude);
+      await saveDateToConfig(year, month, date, hour, longitude, latitude);
     } else {
-      // 仅保存到localStorage，不影响永久配置
-      saveDateToLocalStorage(year, month, date);
-      setLoading(false);
+      console.log('用户取消修改，保持当前数据');
     }
   };
 
-  // 临时计算处理（不保存到配置）
-  const handleTempCalculation = (year, month, date, hour, longitude, latitude) => {
-    // 计算临时八字
-    setLoading(true);
-    const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-    const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
-    const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
-    setTempBazi(bazi);
-    setIsTempCalcMode(true);
+  // 事件委托：处理日期卡片点击
+  const handleDateCardClick = useCallback((e) => {
+    const dateCard = e.currentTarget;
+    if (dateCard) {
+      setIsCalendarOpen(true);
+    }
+  }, []);
+
+  // 重试机制
+  const handleRetry = useCallback(async () => {
+    setError(null);
+    await loadUserConfig();
+  }, [loadUserConfig]);
+
+  // 临时计算处理（不保存到配置，异步计算）
+  const handleTempCalculation = async (year, month, date, hour, longitude, latitude) => {
+    setIsCalendarOpen(false);
+    setError(null);
+
+    // 立即更新UI状态
     setSelectedYear(year);
     setSelectedMonth(month);
-    setSelectedDate(date);
-    setSelectedHour(hour);
-    setTempLongitude(longitude);
-    setTempLatitude(latitude);
-    setIsCalendarOpen(false);
-    setLoading(false);
+      setSelectedDate(date);
+      setSelectedHour(hour);
+      setTempLongitude(longitude);
+      setTempLatitude(latitude);
+      setIsTempCalcMode(true);
 
-    console.log('临时计算八字:', bazi);
+    // 检查配置中是否已有该日期的八字数据
+    const currentConfig = userConfigManager.getCurrentConfig();
+    const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+    const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
+    
+    // 只有当日期/时间/经纬度变化时才重新计算八字
+    const needsRecalc = !currentConfig.bazi ||
+                        currentConfig.birthDate !== birthDateStr ||
+                        currentConfig.birthTime !== birthTimeStr ||
+                        currentConfig.birthLocation?.lng !== longitude ||
+                        currentConfig.birthLocation?.lat !== latitude;
+
+    let bazi;
+    if (needsRecalc) {
+      setCalculating(true);
+
+      try {
+        bazi = await calculateBaziWithWorker(birthDateStr, birthTimeStr, longitude);
+      } catch (workerError) {
+        console.warn('Worker计算失败，使用同步计算:', workerError);
+        bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
+      }
+
+      if (!bazi) {
+        throw new Error('临时八字计算失败');
+      }
+
+      if (bazi) {
+        setTempBazi(bazi);
+        console.log('临时计算八字成功:', bazi);
+      }
+    } else {
+      // 使用已有八字数据，避免重复计算
+      bazi = currentConfig.bazi;
+      setTempBazi(bazi);
+      console.log('使用配置中已有的八字数据进行临时计算，避免重复计算');
+    }
+
+    try {
+      // 计算时辰（快速计算，不阻塞）
+      const solar = Solar.fromYmdHms(year, month, date, hour, 0, 0);
+      const lunar = solar.getLunar();
+      const shichenInfo = {
+        name: lunar.getTimeInGanZhi().slice(-1) + '时'
+      };
+    } catch (error) {
+      console.error('临时计算时辰计算失败:', error);
+      setError(error.message);
+    } finally {
+      setCalculating(false);
+    }
   };
 
   // 获取当前八字（优先使用临时计算，否则使用配置八字）
@@ -279,8 +377,10 @@ const LifeTrendPage = () => {
     if (isTempCalcMode && tempBazi) {
       return tempBazi;
     }
-    if (currentBazi) {
-      return currentBazi;
+    // 优先使用配置中的八字数据
+    const config = userConfigManager.getCurrentConfig();
+    if (config && config.bazi) {
+      return config.bazi;
     }
     // 如果没有八字，则实时计算
     const birthDateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
@@ -290,6 +390,7 @@ const LifeTrendPage = () => {
 
   const displayBazi = getDisplayBazi();
 
+  // 加载状态
   if (loading) {
     return (
       <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -298,6 +399,19 @@ const LifeTrendPage = () => {
             <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
             <p className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>加载中...</p>
             <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>正在计算您的八字和人生能量轨迹</p>
+            {error && (
+              <div className="mt-4">
+                <p className={`text-sm ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                  {error}
+                </p>
+                <button
+                  onClick={handleRetry}
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                >
+                  重试
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -324,10 +438,10 @@ const LifeTrendPage = () => {
         <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 shadow-sm`}>
           <div
             className={`text-center py-3 px-4 rounded-xl cursor-pointer transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'}`}
-            onClick={() => setIsCalendarOpen(true)}
+            onClick={handleDateCardClick}
           >
             <div className={`text-xs mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              {isTempCalcMode ? '🔮 临时计算' : '生辰八字'}
+              {calculating ? '⏳ 计算中...' : isTempCalcMode ? '🔮 临时计算' : '生辰八字'}
             </div>
             {/* 公历日期 */}
             <div className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -344,7 +458,7 @@ const LifeTrendPage = () => {
               时辰：{displayBazi.shichen?.ganzhi || displayBazi.bazi?.hour?.slice(-1) + '时' || '未知'}
             </div>
             <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              {isTempCalcMode ? '点击返回永久配置' : '点击修改日期 / 临时计算'}
+              {calculating ? '正在后台计算八字...' : isTempCalcMode ? '点击返回永久配置' : '点击修改日期 / 临时计算'}
             </div>
           </div>
 
@@ -578,12 +692,189 @@ const LifeTrendPage = () => {
         </div>
       </div>
 
-      {/* 免责声明 */}
-      <div className="mx-4 mt-6 px-4 py-3 rounded-xl border-l-4 border-yellow-500 bg-yellow-500/10">
-        <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-yellow-200/70' : 'text-yellow-800/80'}`}>
-          ⚠️ 提示：本工具基于传统智慧进行能量趋势分析，旨在帮助您感知人生节奏，不用于预测具体事件。请理性看待分析结果，您的选择与行动才是人生的决定性因素。
-        </p>
-      </div>
+      {/* 流年大运 */}
+      {liuNianData && (
+        <div className={`mx-4 mt-6 p-4 rounded-2xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🌟</span>
+              <h3 className={`text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {liuNianData.year}年流年大运
+              </h3>
+            </div>
+            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+              liuNianData.overall.level === 'high' ? 'bg-green-100 text-green-700' :
+              liuNianData.overall.level === 'low' ? 'bg-orange-100 text-orange-700' :
+              'bg-blue-100 text-blue-700'
+            }`}>
+              {liuNianData.liuNianGanZhi} · {liuNianData.overall.yearShengXiao}
+            </div>
+          </div>
+
+          {/* 流年整体运势 */}
+          <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>整体运势</span>
+              <div className="flex items-center gap-2">
+                <div className={`w-24 h-2 rounded-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                  <div
+                    className={`h-2 rounded-full ${
+                      liuNianData.overall.score >= 80 ? 'bg-green-500' :
+                      liuNianData.overall.score >= 60 ? 'bg-blue-500' : 'bg-orange-500'
+                    }`}
+                    style={{ width: `${liuNianData.overall.score}%` }}
+                  ></div>
+                </div>
+                <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {liuNianData.overall.score}分
+                </span>
+              </div>
+            </div>
+            <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              {liuNianData.overall.description}
+            </p>
+          </div>
+
+          {/* 流年五行分析 */}
+          <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
+            <div className="text-xs font-medium mb-2" style={{ color: theme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              五行分析
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
+                <span className="text-lg">🎯</span>
+                <div className="flex-1">
+                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>日主</div>
+                  <div className={`text-sm font-medium ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                    {liuNianData.dayMaster}（{liuNianData.dayMasterElement}）
+                  </div>
+                </div>
+              </div>
+              <div className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
+                <span className="text-lg">🌊</span>
+                <div className="flex-1">
+                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>流年天干</div>
+                  <div className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                    {liuNianData.liuNianGan}（{liuNianData.liuNianGanElement}）- {liuNianData.ganRelation}
+                  </div>
+                </div>
+              </div>
+              <div className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
+                <span className="text-lg">🌍</span>
+                <div className="flex-1">
+                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>流年地支</div>
+                  <div className={`text-sm font-medium ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                    {liuNianData.liuNianBranch}（{liuNianData.liuNianBranchElement}）- {liuNianData.branchRelation}
+                  </div>
+                </div>
+              </div>
+              <div className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
+                <span className="text-lg">📅</span>
+                <div className="flex-1">
+                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>流年干支</div>
+                  <div className={`text-sm font-medium ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+                    {liuNianData.liuNianGanZhi}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 五维运势分析 */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {[
+              { key: 'love', icon: '💕', label: '爱情' },
+              { key: 'career', icon: '💼', label: '事业' },
+              { key: 'study', icon: '📚', label: '学习' },
+              { key: 'health', icon: '🏥', label: '健康' },
+              { key: 'wealth', icon: '💰', label: '财运' },
+            ].map((item) => {
+              const data = liuNianData[item.key];
+              return (
+                <div key={item.key} className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{item.icon}</span>
+                      <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {item.label}
+                      </span>
+                    </div>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      data.level === 'high' ? 'bg-green-100 text-green-700' :
+                      data.level === 'low' ? 'bg-orange-100 text-orange-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {data.score}分
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full mb-2" style={{ backgroundColor: theme === 'dark' ? '#374151' : '#e5e7eb' }}>
+                    <div
+                      className="h-1.5 rounded-full transition-all"
+                      style={{
+                        width: `${data.score}%`,
+                        backgroundColor: data.score >= 80 ? '#10b981' : data.score >= 60 ? '#3b82f6' : '#f97316'
+                      }}
+                    ></div>
+                  </div>
+                  <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {data.description}
+                  </p>
+                  <div className={`mt-2 text-xs ${theme === 'dark' ? 'text-blue-300' : 'text-blue-600'}`}>
+                    💡 {data.advice}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 注意事项提醒 */}
+          {liuNianData.reminders && liuNianData.reminders.length > 0 && (
+            <div>
+              <div className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                📢 注意事项
+              </div>
+              <div className="space-y-2">
+                {liuNianData.reminders.map((reminder, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-start gap-3 p-3 rounded-lg ${
+                      reminder.type === 'success' ? `${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}` :
+                      reminder.type === 'warning' ? `${theme === 'dark' ? 'bg-orange-900/20' : 'bg-orange-50'}` :
+                      `${theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'}`
+                    }`}
+                  >
+                    <span className="text-lg">{reminder.icon}</span>
+                    <span className={`text-xs leading-relaxed flex-1 ${
+                      reminder.type === 'success' ? `${theme === 'dark' ? 'text-green-300' : 'text-green-700'}` :
+                      reminder.type === 'warning' ? `${theme === 'dark' ? 'text-orange-300' : 'text-orange-700'}` :
+                      `${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`
+                    }`}>
+                      {reminder.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 使用说明 */}
+          <div className={`mx-0 mt-6 px-4 py-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-amber-50/80'} border ${theme === 'dark' ? 'border-gray-600' : 'border-amber-200'}`}>
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">📜</span>
+              <div className="flex-1">
+                <div className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-yellow-400' : 'text-amber-800'}`}>
+                  命理使用说明
+                </div>
+                <div className={`text-xs leading-relaxed space-y-1.5 ${theme === 'dark' ? 'text-gray-400' : 'text-amber-900/80'}`}>
+                  <p>本工具基于传统八字命理学说推演，流年大运乃人生运势之宏观指引。</p>
+                  <p>命理学云："命由己造，相由心生"。八字虽能揭示先天禀赋与运势走向，然人生之成败终需靠个人之努力与抉择。</p>
+                  <p>愿此分析助您趋吉避凶、把握良机，然切记：运势仅供参考，行动方为根本。谨此敬告，顺祝安康。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 日期选择器 */}
       <DatePickerModal

@@ -1,4 +1,4 @@
-/* 星座运势组件样式 */
+/* 星座运势组件样式 - 优化为移动端友好 */
 .horoscope-container {
   height: 100%;
   min-height: 100vh;
@@ -29,49 +29,53 @@
   background: #000000;
 }
 
+/* 统一卡片样式 - 简化移动端显示 */
 .horoscope-card {
   background: #ffffff;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 0.75rem;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 14px;
+  border: 1px solid #f3f4f6;
+  margin-bottom: 12px;
 }
 
 .dark .horoscope-card {
-  background: #111827;
+  background: #1f2937;
   border-color: #374151;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.horoscope-score-container {
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  color: #ffffff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(to right, #7c3aed, #4f46e5);
-}
-
-.dark .horoscope-score-container {
-  background: linear-gradient(to right, #6b21a8, #3730a3);
-}
-
+/* 统一字体大小 */
 .horoscope-title {
-  font-size: 1.125rem;
+  font-size: 16px;
   font-weight: 700;
   opacity: 0.9;
 }
 
 .horoscope-subtitle {
   font-weight: 500;
+  font-size: 14px;
   opacity: 0.9;
+}
+
+.horoscope-score-container {
+  border-radius: 12px;
+  padding: 16px;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+}
+
+.dark .horoscope-score-container {
+  background: linear-gradient(135deg, #6b21a8, #3730a3);
 }
 
 .horoscope-banner {
   color: #ffffff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
-  background: linear-gradient(to right, #7c3aed, #4f46e5, #2563eb);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5, #2563eb);
   flex-shrink: 0;
 }
 
@@ -98,22 +102,23 @@
   50% { opacity: 1; }
 }
 
+/* 网格布局优化 */
 .horoscope-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .horoscope-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 10px;
 }
 
 .horoscope-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 10px;
 }
 
 .horoscope-button {
@@ -121,17 +126,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
+  padding: 10px 6px;
+  border-radius: 8px;
   transition: all 0.2s;
   touch-action: manipulation;
+  min-height: 64px;
 }
 
 .horoscope-button-active {
   background: #3b82f6;
   color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  transform: scale(1.02);
 }
 
 .horoscope-button-inactive {
@@ -154,7 +160,7 @@
 
 .horoscope-skeleton {
   background: #f3f4f6;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   animation: pulse 2s infinite;
 }
 
@@ -165,20 +171,20 @@
 .horoscope-error {
   background: #fef2f2;
   border: 1px solid #fecaca;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .dark .horoscope-error {
-  background: rgba(220, 38, 38, 0.2);
+  background: rgba(220, 38, 38, 0.15);
   border-color: #dc2626;
 }
 
 .horoscope-info {
   background: #f0f9ff;
   border: 1px solid #bae6fd;
-  border-radius: 0.75rem;
-  padding: 1rem;
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .dark .horoscope-info {

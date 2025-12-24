@@ -187,12 +187,6 @@ const HoroscopeTab = () => {
     }
   }, [calculateHoroscopeData]);
 
-  // 防抖版本的加载函数，用于用户快速切换时避免多次请求
-  const debouncedLoadHoroscopeGuidance = useMemo(
-    () => debounce(loadHoroscopeGuidance, 300),
-    [loadHoroscopeGuidance]
-  );
-
   // 初始化组件 - 优化为优先获取用户数据
   useEffect(() => {
     let isMounted = true;
@@ -318,8 +312,8 @@ const HoroscopeTab = () => {
         {renderTrendChart()}
 
         <div className="horoscope-card">
-          <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-            <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
             今日运势解读
@@ -330,8 +324,8 @@ const HoroscopeTab = () => {
         </div>
 
         <div className="horoscope-card">
-          <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-            <svg className="w-4 h-4 md:w-5 md:h-5 text-pink-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <svg className="w-4 h-4 text-pink-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
             </svg>
             感性提醒
@@ -351,13 +345,13 @@ const HoroscopeTab = () => {
             <h4 className="text-green-700 dark:text-green-400 font-bold mb-2 flex items-center text-sm">
               <span className="mr-1">✅</span> 宜
             </h4>
-            <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">{String(recommendations.positiveAdvice || '保持积极心态')}</p>
+            <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{String(recommendations.positiveAdvice || '保持积极心态')}</p>
           </div>
           <div className="horoscope-card border-l-4 border-l-red-500">
             <h4 className="text-red-700 dark:text-red-400 font-bold mb-2 flex items-center text-sm">
               <span className="mr-1">❌</span> 忌
             </h4>
-            <p className="text-gray-700 dark:text-gray-300 text-xs leading-relaxed">{String(recommendations.avoidAdvice || '避免消极思维')}</p>
+            <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{String(recommendations.avoidAdvice || '避免消极思维')}</p>
           </div>
         </div>
 
@@ -365,8 +359,8 @@ const HoroscopeTab = () => {
 
         {recommendations.soulQuestion && (
           <div className="horoscope-card">
-            <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+              <svg className="w-4 h-4 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
               </svg>
               心灵启发
@@ -389,10 +383,10 @@ const HoroscopeTab = () => {
               {horoscopeGuidance.horoscopeInfo.icon}
             </div>
             <div>
-              <h4 className="text-xl font-bold text-indigo-900 dark:text-indigo-100">
+              <h4 className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
                 {userHoroscope}
               </h4>
-              <p className="text-indigo-600 dark:text-indigo-400 text-sm">
+              <p className="text-sm text-indigo-600 dark:text-indigo-400">
                 {horoscopeGuidance.horoscopeInfo.element}能量 · {horoscopeGuidance.horoscopeInfo.dateRange}
               </p>
             </div>
@@ -479,24 +473,24 @@ const HoroscopeTab = () => {
         </div>
 
         <div className="container mx-auto px-4 py-3 md:py-6 relative z-10 text-center">
-          <h1 className="text-xl md:text-2xl font-bold mb-1 text-shadow-lg horoscope-title">
+          <h1 className="text-xl font-bold mb-1 text-shadow-lg horoscope-title">
             星座运势
           </h1>
-          <p className="text-white text-xs md:text-base opacity-95 font-medium horoscope-subtitle mb-2">
+          <p className="text-white text-sm opacity-95 font-medium horoscope-subtitle mb-2">
             星象指引·命运解读·运势探索
           </p>
-          <div className="flex items-center justify-center space-x-1 md:space-x-2">
-            <span className="text-[10px] md:text-xs bg-constellation/40 text-white px-2 py-0.5 rounded-full border border-white/20">白羊</span>
-            <span className="text-[10px] md:text-xs bg-destiny/40 text-white px-2 py-0.5 rounded-full border border-white/20">金牛</span>
-            <span className="text-[10px] md:text-xs bg-lunar/40 text-white px-2 py-0.5 rounded-full border border-white/20">双子</span>
-            <span className="text-[10px] md:text-xs bg-solar/40 text-white px-2 py-0.5 rounded-full border border-white/20">巨蟹</span>
+          <div className="flex items-center justify-center space-x-2">
+            <span className="text-xs bg-constellation/40 text-white px-2 py-0.5 rounded-full border border-white/20">白羊</span>
+            <span className="text-xs bg-destiny/40 text-white px-2 py-0.5 rounded-full border border-white/20">金牛</span>
+            <span className="text-xs bg-lunar/40 text-white px-2 py-0.5 rounded-full border border-white/20">双子</span>
+            <span className="text-xs bg-solar/40 text-white px-2 py-0.5 rounded-full border border-white/20">巨蟹</span>
           </div>
         </div>
       </div>
 
       {/* 滚动内容容器 - 为移动设备添加滚动支持 */}
       <div className="horoscope-main-content">
-        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black">
+        <div className="container mx-auto px-4 py-4 bg-white dark:bg-black">
           {/* 星座选择器 */}
           {renderHoroscopeSelector()}
 
@@ -514,19 +508,6 @@ const HoroscopeTab = () => {
             ) : !loading && !error && !userHoroscope ? (
               <EmptyState />
             ) : null}
-
-            {/* 心灵问答 - 合并到运势卡片中 */}
-            {horoscopeGuidance && horoscopeGuidance.recommendations && horoscopeGuidance.recommendations.soulQuestion && (
-              <div className="horoscope-card">
-                <h3 className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">❓ 心灵启发</h3>
-                <p className="text-gray-800 dark:text-gray-200 text-xs font-medium mb-2">
-                  {String(horoscopeGuidance.recommendations.soulQuestion.question)}
-                </p>
-                <div className="text-blue-600 dark:text-blue-400 text-xs italic bg-white/50 dark:bg-black/20 p-2 rounded">
-                  "{String(horoscopeGuidance.recommendations.soulQuestion.answer)}"
-                </div>
-              </div>
-            )}
 
             {/* 星座综合特质展示 */}
             {!loading && !error && userHoroscope && (

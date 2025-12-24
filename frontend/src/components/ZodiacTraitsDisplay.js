@@ -34,6 +34,31 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
     return colors[element] || 'bg-gray-100 dark:bg-gray-900/20';
   };
 
+  // 获取颜色中文名称
+  const getColorName = (hexColor) => {
+    const colorMap = {
+      '#FF6B6B': '浅红',
+      '#FF8E53': '橙红',
+      '#FFD700': '金色',
+      '#FFA500': '橙色',
+      '#4ECDC4': '青绿',
+      '#44A08D': '深绿',
+      '#64B3F4': '浅蓝',
+      '#4A90E2': '蓝色',
+      '#96CEB4': '浅绿',
+      '#FFEAA7': '淡黄',
+      '#DA70D6': '兰紫',
+      '#BA55D3': '紫色',
+      '#808080': '灰色',
+      '#A9A9A9': '浅灰',
+      '#00BFFF': '深蓝',
+      '#1E90FF': '天蓝',
+      '#9370DB': '紫红',
+      '#8A2BE2': '深紫'
+    };
+    return colorMap[hexColor] || '红色';
+  };
+
   // 获取星座详细描述
   const getZodiacDescription = (zodiacName) => {
     const descriptions = {
@@ -164,7 +189,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
           <div>
             <div className="text-xs text-gray-600 dark:text-gray-400">幸运色</div>
             <div className="text-sm font-semibold text-gray-900 dark:text-white">
-              {zodiac.luckyColor?.[0] || '红色'}
+              {zodiac.luckyColor?.map(c => getColorName(c)).join('、') || '红色'}
             </div>
           </div>
           <div>
