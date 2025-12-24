@@ -636,21 +636,18 @@ const UserConfigManagerComponent = () => {
 
     if (isNewConfig) {
       // 新建配置，添加到存储
-      // 注意：新建配置默认 isused = false，但我们需要将其设为活跃配置
+      // 注意：addConfig 方法内部已经自动将新配置设为活跃配置（isused = true）
       success = userConfigManager.addConfig(finalConfigData);
 
-      // 新建配置成功后，立即获取新配置的索引并设为活跃配置
+      // 新建配置成功后，验证配置状态
       if (success) {
         // 获取更新后的配置列表
         const updatedConfigs = userConfigManager.getAllConfigs();
-        newIndex = updatedConfigs.length - 1; // 新配置的索引是最后一个
-        console.log('新建配置成功，索引:', newIndex, '配置数量:', updatedConfigs.length);
+        const newActiveIndex = userConfigManager.getActiveConfigIndex();
+        newIndex = newActiveIndex; // 新配置的索引就是活跃索引
+        console.log('新建配置成功，索引:', newIndex, '活跃索引:', newActiveIndex, '配置数量:', updatedConfigs.length);
 
-        // 立即将新配置设为活跃配置（这会更新 isused 状态为 true）
-        const setActiveSuccess = userConfigManager.setActiveConfig(newIndex);
-        console.log('设置新配置为活跃配置:', setActiveSuccess, 'activeConfigIndex:', userConfigManager.getActiveConfigIndex());
-
-        // 验证新配置的 isused 状态
+        // 验证新配置的 isused 状态（addConfig 已自动设置）
         const verifyConfigs = userConfigManager.getAllConfigs();
         console.log('新配置 isused 状态:', verifyConfigs[newIndex]?.isused);
       }
@@ -719,7 +716,7 @@ const UserConfigManagerComponent = () => {
         showMessage('删除配置成功', 'success');
       } else {
         // 存储中的配置，需要从存储中移除
-        const success = userConfigManager.removeConfig(index);
+        const success = userConfigManager.deleteConfig(index);
         if (success) {
           // 更新本地状态
           const freshConfigs = userConfigManager.getAllConfigs();

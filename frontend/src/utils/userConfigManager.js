@@ -39,8 +39,8 @@ const EMPTY_CONFIG_DEFAULTS = {
     province: '北京市',
     city: '北京市',
     district: '朝阳区',
-    lng: 116.48,
-    lat: 39.95
+    lng: 110.48,
+    lat: 30.95
   },
   zodiac: '金牛座',
   zodiacAnimal: '羊',
@@ -171,6 +171,26 @@ class UserConfigManager {
     if (!this.initialized || this.configs.length === 0) {
       return DEFAULT_CONFIG;
     }
+
+    // 从存储中重新读取配置，确保获取最新数据
+    try {
+      const storedConfigs = localStorage.getItem(STORAGE_KEYS.USER_CONFIGS);
+      const storedIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
+
+      if (storedConfigs && storedIndex) {
+        const parsedConfigs = JSON.parse(storedConfigs);
+        const parsedIndex = parseInt(storedIndex, 10);
+
+        // 更新内存中的配置以匹配存储
+        if (parsedConfigs.length > 0 && parsedIndex < parsedConfigs.length) {
+          this.configs = parsedConfigs;
+          this.activeConfigIndex = parsedIndex;
+        }
+      }
+    } catch (error) {
+      console.error('从存储读取配置失败，使用内存缓存:', error);
+    }
+
     const currentConfig = this.configs[this.activeConfigIndex];
 
     // 如果是空配置，返回默认值
@@ -193,6 +213,19 @@ class UserConfigManager {
     if (!this.initialized) {
       return [DEFAULT_CONFIG];
     }
+
+    // 从存储中重新读取配置，确保获取最新数据
+    try {
+      const storedConfigs = localStorage.getItem(STORAGE_KEYS.USER_CONFIGS);
+      if (storedConfigs) {
+        const parsedConfigs = JSON.parse(storedConfigs);
+        // 更新内存中的配置以匹配存储
+        this.configs = parsedConfigs;
+      }
+    } catch (error) {
+      console.error('从存储读取所有配置失败，使用内存缓存:', error);
+    }
+
     return [...this.configs];
   }
 
@@ -234,12 +267,18 @@ class UserConfigManager {
       gender: config.gender || 'male',
       mbti: config.mbti || 'ISFP',
       nameScore: config.nameScore || null,
-      isused: false, // 新配置默认不使用
+      isused: true, // 新配置立即设为活跃配置
       isSystemDefault: false, // 新配置不是系统默认配置
       ...config
     };
 
+    // 新增配置时，先将所有现有配置的 isused 设为 false
+    this.configs.forEach((c) => {
+      c.isused = false;
+    });
+
     this.configs.push(newConfig);
+    this.activeConfigIndex = this.configs.length - 1;
 
     // 如果存在系统默认配置，将其 isSystemDefault 标记为 false
     const systemDefaultIndex = this.configs.findIndex(c => c.isSystemDefault === true);
@@ -248,10 +287,39 @@ class UserConfigManager {
       console.log('已禁用系统默认配置', systemDefaultIndex);
     }
 
-    this.saveToStorage();
-    this.notifyListeners();
+    // 保存到本地存储前清除缓存
+    this.clearCache();
 
-    console.log('添加新配置成功', newConfig);
+    // 保存到本地存储
+    const saveSuccess = this.saveToStorage();
+    if (!saveSuccess) {
+      console.error('保存新配置失败');
+      return false;
+    }
+
+    // 确认配置100%保存成功后再全局更新引用值
+    const verifyConfigs = this.getAllConfigs();
+    const verifyActiveIndex = this.getActiveConfigIndex();
+    const verifyConfig = verifyConfigs[verifyActiveIndex];
+
+    // 验证新配置的 isused 是否为 true
+    if (!verifyConfig || verifyConfig.isused !== true) {
+      console.error('新配置 isused 验证失败', verifyConfig);
+      // 修复 isused 状态
+      this.configs.forEach((c, idx) => {
+        c.isused = idx === this.activeConfigIndex;
+      });
+      this.saveToStorage();
+    }
+
+    // 通知监听器
+    this.notifyListeners(true); // 强制重新加载标志
+
+    console.log('添加新配置成功并设为活跃配置', {
+      index: this.activeConfigIndex,
+      config: newConfig,
+      isused: newConfig.isused
+    });
     return true;
   }
 
@@ -278,11 +346,38 @@ class UserConfigManager {
     // 更新配置
     this.configs[index] = { ...this.configs[index], ...configUpdates };
 
+    // 确保只有一个配置的 isused 为 true
+    if (this.configs[index].isused === true) {
+      this.configs.forEach((config, idx) => {
+        config.isused = idx === index;
+      });
+    }
+
+    // 保存到本地存储前清除缓存
+    this.clearCache();
+
     // 保存到本地存储
-    this.saveToStorage();
+    const saveSuccess = this.saveToStorage();
+    if (!saveSuccess) {
+      console.error('更新配置保存失败');
+      return false;
+    }
+
+    // 验证更新后的配置
+    const verifyConfigs = this.getAllConfigs();
+    const updatedConfig = verifyConfigs[index];
+
+    if (updatedConfig?.isused !== this.configs[index]?.isused) {
+      console.error('更新配置验证失败：isused 状态不一致');
+      // 修复 isused 状态
+      this.configs.forEach((c, idx) => {
+        c.isused = idx === this.activeConfigIndex;
+      });
+      this.saveToStorage();
+    }
 
     // 通知监听器
-    this.notifyListeners();
+    this.notifyListeners(true); // 强制重新加载标志
 
     console.log(`更新配置 ${index} 成功，isused: ${this.configs[index].isused}`, this.configs[index]);
     return true;
@@ -315,16 +410,36 @@ class UserConfigManager {
     // 确保有一个配置被设置为 isused = true
     if (this.configs.length > 0 && this.activeConfigIndex >= 0) {
       // 更新所有配置的 isused 状态
-      this.configs.forEach((config, idx) => {
-        config.isused = idx === this.activeConfigIndex;
+      this.configs.forEach((config, i) => {
+        config.isused = i === this.activeConfigIndex;
       });
     }
 
+    // 保存到本地存储前清除缓存
+    this.clearCache();
+
     // 保存到本地存储
-    this.saveToStorage();
+    const saveSuccess = this.saveToStorage();
+    if (!saveSuccess) {
+      console.error('删除配置保存失败');
+      return false;
+    }
+
+    // 验证删除后的配置
+    const verifyConfigs = this.getAllConfigs();
+    const activeConfig = verifyConfigs[this.activeConfigIndex];
+
+    if (activeConfig?.isused !== true) {
+      console.error('删除配置验证失败：活跃配置的 isused 状态不正确');
+      // 修复 isused 状态
+      this.configs.forEach((c, idx) => {
+        c.isused = idx === this.activeConfigIndex;
+      });
+      this.saveToStorage();
+    }
 
     // 通知监听器
-    this.notifyListeners();
+    this.notifyListeners(true); // 强制重新加载标志
 
     console.log(`删除配置 ${index} 成功，当前活跃索引 ${this.activeConfigIndex}`);
     return true;
@@ -348,37 +463,134 @@ class UserConfigManager {
 
     this.activeConfigIndex = index;
 
+    // 保存到本地存储前清除缓存
+    this.clearCache();
+
     // 保存到本地存储
-    this.saveToStorage();
+    const saveSuccess = this.saveToStorage();
+    if (!saveSuccess) {
+      console.error('设置活跃配置保存失败');
+      return false;
+    }
+
+    // 验证配置的 isused 状态
+    const verifyConfigs = this.getAllConfigs();
+    const activeConfig = verifyConfigs[this.activeConfigIndex];
+
+    if (activeConfig?.isused !== true) {
+      console.error('设置活跃配置验证失败：isused 状态不正确');
+      // 修复 isused 状态
+      this.configs.forEach((c, idx) => {
+        c.isused = idx === index;
+      });
+      this.saveToStorage();
+    }
 
     // 通知监听器
-    this.notifyListeners();
+    this.notifyListeners(true); // 强制重新加载标志
 
     console.log(`设置活跃配置为 ${index} 成功，isused 状态已更新`);
     return true;
   }
 
   /**
-   * 保存配置到本地存储
+   * 切换到指定配置（与 setActiveConfig 相同，用于兼容性）
+   * @param {Number} index 配置索引
+   * @returns {Boolean} 是否切换成功
+   */
+  switchToConfig(index) {
+    return this.setActiveConfig(index);
+  }
+
+  /**
+   * 删除配置（与 removeConfig 相同，用于兼容性）
+   * @param {Number} index 配置索引
+   * @returns {Boolean} 是否删除成功
+   */
+  deleteConfig(index) {
+    return this.removeConfig(index);
+  }
+
+  /**
+   * 清除缓存，防止数据回滚
+   */
+  clearCache() {
+    try {
+      // 保存必要的数据键
+      const requiredKeys = [STORAGE_KEYS.USER_CONFIGS, STORAGE_KEYS.ACTIVE_CONFIG_INDEX];
+      
+      // 获取所有 localStorage 键
+      const allKeys = Object.keys(localStorage);
+      
+      // 查找可能的缓存键并清除
+      allKeys.forEach(key => {
+        // 清除过期的缓存键（包含 old、temp、cache 等关键词）
+        if (key.includes('nice_today') &&
+            !requiredKeys.includes(key) &&
+            (key.includes('old') || key.includes('temp') || key.includes('cache') || key.includes('backup'))) {
+          localStorage.removeItem(key);
+          console.log('已清除缓存:', key);
+        }
+      });
+
+      // 强制重新加载配置，避免使用内存缓存
+      this.initialized = false;
+    } catch (error) {
+      console.error('清除缓存失败:', error);
+    }
+  }
+
+  /**
+   * 保存配置到本地存储（增强版）
    */
   saveToStorage() {
     try {
+      // 在保存前清除缓存
+      this.clearCache();
+
       const configsJson = JSON.stringify(this.configs);
       localStorage.setItem(STORAGE_KEYS.USER_CONFIGS, configsJson);
       localStorage.setItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX, this.activeConfigIndex.toString());
-      
-      // 验证保存是否成功
+
+      // 立即验证保存是否成功
       const verifyConfigs = localStorage.getItem(STORAGE_KEYS.USER_CONFIGS);
       const verifyIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
-      
+
       if (verifyConfigs !== configsJson) {
         console.error('保存配置验证失败：存储的数据与预期不符');
         return false;
       }
-      
+
+      // 二次验证：解析保存的数据并对比
+      try {
+        const parsedConfigs = JSON.parse(verifyConfigs);
+        const parsedIndex = parseInt(verifyIndex, 10);
+
+        if (parsedConfigs.length !== this.configs.length) {
+          console.error('保存配置验证失败：配置数量不一致');
+          return false;
+        }
+
+        if (parsedIndex !== this.activeConfigIndex) {
+          console.error('保存配置验证失败：活跃索引不一致');
+          return false;
+        }
+
+        // 验证活跃配置的 isused 状态
+        const activeConfig = parsedConfigs[parsedIndex];
+        if (activeConfig && activeConfig.isused !== true) {
+          console.error('保存配置验证失败：活跃配置的 isused 状态不正确');
+          return false;
+        }
+      } catch (parseError) {
+        console.error('保存配置二次验证失败:', parseError);
+        return false;
+      }
+
       console.log('配置已成功保存到本地存储', {
         configCount: this.configs.length,
-        activeIndex: this.activeConfigIndex
+        activeIndex: this.activeConfigIndex,
+        activeConfigIsUsed: this.configs[this.activeConfigIndex]?.isused
       });
       return true;
     } catch (error) {
