@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
-import { userConfigManager } from '../utils/userConfigManager';
+import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
@@ -856,13 +856,13 @@ const UserConfigManagerComponent = () => {
 
         // 异步初始化配置管理器
         await new Promise(resolve => setTimeout(resolve, 100)); // 延迟加载避免卡顿
-        await userConfigManager.initialize();
+        await enhancedUserConfigManager.initialize();
         setIsInitialized(true);
 
         // 异步加载配置
         await new Promise(resolve => setTimeout(resolve, 50));
-        const allConfigs = userConfigManager.getAllConfigs();
-        const activeIndex = userConfigManager.getActiveConfigIndex();
+        const allConfigs = enhancedUserConfigManager.getAllConfigs();
+        const activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
 
         setConfigs(allConfigs);
         setActiveConfigIndex(activeIndex);
@@ -884,7 +884,7 @@ const UserConfigManagerComponent = () => {
   useEffect(() => {
     if (!isInitialized) return;
 
-    const removeListener = userConfigManager.addListener(({
+    const removeListener = enhancedUserConfigManager.addListener(({
       configs: updatedConfigs,
       activeConfigIndex: updatedActiveIndex
     }) => {
@@ -910,7 +910,7 @@ const UserConfigManagerComponent = () => {
   // 处理配置保存
   const handleSaveConfig = useCallback(async (index, configData) => {
     // 检查是否是新建配置（index < 0 表示新建，或 index 超出存储范围）
-    const storedConfigs = userConfigManager.getAllConfigs();
+    const storedConfigs = enhancedUserConfigManager.getAllConfigs();
     const isNewConfig = index < 0 || index >= storedConfigs.length;
 
     console.log('开始保存配置:', { index, isNewConfig, configData });
@@ -1014,21 +1014,17 @@ const UserConfigManagerComponent = () => {
 
     try {
       if (isNewConfig) {
-        // 新建配置，添加到存储
-        // 注意：addConfig 方法内部已经自动将新配置设为活跃配置（isused = true）
-        userConfigManager.addConfig(finalConfigData);
+        // 新建配置，使用增强版配置管理器的新方法，只保存基础信息，八字信息后续可异步更新
+        await enhancedUserConfigManager.addBasicConfig(finalConfigData);
 
         // 获取更新后的配置列表
-        const updatedConfigs = userConfigManager.getAllConfigs();
-        const newActiveIndex = userConfigManager.getActiveConfigIndex();
+        const updatedConfigs = enhancedUserConfigManager.getAllConfigs();
+        const newActiveIndex = enhancedUserConfigManager.getActiveConfigIndex();
 
-        // 验证新配置的 isused 状态（addConfig 已自动设置）
-        const verifyConfigs = userConfigManager.getAllConfigs();
-        console.log('新建配置成功，索引:', newActiveIndex, '活跃索引:', newActiveIndex, '配置数量:', updatedConfigs.length);
-        console.log('新配置 isused 状态:', verifyConfigs[newActiveIndex]?.isused);
+        console.log('新建基础配置成功，索引:', newActiveIndex, '活跃索引:', newActiveIndex, '配置数量:', updatedConfigs.length);
       } else {
         // 现有配置，更新存储
-        userConfigManager.updateConfig(index, finalConfigData);
+        await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, finalConfigData);
       }
 
       console.log('保存配置成功，监听器将自动更新状态');
@@ -1056,7 +1052,7 @@ const UserConfigManagerComponent = () => {
     }
 
     // 检查是否是临时配置（不在存储中）
-    const storedConfigs = userConfigManager.getAllConfigs();
+    const storedConfigs = enhancedUserConfigManager.getAllConfigs();
     const isTempConfig = index >= storedConfigs.length;
 
     // 使用自定义确认对话框替代window.confirm
@@ -1070,11 +1066,11 @@ const UserConfigManagerComponent = () => {
           showMessage('删除配置成功', 'success');
         } else {
           // 存储中的配置，需要从存储中移除
-          userConfigManager.deleteConfig(index);
+          enhancedUserConfigManager.removeConfig(index);
           // deleteConfig 内部已经调用了 notifyListeners
           // 监听器会自动更新本地状态，这里只需要调整展开索引
-          // 注意：监听器更新是异步的，所以需要从 userConfigManager 获取最新长度
-          const freshConfigs = userConfigManager.getAllConfigs();
+          // 注意：监听器更新是异步的，所以需要从 enhancedUserConfigManager 获取最新长度
+          const freshConfigs = enhancedUserConfigManager.getAllConfigs();
           setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
           showMessage('删除配置成功', 'success');
         }
@@ -1107,7 +1103,7 @@ const UserConfigManagerComponent = () => {
 
       // 异步设置活跃配置
       await new Promise(resolve => setTimeout(resolve, 50));
-      userConfigManager.setActiveConfig(index);
+      await enhancedUserConfigManager.setActiveConfig(index);
 
       // setActiveConfig 内部已经调用了 notifyListeners
       // 监听器会自动更新本地状态，不需要手动更新
@@ -1123,7 +1119,7 @@ const UserConfigManagerComponent = () => {
       setIsSwitching(false);
 
       // 恢复之前的状态
-      const activeIndex = userConfigManager.getActiveConfigIndex();
+      const activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
       setActiveConfigIndex(activeIndex);
     }
   }, [isSwitching]);
@@ -1148,7 +1144,7 @@ const UserConfigManagerComponent = () => {
         reader.onload = (e) => {
           try {
             const jsonData = e.target.result;
-            const success = userConfigManager.importConfigs(jsonData);
+            const success = enhancedUserConfigManager.importConfigs(jsonData);
             if (success) {
               // importConfigs 内部已经调用了 notifyListeners
               // 监听器会自动更新本地状态
@@ -1174,7 +1170,7 @@ const UserConfigManagerComponent = () => {
   // 处理导出配置
   const handleExportConfigs = useCallback(() => {
     try {
-      const jsonData = userConfigManager.exportConfigs();
+      const jsonData = enhancedUserConfigManager.exportConfigs();
       if (!jsonData) {
         showMessage('导出配置失败', 'error');
         return;
@@ -1361,28 +1357,19 @@ const UserConfigManagerComponent = () => {
               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
               onClick={async () => {
                 // 从当前配置的出生信息重新计算八字并同步到全局配置
-                if (configs[activeConfigIndex]?.birthDate && configs[activeConfigIndex]?.birthTime) {
+                if (configs[activeConfigIndex]?.nickname) {
                   try {
-                    const longitude = configs[activeConfigIndex].birthLocation?.lng || 116.40;
-                    const baziInfo = calculateDetailedBazi(
-                      configs[activeConfigIndex].birthDate, 
-                      configs[activeConfigIndex].birthTime, 
-                      longitude
-                    );
-                          
-                    if (baziInfo) {
-                      // 更新当前配置的八字信息
-                      const updatedConfig = {
-                        ...configs[activeConfigIndex],
-                        bazi: baziInfo
-                      };
-                            
-                      // 调用全局方法更新配置
-                      await handleSaveConfig(activeConfigIndex, updatedConfig);
-                            
+                    // 使用增强版配置管理器的八字信息同步功能
+                    const success = await enhancedUserConfigManager.calculateAndSyncBaziInfo(configs[activeConfigIndex].nickname, {
+                      // 使用配置中的出生信息
+                    });
+                    
+                    if (success) {
                       // 刷新显示
                       setBaziKey(prev => prev + 1);
                       showMessage('八字信息已同步到全局配置', 'success');
+                    } else {
+                      showMessage('八字信息同步失败', 'error');
                     }
                   } catch (error) {
                     console.error('同步八字信息失败:', error);
@@ -1466,7 +1453,7 @@ const UserConfigManagerComponent = () => {
             if (tempScoringConfigIndex !== null && score) {
               const totalScore = calculateTotalScore(score);
               // 直接更新配置的 nameScore 字段，updateConfig 会自动通知监听器更新状态
-              userConfigManager.updateConfig(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
+              enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
               console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
             }
             // 临时为他人评分时不保存

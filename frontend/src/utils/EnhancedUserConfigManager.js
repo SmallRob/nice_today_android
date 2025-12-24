@@ -8,18 +8,19 @@ import { dataPersistenceManager } from './DataPersistenceManager.js';
 import { dataIntegrityManager } from './DataIntegrityManager.js';
 import { baziUpdateManager } from './BaziUpdateManager.js';
 import { generateLunarAndTrueSolarFields, validateAndFixLunarDate, batchValidateLunarDates } from './LunarCalendarHelper.js';
+import { calculateDetailedBazi } from './baziHelper.js';
 
 // 默认配置模板
 const DEFAULT_CONFIG = {
   nickname: '叉子',
-  realName: '',
+  realName: '张三',
   birthDate: '1991-04-30',
   birthTime: '12:30',
   shichen: '午时',
   birthLocation: {
     province: '北京市',
     city: '北京市',
-    district: '朝阳区',
+    district: '海淀区',
     lng: 116.48,
     lat: 39.95
   },
@@ -32,7 +33,7 @@ const DEFAULT_CONFIG = {
   isused: false,
   // 新增字段：农历日期和真太阳时
   lunarBirthDate: null, // 农历出生日期，格式："辛丑年 八月 初四"
-  trueSolarTime: null,  // 真太阳时，格式："12:30"
+  trueSolarTime: "12:30",  // 真太阳时，格式："12:30"
   lunarInfo: null,      // 完整的农历信息对象
   lastCalculated: null  // 最后计算时间
 };
@@ -438,8 +439,25 @@ class EnhancedUserConfigManager {
         throw new Error(`配置验证失败: ${validation.errors.map(e => e.message).join(', ')}`);
       }
       
+      // 验证昵称唯一性
+      const nicknameExists = this.configs.some(c => c.nickname === config.nickname);
+      if (nicknameExists) {
+        throw new Error(`昵称 '${config.nickname}' 已存在，请选择其他昵称`);
+      }
+      
+      // 确保基础信息配置完整，八字信息单独处理
+      const finalConfig = {
+        ...config,
+        // 如果没有八字信息，设置为null
+        bazi: config.bazi || null,
+        lunarBirthDate: config.lunarBirthDate || null,
+        trueSolarTime: config.trueSolarTime || null,
+        lunarInfo: config.lunarInfo || null,
+        lastCalculated: config.lastCalculated || null
+      };
+      
       // 添加配置
-      this.configs.push(config);
+      this.configs.push(finalConfig);
       
       // 保存到存储
       await this.saveConfigsToStorage();
@@ -447,7 +465,7 @@ class EnhancedUserConfigManager {
       // 通知监听器
       this.notifyListeners();
       
-      console.log('添加新配置成功');
+      console.log('添加新配置成功', finalConfig.nickname);
       return true;
       
     } catch (error) {
@@ -460,7 +478,7 @@ class EnhancedUserConfigManager {
    * 删除配置
    */
   async removeConfig(index) {
-    if (!this.initialized || this.configs.length <= 1) {
+    if (!this.initialized || index < 0 || index >= this.configs.length || this.configs.length <= 1) {
       throw new Error('无法删除配置：索引无效或只剩一个配置');
     }
     
@@ -486,6 +504,143 @@ class EnhancedUserConfigManager {
       
     } catch (error) {
       console.error('删除配置失败:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * 更新八字信息
+   * @param {string} nickname - 用户昵称
+   * @param {Object} baziInfo - 八字信息
+   * @returns {Promise<boolean>} 是否更新成功
+   */
+  async updateBaziInfo(nickname, baziInfo) {
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+    
+    try {
+      // 查找对应用户
+      const configIndex = this.configs.findIndex(config => config.nickname === nickname);
+      
+      if (configIndex === -1) {
+        throw new Error(`未找到昵称为 '${nickname}' 的用户配置`);
+      }
+      
+      // 更新八字信息
+      this.configs[configIndex] = {
+        ...this.configs[configIndex],
+        bazi: baziInfo.bazi || this.configs[configIndex].bazi,
+        lunarBirthDate: baziInfo.lunarBirthDate || this.configs[configIndex].lunarBirthDate,
+        trueSolarTime: baziInfo.trueSolarTime || this.configs[configIndex].trueSolarTime,
+        lunarInfo: baziInfo.lunarInfo || this.configs[configIndex].lunarInfo,
+        lastCalculated: baziInfo.lastCalculated || new Date().toISOString()
+      };
+      
+      // 保存到存储
+      await this.saveConfigsToStorage();
+      
+      // 通知监听器
+      this.notifyListeners();
+      
+      console.log('八字信息更新成功', nickname);
+      return true;
+      
+    } catch (error) {
+      console.error('更新八字信息失败:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * 从出生信息计算并更新八字信息
+   * @param {string} nickname - 用户昵称
+   * @param {Object} birthInfo - 出生信息 {birthDate, birthTime, longitude}
+   * @returns {Promise<boolean>} 是否更新成功
+   */
+  async calculateAndSyncBaziInfo(nickname, birthInfo) {
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+    
+    try {
+      // 查找对应用户
+      const configIndex = this.configs.findIndex(config => config.nickname === nickname);
+      
+      if (configIndex === -1) {
+        throw new Error(`未找到昵称为 '${nickname}' 的用户配置`);
+      }
+      
+      const config = this.configs[configIndex];
+      
+      // 如果没有提供出生信息，使用配置中的信息
+      const birthDate = birthInfo.birthDate || config.birthDate;
+      const birthTime = birthInfo.birthTime || config.birthTime;
+      const longitude = birthInfo.longitude || config.birthLocation?.lng || 116.40;
+      
+      // 计算八字信息
+      const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
+      
+      if (!baziInfo) {
+        throw new Error('八字计算失败');
+      }
+      
+      // 更新八字信息
+      return await this.updateBaziInfo(nickname, {
+        ...baziInfo,
+        lastCalculated: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error('计算并同步八字信息失败:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * 为新配置添加基础信息，八字信息后续可异步更新
+   * @param {Object} basicConfig - 基础配置信息
+   * @returns {Promise<boolean>} 是否添加成功
+   */
+  async addBasicConfig(basicConfig) {
+    try {
+      // 验证基础配置数据
+      const validation = dataIntegrityManager.validateConfig(basicConfig);
+      
+      if (!validation.valid) {
+        throw new Error(`基础配置验证失败: ${validation.errors.map(e => e.message).join(', ')}`);
+      }
+      
+      // 验证昵称唯一性
+      const nicknameExists = this.configs.some(c => c.nickname === basicConfig.nickname);
+      if (nicknameExists) {
+        throw new Error(`昵称 '${basicConfig.nickname}' 已存在，请选择其他昵称`);
+      }
+      
+      // 确保基础信息配置完整，八字信息设置为null
+      const finalConfig = {
+        ...basicConfig,
+        bazi: null, // 八字信息后续异步计算
+        lunarBirthDate: null,
+        trueSolarTime: null,
+        lunarInfo: null,
+        lastCalculated: null
+      };
+      
+      // 添加配置
+      this.configs.push(finalConfig);
+      
+      // 保存到存储
+      await this.saveConfigsToStorage();
+      
+      // 通知监听器
+      this.notifyListeners();
+      
+      console.log('添加基础配置成功', finalConfig.nickname);
+      return true;
+      
+    } catch (error) {
+      console.error('添加基础配置失败:', error);
       return false;
     }
   }

@@ -30,7 +30,7 @@ class DataIntegrityManager {
       gender: { 
         required: true, 
         type: 'string', 
-        enum: ['male', 'female'] 
+        enum: ['male', 'female', 'secret'] 
       },
       mbti: { 
         required: true, 
