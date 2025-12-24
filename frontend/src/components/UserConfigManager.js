@@ -8,7 +8,7 @@ import '../styles/config-selectors.css';
 import { calculateFiveGrids, getCharStrokes, getMeaning } from '../utils/nameScoring';
 import { calculateDetailedBazi } from '../utils/baziHelper';
 import { DEFAULT_REGION } from '../data/ChinaLocationData';
-import { getShichen } from '../utils/astronomy';
+import { getShichen, getShichenSimple, normalizeShichen } from '../utils/astronomy';
 
 // 懒加载优化后的表单组件
 const ConfigEditModal = lazy(() => import('./ConfigEditModal'));
@@ -1293,7 +1293,7 @@ const UserConfigManagerComponent = () => {
                 <span className="ml-2 text-gray-900 dark:text-white">
                   {configs[activeConfigIndex].birthTime || '12:30'}
                   <span className="text-xs text-gray-500 ml-1">
-                    ({configs[activeConfigIndex].shichen || getShichen(configs[activeConfigIndex].birthTime || '12:30')})
+                    ({normalizeShichen(configs[activeConfigIndex].shichen || getShichenSimple(configs[activeConfigIndex].birthTime || '12:30'))})
                   </span>
                 </span>
               </div>

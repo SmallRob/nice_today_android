@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useStore } from '@tanstack/react-store';
 import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
-import { getShichen, calculateTrueSolarTime } from '../utils/astronomy';
+import { getShichen, getShichenSimple, normalizeShichen, calculateTrueSolarTime } from '../utils/astronomy';
 import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 
 // 性别选项
@@ -301,7 +301,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       }
     }
 
-    // 4. 验证出生时间和时辰（必填）
+    // 4. 验证出生时间（必填）
     if (!formData.birthTime || !formData.birthTime.trim()) {
       errors.push('请输入出生时间');
     } else {
@@ -309,33 +309,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       if (!timeMatch) {
         errors.push('出生时间格式不正确，请使用 HH:MM 格式（如 12:30）');
       }
-      // 验证时辰是否已计算
-      else if (!formData.shichen) {
-        errors.push('出生时辰未计算，请检查出生时间和出生地点是否正确');
-      }
     }
 
-    // 5. 验证出生地点（必填）
+    // 5. 验证出生地点（简化：只需经纬度有效即可）
     const loc = formData.birthLocation || {};
-    if (!loc.province || !loc.province.trim()) {
-      errors.push('请输入出生省份');
-    } else if (loc.province.trim().length > 20) {
-      errors.push('省份名称过长，请简写');
-    }
-
-    if (!loc.city || !loc.city.trim()) {
-      errors.push('请输入出生城市');
-    } else if (loc.city.trim().length > 20) {
-      errors.push('城市名称过长，请简写');
-    }
-
-    if (!loc.district || !loc.district.trim()) {
-      errors.push('请输入出生县区');
-    } else if (loc.district.trim().length > 20) {
-      errors.push('县区名称过长，请简写');
-    }
-
-    // 验证经纬度（必填）
     if (loc.lng === undefined || loc.lng === null || isNaN(loc.lng)) {
       errors.push('请输入有效的经度');
     } else if (loc.lng < -180 || loc.lng > 180) {
@@ -375,13 +352,16 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         throw new Error('配置管理器未初始化，请稍后重试');
       }
 
-      // 计算时辰和农历信息
-      const shichen = getShichen(formData.birthTime || '12:30');
+      // 计算简化格式的时辰（用于显示和保存）
+      const shichenSimple = getShichenSimple(formData.birthTime || '12:30');
       
+      // 计算完整格式的时辰（用于日志记录）
+      const shichenFull = getShichen(formData.birthTime || '12:30');
+
       let finalConfig = {
         ...formData,
         birthLocation: finalLocation,
-        shichen: shichen
+        shichen: shichenSimple  // 保存简化格式的时辰（不带刻度）
       };
 
       // 计算农历和真太阳时信息
@@ -396,7 +376,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           lunarBirthDate: lunarFields.lunarBirthDate,
           trueSolarTime: lunarFields.trueSolarTime,
           longitude: finalLocation.lng,
-          shichen: shichen
+          shichen: shichenFull  // 日志记录完整格式的时辰
         });
       } catch (error) {
         console.error('计算农历信息失败:', error);

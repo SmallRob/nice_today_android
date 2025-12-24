@@ -31,6 +31,39 @@ export const getShichen = (timeStr) => {
 };
 
 /**
+ * 获取时辰（简化格式，不包含刻度）
+ * 例如: 12:30 -> 午时
+ * @param {string} timeStr HH:MM 格式的时间
+ * @returns {string} 地支 + "时"，如"午时"
+ */
+export const getShichenSimple = (timeStr) => {
+    if (!timeStr) return '';
+
+    const [hourStr] = timeStr.split(':');
+    const hour = parseInt(hourStr, 10);
+
+    // 计算地支索引
+    const branchIndex = Math.floor((hour + 1) / 2) % 12;
+    const branch = EARTHLY_BRANCHES[branchIndex];
+
+    return `${branch}时`;
+};
+
+/**
+ * 标准时辰格式（移除刻度）
+ * 如果时辰包含刻度（如"午时二刻"），则移除刻度部分
+ * 如果时辰已经是简化格式（如"午时"），则保持不变
+ * @param {string} shichen 时辰字符串
+ * @returns {string} 简化格式的时辰
+ */
+export const normalizeShichen = (shichen) => {
+    if (!shichen) return '';
+
+    // 移除刻度部分（初刻、一刻、二刻、三刻）
+    return shichen.replace(/(初刻|一刻|二刻|三刻)/g, '');
+};
+
+/**
  * 计算真太阳时
  * @param {string} birthDateStr YYYY-MM-DD
  * @param {string} birthTimeStr HH:MM

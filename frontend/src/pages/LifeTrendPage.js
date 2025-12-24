@@ -331,15 +331,15 @@ const LifeTrendPage = () => {
         }, 500);
       }
 
-      // 计算时辰（使用统一函数）
-      const { getShichen } = await import('../utils/astronomy');
-      const shichenDisplay = getShichen(newBirthTime);
+      // 计算时辰（使用简化格式保存）
+      const { getShichenSimple } = await import('../utils/astronomy');
+      const shichenSimple = getShichenSimple(newBirthTime);
 
       // 保存配置
       const updates = {
         birthDate: newBirthDate,
         birthTime: newBirthTime,
-        shichen: shichenDisplay,
+        shichen: shichenSimple,  // 使用简化格式的时辰
         birthLocation: {
           province: currentConfig.birthLocation?.province || '默认',
           city: currentConfig.birthLocation?.city || '默认',
