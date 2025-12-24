@@ -325,14 +325,22 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
       initializeConfigManager();
     }
 
+    // 只有当配置数据有效时才更新
     if (currentConfig && currentConfig.birthDate) {
-      setBirthDate(new Date(currentConfig.birthDate));
-      setUserInfo({
-        nickname: currentConfig.nickname || '',
-        birthDate: currentConfig.birthDate
-      });
+      const userBirthDate = new Date(currentConfig.birthDate);
+      
+      // 避免无效日期（如默认值）覆盖用户配置
+      const isDefaultDate = currentConfig.birthDate === DEFAULT_BIRTH_DATE;
+      
+      if (!isDefaultDate || !birthDate) { // 如果是默认日期且已有用户数据，则不覆盖
+        setBirthDate(userBirthDate);
+        setUserInfo({
+          nickname: currentConfig.nickname || '',
+          birthDate: currentConfig.birthDate
+        });
+      }
     }
-  }, [configManagerReady, currentConfig, initializeConfigManager]);
+  }, [configManagerReady, currentConfig, initializeConfigManager, birthDate]);
 
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
@@ -608,29 +616,57 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     setLoading(false);
   }, [birthDate]);
 
-  // 组件挂载时自动加载默认数据
+  // 监听配置变化，当配置更新时重新加载数据
   useEffect(() => {
-    const loadDefaultData = async () => {
+    if (!configManagerReady || !currentConfig) return;
+
+    const loadData = async () => {
+      // 只有当出生日期发生变化时才重新加载
+      if (currentConfig.birthDate && currentConfig.birthDate !== DEFAULT_BIRTH_DATE) {
+        const userBirthDate = new Date(currentConfig.birthDate);
+        
+        // 避免重复加载相同的数据
+        if (!birthDate || userBirthDate.getTime() !== birthDate.getTime()) {
+          setBirthDate(userBirthDate);
+          await loadBiorhythmData(userBirthDate);
+        }
+      }
+    };
+
+    loadData();
+  }, [currentConfig, configManagerReady, birthDate, loadBiorhythmData, DEFAULT_BIRTH_DATE]);
+
+  // 组件挂载时自动加载数据
+  useEffect(() => {
+    const loadData = async () => {
       // 等待配置管理器初始化完成
       if (!configManagerReady) return;
 
-      // 如果已有出生日期，则使用它
+      // 优先使用用户配置的出生日期
+      if (currentConfig && currentConfig.birthDate && currentConfig.birthDate !== DEFAULT_BIRTH_DATE) {
+        const userBirthDate = new Date(currentConfig.birthDate);
+        setBirthDate(userBirthDate);
+        await loadBiorhythmData(userBirthDate);
+        return;
+      }
+
+      // 如果没有用户配置或使用默认日期，检查是否有存储的出生日期
       if (birthDate) {
         await loadBiorhythmData(birthDate);
         return;
       }
 
-      // 否则使用默认日期
+      // 最后才使用默认日期
       const defaultDate = parseDateLocal(DEFAULT_BIRTH_DATE);
       setBirthDate(defaultDate);
       await loadBiorhythmData(defaultDate);
     };
 
-    loadDefaultData();
+    loadData();
 
     // 初始化实践活动
     setPracticeActivities(getRandomActivities(0, 0, 0));
-  }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE, configManagerReady, getRandomActivities]);
+  }, [loadBiorhythmData, birthDate, currentConfig, DEFAULT_BIRTH_DATE, configManagerReady, getRandomActivities]);
 
   // 检测节律极值并发送通知，同时生成动态提示
   useEffect(() => {

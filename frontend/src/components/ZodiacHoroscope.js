@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
-import { userConfigManager } from '../utils/userConfigManager';
+import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
 import ZodiacTraitsDisplay from './ZodiacTraitsDisplay';
 import {
@@ -65,6 +65,9 @@ const {
 const getHoroscopeData = () => HOROSCOPE_DATA_ENHANCED;
 
 const HoroscopeTab = () => {
+  // 使用新的配置上下文
+  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+  
   // 状态管理
   const [userHoroscope, setUserHoroscope] = useState('');
   const [horoscopeGuidance, setHoroscopeGuidance] = useState(null);
@@ -108,13 +111,12 @@ const HoroscopeTab = () => {
   // 从用户配置获取用户星座
   const getUserZodiac = useCallback(() => {
     try {
-      const config = userConfigManager.getCurrentConfig();
-      return config?.zodiac || '';
+      return currentConfig?.zodiac || '';
     } catch (error) {
       console.log('获取用户星座失败:', error);
       return '';
     }
-  }, []);
+  }, [currentConfig]);
 
   // 优化的模块化运势数据计算
   const calculateHoroscopeData = useCallback((horoscope, date) => {
@@ -194,8 +196,8 @@ const HoroscopeTab = () => {
     const initialize = async () => {
       try {
         // 确保用户配置管理器已初始化
-        if (!userConfigManager.initialized) {
-          await userConfigManager.initialize();
+        if (!enhancedUserConfigManager.initialized) {
+          await enhancedUserConfigManager.initialize();
         }
 
         // 获取用户星座

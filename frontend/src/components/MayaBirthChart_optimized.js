@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from '
 
 import './MayaBirthChart.css';
 import { formatDateString } from '../services/apiServiceRefactored';
-import { userConfigManager } from '../utils/userConfigManager';
+import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { useTheme } from '../context/ThemeContext';
 import {
   sealInfoMap,
@@ -166,6 +166,9 @@ class MayaCalendarCalculator {
 // 主组件 - 极简移动端优化版本
 const MayaBirthChart = () => {
   const { theme } = useTheme();
+  // 使用新的配置上下文
+  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+  
   const [birthInfo, setBirthInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -180,18 +183,19 @@ const MayaBirthChart = () => {
     let isMounted = true;
 
     const init = async () => {
-      await userConfigManager.initialize();
       if (!isMounted) return;
 
-      const config = userConfigManager.getCurrentConfig();
-      setUserInfo({
-        nickname: config.nickname || '',
-        birthDate: config.birthDate || ''
-      });
+      // 从用户配置上下文获取用户信息
+      if (currentConfig) {
+        setUserInfo({
+          nickname: currentConfig.nickname || '',
+          birthDate: currentConfig.birthDate || ''
+        });
 
-      if (config.birthDate) {
-        // 直接加载用户配置中的出生日期数据
-        loadBirthInfo(new Date(config.birthDate));
+        if (currentConfig.birthDate) {
+          // 直接加载用户配置中的出生日期数据
+          loadBirthInfo(new Date(currentConfig.birthDate));
+        }
       }
     };
 
@@ -200,7 +204,7 @@ const MayaBirthChart = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [currentConfig]);
 
   // 简化版数据生成函数 - 确保所有值都有默认值，避免undefined
   const generateBirthInfo = useCallback((dateStr, kin, seal, tone, seed) => {

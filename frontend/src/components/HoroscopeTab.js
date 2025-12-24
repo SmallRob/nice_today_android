@@ -4,6 +4,9 @@ import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { Card } from './PageLayout';
 
 const HoroscopeTab = () => {
+  // 使用新的配置上下文
+  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+  
   // 状态管理
   const [userHoroscope, setUserHoroscope] = useState('');
   const [isTemporaryHoroscope, setIsTemporaryHoroscope] = useState(false);
@@ -443,22 +446,15 @@ const HoroscopeTab = () => {
   // 初始化组件
   useEffect(() => {
     let isMounted = true;
-    const removeListener = () => {};
     
     const initialize = async () => {
       try {
-        // 确保用户配置管理器已初始化
-        if (!userConfigManager.initialized) {
-          await userConfigManager.initialize();
-        }
-        
         // 加载所有星座
         await loadAllHoroscopes();
         
         if (!isMounted) return;
         
-        // 从用户配置管理器获取用户信息
-        const currentConfig = userConfigManager.getCurrentConfig();
+        // 从用户配置上下文获取用户信息
         if (currentConfig && isMounted) {
           setUserInfo(currentConfig);
           
@@ -481,44 +477,15 @@ const HoroscopeTab = () => {
               await calculateHoroscopeFromDate(year, month, day);
             }
           }
-        }
-        
-        // 添加配置变更监听器
-        const removeConfigListener = userConfigManager.addListener((configData) => {
-          if (isMounted && configData.currentConfig) {
-            setUserInfo(configData.currentConfig);
-            
-            // 只有当不是临时星座时，才更新星座信息
-            if (!isTemporaryRef.current) {
-              // 当配置变更时，更新星座信息
-              if (configData.currentConfig.zodiac && 
-                  configData.currentConfig.zodiac !== userHoroscope) {
-                setUserHoroscope(configData.currentConfig.zodiac);
-                storageManager.setUserHoroscope(configData.currentConfig.zodiac);
-                // 强制重新加载数据（包括配置切换和强制重载）
-                setDataLoaded(false);
-              } else if (configData.currentConfig.birthDate && 
-                         !configData.currentConfig.zodiac) {
-                // 如果有出生日期但没有星座，计算星座
-                const birthDateObj = new Date(configData.currentConfig.birthDate);
-                const year = birthDateObj.getFullYear();
-                const month = birthDateObj.getMonth() + 1;
-                const day = birthDateObj.getDate();
-                
-                if (year && month && day) {
-                  calculateHoroscopeFromDate(year, month, day);
-                }
-              }
-            }
-            
-            // 如果收到强制重载标志，确保重新加载数据
-            if (configData.forceReload) {
-              setDataLoaded(false);
-            }
+        } else {
+          // 降级处理：使用原有逻辑
+          await getStoredHoroscope();
+          
+          // 如果没有保存的星座，尝试从生物节律中获取出生年份
+          if (!userHoroscope) {
+            await getBirthDateFromBiorhythm();
           }
-        });
-        
-        removeListener.current = removeConfigListener;
+        }
         
         if (isMounted) {
           setInitialized(true);
@@ -544,11 +511,8 @@ const HoroscopeTab = () => {
     
     return () => {
       isMounted = false;
-      if (removeListener.current) {
-        removeListener.current();
-      }
     };
-  }, [loadAllHoroscopes, calculateHoroscopeFromDate, userHoroscope, getStoredHoroscope]);
+  }, [loadAllHoroscopes, calculateHoroscopeFromDate, currentConfig, getStoredHoroscope]);
 
   // 同步临时状态到ref
   useEffect(() => {
@@ -595,7 +559,6 @@ const HoroscopeTab = () => {
   // 新增：恢复用户配置的星座
   const handleRestoreUserHoroscope = useCallback(async () => {
     // 从用户配置获取星座
-    const currentConfig = userConfigManager.getCurrentConfig();
     if (currentConfig && currentConfig.zodiac) {
       setUserHoroscope(currentConfig.zodiac);
       setIsTemporaryHoroscope(false);
@@ -604,7 +567,7 @@ const HoroscopeTab = () => {
       // 标记需要重新加载数据
       setDataLoaded(false);
     }
-  }, [storageManager, setDataLoaded, setIsTemporaryHoroscope, userConfigManager]);
+  }, [storageManager, setDataLoaded, setIsTemporaryHoroscope, currentConfig]);
 
 
 

@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from '
 import './MayaBirthChart.css';
 import { formatDateString } from '../services/apiServiceRefactored';
 import { storageManager } from '../utils/storageManager';
+import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { 
   sealInfoMap, 
   toneInfoMap,
@@ -219,6 +220,9 @@ const HistorySection = memo(({ historyDates, handleHistoryClick }) => (
 
 // 主组件 - 优化性能和内存管理
 const MayaBirthChart = () => {
+  // 使用新的配置上下文
+  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+  
   // 使用useRef管理不需要触发重渲染的状态
   const loadingRef = useRef(false);
   const birthDateRef = useRef(null);
@@ -232,11 +236,6 @@ const MayaBirthChart = () => {
   const [showResults, setShowResults] = useState(false);
   const [historyDates, setHistoryDates] = useState([]);
   const [userInteracted, _setUserInteracted] = useState(false);
-  const [configManagerReady, _setConfigManagerReady] = useState(false);
-  const [userInfo, setUserInfo] = useState({
-    nickname: '',
-    birthDate: ''
-  });
 
   // 优化的状态更新函数
   const setBirthDate = useCallback((date) => {
@@ -724,18 +723,16 @@ const MayaBirthChart = () => {
     }
     abortControllerRef.current = new AbortController();
     
-    // 初始化配置管理器
-    await userConfigManager.initialize();
-    setConfigManagerReady(true);
+    // 使用新的配置上下文
+    const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
     
-  // 获取当前配置
-  const currentConfig = userConfigManager.getCurrentConfig();
-  
-  // 精简用户信息，只保留必要字段
-  setUserInfo({
-    nickname: currentConfig.nickname || '',
-    birthDate: currentConfig.birthDate || ''
-  });
+    // 精简用户信息，只保留必要字段
+    if (currentConfig) {
+      setUserInfo({
+        nickname: currentConfig.nickname || '',
+        birthDate: currentConfig.birthDate || ''
+      });
+    }
     
     // 获取出生日期
     let birthDateToUse = DEFAULT_BIRTH_DATE;

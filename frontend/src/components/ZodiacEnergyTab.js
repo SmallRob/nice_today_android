@@ -58,38 +58,44 @@ const ZodiacEnergyTab = memo(() => {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [tempZodiac, setTempZodiac] = useState(''); // 用于临时切换生肖查看
 
-  // 监听用户配置变化
+  // 监听用户配置变化 - 优化配置数据加载逻辑
   useEffect(() => {
-    if (currentConfig) {
-      setUserInfo(currentConfig);
+    if (!currentConfig) return;
 
-      // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
-      if (currentConfig.zodiacAnimal &&
-        currentConfig.zodiacAnimal !== userZodiac &&
-        !tempZodiac) {
-        setUserZodiac(currentConfig.zodiacAnimal);
-        setDataLoaded(false);
-      } else if (currentConfig.birthDate && userZodiac === '鼠') {
-        // 如果没有生肖但有出生日期，计算生肖
-        const birthYear = new Date(currentConfig.birthDate.replace(/-/g, '/')).getFullYear();
-        if (birthYear && birthYear > 1900 && birthYear < 2100) {
-          const calculatedZodiac = ZODIAC_LIST[(birthYear - 4) % 12];
-          if (calculatedZodiac && calculatedZodiac !== '鼠') {
-            setUserZodiac(calculatedZodiac);
-            setDataLoaded(false);
-          }
+    // 避免默认值覆盖用户配置
+    const isDefaultBirthDate = currentConfig.birthDate === '1991-04-30';
+    
+    // 只有当配置数据有效时才更新
+    if (!isDefaultBirthDate || !userInfo.birthDate) {
+      setUserInfo(currentConfig);
+    }
+
+    // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
+    if (currentConfig.zodiacAnimal &&
+      currentConfig.zodiacAnimal !== userZodiac &&
+      !tempZodiac) {
+      setUserZodiac(currentConfig.zodiacAnimal);
+      setDataLoaded(false);
+    } else if (currentConfig.birthDate && !isDefaultBirthDate && userZodiac === '鼠') {
+      // 如果没有生肖但有出生日期，计算生肖（排除默认日期）
+      const birthYear = new Date(currentConfig.birthDate.replace(/-/g, '/')).getFullYear();
+      if (birthYear && birthYear > 1900 && birthYear < 2100) {
+        const calculatedZodiac = ZODIAC_LIST[(birthYear - 4) % 12];
+        if (calculatedZodiac && calculatedZodiac !== '鼠') {
+          setUserZodiac(calculatedZodiac);
+          setDataLoaded(false);
         }
       }
-
-      // 更新八字信息
-      const bazi = calculateBazi(
-        currentConfig.birthDate,
-        currentConfig.birthTime,
-        currentConfig.birthLocation?.lng
-      );
-      setBaziInfo(bazi);
     }
-  }, [currentConfig, userZodiac, tempZodiac]);
+
+    // 更新八字信息
+    const bazi = calculateBazi(
+      currentConfig.birthDate,
+      currentConfig.birthTime,
+      currentConfig.birthLocation?.lng
+    );
+    setBaziInfo(bazi);
+  }, [currentConfig, userZodiac, tempZodiac, userInfo.birthDate]);
 
   // 五行元素数据 - 使用useMemo缓存，避免重复创建
   const wuxingElements = React.useMemo(() => [

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { userConfigManager } from '../utils/userConfigManager';
+import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
 
@@ -506,6 +506,9 @@ const MBTIPersonalityTabHome = () => {
     }
   };
 
+  // 使用新的配置上下文
+  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+
   // 初始化组件 - 优化为立即加载默认数据
   useEffect(() => {
     let isMounted = true;
@@ -518,19 +521,16 @@ const MBTIPersonalityTabHome = () => {
         setTempMBTI('');
 
         // 异步获取用户配置，但不阻塞界面
-        setTimeout(async () => {
+        setTimeout(() => {
           try {
-            // 确保用户配置管理器已初始化
-            if (!userConfigManager.initialized) {
-              await userConfigManager.initialize();
-            }
-
-            // 获取用户配置
-            const currentConfig = userConfigManager.getCurrentConfig();
+            // 从用户配置上下文获取用户信息
             if (currentConfig && isMounted) {
+              // 避免默认值覆盖用户配置
+              const isDefaultBirthDate = currentConfig.birthDate === '1991-04-30';
+              
               setUserInfo({
                 nickname: currentConfig.nickname || '',
-                birthDate: currentConfig.birthDate || '',
+                birthDate: (!isDefaultBirthDate || !userInfo.birthDate) ? currentConfig.birthDate || '' : userInfo.birthDate,
                 mbti: currentConfig.mbti || ''
               });
 
@@ -540,30 +540,6 @@ const MBTIPersonalityTabHome = () => {
                 // 标记需要重新加载数据
                 setDataLoaded(false);
               }
-            }
-
-            // 添加配置变更监听器
-            const removeConfigListener = userConfigManager.addListener((configData) => {
-              if (isMounted && configData.currentConfig) {
-                setUserInfo({
-                  nickname: configData.currentConfig.nickname || '',
-                  birthDate: configData.currentConfig.birthDate || '',
-                  mbti: configData.currentConfig.mbti || ''
-                });
-
-                // 仅在没有临时MBTI时更新MBTI信息，避免覆盖用户临时选择
-                if (configData.currentConfig.mbti &&
-                  configData.currentConfig.mbti !== userMBTI &&
-                  !tempMBTI) { // 仅在没有临时MBTI时更新
-                  setUserMBTI(configData.currentConfig.mbti);
-                  // 标记需要重新加载数据
-                  setDataLoaded(false);
-                }
-              }
-            });
-
-            if (removeConfigListener) {
-              removeConfigListener();
             }
           } catch (error) {
             console.warn('异步加载用户配置失败:', error);
@@ -591,7 +567,7 @@ const MBTIPersonalityTabHome = () => {
     return () => {
       isMounted = false;
     };
-  }, [mbtiList]);
+  }, [mbtiList, currentConfig]);
 
   // 当MBTI类型变化时重新加载数据
   useEffect(() => {

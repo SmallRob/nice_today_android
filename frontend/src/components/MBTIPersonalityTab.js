@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { userConfigManager } from '../utils/userConfigManager';
+import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
 
@@ -466,24 +466,21 @@ const MBTIPersonalityTab = () => {
     return examplesMap[type] || ['知名人士', '成功人士', '行业领袖'];
   };
 
+  // 使用新的配置上下文
+  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+
   // 初始化组件
   useEffect(() => {
     let isMounted = true;
     
     const initialize = async () => {
       try {
-        // 确保用户配置管理器已初始化
-        if (!userConfigManager.initialized) {
-          await userConfigManager.initialize();
-        }
-        
         // 加载所有MBTI类型
         setAllMBTIs(mbtiList);
         
         if (!isMounted) return;
         
-        // 从用户配置管理器获取用户信息
-        const currentConfig = userConfigManager.getCurrentConfig();
+        // 从用户配置上下文获取用户信息
         if (currentConfig && isMounted) {
           setUserInfo({
             nickname: currentConfig.nickname || '',
@@ -497,34 +494,9 @@ const MBTIPersonalityTab = () => {
           }
         }
         
-        // 添加配置变更监听器
-        const removeConfigListener = userConfigManager.addListener((configData) => {
-          if (isMounted && configData.currentConfig) {
-            setUserInfo({
-              nickname: configData.currentConfig.nickname || '',
-              birthDate: configData.currentConfig.birthDate || '',
-              mbti: configData.currentConfig.mbti || ''
-            });
-            
-            // 当配置变更时，更新MBTI信息
-            if (configData.currentConfig.mbti && 
-                configData.currentConfig.mbti !== userMBTI) {
-              setUserMBTI(configData.currentConfig.mbti);
-              // 标记需要重新加载数据
-              setDataLoaded(false);
-            }
-          }
-        });
-        
         if (isMounted) {
           setInitialized(true);
         }
-        
-        return () => {
-          if (removeConfigListener) {
-            removeConfigListener();
-          }
-        };
       } catch (error) {
         console.error('初始化MBTI组件失败:', error);
         
@@ -536,15 +508,12 @@ const MBTIPersonalityTab = () => {
       }
     };
     
-    const cleanup = initialize();
+    initialize();
     
     return () => {
       isMounted = false;
-      if (cleanup && typeof cleanup.then === 'function') {
-        cleanup.then(cleanupFn => cleanupFn && cleanupFn());
-      }
     };
-  }, [mbtiList, userMBTI]);
+  }, [mbtiList, currentConfig]);
 
   // 当MBTI类型变化时重新加载数据
   useEffect(() => {

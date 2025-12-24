@@ -848,55 +848,97 @@ const UserConfigManagerComponent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 编辑弹窗状态
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
 
-  // 初始化配置管理器 - 优化异步加载
+  // 配置监听器回调 - 统一处理配置变更
+  const handleConfigChange = useCallback(({
+    configs: updatedConfigs,
+    activeConfigIndex: updatedActiveIndex,
+    currentConfig
+  }) => {
+    console.log('配置变更监听器触发:', {
+      configsLength: updatedConfigs.length,
+      activeIndex: updatedActiveIndex,
+      currentConfigNickname: currentConfig?.nickname
+    });
+    
+    setConfigs([...updatedConfigs]);
+    setActiveConfigIndex(updatedActiveIndex);
+    
+    // 确保展开索引在有效范围内
+    if (expandedIndex >= updatedConfigs.length) {
+      setExpandedIndex(updatedActiveIndex);
+    }
+  }, [expandedIndex]);
+
+  // 初始化配置管理器 - 类似轻量版AppLite的初始化逻辑
   useEffect(() => {
+    let isMounted = true;
+    let removeListener = null;
+
     const init = async () => {
       try {
+        if (!isMounted) return;
+        
         setLoading(true);
         setError(null);
 
-        // 异步初始化配置管理器
-        await new Promise(resolve => setTimeout(resolve, 100)); // 延迟加载避免卡顿
-        await enhancedUserConfigManager.initialize();
+        console.log('开始初始化UserConfigManager组件...');
+        
+        // 检查配置管理器是否已初始化
+        if (!enhancedUserConfigManager.initialized) {
+          console.log('配置管理器未初始化，开始初始化...');
+          await enhancedUserConfigManager.initialize();
+          console.log('配置管理器初始化完成');
+        } else {
+          console.log('配置管理器已初始化，跳过重复初始化');
+        }
+        
+        if (!isMounted) return;
         setIsInitialized(true);
 
-        // 异步加载配置
-        await new Promise(resolve => setTimeout(resolve, 50));
+        // 获取当前用户配置
+        const currentConfig = enhancedUserConfigManager.getCurrentConfig();
         const allConfigs = enhancedUserConfigManager.getAllConfigs();
         const activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
 
+        console.log('获取配置数据:', {
+          configCount: allConfigs.length,
+          activeIndex,
+          currentNickname: currentConfig.nickname
+        });
+
+        if (!isMounted) return;
         setConfigs(allConfigs);
         setActiveConfigIndex(activeIndex);
 
         // 默认展开当前配置
         setExpandedIndex(activeIndex);
+        
+        // 立即设置监听器，确保后续变更能及时响应
+        removeListener = enhancedUserConfigManager.addListener(handleConfigChange);
+        
+        if (!isMounted) return;
         setLoading(false);
+        console.log('UserConfigManager组件初始化完成');
+
       } catch (error) {
         console.error('初始化用户配置失败:', error);
+        if (!isMounted) return;
         setError('初始化失败: ' + error.message);
         setLoading(false);
       }
     };
 
     init();
-  }, []);
-
-  // 添加配置变更监听器
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    const removeListener = enhancedUserConfigManager.addListener(({
-      configs: updatedConfigs,
-      activeConfigIndex: updatedActiveIndex
-    }) => {
-      setConfigs([...updatedConfigs]);
-      setActiveConfigIndex(updatedActiveIndex);
-    });
-
+    
+    // 返回清理函数
     return () => {
-      removeListener();
+      isMounted = false;
+      if (removeListener && typeof removeListener === 'function') {
+        removeListener();
+        console.log('UserConfigManager组件监听器已清理');
+      }
     };
-  }, [isInitialized]);
+  }, [handleConfigChange]);
 
   // 显示提示信息
   const showMessage = useCallback((text, type = 'info') => {
@@ -1530,13 +1572,14 @@ const UserConfigManagerComponent = () => {
           onSave={async (index, configData) => {
             // 直接调用保存函数，弹窗已在 ConfigEditModal 内部关闭
             try {
-              await handleSaveConfig(index, configData);
+              const result = await handleSaveConfig(index, configData);
               // 保存成功，ConfigEditModal 会显示成功消息
-              console.log('配置保存完成');
+              console.log('配置保存完成，返回值:', result);
+              return result; // 返回保存结果
             } catch (error) {
               console.error('保存过程中发生错误:', error);
-              // 保存失败，ConfigEditModal 会显示错误消息
-              // 注意：此时弹窗已关闭，用户需要重新打开编辑
+              // 保存失败，重新抛出异常让 ConfigEditModal 能够捕获并显示错误消息
+              throw error;
             }
           }}
           showMessage={showMessage}

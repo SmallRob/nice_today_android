@@ -507,6 +507,22 @@ class DataPersistenceManager {
   }
 
   /**
+   * 初始化数据持久化管理器
+   * 执行必要的初始化操作
+   */
+  async initialize() {
+    try {
+      // 确保内存缓存、本地存储和备份管理器已准备好
+      // 目前这些组件在构造函数中已经创建，所以只需返回成功
+      console.log('数据持久化管理器初始化完成');
+      return true;
+    } catch (error) {
+      console.error('数据持久化管理器初始化失败:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 设置数据（多级存储）
    */
   async set(key, value, strategy = STORAGE_STRATEGIES.ALL) {
