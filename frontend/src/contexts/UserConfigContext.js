@@ -76,7 +76,7 @@ export const UserConfigProvider = ({ children }) => {
   // 更新配置
   const updateConfig = useCallback(async (index, config) => {
     try {
-      await userConfigManager.updateConfig(index, config);
+      userConfigManager.updateConfig(index, config);
       // 监听器会自动更新状态
       return true;
     } catch (err) {
@@ -94,10 +94,7 @@ export const UserConfigProvider = ({ children }) => {
   // 添加新配置
   const addConfig = useCallback(async (config) => {
     try {
-      const success = userConfigManager.addConfig(config);
-      if (!success) {
-        throw new Error('添加配置失败');
-      }
+      userConfigManager.addConfig(config);
       // addConfig 方法内部已经自动设置新配置为活跃配置，不需要额外调用 setActiveConfig
       // 监听器会自动更新状态
       return true;

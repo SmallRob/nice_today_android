@@ -634,37 +634,31 @@ const UserConfigManagerComponent = () => {
       }
     }
 
-    let success;
-    let newIndex = index;
+    try {
+      if (isNewConfig) {
+        // 新建配置，添加到存储
+        // 注意：addConfig 方法内部已经自动将新配置设为活跃配置（isused = true）
+        userConfigManager.addConfig(finalConfigData);
 
-    if (isNewConfig) {
-      // 新建配置，添加到存储
-      // 注意：addConfig 方法内部已经自动将新配置设为活跃配置（isused = true）
-      success = userConfigManager.addConfig(finalConfigData);
-
-      // 新建配置成功后，验证配置状态
-      if (success) {
         // 获取更新后的配置列表
         const updatedConfigs = userConfigManager.getAllConfigs();
         const newActiveIndex = userConfigManager.getActiveConfigIndex();
-        newIndex = newActiveIndex; // 新配置的索引就是活跃索引
-        console.log('新建配置成功，索引:', newIndex, '活跃索引:', newActiveIndex, '配置数量:', updatedConfigs.length);
 
         // 验证新配置的 isused 状态（addConfig 已自动设置）
         const verifyConfigs = userConfigManager.getAllConfigs();
-        console.log('新配置 isused 状态:', verifyConfigs[newIndex]?.isused);
+        console.log('新建配置成功，索引:', newActiveIndex, '活跃索引:', newActiveIndex, '配置数量:', updatedConfigs.length);
+        console.log('新配置 isused 状态:', verifyConfigs[newActiveIndex]?.isused);
+      } else {
+        // 现有配置，更新存储
+        userConfigManager.updateConfig(index, finalConfigData);
       }
-    } else {
-      // 现有配置，更新存储
-      success = userConfigManager.updateConfig(index, finalConfigData);
-    }
 
-    if (success) {
       console.log('保存配置成功，监听器将自动更新状态');
       return true; // 返回成功状态
-    } else {
-      console.error('保存配置失败:', { isNewConfig, success });
-      return false; // 返回失败状态
+    } catch (error) {
+      console.error('保存配置失败:', error);
+      // 将异常信息传递给调用者
+      throw error;
     }
   }, [showMessage]);
 
@@ -689,25 +683,26 @@ const UserConfigManagerComponent = () => {
 
     // 使用自定义确认对话框替代window.confirm
     if (window.confirm('确定要删除这个配置吗？')) {
-      if (isTempConfig) {
-        // 临时配置，只需从本地状态移除
-        setConfigs(prev => prev.filter((_, i) => i !== index));
-        // 调整展开索引
-        setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
-        showMessage('删除配置成功', 'success');
-      } else {
-        // 存储中的配置，需要从存储中移除
-        const success = userConfigManager.deleteConfig(index);
-        if (success) {
+      try {
+        if (isTempConfig) {
+          // 临时配置，只需从本地状态移除
+          setConfigs(prev => prev.filter((_, i) => i !== index));
+          // 调整展开索引
+          setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
+          showMessage('删除配置成功', 'success');
+        } else {
+          // 存储中的配置，需要从存储中移除
+          userConfigManager.deleteConfig(index);
           // deleteConfig 内部已经调用了 notifyListeners
           // 监听器会自动更新本地状态，这里只需要调整展开索引
           // 注意：监听器更新是异步的，所以需要从 userConfigManager 获取最新长度
           const freshConfigs = userConfigManager.getAllConfigs();
           setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
           showMessage('删除配置成功', 'success');
-        } else {
-          showMessage('删除配置失败，请重试', 'error');
         }
+      } catch (error) {
+        console.error('删除配置失败:', error);
+        showMessage(`删除配置失败: ${error.message}`, 'error');
       }
     }
   }, [configs.length, showMessage]);
@@ -734,20 +729,16 @@ const UserConfigManagerComponent = () => {
 
       // 异步设置活跃配置
       await new Promise(resolve => setTimeout(resolve, 50));
-      const success = userConfigManager.setActiveConfig(index);
+      userConfigManager.setActiveConfig(index);
 
-      if (success) {
-        // setActiveConfig 内部已经调用了 notifyListeners
-        // 监听器会自动更新本地状态，不需要手动更新
-        console.log('设置活跃配置成功，监听器将自动更新状态');
+      // setActiveConfig 内部已经调用了 notifyListeners
+      // 监听器会自动更新本地状态，不需要手动更新
+      console.log('设置活跃配置成功，监听器将自动更新状态');
 
-        // 延迟更新切换状态，确保UI流畅
-        setTimeout(() => {
-          setIsSwitching(false);
-        }, 300);
-      } else {
-        throw new Error('设置当前配置失败');
-      }
+      // 延迟更新切换状态，确保UI流畅
+      setTimeout(() => {
+        setIsSwitching(false);
+      }, 300);
     } catch (error) {
       console.error('切换配置失败:', error);
       setError('切换配置失败: ' + error.message);
@@ -1095,6 +1086,7 @@ const UserConfigManagerComponent = () => {
               }
             } catch (error) {
               console.error('保存过程中发生错误:', error);
+              showMessage(`保存失败: ${error.message}`, 'error');
               // 失败时不关闭弹窗，让用户可以重试
             }
           }}

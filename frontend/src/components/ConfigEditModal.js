@@ -410,20 +410,21 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         });
       } catch (error) {
         console.error('计算农历信息失败:', error);
+        // 农历计算失败不影响保存，继续流程
       }
 
       // 将表单数据传递给父组件处理（等待保存完成）
       const saveSuccess = await onSave(index, finalConfig);
 
       if (!saveSuccess) {
-        throw new Error('保存失败');
+        throw new Error('保存失败: onSave 返回 false');
       }
 
       // 只有保存成功才显示成功消息（弹窗由父组件控制关闭）
       showMessage('保存成功，数据已保存', 'success');
     } catch (error) {
       console.error('保存配置失败:', error);
-      showMessage('保存失败，请重试', 'error');
+      showMessage(`保存失败: ${error.message}`, 'error');
       throw error; // 重新抛出异常，让父组件感知
     } finally {
       setIsSaving(false);

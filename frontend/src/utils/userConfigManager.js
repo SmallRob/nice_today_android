@@ -241,11 +241,11 @@ class UserConfigManager {
    * 添加新配置
    * @param {Object} config 新配置对象
    * @returns {Boolean} 是否添加成功
+   * @throws {Error} 配置对象无效或保存失败时抛出异常
    */
   addConfig(config) {
     if (!config || typeof config !== 'object') {
-      console.error('配置对象无效');
-      return false;
+      throw new Error('配置对象无效');
     }
 
     // 确保配置包含必要字段
@@ -287,14 +287,10 @@ class UserConfigManager {
       console.log('已禁用系统默认配置', systemDefaultIndex);
     }
 
-    // 保存到本地存储前清除缓存
-    this.clearCache();
-
     // 保存到本地存储
     const saveSuccess = this.saveToStorage();
     if (!saveSuccess) {
-      console.error('保存新配置失败');
-      return false;
+      throw new Error('保存新配置失败');
     }
 
     // 确认配置100%保存成功后再全局更新引用值
@@ -304,12 +300,16 @@ class UserConfigManager {
 
     // 验证新配置的 isused 是否为 true
     if (!verifyConfig || verifyConfig.isused !== true) {
-      console.error('新配置 isused 验证失败', verifyConfig);
-      // 修复 isused 状态
+      const errorMsg = `新配置 isused 验证失败，verifyConfig: ${JSON.stringify(verifyConfig)}`;
+      console.error(errorMsg, verifyConfig);
+      // 尝试修复 isused 状态
       this.configs.forEach((c, idx) => {
         c.isused = idx === this.activeConfigIndex;
       });
-      this.saveToStorage();
+      const repairSuccess = this.saveToStorage();
+      if (!repairSuccess) {
+        throw new Error(`${errorMsg}，修复也失败`);
+      }
     }
 
     // 通知监听器
@@ -328,15 +328,17 @@ class UserConfigManager {
    * @param {Number} index 配置索引
    * @param {Object} updates 更新的字段
    * @returns {Boolean} 是否更新成功
+   * @throws {Error} 参数无效或保存失败时抛出异常
    */
   updateConfig(index, updates) {
-    if (!this.initialized ||
-      index < 0 ||
-      index >= this.configs.length ||
-      !updates ||
-      typeof updates !== 'object') {
-      console.error('无效的参数');
-      return false;
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+    if (index < 0 || index >= this.configs.length) {
+      throw new Error(`无效的配置索引: ${index}`);
+    }
+    if (!updates || typeof updates !== 'object') {
+      throw new Error('更新数据无效');
     }
 
     // 保留原配置的 isused 状态（除非明确指定）
@@ -353,14 +355,10 @@ class UserConfigManager {
       });
     }
 
-    // 保存到本地存储前清除缓存
-    this.clearCache();
-
     // 保存到本地存储
     const saveSuccess = this.saveToStorage();
     if (!saveSuccess) {
-      console.error('更新配置保存失败');
-      return false;
+      throw new Error('更新配置保存失败');
     }
 
     // 验证更新后的配置
@@ -368,12 +366,16 @@ class UserConfigManager {
     const updatedConfig = verifyConfigs[index];
 
     if (updatedConfig?.isused !== this.configs[index]?.isused) {
-      console.error('更新配置验证失败：isused 状态不一致');
-      // 修复 isused 状态
+      const errorMsg = `更新配置验证失败：isused 状态不一致，expected: ${this.configs[index]?.isused}, actual: ${updatedConfig?.isused}`;
+      console.error(errorMsg);
+      // 尝试修复 isused 状态
       this.configs.forEach((c, idx) => {
         c.isused = idx === this.activeConfigIndex;
       });
-      this.saveToStorage();
+      const repairSuccess = this.saveToStorage();
+      if (!repairSuccess) {
+        throw new Error(`${errorMsg}，修复也失败`);
+      }
     }
 
     // 通知监听器
@@ -387,14 +389,17 @@ class UserConfigManager {
    * 删除指定索引的配置
    * @param {Number} index 配置索引
    * @returns {Boolean} 是否删除成功
+   * @throws {Error} 索引无效或保存失败时抛出异常
    */
   removeConfig(index) {
-    if (!this.initialized ||
-      index < 0 ||
-      index >= this.configs.length ||
-      this.configs.length <= 1) {
-      console.error('无法删除配置：索引无效或只剩一个配置');
-      return false;
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+    if (index < 0 || index >= this.configs.length) {
+      throw new Error(`无效的配置索引: ${index}`);
+    }
+    if (this.configs.length <= 1) {
+      throw new Error('至少需要保留一个配置');
     }
 
     // 删除配置
@@ -415,14 +420,10 @@ class UserConfigManager {
       });
     }
 
-    // 保存到本地存储前清除缓存
-    this.clearCache();
-
     // 保存到本地存储
     const saveSuccess = this.saveToStorage();
     if (!saveSuccess) {
-      console.error('删除配置保存失败');
-      return false;
+      throw new Error('删除配置保存失败');
     }
 
     // 验证删除后的配置
@@ -430,12 +431,16 @@ class UserConfigManager {
     const activeConfig = verifyConfigs[this.activeConfigIndex];
 
     if (activeConfig?.isused !== true) {
-      console.error('删除配置验证失败：活跃配置的 isused 状态不正确');
-      // 修复 isused 状态
+      const errorMsg = `删除配置验证失败：活跃配置的 isused 状态不正确，index: ${this.activeConfigIndex}, isused: ${activeConfig?.isused}`;
+      console.error(errorMsg);
+      // 尝试修复 isused 状态
       this.configs.forEach((c, idx) => {
         c.isused = idx === this.activeConfigIndex;
       });
-      this.saveToStorage();
+      const repairSuccess = this.saveToStorage();
+      if (!repairSuccess) {
+        throw new Error(`${errorMsg}，修复也失败`);
+      }
     }
 
     // 通知监听器
@@ -449,11 +454,14 @@ class UserConfigManager {
    * 设置活跃配置
    * @param {Number} index 配置索引
    * @returns {Boolean} 是否设置成功
+   * @throws {Error} 索引无效或保存失败时抛出异常
    */
   setActiveConfig(index) {
-    if (!this.initialized || index < 0 || index >= this.configs.length) {
-      console.error('无效的配置索引');
-      return false;
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+    if (index < 0 || index >= this.configs.length) {
+      throw new Error(`无效的配置索引: ${index}`);
     }
 
     // 更新所有配置的 isused 状态
@@ -463,14 +471,10 @@ class UserConfigManager {
 
     this.activeConfigIndex = index;
 
-    // 保存到本地存储前清除缓存
-    this.clearCache();
-
     // 保存到本地存储
     const saveSuccess = this.saveToStorage();
     if (!saveSuccess) {
-      console.error('设置活跃配置保存失败');
-      return false;
+      throw new Error('设置活跃配置保存失败');
     }
 
     // 验证配置的 isused 状态
@@ -478,12 +482,16 @@ class UserConfigManager {
     const activeConfig = verifyConfigs[this.activeConfigIndex];
 
     if (activeConfig?.isused !== true) {
-      console.error('设置活跃配置验证失败：isused 状态不正确');
-      // 修复 isused 状态
+      const errorMsg = `设置活跃配置验证失败：isused 状态不正确，index: ${this.activeConfigIndex}, isused: ${activeConfig?.isused}`;
+      console.error(errorMsg);
+      // 尝试修复 isused 状态
       this.configs.forEach((c, idx) => {
         c.isused = idx === index;
       });
-      this.saveToStorage();
+      const repairSuccess = this.saveToStorage();
+      if (!repairSuccess) {
+        throw new Error(`${errorMsg}，修复也失败`);
+      }
     }
 
     // 通知监听器
@@ -558,18 +566,18 @@ class UserConfigManager {
 
   /**
    * 保存配置到本地存储（增强版）
+   * @returns {Boolean} 是否保存成功
+   * @throws {Error} 保存失败时抛出异常
    */
   saveToStorage() {
+    // 检查 localStorage 是否可用
+    if (!this.checkStorageAvailable()) {
+      throw new Error('localStorage 不可用，无法保存配置');
+    }
+
     try {
-      // 检查 localStorage 是否可用
-      if (!this.checkStorageAvailable()) {
-        console.error('localStorage 不可用，无法保存配置');
-        return false;
-      }
 
       // 在保存前清除缓存（注意：不再设置 initialized = false）
-      this.clearCache();
-
       const configsJson = JSON.stringify(this.configs);
       localStorage.setItem(STORAGE_KEYS.USER_CONFIGS, configsJson);
       localStorage.setItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX, this.activeConfigIndex.toString());
@@ -579,53 +587,25 @@ class UserConfigManager {
       const verifyIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
 
       if (verifyConfigs !== configsJson) {
-        console.error('保存配置验证失败：存储的数据与预期不符', {
-          expectedLength: configsJson.length,
-          actualLength: verifyConfigs?.length || 0,
-          expected: configsJson,
-          actual: verifyConfigs
-        });
-        return false;
+        throw new Error(`保存配置验证失败：存储的数据与预期不符，expectedLength: ${configsJson.length}, actualLength: ${verifyConfigs?.length || 0}`);
       }
 
       // 二次验证：解析保存的数据并对比
-      try {
-        const parsedConfigs = JSON.parse(verifyConfigs);
-        const parsedIndex = parseInt(verifyIndex, 10);
+      const parsedConfigs = JSON.parse(verifyConfigs);
+      const parsedIndex = parseInt(verifyIndex, 10);
 
-        if (parsedConfigs.length !== this.configs.length) {
-          console.error('保存配置验证失败：配置数量不一致', {
-            expected: this.configs.length,
-            actual: parsedConfigs.length
-          });
-          return false;
-        }
+      if (parsedConfigs.length !== this.configs.length) {
+        throw new Error(`保存配置验证失败：配置数量不一致，expected: ${this.configs.length}, actual: ${parsedConfigs.length}`);
+      }
 
-        if (parsedIndex !== this.activeConfigIndex) {
-          console.error('保存配置验证失败：活跃索引不一致', {
-            expected: this.activeConfigIndex,
-            actual: parsedIndex
-          });
-          return false;
-        }
+      if (parsedIndex !== this.activeConfigIndex) {
+        throw new Error(`保存配置验证失败：活跃索引不一致，expected: ${this.activeConfigIndex}, actual: ${parsedIndex}`);
+      }
 
-        // 验证活跃配置的 isused 状态
-        const activeConfig = parsedConfigs[parsedIndex];
-        if (activeConfig && activeConfig.isused !== true) {
-          console.error('保存配置验证失败：活跃配置的 isused 状态不正确', {
-            activeConfigIndex: parsedIndex,
-            isused: activeConfig.isused,
-            nickname: activeConfig.nickname
-          });
-          return false;
-        }
-      } catch (parseError) {
-        console.error('保存配置二次验证失败:', parseError, {
-          verifyConfigs,
-          verifyIndex,
-          activeConfigIndex: this.activeConfigIndex
-        });
-        return false;
+      // 验证活跃配置的 isused 状态
+      const activeConfig = parsedConfigs[parsedIndex];
+      if (activeConfig && activeConfig.isused !== true) {
+        throw new Error(`保存配置验证失败：活跃配置的 isused 状态不正确，index: ${parsedIndex}, isused: ${activeConfig.isused}, nickname: ${activeConfig.nickname}`);
       }
 
       console.log('配置已成功保存到本地存储', {
@@ -635,17 +615,15 @@ class UserConfigManager {
       });
       return true;
     } catch (error) {
-      // 检查是否是存储配额已满的错误
+      // 重新抛出异常，让调用者捕获处理
       if (error.name === 'QuotaExceededError' || error.code === 22) {
-        console.error('localStorage 存储配额已满，无法保存配置', error);
-      } else {
-        console.error('保存配置到本地存储失败:', error, {
-          configCount: this.configs?.length,
-          activeConfigIndex: this.activeConfigIndex,
-          storageKeys: Object.keys(localStorage).filter(k => k.includes('nice_today'))
-        });
+        throw new Error(`localStorage 存储配额已满: ${error.message}`);
       }
-      return false;
+      // 如果是已经抛出的错误，直接重新抛出
+      if (error.message && error.message.includes('保存配置验证失败')) {
+        throw error;
+      }
+      throw new Error(`保存配置到本地存储失败: ${error.message}`);
     }
   }
 
