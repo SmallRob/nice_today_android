@@ -522,10 +522,11 @@ const UserConfigManagerComponent = () => {
   // 显示提示信息
   const showMessage = useCallback((text, type = 'info') => {
     setMessage({ text, type });
-    // 3秒后自动清除消息
+    // 根据消息类型和长度调整显示时间
+    const displayTime = type === 'error' ? 8000 : 3000; // 错误消息显示8秒，其他消息3秒
     setTimeout(() => {
       setMessage(null);
-    }, 3000);
+    }, displayTime);
   }, []);
 
   // 处理配置保存
@@ -533,6 +534,8 @@ const UserConfigManagerComponent = () => {
     // 检查是否是新建配置（index < 0 表示新建，或 index 超出存储范围）
     const storedConfigs = userConfigManager.getAllConfigs();
     const isNewConfig = index < 0 || index >= storedConfigs.length;
+
+    console.log('开始保存配置:', { index, isNewConfig, configData });
 
     // 自动为中文姓名打分（只有当 nameScore 不存在时才计算）
     let finalConfigData = { ...configData };
@@ -657,16 +660,11 @@ const UserConfigManagerComponent = () => {
     }
 
     if (success) {
-      // addConfig、updateConfig 内部已经调用了 notifyListeners
-      // 监听器会自动更新本地状态，不需要手动更新
       console.log('保存配置成功，监听器将自动更新状态');
-
-      showMessage('保存配置成功', 'success');
-
-      // 保存成功后折叠面板
-      setExpandedIndex(-1);
+      return true; // 返回成功状态
     } else {
-      showMessage('保存配置失败，请重试', 'error');
+      console.error('保存配置失败:', { isNewConfig, success });
+      return false; // 返回失败状态
     }
   }, [showMessage]);
 
@@ -865,7 +863,7 @@ const UserConfigManagerComponent = () => {
       {/* 消息提示 */}
       {message && (
         <div className={`p-4 rounded-lg ${message.type === 'error' ? 'bg-red-50 dark:bg-red-900 border-l-4 border-red-400' : message.type === 'success' ? 'bg-green-50 dark:bg-green-900 border-l-4 border-green-400' : 'bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400'}`}>
-          <p className={`${message.type === 'error' ? 'text-red-700 dark:text-red-300' : message.type === 'success' ? 'text-green-700 dark:text-green-300' : 'text-blue-700 dark:text-blue-300'}`}>
+          <p className={`${message.type === 'error' ? 'text-red-700 dark:text-red-300' : message.type === 'success' ? 'text-green-700 dark:text-green-300' : 'text-blue-700 dark:text-blue-300'} whitespace-pre-line`}>
             {message.text}
           </p>
         </div>
@@ -1082,10 +1080,23 @@ const UserConfigManagerComponent = () => {
           config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : null}
           index={editingConfigIndex}
           isNew={editingConfigIndex < 0}
-          onSave={(index, configData) => {
-            handleSaveConfig(index, configData);
-            setIsEditModalOpen(false);
-            setEditingConfigIndex(null);
+          onSave={async (index, configData) => {
+            try {
+              // 等待保存完成，只有成功才关闭弹窗
+              const success = await handleSaveConfig(index, configData);
+              if (success) {
+                // 保存成功后延迟关闭弹窗，显示后台数据同步提示
+                showMessage('📝 数据已保存到后台，正在同步...', 'info');
+                setTimeout(() => {
+                  setIsEditModalOpen(false);
+                  setEditingConfigIndex(null);
+                  showMessage('✅ 同步完成，请在 1-2 秒后查看其他页面', 'success');
+                }, 2000);
+              }
+            } catch (error) {
+              console.error('保存过程中发生错误:', error);
+              // 失败时不关闭弹窗，让用户可以重试
+            }
           }}
           showMessage={showMessage}
         />

@@ -518,10 +518,10 @@ class UserConfigManager {
     try {
       // 保存必要的数据键
       const requiredKeys = [STORAGE_KEYS.USER_CONFIGS, STORAGE_KEYS.ACTIVE_CONFIG_INDEX];
-      
+
       // 获取所有 localStorage 键
       const allKeys = Object.keys(localStorage);
-      
+
       // 查找可能的缓存键并清除
       allKeys.forEach(key => {
         // 清除过期的缓存键（包含 old、temp、cache 等关键词）
@@ -533,10 +533,26 @@ class UserConfigManager {
         }
       });
 
-      // 强制重新加载配置，避免使用内存缓存
-      this.initialized = false;
+      // 注意：不要在这里设置 initialized = false
+      // 因为 clearCache 可能在 saveToStorage 中被调用，设置会导致状态不一致
+      // initialized 只应该在 initialize 方法结束时才设为 true
     } catch (error) {
       console.error('清除缓存失败:', error);
+    }
+  }
+
+  /**
+   * 检查 localStorage 是否可用
+   */
+  checkStorageAvailable() {
+    try {
+      const testKey = '__storage_test__';
+      localStorage.setItem(testKey, 'test');
+      localStorage.removeItem(testKey);
+      return true;
+    } catch (error) {
+      console.error('localStorage 不可用:', error);
+      return false;
     }
   }
 
@@ -545,7 +561,13 @@ class UserConfigManager {
    */
   saveToStorage() {
     try {
-      // 在保存前清除缓存
+      // 检查 localStorage 是否可用
+      if (!this.checkStorageAvailable()) {
+        console.error('localStorage 不可用，无法保存配置');
+        return false;
+      }
+
+      // 在保存前清除缓存（注意：不再设置 initialized = false）
       this.clearCache();
 
       const configsJson = JSON.stringify(this.configs);
@@ -557,7 +579,12 @@ class UserConfigManager {
       const verifyIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
 
       if (verifyConfigs !== configsJson) {
-        console.error('保存配置验证失败：存储的数据与预期不符');
+        console.error('保存配置验证失败：存储的数据与预期不符', {
+          expectedLength: configsJson.length,
+          actualLength: verifyConfigs?.length || 0,
+          expected: configsJson,
+          actual: verifyConfigs
+        });
         return false;
       }
 
@@ -567,23 +594,37 @@ class UserConfigManager {
         const parsedIndex = parseInt(verifyIndex, 10);
 
         if (parsedConfigs.length !== this.configs.length) {
-          console.error('保存配置验证失败：配置数量不一致');
+          console.error('保存配置验证失败：配置数量不一致', {
+            expected: this.configs.length,
+            actual: parsedConfigs.length
+          });
           return false;
         }
 
         if (parsedIndex !== this.activeConfigIndex) {
-          console.error('保存配置验证失败：活跃索引不一致');
+          console.error('保存配置验证失败：活跃索引不一致', {
+            expected: this.activeConfigIndex,
+            actual: parsedIndex
+          });
           return false;
         }
 
         // 验证活跃配置的 isused 状态
         const activeConfig = parsedConfigs[parsedIndex];
         if (activeConfig && activeConfig.isused !== true) {
-          console.error('保存配置验证失败：活跃配置的 isused 状态不正确');
+          console.error('保存配置验证失败：活跃配置的 isused 状态不正确', {
+            activeConfigIndex: parsedIndex,
+            isused: activeConfig.isused,
+            nickname: activeConfig.nickname
+          });
           return false;
         }
       } catch (parseError) {
-        console.error('保存配置二次验证失败:', parseError);
+        console.error('保存配置二次验证失败:', parseError, {
+          verifyConfigs,
+          verifyIndex,
+          activeConfigIndex: this.activeConfigIndex
+        });
         return false;
       }
 
@@ -594,7 +635,16 @@ class UserConfigManager {
       });
       return true;
     } catch (error) {
-      console.error('保存配置到本地存储失败:', error);
+      // 检查是否是存储配额已满的错误
+      if (error.name === 'QuotaExceededError' || error.code === 22) {
+        console.error('localStorage 存储配额已满，无法保存配置', error);
+      } else {
+        console.error('保存配置到本地存储失败:', error, {
+          configCount: this.configs?.length,
+          activeConfigIndex: this.activeConfigIndex,
+          storageKeys: Object.keys(localStorage).filter(k => k.includes('nice_today'))
+        });
+      }
       return false;
     }
   }

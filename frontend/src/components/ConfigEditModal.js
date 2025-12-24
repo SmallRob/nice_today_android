@@ -264,99 +264,170 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     return '';
   };
 
-  // 验证位置信息
-  const validateLocation = () => {
-    const currentLoc = formData.birthLocation || { ...DEFAULT_REGION };
+  // 验证所有输入字段的合规性
+  const validateAllInputs = (formData) => {
+    const errors = [];
 
-    // 检查必填字段
-    if (!currentLoc.province || !currentLoc.province.trim()) {
-      showMessage('请输入省份', 'error');
-      return null;
+    // 1. 验证昵称
+    if (!formData.nickname || !formData.nickname.trim()) {
+      errors.push('请输入昵称');
+    } else if (formData.nickname.trim().length < 2) {
+      errors.push('昵称至少需要2个字符');
+    } else if (formData.nickname.trim().length > 20) {
+      errors.push('昵称最多支持20个字符');
     }
 
-    if (!currentLoc.city || !currentLoc.city.trim()) {
-      showMessage('请输入城市', 'error');
-      return null;
+    // 2. 验证真实姓名（可选，但如果输入需要验证格式）
+    if (formData.realName && formData.realName.trim()) {
+      if (formData.realName.trim().length > 50) {
+        errors.push('真实姓名最多支持50个字符');
+      }
+      if (!/^[\u4e00-\u9fa5·a-zA-Z\s]+$/.test(formData.realName.trim())) {
+        errors.push('真实姓名只能包含中文、英文、空格或分隔符（·）');
+      }
     }
 
-    if (!currentLoc.district || !currentLoc.district.trim()) {
-      showMessage('请输入县区', 'error');
-      return null;
+    // 3. 验证出生日期
+    if (!formData.birthDate) {
+      errors.push('请选择出生日期');
+    } else {
+      const birthDate = new Date(formData.birthDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (isNaN(birthDate.getTime())) {
+        errors.push('出生日期格式不正确');
+      } else if (birthDate > today) {
+        errors.push('出生日期不能是未来日期');
+      } else if (birthDate < new Date('1900-01-01')) {
+        errors.push('出生日期不能早于1900年');
+      }
     }
 
-    // 检查经纬度
-    if (currentLoc.lng === undefined || currentLoc.lng === null || isNaN(currentLoc.lng)) {
-      showMessage('请输入有效的经度', 'error');
-      return null;
+    // 4. 验证出生时间（确保格式正确）
+    if (formData.birthTime) {
+      const timeMatch = formData.birthTime.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+      if (!timeMatch) {
+        errors.push('出生时间格式不正确');
+      }
     }
 
-    if (currentLoc.lat === undefined || currentLoc.lat === null || isNaN(currentLoc.lat)) {
-      showMessage('请输入有效的纬度', 'error');
-      return null;
+    // 5. 验证性别（检查是否有效值）
+    const validGenders = ['male', 'female', 'secret'];
+    if (formData.gender && !validGenders.includes(formData.gender)) {
+      errors.push('请选择有效的性别选项');
     }
 
-    if (currentLoc.lng < -180 || currentLoc.lng > 180) {
-      showMessage('经度必须在-180到180之间', 'error');
-      return null;
+    // 6. 验证星座（如果已选择）
+    if (formData.zodiac && !ZODIAC_OPTIONS.includes(formData.zodiac)) {
+      errors.push('请选择有效的星座');
     }
 
-    if (currentLoc.lat < -90 || currentLoc.lat > 90) {
-      showMessage('纬度必须在-90到90之间', 'error');
-      return null;
+    // 7. 验证生肖（如果已选择）
+    if (formData.zodiacAnimal && !ZODIAC_ANIMAL_OPTIONS.includes(formData.zodiacAnimal)) {
+      errors.push('请选择有效的生肖');
     }
 
-    return currentLoc;
+    // 8. 验证MBTI类型（如果已选择）
+    if (formData.mbti && !MBTI_OPTIONS.includes(formData.mbti)) {
+      errors.push('请选择有效的MBTI类型');
+    }
+
+    // 9. 验证出生地点（合并到 validateAllInputs 中）
+    const loc = formData.birthLocation || {};
+    if (!loc.province || !loc.province.trim()) {
+      errors.push('请输入出生省份');
+    } else if (loc.province.trim().length > 20) {
+      errors.push('省份名称过长，请简写');
+    }
+
+    if (!loc.city || !loc.city.trim()) {
+      errors.push('请输入出生城市');
+    } else if (loc.city.trim().length > 20) {
+      errors.push('城市名称过长，请简写');
+    }
+
+    if (!loc.district || !loc.district.trim()) {
+      errors.push('请输入出生县区');
+    } else if (loc.district.trim().length > 20) {
+      errors.push('县区名称过长，请简写');
+    }
+
+    // 验证经纬度
+    if (loc.lng === undefined || loc.lng === null || isNaN(loc.lng)) {
+      errors.push('请输入有效的经度');
+    } else if (loc.lng < -180 || loc.lng > 180) {
+      errors.push('经度必须在-180到180之间');
+    }
+
+    if (loc.lat === undefined || loc.lat === null || isNaN(loc.lat)) {
+      errors.push('请输入有效的纬度');
+    } else if (loc.lat < -90 || loc.lat > 90) {
+      errors.push('纬度必须在-90到90之间');
+    }
+
+    return errors;
   };
 
   // 保存配置
   const handleSave = async (formData) => {
-    if (!formData.nickname || !formData.nickname.trim()) {
-      showMessage('请输入昵称', 'error');
+    // 全面验证所有输入（已包含位置验证）
+    const validationErrors = validateAllInputs(formData);
+
+    if (validationErrors.length > 0) {
+      // 显示所有错误信息
+      const errorList = validationErrors.map((err, idx) => `${idx + 1}. ${err}`).join('\n');
+      showMessage(`输入不合规：\n${errorList}`, 'error');
+      console.error('输入验证失败:', validationErrors);
       return;
     }
 
-    if (!formData.birthDate) {
-      showMessage('请选择出生日期', 'error');
-      return;
-    }
-
+    // 获取验证后的位置信息
+    const finalLocation = formData.birthLocation || { ...DEFAULT_REGION };
     setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // 校验位置信息
-    const finalLocation = validateLocation();
-    if (!finalLocation) {
-      setIsSaving(false);
-      return;
-    }
-
-    // 计算农历和真太阳时信息
-    let finalConfig = {
-      ...formData,
-      birthLocation: finalLocation,
-      shichen: getShichen(formData.birthTime || '12:30')
-    };
 
     try {
-      const lunarFields = generateLunarAndTrueSolarFields(finalConfig);
-      finalConfig = {
-        ...finalConfig,
-        ...lunarFields
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 计算农历和真太阳时信息
+      let finalConfig = {
+        ...formData,
+        birthLocation: finalLocation,
+        shichen: getShichen(formData.birthTime || '12:30')
       };
 
-      console.log('自动计算农历信息:', {
-        lunarBirthDate: lunarFields.lunarBirthDate,
-        trueSolarTime: lunarFields.trueSolarTime,
-        longitude: finalLocation.lng
-      });
-    } catch (error) {
-      console.error('计算农历信息失败:', error);
-    }
+      try {
+        const lunarFields = generateLunarAndTrueSolarFields(finalConfig);
+        finalConfig = {
+          ...finalConfig,
+          ...lunarFields
+        };
 
-    // 将表单数据传递给父组件处理
-    onSave(index, finalConfig);
-    setIsSaving(false);
-    onClose();
+        console.log('自动计算农历信息:', {
+          lunarBirthDate: lunarFields.lunarBirthDate,
+          trueSolarTime: lunarFields.trueSolarTime,
+          longitude: finalLocation.lng
+        });
+      } catch (error) {
+        console.error('计算农历信息失败:', error);
+      }
+
+      // 将表单数据传递给父组件处理（等待保存完成）
+      const saveSuccess = await onSave(index, finalConfig);
+
+      if (!saveSuccess) {
+        throw new Error('保存失败');
+      }
+
+      // 只有保存成功才显示成功消息（弹窗由父组件控制关闭）
+      showMessage('保存成功，数据已保存', 'success');
+    } catch (error) {
+      console.error('保存配置失败:', error);
+      showMessage('保存失败，请重试', 'error');
+      throw error; // 重新抛出异常，让父组件感知
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -677,7 +748,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                         className="flex-1 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white touch-manipulation"
                         style={{ fontSize: '16px' }}
                       >
-                        <option value="">选择省份</option>
+                        <option value="">选择省</option>
                         {REGION_DATA.map(p => (
                           <option key={p.name} value={p.name}>{p.name}</option>
                         ))}
@@ -688,7 +759,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                         className="flex-1 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white touch-manipulation"
                         style={{ fontSize: '16px' }}
                       >
-                        <option value="">选择城市</option>
+                        <option value="">选择市</option>
                         {REGION_DATA.find(p => p.name === field.state.value?.province)?.children.map(c => (
                           <option key={c.name} value={c.name}>{c.name}</option>
                         ))}
@@ -699,7 +770,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                         className="flex-1 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white touch-manipulation"
                         style={{ fontSize: '16px' }}
                       >
-                        <option value="">选择县区</option>
+                        <option value="">选县区</option>
                         {REGION_DATA.find(p => p.name === field.state.value?.province)
                           ?.children.find(c => c.name === field.state.value?.city)
                           ?.children.map(d => (
