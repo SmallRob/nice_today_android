@@ -51,13 +51,18 @@ export const UserConfigProvider = ({ children }) => {
   useEffect(() => {
     if (!configManagerReady) return;
 
-    const handleConfigChange = (newConfig, allConfigs) => {
-      setCurrentConfig(newConfig);
-      setConfigs(allConfigs);
+    const handleConfigChange = ({
+      configs: updatedConfigs,
+      activeConfigIndex: updatedActiveIndex,
+      currentConfig: updatedCurrentConfig,
+      forceReload
+    }) => {
+      setCurrentConfig(updatedCurrentConfig);
+      setConfigs(updatedConfigs);
     };
 
     const removeListener = userConfigManager.addListener(handleConfigChange);
-    
+
     return () => {
       if (removeListener) removeListener();
     };

@@ -657,26 +657,9 @@ const UserConfigManagerComponent = () => {
     }
 
     if (success) {
-      // 立即从 userConfigManager 重新加载所有配置，确保数据同步
-      // addConfig、updateConfig、setActiveConfig 都会调用 saveToStorage 和 notifyListeners
-      const freshConfigs = userConfigManager.getAllConfigs();
-      const freshActiveIndex = userConfigManager.getActiveConfigIndex();
-
-      console.log('保存后配置状态:', {
-        configCount: freshConfigs.length,
-        activeIndex: freshActiveIndex,
-        activeConfig: freshConfigs[freshActiveIndex],
-        activeConfigIsUsed: freshConfigs[freshActiveIndex]?.isused
-      });
-
-      // 更新本地状态
-      setConfigs([...freshConfigs]);
-      setActiveConfigIndex(freshActiveIndex);
-
-      // 强制重新加载所有组件，确保数据同步
-      setTimeout(() => {
-        userConfigManager.forceReloadAll();
-      }, 100);
+      // addConfig、updateConfig 内部已经调用了 notifyListeners
+      // 监听器会自动更新本地状态，不需要手动更新
+      console.log('保存配置成功，监听器将自动更新状态');
 
       showMessage('保存配置成功', 'success');
 
@@ -718,10 +701,10 @@ const UserConfigManagerComponent = () => {
         // 存储中的配置，需要从存储中移除
         const success = userConfigManager.deleteConfig(index);
         if (success) {
-          // 更新本地状态
+          // deleteConfig 内部已经调用了 notifyListeners
+          // 监听器会自动更新本地状态，这里只需要调整展开索引
+          // 注意：监听器更新是异步的，所以需要从 userConfigManager 获取最新长度
           const freshConfigs = userConfigManager.getAllConfigs();
-          setConfigs([...freshConfigs]);
-          // 调整展开索引
           setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
           showMessage('删除配置成功', 'success');
         } else {
@@ -751,20 +734,16 @@ const UserConfigManagerComponent = () => {
       setIsSwitching(true);
       setError(null);
 
-      // 显示切换状态
-      setActiveConfigIndex(index);
-
       // 异步设置活跃配置
       await new Promise(resolve => setTimeout(resolve, 50));
       const success = userConfigManager.setActiveConfig(index);
 
       if (success) {
-        // 异步强制重新加载所有组件，确保新配置生效
-        setTimeout(() => {
-          userConfigManager.forceReloadAll();
-        }, 200);
+        // setActiveConfig 内部已经调用了 notifyListeners
+        // 监听器会自动更新本地状态，不需要手动更新
+        console.log('设置活跃配置成功，监听器将自动更新状态');
 
-        // 延迟更新状态，确保UI流畅
+        // 延迟更新切换状态，确保UI流畅
         setTimeout(() => {
           setIsSwitching(false);
         }, 300);
@@ -804,11 +783,9 @@ const UserConfigManagerComponent = () => {
             const jsonData = e.target.result;
             const success = userConfigManager.importConfigs(jsonData);
             if (success) {
-              // 重新加载配置
-              const freshConfigs = userConfigManager.getAllConfigs();
-              const activeIndex = userConfigManager.getActiveConfigIndex();
-              setConfigs([...freshConfigs]);
-              setActiveConfigIndex(activeIndex);
+              // importConfigs 内部已经调用了 notifyListeners
+              // 监听器会自动更新本地状态
+              console.log('导入配置成功，监听器将自动更新状态');
               showMessage('导入配置成功', 'success');
             } else {
               showMessage('导入配置失败，请检查文件格式', 'error');
