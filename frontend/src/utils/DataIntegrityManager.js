@@ -171,15 +171,15 @@ class DataIntegrityManager {
    */
   checkDataIntegrity(config) {
     const integrityIssues = [];
-    
-    // 检查关键字段是否为空
-    const criticalFields = ['nickname', 'birthDate', 'zodiac', 'zodiacAnimal'];
+
+    // 检查关键字段是否为空（只检查真正的必填字段）
+    const criticalFields = ['nickname', 'birthDate'];
     for (const field of criticalFields) {
-      if (!config[field] || config[field].trim() === '') {
+      if (!config[field] || (typeof config[field] === 'string' && config[field].trim() === '')) {
         integrityIssues.push(`${field} 字段为空`);
       }
     }
-    
+
     // 检查数据一致性
     if (config.birthDate && config.birthTime) {
       const birthDateTime = new Date(`${config.birthDate}T${config.birthTime}:00`);
@@ -187,15 +187,23 @@ class DataIntegrityManager {
         integrityIssues.push('出生日期时间格式无效');
       }
     }
-    
-    // 检查地理位置数据
+
+    // 检查地理位置数据（简化：只检查经纬度）
     if (config.birthLocation) {
       const { lng, lat } = config.birthLocation;
-      if (lng === 0 && lat === 0) {
-        integrityIssues.push('地理位置数据可能未正确设置');
+      if (lng === undefined || lng === null || isNaN(lng)) {
+        integrityIssues.push('经度信息无效');
+      } else if (lng < -180 || lng > 180) {
+        integrityIssues.push('经度范围无效');
+      }
+
+      if (lat === undefined || lat === null || isNaN(lat)) {
+        integrityIssues.push('纬度信息无效');
+      } else if (lat < -90 || lat > 90) {
+        integrityIssues.push('纬度范围无效');
       }
     }
-    
+
     return {
       isIntegrity: integrityIssues.length === 0,
       issues: integrityIssues

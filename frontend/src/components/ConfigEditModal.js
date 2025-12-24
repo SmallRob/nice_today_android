@@ -369,23 +369,36 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
       // 计算简化格式的时辰（用于显示和保存）
       const shichenSimple = getShichenSimple(formData.birthTime || '12:30');
-      
+
       // 计算完整格式的时辰（用于日志记录）
       const shichenFull = getShichen(formData.birthTime || '12:30');
 
       let finalConfig = {
         ...formData,
         birthLocation: finalLocation,
-        shichen: shichenSimple  // 保存简化格式的时辰（不带刻度）
+        shichen: shichenSimple,  // 保存简化格式的时辰（不带刻度）
+        // 确保必填字段有默认值
+        isused: formData.isused ?? false,
+        nameScore: formData.nameScore ?? null,
+        bazi: formData.bazi ?? null,
+        lunarInfo: formData.lunarInfo ?? null,
+        lastCalculated: formData.lastCalculated ?? null
       };
 
       // 计算农历和真太阳时信息
       try {
         const lunarFields = generateLunarAndTrueSolarFields(finalConfig);
-        finalConfig = {
-          ...finalConfig,
-          ...lunarFields
-        };
+        // 只覆盖非空的字段
+        if (lunarFields.lunarBirthDate) {
+          finalConfig.lunarBirthDate = lunarFields.lunarBirthDate;
+        }
+        if (lunarFields.trueSolarTime) {
+          finalConfig.trueSolarTime = lunarFields.trueSolarTime;
+        }
+        if (lunarFields.lunarInfo) {
+          finalConfig.lunarInfo = lunarFields.lunarInfo;
+        }
+        finalConfig.lastCalculated = lunarFields.lastCalculated || new Date().toISOString();
 
         console.log('自动计算农历信息:', {
           lunarBirthDate: lunarFields.lunarBirthDate,
@@ -395,18 +408,29 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         });
       } catch (error) {
         console.error('计算农历信息失败:', error);
-        // 农历计算失败不影响保存，继续流程
+        // 农历计算失败不影响保存，设置默认值
+        finalConfig.lunarBirthDate = null;
+        finalConfig.trueSolarTime = null;
+        finalConfig.lunarInfo = null;
+        finalConfig.lastCalculated = new Date().toISOString();
       }
 
-      // 将表单数据传递给父组件处理（等待保存完成）
-      const saveSuccess = await onSave(index, finalConfig);
+      // 验证通过，立即关闭弹窗
+      onClose();
 
-      if (!saveSuccess) {
-        throw new Error('保存失败: onSave 返回 false');
-      }
+      // 显示保存中消息
+      showMessage('正在保存配置，数据将在后台同步...', 'info');
 
-      // 只有保存成功才显示成功消息（弹窗由父组件控制关闭）
-      showMessage('保存成功，数据已保存', 'success');
+      // 异步保存数据（不阻塞弹窗关闭）
+      onSave(index, finalConfig).then(() => {
+        // 保存成功后更新消息
+        showMessage('✅ 保存成功，数据已同步', 'success');
+      }).catch((error) => {
+        // 保存失败显示错误，但不影响用户体验
+        console.error('异步保存失败:', error);
+        showMessage(`⚠️ 保存失败: ${error.message}`, 'error');
+      });
+
     } catch (error) {
       console.error('保存配置失败:', error);
       showMessage(`保存失败: ${error.message}`, 'error');

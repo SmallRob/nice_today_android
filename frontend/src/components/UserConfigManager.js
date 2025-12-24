@@ -914,7 +914,11 @@ const UserConfigManagerComponent = () => {
     const storedConfigs = enhancedUserConfigManager.getAllConfigs();
     const isNewConfig = index < 0 || index >= storedConfigs.length;
 
-    console.log('开始保存配置:', { index, isNewConfig, configData });
+    console.log('========== 开始保存配置 ==========');
+    console.log('传入参数:', { index, isNewConfig, storedConfigsCount: storedConfigs.length });
+    console.log('配置数据:', JSON.parse(JSON.stringify(configData, (k, v) =>
+      (k === 'bazi' || k === 'lunarInfo' || k === 'nameScore') ? '[对象]' : v
+    )));
 
     // 自动为中文姓名打分（只有当 nameScore 不存在时才计算）
     let finalConfigData = { ...configData };
@@ -1008,23 +1012,34 @@ const UserConfigManagerComponent = () => {
     try {
       if (isNewConfig) {
         // 新建配置，使用基础配置保存方式（不计算八字）
+        console.log('执行添加新配置操作...');
         const addResult = await enhancedUserConfigManager.addBasicConfig(finalConfigData);
+        console.log('addBasicConfig 返回结果:', addResult);
         if (!addResult) {
           throw new Error('添加新配置失败');
         }
         console.log('新建基础配置成功（八字将异步计算）');
       } else {
         // 现有配置，更新存储（不计算八字）
+        console.log('执行更新配置操作，索引:', index);
         const updateResult = await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, finalConfigData);
+        console.log('updateConfigWithNodeUpdate 返回结果:', {
+          success: updateResult?.success,
+          recovered: updateResult?.recovered,
+          error: updateResult?.error
+        });
         if (!updateResult || !updateResult.success) {
           throw new Error(updateResult?.error || '更新配置失败');
         }
       }
 
-      console.log('保存配置成功，监听器将自动更新状态');
+      console.log('========== 保存配置成功 ==========');
+      console.log('监听器将自动更新状态');
       return true; // 返回成功状态
     } catch (error) {
-      console.error('保存配置失败:', error);
+      console.error('========== 保存配置失败 ==========');
+      console.error('错误信息:', error.message);
+      console.error('错误堆栈:', error.stack);
       // 将异常信息传递给调用者
       throw error;
     }
@@ -1513,22 +1528,15 @@ const UserConfigManagerComponent = () => {
           index={editingConfigIndex}
           isNew={editingConfigIndex < 0}
           onSave={async (index, configData) => {
+            // 直接调用保存函数，弹窗已在 ConfigEditModal 内部关闭
             try {
-              // 等待保存完成，只有成功才关闭弹窗
-              const success = await handleSaveConfig(index, configData);
-              if (success) {
-                // 保存成功后延迟关闭弹窗，显示后台数据同步提示
-                showMessage('📝 数据已保存到后台，正在同步...', 'info');
-                setTimeout(() => {
-                  setIsEditModalOpen(false);
-                  setEditingConfigIndex(null);
-                  showMessage('✅ 同步完成，请在 1-2 秒后查看其他页面', 'success');
-                }, 2000);
-              }
+              await handleSaveConfig(index, configData);
+              // 保存成功，ConfigEditModal 会显示成功消息
+              console.log('配置保存完成');
             } catch (error) {
               console.error('保存过程中发生错误:', error);
-              showMessage(`保存失败: ${error.message}`, 'error');
-              // 失败时不关闭弹窗，让用户可以重试
+              // 保存失败，ConfigEditModal 会显示错误消息
+              // 注意：此时弹窗已关闭，用户需要重新打开编辑
             }
           }}
           showMessage={showMessage}

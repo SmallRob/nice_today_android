@@ -216,18 +216,24 @@ class EnhancedUserConfigManager {
       if (!saveResult.success) {
         throw new Error('保存到主存储失败');
       }
-      
+
       // 保存活跃索引
-      await dataPersistenceManager.saveData(
-        STORAGE_KEYS.ACTIVE_CONFIG_INDEX, 
+      const activeIndexResult = await dataPersistenceManager.saveData(
+        STORAGE_KEYS.ACTIVE_CONFIG_INDEX,
         this.activeConfigIndex.toString()
       );
-      
+      if (!activeIndexResult.success) {
+        throw new Error('保存活跃索引失败');
+      }
+
       // 保存元数据
-      await dataPersistenceManager.saveData(
-        STORAGE_KEYS.CONFIG_METADATA, 
+      const metadataResult = await dataPersistenceManager.saveData(
+        STORAGE_KEYS.CONFIG_METADATA,
         this.metadata
       );
+      if (!metadataResult.success) {
+        throw new Error('保存元数据失败');
+      }
       
       // 创建备份
       await dataPersistenceManager.createBackup(STORAGE_KEYS.USER_CONFIGS, this.configs);
@@ -384,13 +390,20 @@ class EnhancedUserConfigManager {
    * 使用节点级更新修改配置（带容错机制）
    */
   async updateConfigWithNodeUpdate(index, updates, updateType = 'auto') {
+    console.log('========== updateConfigWithNodeUpdate 开始 ==========');
+    console.log('参数:', { index, updateType, configsLength: this.configs.length, initialized: this.initialized });
+
     if (!this.initialized || index < 0 || index >= this.configs.length) {
-      throw new Error('无效的配置索引');
+      console.error('无效的配置索引:', { index, configsLength: this.configs.length, initialized: this.initialized });
+      throw new Error(`无效的配置索引: index=${index}, configs.length=${this.configs.length}`);
     }
 
     const currentConfig = this.configs[index];
     const lockKey = `config-update-${index}`;
     const operationId = `update-${Date.now()}`;
+
+    console.log('当前配置:', { nickname: currentConfig.nickname, birthDate: currentConfig.birthDate });
+    console.log('更新字段:', Object.keys(updates));
 
     operationLogger.log('info', 'UPDATE_STARTED', {
       operationId,
@@ -429,11 +442,15 @@ class EnhancedUserConfigManager {
 
         this.configs[index] = updatedConfig;
 
+        console.log('配置已更新到内存，准备保存到存储...');
+
         // 保存到存储
-        await this.saveConfigsToStorage();
+        const saveResult = await this.saveConfigsToStorage();
+        console.log('saveConfigsToStorage 返回结果:', saveResult);
 
         // 通知监听器
         this.notifyListeners();
+        console.log('监听器已通知');
 
         operationLogger.log('success', 'UPDATE_SUCCESS', {
           operationId,
