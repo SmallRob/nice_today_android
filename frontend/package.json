@@ -17,6 +17,8 @@
     "@capacitor/splash-screen": "^5.0.8",
     "@capacitor/status-bar": "^5.0.8",
     "@iconify/react": "^6.0.2",
+    "@tanstack/react-form": "^1.27.6",
+    "@tanstack/react-store": "^0.8.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

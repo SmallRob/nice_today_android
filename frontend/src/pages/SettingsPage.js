@@ -10,6 +10,8 @@ import updateCheckService from '../utils/updateCheckService';
 import { useNotification } from '../context/NotificationContext';
 import versionDetector from '../utils/versionDetector';
 import { restartApp } from '../utils/restartApp';
+import { errorTrackingSettings } from '../utils/errorTrackingSettings';
+import { errorLogger } from '../utils/errorLogger';
 import versionData from '../version.json';
 import '../index.css';
 
@@ -52,6 +54,11 @@ function SettingsPage() {
     checkRecords: []
   });
 
+  // 错误日志追踪设置
+  const [errorTrackingEnabled, setErrorTrackingEnabled] = useState(() => {
+    return errorTrackingSettings.isEnabled();
+  });
+
   // 滚动容器引用
   const scrollContainerRef = useRef(null);
 
@@ -82,6 +89,16 @@ function SettingsPage() {
   useEffect(() => {
     scrollToTop();
   }, [activeTab, scrollToTop]);
+
+  // 切换错误日志追踪
+  const handleToggleErrorTracking = useCallback(() => {
+    const newState = errorTrackingSettings.toggle();
+    setErrorTrackingEnabled(newState);
+    showNotification(
+      newState ? '错误日志追踪已启用' : '错误日志追踪已关闭',
+      'success'
+    );
+  }, [showNotification]);
 
   useEffect(() => {
     const loadAppInfo = async () => {
@@ -769,6 +786,30 @@ function SettingsPage() {
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
+                      </button>
+
+                      {/* 错误日志追踪开关 */}
+                      <button
+                        onClick={handleToggleErrorTracking}
+                        className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-xl">🔴</span>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-gray-900 dark:text-white">错误日志追踪</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {errorTrackingEnabled ? '已启用 - 显示错误追踪球' : '已关闭 - 隐藏错误追踪球'}
+                            </span>
+                          </div>
+                        </div>
+                        {/* 开关图标 */}
+                        <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${
+                          errorTrackingEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                        }`}>
+                          <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                            errorTrackingEnabled ? 'translate-x-5' : 'translate-x-0'
+                          }`}></div>
+                        </div>
                       </button>
                     </div>
                   </Card>

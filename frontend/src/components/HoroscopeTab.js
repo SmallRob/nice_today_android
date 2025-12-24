@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { storageManager } from '../utils/storageManager';
-import { userConfigManager } from '../utils/userConfigManager';
+import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { Card } from './PageLayout';
 
 const HoroscopeTab = () => {

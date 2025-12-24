@@ -5,9 +5,10 @@ import RadarChart from '../components/RadarChart';
 import DatePickerModal from '../components/DatePickerModal';
 import { storageManager } from '../utils/storageManager';
 import { userConfigManager } from '../utils/userConfigManager';
-import { calculateDetailedBazi, calculateLiuNianDaYun } from '../utils/baziHelper';
+import { calculateDetailedBazi, calculateLiuNianDaYun, calculateDailyEnergy } from '../utils/baziHelper';
 import { calculateBaziWithWorker } from '../utils/workerManager';
 import { Solar } from 'lunar-javascript';
+import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
@@ -34,6 +35,9 @@ const LifeTrendPage = () => {
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState(null);
 
+  // 今日能量提示数据
+  const [dailyEnergyData, setDailyEnergyData] = useState(null);
+
   // 临时计算相关状态
   const [isTempCalcMode, setIsTempCalcMode] = useState(false);
   const [tempBazi, setTempBazi] = useState(null);
@@ -42,7 +46,6 @@ const LifeTrendPage = () => {
 
   // 农历和八字数据
   const [lunarData, setLunarData] = useState(null);
-  const [currentBazi, setCurrentBazi] = useState(null);
   const [liuNianData, setLiuNianData] = useState(null);
 
   // 加载用户配置的函数（提取出来以便重试）
@@ -69,8 +72,24 @@ const LifeTrendPage = () => {
 
         // 步骤2：直接使用配置中的八字，不重复计算
         if (config.bazi) {
-          setCurrentBazi(config.bazi);
           console.log('直接使用用户配置中的八字数据，避免重复计算');
+        } else {
+          // 如果配置中没有八字数据，则计算一次并保存到配置中
+          const birthDateStr = config.birthDate;
+          const birthTimeStr = config.birthTime || '12:00';
+          const longitude = config.birthLocation?.lng || 110;
+          
+          try {
+            const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
+            if (bazi) {
+              // 更新配置中的八字数据
+              const configIndex = userConfigManager.getActiveConfigIndex();
+              userConfigManager.updateConfig(configIndex, { bazi });
+              console.log('计算并保存八字数据到用户配置');
+            }
+          } catch (error) {
+            console.error('计算八字数据失败:', error);
+          }
         }
       }
 
@@ -101,10 +120,13 @@ const LifeTrendPage = () => {
 
   // 计算当前年龄
   useEffect(() => {
-    const today = new Date();
-    const birth = new Date(selectedYear, selectedMonth - 1, selectedDate);
-    const age = today.getFullYear() - birth.getFullYear();
-    setCurrentAge(Math.max(0, Math.min(100, age)));
+    const config = userConfigManager.getCurrentConfig();
+    if (config && config.birthDate) {
+      const birthDate = new Date(config.birthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      setCurrentAge(Math.max(0, Math.min(100, age)));
+    }
   }, [selectedYear, selectedMonth, selectedDate]);
 
   // 保存用户选择的日期到永久配置（异步计算，立即关闭弹窗）
@@ -166,17 +188,29 @@ const LifeTrendPage = () => {
         birthTime: newBirthTime,
         shichen: shichenInfo.name,
         birthLocation: {
-          province: '默认',
-          city: '默认',
-          district: '默认',
+          province: currentConfig.birthLocation?.province || '默认',
+          city: currentConfig.birthLocation?.city || '默认',
+          district: currentConfig.birthLocation?.district || '默认',
           lng: longitude,
           lat: latitude
         },
         bazi: bazi
       };
 
+      // 计算并添加农历和真太阳时信息
+      try {
+        const lunarFields = generateLunarAndTrueSolarFields({
+          ...updates,
+          birthLocation: updates.birthLocation
+        });
+        Object.assign(updates, lunarFields);
+        console.log('计算并保存农历信息:', lunarFields);
+      } catch (error) {
+        console.error('计算农历信息失败:', error);
+        // 即使计算失败也继续保存基本配置
+      }
+
       userConfigManager.updateConfig(configIndex, updates);
-      setCurrentBazi(bazi);
 
       console.log('保存日期和八字到配置成功:', updates);
     } catch (error) {
@@ -221,13 +255,8 @@ const LifeTrendPage = () => {
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
-
-      // 确定使用的八字（用于生成不同的数据）
-      const usedBazi = isTempCalcMode ? tempBazi : currentBazi;
-
-      // 从缓存加载数据（包含八字信息）
-      const baziKey = usedBazi ? `${usedBazi.year}${usedBazi.month}${usedBazi.day}${usedBazi.hour}` : 'default';
-      const cacheKey = `lifeTrend_data_${selectedYear}_${selectedMonth}_${selectedDate}_${selectedHour}_${tempLongitude}_${baziKey}`;
+      // 从缓存加载数据（基于日期和经纬度）
+      const cacheKey = `lifeTrend_data_${selectedYear}_${selectedMonth}_${selectedDate}_${tempLongitude}`;
       const cachedData = storageManager.getGlobalCache(cacheKey);
 
       if (cachedData) {
@@ -246,7 +275,7 @@ const LifeTrendPage = () => {
 
     loadData();
     return () => { isMounted = false; };
-  }, [selectedYear, selectedMonth, selectedDate, selectedHour, tempBazi, currentBazi, isTempCalcMode, tempLongitude]);
+  }, [selectedYear, selectedMonth, selectedDate, tempLongitude]);
 
   // 计算农历日期
   useEffect(() => {
@@ -268,14 +297,50 @@ const LifeTrendPage = () => {
     // 优先使用配置中的八字数据
     const config = userConfigManager.getCurrentConfig();
     const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
-    
+
     if (usedBazi && usedBazi.bazi) {
       const currentYear = new Date().getFullYear();
-      const liuNian = calculateLiuNianDaYun(usedBazi, currentYear);
-      setLiuNianData(liuNian);
-      console.log('使用已有八字计算流年大运');
+
+      // 检查缓存避免重复计算
+      const cacheKey = `liunian_${currentYear}_${usedBazi.bazi.year}${usedBazi.bazi.month}${usedBazi.bazi.day}${usedBazi.bazi.hour}`;
+      const cachedData = storageManager.getGlobalCache(cacheKey);
+
+      if (cachedData) {
+        setLiuNianData(cachedData);
+        console.log('使用缓存的流年大运数据');
+      } else {
+        const liuNian = calculateLiuNianDaYun(usedBazi, currentYear);
+        setLiuNianData(liuNian);
+        storageManager.setGlobalCache(cacheKey, liuNian);
+        console.log('计算并缓存流年大运数据');
+      }
     }
-  }, [isTempCalcMode, tempBazi, selectedYear, selectedMonth, selectedDate, selectedHour, tempLongitude]);
+  }, [isTempCalcMode, tempBazi, selectedYear, selectedMonth, selectedDate]);
+
+  // 计算今日能量提示（基于当日五行信息结合用户八字动态计算）
+  useEffect(() => {
+    const config = userConfigManager.getCurrentConfig();
+    const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
+
+    if (usedBazi && usedBazi.bazi) {
+      const today = new Date();
+
+      // 检查缓存
+      const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+      const cacheKey = `dailyEnergy_${dateStr}_${usedBazi.bazi.year}${usedBazi.bazi.month}${usedBazi.bazi.day}${usedBazi.bazi.hour}`;
+      const cachedData = storageManager.getGlobalCache(cacheKey);
+
+      if (cachedData) {
+        setDailyEnergyData(cachedData);
+        console.log('使用缓存的今日能量提示数据');
+      } else {
+        const energyData = calculateDailyEnergy(usedBazi, today);
+        setDailyEnergyData(energyData);
+        storageManager.setGlobalCache(cacheKey, energyData);
+        console.log('计算并缓存今日能量提示数据');
+      }
+    }
+  }, [isTempCalcMode, tempBazi, selectedYear, selectedMonth, selectedDate]);
 
   // 获取当前选中年份的数据（用于雷达图）
   const currentYearData = klineData.find(d => d.age === currentAge) || klineData[0];
@@ -313,11 +378,11 @@ const LifeTrendPage = () => {
     // 立即更新UI状态
     setSelectedYear(year);
     setSelectedMonth(month);
-      setSelectedDate(date);
-      setSelectedHour(hour);
-      setTempLongitude(longitude);
-      setTempLatitude(latitude);
-      setIsTempCalcMode(true);
+    setSelectedDate(date);
+    setSelectedHour(hour);
+    setTempLongitude(longitude);
+    setTempLatitude(latitude);
+    setIsTempCalcMode(true);
 
     // 检查配置中是否已有该日期的八字数据
     const currentConfig = userConfigManager.getCurrentConfig();
@@ -357,19 +422,7 @@ const LifeTrendPage = () => {
       console.log('使用配置中已有的八字数据进行临时计算，避免重复计算');
     }
 
-    try {
-      // 计算时辰（快速计算，不阻塞）
-      const solar = Solar.fromYmdHms(year, month, date, hour, 0, 0);
-      const lunar = solar.getLunar();
-      const shichenInfo = {
-        name: lunar.getTimeInGanZhi().slice(-1) + '时'
-      };
-    } catch (error) {
-      console.error('临时计算时辰计算失败:', error);
-      setError(error.message);
-    } finally {
-      setCalculating(false);
-    }
+    setCalculating(false);
   };
 
   // 获取当前八字（优先使用临时计算，否则使用配置八字）
@@ -382,10 +435,11 @@ const LifeTrendPage = () => {
     if (config && config.bazi) {
       return config.bazi;
     }
-    // 如果没有八字，则实时计算
-    const birthDateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
-    const birthTimeStr = `${String(selectedHour).padStart(2, '0')}:00`;
-    return calculateDetailedBazi(birthDateStr, birthTimeStr, tempLongitude);
+    // 如果配置中没有八字数据，则返回一个空对象，避免重复计算
+    return {
+      bazi: { year: '', month: '', day: '', hour: '' },
+      shichen: { ganzhi: '未知' }
+    };
   };
 
   const displayBazi = getDisplayBazi();
@@ -616,53 +670,39 @@ const LifeTrendPage = () => {
             </span>
           </div>
           <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-            {selectedYear}.{selectedMonth}.{selectedDate}
+            {new Date().getFullYear()}.{new Date().getMonth() + 1}.{new Date().getDate()}
           </span>
         </div>
 
-        {currentYearData && (
+        {dailyEnergyData && (
           <>
             <div className={`mb-4 p-3 rounded-xl text-sm leading-relaxed ${
               theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-700'
             }`}>
-              {currentYearData.value >= 60 
-                ? '今天能量充沛，适合开展新的计划，把握机遇。保持积极心态，会有不错的收获。'
-                : '今天相对平静，适合处理日常事务和规划未来。保持耐心，稳步前进。'}
+              {dailyEnergyData.description}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>建议</div>
                 <div className="space-y-2">
-                  {currentYearData.career >= 50 && (
-                    <div className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}`}>
-                      <span>🎤</span>
-                      <span className={`text-xs ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>积极工作</span>
+                  {dailyEnergyData.suggestions && dailyEnergyData.suggestions.map((suggestion, index) => (
+                    <div key={`suggestion-${index}`} className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}`}>
+                      <span>{suggestion.icon}</span>
+                      <span className={`text-xs ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>{suggestion.label}</span>
                     </div>
-                  )}
-                  {currentYearData.relationship >= 50 && (
-                    <div className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}`}>
-                      <span>👥</span>
-                      <span className={`text-xs ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>社交活动</span>
-                    </div>
-                  )}
+                  ))}
                 </div>
               </div>
               <div>
                 <div className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>注意</div>
                 <div className="space-y-2">
-                  {currentYearData.wealth < 50 && (
-                    <div className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50'}`}>
-                      <span>💰</span>
-                      <span className={`text-xs ${theme === 'dark' ? 'text-red-300' : 'text-red-700'}`}>谨慎消费</span>
+                  {dailyEnergyData.attentions && dailyEnergyData.attentions.map((attention, index) => (
+                    <div key={`attention-${index}`} className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50'}`}>
+                      <span>{attention.icon}</span>
+                      <span className={`text-xs ${theme === 'dark' ? 'text-red-300' : 'text-red-700'}`}>{attention.label}</span>
                     </div>
-                  )}
-                  {currentYearData.health < 50 && (
-                    <div className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50'}`}>
-                      <span>🏃</span>
-                      <span className={`text-xs ${theme === 'dark' ? 'text-red-300' : 'text-red-700'}`}>注意休息</span>
-                    </div>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
@@ -676,18 +716,18 @@ const LifeTrendPage = () => {
           📊 能量趋势解读
         </h3>
         <p className={`text-sm leading-relaxed mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-          当前处于<b className={theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}>能量{currentYearData?.value >= 50 ? '上升' : '调整'}期</b>，整体趋势{currentYearData?.value >= 50 ? '向好' : '平稳'}。
+          当前处于<b className={theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}>能量{dailyEnergyData?.overallScore >= 50 ? '上升' : '调整'}期</b>，整体趋势{dailyEnergyData?.overallScore >= 50 ? '向好' : '平稳'}。
           根据能量轨迹分析，您正处于人生的<b className={theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}>发展阶段</b>，
           适合尝试新事物，但需注意保持节奏。
         </p>
         <div className={`flex justify-between items-center p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>当前趋势</span>
           <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
-            currentYearData?.value >= 50
+            dailyEnergyData?.overallScore >= 50
               ? `${theme === 'dark' ? 'text-green-400 bg-green-900/30' : 'text-green-700 bg-green-100'}`
               : `${theme === 'dark' ? 'text-orange-400 bg-orange-900/30' : 'text-orange-700 bg-orange-100'}`
           }`}>
-            📈 {currentYearData?.value >= 50 ? '上涨中' : '平稳中'}
+            📈 {dailyEnergyData?.overallScore >= 50 ? '上涨中' : '平稳中'}
           </span>
         </div>
       </div>
@@ -780,7 +820,7 @@ const LifeTrendPage = () => {
             </div>
           </div>
 
-          {/* 五维运势分析 */}
+          {/* 六维运势分析 */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             {[
               { key: 'love', icon: '💕', label: '爱情' },
@@ -788,6 +828,7 @@ const LifeTrendPage = () => {
               { key: 'study', icon: '📚', label: '学习' },
               { key: 'health', icon: '🏥', label: '健康' },
               { key: 'wealth', icon: '💰', label: '财运' },
+              { key: 'social', icon: '👥', label: '人际' },
             ].map((item) => {
               const data = liuNianData[item.key];
               return (

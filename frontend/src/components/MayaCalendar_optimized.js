@@ -406,31 +406,31 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
     </MayaInfoCard>
   ), [selectedDate, handleDateChange, handleQuickSelect, formatDateLocal]);
 
-  // 优化的玛雅历法核心信息组件 - 紧凑布局
+  // 优化的玛雅历法核心信息组件 - 移动设备一行3列布局
   const MayaCoreInfo = useMemo(() => (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-1 md:gap-2">
       {/* KIN数 */}
-      <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
-        <div className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-1">
+      <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-2 text-center">
+        <div className="text-base font-bold text-purple-600 dark:text-purple-400 mb-1">
           KIN {mayaData?.kin}
         </div>
-        <div className="text-xs text-purple-800 dark:text-purple-300 font-medium">能量编号</div>
+        <div className="text-xs text-purple-800 dark:text-purple-300 font-medium text-center">能量编号</div>
       </div>
       
       {/* 调性 */}
-      <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
+      <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-2 text-center">
         <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-1">
           {mayaData?.tone}
         </div>
-        <div className="text-xs text-blue-800 dark:text-blue-300 font-medium">银河音调</div>
+        <div className="text-xs text-blue-800 dark:text-blue-300 font-medium text-center">银河音调</div>
       </div>
       
       {/* 图腾 */}
-      <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-3 text-center">
+      <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-2 text-center">
         <div className="text-sm font-bold text-green-600 dark:text-green-400 mb-1">
           {mayaData?.seal}
         </div>
-        <div className="text-xs text-green-800 dark:text-green-300 font-medium">太阳印记</div>
+        <div className="text-xs text-green-800 dark:text-green-300 font-medium text-center">太阳印记</div>
       </div>
     </div>
   ), [mayaData?.kin, mayaData?.tone, mayaData?.seal]);

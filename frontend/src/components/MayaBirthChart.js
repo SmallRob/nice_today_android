@@ -5,7 +5,6 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from '
 import './MayaBirthChart.css';
 import { formatDateString } from '../services/apiServiceRefactored';
 import { storageManager } from '../utils/storageManager';
-import { userConfigManager } from '../utils/userConfigManager';
 import { 
   sealInfoMap, 
   toneInfoMap,

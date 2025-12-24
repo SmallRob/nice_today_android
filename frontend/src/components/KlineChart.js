@@ -5,8 +5,8 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
   const isMobile = window.innerWidth < 375;
   const containerWidth = isMobile ? 280 : 350;
   const containerHeight = 280;
-  // 优化内边距，扩大数据展示区域
-  const padding = isMobile ? { top: 30, right: 12, bottom: 40, left: 35 } : { top: 35, right: 15, bottom: 45, left: 45 };
+  // 优化内边距，扩大数据展示区域 - 移动端压缩左侧空白
+  const padding = isMobile ? { top: 30, right: 12, bottom: 40, left: 28 } : { top: 35, right: 15, bottom: 45, left: 45 };
   const chartWidth = containerWidth - padding.left - padding.right;
   const chartHeight = containerHeight - padding.top - padding.bottom;
 
@@ -136,6 +136,8 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
   const monthDayFontSize = isMobile ? 7 : 9;
   const yOffset = isMobile ? 12 : 15;
   const yValOffset = isMobile ? 3 : 4;
+  // 移动端优化：压缩Y轴标签偏移量，使标签更紧凑贴近Y轴
+  const yAxisLabelOffset = isMobile ? 24 : 35;
 
   if (timeDimension === 'year') {
     // 年维度：从10岁起，按10年间隔
@@ -251,10 +253,10 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
           strokeWidth="1"
         />
 
-        {/* 数值标记 */}
-        <text x={padding.left - (isMobile ? 30 : 35)} y={padding.top + yValOffset} fill={theme === 'dark' ? '#9ca3af' : '#6b7280'} fontSize={fontSize}>100</text>
-        <text x={padding.left - (isMobile ? 30 : 35)} y={padding.top + chartHeight / 2 + yValOffset} fill={theme === 'dark' ? '#9ca3af' : '#6b7280'} fontSize={fontSize}>50</text>
-        <text x={padding.left - (isMobile ? 30 : 35)} y={padding.top + chartHeight + yValOffset} fill={theme === 'dark' ? '#9ca3af' : '#6b7280'} fontSize={fontSize}>0</text>
+        {/* 数值标记 - 移动端压缩偏移量使标签更紧凑 */}
+        <text x={padding.left - yAxisLabelOffset} y={padding.top + yValOffset} fill={theme === 'dark' ? '#9ca3af' : '#6b7280'} fontSize={fontSize}>100</text>
+        <text x={padding.left - yAxisLabelOffset} y={padding.top + chartHeight / 2 + yValOffset} fill={theme === 'dark' ? '#9ca3af' : '#6b7280'} fontSize={fontSize}>50</text>
+        <text x={padding.left - yAxisLabelOffset} y={padding.top + chartHeight + yValOffset} fill={theme === 'dark' ? '#9ca3af' : '#6b7280'} fontSize={fontSize}>0</text>
 
         {/* 曲线路径 - 曲线模式下使用平滑曲线 */}
         {chartType === 'line' ? (

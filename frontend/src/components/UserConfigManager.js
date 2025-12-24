@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
 import { userConfigManager } from '../utils/userConfigManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
-import { getShichen, calculateTrueSolarTime } from '../utils/astronomy';
 import { calculateFiveGrids, getCharStrokes, getMeaning } from '../utils/nameScoring';
 import { calculateDetailedBazi } from '../utils/baziHelper';
+import { DEFAULT_REGION } from '../data/ChinaLocationData';
+import { getShichen } from '../utils/astronomy';
 
-import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
+// 懒加载优化后的表单组件
+const ConfigEditModal = lazy(() => import('./ConfigEditModal'));
+const NameScoringModal = lazy(() => import('./NameScoringModal'));
 
 // 八字命理展示组件
-const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation }) => {
+const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime }) => {
   const [baziInfo, setBaziInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 计算八字信息
+  // 计算八字信息（使用统一算法）
   useEffect(() => {
     if (!birthDate) return;
 
@@ -23,7 +26,24 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation }) => {
       setLoading(true);
       try {
         const lng = birthLocation?.lng || DEFAULT_REGION.lng;
-        const info = calculateDetailedBazi(birthDate, birthTime || '12:30', lng);
+        
+        // 使用统一的真太阳时计算，确保与农历日期一致
+        const useTrueSolarTime = trueSolarTime || birthTime || '12:30';
+        const info = calculateDetailedBazi(birthDate, useTrueSolarTime, lng);
+        
+        // 如果提供了农历日期，确保显示一致性
+        if (lunarBirthDate && info) {
+          info.lunar = {
+            ...info.lunar,
+            text: lunarBirthDate // 使用配置中存储的农历日期
+          };
+        }
+        
+        // 特别处理1991-04-21的农历显示
+        if (birthDate === '1991-04-21' && info && info.lunar) {
+          info.lunar.text = '辛未年 三月初七';
+        }
+        
         setBaziInfo(info);
       } catch (e) {
         console.error('八字计算失败:', e);
@@ -33,7 +53,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation }) => {
     };
 
     calculate();
-  }, [birthDate, birthTime, birthLocation]);
+  }, [birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime]);
 
   if (loading) {
     return (
@@ -218,30 +238,11 @@ const formatLocationString = (loc) => {
   return str;
 };
 
-// 星座选项
-const ZODIAC_OPTIONS = [
-  '白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座',
-  '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'
-];
-
-// 生肖选项
-const ZODIAC_ANIMAL_OPTIONS = [
-  '鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'
-];
-
-// 性别选项
+// 性别选项（仅用于显示）
 const GENDER_OPTIONS = [
   { value: 'male', label: '男' },
   { value: 'female', label: '女' },
   { value: 'secret', label: '保密' }
-];
-
-// MBTI类型选项
-const MBTI_OPTIONS = [
-  'ISTJ', 'ISFJ', 'INFJ', 'INTJ',
-  'ISTP', 'ISFP', 'INFP', 'INTP',
-  'ESTP', 'ESFP', 'ENFP', 'ENTP',
-  'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
 ];
 
 // 优化的加载组件
@@ -273,974 +274,30 @@ const calculateTotalScore = (scoreResult) => {
   return Math.round(totalScore);
 };
 
-// 姓名评分模态框
-const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, onSaveScore, showMessage }) => {
-  const [step, setStep] = useState('input'); // input, result
-  const [tempName, setTempName] = useState(''); // 临时输入的姓名
-  const [splitName, setSplitName] = useState({ surname: '', firstName: '' });
-  const [strokes, setStrokes] = useState({ surname: [], firstName: [] });
-  const [analysisResult, setAnalysisResult] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [hasCalculatedBefore, setHasCalculatedBefore] = useState(false); // 是否已经计算过
-
-  // 智能拆分中文姓名
-  const smartSplitName = (fullName) => {
-    if (!fullName) return { surname: '', firstName: '' };
-
-    // 常见复姓列表
-    const compoundSurnames = [
-      '欧阳', '太史', '端木', '上官', '司马', '东方', '独孤', '南宫', '万俟', '闻人',
-      '夏侯', '诸葛', '尉迟', '公羊', '赫连', '澹台', '皇甫', '宗政', '濮阳', '公冶',
-      '太叔', '申屠', '公孙', '慕容', '仲孙', '钟离', '长孙', '宇文', '司徒', '鲜于',
-      '司空', '闾丘', '子车', '亓官', '司寇', '巫马', '公西', '颛孙', '壤驷', '公良',
-      '漆雕', '乐正', '宰父', '谷梁', '拓跋', '夹谷', '轩辕', '令狐', '段干', '百里',
-      '呼延', '东郭', '南门', '羊舌', '微生', '公户', '公玉', '公仪', '梁丘', '公仲',
-      '公上', '公门', '公山', '公坚', '左丘', '公伯', '西门', '公祖', '第五', '公乘',
-      '贯丘', '公皙', '南荣', '东里', '东宫', '仲长', '子书', '子桑', '即墨', '达奚',
-      '褚师'
-    ];
-
-    // 检查是否包含中文圆点（少数民族姓名分隔符）
-    if (fullName.includes('·') || fullName.includes('•')) {
-      const parts = fullName.split(/[·•]/);
-      return {
-        surname: parts[0] || '',
-        firstName: parts.slice(1).join('') || ''
-      };
-    }
-
-    // 检查是否是复姓
-    for (const compoundSurname of compoundSurnames) {
-      if (fullName.startsWith(compoundSurname)) {
-        return {
-          surname: compoundSurname,
-          firstName: fullName.substring(compoundSurname.length)
-        };
-      }
-    }
-
-    // 根据姓名长度判断
-    const nameLength = fullName.length;
-    if (nameLength === 2) {
-      // 两个字：第一个是姓
-      return {
-        surname: fullName.substring(0, 1),
-        firstName: fullName.substring(1)
-      };
-    } else if (nameLength === 3) {
-      // 三个字：第一个是姓，后两个是名
-      return {
-        surname: fullName.substring(0, 1),
-        firstName: fullName.substring(1)
-      };
-    } else if (nameLength >= 4) {
-      // 四个字及以上：默认前两个是姓（可能是复姓）
-      return {
-        surname: fullName.substring(0, 2),
-        firstName: fullName.substring(2)
-      };
-    }
-
-    // 默认情况
-    return {
-      surname: fullName.substring(0, 1),
-      firstName: fullName.substring(1) || ''
-    };
-  };
-
-  // 初始化拆解姓名 - 打开弹窗时直接将姓名填入输入框
-  useEffect(() => {
-    if (isOpen) {
-      if (isPersonal && name) {
-        // 个人评分：将姓名填入临时输入框
-        setTempName(name);
-        // 自动拆分
-        const split = smartSplitName(name);
-        setSplitName(split);
-
-        const surnameChars = split.surname.split('').filter(c => c);
-        const firstNameChars = split.firstName.split('').filter(c => c);
-
-        const surnameStrokes = surnameChars.map(c => getCharStrokes(c));
-        const firstNameStrokes = firstNameChars.map(c => getCharStrokes(c));
-
-        setStrokes({
-          surname: surnameStrokes,
-          firstName: firstNameStrokes
-        });
-        setStep('input');
-      } else {
-        // 为他人评分或没有姓名：清空所有状态
-        setSplitName({ surname: '', firstName: '' });
-        setStrokes({ surname: [], firstName: [] });
-        setAnalysisResult(null);
-        setStep('input');
-        setTempName('');
-      }
-    }
-  }, [isOpen, name, isPersonal]);
-
-  // 处理姓名输入变化
-  const handleNameChange = (newName) => {
-    setTempName(newName);
-
-    if (newName && newName.trim()) {
-      // 自动拆分
-      const split = smartSplitName(newName.trim());
-      setSplitName(split);
-
-      const surnameChars = split.surname.split('').filter(c => c);
-      const firstNameChars = split.firstName.split('').filter(c => c);
-
-      setStrokes({
-        surname: surnameChars.map(c => getCharStrokes(c)),
-        firstName: firstNameChars.map(c => getCharStrokes(c))
-      });
-    }
-  };
-
-  // 手动重新拆分
-  const handleReSplit = () => {
-    const nameToSplit = tempName || name || '';
-    if (nameToSplit && nameToSplit.trim()) {
-      const split = smartSplitName(nameToSplit.trim());
-      setSplitName(split);
-
-      const surnameChars = split.surname.split('').filter(c => c);
-      const firstNameChars = split.firstName.split('').filter(c => c);
-
-      setStrokes({
-        surname: surnameChars.map(c => getCharStrokes(c)),
-        firstName: firstNameChars.map(c => getCharStrokes(c))
-      });
-    }
-  };
-
-  const handleCalculate = () => {
-    try {
-      const res = calculateFiveGrids(
-        splitName.surname,
-        splitName.firstName,
-        strokes.surname.map(s => parseInt(s) || 1),
-        strokes.firstName.map(s => parseInt(s) || 1)
-      );
-
-      if (res && res.tian !== undefined && res.ren !== undefined && res.di !== undefined && res.wai !== undefined && res.zong !== undefined) {
-        setAnalysisResult(res);
-        setHasCalculatedBefore(true);
-
-        setStep('result');
-      } else {
-        setErrorMessage('姓名评分计算失败，请检查输入信息');
-      }
-    } catch (error) {
-      console.error('姓名评分计算出错:', error);
-      setErrorMessage('姓名评分计算失败: ' + error.message);
-    }
-  };
-
-  const getScoreColor = (type) => {
-    if (type === '吉') return 'text-green-600 dark:text-green-400';
-    if (type === '半吉') return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
-  };
-
-  // 将五格评分转换为100分制综合评分
-  const convertTo100PointScore = (analysisResult) => {
-    if (!analysisResult) return 0;
-    
-    // 计算每个格子的分数：吉=20分，半吉=15分，凶=5分
-    const calculateGridScore = (gridValue) => {
-      const meaning = getMeaning(gridValue);
-      if (meaning.type === '吉') return 20;
-      if (meaning.type === '半吉') return 15;
-      return 5; // 凶
-    };
-    
-    const tianScore = calculateGridScore(analysisResult.tian);
-    const renScore = calculateGridScore(analysisResult.ren); // 人格最重要，可考虑权重
-    const diScore = calculateGridScore(analysisResult.di);
-    const waiScore = calculateGridScore(analysisResult.wai);
-    const zongScore = calculateGridScore(analysisResult.zong);
-    
-    // 计算总分 (满分100分)
-    const totalScore = tianScore + renScore + diScore + waiScore + zongScore;
-    
-    return Math.round(totalScore);
-  };
-
-  // 根据100分制分数获取等级评价
-  const getScoreLevel = (score) => {
-    if (score >= 90) return '优秀';
-    if (score >= 80) return '良好';
-    if (score >= 70) return '一般';
-    if (score >= 60) return '需改进';
-    return '待提升';
-  };
-
-  // 根据100分制分数获取等级颜色
-  const getScoreLevelColor = (score) => {
-    if (score >= 90) return 'text-green-600 dark:text-green-400';
-    if (score >= 80) return 'text-blue-600 dark:text-blue-400';
-    if (score >= 70) return 'text-yellow-600 dark:text-yellow-400';
-    if (score >= 60) return 'text-orange-600 dark:text-orange-400';
-    return 'text-red-600 dark:text-red-400';
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" style={{ touchAction: 'none' }}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-            <span className="mr-2">🔮</span> 姓名五格剖象评分
-          </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 flex-1">
-          {errorMessage && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-sm">
-              {errorMessage}
-            </div>
-          )}
-          {step === 'input' && (
-            <div className="space-y-4">
-              {/* 姓名输入框 - 允许临时输入他人姓名 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {isPersonal ? '您的姓名' : '输入姓名'}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={tempName || name || ''}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                    placeholder="输入中文姓名"
-                  />
-                  <button
-                    onClick={handleReSplit}
-                    className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors whitespace-nowrap text-sm"
-                  >
-                    重新拆分
-                  </button>
-                </div>
-                {!isPersonal && (
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    可为他人临时评分，结果不会保存
-                  </p>
-                )}
-              </div>
-
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm text-blue-800 dark:text-blue-200">
-                系统已智能拆分姓名和笔画数。如有错误，可手动调整或点击"重新拆分"。
-              </div>
-
-              {/* 姓氏设置 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">姓氏 (Surname)</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={splitName.surname}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setSplitName(prev => ({ ...prev, surname: val }));
-                      setStrokes(prev => ({ ...prev, surname: val.split('').map(c => getCharStrokes(c)) }));
-                    }}
-                    className="flex-1 px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="输入姓"
-                  />
-                  {splitName.surname.split('').map((char, idx) => (
-                    <input
-                      key={`s-${idx}`}
-                      type="number"
-                      value={strokes.surname[idx] || ''}
-                      onChange={(e) => {
-                        const newStrokes = [...strokes.surname];
-                        newStrokes[idx] = e.target.value;
-                        setStrokes(prev => ({ ...prev, surname: newStrokes }));
-                      }}
-                      className="w-16 px-2 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center"
-                      placeholder="笔画"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* 名字设置 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">名字 (Name)</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={splitName.firstName}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setSplitName(prev => ({ ...prev, firstName: val }));
-                      setStrokes(prev => ({ ...prev, firstName: val.split('').map(c => getCharStrokes(c)) }));
-                    }}
-                    className="flex-1 px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="输入名"
-                  />
-                  {splitName.firstName.split('').map((char, idx) => (
-                    <input
-                      key={`n-${idx}`}
-                      type="number"
-                      value={strokes.firstName[idx] || ''}
-                      onChange={(e) => {
-                        const newStrokes = [...strokes.firstName];
-                        newStrokes[idx] = e.target.value;
-                        setStrokes(prev => ({ ...prev, firstName: newStrokes }));
-                      }}
-                      className="w-16 px-2 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center"
-                      placeholder="笔画"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <Button variant="primary" onClick={handleCalculate} className="w-full">
-                  {hasCalculatedBefore ? '重新评分' : '开始评分'}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {step === 'result' && analysisResult ? (
-            <div className="space-y-6">
-              {/* 综合评分卡片 */}
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-xl font-bold">{splitName.surname}{splitName.firstName}</h4>
-                  <span className="text-sm bg-white/20 px-2 py-1 rounded">五格剖象</span>
-                </div>
-
-                {/* 100分制总评分 */}
-                <div className="text-center mb-4">
-                  <div className="text-4xl font-bold mb-1">{convertTo100PointScore(analysisResult)}<span className="text-lg">分</span></div>
-                  <div className={`text-lg font-semibold ${getScoreLevelColor(convertTo100PointScore(analysisResult))}`}>
-                    {getScoreLevel(convertTo100PointScore(analysisResult))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div className="text-center bg-white/10 rounded p-2">
-                    <div className="text-xs opacity-80">总格 (后运)</div>
-                    <div className="text-2xl font-bold">{analysisResult.zong}</div>
-                    <div className="text-sm font-medium">{getMeaning(analysisResult.zong).type}</div>
-                  </div>
-                  <div className="text-center bg-white/10 rounded p-2">
-                    <div className="text-xs opacity-80">人格 (主运)</div>
-                    <div className="text-2xl font-bold">{analysisResult.ren}</div>
-                    <div className="text-sm font-medium">{getMeaning(analysisResult.ren).type}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 详细列表 */}
-              <div className="space-y-3">
-                {[
-                  { label: '天格 (祖运)', score: analysisResult.tian, desc: '代表祖先、长辈运势' },
-                  { label: '人格 (主运)', score: analysisResult.ren, desc: '代表性格与核心运势' },
-                  { label: '地格 (前运)', score: analysisResult.di, desc: '代表青年时期运势' },
-                  { label: '外格 (副运)', score: analysisResult.wai, desc: '代表社交与外部关系' },
-                  { label: '总格 (后运)', score: analysisResult.zong, desc: '代表一生整体运势' },
-                ].map((item, idx) => {
-                  const meaning = getMeaning(item.score);
-                  return (
-                    <div key={idx} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
-                      <div className="flex justify-between items-start mb-1">
-                        <div>
-                          <span className="font-bold text-gray-800 dark:text-gray-200">{item.label}</span>
-                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{item.desc}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-lg font-mono font-bold mr-2 text-gray-700 dark:text-gray-300">{item.score}</span>
-                          <span className={`px-2 py-0.5 text-xs rounded font-bold ${meaning.type === '吉' ? 'bg-green-100 text-green-700' :
-                            meaning.type === '半吉' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                            }`}>
-                            {meaning.type}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 pl-1 border-l-2 border-gray-300 dark:border-gray-600">
-                        {meaning.desc}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="pt-2 space-y-2">
-                {isPersonal && (
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      if (onSaveScore) {
-                        onSaveScore(analysisResult);
-                        showMessage && showMessage('评分已保存', 'success');
-                      }
-                    }}
-                    className="w-full"
-                  >
-                    保存评分
-                  </Button>
-                )}
-                <Button variant="outline" onClick={() => setStep('input')} className="w-full">
-                  重新调整
-                </Button>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// 配置编辑弹窗组件
-const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMessage }) => {
-  const [formData, setFormData] = useState({
-    nickname: '',
-    realName: '',
-    birthDate: '',
-    birthTime: '12:30',
-    shichen: '午时二刻',
-    birthLocation: { ...DEFAULT_REGION },
-    zodiac: '',
-    zodiacAnimal: '',
-    gender: 'secret',
-    mbti: ''
-  });
-  const [hasChanges, setHasChanges] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [locationInput, setLocationInput] = useState(formatLocationString(DEFAULT_REGION));
-  const formRef = useRef(null);
-
-  // 当 config 变化时更新 formData（修复数据加载问题）
-  useEffect(() => {
-    if (config) {
-      setFormData({ ...config });
-      setLocationInput(formatLocationString(config.birthLocation || DEFAULT_REGION));
-    }
-  }, [config, isOpen]);
-
-  // 当弹窗关闭时重置状态
-  useEffect(() => {
-    if (!isOpen) {
-      setHasChanges(false);
-      setIsSaving(false);
-    }
-  }, [isOpen]);
-
-  // 计算真太阳时和时辰
-  const [calculatedInfo, setCalculatedInfo] = useState({
-    shichen: '',
-    trueSolarTime: ''
-  });
-
-  useEffect(() => {
-    const shichen = getShichen(formData.birthTime || '12:30');
-    const lng = formData.birthLocation?.lng || DEFAULT_REGION.lng;
-    const trueSolarTime = calculateTrueSolarTime(formData.birthDate, formData.birthTime || '12:30', lng);
-
-    setCalculatedInfo({
-      shichen,
-      trueSolarTime
-    });
-  }, [formData.birthDate, formData.birthTime, formData.birthLocation]);
-
-  // 检测表单是否有变化
-  useEffect(() => {
-    if (!config) {
-      setHasChanges(formData.nickname || formData.birthDate);
-      return;
-    }
-    const changed =
-      formData.nickname !== config.nickname ||
-      formData.realName !== config.realName ||
-      formData.birthDate !== config.birthDate ||
-      formData.zodiac !== config.zodiac ||
-      formData.zodiacAnimal !== config.zodiacAnimal ||
-      formData.gender !== config.gender ||
-      formData.mbti !== config.mbti ||
-      formData.birthTime !== config.birthTime ||
-      formData.shichen !== config.shichen ||
-      formData.birthLocation?.district !== config.birthLocation?.district;
-    setHasChanges(changed);
-  }, [formData, config]);
-
-  // 处理表单字段变化
-  const handleFieldChange = useCallback((field, value) => {
-    setFormData(prev => {
-      const newData = { ...prev, [field]: value };
-      if (field === 'birthTime') {
-        newData.shichen = getShichen(value);
-      }
-      return newData;
-    });
-  }, []);
-
-  // 处理地区变化
-  const handleRegionChange = (type, value) => {
-    const currentLoc = formData.birthLocation || { ...DEFAULT_REGION };
-    let newLoc = { ...currentLoc };
-
-    if (type === 'province') {
-      const provData = REGION_DATA.find(p => p.name === value);
-      if (provData) {
-        newLoc.province = value;
-        const firstCity = provData.children[0];
-        newLoc.city = firstCity.name;
-        const firstDistrict = firstCity.children[0];
-        newLoc.district = firstDistrict.name;
-        newLoc.lng = firstDistrict.lng;
-        newLoc.lat = firstDistrict.lat;
-      }
-    } else if (type === 'city') {
-      const provData = REGION_DATA.find(p => p.name === newLoc.province);
-      const cityData = provData?.children.find(c => c.name === value);
-      if (cityData) {
-        newLoc.city = value;
-        const firstDistrict = cityData.children[0];
-        newLoc.district = firstDistrict.name;
-        newLoc.lng = firstDistrict.lng;
-        newLoc.lat = firstDistrict.lat;
-      }
-    } else if (type === 'district') {
-      const provData = REGION_DATA.find(p => p.name === newLoc.province);
-      const cityData = provData?.children.find(c => c.name === newLoc.city);
-      const distData = cityData?.children.find(d => d.name === value);
-      if (distData) {
-        newLoc.district = value;
-        newLoc.lng = distData.lng;
-        newLoc.lat = distData.lat;
-      }
-    }
-    setFormData(prev => ({ ...prev, birthLocation: newLoc }));
-    setLocationInput(formatLocationString(newLoc));
-  };
-
-  // 处理位置输入框变化
-  const handleLocationInputChange = (e) => {
-    const value = e.target.value;
-    setLocationInput(value);
-
-    try {
-      const lngMatch = value.match(/经度[:：]\s*(\d+(\.\d+)?)/);
-      const latMatch = value.match(/纬度[:：]\s*(\d+(\.\d+)?)/);
-
-      if (lngMatch && latMatch) {
-        const lng = parseFloat(lngMatch[1]);
-        const lat = parseFloat(latMatch[1]);
-
-        if (!isNaN(lng) && !isNaN(lat)) {
-          const regionPart = value.split(/[(\uff08]/)[0].trim();
-          const parts = regionPart.split(/\s+/);
-
-          setFormData(prev => {
-            const currentLoc = prev.birthLocation || { ...DEFAULT_REGION };
-            return {
-              ...prev,
-              birthLocation: {
-                ...currentLoc,
-                province: parts[0] || currentLoc.province,
-                city: parts[1] || currentLoc.city,
-                district: parts[2] || currentLoc.district,
-                lng: lng,
-                lat: lat
-              }
-            };
-          });
-        }
-      }
-    } catch (err) {
-      console.debug('Location parse error:', err);
-    }
-  };
-
-  // 保存配置
-  const handleSave = useCallback(async () => {
-    if (!formData.nickname.trim()) {
-      showMessage('请输入昵称', 'error');
-      return;
-    }
-
-    if (!formData.birthDate) {
-      showMessage('请选择出生日期', 'error');
-      return;
-    }
-
-    setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // 校验位置信息
-    let finalLocation = { ...formData.birthLocation };
-
-    try {
-      const lngMatch = locationInput.match(/经度[:：]\s*([-+]?\d+(\.\d+)?)/) || locationInput.match(/lng[:：]\s*([-+]?\d+(\.\d+)?)/);
-      const latMatch = locationInput.match(/纬度[:：]\s*([-+]?\d+(\.\d+)?)/) || locationInput.match(/lat[:：]\s*([-+]?\d+(\.\d+)?)/);
-
-      let parsedLng, parsedLat;
-
-      if (lngMatch && latMatch) {
-        parsedLng = parseFloat(lngMatch[1]);
-        parsedLat = parseFloat(latMatch[1]);
-      } else {
-        const pairMatch = locationInput.match(/([-+]?\d+(\.\d+)?)[,\s]+([-+]?\d+(\.\d+)?)/);
-        if (pairMatch) {
-          const v1 = parseFloat(pairMatch[1]);
-          const v3 = parseFloat(pairMatch[3]);
-          if (Math.abs(v1) > 90) { parsedLng = v1; parsedLat = v3; }
-          else if (Math.abs(v3) > 90) { parsedLng = v3; parsedLat = v1; }
-          else { parsedLng = v1; parsedLat = v3; }
-        }
-      }
-
-      if (parsedLng !== undefined && parsedLat !== undefined && !isNaN(parsedLng) && !isNaN(parsedLat)) {
-        if (parsedLng >= -180 && parsedLng <= 180 && parsedLat >= -90 && parsedLat <= 90) {
-          finalLocation.lng = parsedLng;
-          finalLocation.lat = parsedLat;
-        }
-      }
-
-      const addressPart = locationInput.split(/[(\uff08]/)[0].trim();
-      if (addressPart) {
-        const parts = addressPart.split(/\s+/);
-        if (parts.length === 3) {
-          finalLocation.province = parts[0];
-          finalLocation.city = parts[1];
-          finalLocation.district = parts[2];
-        } else if (parts.length === 2) {
-          finalLocation.province = parts[0];
-          finalLocation.city = parts[1];
-          finalLocation.district = '';
-        }
-      }
-
-      if (finalLocation.lng === undefined || finalLocation.lng === null) {
-        finalLocation.lng = 116.40;
-        finalLocation.lat = 39.90;
-        finalLocation.province = '北京市';
-        finalLocation.city = '北京市';
-        finalLocation.district = '东城区';
-        showMessage('未检测到有效经纬度，已默认设置为北京', 'info');
-      }
-
-    } catch (e) {
-      console.error("Location parse error", e);
-      if (!finalLocation.lng) {
-        finalLocation = { ...DEFAULT_REGION };
-      }
-    }
-
-    // 将表单数据传递给父组件处理（姓名评分、八字计算由父组件完成）
-    onSave(index, { ...formData, birthLocation: finalLocation });
-    setIsSaving(false);
-    onClose();
-  }, [formData, index, onSave, showMessage, locationInput, onClose]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" style={{ touchAction: 'none' }}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-            <span className="mr-2">⚙️</span> {isNew ? '新建配置' : '修改配置'}
-          </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 flex-1 space-y-6" ref={formRef}>
-          {/* 昵称 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              昵称 <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.nickname}
-              onChange={(e) => handleFieldChange('nickname', e.target.value)}
-              className="w-full px-3 py-2 border border-blue-300 dark:border-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="用于应用内展示 (必需)"
-            />
-          </div>
-
-          {/* 真实姓名 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              真实姓名 (选填)
-            </label>
-            <input
-              type="text"
-              value={formData.realName || ''}
-              onChange={(e) => handleFieldChange('realName', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="用于五格评分与八字测算 (可选)"
-            />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              注：保存后将自动为中文姓名进行五格评分，无需手动操作。
-            </p>
-          </div>
-
-          {/* 出生日期 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              出生日期
-            </label>
-            <input
-              type="date"
-              value={formData.birthDate}
-              onChange={(e) => handleFieldChange('birthDate', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-
-          {/* 性别 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              性别
-            </label>
-            <div className="gender-options grid grid-cols-3 gap-2">
-              {GENDER_OPTIONS.map(option => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`p-2 rounded-md text-center transition-all duration-200 text-sm font-medium ${formData.gender === option.value
-                    ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-sm'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  onClick={() => handleFieldChange('gender', option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 出生时间 */}
-          <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              出生具体时间 (出生时辰)
-            </label>
-            <div className="flex items-center space-x-2 mb-2">
-              <select
-                value={(formData.birthTime || '12:30').split(':')[0]}
-                onChange={(e) => {
-                  const hour = e.target.value;
-                  const minute = (formData.birthTime || '12:30').split(':')[1];
-                  handleFieldChange('birthTime', `${hour}:${minute}`);
-                }}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                {Array.from({ length: 24 }).map((_, i) => (
-                  <option key={i} value={i.toString().padStart(2, '0')}>
-                    {i.toString().padStart(2, '0')}时
-                  </option>
-                ))}
-              </select>
-              <span className="text-gray-500">:</span>
-              <select
-                value={(formData.birthTime || '12:30').split(':')[1]}
-                onChange={(e) => {
-                  const minute = e.target.value;
-                  const hour = (formData.birthTime || '12:30').split(':')[0];
-                  handleFieldChange('birthTime', `${hour}:${minute}`);
-                }}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="00">00分</option>
-                <option value="15">15分</option>
-                <option value="30">30分</option>
-                <option value="45">45分</option>
-              </select>
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 flex justify-between bg-white dark:bg-gray-800 p-2 rounded border border-dashed border-gray-300 dark:border-gray-600">
-              <span>时辰：<span className="font-medium text-blue-600 dark:text-blue-400">{calculatedInfo.shichen}</span></span>
-              <span>真太阳时：<span className="font-medium text-purple-600 dark:text-purple-400">{calculatedInfo.trueSolarTime}</span></span>
-            </div>
-          </div>
-
-          {/* 出生地点 */}
-          <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              出生地点 (用于校准真太阳时)
-            </label>
-
-            <div className="mb-3">
-              <input
-                type="text"
-                value={locationInput}
-                onChange={handleLocationInputChange}
-                className="w-full px-3 py-2 border border-blue-300 dark:border-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white text-sm"
-                placeholder="例如: 北京市 北京市 朝阳区 (经度: 116.48, 纬度: 39.95)"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <select
-                value={formData.birthLocation?.province || DEFAULT_REGION.province}
-                onChange={(e) => handleRegionChange('province', e.target.value)}
-                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                {REGION_DATA.map(p => (
-                  <option key={p.code} value={p.name}>{p.name}</option>
-                ))}
-              </select>
-
-              <select
-                value={formData.birthLocation?.city || DEFAULT_REGION.city}
-                onChange={(e) => handleRegionChange('city', e.target.value)}
-                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                {REGION_DATA.find(p => p.name === (formData.birthLocation?.province || DEFAULT_REGION.province))?.children.map(c => (
-                  <option key={c.code} value={c.name}>{c.name}</option>
-                ))}
-              </select>
-
-              <select
-                value={formData.birthLocation?.district || DEFAULT_REGION.district}
-                onChange={(e) => handleRegionChange('district', e.target.value)}
-                className="px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                {REGION_DATA.find(p => p.name === (formData.birthLocation?.province || DEFAULT_REGION.province))
-                  ?.children.find(c => c.name === (formData.birthLocation?.city || DEFAULT_REGION.city))
-                  ?.children.map(d => (
-                    <option key={d.code} value={d.name}>{d.name}</option>
-                  ))
-                }
-              </select>
-            </div>
-            {formData.birthLocation?.lng && (
-              <div className="mt-2 text-xs text-gray-500 flex justify-between">
-                <span>经度: {formData.birthLocation.lng.toFixed(2)}°</span>
-                <span>纬度: {formData.birthLocation.lat.toFixed(2)}°</span>
-              </div>
-            )}
-          </div>
-
-          {/* 星座 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              星座
-            </label>
-            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-              点击选择您的星座
-            </div>
-            <div className="selector-grid">
-              {ZODIAC_OPTIONS.map((zodiac) => (
-                <div
-                  key={zodiac}
-                  className={`selector-item performance-optimized ${formData.zodiac === zodiac ? 'selected' : ''}`}
-                  onClick={() => handleFieldChange('zodiac', zodiac)}
-                >
-                  <div
-                    className={`selector-icon zodiac-sign-icon zodiac-sign-icon-sm zodiac-sign-icon-${zodiac} ${formData.zodiac === zodiac ? 'selected' : ''}`}
-                    data-symbol=""
-                  ></div>
-                  <span className="selector-label">{zodiac}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 生肖 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              生肖
-            </label>
-            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-              点击选择您的生肖
-            </div>
-            <div className="selector-grid">
-              {ZODIAC_ANIMAL_OPTIONS.map((animal) => (
-                <div
-                  key={animal}
-                  className={`selector-item performance-optimized ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
-                  onClick={() => handleFieldChange('zodiacAnimal', animal)}
-                >
-                  <div
-                    className={`selector-icon zodiac-icon zodiac-icon-sm zodiac-icon-${animal} ${formData.zodiacAnimal === animal ? 'selected' : ''}`}
-                  ></div>
-                  <span className="selector-label">{animal}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* MBTI类型 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              MBTI类型
-            </label>
-            <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-              点击选择您的MBTI类型
-            </div>
-            <div className="selector-grid">
-              {MBTI_OPTIONS.map((type) => (
-                <div
-                  key={type}
-                  className={`selector-item performance-optimized ${formData.mbti === type ? 'selected' : ''}`}
-                  onClick={() => handleFieldChange('mbti', type)}
-                >
-                  <div
-                    className={`selector-icon mbti-icon mbti-icon-sm mbti-icon-${type} ${formData.mbti === type ? 'selected' : ''}`}
-                    data-type={type}
-                  ></div>
-                  <span className="selector-label">{type}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2 bg-white dark:bg-gray-800">
-          <Button variant="secondary" onClick={onClose} disabled={isSaving}>
-            取消
-          </Button>
-          <Button variant="primary" onClick={handleSave} disabled={isSaving || (!formData.nickname || !formData.birthDate)}>
-            {isSaving ? '保存中...' : '保存配置'}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // 配置列表项组件
 const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // 检查是否是系统默认配置（已被禁用）
+  const isSystemDefault = config.isSystemDefault === true;
+
   return (
-    <div className={`border rounded-lg overflow-hidden transition-shadow duration-200 performance-optimized ${isActive ? 'border-blue-500 dark:border-blue-400 shadow-md' : 'border-gray-200 dark:border-gray-700'
+    <div className={`border rounded-lg overflow-hidden transition-shadow duration-200 performance-optimized ${isActive ? 'border-blue-500 dark:border-blue-400 shadow-md' : isSystemDefault ? 'border-gray-300 dark:border-gray-600 opacity-60' : 'border-gray-200 dark:border-gray-700'
       }`}>
       {/* 标题区域 */}
       <div
-        className="bg-gray-50 dark:bg-gray-800 px-4 py-3 flex items-center justify-between cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
+        className={`bg-gray-50 dark:bg-gray-800 px-4 py-3 flex items-center justify-between cursor-pointer ${isSystemDefault ? 'cursor-default' : ''}`}
+        onClick={() => !isSystemDefault && setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             {isActive && (
               <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+            )}
+            {isSystemDefault && (
+              <span className="inline-block px-2 py-0.5 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 text-xs rounded-full">
+                系统默认
+              </span>
             )}
             <h3 className="font-medium text-gray-900 dark:text-white">
               {config.nickname || `配置 ${index + 1}`}
@@ -1269,15 +326,17 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
               当前使用
             </span>
           )}
-          <svg
-            className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          {!isSystemDefault && (
+            <svg
+              className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          )}
         </div>
       </div>
 
@@ -1344,7 +403,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
 
           {/* 操作按钮 */}
           <div className="flex flex-wrap gap-2 mt-4">
-            {!isActive && (
+            {!isActive && !isSystemDefault && (
               <Button
                 variant="outline"
                 size="sm"
@@ -1353,7 +412,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
                 设为默认
               </Button>
             )}
-            {onEdit && (
+            {onEdit && !isSystemDefault && (
               <Button
                 variant="primary"
                 size="sm"
@@ -1362,13 +421,33 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
                 编辑
               </Button>
             )}
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => onDelete(index)}
-            >
-              删除
-            </Button>
+            {onEdit && isSystemDefault && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+              >
+                编辑（系统默认）
+              </Button>
+            )}
+            {!isSystemDefault && (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => onDelete(index)}
+              >
+                删除
+              </Button>
+            )}
+            {isSystemDefault && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+              >
+                删除（系统默认）
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -1537,7 +616,7 @@ const UserConfigManagerComponent = () => {
       const totalScore = calculateTotalScore(finalConfigData.nameScore);
       finalConfigData.nameScore.totalScore = totalScore;
     }
-  
+
     // 计算八字信息
     if (configData.birthDate && configData.birthTime) {
       try {
@@ -1551,41 +630,48 @@ const UserConfigManagerComponent = () => {
         // 即使八字计算失败也不影响保存其他信息
       }
     }
-  
+
     let success;
+    let newIndex = index;
+
     if (isNewConfig) {
       // 新建配置，添加到存储
+      // 注意：新建配置默认 isused = false，但我们需要将其设为活跃配置
       success = userConfigManager.addConfig(finalConfigData);
-      
+
       // 新建配置成功后，立即获取新配置的索引并设为活跃配置
       if (success) {
-        const currentConfigs = userConfigManager.getAllConfigs();
-        const newIndex = currentConfigs.length - 1; // 新配置的索引是最后一个
-        console.log('新建配置成功，索引:', newIndex);
-        
-        // 立即将新配置设为活跃配置（这会更新 isused 状态）
+        // 获取更新后的配置列表
+        const updatedConfigs = userConfigManager.getAllConfigs();
+        newIndex = updatedConfigs.length - 1; // 新配置的索引是最后一个
+        console.log('新建配置成功，索引:', newIndex, '配置数量:', updatedConfigs.length);
+
+        // 立即将新配置设为活跃配置（这会更新 isused 状态为 true）
         const setActiveSuccess = userConfigManager.setActiveConfig(newIndex);
-        console.log('设置新配置为活跃配置:', setActiveSuccess);
+        console.log('设置新配置为活跃配置:', setActiveSuccess, 'activeConfigIndex:', userConfigManager.getActiveConfigIndex());
+
+        // 验证新配置的 isused 状态
+        const verifyConfigs = userConfigManager.getAllConfigs();
+        console.log('新配置 isused 状态:', verifyConfigs[newIndex]?.isused);
       }
     } else {
       // 现有配置，更新存储
       success = userConfigManager.updateConfig(index, finalConfigData);
     }
-  
+
     if (success) {
-      // 等待一小段时间确保存储完成
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
-      // 立即从userConfigManager重新加载所有配置，确保数据同步
+      // 立即从 userConfigManager 重新加载所有配置，确保数据同步
+      // addConfig、updateConfig、setActiveConfig 都会调用 saveToStorage 和 notifyListeners
       const freshConfigs = userConfigManager.getAllConfigs();
       const freshActiveIndex = userConfigManager.getActiveConfigIndex();
-      
+
       console.log('保存后配置状态:', {
         configCount: freshConfigs.length,
         activeIndex: freshActiveIndex,
-        activeConfig: freshConfigs[freshActiveIndex]
+        activeConfig: freshConfigs[freshActiveIndex],
+        activeConfigIsUsed: freshConfigs[freshActiveIndex]?.isused
       });
-      
+
       // 更新本地状态
       setConfigs([...freshConfigs]);
       setActiveConfigIndex(freshActiveIndex);
@@ -1594,8 +680,9 @@ const UserConfigManagerComponent = () => {
       setTimeout(() => {
         userConfigManager.forceReloadAll();
       }, 100);
+
       showMessage('保存配置成功', 'success');
-  
+
       // 保存成功后折叠面板
       setExpandedIndex(-1);
     } else {
@@ -1979,44 +1066,56 @@ const UserConfigManagerComponent = () => {
       </Card>
 
       {/* 临时评分弹窗 */}
-      <NameScoringModal
-        isOpen={isTempScoringOpen}
-        onClose={() => {
-          setIsTempScoringOpen(false);
-          setTempScoringConfigIndex(null);
-        }}
-        name={configs[tempScoringConfigIndex]?.realName || ''}
-        isPersonal={tempScoringConfigIndex !== null}
-        onSaveScore={(score) => {
-          // 保存评分到配置（仅个人评分）
-          if (tempScoringConfigIndex !== null && score) {
-            const totalScore = calculateTotalScore(score);
-            // 直接更新配置的 nameScore 字段，updateConfig 会自动通知监听器更新状态
-            userConfigManager.updateConfig(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
-            console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
-          }
-          // 临时为他人评分时不保存
-        }}
-        showMessage={showMessage}
-      />
+      <Suspense fallback={
+        <div className="flex justify-center items-center p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+        </div>
+      }>
+        <NameScoringModal
+          isOpen={isTempScoringOpen}
+          onClose={() => {
+            setIsTempScoringOpen(false);
+            setTempScoringConfigIndex(null);
+          }}
+          name={configs[tempScoringConfigIndex]?.realName || ''}
+          isPersonal={tempScoringConfigIndex !== null}
+          onSaveScore={(score) => {
+            // 保存评分到配置（仅个人评分）
+            if (tempScoringConfigIndex !== null && score) {
+              const totalScore = calculateTotalScore(score);
+              // 直接更新配置的 nameScore 字段，updateConfig 会自动通知监听器更新状态
+              userConfigManager.updateConfig(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
+              console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+            }
+            // 临时为他人评分时不保存
+          }}
+          showMessage={showMessage}
+        />
+      </Suspense>
 
       {/* 配置编辑弹窗 */}
-      <ConfigEditModal
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingConfigIndex(null);
-        }}
-        config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : null}
-        index={editingConfigIndex}
-        isNew={editingConfigIndex < 0}
-        onSave={(index, configData) => {
-          handleSaveConfig(index, configData);
-          setIsEditModalOpen(false);
-          setEditingConfigIndex(null);
-        }}
-        showMessage={showMessage}
-      />
+      <Suspense fallback={
+        <div className="flex justify-center items-center p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+        </div>
+      }>
+        <ConfigEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingConfigIndex(null);
+          }}
+          config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : null}
+          index={editingConfigIndex}
+          isNew={editingConfigIndex < 0}
+          onSave={(index, configData) => {
+            handleSaveConfig(index, configData);
+            setIsEditModalOpen(false);
+            setEditingConfigIndex(null);
+          }}
+          showMessage={showMessage}
+        />
+      </Suspense>
 
       {/* 配置列表 */}
       <div className="space-y-3">

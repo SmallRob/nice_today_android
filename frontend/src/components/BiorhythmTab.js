@@ -3,8 +3,7 @@ import BiorhythmChart from './BiorhythmChart';
 import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
 import { initDataMigration } from '../utils/dataMigration';
-import { userConfigManager } from '../utils/userConfigManager';
-import { useTheme } from '../context/ThemeContext';
+import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import notificationService from '../utils/notificationService';
 
 // 实践活动数据
@@ -305,9 +304,12 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     initDataMigration();
   }, []);
 
-  // 从用户配置管理器获取出生日期
+  // 使用全局配置上下文
+  const { configManagerReady, initializeConfigManager } = useUserConfig();
+  const currentConfig = useCurrentConfig();
+
+  // 从全局配置获取用户信息
   const [birthDate, setBirthDate] = useState(null);
-  const [configManagerReady, setConfigManagerReady] = useState(false);
   const [userInfo, setUserInfo] = useState({
     nickname: '',
     birthDate: ''
@@ -317,41 +319,20 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
   const [dailyTip, setDailyTip] = useState('');
   const [lastTipRefresh, setLastTipRefresh] = useState(0);
 
-  // 初始化配置管理器并获取用户配置
+  // 确保配置管理器已初始化，并监听配置变化
   useEffect(() => {
-    const initConfigManager = async () => {
-      await userConfigManager.initialize();
-      setConfigManagerReady(true);
+    if (!configManagerReady) {
+      initializeConfigManager();
+    }
 
-      const currentConfig = userConfigManager.getCurrentConfig();
-      if (currentConfig && currentConfig.birthDate) {
-        setBirthDate(new Date(currentConfig.birthDate));
-        setUserInfo({
-          nickname: currentConfig.nickname,
-          birthDate: currentConfig.birthDate
-        });
-      }
-    };
-
-    initConfigManager();
-
-    // 添加配置变更监听器
-    const removeListener = userConfigManager.addListener(({
-      currentConfig
-    }) => {
-      if (currentConfig && currentConfig.birthDate) {
-        setBirthDate(new Date(currentConfig.birthDate));
-        setUserInfo({
-          nickname: currentConfig.nickname,
-          birthDate: currentConfig.birthDate
-        });
-      }
-    });
-
-    return () => {
-      removeListener();
-    };
-  }, []);
+    if (currentConfig && currentConfig.birthDate) {
+      setBirthDate(new Date(currentConfig.birthDate));
+      setUserInfo({
+        nickname: currentConfig.nickname || '',
+        birthDate: currentConfig.birthDate
+      });
+    }
+  }, [configManagerReady, currentConfig, initializeConfigManager]);
 
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);

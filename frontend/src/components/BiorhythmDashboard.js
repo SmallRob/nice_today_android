@@ -4,6 +4,7 @@ import PageLayout from './PageLayout';
 import DarkModeToggle from './DarkModeToggle';
 import { useTabPerformance } from '../utils/tabPerformanceMonitor';
 import '../styles/animations.css';
+import niceDayImage from '../images/nice_day.png';
 
 // 懒加载组件 - 提升初始加载性能
 const BiorhythmTab = lazy(() => import('./BiorhythmTab'));
@@ -319,7 +320,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               {/* 应用图标 */}
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden">
                 <img
-                  src="/images/nice_day.png"
+                  src={niceDayImage}
                   alt="Nice Today"
                   className="w-8 h-8 object-contain"
                   onError={(e) => {

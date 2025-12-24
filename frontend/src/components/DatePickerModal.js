@@ -2,6 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import LunarCalendar from '../utils/lunarCalendar';
 import BaziCalculator from '../utils/baziCalculator';
 
+// 缓存计算结果
+const previewCache = new Map();
+
+const getCacheKey = (year, month, date, hour, longitude) => {
+  return `${year}-${month}-${date}-${hour}-${longitude}`;
+};
+
 const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selectedDate, selectedHour, latitude, longitude, onConfirm, onTempCalc, theme }) => {
   const [tempYear, setTempYear] = useState(selectedYear);
   const [tempMonth, setTempMonth] = useState(selectedMonth);
@@ -15,7 +22,7 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
 
   const yearOptions = Array.from({ length: 100 }, (_, i) => 1950 + i);
 
-  // 计算农历日期和八字预览（使用防抖优化）
+  // 计算农历日期和八字预览（使用防抖和缓存优化）
   useEffect(() => {
     // 清除之前的定时器
     if (previewTimeoutRef.current) {
@@ -25,11 +32,33 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
     // 使用防抖，避免频繁计算
     previewTimeoutRef.current = setTimeout(() => {
       try {
-        const lunar = LunarCalendar.solarToLunar(tempYear, tempMonth, tempDate);
-        setLunarData(lunar);
+        // 检查缓存
+        const cacheKey = getCacheKey(tempYear, tempMonth, tempDate, tempHour, tempLongitude);
+        const cachedData = previewCache.get(cacheKey);
+        
+        if (cachedData) {
+          // 使用缓存数据
+          setLunarData(cachedData.lunar);
+          setPreviewBazi(cachedData.bazi);
+          return;
+        }
 
+        // 计算新数据
+        const lunar = LunarCalendar.solarToLunar(tempYear, tempMonth, tempDate);
         const bazi = BaziCalculator.calculateBazi(tempYear, tempMonth, tempDate, tempHour, 0, tempLongitude);
+        
+        // 更新状态
+        setLunarData(lunar);
         setPreviewBazi(bazi);
+        
+        // 缓存计算结果
+        previewCache.set(cacheKey, { lunar, bazi });
+        
+        // 限制缓存大小
+        if (previewCache.size > 50) {
+          const firstKey = previewCache.keys().next().value;
+          previewCache.delete(firstKey);
+        }
       } catch (error) {
         console.warn('预览计算失败:', error);
       }

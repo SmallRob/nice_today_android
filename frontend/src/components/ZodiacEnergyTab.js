@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
-import { userConfigManager } from '../utils/userConfigManager';
-import { Card } from './PageLayout';
+import { useUserConfig } from '../contexts/UserConfigContext';
 import { useTheme } from '../context/ThemeContext';
 import ChineseZodiacSelector from './ChineseZodiacSelector';
-import TraditionalZodiacBackground from './TraditionalZodiacBackground';
 import '../styles/zodiac-icons.css';
 import '../styles/chinese-zodiac-icons.css';
-import '../styles/traditional-zodiac-background.css';
 import '../styles/responsive-zodiac.css';
-import { calculateBazi, getMonthlyBaziFortune, solarToLunarDescription } from '../utils/baziHelper';
+import { calculateBazi, getMonthlyBaziFortune } from '../utils/baziHelper';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -32,44 +29,21 @@ ChartJS.register(
   Legend
 );
 
-// 生肖能量组件配置管理器 - 仅用于读取默认配置
-class ZodiacEnergyConfigManager {
-  constructor() {
-    this.CONFIG_KEY = 'zodiac_energy_config';
-    this.DEFAULT_CONFIG = {
-      userZodiac: '',
-      selectedDate: new Date().toISOString(),
-      lastUsedZodiac: '',
-      zodiacHistory: [],
-      themeSettings: {
-        autoSync: true,
-        independentMode: false
-      },
-      version: '1.0',
-      lastUpdated: Date.now()
-    };
-  }
+// 生肖列表 - 移到组件外部避免重复创建和"在定义前使用"的警告
+const ZODIAC_LIST = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
 
-  // 获取配置 - 仅返回默认配置，不保存任何用户选择
-  getConfig() {
-    // 始终返回默认配置，忽略任何已保存的用户配置
-    return { ...this.DEFAULT_CONFIG };
-  }
-}
-
-// 创建配置管理器实例
-const zodiacEnergyConfigManager = new ZodiacEnergyConfigManager();
-
-const ZodiacEnergyTab = memo(({ onError }) => {
+const ZodiacEnergyTab = memo(() => {
   // 使用主题管理
-  const { theme, configManager: themeConfigManager } = useTheme();
+  const { theme } = useTheme();
+
+  // 使用用户配置
+  const { currentConfig } = useUserConfig();
 
   // 状态管理
   const [userZodiac, setUserZodiac] = useState('');
   const [energyGuidance, setEnergyGuidance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [allZodiacs, setAllZodiacs] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [userInfo, setUserInfo] = useState({
     nickname: '',
@@ -83,6 +57,39 @@ const ZodiacEnergyTab = memo(({ onError }) => {
   const [initialized, setInitialized] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [tempZodiac, setTempZodiac] = useState(''); // 用于临时切换生肖查看
+
+  // 监听用户配置变化
+  useEffect(() => {
+    if (currentConfig) {
+      setUserInfo(currentConfig);
+
+      // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
+      if (currentConfig.zodiacAnimal &&
+        currentConfig.zodiacAnimal !== userZodiac &&
+        !tempZodiac) {
+        setUserZodiac(currentConfig.zodiacAnimal);
+        setDataLoaded(false);
+      } else if (currentConfig.birthDate && userZodiac === '鼠') {
+        // 如果没有生肖但有出生日期，计算生肖
+        const birthYear = new Date(currentConfig.birthDate.replace(/-/g, '/')).getFullYear();
+        if (birthYear && birthYear > 1900 && birthYear < 2100) {
+          const calculatedZodiac = ZODIAC_LIST[(birthYear - 4) % 12];
+          if (calculatedZodiac && calculatedZodiac !== '鼠') {
+            setUserZodiac(calculatedZodiac);
+            setDataLoaded(false);
+          }
+        }
+      }
+
+      // 更新八字信息
+      const bazi = calculateBazi(
+        currentConfig.birthDate,
+        currentConfig.birthTime,
+        currentConfig.birthLocation?.lng
+      );
+      setBaziInfo(bazi);
+    }
+  }, [currentConfig, userZodiac, tempZodiac]);
 
   // 五行元素数据 - 使用useMemo缓存，避免重复创建
   const wuxingElements = React.useMemo(() => [
@@ -167,25 +174,6 @@ const ZodiacEnergyTab = memo(({ onError }) => {
       breathingMethod: '乌加依呼吸，固肾强腰，促进肾经流动'
     }
   ], []);
-
-  // 生肖列表 - 使用useMemo缓存
-  const zodiacs = React.useMemo(() => ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'], []);
-
-  // 获取所有生肖列表
-  const loadAllZodiacs = useCallback(async () => {
-    setAllZodiacs(zodiacs);
-  }, [zodiacs]);
-
-  // 根据年份计算生肖
-  const calculateZodiacFromYear = useCallback((year) => {
-    // 生肖计算规则：(年份 - 4) % 12
-    const index = (year - 4) % 12;
-    const zodiac = zodiacs[index];
-
-    if (zodiac) {
-      setUserZodiac(zodiac);
-    }
-  }, [zodiacs]);
 
   // 加载能量指引数据
   const loadEnergyGuidance = useCallback(async () => {
@@ -318,93 +306,14 @@ const ZodiacEnergyTab = memo(({ onError }) => {
   // 初始化组件 - 优化为立即加载默认数据
   useEffect(() => {
     let isMounted = true;
-    const removeListener = () => { };
 
     const initialize = async () => {
       try {
-        // 立即加载所有生肖，不等待
-        await loadAllZodiacs();
-
         if (!isMounted) return;
 
         // 设置默认生肖为"鼠"，确保有数据可显示
         setUserZodiac('鼠');
         setTempZodiac('');
-
-        // 异步获取用户配置，但不阻塞界面
-        setTimeout(async () => {
-          try {
-            // 确保用户配置管理器已初始化
-            if (!userConfigManager.initialized) {
-              await userConfigManager.initialize();
-            }
-
-            // 获取用户配置
-            const currentConfig = userConfigManager.getCurrentConfig();
-            if (currentConfig && isMounted) {
-              setUserInfo(currentConfig);
-
-              // 如果用户有配置的生肖，则更新显示
-              if (currentConfig.zodiacAnimal && currentConfig.zodiacAnimal !== '鼠') {
-                setUserZodiac(currentConfig.zodiacAnimal);
-                // 标记需要重新加载数据
-                setDataLoaded(false);
-              } else if (currentConfig.birthDate) {
-                // 如果没有生肖但有出生日期，计算生肖
-                const birthYear = new Date(currentConfig.birthDate.replace(/-/g, '/')).getFullYear();
-                if (birthYear && birthYear > 1900 && birthYear < 2100) {
-                  const calculatedZodiac = zodiacs[(birthYear - 4) % 12];
-                  if (calculatedZodiac && calculatedZodiac !== '鼠') {
-                    setUserZodiac(calculatedZodiac);
-                    // 标记需要重新加载数据
-                    setDataLoaded(false);
-                  }
-                }
-              }
-
-              // 计算八字信息
-              const bazi = calculateBazi(
-                currentConfig.birthDate,
-                currentConfig.birthTime,
-                currentConfig.birthLocation?.lng
-              );
-              setBaziInfo(bazi);
-            }
-
-            // 添加配置变更监听器
-            const removeConfigListener = userConfigManager.addListener((configData) => {
-              if (isMounted && configData.currentConfig) {
-                setUserInfo(configData.currentConfig);
-
-                // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
-                if (configData.currentConfig.zodiacAnimal &&
-                  configData.currentConfig.zodiacAnimal !== userZodiac &&
-                  !tempZodiac) { // 仅在没有临时生肖时更新
-                  setUserZodiac(configData.currentConfig.zodiacAnimal);
-                  // 强制重新加载数据（包括配置切换和强制重载）
-                  setDataLoaded(false);
-                }
-
-                // 更新八字信息
-                const bazi = calculateBazi(
-                  configData.currentConfig.birthDate,
-                  configData.currentConfig.birthTime,
-                  configData.currentConfig.birthLocation?.lng
-                );
-                setBaziInfo(bazi);
-
-                // 如果收到强制重载标志，确保重新加载数据
-                if (configData.forceReload) {
-                  setDataLoaded(false);
-                }
-              }
-            });
-
-            removeListener.current = removeConfigListener;
-          } catch (error) {
-            console.warn('异步加载用户配置失败:', error);
-          }
-        }, 50); // 短延迟，确保界面先显示
 
         if (isMounted) {
           setInitialized(true);
@@ -413,7 +322,6 @@ const ZodiacEnergyTab = memo(({ onError }) => {
         console.error('初始化生肖能量组件失败:', error);
 
         // 降级处理：使用默认逻辑
-        await loadAllZodiacs();
         setUserZodiac('鼠');
         setTempZodiac('');
         if (isMounted) {
@@ -426,11 +334,8 @@ const ZodiacEnergyTab = memo(({ onError }) => {
 
     return () => {
       isMounted = false;
-      if (removeListener.current) {
-        removeListener.current();
-      }
     };
-  }, [loadAllZodiacs, zodiacs]);
+  }, []);
 
   // 当生肖或日期变化时重新加载数据 - 优化加载逻辑
   useEffect(() => {
@@ -446,15 +351,6 @@ const ZodiacEnergyTab = memo(({ onError }) => {
       return () => clearTimeout(timer);
     }
   }, [userZodiac, selectedDate, loadEnergyGuidance, initialized, dataLoaded, userInfo.zodiacAnimal, tempZodiac]);
-
-  // 本地日期格式化方法
-  const formatDateLocal = (date) => {
-    if (!date) return null;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
 
   // 处理生肖选择 - 支持临时查看模式
   const handleZodiacChange = async (zodiac) => {
@@ -512,8 +408,8 @@ const ZodiacEnergyTab = memo(({ onError }) => {
           </svg>
           能量匹配度
         </h3>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 p-4">
-          <div className="relative w-28 h-28">
+        <div className="flex flex-row items-center justify-center gap-3 md:gap-4 p-3 md:p-4">
+          <div className="relative w-24 h-24 md:w-28 md:h-28 flex-shrink-0">
             <svg className="w-full h-full" viewBox="0 0 36 36">
               <path
                 d="M18 2.0845
@@ -585,19 +481,19 @@ const ZodiacEnergyTab = memo(({ onError }) => {
         </h3>
         <div className="space-y-3">
           {/* 快速能量提升方法 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className={`bg-gradient-to-r ${getGradientClass({ from: 'blue-50', to: 'indigo-50' })} rounded p-3`}>
-              <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
-                <span className="mr-2">⚡</span> {elementData.quickBoost.method}
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
+            <div className={`bg-gradient-to-r ${getGradientClass({ from: 'blue-50', to: 'indigo-50' })} rounded p-2.5 md:p-3`}>
+              <h4 className="text-xs md:text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1.5 md:mb-2 flex items-center">
+                <span className="mr-1.5 md:mr-2">⚡</span> {elementData.quickBoost.method}
               </h4>
-              <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.description}</p>
+              <p className="text-[10px] md:text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.description}</p>
             </div>
 
-            <div className={`bg-gradient-to-r ${getGradientClass({ from: 'purple-50', to: 'pink-50' })} rounded p-3`}>
-              <h4 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2 flex items-center">
-                <span className="mr-2">🌟</span> {elementData.quickBoost.secondMethod}
+            <div className={`bg-gradient-to-r ${getGradientClass({ from: 'purple-50', to: 'pink-50' })} rounded p-2.5 md:p-3`}>
+              <h4 className="text-xs md:text-sm font-semibold text-purple-800 dark:text-purple-300 mb-1.5 md:mb-2 flex items-center">
+                <span className="mr-1.5 md:mr-2">🌟</span> {elementData.quickBoost.secondMethod}
               </h4>
-              <p className="text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.secondDescription}</p>
+              <p className="text-[10px] md:text-xs text-gray-700 dark:text-gray-300">{elementData.quickBoost.secondDescription}</p>
             </div>
           </div>
 
@@ -695,10 +591,10 @@ const ZodiacEnergyTab = memo(({ onError }) => {
           </svg>
           饮食调理建议
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
           {/* 左侧：宜食食物 */}
           <div className="h-full">
-            <div className="h-full bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-xl p-4 border border-green-200 dark:border-green-800 shadow-sm">
+            <div className="h-full bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-xl p-3 md:p-4 border border-green-200 dark:border-green-800 shadow-sm">
               <div className="flex items-center mb-3">
                 <div className="bg-green-100 dark:bg-green-900/50 w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                   <span className="text-green-600 dark:text-green-400">✅</span>
@@ -721,7 +617,7 @@ const ZodiacEnergyTab = memo(({ onError }) => {
 
           {/* 右侧：忌食食物 */}
           <div className="h-full">
-            <div className="h-full bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950 dark:to-pink-950 rounded-xl p-4 border border-red-200 dark:border-red-800 shadow-sm">
+            <div className="h-full bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-950 dark:to-pink-950 rounded-xl p-3 md:p-4 border border-red-200 dark:border-red-800 shadow-sm">
               <div className="flex items-center mb-3">
                 <div className="bg-red-100 dark:bg-red-900/50 w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                   <span className="text-red-600 dark:text-red-400">❌</span>
@@ -861,12 +757,11 @@ const ZodiacEnergyTab = memo(({ onError }) => {
   const renderBaziFortuneCard = () => {
     if (!baziInfo) return null;
 
-    // 根据选择的日期计算运势
+    // 根据选择的日期计算运势 - 使用全局缓存的baziInfo避免重复计算
     const monthlyFortune = getMonthlyBaziFortune(baziInfo.pillars, selectedDate);
-    const lunarDesc = userInfo.birthDate ? solarToLunarDescription(userInfo.birthDate) : '';
-    
+
     // 检查是否是当前月份
-    const isCurrentMonth = selectedDate.getMonth() === new Date().getMonth() && 
+    const isCurrentMonth = selectedDate.getMonth() === new Date().getMonth() &&
                           selectedDate.getFullYear() === new Date().getFullYear();
     
     // 获取月份名称
@@ -953,26 +848,26 @@ const ZodiacEnergyTab = memo(({ onError }) => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
+            <div className="p-2 md:p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-1 opacity-10">
-                <span className="text-2xl">👤</span>
+                <span className="text-xl md:text-2xl">👤</span>
               </div>
-              <div className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-bold">命主元神</div>
+              <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-bold">命主元神</div>
               <div className="flex items-center">
-                <span className="text-lg font-black text-gray-800 dark:text-white mr-2">{monthlyFortune.dayMaster}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                <span className="text-base md:text-lg font-black text-gray-800 dark:text-white mr-1.5 md:mr-2">{monthlyFortune.dayMaster}</span>
+                <span className="text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                   {monthlyFortune.masterElement}命人
                 </span>
               </div>
             </div>
-            <div className="p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
+            <div className="p-2 md:p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-1 opacity-10">
-                <span className="text-2xl">📅</span>
+                <span className="text-xl md:text-2xl">📅</span>
               </div>
-              <div className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-bold">月份干支</div>
-              <div className="text-[10px] font-black text-gray-800 dark:text-white mt-1.5 flex items-center">
-                <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded">
+              <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-bold">月份干支</div>
+              <div className="text-[9px] md:text-[10px] font-black text-gray-800 dark:text-white mt-1 md:mt-1.5 flex items-center">
+                <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-1.5 md:px-2 py-0.5 rounded">
                   {monthlyFortune.monthGanzhi || '未知'}
                 </span>
               </div>
@@ -1173,22 +1068,22 @@ const ZodiacEnergyTab = memo(({ onError }) => {
         <div className="h-72">
           <Line data={chartData} options={chartOptions} />
         </div>
-        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <div className="bg-blue-50/50 dark:bg-blue-900/10 p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
-            <div className="text-blue-600 dark:text-blue-400 text-[10px] font-bold">能量指数</div>
-            <div className="text-base font-black text-blue-700 dark:text-blue-300">
+        <div className="mt-4 grid grid-cols-3 gap-1.5 md:gap-2 text-center">
+          <div className="bg-blue-50/50 dark:bg-blue-900/10 p-1.5 md:p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
+            <div className="text-blue-600 dark:text-blue-400 text-[9px] md:text-[10px] font-bold">能量指数</div>
+            <div className="text-sm md:text-base font-black text-blue-700 dark:text-blue-300">
               {energyScores[energyScores.length - 1]}%
             </div>
           </div>
-          <div className="bg-amber-50/50 dark:bg-amber-900/10 p-2 rounded-lg border border-amber-100 dark:border-amber-900/30">
-            <div className="text-amber-600 dark:text-amber-400 text-[10px] font-bold">财运趋势</div>
-            <div className="text-base font-black text-amber-700 dark:text-amber-300">
+          <div className="bg-amber-50/50 dark:bg-amber-900/10 p-1.5 md:p-2 rounded-lg border border-amber-100 dark:border-amber-900/30">
+            <div className="text-amber-600 dark:text-amber-400 text-[9px] md:text-[10px] font-bold">财运趋势</div>
+            <div className="text-sm md:text-base font-black text-amber-700 dark:text-amber-300">
               {wealthScores[wealthScores.length - 1]}%
             </div>
           </div>
-          <div className="bg-green-50/50 dark:bg-green-900/10 p-2 rounded-lg border border-green-100 dark:border-green-900/30">
-            <div className="text-green-600 dark:text-green-300 text-[10px] font-bold">事业趋势</div>
-            <div className="text-base font-black text-green-700 dark:text-green-300">
+          <div className="bg-green-50/50 dark:bg-green-900/10 p-1.5 md:p-2 rounded-lg border border-green-100 dark:border-green-900/30">
+            <div className="text-green-600 dark:text-green-300 text-[9px] md:text-[10px] font-bold">事业趋势</div>
+            <div className="text-sm md:text-base font-black text-green-700 dark:text-green-300">
               {careerScores[careerScores.length - 1]}%
             </div>
           </div>

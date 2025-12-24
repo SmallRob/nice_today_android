@@ -24,7 +24,8 @@ const DEFAULT_CONFIG = {
   mbti: 'INFP',
   nameScore: null, // 姓名评分结果
   bazi: null, // 八字命格信息（包含四柱、时辰、经纬度等）
-  isused: false // 是否为当前使用的配置
+  isused: false, // 是否为当前使用的配置
+  isSystemDefault: true // 标记为系统默认配置
 };
 
 // 空配置默认值
@@ -47,7 +48,8 @@ const EMPTY_CONFIG_DEFAULTS = {
   mbti: 'ISFP',
   nameScore: null,
   bazi: null,
-  isused: false
+  isused: false,
+  isSystemDefault: false
 };
 
 // 本地存储键名
@@ -89,7 +91,7 @@ class UserConfigManager {
         this.activeConfigIndex = 0;
       }
 
-      // 确保每个配置都有必要的字段，包括 isused
+      // 确保每个配置都有必要的字段，包括 isused 和 isSystemDefault
       this.configs = this.configs.map(config => ({
         nickname: config.nickname || DEFAULT_CONFIG.nickname,
         realName: config.realName || '',
@@ -104,8 +106,21 @@ class UserConfigManager {
         nameScore: config.nameScore || null,
         bazi: config.bazi || null,
         isused: config.isused || false, // 确保 isused 字段存在
+        isSystemDefault: config.isSystemDefault !== undefined ? config.isSystemDefault : false, // 确保 isSystemDefault 字段存在
         ...config
       }));
+
+      // 检查是否存在系统默认配置（只有一个默认配置的系统默认标记为 true）
+      const systemDefaultIndex = this.configs.findIndex(c => c.nickname === '叉子' && c.birthDate === '1991-04-30');
+      if (systemDefaultIndex !== -1 && systemDefaultIndex === 0) {
+        this.configs[systemDefaultIndex].isSystemDefault = true;
+      }
+
+      // 如果有自定义配置且存在系统默认配置，将系统默认配置标记为禁用
+      const hasCustomConfig = this.configs.some(c => c.nickname !== '叉子');
+      if (hasCustomConfig && systemDefaultIndex !== -1) {
+        this.configs[systemDefaultIndex].isSystemDefault = false;
+      }
 
       // 确保 activeConfigIndex 与 isused 状态一致
       // 检查是否有配置的 isused 为 true
@@ -134,7 +149,8 @@ class UserConfigManager {
 
       console.log('用户配置管理器初始化完成', {
         configCount: this.configs.length,
-        activeIndex: this.activeConfigIndex
+        activeIndex: this.activeConfigIndex,
+        hasSystemDefault: this.configs.some(c => c.isSystemDefault === true)
       });
 
       return true;
@@ -219,10 +235,19 @@ class UserConfigManager {
       mbti: config.mbti || 'ISFP',
       nameScore: config.nameScore || null,
       isused: false, // 新配置默认不使用
+      isSystemDefault: false, // 新配置不是系统默认配置
       ...config
     };
 
     this.configs.push(newConfig);
+
+    // 如果存在系统默认配置，将其 isSystemDefault 标记为 false
+    const systemDefaultIndex = this.configs.findIndex(c => c.isSystemDefault === true);
+    if (systemDefaultIndex !== -1) {
+      this.configs[systemDefaultIndex].isSystemDefault = false;
+      console.log('已禁用系统默认配置', systemDefaultIndex);
+    }
+
     this.saveToStorage();
     this.notifyListeners();
 

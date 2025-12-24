@@ -269,25 +269,14 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
     const ganRelation = getRelation(dayMasterElement, liuNianGanElement);
     const branchRelation = getRelation(dayMasterElement, liuNianBranchElement);
 
-    // 计算各维度运势分数（基于关系）
-    const getScoreByRelation = (relation) => {
-        const scoreMap = {
-            '比劫': 70,
-            '食伤': 85,
-            '财星': 90,
-            '官杀': 65,
-            '印星': 80
-        };
-        return scoreMap[relation] || 75;
-    };
-
     // 各维度关系映射
     const dimensionRelations = {
-        love: ['食伤', '财星'], // 爱情多受食伤财星影响
-        career: ['官杀', '印星'], // 事业多受官杀印星影响
-        study: ['印星', '食伤'], // 学习多受印星食伤影响
-        health: ['比劫', '印星'], // 健康多受比劫印星影响
-        wealth: ['财星', '食伤'] // 财运多受财星食伤影响
+        love: ['食伤', '财星', '比劫'], // 爱情多受食伤财星比劫影响
+        career: ['官杀', '印星', '财星'], // 事业多受官杀印星财星影响
+        study: ['印星', '食伤', '官杀'], // 学习多受印星食伤官杀影响
+        health: ['比劫', '印星', '食伤'], // 健康多受比劫印星食伤影响
+        wealth: ['财星', '食伤', '官杀'], // 财运多受财星食伤官杀影响
+        social: ['比劫', '食伤', '印星'] // 人际多受比劫食伤印星影响
     };
 
     const calculateDimensionScore = (dimension) => {
@@ -314,35 +303,40 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
     const generateDimensionFortune = (dimension, score) => {
         const descriptions = {
             love: {
-                high: '桃花运旺，适合表白或深入了解对方。单身者有望遇到心仪之人。',
-                mid: '感情平稳，适合维持现状。有伴侣者可增进彼此了解。',
-                low: '感情运一般，宜低调处理感情问题，避免冲突。'
+                high: '桃花运旺盛，单身者有望邂逅良缘，有伴侣者感情升温。',
+                mid: '感情平稳，适合与伴侣增进了解，共同规划未来。',
+                low: '感情运势一般，宜低调处理感情问题，多沟通少争执。'
             },
             career: {
-                high: '事业运势强劲，有晋升机会或获得贵人相助。',
-                mid: '工作平稳，适合稳步推进现有项目。',
-                low: '工作压力较大，宜保持低调，避免冲动决策。'
+                high: '事业运势强劲，有晋升机会或获得贵人相助，可大胆行动。',
+                mid: '工作状态平稳，按部就班推进项目，积累经验。',
+                low: '工作压力较大，宜保持低调，避免冲动决策，稳扎稳打。'
             },
             study: {
-                high: '思维活跃，记忆力佳，适合学习新知识或考证。',
-                mid: '学习状态平稳，按计划进行会有收获。',
-                low: '注意力易分散，需要更多耐心和专注。'
+                high: '思维活跃，记忆力佳，适合学习新知识或考证深造。',
+                mid: '学习状态平稳，按计划进行会有不错的收获。',
+                low: '注意力易分散，需要更多耐心和专注，循序渐进。'
             },
             health: {
-                high: '精力充沛，身体状态良好，适合运动锻炼。',
-                mid: '身体状况稳定，注意规律作息。',
-                low: '注意休息，避免过度劳累，关注小病小痛。'
+                high: '精力充沛，身体状态良好，适合运动锻炼，保持健康。',
+                mid: '身体状况稳定，注意规律作息，均衡饮食。',
+                low: '注意休息，避免过度劳累，关注小病小痛，预防为主。'
             },
             wealth: {
-                high: '财运亨通，有投资机会，但需谨慎选择。',
-                mid: '财运平稳，适合保守理财。',
+                high: '财运亨通，有投资机会，但需谨慎选择，理性分析。',
+                mid: '财运平稳，适合保守理财，稳健投资。',
                 low: '财运一般，宜减少不必要开支，避免冒险投资。'
+            },
+            social: {
+                high: '人缘极佳，社交活动频繁，结识良友或获得贵人相助。',
+                mid: '人际关系和谐，适度社交有助于拓展人脉。',
+                low: '社交运势一般，宜保持低调，避免人际冲突，专注自我。'
             }
         };
 
         const advice = {
             love: {
-                high: '积极社交，把握机会',
+                high: '积极社交，把握良机',
                 mid: '保持真诚，耐心经营',
                 low: '低调处理，避免争执'
             },
@@ -365,6 +359,11 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
                 high: '把握机遇，理性投资',
                 mid: '稳健理财，控制消费',
                 low: '节省开支，避免借贷'
+            },
+            social: {
+                high: '广结善缘，真诚待人',
+                mid: '适度社交，拓展人脉',
+                low: '保持低调，避免冲突'
             }
         };
 
@@ -387,7 +386,8 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
             calculateDimensionScore('career'),
             calculateDimensionScore('study'),
             calculateDimensionScore('health'),
-            calculateDimensionScore('wealth')
+            calculateDimensionScore('wealth'),
+            calculateDimensionScore('social')
         ];
         const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 
@@ -415,6 +415,7 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
         const careerScore = calculateDimensionScore('career');
         const healthScore = calculateDimensionScore('health');
         const wealthScore = calculateDimensionScore('wealth');
+        const socialScore = calculateDimensionScore('social');
 
         if (loveScore < 60) {
             reminders.push({
@@ -451,6 +452,20 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
                 text: '财运一般，控制开支，避免高风险投资。'
             });
         }
+        if (socialScore >= 80) {
+            reminders.push({
+                type: 'success',
+                icon: '🤝',
+                text: '人缘极佳，广结善缘，贵人相助机会增多。'
+            });
+        }
+        if (socialScore < 60) {
+            reminders.push({
+                type: 'warning',
+                icon: '👥',
+                text: '社交运势一般，宜低调行事，避免人际冲突。'
+            });
+        }
 
         // 基于五行的通用提醒
         if (ganRelation === '官杀' || branchRelation === '官杀') {
@@ -467,6 +482,13 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
                 text: '今年适合团队合作，但需注意守财，避免冲动消费。'
             });
         }
+        if (ganRelation === '印星' || branchRelation === '印星') {
+            reminders.push({
+                type: 'info',
+                icon: '📚',
+                text: '贵人相助，学习力强，适合深造进修。'
+            });
+        }
 
         return reminders;
     };
@@ -478,6 +500,7 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
         study: generateDimensionFortune('study', calculateDimensionScore('study')),
         health: generateDimensionFortune('health', calculateDimensionScore('health')),
         wealth: generateDimensionFortune('wealth', calculateDimensionScore('wealth')),
+        social: generateDimensionFortune('social', calculateDimensionScore('social')),
         reminders: generateReminders(),
         dayMaster: dayMaster,
         dayMasterElement: dayMasterElement,
@@ -489,5 +512,210 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
         ganRelation: ganRelation,
         branchRelation: branchRelation,
         year: targetYear
+    };
+};
+
+/**
+ * 计算今日能量提示（基于当日五行信息结合用户八字动态计算）
+ * @param {Object} baziData 八字数据
+ * @param {Date} targetDate 目标日期（默认为今天）
+ * @returns {Object} 今日能量提示信息
+ */
+export const calculateDailyEnergy = (baziData, targetDate = new Date()) => {
+    if (!baziData || !baziData.bazi) {
+        // 返回默认值
+        return {
+            overallScore: 75,
+            description: '今天能量平稳，适合处理日常事务和规划未来。保持耐心，稳步前进。',
+            suggestions: [
+                { icon: '🎤', label: '积极工作', type: 'good' }
+            ],
+            attentions: [
+                { icon: '💰', label: '谨慎消费', type: 'warning' }
+            ],
+            dailyWuxing: {
+                gan: '未知',
+                ganElement: '未知',
+                branch: '未知',
+                branchElement: '未知',
+                ganzhi: '未知'
+            }
+        };
+    }
+
+    // 获取当日干支
+    const solar = Solar.fromDate(targetDate);
+    const lunar = solar.getLunar();
+    const dayGanZhi = lunar.getDayInGanZhi(); // 当日日柱干支
+
+    // 解析八字五行信息
+    const dayMaster = baziData.bazi.day.charAt(0); // 日主（日干）
+    
+    // 五行对应表
+    const wuxingMap = {
+        '甲': '木', '乙': '木', '寅': '木', '卯': '木',
+        '丙': '火', '丁': '火', '巳': '火', '午': '火',
+        '戊': '土', '己': '土', '辰': '土', '戌': '土', '丑': '土', '未': '土',
+        '庚': '金', '辛': '金', '申': '金', '酉': '金',
+        '壬': '水', '癸': '水', '亥': '水', '子': '水'
+    };
+
+    // 获取日主五行
+    const dayMasterElement = wuxingMap[dayMaster] || '未知';
+
+    // 获取当日天干地支五行
+    const dailyGan = dayGanZhi.charAt(0);
+    const dailyBranch = dayGanZhi.charAt(1);
+    const dailyGanElement = wuxingMap[dailyGan];
+    const dailyBranchElement = wuxingMap[dailyBranch];
+
+    // 五行生克关系
+    const wuxingRelations = {
+        '木': { '生': '火', '克': '土', '被生': '水', '被克': '金' },
+        '火': { '生': '土', '克': '金', '被生': '木', '被克': '水' },
+        '土': { '生': '金', '克': '水', '被生': '火', '被克': '木' },
+        '金': { '生': '水', '克': '木', '被生': '土', '被克': '火' },
+        '水': { '生': '木', '克': '火', '被生': '金', '被克': '土' }
+    };
+
+    // 分析当日与日主的关系
+    const getRelation = (element1, element2) => {
+        if (element1 === element2) return '比劫';
+        if (wuxingRelations[element1]['生'] === element2) return '食伤';
+        if (wuxingRelations[element1]['克'] === element2) return '财星';
+        if (wuxingRelations[element1]['被克'] === element2) return '官杀';
+        if (wuxingRelations[element1]['被生'] === element2) return '印星';
+        return '未知';
+    };
+
+    const ganRelation = getRelation(dayMasterElement, dailyGanElement);
+    const branchRelation = getRelation(dayMasterElement, dailyBranchElement);
+
+    // 计算今日综合能量分数
+    const relationScores = {
+        '比劫': 75,
+        '食伤': 85,
+        '财星': 90,
+        '官杀': 65,
+        '印星': 80
+    };
+
+    let energyScore = (relationScores[ganRelation] || 75 + relationScores[branchRelation] || 75) / 2;
+
+    // 根据关系添加额外分数
+    if (ganRelation === branchRelation) energyScore += 5; // 天地同气
+    if (dayMasterElement === dailyGanElement) energyScore += 3; // 天干同五行
+    if (dayMasterElement === dailyBranchElement) energyScore += 3; // 地支同五行
+
+    // 基于日期添加随机波动（固定算法，保证同一天相同结果）
+    const dateSeed = targetDate.getFullYear() * 10000 + (targetDate.getMonth() + 1) * 100 + targetDate.getDate();
+    const random = ((dateSeed * 3 + dateSeed % 7) % 10) - 5;
+    energyScore = Math.min(100, Math.max(40, energyScore + random));
+
+    // 生成今日运势描述
+    const getEnergyDescription = (score, relation) => {
+        const descriptions = {
+            '比劫': '今天能量适中，适合与人合作、结交朋友。保持平和心态，稳步前进。',
+            '食伤': '今天能量充沛，灵感迸发，适合创意工作和自我表达。',
+            '财星': '今天财运不错，适合处理财务事务和商业活动。',
+            '官杀': '今天可能有一定压力，适合处理重要决策，保持理性思考。',
+            '印星': '今天贵人相助，适合学习进修和规划未来。'
+        };
+        
+        const scoreDescriptions = score >= 60
+            ? '今天能量充沛，适合开展新的计划，把握机遇。保持积极心态，会有不错的收获。'
+            : '今天相对平静，适合处理日常事务和规划未来。保持耐心，稳步前进。';
+            
+        return score >= 60 ? descriptions[relation] || scoreDescriptions : scoreDescriptions;
+    };
+
+    // 生成建议（根据关系和分数）
+    const generateSuggestions = (score, relation) => {
+        const suggestions = [];
+        
+        // 基本建议
+        if (score >= 60) {
+            suggestions.push({ icon: '🎤', label: '积极工作', type: 'good' });
+        }
+        
+        // 根据关系添加特定建议
+        const relationSuggestions = {
+            '比劫': [
+                { icon: '🤝', label: '团队合作', type: 'good' },
+                { icon: '🎯', label: '设定目标', type: 'good' }
+            ],
+            '食伤': [
+                { icon: '🎨', label: '发挥创意', type: 'good' },
+                { icon: '📝', label: '记录灵感', type: 'good' }
+            ],
+            '财星': [
+                { icon: '💼', label: '把握商机', type: 'good' },
+                { icon: '📊', label: '理性投资', type: 'good' }
+            ],
+            '官杀': [
+                { icon: '⚖️', label: '处理决策', type: 'good' },
+                { icon: '📋', label: '制定计划', type: 'good' }
+            ],
+            '印星': [
+                { icon: '📚', label: '学习进修', type: 'good' },
+                { icon: '🧘', label: '静心思考', type: 'good' }
+            ]
+        };
+        
+        if (relationSuggestions[relation]) {
+            suggestions.push(...relationSuggestions[relation].slice(0, 2));
+        }
+        
+        return suggestions.slice(0, 2);
+    };
+
+    // 生成注意事项（根据关系和分数）
+    const generateAttentions = (score, relation) => {
+        const attentions = [];
+        
+        // 基本注意事项
+        if (score < 60) {
+            attentions.push({ icon: '💰', label: '谨慎消费', type: 'warning' });
+        }
+        
+        // 根据关系添加特定注意事项
+        const relationAttentions = {
+            '比劫': [
+                { icon: '💳', label: '避免冲动消费', type: 'warning' }
+            ],
+            '食伤': [
+                { icon: '⚠️', label: '避免过度冒险', type: 'warning' }
+            ],
+            '财星': [
+                { icon: '🎲', label: '谨慎投资', type: 'warning' }
+            ],
+            '官杀': [
+                { icon: '😰', label: '注意情绪调节', type: 'warning' }
+            ],
+            '印星': [
+                { icon: '😴', label: '避免过度劳累', type: 'warning' }
+            ]
+        };
+        
+        if (relationAttentions[relation]) {
+            attentions.push(...relationAttentions[relation].slice(0, 2));
+        }
+        
+        return attentions.slice(0, 2);
+    };
+
+    return {
+        overallScore: Math.round(energyScore),
+        description: getEnergyDescription(energyScore, ganRelation),
+        suggestions: generateSuggestions(energyScore, ganRelation),
+        attentions: generateAttentions(energyScore, ganRelation),
+        dailyWuxing: {
+            gan: dailyGan,
+            ganElement: dailyGanElement,
+            branch: dailyBranch,
+            branchElement: dailyBranchElement,
+            ganzhi: dayGanZhi,
+            relation: ganRelation
+        }
     };
 };
