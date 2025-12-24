@@ -268,7 +268,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
   const validateAllInputs = (formData) => {
     const errors = [];
 
-    // 1. 验证昵称
+    // 1. 验证昵称（必填）
     if (!formData.nickname || !formData.nickname.trim()) {
       errors.push('请输入昵称');
     } else if (formData.nickname.trim().length < 2) {
@@ -277,17 +277,14 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       errors.push('昵称最多支持20个字符');
     }
 
-    // 2. 验证真实姓名（可选，但如果输入需要验证格式）
+    // 2. 验证真实姓名（选填，只验证长度）
     if (formData.realName && formData.realName.trim()) {
       if (formData.realName.trim().length > 50) {
         errors.push('真实姓名最多支持50个字符');
       }
-      if (!/^[\u4e00-\u9fa5·a-zA-Z\s]+$/.test(formData.realName.trim())) {
-        errors.push('真实姓名只能包含中文、英文、空格或分隔符（·）');
-      }
     }
 
-    // 3. 验证出生日期
+    // 3. 验证出生日期（必填）
     if (!formData.birthDate) {
       errors.push('请选择出生日期');
     } else {
@@ -304,36 +301,21 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       }
     }
 
-    // 4. 验证出生时间（确保格式正确）
-    if (formData.birthTime) {
-      const timeMatch = formData.birthTime.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+    // 4. 验证出生时间和时辰（必填）
+    if (!formData.birthTime || !formData.birthTime.trim()) {
+      errors.push('请输入出生时间');
+    } else {
+      const timeMatch = formData.birthTime.trim().match(/^([01]\d|2[0-3]):([0-5]\d)$/);
       if (!timeMatch) {
-        errors.push('出生时间格式不正确');
+        errors.push('出生时间格式不正确，请使用 HH:MM 格式（如 12:30）');
+      }
+      // 验证时辰是否已计算
+      else if (!formData.shichen) {
+        errors.push('出生时辰未计算，请检查出生时间和出生地点是否正确');
       }
     }
 
-    // 5. 验证性别（检查是否有效值）
-    const validGenders = ['male', 'female', 'secret'];
-    if (formData.gender && !validGenders.includes(formData.gender)) {
-      errors.push('请选择有效的性别选项');
-    }
-
-    // 6. 验证星座（如果已选择）
-    if (formData.zodiac && !ZODIAC_OPTIONS.includes(formData.zodiac)) {
-      errors.push('请选择有效的星座');
-    }
-
-    // 7. 验证生肖（如果已选择）
-    if (formData.zodiacAnimal && !ZODIAC_ANIMAL_OPTIONS.includes(formData.zodiacAnimal)) {
-      errors.push('请选择有效的生肖');
-    }
-
-    // 8. 验证MBTI类型（如果已选择）
-    if (formData.mbti && !MBTI_OPTIONS.includes(formData.mbti)) {
-      errors.push('请选择有效的MBTI类型');
-    }
-
-    // 9. 验证出生地点（合并到 validateAllInputs 中）
+    // 5. 验证出生地点（必填）
     const loc = formData.birthLocation || {};
     if (!loc.province || !loc.province.trim()) {
       errors.push('请输入出生省份');
@@ -353,7 +335,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       errors.push('县区名称过长，请简写');
     }
 
-    // 验证经纬度
+    // 验证经纬度（必填）
     if (loc.lng === undefined || loc.lng === null || isNaN(loc.lng)) {
       errors.push('请输入有效的经度');
     } else if (loc.lng < -180 || loc.lng > 180) {
@@ -387,15 +369,22 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     setIsSaving(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // 检查配置管理器是否已初始化
+      const { enhancedUserConfigManager } = await import('../utils/EnhancedUserConfigManager');
+      if (!enhancedUserConfigManager.initialized) {
+        throw new Error('配置管理器未初始化，请稍后重试');
+      }
 
-      // 计算农历和真太阳时信息
+      // 计算时辰和农历信息
+      const shichen = getShichen(formData.birthTime || '12:30');
+      
       let finalConfig = {
         ...formData,
         birthLocation: finalLocation,
-        shichen: getShichen(formData.birthTime || '12:30')
+        shichen: shichen
       };
 
+      // 计算农历和真太阳时信息
       try {
         const lunarFields = generateLunarAndTrueSolarFields(finalConfig);
         finalConfig = {
@@ -406,7 +395,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         console.log('自动计算农历信息:', {
           lunarBirthDate: lunarFields.lunarBirthDate,
           trueSolarTime: lunarFields.trueSolarTime,
-          longitude: finalLocation.lng
+          longitude: finalLocation.lng,
+          shichen: shichen
         });
       } catch (error) {
         console.error('计算农历信息失败:', error);
@@ -536,9 +526,6 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             <div>
               <form.Field
                 name="birthDate"
-                validators={{
-                  onChange: ({ value }) => !value ? '请选择出生日期' : undefined
-                }}
               >
                 {(field) => (
                   <>

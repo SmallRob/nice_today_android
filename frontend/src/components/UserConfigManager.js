@@ -1008,12 +1008,17 @@ const UserConfigManagerComponent = () => {
     try {
       if (isNewConfig) {
         // 新建配置，使用基础配置保存方式（不计算八字）
-        await enhancedUserConfigManager.addBasicConfig(finalConfigData);
-
+        const addResult = await enhancedUserConfigManager.addBasicConfig(finalConfigData);
+        if (!addResult) {
+          throw new Error('添加新配置失败');
+        }
         console.log('新建基础配置成功（八字将异步计算）');
       } else {
         // 现有配置，更新存储（不计算八字）
-        await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, finalConfigData);
+        const updateResult = await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, finalConfigData);
+        if (!updateResult || !updateResult.success) {
+          throw new Error(updateResult?.error || '更新配置失败');
+        }
       }
 
       console.log('保存配置成功，监听器将自动更新状态');

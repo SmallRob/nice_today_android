@@ -101,11 +101,11 @@ const LifeTrendPage = () => {
             trueSolarTime: baziFromCache.trueSolarTime,
             lastCalculated: new Date().toISOString()
           });
-        } 
+        }
         // 2) 如果缓存中没有，检查配置中是否已有八字
         else if (config.bazi) {
           console.log('使用用户配置中的八字数据');
-        } 
+        }
         // 3) 如果都没有，计算一次并保存到配置和缓存
         else {
           console.log('缓存和配置中都没有八字，开始计算...');
@@ -238,18 +238,15 @@ const LifeTrendPage = () => {
         console.log('使用配置中已有的八字数据，避免重复计算');
       }
 
-      // 计算时辰（快速计算，不阻塞）
-      const solar = Solar.fromYmdHms(year, month, date, hour, 0, 0);
-      const lunar = solar.getLunar();
-      const shichenInfo = {
-        name: lunar.getTimeInGanZhi().slice(-1) + '时'
-      };
+      // 计算时辰（使用统一函数）
+      const { getShichen } = await import('../utils/astronomy');
+      const shichenDisplay = getShichen(newBirthTime);
 
       // 保存配置
       const updates = {
         birthDate: newBirthDate,
         birthTime: newBirthTime,
-        shichen: shichenInfo.name,
+        shichen: shichenDisplay,
         birthLocation: {
           province: currentConfig.birthLocation?.province || '默认',
           city: currentConfig.birthLocation?.city || '默认',
@@ -516,7 +513,13 @@ const LifeTrendPage = () => {
 
   // 统一获取时辰显示文字
   const getShichenDisplay = () => {
-    // 1. 优先使用 shichen.ganzhi（如果已包含"时"则直接使用）
+    // 首先从配置中获取时辰信息（优先级最高）
+    const config = enhancedUserConfigManager.getCurrentConfig();
+    if (config?.shichen && typeof config.shichen === 'string' && config.shichen.endsWith('时')) {
+      return config.shichen;
+    }
+
+    // 1. 优先使用 displayBazi.shichen.ganzhi（如果已包含"时"则直接使用）
     if (displayBazi.shichen?.ganzhi) {
       const ganzhi = displayBazi.shichen.ganzhi;
       if (ganzhi.endsWith('时')) {
@@ -534,6 +537,15 @@ const LifeTrendPage = () => {
     // 3. 从 bazi.hour 提取（时柱最后一字 + "时"）
     if (displayBazi.bazi?.hour && displayBazi.bazi.hour.length >= 2) {
       return displayBazi.bazi.hour.slice(-1) + '时';
+    }
+    // 4. 最后尝试从出生时间计算时辰
+    if (config?.birthTime) {
+      try {
+        const { getShichen } = require('../utils/astronomy');
+        return getShichen(config.birthTime);
+      } catch (error) {
+        console.error('计算时辰失败:', error);
+      }
     }
     return '未知';
   };
