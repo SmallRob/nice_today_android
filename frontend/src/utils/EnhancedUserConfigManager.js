@@ -18,7 +18,7 @@ import { operationLogger } from './OperationLogger.js';
 // 默认配置模板
 const DEFAULT_CONFIG = {
   nickname: '叉子',
-  realName: '张三',
+  realName: '',
   birthDate: '1991-04-30',
   birthTime: '12:30',
   shichen: '午时',
@@ -29,10 +29,10 @@ const DEFAULT_CONFIG = {
     lng: 116.48,
     lat: 39.95
   },
-  zodiac: '金牛座',
-  zodiacAnimal: '羊',
-  gender: 'male',
-  mbti: 'INFP',
+  zodiac: '',
+  zodiacAnimal: '',
+  gender: 'secret',
+  mbti: '',
   nameScore: null,
   bazi: null,
   isused: false,

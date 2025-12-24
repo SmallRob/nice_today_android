@@ -87,7 +87,7 @@ class BaziUpdateManager {
   }
 
   /**
-   * 验证地理位置
+   * 验证地理位置（简化：只验证经纬度）
    */
   validateLocation(updates) {
     const validation = {
@@ -97,19 +97,23 @@ class BaziUpdateManager {
     };
 
     if (updates.birthLocation) {
-      const { province, city, district, lng, lat } = updates.birthLocation;
-      
-      if (!province || !city || !district) {
+      const { lng, lat } = updates.birthLocation;
+
+      // 只验证经纬度，省市区可以为空
+      if (lng === undefined || lng === null) {
         validation.valid = false;
-        validation.errors.push('地理位置信息不完整');
+        validation.errors.push('经度信息缺失');
+      } else if (lng < -180 || lng > 180) {
+        validation.valid = false;
+        validation.errors.push('经度范围无效');
       }
 
-      if (lng === undefined || lat === undefined) {
+      if (lat === undefined || lat === null) {
         validation.valid = false;
-        validation.errors.push('经纬度信息缺失');
-      } else if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
+        validation.errors.push('纬度信息缺失');
+      } else if (lat < -90 || lat > 90) {
         validation.valid = false;
-        validation.errors.push('经纬度范围无效');
+        validation.errors.push('纬度范围无效');
       }
     }
 

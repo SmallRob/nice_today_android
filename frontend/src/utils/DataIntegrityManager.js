@@ -25,18 +25,14 @@ class DataIntegrityManager {
         type: 'object',
         validate: this.validateLocation.bind(this)
       },
-      zodiac: { required: true, type: 'string' },
-      zodiacAnimal: { required: true, type: 'string' },
-      gender: { 
-        required: true, 
-        type: 'string', 
-        enum: ['male', 'female', 'secret'] 
+      zodiac: { required: false, type: 'string' },
+      zodiacAnimal: { required: false, type: 'string' },
+      gender: {
+        required: true,
+        type: 'string',
+        enum: ['male', 'female', 'secret']
       },
-      mbti: { 
-        required: true, 
-        type: 'string', 
-        pattern: /^[EI][SN][TF][JP]$/ 
-      },
+      mbti: { required: false, type: 'string' },
       nameScore: { required: false, type: 'object' },
       bazi: { required: false, type: 'object' },
       isused: { required: true, type: 'boolean' }
@@ -59,24 +55,25 @@ class DataIntegrityManager {
   }
 
   /**
-   * 验证出生地点
+   * 验证出生地点（简化：只验证经纬度）
    */
   validateLocation(location) {
     if (!location || typeof location !== 'object') return false;
-    
-    const requiredFields = ['province', 'city', 'district', 'lng', 'lat'];
-    for (const field of requiredFields) {
-      if (location[field] === undefined || location[field] === null) {
-        return false;
-      }
+
+    // 只验证经纬度是否有效，省市区允许为空
+    if (location.lng === undefined || location.lng === null) {
+      return false;
     }
-    
+    if (location.lat === undefined || location.lat === null) {
+      return false;
+    }
+
     // 验证经纬度范围
     const lng = parseFloat(location.lng);
     const lat = parseFloat(location.lat);
-    
-    return !isNaN(lng) && !isNaN(lat) && 
-           lng >= -180 && lng <= 180 && 
+
+    return !isNaN(lng) && !isNaN(lat) &&
+           lng >= -180 && lng <= 180 &&
            lat >= -90 && lat <= 90;
   }
 

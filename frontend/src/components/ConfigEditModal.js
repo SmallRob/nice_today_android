@@ -115,7 +115,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         gender: 'secret',
         zodiac: '',
         zodiacAnimal: '',
-        mbti: ''
+        mbti: '',
+        isused: false
       };
     } else if (config) {
       // 确保深拷贝 birthLocation 对象，避免引用问题
@@ -134,7 +135,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         gender: config.gender || 'secret',
         zodiac: config.zodiac || '',
         zodiacAnimal: config.zodiacAnimal || '',
-        mbti: config.mbti || ''
+        mbti: config.mbti || '',
+        isused: config.isused ?? false
       };
     }
     return {
@@ -146,7 +148,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       gender: 'secret',
       zodiac: '',
       zodiacAnimal: '',
-      mbti: ''
+      mbti: '',
+      isused: false
     };
   }, [isNew, config]);
 
@@ -341,8 +344,20 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       return;
     }
 
-    // 获取验证后的位置信息
-    const finalLocation = formData.birthLocation || { ...DEFAULT_REGION };
+    // 获取验证后的位置信息（确保有有效的经纬度）
+    let finalLocation = formData.birthLocation || { ...DEFAULT_REGION };
+    // 确保经纬度有效（使用默认值兜底）
+    if (finalLocation.lng === undefined || finalLocation.lng === null || isNaN(finalLocation.lng)) {
+      finalLocation.lng = DEFAULT_REGION.lng;
+    }
+    if (finalLocation.lat === undefined || finalLocation.lat === null || isNaN(finalLocation.lat)) {
+      finalLocation.lat = DEFAULT_REGION.lat;
+    }
+    // 确保省市区有默认值（即使为空字符串）
+    if (!finalLocation.province) finalLocation.province = DEFAULT_REGION.province;
+    if (!finalLocation.city) finalLocation.city = DEFAULT_REGION.city;
+    if (!finalLocation.district) finalLocation.district = DEFAULT_REGION.district;
+
     setIsSaving(true);
 
     try {
