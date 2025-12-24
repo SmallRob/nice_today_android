@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 
 import PageLayout, { Card, Button } from './PageLayout';
 import { useCurrentConfig } from '../contexts/UserConfigContext';
 import { baziCacheManager } from '../utils/BaziCacheManager';
+import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';

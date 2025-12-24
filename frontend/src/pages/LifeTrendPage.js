@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useCurrentConfig } from '../contexts/UserConfigContext';
+import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import KlineChart from '../components/KlineChart';
 import RadarChart from '../components/RadarChart';
 import DatePickerModal from '../components/DatePickerModal';
@@ -12,6 +13,7 @@ import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
+  const { getCurrentConfig, updateBaziInfo } = useCurrentConfig();
 
   // 视图和图表状态
   const [selectedView, setSelectedView] = useState('kline');
@@ -60,9 +62,8 @@ const LifeTrendPage = () => {
     try {
       console.log('开始异步重新计算八字...');
       const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
-      if (bazi) {
+      if (bazi && updateBaziInfo) {
         // 使用新的 Context API 更新八字信息
-        const { updateBaziInfo } = useCurrentConfig();
         await updateBaziInfo(nickname, {
           bazi: bazi,
           lunarBirthDate: bazi.lunar?.text,
@@ -84,7 +85,6 @@ const LifeTrendPage = () => {
       setError(null);
 
       // 步骤1：加载用户配置
-      const { getCurrentConfig } = useCurrentConfig();
       const config = getCurrentConfig();
       if (!config || !config.birthDate) {
         throw new Error('用户配置不完整');
@@ -138,7 +138,6 @@ const LifeTrendPage = () => {
             if (bazi && bazi.bazi) {
               const baziData = bazi.bazi;
               if (baziData.year && baziData.month && baziData.day && baziData.hour) {
-                const { updateBaziInfo } = useCurrentConfig();
                 await updateBaziInfo(nickname, {
                   bazi: bazi,
                   lunarBirthDate: bazi.lunar?.text,
@@ -192,7 +191,6 @@ const LifeTrendPage = () => {
 
   // 计算当前年龄
   useEffect(() => {
-    const { getCurrentConfig } = useCurrentConfig();
     const config = getCurrentConfig();
     if (config && config.birthDate) {
       const birthDate = new Date(config.birthDate);
@@ -218,14 +216,15 @@ const LifeTrendPage = () => {
       setTempLatitude(latitude);
       setIsTempCalcMode(false);
 
+
       // 检查配置中是否已有该日期的八字数据
-      const { getCurrentConfig } = useCurrentConfig();
       const currentConfig = getCurrentConfig();
       const needsRecalc = !currentConfig.bazi ||
                         currentConfig.birthDate !== newBirthDate ||
                         currentConfig.birthTime !== newBirthTime ||
                         currentConfig.birthLocation?.lng !== longitude ||
                         currentConfig.birthLocation?.lat !== latitude;
+
 
       let bazi;
       let baziCalculationFailed = false;
@@ -267,7 +266,6 @@ const LifeTrendPage = () => {
         const nickname = currentConfig.nickname;
         if (nickname && bazi && !baziCalculationFailed) {
           try {
-            const { updateBaziInfo } = useCurrentConfig();
             await updateBaziInfo(nickname, {
               bazi: bazi.bazi,
               shichen: bazi.shichen,
@@ -344,8 +342,7 @@ const LifeTrendPage = () => {
       }
 
       // 更新配置到存储
-      const { updateConfig } = useCurrentConfig();
-      await updateConfig(updates);
+      await enhancedUserConfigManager.updateConfigWithNodeUpdate(null, updates);
 
       console.log('保存日期到配置成功:', updates);
       showSuccessMessage('出生信息已保存' + (baziCalculationFailed ? '（八字将在后台计算）' : '，八字已更新'));
@@ -431,7 +428,6 @@ const LifeTrendPage = () => {
   // 计算流年大运（基于当前八字和当前年份）
   useEffect(() => {
     // 优先使用配置中的八字数据
-    const { getCurrentConfig } = useCurrentConfig();
     const config = getCurrentConfig();
     const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
 
@@ -456,7 +452,6 @@ const LifeTrendPage = () => {
 
   // 计算今日能量提示（基于当日五行信息结合用户八字动态计算）
   useEffect(() => {
-    const { getCurrentConfig } = useCurrentConfig();
     const config = getCurrentConfig();
     const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
 
@@ -523,7 +518,6 @@ const LifeTrendPage = () => {
     setIsTempCalcMode(true);
 
       // 检查配置中是否已有该日期的八字数据
-      const { getCurrentConfig } = useCurrentConfig();
       const currentConfig = getCurrentConfig();
       const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
       const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
@@ -577,7 +571,6 @@ const LifeTrendPage = () => {
     }
 
     // 优先从全局配置中获取八字
-    const { getCurrentConfig } = useCurrentConfig();
     const config = getCurrentConfig();
     if (config) {
       // 检查配置中的八字数据是否完整
@@ -624,7 +617,6 @@ const LifeTrendPage = () => {
   // 统一获取时辰显示文字
   const getShichenDisplay = () => {
     // 首先从配置中获取时辰信息（优先级最高）
-    const { getCurrentConfig } = useCurrentConfig();
     const config = getCurrentConfig();
     if (config?.shichen && typeof config.shichen === 'string' && config.shichen.endsWith('时')) {
       return config.shichen;
