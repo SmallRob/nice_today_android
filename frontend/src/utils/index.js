@@ -23,6 +23,16 @@ export { default as BaziUpdateManager } from './BaziUpdateManager.js';
 export { configMigrationTool } from './ConfigMigrationTool.js';
 export { default as ConfigMigrationTool } from './ConfigMigrationTool.js';
 
+// 容错机制相关
+export { concurrencyLock } from './ConcurrencyLock.js';
+export { default as ConcurrencyLock } from './ConcurrencyLock.js';
+
+export { nodeRecoveryManager } from './NodeRecoveryManager.js';
+export { default as NodeRecoveryManager } from './NodeRecoveryManager.js';
+
+export { operationLogger } from './OperationLogger.js';
+export { default as OperationLogger } from './OperationLogger.js';
+
 // 旧版管理器（保持兼容性）
 export { userConfigManager } from './userConfigManager.js';
 export { default as UserConfigManager } from './userConfigManager.js';

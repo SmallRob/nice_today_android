@@ -2,6 +2,7 @@
  * 增强版用户配置管理器
  * 集成数据持久化、数据完整性检查、节点级更新等功能
  * 提供原子操作和事务完整性保证
+ * 支持并发访问保护和自动节点恢复
  */
 
 import { dataPersistenceManager } from './DataPersistenceManager.js';
@@ -10,6 +11,9 @@ import { baziUpdateManager } from './BaziUpdateManager.js';
 import { generateLunarAndTrueSolarFields, validateAndFixLunarDate, batchValidateLunarDates } from './LunarCalendarHelper.js';
 import { calculateDetailedBazi } from './baziHelper.js';
 import { baziCacheManager } from './BaziCacheManager.js';
+import { concurrencyLock } from './ConcurrencyLock.js';
+import { nodeRecoveryManager } from './NodeRecoveryManager.js';
+import { operationLogger } from './OperationLogger.js';
 
 // 默认配置模板
 const DEFAULT_CONFIG = {
@@ -58,6 +62,10 @@ class EnhancedUserConfigManager {
       dataChecksum: null,
       backupCount: 0
     };
+    // 容错机制配置
+    this.faultToleranceEnabled = true; // 是否启用容错机制
+    this.autoRecoveryEnabled = true;   // 是否启用自动恢复
+    this.maxRecoveryAttempts = 3;    // 最大恢复尝试次数
     
     // 绑定方法
     this.handleStorageError = this.handleStorageError.bind(this);
@@ -373,70 +381,140 @@ class EnhancedUserConfigManager {
   }
 
   /**
-   * 使用节点级更新修改配置
+   * 使用节点级更新修改配置（带容错机制）
    */
   async updateConfigWithNodeUpdate(index, updates, updateType = 'auto') {
     if (!this.initialized || index < 0 || index >= this.configs.length) {
       throw new Error('无效的配置索引');
     }
-    
-    try {
-      const currentConfig = this.configs[index];
-      
-      // 执行节点级更新
-      const updateResult = await baziUpdateManager.executeNodeUpdate(
-        currentConfig, 
-        updates, 
-        updateType
-      );
-      
-      if (!updateResult.success) {
-        throw new Error(updateResult.error);
+
+    const currentConfig = this.configs[index];
+    const lockKey = `config-update-${index}`;
+    const operationId = `update-${Date.now()}`;
+
+    operationLogger.log('info', 'UPDATE_STARTED', {
+      operationId,
+      index,
+      configNickname: currentConfig.nickname,
+      updateType,
+      updates: Object.keys(updates)
+    });
+
+    // 使用并发锁保护关键操作
+    return await concurrencyLock.withLock(lockKey, async () => {
+      try {
+        // 执行节点级更新
+        const updateResult = await baziUpdateManager.executeNodeUpdate(
+          currentConfig,
+          updates,
+          updateType
+        );
+
+        if (!updateResult.success) {
+          throw new Error(updateResult.error || '节点级更新失败');
+        }
+
+        // 更新配置
+        let updatedConfig = updateResult.updatedConfig;
+
+        // 如果更新了出生日期、时间或位置，重新计算农历和真太阳时
+        const needsLunarRecalculation =
+          updates.birthDate !== undefined ||
+          updates.birthTime !== undefined ||
+          updates.birthLocation !== undefined;
+
+        if (needsLunarRecalculation) {
+          updatedConfig = validateAndFixLunarDate(updatedConfig);
+        }
+
+        this.configs[index] = updatedConfig;
+
+        // 保存到存储
+        await this.saveConfigsToStorage();
+
+        // 通知监听器
+        this.notifyListeners();
+
+        operationLogger.log('success', 'UPDATE_SUCCESS', {
+          operationId,
+          index,
+          configNickname: currentConfig.nickname,
+          affectedFields: updateResult.affectedFields,
+          needsLunarRecalculation,
+          warnings: updateResult.warnings
+        });
+
+        return {
+          success: true,
+          updatedConfig,
+          transaction: updateResult.transaction
+        };
+
+      } catch (error) {
+        operationLogger.log('error', 'UPDATE_ERROR', {
+          operationId,
+          index,
+          configNickname: currentConfig.nickname,
+          error: error.message,
+          stack: error.stack
+        });
+
+        // 容错机制：尝试自动恢复
+        if (this.autoRecoveryEnabled && this.faultToleranceEnabled) {
+          operationLogger.log('info', 'ATTEMPTING_AUTO_RECOVERY', {
+            operationId,
+            index,
+            configNickname: currentConfig.nickname
+          });
+
+          const recoveryResult = await nodeRecoveryManager.detectAndRecover(
+            index,
+            currentConfig,
+            updates,
+            error,
+            this.configs
+          );
+
+          if (recoveryResult.success) {
+            // 恢复成功，保存并通知
+            await this.saveConfigsToStorage();
+            this.notifyListeners();
+
+            operationLogger.log('success', 'RECOVERY_SUCCESS', {
+              operationId,
+              recoveryId: recoveryResult.recoveryId,
+              index,
+              configNickname: currentConfig.nickname
+            });
+
+            return {
+              success: true,
+              updatedConfig: recoveryResult.node,
+              recovered: true,
+              recoveryId: recoveryResult.recoveryId,
+              warnings: recoveryResult.warnings
+            };
+          } else {
+            operationLogger.log('error', 'RECOVERY_FAILED', {
+              operationId,
+              recoveryId: recoveryResult.recoveryId,
+              index,
+              configNickname: currentConfig.nickname,
+              recoveryError: recoveryResult.error
+            });
+
+            // 恢复失败，抛出原始错误
+            throw new Error(`更新失败且自动恢复失败: ${error.message}`);
+          }
+        } else {
+          // 未启用容错机制，直接抛出错误
+          throw error;
+        }
       }
-      
-      // 更新配置
-      let updatedConfig = updateResult.updatedConfig;
-      
-      // 如果更新了出生日期、时间或位置，重新计算农历和真太阳时
-      const needsLunarRecalculation = 
-        updates.birthDate !== undefined || 
-        updates.birthTime !== undefined || 
-        updates.birthLocation !== undefined;
-      
-      if (needsLunarRecalculation) {
-        updatedConfig = validateAndFixLunarDate(updatedConfig);
-      }
-      
-      this.configs[index] = updatedConfig;
-      
-      // 保存到存储
-      await this.saveConfigsToStorage();
-      
-      // 通知监听器
-      this.notifyListeners();
-      
-      console.log('节点级更新成功:', {
-        index,
-        affectedFields: updateResult.affectedFields,
-        needsLunarRecalculation,
-        warnings: updateResult.warnings
-      });
-      
-      return {
-        success: true,
-        updatedConfig,
-        transaction: updateResult.transaction
-      };
-      
-    } catch (error) {
-      console.error('节点级更新失败:', error);
-      
-      return {
-        success: false,
-        error: error.message,
-        originalConfig: this.configs[index]
-      };
-    }
+    }, {
+      owner: `config-manager-${operationId}`,
+      timeout: 60000 // 60秒超时
+    });
   }
 
   /**
@@ -950,6 +1028,7 @@ class EnhancedUserConfigManager {
     return baziCacheManager.getDefaultConfigBazi(defaultConfig);
   }
 
+
   /**
    * 重置系统
    */
@@ -975,6 +1054,158 @@ class EnhancedUserConfigManager {
       console.error('系统重置失败:', error);
       return false;
     }
+  }
+
+  // ==================== 容错机制相关方法 ====================
+
+  /**
+   * 启用/禁用容错机制
+   * @param {boolean} enabled 是否启用
+   */
+  setFaultToleranceEnabled(enabled) {
+    this.faultToleranceEnabled = enabled;
+    operationLogger.log('info', 'FAULT_TOLERANCE_TOGGLED', {
+      enabled,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  /**
+   * 启用/禁用自动恢复
+   * @param {boolean} enabled 是否启用
+   */
+  setAutoRecoveryEnabled(enabled) {
+    this.autoRecoveryEnabled = enabled;
+    operationLogger.log('info', 'AUTO_RECOVERY_TOGGLED', {
+      enabled,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  /**
+   * 获取容错机制状态
+   * @returns {Object} 容错状态
+   */
+  getFaultToleranceStatus() {
+    return {
+      faultToleranceEnabled: this.faultToleranceEnabled,
+      autoRecoveryEnabled: this.autoRecoveryEnabled,
+      maxRecoveryAttempts: this.maxRecoveryAttempts
+    };
+  }
+
+  /**
+   * 获取操作日志
+   * @param {Object} filters 过滤条件
+   * @returns {Array} 日志列表
+   */
+  getOperationLogs(filters = {}) {
+    return operationLogger.getLogs(filters);
+  }
+
+  /**
+   * 获取最近的操作日志
+   * @param {number} count 日志数量
+   * @returns {Array} 日志列表
+   */
+  getRecentLogs(count = 50) {
+    return operationLogger.getRecentLogs(count);
+  }
+
+  /**
+   * 获取错误日志
+   * @returns {Array} 错误日志列表
+   */
+  getErrorLogs() {
+    return operationLogger.getErrorLogs();
+  }
+
+  /**
+   * 导出操作日志
+   * @returns {string} JSON格式的日志
+   */
+  exportOperationLogs() {
+    return operationLogger.exportLogs();
+  }
+
+  /**
+   * 清空操作日志
+   */
+  clearOperationLogs() {
+    operationLogger.clearLogs();
+  }
+
+  /**
+   * 获取恢复历史
+   * @param {Object} filters 过滤条件
+   * @returns {Array} 恢复历史
+   */
+  getRecoveryHistory(filters = {}) {
+    return nodeRecoveryManager.getRecoveryHistory(filters);
+  }
+
+  /**
+   * 导出恢复历史
+   * @returns {string} JSON格式的恢复历史
+   */
+  exportRecoveryHistory() {
+    return nodeRecoveryManager.exportHistory();
+  }
+
+  /**
+   * 获取容错统计信息
+   * @returns {Object} 统计信息
+   */
+  getFaultToleranceStatistics() {
+    const recoveryStats = nodeRecoveryManager.getStatistics();
+    const errorLogs = operationLogger.getErrorLogs();
+    const recentErrors = errorLogs.slice(-20); // 最近20个错误
+
+    return {
+      recovery: recoveryStats,
+      errors: {
+        total: errorLogs.length,
+        recent: recentErrors.length
+      },
+      locks: concurrencyLock.getLockStatus()
+    };
+  }
+
+  /**
+   * 清理过期的备份和锁
+   * @returns {Promise<Object>} 清理结果
+   */
+  async cleanupMaintenance() {
+    const results = {
+      backupsCleaned: 0,
+      logsCleaned: 0,
+      locksCleaned: 0
+    };
+
+    try {
+      // 清理过期的配置备份
+      results.backupsCleaned = nodeRecoveryManager.cleanupOldBackups();
+
+      // 清理过期的日志
+      operationLogger.cleanExpiredLogs();
+      results.logsCleaned = 1;
+
+      // 清理过期的锁
+      results.locksCleaned = concurrencyLock.cleanupExpiredLocks();
+
+      operationLogger.log('info', 'MAINTENANCE_CLEANUP', {
+        ...results,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      operationLogger.log('error', 'MAINTENANCE_ERROR', {
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    return results;
   }
 }
 
