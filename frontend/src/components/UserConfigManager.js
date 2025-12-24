@@ -39,11 +39,6 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
           };
         }
         
-        // 特别处理1991-04-21的农历显示
-        if (birthDate === '1991-04-21' && info && info.lunar) {
-          info.lunar.text = '辛未年 三月初七';
-        }
-        
         setBaziInfo(info);
       } catch (e) {
         console.error('八字计算失败:', e);
@@ -214,6 +209,95 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
           </p>
         </div>
       </div>
+
+      {/* 命局五行喜忌 */}
+      <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">命局五行喜忌</h4>
+        <div className="text-sm text-gray-800 dark:text-gray-200 space-y-2">
+          {(() => {
+            const preferences = calculateWuxingPreferences(baziInfo);
+            if (!preferences) return null;
+            
+            return (
+              <div className="space-y-3">
+                {/* 最喜五行 */}
+                {preferences.preferred.filter(p => p.priority === '最喜').map((item, index) => (
+                  <div key={`preferred-top-${index}`} className="border-l-4 border-green-500 pl-3">
+                    <p className="font-medium">最喜五行{item.element}：</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                      十神：{item.shishen}；方位：{item.fangwei}；数字{item.shuzi}；色彩：{item.secai}
+                    </p>
+                  </div>
+                ))}
+                
+                {/* 次喜五行 */}
+                {preferences.preferred.filter(p => p.priority === '次喜').map((item, index) => (
+                  <div key={`preferred-secondary-${index}`} className="border-l-4 border-blue-500 pl-3">
+                    <p className="font-medium">次喜五行{item.element}：</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                      十神：{item.shishen}；方位：{item.fangwei}；数字{item.shuzi}；色彩：{item.secai}
+                    </p>
+                  </div>
+                ))}
+                
+                {/* 最忌五行 */}
+                {preferences.avoided.filter(p => p.priority === '最忌').map((item, index) => (
+                  <div key={`avoided-top-${index}`} className="border-l-4 border-red-500 pl-3">
+                    <p className="font-medium">最忌五行{item.element}：</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                      十神：{item.shishen}；方位：{item.fangwei}；数字：{item.shuzi}；色彩：{item.secai}
+                    </p>
+                  </div>
+                ))}
+                
+                {/* 次忌五行 */}
+                {preferences.avoided.filter(p => p.priority === '次忌').map((item, index) => (
+                  <div key={`avoided-secondary-${index}`} className="border-l-4 border-orange-500 pl-3">
+                    <p className="font-medium">次忌五行{item.element}：</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                      十神：{item.shishen}；方位：{item.fangwei}；数字：{item.shuzi}；色彩：{item.secai}
+                    </p>
+                  </div>
+                ))}
+                
+                {/* 平常五行 */}
+                {preferences.neutral.map((item, index) => (
+                  <div key={`neutral-${index}`} className="border-l-4 border-gray-500 pl-3">
+                    <p className="font-medium">平常五行{item.element}：</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                      十神：{item.shishen}；方位：{item.fangwei}；数字{item.shuzi}；色彩{item.secai}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* 十年大运 */}
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">大运</h4>
+        <div className="text-sm text-gray-800 dark:text-gray-200">
+          {(() => {
+            // 从出生日期中提取年份
+            const birthYear = birthDate ? parseInt(birthDate.split('-')[0]) : new Date().getFullYear();
+            const dayun = calculateDaYun(baziInfo, birthYear);
+            if (!dayun) return null;
+            
+            return (
+              <div className="space-y-1">
+                {dayun.map((d, index) => (
+                  <div key={index} className="flex justify-between py-1 border-b border-yellow-100 dark:border-yellow-800/50">
+                    <span className="font-medium">{d.ganzhi} {d.startYear}-{d.endYear}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">({d.ageRange})</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
     </div>
   );
 };
@@ -272,6 +356,300 @@ const calculateTotalScore = (scoreResult) => {
   const totalScore = tianScore + renScore + diScore + waiScore + zongScore;
 
   return Math.round(totalScore);
+};
+
+// 计算五行喜忌功能
+const calculateWuxingPreferences = (baziInfo) => {
+  if (!baziInfo || !baziInfo.bazi || !baziInfo.wuxing) {
+    return null;
+  }
+
+  // 获取日主（日干）
+  const dayMaster = baziInfo.bazi.day.charAt(0);
+  
+  // 五行对应表
+  const wuxingMap = {
+    '甲': '木', '乙': '木', '寅': '木', '卯': '木',
+    '丙': '火', '丁': '火', '巳': '火', '午': '火',
+    '戊': '土', '己': '土', '辰': '土', '戌': '土', '丑': '土', '未': '土',
+    '庚': '金', '辛': '金', '申': '金', '酉': '金',
+    '壬': '水', '癸': '水', '亥': '水', '子': '水'
+  };
+  
+  // 获取日主五行
+  const dayMasterElement = wuxingMap[dayMaster] || '未知';
+  
+  // 五行生克关系
+  const wuxingRelations = {
+    '木': { '生': '火', '克': '土', '被生': '水', '被克': '金' },
+    '火': { '生': '土', '克': '金', '被生': '木', '被克': '水' },
+    '土': { '生': '金', '克': '水', '被生': '火', '被克': '木' },
+    '金': { '生': '水', '克': '木', '被生': '土', '被克': '火' },
+    '水': { '生': '木', '克': '火', '被生': '金', '被克': '土' }
+  };
+  
+  // 统计四柱五行数量
+  const wuxingElements = ['木', '火', '土', '金', '水'];
+  const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+  
+  const wuxingStr = baziInfo.wuxing.text; // "金土 火金 金金 土水"
+  const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
+  wuxingList.forEach(element => {
+    elementCounts[element]++;
+  });
+  
+  // 分析五行强弱
+  let strongestElement = null;
+  let weakestElement = null;
+  let maxCount = -1;
+  let minCount = 10;
+  
+  wuxingElements.forEach(element => {
+    if (elementCounts[element] > maxCount) {
+      maxCount = elementCounts[element];
+      strongestElement = element;
+    }
+    if (elementCounts[element] < minCount) {
+      minCount = elementCounts[element];
+      weakestElement = element;
+    }
+  });
+  
+  // 确定喜用神和忌神
+  // 如果日主五行在四柱中力量过强，需要克制或泄耗
+  // 如果日主五行在四柱中力量过弱，需要生扶或同类相助
+  const dayElementCount = elementCounts[dayMasterElement];
+  const averageCount = (elementCounts['木'] + elementCounts['火'] + elementCounts['土'] + elementCounts['金'] + elementCounts['水']) / 5;
+  
+  let preferences = {
+    preferred: [], // 喜用神
+    avoided: [], // 忌神
+    neutral: []  // 平常用神
+  };
+  
+  // 根据日主强弱判断喜用神
+  if (dayElementCount > averageCount) {
+    // 日主偏强，需要克制、泄耗
+    preferences.preferred.push({
+      element: wuxingRelations[dayMasterElement]['被克'], // 克我者为官杀，为喜用
+      priority: '次喜',
+      shishen: '官杀',
+      fangwei: '克我方位',
+      shuzi: '克我数字',
+      secai: '克我色彩'
+    });
+    
+    preferences.preferred.push({
+      element: wuxingRelations[dayMasterElement]['生'], // 我生者为食伤，为喜用
+      priority: '最喜',
+      shishen: '食伤',
+      fangwei: '生我方位',
+      shuzi: '生我数字',
+      secai: '生我色彩'
+    });
+    
+    // 最强的五行作为忌神
+    if (strongestElement) {
+      preferences.avoided.push({
+        element: strongestElement,
+        priority: '最忌',
+        shishen: '同类过旺',
+        fangwei: '同类方位',
+        shuzi: '同类数字',
+        secai: '同类色彩'
+      });
+    }
+    
+    // 被克的五行作为次忌
+    preferences.avoided.push({
+      element: wuxingRelations[dayMasterElement]['克'], // 我克者为财星，可能为忌
+      priority: '次忌',
+      shishen: '财星',
+      fangwei: '我克方位',
+      shuzi: '我克数字',
+      secai: '我克色彩'
+    });
+  } else {
+    // 日主偏弱，需要生扶
+    preferences.preferred.push({
+      element: wuxingRelations[dayMasterElement]['被生'], // 生我者为印枭，为喜用
+      priority: '最喜',
+      shishen: '印枭',
+      fangwei: '生我方位',
+      shuzi: '生我数字',
+      secai: '生我色彩'
+    });
+    
+    preferences.preferred.push({
+      element: dayMasterElement, // 同类为比劫，为喜用
+      priority: '次喜',
+      shishen: '比劫',
+      fangwei: '同类方位',
+      shuzi: '同类数字',
+      secai: '同类色彩'
+    });
+    
+    // 最强的五行作为忌神（克制日主的）
+    if (strongestElement === wuxingRelations[dayMasterElement]['被克']) {
+      preferences.avoided.push({
+        element: strongestElement,
+        priority: '最忌',
+        shishen: '官杀',
+        fangwei: '克我方位',
+        shuzi: '克我数字',
+        secai: '克我色彩'
+      });
+    } else {
+      preferences.avoided.push({
+        element: wuxingRelations[dayMasterElement]['生'], // 泄耗日主的
+        priority: '最忌',
+        shishen: '食伤',
+        fangwei: '泄耗方位',
+        shuzi: '泄耗数字',
+        secai: '泄耗色彩'
+      });
+    }
+    
+    preferences.avoided.push({
+      element: wuxingRelations[dayMasterElement]['克'], // 我克者为财星，可能为忌
+      priority: '次忌',
+      shishen: '财星',
+      fangwei: '我克方位',
+      shuzi: '我克数字',
+      secai: '我克色彩'
+    });
+  }
+  
+  // 剩余的作为平常
+  wuxingElements.forEach(element => {
+    if (!preferences.preferred.some(p => p.element === element) && 
+        !preferences.avoided.some(a => a.element === element)) {
+      preferences.neutral.push({
+        element: element,
+        priority: '平常',
+        shishen: '食伤', // 默认值
+        fangwei: '平常方位',
+        shuzi: '平常数字',
+        secai: '平常色彩'
+      });
+    }
+  });
+  
+  // 根据具体的五行配置设置更详细的属性
+  const elementDetails = {
+    '木': { shishen: '比劫', fangwei: '东、东南', shuzi: '三、八', secai: '绿、青' },
+    '火': { shishen: '食伤', fangwei: '南、东南', shuzi: '二、七', secai: '红、紫、橙' },
+    '土': { shishen: '财星', fangwei: '中央、本地', shuzi: '五、零', secai: '黄、棕' },
+    '金': { shishen: '官杀', fangwei: '西、西北', shuzi: '四、九', secai: '白、银、金' },
+    '水': { shishen: '印枭', fangwei: '北、西南', shuzi: '一、六', secai: '黑、蓝' }
+  };
+  
+  // 更新详细信息
+  preferences.preferred.forEach(item => {
+    if (elementDetails[item.element]) {
+      item.shishen = elementDetails[item.element].shishen;
+      item.fangwei = elementDetails[item.element].fangwei;
+      item.shuzi = elementDetails[item.element].shuzi;
+      item.secai = elementDetails[item.element].secai;
+    }
+  });
+  
+  preferences.avoided.forEach(item => {
+    if (elementDetails[item.element]) {
+      item.shishen = elementDetails[item.element].shishen;
+      item.fangwei = elementDetails[item.element].fangwei;
+      item.shuzi = elementDetails[item.element].shuzi;
+      item.secai = elementDetails[item.element].secai;
+    }
+  });
+  
+  preferences.neutral.forEach(item => {
+    if (elementDetails[item.element]) {
+      item.shishen = elementDetails[item.element].shishen;
+      item.fangwei = elementDetails[item.element].fangwei;
+      item.shuzi = elementDetails[item.element].shuzi;
+      item.secai = elementDetails[item.element].secai;
+    }
+  });
+  
+  return preferences;
+};
+
+// 计算十年大运
+const calculateDaYun = (baziInfo, birthYear) => {
+  if (!baziInfo || !baziInfo.bazi) {
+    return null;
+  }
+
+  // 获取日主（日干）
+  const dayMaster = baziInfo.bazi.day.charAt(0);
+  
+  // 天干
+  const gan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+  // 地支
+  const zhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  
+  // 男性阳干顺排，阴干逆排；女性阴干顺排，阳干逆排
+  // 根据出生年份判断性别和干支阴阳
+  const dayMasterIndex = gan.indexOf(dayMaster);
+  
+  // 简化版本：根据年干判断阴阳（奇数为阳，偶数为阴）
+  const yearGanIndex = gan.indexOf(baziInfo.bazi.year.charAt(0));
+  const isYangYear = yearGanIndex % 2 === 0; // 甲、丙、戊、庚、壬为阳
+  
+  // 男性大运顺排，女性大运逆排
+  const isMale = true; // 默认为男性，实际应从配置中获取
+  
+  let dayunSequence = [];
+  
+  // 计算大运起始干支
+  // 男性阳干或女性阴干：顺排
+  // 男性阴干或女性阳干：逆排
+  const isForward = (isMale && isYangYear) || (!isMale && !isYangYear);
+  
+  // 从月柱开始排大运
+  const monthGan = baziInfo.bazi.month.charAt(0);
+  const monthZhi = baziInfo.bazi.month.charAt(1);
+  
+  const monthGanIndex = gan.indexOf(monthGan);
+  const monthZhiIndex = zhi.indexOf(monthZhi);
+  
+  // 生成10个大运干支（代表10个10年周期）
+  for (let i = 0; i < 10; i++) {
+    let ganIndex, zhiIndex;
+    
+    if (isForward) {
+      // 顺排
+      ganIndex = (monthGanIndex + i + 1) % 10;
+      zhiIndex = (monthZhiIndex + i + 1) % 12;
+    } else {
+      // 逆排
+      ganIndex = (monthGanIndex - i - 1 + 10) % 10;
+      zhiIndex = (monthZhiIndex - i - 1 + 12) % 12;
+    }
+    
+    if (ganIndex < 0) ganIndex += 10;
+    if (zhiIndex < 0) zhiIndex += 12;
+    
+    const dagan = gan[ganIndex];
+    const dazhi = zhi[zhiIndex];
+    
+    // 计算大运的起止年份
+    // 通常大运从出生后几年开始，这里假设6-10岁开始
+    const startAge = 6 + i * 10; // 6-15, 16-25, 26-35...
+    const endAge = startAge + 9;
+    const startY = birthYear + startAge;
+    const endY = startY + 9;
+    
+    dayunSequence.push({
+      ganzhi: dagan + dazhi,
+      startYear: startY,
+      endYear: endY,
+      ageRange: `${startAge}-${endAge}岁`
+    });
+  }
+  
+  return dayunSequence;
 };
 
 // 配置列表项组件
@@ -959,25 +1337,66 @@ const UserConfigManagerComponent = () => {
         </div>
       </Card>
 
-      {/* 八字命理展示栏目 */}
+      {/* 八字命格展示栏目 */}
       <Card
-        title="八字命理"
+        title="八字命格"
         className="mb-6"
         headerExtra={
-          <button
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            onClick={() => {
-              // 触发重新计算
-              if (configs[activeConfigIndex]?.birthDate) {
-                setBaziKey(prev => prev + 1);
-              }
-            }}
-            title="刷新八字信息"
-          >
-            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
+          <div className="flex space-x-2">
+            <button
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              onClick={() => {
+                // 触发重新计算
+                if (configs[activeConfigIndex]?.birthDate) {
+                  setBaziKey(prev => prev + 1);
+                }
+              }}
+              title="刷新八字信息"
+            >
+              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+            <button
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              onClick={async () => {
+                // 从当前配置的出生信息重新计算八字并同步到全局配置
+                if (configs[activeConfigIndex]?.birthDate && configs[activeConfigIndex]?.birthTime) {
+                  try {
+                    const longitude = configs[activeConfigIndex].birthLocation?.lng || 116.40;
+                    const baziInfo = calculateDetailedBazi(
+                      configs[activeConfigIndex].birthDate, 
+                      configs[activeConfigIndex].birthTime, 
+                      longitude
+                    );
+                          
+                    if (baziInfo) {
+                      // 更新当前配置的八字信息
+                      const updatedConfig = {
+                        ...configs[activeConfigIndex],
+                        bazi: baziInfo
+                      };
+                            
+                      // 调用全局方法更新配置
+                      await handleSaveConfig(activeConfigIndex, updatedConfig);
+                            
+                      // 刷新显示
+                      setBaziKey(prev => prev + 1);
+                      showMessage('八字信息已同步到全局配置', 'success');
+                    }
+                  } catch (error) {
+                    console.error('同步八字信息失败:', error);
+                    showMessage('同步八字信息失败: ' + error.message, 'error');
+                  }
+                }
+              }}
+              title="同步八字到全局配置"
+            >
+              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
+            </button>
+          </div>
         }
       >
         {configs[activeConfigIndex]?.birthDate ? (
@@ -989,7 +1408,7 @@ const UserConfigManagerComponent = () => {
           />
         ) : (
           <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-            <p>请先设置出生日期以查看八字命理信息</p>
+            <p>请先设置出生日期以查看八字命格信息</p>
           </div>
         )}
       </Card>

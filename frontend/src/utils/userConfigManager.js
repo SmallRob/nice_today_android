@@ -258,9 +258,9 @@ class UserConfigManager {
       birthLocation: config.birthLocation || {
         province: '北京市',
         city: '北京市',
-        district: '朝阳区',
+        district: '海淀区',
         lng: 116.48,
-        lat: 39.95
+        lat: 38.95
       },
       zodiac: config.zodiac || '未知',
       zodiacAnimal: config.zodiacAnimal || '未知',
