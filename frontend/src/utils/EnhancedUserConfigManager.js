@@ -356,8 +356,16 @@ class EnhancedUserConfigManager {
     if (!this.initialized) {
       return [DEFAULT_CONFIG];
     }
-    
+
     return [...this.configs];
+  }
+
+  /**
+   * 获取当前活跃配置的索引
+   * @returns {Number} 当前配置索引
+   */
+  getActiveConfigIndex() {
+    return this.activeConfigIndex;
   }
 
   /**
@@ -770,6 +778,71 @@ class EnhancedUserConfigManager {
         console.error('监听器执行出错:', error);
       }
     });
+  }
+
+  /**
+   * 导出配置数据
+   * @returns {String} JSON字符串
+   */
+  exportConfigs() {
+    try {
+      return JSON.stringify({
+        configs: this.configs,
+        activeConfigIndex: this.activeConfigIndex,
+        metadata: this.metadata,
+        exportDate: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('导出配置失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 导入配置数据
+   * @param {String} jsonData JSON字符串
+   * @returns {Boolean} 是否导入成功
+   */
+  async importConfigs(jsonData) {
+    try {
+      const data = JSON.parse(jsonData);
+
+      if (!data.configs || !Array.isArray(data.configs)) {
+        throw new Error('无效的配置数据格式');
+      }
+
+      // 验证所有配置的完整性
+      const validation = dataIntegrityManager.batchValidate(data.configs);
+      if (validation.validCount !== data.configs.length) {
+        console.warn('导入的配置存在数据完整性问题，将进行修复');
+      }
+
+      this.configs = data.configs;
+      this.activeConfigIndex = data.activeConfigIndex || 0;
+
+      // 确保至少有一组配置
+      if (this.configs.length === 0) {
+        this.configs = [DEFAULT_CONFIG];
+        this.activeConfigIndex = 0;
+      }
+
+      // 确保索引在有效范围内
+      this.activeConfigIndex = Math.max(0, Math.min(this.activeConfigIndex, this.configs.length - 1));
+
+      // 保存到存储
+      await this.saveConfigsToStorage();
+      this.notifyListeners();
+
+      console.log('导入配置成功', {
+        configCount: this.configs.length,
+        activeIndex: this.activeConfigIndex
+      });
+
+      return true;
+    } catch (error) {
+      console.error('导入配置失败:', error);
+      return false;
+    }
   }
 
   /**

@@ -4,7 +4,7 @@ import KlineChart from '../components/KlineChart';
 import RadarChart from '../components/RadarChart';
 import DatePickerModal from '../components/DatePickerModal';
 import { storageManager } from '../utils/storageManager';
-import { userConfigManager } from '../utils/userConfigManager';
+import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import { calculateDetailedBazi, calculateLiuNianDaYun, calculateDailyEnergy } from '../utils/baziHelper';
 import { calculateBaziWithWorker } from '../utils/workerManager';
 import { Solar } from 'lunar-javascript';
@@ -56,7 +56,7 @@ const LifeTrendPage = () => {
       setError(null);
 
       // 步骤1：加载用户配置
-      const config = userConfigManager.getCurrentConfig();
+      const config = enhancedUserConfigManager.getCurrentConfig();
       if (!config || !config.birthDate) {
         throw new Error('用户配置不完整');
       }
@@ -83,8 +83,9 @@ const LifeTrendPage = () => {
             const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
             if (bazi) {
               // 更新配置中的八字数据
-              const configIndex = userConfigManager.getActiveConfigIndex();
-              userConfigManager.updateConfig(configIndex, { bazi });
+              const configIndex = enhancedUserConfigManager.activeConfigIndex;
+              // 使用节点级更新方式更新八字信息
+              enhancedUserConfigManager.updateConfigWithNodeUpdate(configIndex, { bazi });
               console.log('计算并保存八字数据到用户配置');
             }
           } catch (error) {
@@ -120,7 +121,7 @@ const LifeTrendPage = () => {
 
   // 计算当前年龄
   useEffect(() => {
-    const config = userConfigManager.getCurrentConfig();
+    const config = enhancedUserConfigManager.getCurrentConfig();
     if (config && config.birthDate) {
       const birthDate = new Date(config.birthDate);
       const today = new Date();
@@ -134,7 +135,7 @@ const LifeTrendPage = () => {
     try {
       const newBirthDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
       const newBirthTime = `${String(hour).padStart(2, '0')}:00`;
-      const configIndex = userConfigManager.getActiveConfigIndex();
+      const configIndex = enhancedUserConfigManager.activeConfigIndex;
 
       // 立即更新UI状态
       setSelectedYear(year);
@@ -146,7 +147,7 @@ const LifeTrendPage = () => {
       setIsTempCalcMode(false);
 
       // 检查配置中是否已有该日期的八字数据
-      const currentConfig = userConfigManager.getCurrentConfig();
+      const currentConfig = enhancedUserConfigManager.getCurrentConfig();
       const needsRecalc = !currentConfig.bazi || 
                         currentConfig.birthDate !== newBirthDate ||
                         currentConfig.birthTime !== newBirthTime ||
@@ -165,9 +166,28 @@ const LifeTrendPage = () => {
           console.warn('Worker计算失败，使用同步计算:', workerError);
           bazi = calculateDetailedBazi(newBirthDate, newBirthTime, longitude);
         }
-
+        
         if (!bazi) {
           throw new Error('八字计算失败');
+        }
+              
+        // 将新计算的八字信息同步保存到八字对象中
+        const nickname = currentConfig.nickname;
+        if (nickname) {
+          const baziSyncResult = await enhancedUserConfigManager.updateBaziInfo(nickname, {
+            bazi: bazi.bazi,
+            shichen: bazi.shichen,
+            lunarBirthDate: bazi.lunarBirthDate,
+            trueSolarTime: bazi.trueSolarTime,
+            lunarInfo: bazi.lunarInfo,
+            lastCalculated: new Date().toISOString()
+          });
+                
+          if (!baziSyncResult) {
+            console.warn('八字信息同步保存失败');
+          } else {
+            console.log('八字信息已同步保存到全局配置');
+          }
         }
       } else {
         // 使用已有八字数据，避免重复计算
@@ -210,7 +230,7 @@ const LifeTrendPage = () => {
         // 即使计算失败也继续保存基本配置
       }
 
-      userConfigManager.updateConfig(configIndex, updates);
+      enhancedUserConfigManager.updateConfigWithNodeUpdate(configIndex, updates);
 
       console.log('保存日期和八字到配置成功:', updates);
     } catch (error) {
@@ -295,7 +315,7 @@ const LifeTrendPage = () => {
   // 计算流年大运（基于当前八字和当前年份）
   useEffect(() => {
     // 优先使用配置中的八字数据
-    const config = userConfigManager.getCurrentConfig();
+    const config = enhancedUserConfigManager.getCurrentConfig();
     const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
 
     if (usedBazi && usedBazi.bazi) {
@@ -319,7 +339,7 @@ const LifeTrendPage = () => {
 
   // 计算今日能量提示（基于当日五行信息结合用户八字动态计算）
   useEffect(() => {
-    const config = userConfigManager.getCurrentConfig();
+    const config = enhancedUserConfigManager.getCurrentConfig();
     const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
 
     if (usedBazi && usedBazi.bazi) {
@@ -385,7 +405,7 @@ const LifeTrendPage = () => {
     setIsTempCalcMode(true);
 
     // 检查配置中是否已有该日期的八字数据
-    const currentConfig = userConfigManager.getCurrentConfig();
+    const currentConfig = enhancedUserConfigManager.getCurrentConfig();
     const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
     const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
     
@@ -414,6 +434,9 @@ const LifeTrendPage = () => {
       if (bazi) {
         setTempBazi(bazi);
         console.log('临时计算八字成功:', bazi);
+        
+        // 如果用户确认使用临时计算结果，可以将其同步保存到八字对象中
+        // 这里只是计算，不自动保存到永久配置
       }
     } else {
       // 使用已有八字数据，避免重复计算
@@ -431,7 +454,7 @@ const LifeTrendPage = () => {
       return tempBazi;
     }
     // 优先使用配置中的八字数据
-    const config = userConfigManager.getCurrentConfig();
+    const config = enhancedUserConfigManager.getCurrentConfig();
     if (config && config.bazi) {
       return config.bazi;
     }
@@ -490,29 +513,33 @@ const LifeTrendPage = () => {
 
         {/* 日期卡片 */}
         <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 shadow-sm`}>
-          <div
-            className={`text-center py-3 px-4 rounded-xl cursor-pointer transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'}`}
-            onClick={handleDateCardClick}
-          >
-            <div className={`text-xs mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              {calculating ? '⏳ 计算中...' : isTempCalcMode ? '🔮 临时计算' : '生辰八字'}
-            </div>
-            {/* 公历日期 */}
-            <div className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {selectedYear}年 {selectedMonth}月 {selectedDate}日
-            </div>
-            {/* 农历日期 */}
-            {lunarData && (
-              <div className={`text-sm mt-1 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                农历{lunarData.lunarMonthStr}{lunarData.lunarDayStr}
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex-1">
+              <div
+                className={`text-center py-3 px-4 rounded-xl cursor-pointer transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'}`}
+                onClick={handleDateCardClick}
+              >
+                <div className={`text-xs mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {calculating ? '⏳ 计算中...' : isTempCalcMode ? '🔮 临时计算' : '生辰八字'}
+                </div>
+                {/* 公历日期 */}
+                <div className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {selectedYear}年 {selectedMonth}月 {selectedDate}日
+                </div>
+                {/* 农历日期 */}
+                {lunarData && (
+                  <div className={`text-sm mt-1 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                    农历{lunarData.lunarMonthStr}{lunarData.lunarDayStr}
+                  </div>
+                )}
+                {/* 时辰 */}
+                <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                  时辰：{displayBazi.shichen?.ganzhi || displayBazi.bazi?.hour?.slice(-1) + '时' || '未知'}
+                </div>
+                <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {calculating ? '正在后台计算八字...' : isTempCalcMode ? '点击返回永久配置' : '点击修改日期 / 临时计算'}
+                </div>
               </div>
-            )}
-            {/* 时辰 */}
-            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-              时辰：{displayBazi.shichen?.ganzhi || displayBazi.bazi?.hour?.slice(-1) + '时' || '未知'}
-            </div>
-            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              {calculating ? '正在后台计算八字...' : isTempCalcMode ? '点击返回永久配置' : '点击修改日期 / 临时计算'}
             </div>
           </div>
 

@@ -1066,7 +1066,7 @@ const UserConfigManagerComponent = () => {
           showMessage('删除配置成功', 'success');
         } else {
           // 存储中的配置，需要从存储中移除
-          enhancedUserConfigManager.removeConfig(index);
+          await enhancedUserConfigManager.removeConfig(index);
           // deleteConfig 内部已经调用了 notifyListeners
           // 监听器会自动更新本地状态，这里只需要调整展开索引
           // 注意：监听器更新是异步的，所以需要从 enhancedUserConfigManager 获取最新长度
@@ -1144,7 +1144,7 @@ const UserConfigManagerComponent = () => {
         reader.onload = (e) => {
           try {
             const jsonData = e.target.result;
-            const success = enhancedUserConfigManager.importConfigs(jsonData);
+            const success = await enhancedUserConfigManager.importConfigs(jsonData);
             if (success) {
               // importConfigs 内部已经调用了 notifyListeners
               // 监听器会自动更新本地状态
@@ -1448,13 +1448,18 @@ const UserConfigManagerComponent = () => {
           }}
           name={configs[tempScoringConfigIndex]?.realName || ''}
           isPersonal={tempScoringConfigIndex !== null}
-          onSaveScore={(score) => {
+          onSaveScore={async (score) => {
             // 保存评分到配置（仅个人评分）
             if (tempScoringConfigIndex !== null && score) {
               const totalScore = calculateTotalScore(score);
-              // 直接更新配置的 nameScore 字段，updateConfig 会自动通知监听器更新状态
-              enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
-              console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+              // 直接更新配置的 nameScore 字段
+              try {
+                await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
+                console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+              } catch (error) {
+                console.error('保存姓名评分失败:', error);
+                showMessage && showMessage('保存评分失败: ' + error.message, 'error');
+              }
             }
             // 临时为他人评分时不保存
           }}
