@@ -55,6 +55,26 @@ const LifeTrendPage = () => {
   const [lunarData, setLunarData] = useState(null);
   const [liuNianData, setLiuNianData] = useState(null);
 
+  // 异步重新计算八字（不阻塞主流程）
+  const recalcBaziAsync = async (birthDateStr, birthTimeStr, longitude, nickname) => {
+    try {
+      console.log('开始异步重新计算八字...');
+      const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
+      if (bazi) {
+        await enhancedUserConfigManager.updateBaziInfo(nickname, {
+          bazi: bazi,
+          lunarBirthDate: bazi.lunar?.text,
+          trueSolarTime: birthTimeStr,
+          lastCalculated: new Date().toISOString()
+        });
+        await enhancedUserConfigManager.syncBaziToCache(nickname);
+        console.log('异步重新计算八字成功');
+      }
+    } catch (error) {
+      console.error('异步重新计算八字失败:', error);
+    }
+  };
+
   // 加载用户配置的函数（提取出来以便重试）
   const loadUserConfig = useCallback(async () => {
     let isMounted = true;
@@ -84,53 +104,87 @@ const LifeTrendPage = () => {
         setTempLatitude(config.birthLocation?.lat || 30);
         setTempLongitude(config.birthLocation?.lng || 110);
 
-        // 步骤2：优先从缓存获取八字
         const birthDateStr = config.birthDate;
         const birthTimeStr = config.birthTime || '12:00';
         const longitude = config.birthLocation?.lng || 110;
+        const nickname = config.nickname;
 
-        // 1) 先尝试从缓存获取八字
-        let baziFromCache = enhancedUserConfigManager.getBaziFromCacheByBirthInfo(birthDateStr, birthTimeStr, longitude);
-        if (baziFromCache && baziFromCache.bazi) {
-          console.log('从缓存获取八字成功:', baziFromCache);
-          // 如果缓存中有八字，同步到配置中
-          const configIndex = enhancedUserConfigManager.getActiveConfigIndex();
-          await enhancedUserConfigManager.updateBaziInfo(config.nickname, {
-            bazi: baziFromCache.bazi,
-            lunarBirthDate: baziFromCache.lunarBirthDate,
-            trueSolarTime: baziFromCache.trueSolarTime,
-            lastCalculated: new Date().toISOString()
-          });
-        }
-        // 2) 如果缓存中没有，检查配置中是否已有八字
-        else if (config.bazi) {
-          console.log('使用用户配置中的八字数据');
-        }
-        // 3) 如果都没有，计算一次并保存到配置和缓存
-        else {
-          console.log('缓存和配置中都没有八字，开始计算...');
+        // 步骤2：按优先级获取八字数据
+        let baziLoaded = false;
+
+        // 1) 优先从全局配置中获取八字（最高优先级）
+        if (config.bazi) {
           try {
-            const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
-            if (bazi) {
-              // 更新配置中的八字数据
-              const configIndex = enhancedUserConfigManager.getActiveConfigIndex();
-              // 使用节点级更新方式更新八字信息
-              await enhancedUserConfigManager.updateBaziInfo(config.nickname, {
-                bazi: bazi,
-                lunarBirthDate: bazi.lunar?.text,
-                trueSolarTime: birthTimeStr,
-                lastCalculated: new Date().toISOString()
-              });
-
-              // 同时缓存八字信息
-              await enhancedUserConfigManager.syncBaziToCache(config.nickname);
-
-              console.log('计算并保存八字数据到用户配置和缓存');
+            // 验证八字数据完整性
+            const baziData = config.bazi.bazi || config.bazi;
+            if (baziData && baziData.year && baziData.month && baziData.day && baziData.hour) {
+              console.log('✓ 从全局配置中获取八字成功');
+              baziLoaded = true;
+            } else {
+              console.warn('⚠ 全局配置中的八字数据不完整');
             }
           } catch (error) {
-            console.error('计算八字数据失败:', error);
-            // 计算失败不阻断加载流程，只是没有八字数据
+            console.warn('⚠ 解析全局配置中的八字数据失败:', error);
           }
+        }
+
+        // 2) 如果配置中没有，尝试从缓存获取
+        if (!baziLoaded) {
+          try {
+            const baziFromCache = enhancedUserConfigManager.getBaziFromCacheByBirthInfo(birthDateStr, birthTimeStr, longitude);
+            if (baziFromCache && baziFromCache.bazi) {
+              // 验证缓存数据完整性
+              const cacheBaziData = baziFromCache.bazi.bazi || baziFromCache.bazi;
+              if (cacheBaziData && cacheBaziData.year && cacheBaziData.month && cacheBaziData.day && cacheBaziData.hour) {
+                console.log('✓ 从缓存获取八字成功，同步到配置中');
+                await enhancedUserConfigManager.updateBaziInfo(nickname, {
+                  bazi: baziFromCache.bazi,
+                  lunarBirthDate: baziFromCache.lunarBirthDate,
+                  trueSolarTime: baziFromCache.trueSolarTime,
+                  lastCalculated: new Date().toISOString()
+                });
+                baziLoaded = true;
+              } else {
+                console.warn('⚠ 缓存中的八字数据不完整');
+              }
+            }
+          } catch (error) {
+            console.warn('⚠ 从缓存获取八字失败:', error);
+          }
+        }
+
+        // 3) 如果配置和缓存都没有，同步计算一次（不阻塞后续流程）
+        if (!baziLoaded && nickname) {
+          console.log('⚠ 配置和缓存中都没有八字，开始计算...');
+          try {
+            const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
+            if (bazi && bazi.bazi) {
+              const baziData = bazi.bazi;
+              if (baziData.year && baziData.month && baziData.day && baziData.hour) {
+                await enhancedUserConfigManager.updateBaziInfo(nickname, {
+                  bazi: bazi,
+                  lunarBirthDate: bazi.lunar?.text,
+                  trueSolarTime: birthTimeStr,
+                  lastCalculated: new Date().toISOString()
+                });
+                await enhancedUserConfigManager.syncBaziToCache(nickname);
+                baziLoaded = true;
+                console.log('✓ 计算并保存八字数据成功');
+              }
+            }
+          } catch (error) {
+            console.error('✗ 计算八字数据失败:', error);
+            // 计算失败不阻断加载流程，使用空八字对象
+          }
+        }
+
+        // 4) 如果八字数据仍不完整，触发异步重试（不阻塞主流程）
+        if (!baziLoaded && nickname) {
+          console.warn('⚠ 八字数据不完整，将触发异步重试');
+          // 使用 setTimeout 延迟重试，不阻塞主流程
+          setTimeout(() => {
+            recalcBaziAsync(birthDateStr, birthTimeStr, longitude, nickname);
+          }, 1000);
         }
       }
 
@@ -195,6 +249,8 @@ const LifeTrendPage = () => {
                         currentConfig.birthLocation?.lat !== latitude;
 
       let bazi;
+      let baziCalculationFailed = false;
+
       if (needsRecalc) {
         // 只有当八字数据不存在或日期变化时才重新计算
         setCalculating(true);
@@ -206,36 +262,73 @@ const LifeTrendPage = () => {
         } catch (workerError) {
           console.warn('Worker计算失败，使用同步计算:', workerError);
           // Worker 失败时降级到同步计算
-          bazi = calculateDetailedBazi(newBirthDate, newBirthTime, longitude);
+          try {
+            bazi = calculateDetailedBazi(newBirthDate, newBirthTime, longitude);
+          } catch (syncError) {
+            console.error('同步计算八字也失败:', syncError);
+            baziCalculationFailed = true;
+            bazi = null;
+          }
         }
 
         if (!bazi) {
-          throw new Error('八字计算失败');
+          console.error('八字计算失败，但继续保存基本信息');
+          baziCalculationFailed = true;
+          // 不抛出异常，继续保存基本配置
+        } else {
+          // 验证八字数据完整性
+          const baziData = bazi.bazi || bazi;
+          if (!baziData || !baziData.year || !baziData.month || !baziData.day || !baziData.hour) {
+            console.warn('计算的八字数据不完整');
+            baziCalculationFailed = true;
+          }
         }
 
         // 将新计算的八字信息同步保存到配置中
         const nickname = currentConfig.nickname;
-        if (nickname) {
-          const baziSyncResult = await enhancedUserConfigManager.updateBaziInfo(nickname, {
-            bazi: bazi.bazi,
-            shichen: bazi.shichen,
-            lunarBirthDate: bazi.lunarBirthDate,
-            trueSolarTime: bazi.trueSolarTime,
-            lunarInfo: bazi.lunarInfo,
-            lastCalculated: new Date().toISOString()
-          });
+        if (nickname && bazi && !baziCalculationFailed) {
+          try {
+            const baziSyncResult = await enhancedUserConfigManager.updateBaziInfo(nickname, {
+              bazi: bazi.bazi,
+              shichen: bazi.shichen,
+              lunarBirthDate: bazi.lunarBirthDate,
+              trueSolarTime: bazi.trueSolarTime,
+              lunarInfo: bazi.lunarInfo,
+              lastCalculated: new Date().toISOString()
+            });
 
-          if (!baziSyncResult) {
-            console.warn('八字信息同步保存失败');
-          } else {
-            console.log('八字信息已同步保存到全局配置');
-            showSuccessMessage('八字信息已更新保存');
+            if (!baziSyncResult) {
+              console.warn('八字信息同步保存失败');
+            } else {
+              console.log('八字信息已同步保存到全局配置');
+              showSuccessMessage('八字信息已更新保存');
+            }
+          } catch (syncError) {
+            console.error('八字信息同步保存失败:', syncError);
+            baziCalculationFailed = true;
           }
         }
       } else {
         // 使用已有八字数据，避免重复计算
         bazi = currentConfig.bazi;
+        // 验证已有八字数据完整性
+        if (bazi) {
+          const baziData = bazi.bazi || bazi;
+          if (!baziData || !baziData.year || !baziData.month || !baziData.day || !baziData.hour) {
+            console.warn('配置中的八字数据不完整');
+            baziCalculationFailed = true;
+            bazi = null;
+          }
+        }
         console.log('使用配置中已有的八字数据，避免重复计算');
+      }
+
+      // 如果八字计算或保存失败，触发异步重试
+      if (baziCalculationFailed && currentConfig.nickname) {
+        console.warn('⚠ 八字数据计算/保存失败，将触发异步重试');
+        setTimeout(() => {
+          recalcBaziAsync(newBirthDate, newBirthTime, longitude, currentConfig.nickname);
+        }, 500);
       }
 
       // 计算时辰（使用统一函数）
@@ -253,9 +346,13 @@ const LifeTrendPage = () => {
           district: currentConfig.birthLocation?.district || '默认',
           lng: longitude,
           lat: latitude
-        },
-        bazi: bazi
+        }
       };
+
+      // 只有八字计算成功时才保存八字数据
+      if (bazi && !baziCalculationFailed) {
+        updates.bazi = bazi;
+      }
 
       // 计算并添加农历和真太阳时信息
       try {
@@ -273,8 +370,8 @@ const LifeTrendPage = () => {
       // 更新配置到存储
       await enhancedUserConfigManager.updateConfigWithNodeUpdate(configIndex, updates);
 
-      console.log('保存日期和八字到配置成功:', updates);
-      showSuccessMessage('出生信息已保存，八字已更新');
+      console.log('保存日期到配置成功:', updates);
+      showSuccessMessage('出生信息已保存' + (baziCalculationFailed ? '（八字将在后台计算）' : '，八字已更新'));
     } catch (error) {
       console.error('保存日期到配置失败:', error);
       setError(error.message);
@@ -494,15 +591,47 @@ const LifeTrendPage = () => {
 
   // 获取当前八字（优先使用临时计算，否则使用配置八字）
   const getDisplayBazi = () => {
+    // 优先使用临时计算数据
     if (isTempCalcMode && tempBazi) {
       return tempBazi;
     }
-    // 优先使用配置中的八字数据
+
+    // 优先从全局配置中获取八字
     const config = enhancedUserConfigManager.getCurrentConfig();
-    if (config && config.bazi) {
-      return config.bazi;
+    if (config) {
+      // 检查配置中的八字数据是否完整
+      if (config.bazi) {
+        const baziData = config.bazi.bazi || config.bazi;
+        // 验证八字数据完整性
+        if (baziData && baziData.year && baziData.month && baziData.day && baziData.hour) {
+          return config.bazi;
+        } else {
+          console.warn('⚠ 配置中的八字数据不完整');
+          // 触发异步重试（不阻塞主流程）
+          if (config.nickname && config.birthDate) {
+            const birthDateStr = config.birthDate;
+            const birthTimeStr = config.birthTime || '12:00';
+            const longitude = config.birthLocation?.lng || 110;
+            setTimeout(() => {
+              recalcBaziAsync(birthDateStr, birthTimeStr, longitude, config.nickname);
+            }, 500);
+          }
+        }
+      } else {
+        console.warn('⚠ 配置中没有八字数据');
+        // 触发异步重试（不阻塞主流程）
+        if (config.nickname && config.birthDate) {
+          const birthDateStr = config.birthDate;
+          const birthTimeStr = config.birthTime || '12:00';
+          const longitude = config.birthLocation?.lng || 110;
+          setTimeout(() => {
+            recalcBaziAsync(birthDateStr, birthTimeStr, longitude, config.nickname);
+          }, 500);
+        }
+      }
     }
-    // 如果配置中没有八字数据，则返回一个空对象，避免重复计算
+
+    // 如果没有有效的八字数据，返回默认空对象
     return {
       bazi: { year: '', month: '', day: '', hour: '' },
       shichen: { ganzhi: '未知' }
