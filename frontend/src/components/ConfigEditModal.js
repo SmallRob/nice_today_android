@@ -362,10 +362,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
     try {
       // 检查配置管理器是否已初始化
-      const { enhancedUserConfigManager } = await import('../utils/EnhancedUserConfigManager');
-      if (!enhancedUserConfigManager.initialized) {
-        throw new Error('配置管理器未初始化，请稍后重试');
-      }
+      // 新的 Context API 不需要显式初始化检查
 
       // 计算简化格式的时辰（用于显示和保存）
       const shichenSimple = getShichenSimple(formData.birthTime || '12:30');

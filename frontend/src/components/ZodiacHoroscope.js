@@ -195,11 +195,6 @@ const HoroscopeTab = () => {
 
     const initialize = async () => {
       try {
-        // 确保用户配置管理器已初始化
-        if (!enhancedUserConfigManager.initialized) {
-          await enhancedUserConfigManager.initialize();
-        }
-
         // 获取用户星座
         const userZodiac = getUserZodiac();
 

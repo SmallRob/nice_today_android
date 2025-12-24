@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { useCurrentConfig } from '../contexts/UserConfigContext';
 import KlineChart from '../components/KlineChart';
 import RadarChart from '../components/RadarChart';
 import DatePickerModal from '../components/DatePickerModal';
 import { storageManager } from '../utils/storageManager';
-import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import { calculateDetailedBazi, calculateLiuNianDaYun, calculateDailyEnergy } from '../utils/baziHelper';
 import { calculateBaziWithWorker } from '../utils/workerManager';
 import { Solar } from 'lunar-javascript';
@@ -61,13 +61,14 @@ const LifeTrendPage = () => {
       console.log('开始异步重新计算八字...');
       const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
       if (bazi) {
-        await enhancedUserConfigManager.updateBaziInfo(nickname, {
+        // 使用新的 Context API 更新八字信息
+        const { updateBaziInfo } = useCurrentConfig();
+        await updateBaziInfo(nickname, {
           bazi: bazi,
           lunarBirthDate: bazi.lunar?.text,
           trueSolarTime: birthTimeStr,
           lastCalculated: new Date().toISOString()
         });
-        await enhancedUserConfigManager.syncBaziToCache(nickname);
         console.log('异步重新计算八字成功');
       }
     } catch (error) {
@@ -83,7 +84,8 @@ const LifeTrendPage = () => {
       setError(null);
 
       // 步骤1：加载用户配置
-      const config = enhancedUserConfigManager.getCurrentConfig();
+      const { getCurrentConfig } = useCurrentConfig();
+      const config = getCurrentConfig();
       if (!config || !config.birthDate) {
         throw new Error('用户配置不完整');
       }
@@ -128,46 +130,21 @@ const LifeTrendPage = () => {
           }
         }
 
-        // 2) 如果配置中没有，尝试从缓存获取
-        if (!baziLoaded) {
-          try {
-            const baziFromCache = enhancedUserConfigManager.getBaziFromCacheByBirthInfo(birthDateStr, birthTimeStr, longitude);
-            if (baziFromCache && baziFromCache.bazi) {
-              // 验证缓存数据完整性
-              const cacheBaziData = baziFromCache.bazi.bazi || baziFromCache.bazi;
-              if (cacheBaziData && cacheBaziData.year && cacheBaziData.month && cacheBaziData.day && cacheBaziData.hour) {
-                console.log('✓ 从缓存获取八字成功，同步到配置中');
-                await enhancedUserConfigManager.updateBaziInfo(nickname, {
-                  bazi: baziFromCache.bazi,
-                  lunarBirthDate: baziFromCache.lunarBirthDate,
-                  trueSolarTime: baziFromCache.trueSolarTime,
-                  lastCalculated: new Date().toISOString()
-                });
-                baziLoaded = true;
-              } else {
-                console.warn('⚠ 缓存中的八字数据不完整');
-              }
-            }
-          } catch (error) {
-            console.warn('⚠ 从缓存获取八字失败:', error);
-          }
-        }
-
-        // 3) 如果配置和缓存都没有，同步计算一次（不阻塞后续流程）
+        // 2) 如果配置和缓存都没有，同步计算一次（不阻塞后续流程）
         if (!baziLoaded && nickname) {
-          console.log('⚠ 配置和缓存中都没有八字，开始计算...');
+          console.log('⚠ 配置中没有八字，开始计算...');
           try {
             const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
             if (bazi && bazi.bazi) {
               const baziData = bazi.bazi;
               if (baziData.year && baziData.month && baziData.day && baziData.hour) {
-                await enhancedUserConfigManager.updateBaziInfo(nickname, {
+                const { updateBaziInfo } = useCurrentConfig();
+                await updateBaziInfo(nickname, {
                   bazi: bazi,
                   lunarBirthDate: bazi.lunar?.text,
                   trueSolarTime: birthTimeStr,
                   lastCalculated: new Date().toISOString()
                 });
-                await enhancedUserConfigManager.syncBaziToCache(nickname);
                 baziLoaded = true;
                 console.log('✓ 计算并保存八字数据成功');
               }
@@ -215,7 +192,8 @@ const LifeTrendPage = () => {
 
   // 计算当前年龄
   useEffect(() => {
-    const config = enhancedUserConfigManager.getCurrentConfig();
+    const { getCurrentConfig } = useCurrentConfig();
+    const config = getCurrentConfig();
     if (config && config.birthDate) {
       const birthDate = new Date(config.birthDate);
       const today = new Date();
@@ -241,7 +219,8 @@ const LifeTrendPage = () => {
       setIsTempCalcMode(false);
 
       // 检查配置中是否已有该日期的八字数据
-      const currentConfig = enhancedUserConfigManager.getCurrentConfig();
+      const { getCurrentConfig } = useCurrentConfig();
+      const currentConfig = getCurrentConfig();
       const needsRecalc = !currentConfig.bazi ||
                         currentConfig.birthDate !== newBirthDate ||
                         currentConfig.birthTime !== newBirthTime ||
@@ -288,7 +267,8 @@ const LifeTrendPage = () => {
         const nickname = currentConfig.nickname;
         if (nickname && bazi && !baziCalculationFailed) {
           try {
-            const baziSyncResult = await enhancedUserConfigManager.updateBaziInfo(nickname, {
+            const { updateBaziInfo } = useCurrentConfig();
+            await updateBaziInfo(nickname, {
               bazi: bazi.bazi,
               shichen: bazi.shichen,
               lunarBirthDate: bazi.lunarBirthDate,
@@ -297,12 +277,8 @@ const LifeTrendPage = () => {
               lastCalculated: new Date().toISOString()
             });
 
-            if (!baziSyncResult) {
-              console.warn('八字信息同步保存失败');
-            } else {
-              console.log('八字信息已同步保存到全局配置');
-              showSuccessMessage('八字信息已更新保存');
-            }
+            console.log('八字信息已同步保存到全局配置');
+            showSuccessMessage('八字信息已更新保存');
           } catch (syncError) {
             console.error('八字信息同步保存失败:', syncError);
             baziCalculationFailed = true;
@@ -368,7 +344,8 @@ const LifeTrendPage = () => {
       }
 
       // 更新配置到存储
-      await enhancedUserConfigManager.updateConfigWithNodeUpdate(configIndex, updates);
+      const { updateConfig } = useCurrentConfig();
+      await updateConfig(updates);
 
       console.log('保存日期到配置成功:', updates);
       showSuccessMessage('出生信息已保存' + (baziCalculationFailed ? '（八字将在后台计算）' : '，八字已更新'));
@@ -454,7 +431,8 @@ const LifeTrendPage = () => {
   // 计算流年大运（基于当前八字和当前年份）
   useEffect(() => {
     // 优先使用配置中的八字数据
-    const config = enhancedUserConfigManager.getCurrentConfig();
+    const { getCurrentConfig } = useCurrentConfig();
+    const config = getCurrentConfig();
     const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
 
     if (usedBazi && usedBazi.bazi) {
@@ -478,7 +456,8 @@ const LifeTrendPage = () => {
 
   // 计算今日能量提示（基于当日五行信息结合用户八字动态计算）
   useEffect(() => {
-    const config = enhancedUserConfigManager.getCurrentConfig();
+    const { getCurrentConfig } = useCurrentConfig();
+    const config = getCurrentConfig();
     const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
 
     if (usedBazi && usedBazi.bazi) {
@@ -543,13 +522,14 @@ const LifeTrendPage = () => {
     setTempLatitude(latitude);
     setIsTempCalcMode(true);
 
-    // 检查配置中是否已有该日期的八字数据
-    const currentConfig = enhancedUserConfigManager.getCurrentConfig();
-    const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-    const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
+      // 检查配置中是否已有该日期的八字数据
+      const { getCurrentConfig } = useCurrentConfig();
+      const currentConfig = getCurrentConfig();
+      const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+      const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
 
-    // 只有当日期/时间/经纬度变化时才重新计算八字
-    const needsRecalc = !currentConfig.bazi ||
+      // 只有当日期/时间/经纬度变化时才重新计算八字
+      const needsRecalc = !currentConfig.bazi ||
                         currentConfig.birthDate !== birthDateStr ||
                         currentConfig.birthTime !== birthTimeStr ||
                         currentConfig.birthLocation?.lng !== longitude ||
@@ -597,7 +577,8 @@ const LifeTrendPage = () => {
     }
 
     // 优先从全局配置中获取八字
-    const config = enhancedUserConfigManager.getCurrentConfig();
+    const { getCurrentConfig } = useCurrentConfig();
+    const config = getCurrentConfig();
     if (config) {
       // 检查配置中的八字数据是否完整
       if (config.bazi) {
@@ -643,7 +624,8 @@ const LifeTrendPage = () => {
   // 统一获取时辰显示文字
   const getShichenDisplay = () => {
     // 首先从配置中获取时辰信息（优先级最高）
-    const config = enhancedUserConfigManager.getCurrentConfig();
+    const { getCurrentConfig } = useCurrentConfig();
+    const config = getCurrentConfig();
     if (config?.shichen && typeof config.shichen === 'string' && config.shichen.endsWith('时')) {
       return config.shichen;
     }

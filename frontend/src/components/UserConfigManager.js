@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
-import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
+import { useCurrentConfig } from '../contexts/UserConfigContext';
 import { baziCacheManager } from '../utils/BaziCacheManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
