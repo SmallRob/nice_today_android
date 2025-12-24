@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import LunarCalendar from '../utils/lunarCalendar';
-import BaziCalculator from '../utils/baziCalculator';
+import { calculateDetailedBazi } from '../utils/baziHelper';
+import { Solar } from 'lunar-javascript';
 
 // 缓存计算结果
 const previewCache = new Map();
@@ -9,11 +10,18 @@ const getCacheKey = (year, month, date, hour, longitude) => {
   return `${year}-${month}-${date}-${hour}-${longitude}`;
 };
 
+// 根据小时数找到对应的时辰起始值
+const getShichenValue = (hour) => {
+  if (hour >= 23 || hour < 1) return 23; // 子时
+  return Math.floor((hour + 1) / 2) * 2 - 1; // 将实际小时映射到时辰起始值
+};
+
 const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selectedDate, selectedHour, latitude, longitude, onConfirm, onTempCalc, theme }) => {
   const [tempYear, setTempYear] = useState(selectedYear);
   const [tempMonth, setTempMonth] = useState(selectedMonth);
   const [tempDate, setTempDate] = useState(selectedDate);
-  const [tempHour, setTempHour] = useState(selectedHour);
+  // 初始化时辰值：将实际小时映射到时辰起始值
+  const [tempHour, setTempHour] = useState(() => getShichenValue(selectedHour));
   const [tempLatitude, setTempLatitude] = useState(latitude || 30);
   const [tempLongitude, setTempLongitude] = useState(longitude || 110);
   const [lunarData, setLunarData] = useState(null);
@@ -35,7 +43,7 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
         // 检查缓存
         const cacheKey = getCacheKey(tempYear, tempMonth, tempDate, tempHour, tempLongitude);
         const cachedData = previewCache.get(cacheKey);
-        
+
         if (cachedData) {
           // 使用缓存数据
           setLunarData(cachedData.lunar);
@@ -45,15 +53,29 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
 
         // 计算新数据
         const lunar = LunarCalendar.solarToLunar(tempYear, tempMonth, tempDate);
-        const bazi = BaziCalculator.calculateBazi(tempYear, tempMonth, tempDate, tempHour, 0, tempLongitude);
-        
+
+        // 使用新的 calculateDetailedBazi API
+        const birthDateStr = `${tempYear}-${String(tempMonth).padStart(2, '0')}-${String(tempDate).padStart(2, '0')}`;
+        const birthTimeStr = `${String(tempHour).padStart(2, '0')}:00`;
+
+        const baziResult = calculateDetailedBazi(birthDateStr, birthTimeStr, tempLongitude);
+
+        // 转换为预览显示格式
+        const bazi = {
+          year: baziResult.bazi?.year || '未知',
+          month: baziResult.bazi?.month || '未知',
+          day: baziResult.bazi?.day || '未知',
+          hour: baziResult.bazi?.hour || '未知',
+          shichen: baziResult.shichen?.ganzhi || baziResult.shichen?.name || '未知'
+        };
+
         // 更新状态
         setLunarData(lunar);
         setPreviewBazi(bazi);
-        
+
         // 缓存计算结果
         previewCache.set(cacheKey, { lunar, bazi });
-        
+
         // 限制缓存大小
         if (previewCache.size > 50) {
           const firstKey = previewCache.keys().next().value;
@@ -61,6 +83,8 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
         }
       } catch (error) {
         console.warn('预览计算失败:', error);
+        // 设置空对象避免显示错误
+        setPreviewBazi(null);
       }
     }, 300); // 300ms 防抖
 
@@ -71,8 +95,9 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
     };
   }, [tempYear, tempMonth, tempDate, tempHour, tempLongitude]);
 
+  // 时辰选项 - value 映射到实际起始小时
   const shichenOptions = [
-    { name: '子时', value: 0, range: '23:00-01:00' },
+    { name: '子时', value: 23, range: '23:00-01:00' },
     { name: '丑时', value: 1, range: '01:00-03:00' },
     { name: '寅时', value: 3, range: '03:00-05:00' },
     { name: '卯时', value: 5, range: '05:00-07:00' },

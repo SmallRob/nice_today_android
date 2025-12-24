@@ -9,6 +9,7 @@ import { dataIntegrityManager } from './DataIntegrityManager.js';
 import { baziUpdateManager } from './BaziUpdateManager.js';
 import { generateLunarAndTrueSolarFields, validateAndFixLunarDate, batchValidateLunarDates } from './LunarCalendarHelper.js';
 import { calculateDetailedBazi } from './baziHelper.js';
+import { baziCacheManager } from './BaziCacheManager.js';
 
 // 默认配置模板
 const DEFAULT_CONFIG = {
@@ -72,6 +73,9 @@ class EnhancedUserConfigManager {
       
       // 初始化数据持久化管理器
       await dataPersistenceManager.initialize();
+      
+      // 初始化八字缓存管理器
+      await baziCacheManager.initialize();
       
       // 从多级存储加载配置
       const loadResult = await this.loadConfigsFromStorage();
@@ -856,8 +860,94 @@ class EnhancedUserConfigManager {
       listenerCount: this.listeners.length,
       metadata: { ...this.metadata },
       storageStatus: dataPersistenceManager.getStatus(),
-      lastValidation: dataIntegrityManager.batchValidate(this.configs)
+      lastValidation: dataIntegrityManager.batchValidate(this.configs),
+      baziCacheStats: baziCacheManager.getCacheStats()
     };
+  }
+
+  /**
+   * 从八字缓存获取八字信息
+   * @param {string} nickname 用户昵称
+   * @returns {Object|null} 八字信息
+   */
+  getBaziFromCache(nickname) {
+    return baziCacheManager.getBaziByNickname(nickname);
+  }
+
+  /**
+   * 从八字缓存获取八字信息（通过出生信息）
+   * @param {string} birthDate 出生日期
+   * @param {string} birthTime 出生时间
+   * @param {number} longitude 经度
+   * @returns {Object|null} 八字信息
+   */
+  getBaziFromCacheByBirthInfo(birthDate, birthTime, longitude) {
+    return baziCacheManager.getBaziByBirthInfo(birthDate, birthTime, longitude);
+  }
+
+  /**
+   * 同步用户配置的八字到缓存
+   * @param {string} nickname 用户昵称
+   * @returns {Promise<boolean>} 是否同步成功
+   */
+  async syncBaziToCache(nickname) {
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+    
+    const configIndex = this.configs.findIndex(c => c.nickname === nickname);
+    if (configIndex === -1) {
+      throw new Error(`未找到昵称为 '${nickname}' 的用户配置`);
+    }
+    
+    const config = this.configs[configIndex];
+    
+    // 同步八字到缓存
+    const success = baziCacheManager.syncConfigBaziToCache(config);
+    
+    if (success) {
+      console.log('八字信息已同步到缓存:', nickname);
+    }
+    
+    return success;
+  }
+
+  /**
+   * 批量同步所有配置的八字到缓存
+   * @returns {Promise<Object>} 同步统计
+   */
+  async syncAllBaziToCache() {
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+    
+    return baziCacheManager.batchSyncConfigs(this.configs);
+  }
+
+  /**
+   * 清除指定用户的八字缓存
+   * @param {string} nickname 用户昵称
+   */
+  clearBaziCache(nickname) {
+    baziCacheManager.clearCache(nickname);
+    console.log('已清除用户八字缓存:', nickname);
+  }
+
+  /**
+   * 清除所有八字缓存
+   */
+  clearAllBaziCache() {
+    baziCacheManager.clearAllCache();
+    console.log('已清除所有八字缓存');
+  }
+
+  /**
+   * 从缓存获取默认配置的八字
+   * @param {Object} defaultConfig 默认配置对象
+   * @returns {Object|null} 八字信息
+   */
+  getDefaultBaziFromCache(defaultConfig) {
+    return baziCacheManager.getDefaultConfigBazi(defaultConfig);
   }
 
   /**

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
+import { baziCacheManager } from '../utils/BaziCacheManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
@@ -998,32 +999,20 @@ const UserConfigManagerComponent = () => {
       finalConfigData.nameScore.totalScore = totalScore;
     }
 
-    // 计算八字信息
-    if (configData.birthDate && configData.birthTime) {
-      try {
-        const longitude = configData.birthLocation?.lng || 116.40;
-        const baziInfo = calculateDetailedBazi(configData.birthDate, configData.birthTime, longitude);
-        if (baziInfo) {
-          finalConfigData.bazi = baziInfo;
-        }
-      } catch (error) {
-        console.error('八字计算失败:', error);
-        // 即使八字计算失败也不影响保存其他信息
-      }
+    // 优化：保存时不同步计算八字，只保存基础信息
+    // 八字计算将在后台异步完成，或通过手动同步按钮触发
+    if (finalConfigData.bazi) {
+      console.log('配置中已有八字信息，保留');
     }
 
     try {
       if (isNewConfig) {
-        // 新建配置，使用增强版配置管理器的新方法，只保存基础信息，八字信息后续可异步更新
+        // 新建配置，使用基础配置保存方式（不计算八字）
         await enhancedUserConfigManager.addBasicConfig(finalConfigData);
 
-        // 获取更新后的配置列表
-        const updatedConfigs = enhancedUserConfigManager.getAllConfigs();
-        const newActiveIndex = enhancedUserConfigManager.getActiveConfigIndex();
-
-        console.log('新建基础配置成功，索引:', newActiveIndex, '活跃索引:', newActiveIndex, '配置数量:', updatedConfigs.length);
+        console.log('新建基础配置成功（八字将异步计算）');
       } else {
-        // 现有配置，更新存储
+        // 现有配置，更新存储（不计算八字）
         await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, finalConfigData);
       }
 
@@ -1045,7 +1034,7 @@ const UserConfigManagerComponent = () => {
   }, [showMessage]);
 
   // 处理删除配置
-  const handleDeleteConfig = useCallback((index) => {
+  const handleDeleteConfig = useCallback(async (index) => {
     if (configs.length <= 1) {
       showMessage('至少需要保留一个配置', 'error');
       return;
@@ -1141,7 +1130,7 @@ const UserConfigManagerComponent = () => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           try {
             const jsonData = e.target.result;
             const success = await enhancedUserConfigManager.importConfigs(jsonData);
@@ -1356,21 +1345,57 @@ const UserConfigManagerComponent = () => {
             <button
               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
               onClick={async () => {
-                // 从当前配置的出生信息重新计算八字并同步到全局配置
+                // 从当前配置的出生信息重新计算八字并同步到缓存和配置
                 if (configs[activeConfigIndex]?.nickname) {
                   try {
-                    // 使用增强版配置管理器的八字信息同步功能
-                    const success = await enhancedUserConfigManager.calculateAndSyncBaziInfo(configs[activeConfigIndex].nickname, {
-                      // 使用配置中的出生信息
-                    });
-                    
-                    if (success) {
-                      // 刷新显示
-                      setBaziKey(prev => prev + 1);
-                      showMessage('八字信息已同步到全局配置', 'success');
-                    } else {
-                      showMessage('八字信息同步失败', 'error');
+                    const config = configs[activeConfigIndex];
+                    const nickname = config.nickname;
+                    const birthDate = config.birthDate;
+                    const birthTime = config.birthTime || '12:30';
+                    const longitude = config.birthLocation?.lng || 116.40;
+
+                    if (!birthDate) {
+                      showMessage('请先设置出生日期', 'error');
+                      return;
                     }
+
+                    console.log('开始同步八字信息:', { nickname, birthDate, birthTime, longitude });
+
+                    // 1. 计算八字信息
+                    const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
+                    if (!baziInfo) {
+                      showMessage('八字计算失败', 'error');
+                      return;
+                    }
+
+                    // 2. 同步八字到全局配置
+                    const updateSuccess = await enhancedUserConfigManager.updateBaziInfo(nickname, {
+                      bazi: baziInfo,
+                      lunarBirthDate: baziInfo.lunar?.text,
+                      trueSolarTime: birthTime,
+                      lastCalculated: new Date().toISOString()
+                    });
+
+                    if (!updateSuccess) {
+                      showMessage('八字信息更新到配置失败', 'error');
+                      return;
+                    }
+
+                    // 3. 同步八字到缓存
+                    const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
+                      birthDate,
+                      birthTime,
+                      longitude
+                    }, baziInfo);
+
+                    if (!cacheSuccess) {
+                      console.warn('八字信息同步到缓存失败，但已保存到配置');
+                    }
+
+                    // 4. 刷新显示
+                    setBaziKey(prev => prev + 1);
+                    showMessage('✅ 八字信息已成功同步', 'success');
+
                   } catch (error) {
                     console.error('同步八字信息失败:', error);
                     showMessage('同步八字信息失败: ' + error.message, 'error');
