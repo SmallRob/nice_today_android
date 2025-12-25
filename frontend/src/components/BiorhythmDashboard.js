@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BiorhythmIcon, IconLibrary } from './IconLibrary';
 import PageLayout from './PageLayout';
 import DarkModeToggle from './DarkModeToggle';
@@ -6,22 +6,12 @@ import { useTabPerformance } from '../utils/tabPerformanceMonitor';
 import '../styles/animations.css';
 import niceDayImage from '../images/nice_day.png';
 
-// 懒加载组件 - 提升初始加载性能
-const BiorhythmTab = lazy(() => import('./BiorhythmTab'));
-const ZodiacEnergyTab = lazy(() => import('./ZodiacEnergyTab'));
-const HoroscopeTab = lazy(() => import('./ZodiacHoroscope'));
-const MBTIPersonalityTab = lazy(() => import('./MBTIPersonalityTabHome'));
-const MayaCalendarTab = lazy(() => import('./MayaCalendarTab'));
-
-// 加载占位符组件
-const TabLoadingPlaceholder = () => (
-  <div className="flex justify-center items-center py-8">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-      <p className="text-gray-600 dark:text-gray-400 text-sm">正在加载内容...</p>
-    </div>
-  </div>
-);
+// 直接导入组件，不使用懒加载
+import BiorhythmTab from './BiorhythmTab';
+import ZodiacEnergyTab from './ZodiacEnergyTab';
+import HoroscopeTab from './ZodiacHoroscope';
+import MBTIPersonalityTab from './MBTIPersonalityTabHome';
+import MayaCalendarTab from './MayaCalendarTab';
 
 // 错误边界组件
 const ErrorBoundaryFallback = ({ error, resetError }) => (
@@ -410,7 +400,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             {fallbackMode ? (
               <FallbackComponent />
             ) : (
-              <Suspense fallback={<TabLoadingPlaceholder />}>
+              <>
                 {activeTab === 'biorhythm' && loadedTabs.has('biorhythm') && (
                   <BiorhythmTab
                     serviceStatus={serviceStatus.biorhythm}
@@ -438,7 +428,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                     onError={(error) => handleError(error, 'MBTIPersonalityTab')}
                   />
                 )}
-              </Suspense>
+              </>
             )}
           </div>
         </div>

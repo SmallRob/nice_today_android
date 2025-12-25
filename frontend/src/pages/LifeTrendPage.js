@@ -26,10 +26,11 @@ const LifeTrendPage = () => {
   const [chartType, setChartType] = useState('kline');
   const [timeDimension, setTimeDimension] = useState('year');
 
-  // 日期和时间状态
-  const [selectedYear, setSelectedYear] = useState(2025);
-  const [selectedMonth, setSelectedMonth] = useState(12);
-  const [selectedDate, setSelectedDate] = useState(23);
+  // 日期和时间状态（使用当前日期作为默认值）
+  const today = new Date();
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1);
+  const [selectedDate, setSelectedDate] = useState(today.getDate());
   const [selectedHour, setSelectedHour] = useState(12);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
@@ -514,20 +515,27 @@ const LifeTrendPage = () => {
     }
 
     try {
+      // 验证 baziData.bazi 结构完整性
+      if (!baziData.bazi.day || !baziData.bazi.year || !baziData.bazi.month || !baziData.bazi.hour) {
+        console.warn('八字数据结构不完整，返回默认流年数据');
+        throw new Error('Invalid bazi data structure');
+      }
+
       // 检查缓存避免重复计算
       const cacheKey = `liunian_${year}_${baziData.bazi.year}${baziData.bazi.month}${baziData.bazi.day}${baziData.bazi.hour}`;
       const cachedData = storageManager.getGlobalCache(cacheKey);
 
-      if (cachedData) {
+      if (cachedData && typeof cachedData === 'object' && cachedData.overall && cachedData.year === year) {
         console.log(`使用缓存的流年大运数据 (${year}年)`);
         return cachedData;
       }
 
       // 计算新的流年数据
       const liuNian = calculateLiuNianDaYun(baziData, year);
-      if (liuNian) {
+      if (liuNian && typeof liuNian === 'object' && liuNian.overall) {
         storageManager.setGlobalCache(cacheKey, liuNian);
         console.log(`计算并缓存流年大运数据 (${year}年)`);
+        return liuNian;
       } else {
         // 计算失败，返回默认数据
         console.warn(`计算${year}年流年运势失败，返回默认数据`);
@@ -560,7 +568,6 @@ const LifeTrendPage = () => {
           ]
         };
       }
-      return liuNian;
     } catch (error) {
       console.error(`计算${year}年流年运势失败:`, error);
       // 返回默认数据而不是 null
@@ -621,7 +628,7 @@ const LifeTrendPage = () => {
       console.warn('获取八字数据失败，使用默认今日能量数据:', error.message);
     }
 
-    if (baziData && baziData.bazi) {
+    if (baziData && baziData.bazi && baziData.bazi.day) {
       const today = new Date();
 
       try {
@@ -630,14 +637,19 @@ const LifeTrendPage = () => {
         const cacheKey = `dailyEnergy_${dateStr}_${baziData.bazi.year}${baziData.bazi.month}${baziData.bazi.day}${baziData.bazi.hour}`;
         const cachedData = storageManager.getGlobalCache(cacheKey);
 
-        if (cachedData) {
+        if (cachedData && typeof cachedData === 'object' && cachedData.overallScore !== undefined) {
           setDailyEnergyData(cachedData);
           console.log('使用缓存的今日能量提示数据');
         } else {
           const energyData = calculateDailyEnergy(baziData, today);
-          setDailyEnergyData(energyData);
-          storageManager.setGlobalCache(cacheKey, energyData);
-          console.log('计算并缓存今日能量提示数据');
+          if (energyData && typeof energyData === 'object' && energyData.overallScore !== undefined) {
+            setDailyEnergyData(energyData);
+            storageManager.setGlobalCache(cacheKey, energyData);
+            console.log('计算并缓存今日能量提示数据');
+          } else {
+            console.warn('计算今日能量提示返回无效数据，使用默认值');
+            throw new Error('Invalid energy data');
+          }
         }
       } catch (error) {
         console.warn('计算今日能量提示失败，使用默认数据:', error.message);
@@ -668,8 +680,7 @@ const LifeTrendPage = () => {
         ],
         attentions: [
           { icon: '⚠️', label: '注意休息' },
-          { icon: '💧', label: '多喝温水' },
-          { icon: '📝', label: '建议完善个人信息' }
+          { icon: '💧', label: '多喝温水' }
         ]
       });
     }
@@ -1088,35 +1099,49 @@ const LifeTrendPage = () => {
           </span>
         </div>
 
-        {dailyEnergyData && (
+        {dailyEnergyData && typeof dailyEnergyData === 'object' && (
           <>
             <div className={`mb-4 p-3 rounded-xl text-sm leading-relaxed ${
               theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-700'
             }`}>
-              {dailyEnergyData.description}
+              {dailyEnergyData.description || '今日能量平稳'}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>建议</div>
                 <div className="space-y-2">
-                  {dailyEnergyData.suggestions && dailyEnergyData.suggestions.map((suggestion, index) => (
-                    <div key={`suggestion-${index}`} className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}`}>
-                      <span>{suggestion.icon}</span>
-                      <span className={`text-xs ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>{suggestion.label}</span>
-                    </div>
-                  ))}
+                  {Array.isArray(dailyEnergyData.suggestions) && dailyEnergyData.suggestions.map((suggestion, index) => {
+                    const icon = typeof suggestion.icon === 'string' ? suggestion.icon : '✅';
+                    const label = typeof suggestion.label === 'string' ? suggestion.label : '建议';
+                    return (
+                      <div key={`suggestion-${index}`} className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}`}>
+                        <span>{icon}</span>
+                        <span className={`text-xs ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>{label}</span>
+                      </div>
+                    );
+                  })}
+                  {(!dailyEnergyData.suggestions || dailyEnergyData.suggestions.length === 0) && (
+                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>暂无建议</div>
+                  )}
                 </div>
               </div>
               <div>
                 <div className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>注意</div>
                 <div className="space-y-2">
-                  {dailyEnergyData.attentions && dailyEnergyData.attentions.map((attention, index) => (
-                    <div key={`attention-${index}`} className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50'}`}>
-                      <span>{attention.icon}</span>
-                      <span className={`text-xs ${theme === 'dark' ? 'text-red-300' : 'text-red-700'}`}>{attention.label}</span>
-                    </div>
-                  ))}
+                  {Array.isArray(dailyEnergyData.attentions) && dailyEnergyData.attentions.map((attention, index) => {
+                    const icon = typeof attention.icon === 'string' ? attention.icon : '⚠️';
+                    const label = typeof attention.label === 'string' ? attention.label : '注意';
+                    return (
+                      <div key={`attention-${index}`} className={`flex items-center gap-2 p-2 rounded-lg ${theme === 'dark' ? 'bg-red-900/20' : 'bg-red-50'}`}>
+                        <span>{icon}</span>
+                        <span className={`text-xs ${theme === 'dark' ? 'text-red-300' : 'text-red-700'}`}>{label}</span>
+                      </div>
+                    );
+                  })}
+                  {(!dailyEnergyData.attentions || dailyEnergyData.attentions.length === 0) && (
+                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>暂无注意事项</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1125,26 +1150,28 @@ const LifeTrendPage = () => {
       </div>
 
       {/* 能量趋势解读 */}
-      <div className={`mx-4 mt-4 p-4 rounded-2xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
-        <h3 className={`text-base font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          📊 能量趋势解读
-        </h3>
-        <p className={`text-sm leading-relaxed mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-          当前处于<b className={theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}>能量{dailyEnergyData?.overallScore >= 50 ? '上升' : '调整'}期</b>，整体趋势{dailyEnergyData?.overallScore >= 50 ? '向好' : '平稳'}。
-          根据能量轨迹分析，您正处于人生的<b className={theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}>发展阶段</b>，
-          适合尝试新事物，但需注意保持节奏。
-        </p>
-        <div className={`flex justify-between items-center p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-          <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>当前趋势</span>
-          <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
-            dailyEnergyData?.overallScore >= 50
+      {dailyEnergyData && typeof dailyEnergyData === 'object' && (
+        <div className={`mx-4 mt-4 p-4 rounded-2xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
+          <h3 className={`text-base font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            📊 能量趋势解读
+          </h3>
+          <p className={`text-sm leading-relaxed mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            当前处于<b className={theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}>能量{(typeof dailyEnergyData.overallScore === 'number' && dailyEnergyData.overallScore >= 50) ? '上升' : '调整'}期</b>，整体趋势{(typeof dailyEnergyData.overallScore === 'number' && dailyEnergyData.overallScore >= 50) ? '向好' : '平稳'}。
+            根据能量轨迹分析，您正处于人生的<b className={theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}>发展阶段</b>，
+            适合尝试新事物，但需注意保持节奏。
+          </p>
+          <div className={`flex justify-between items-center p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
+            <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>当前趋势</span>
+            <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
+              (typeof dailyEnergyData.overallScore === 'number' && dailyEnergyData.overallScore >= 50)
               ? `${theme === 'dark' ? 'text-green-400 bg-green-900/30' : 'text-green-700 bg-green-100'}`
               : `${theme === 'dark' ? 'text-orange-400 bg-orange-900/30' : 'text-orange-700 bg-orange-100'}`
-          }`}>
-            📈 {dailyEnergyData?.overallScore >= 50 ? '上涨中' : '平稳中'}
-          </span>
+            }`}>
+              📈 {(typeof dailyEnergyData.overallScore === 'number' && dailyEnergyData.overallScore >= 50) ? '上涨中' : '平稳中'}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 流年大运 */}
       {liuNianLoading ? (
@@ -1156,25 +1183,25 @@ const LifeTrendPage = () => {
             </p>
           </div>
         </div>
-      ) : liuNianData ? (
+      ) : liuNianData && typeof liuNianData === 'object' ? (
         <div className={`mx-4 mt-6 p-4 rounded-2xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
               <span className="text-2xl">🌟</span>
               <h3 className={`text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {liuNianData.year}年流年大运
+                {liuNianData.year || radarViewYear}年流年大运
               </h3>
             </div>
             <div className="flex items-center gap-2">
               <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                liuNianData.overall.level === 'high' ? 'bg-green-100 text-green-700' :
-                liuNianData.overall.level === 'low' ? 'bg-orange-100 text-orange-700' :
+                (liuNianData.overall?.level === 'high') ? 'bg-green-100 text-green-700' :
+                (liuNianData.overall?.level === 'low') ? 'bg-orange-100 text-orange-700' :
                 'bg-blue-100 text-blue-700'
               }`}>
-                {liuNianData.liuNianGanZhi} · {liuNianData.overall.yearShengXiao}
+                {liuNianData.liuNianGanZhi || '未知'} · {liuNianData.overall?.yearShengXiao || '未知'}
               </div>
               {/* 年份查看指示器 */}
-              {selectedView === 'radar' && liuNianData.year !== currentYear && (
+              {selectedView === 'radar' && (liuNianData.year || radarViewYear) !== currentYear && (
                 <div className={`px-2 py-1 rounded-full text-xs ${theme === 'dark' ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
                   雷达图查看: {radarViewYear}年
                 </div>
@@ -1183,28 +1210,30 @@ const LifeTrendPage = () => {
           </div>
 
           {/* 流年整体运势 */}
-          <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>整体运势</span>
-              <div className="flex items-center gap-2">
-                <div className={`w-24 h-2 rounded-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-200'}`}>
-                  <div
-                    className={`h-2 rounded-full ${
-                      liuNianData.overall.score >= 80 ? 'bg-green-500' :
-                      liuNianData.overall.score >= 60 ? 'bg-blue-500' : 'bg-orange-500'
-                    }`}
-                    style={{ width: `${liuNianData.overall.score}%` }}
-                  ></div>
+          {liuNianData.overall && typeof liuNianData.overall === 'object' && (
+            <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>整体运势</span>
+                <div className="flex items-center gap-2">
+                  <div className={`w-24 h-2 rounded-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                    <div
+                      className={`h-2 rounded-full ${
+                        (typeof liuNianData.overall.score === 'number' && liuNianData.overall.score >= 80) ? 'bg-green-500' :
+                        (typeof liuNianData.overall.score === 'number' && liuNianData.overall.score >= 60) ? 'bg-blue-500' : 'bg-orange-500'
+                      }`}
+                      style={{ width: `${typeof liuNianData.overall.score === 'number' ? liuNianData.overall.score : 60}%` }}
+                    ></div>
+                  </div>
+                  <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    {typeof liuNianData.overall.score === 'number' ? liuNianData.overall.score : 60}分
+                  </span>
                 </div>
-                <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  {liuNianData.overall.score}分
-                </span>
               </div>
+              <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                {liuNianData.overall.description || '暂无描述'}
+              </p>
             </div>
-            <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              {liuNianData.overall.description}
-            </p>
-          </div>
+          )}
 
           {/* 流年五行分析 */}
           <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
@@ -1217,7 +1246,7 @@ const LifeTrendPage = () => {
                 <div className="flex-1">
                   <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>日主</div>
                   <div className={`text-sm font-medium ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                    {liuNianData.dayMaster}（{liuNianData.dayMasterElement}）
+                    {liuNianData.dayMaster || '未知'}（{liuNianData.dayMasterElement || '未知'}）
                   </div>
                 </div>
               </div>
@@ -1226,7 +1255,7 @@ const LifeTrendPage = () => {
                 <div className="flex-1">
                   <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>流年天干</div>
                   <div className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                    {liuNianData.liuNianGan}（{liuNianData.liuNianGanElement}）- {liuNianData.ganRelation}
+                    {liuNianData.liuNianGan || '未知'}（{liuNianData.liuNianGanElement || '未知'}）- {liuNianData.ganRelation || '未知'}
                   </div>
                 </div>
               </div>
@@ -1235,7 +1264,7 @@ const LifeTrendPage = () => {
                 <div className="flex-1">
                   <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>流年地支</div>
                   <div className={`text-sm font-medium ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
-                    {liuNianData.liuNianBranch}（{liuNianData.liuNianBranchElement}）- {liuNianData.branchRelation}
+                    {liuNianData.liuNianBranch || '未知'}（{liuNianData.liuNianBranchElement || '未知'}）- {liuNianData.branchRelation || '未知'}
                   </div>
                 </div>
               </div>
@@ -1244,7 +1273,7 @@ const LifeTrendPage = () => {
                 <div className="flex-1">
                   <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>流年干支</div>
                   <div className={`text-sm font-medium ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
-                    {liuNianData.liuNianGanZhi}
+                    {liuNianData.liuNianGanZhi || '未知'}
                   </div>
                 </div>
               </div>
@@ -1261,7 +1290,17 @@ const LifeTrendPage = () => {
               { key: 'wealth', icon: '💰', label: '财运' },
               { key: 'social', icon: '👥', label: '人际' },
             ].map((item) => {
-              const data = liuNianData[item.key];
+              const data = liuNianData[item.key] || {
+                score: 60,
+                level: 'medium',
+                description: '数据不可用',
+                advice: '建议完善出生信息'
+              };
+              const score = typeof data.score === 'number' ? data.score : 60;
+              const level = typeof data.level === 'string' ? data.level : 'medium';
+              const description = typeof data.description === 'string' ? data.description : '数据不可用';
+              const advice = typeof data.advice === 'string' ? data.advice : '建议完善出生信息';
+
               return (
                 <div key={item.key} className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
                   <div className="flex items-center justify-between mb-2">
@@ -1272,27 +1311,27 @@ const LifeTrendPage = () => {
                       </span>
                     </div>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      data.level === 'high' ? 'bg-green-100 text-green-700' :
-                      data.level === 'low' ? 'bg-orange-100 text-orange-700' :
+                      level === 'high' ? 'bg-green-100 text-green-700' :
+                      level === 'low' ? 'bg-orange-100 text-orange-700' :
                       'bg-blue-100 text-blue-700'
                     }`}>
-                      {data.score}分
+                      {score}分
                     </span>
                   </div>
                   <div className="w-full h-1.5 rounded-full mb-2" style={{ backgroundColor: theme === 'dark' ? '#374151' : '#e5e7eb' }}>
                     <div
                       className="h-1.5 rounded-full transition-all"
                       style={{
-                        width: `${data.score}%`,
-                        backgroundColor: data.score >= 80 ? '#10b981' : data.score >= 60 ? '#3b82f6' : '#f97316'
+                        width: `${score}%`,
+                        backgroundColor: score >= 80 ? '#10b981' : score >= 60 ? '#3b82f6' : '#f97316'
                       }}
                     ></div>
                   </div>
                   <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {data.description}
+                    {description}
                   </p>
                   <div className={`mt-2 text-xs ${theme === 'dark' ? 'text-blue-300' : 'text-blue-600'}`}>
-                    💡 {data.advice}
+                    💡 {advice}
                   </div>
                 </div>
               );
@@ -1300,31 +1339,36 @@ const LifeTrendPage = () => {
           </div>
 
           {/* 注意事项提醒 */}
-          {liuNianData.reminders && liuNianData.reminders.length > 0 && (
+          {liuNianData.reminders && Array.isArray(liuNianData.reminders) && liuNianData.reminders.length > 0 && (
             <div>
               <div className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 📢 注意事项
               </div>
               <div className="space-y-2">
-                {liuNianData.reminders.map((reminder, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-start gap-3 p-3 rounded-lg ${
-                      reminder.type === 'success' ? `${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}` :
-                      reminder.type === 'warning' ? `${theme === 'dark' ? 'bg-orange-900/20' : 'bg-orange-50'}` :
-                      `${theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'}`
-                    }`}
-                  >
-                    <span className="text-lg">{reminder.icon}</span>
-                    <span className={`text-xs leading-relaxed flex-1 ${
-                      reminder.type === 'success' ? `${theme === 'dark' ? 'text-green-300' : 'text-green-700'}` :
-                      reminder.type === 'warning' ? `${theme === 'dark' ? 'text-orange-300' : 'text-orange-700'}` :
-                      `${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`
-                    }`}>
-                      {reminder.text}
-                    </span>
-                  </div>
-                ))}
+                {liuNianData.reminders.map((reminder, index) => {
+                  const reminderType = typeof reminder.type === 'string' ? reminder.type : 'info';
+                  const reminderIcon = typeof reminder.icon === 'string' ? reminder.icon : 'ℹ️';
+                  const reminderText = typeof reminder.text === 'string' ? reminder.text : '提示信息';
+                  return (
+                    <div
+                      key={index}
+                      className={`flex items-start gap-3 p-3 rounded-lg ${
+                        reminderType === 'success' ? `${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}` :
+                        reminderType === 'warning' ? `${theme === 'dark' ? 'bg-orange-900/20' : 'bg-orange-50'}` :
+                        `${theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'}`
+                      }`}
+                    >
+                      <span className="text-lg">{reminderIcon}</span>
+                      <span className={`text-xs leading-relaxed flex-1 ${
+                        reminderType === 'success' ? `${theme === 'dark' ? 'text-green-300' : 'text-green-700'}` :
+                        reminderType === 'warning' ? `${theme === 'dark' ? 'text-orange-300' : 'text-orange-700'}` :
+                        `${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`
+                      }`}>
+                        {reminderText}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

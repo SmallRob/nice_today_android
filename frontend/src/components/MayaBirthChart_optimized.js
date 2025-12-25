@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 
 import './MayaBirthChart.css';
 import { formatDateString } from '../services/apiServiceRefactored';
@@ -16,16 +16,8 @@ import {
   WEEKDAYS
 } from '../config/mayaConfig';
 
-// 优化的懒加载策略，预加载结果组件
-let ResultsSectionPromise;
-const getResultsSection = () => {
-  if (!ResultsSectionPromise) {
-    ResultsSectionPromise = import('./MayaBirthChartResults_optimized');
-  }
-  return ResultsSectionPromise;
-};
-
-const ResultsSection = lazy(() => getResultsSection());
+// 直接导入结果组件，不使用懒加载
+import ResultsSection from './MayaBirthChartResults_optimized';
 
 // 优化的加载组件 - 紧凑设计
 const LoadingSpinner = memo(() => (
@@ -177,6 +169,46 @@ const MayaBirthChart = () => {
 
   const cacheRef = useRef(new Map());
 
+  // 简化版数据生成函数 - 确保所有值都有默认值，避免undefined
+  // 必须在 loadBirthInfo 之前定义，避免初始化顺序错误
+  const generateBirthInfo = useCallback((dateStr, kin, seal, tone, seed) => {
+    // 确保所有值都有默认值，避免undefined
+    const safeTone = tone || '磁性';
+    const safeSeal = seal || '红龙';
+    const sealInfo = sealInfoMap[safeSeal] || DEFAULT_SEAL_INFO;
+    const toneInfo = toneInfoMap[safeTone] || DEFAULT_TONE_INFO;
+
+    return {
+      date: dateStr || '未知日期',
+      weekday: WEEKDAYS[new Date(dateStr).getDay()] || '未知',
+      maya_kin: `KIN ${kin || 1}`,
+      maya_tone: `${safeTone}之音`,
+      maya_seal: safeSeal,
+      maya_seal_desc: `${safeTone}的${safeSeal}`,
+      maya_seal_info: sealInfo,
+      maya_tone_info: {
+        ...(toneInfo || {}),
+        数字: (toneInfo && toneInfo.数字) ? toneInfo.数字 : (kin ? ((kin - 1) % 13) + 1 : 1)
+      },
+      life_purpose: {
+        summary: `${safeTone}的${safeSeal}代表独特的生命能量`,
+        details: MayaCalendarCalculator.getRandomElement(lifePurposeDetailsOptions, seed) ||
+          "你的生命使命与创造和表达有关。",
+        action_guide: MayaCalendarCalculator.getRandomElement(lifePurposeActionGuideOptions, seed + 1) ||
+          "通过日常行动实现潜能。"
+      },
+      personal_traits: {
+        strengths: personalTraitsStrengthsPool?.slice(0, 3) || [],
+        challenges: personalTraitsChallengesPool?.slice(0, 2) || []
+      },
+      birth_energy_field: {
+        primary: { type: "个人能量场", info: { "描述": "反映个人状态的能场" } },
+        secondary: { type: "创造能量场", info: { "描述": "与创造力相关的能场" } },
+        balance_suggestion: "平衡能量发挥潜能"
+      }
+    };
+  }, [personalTraitsStrengthsPool, personalTraitsChallengesPool]);
+
   // 优化版加载函数 - 添加超时机制和可靠的加载流程
   const loadBirthInfo = useCallback(async (date) => {
     if (!date) {
@@ -229,17 +261,24 @@ const MayaBirthChart = () => {
     const init = async () => {
       if (!isMounted) return;
 
-      // 从用户配置上下文获取用户信息
-      if (currentConfig) {
+      // 从用户配置上下文获取用户信息（带错误处理）
+      let config = null;
+      try {
+        config = currentConfig;
+      } catch (error) {
+        console.warn('获取用户配置失败，使用默认配置:', error.message);
+      }
+
+      if (config) {
         setUserInfo({
-          nickname: currentConfig.nickname || '',
-          birthDate: currentConfig.birthDate || ''
+          nickname: config.nickname || '用户',
+          birthDate: config.birthDate || ''
         });
 
-        if (currentConfig.birthDate) {
+        if (config.birthDate) {
           // 直接加载用户配置中的出生日期数据
           try {
-            await loadBirthInfo(new Date(currentConfig.birthDate));
+            await loadBirthInfo(new Date(config.birthDate));
           } catch (err) {
             console.error('加载出生信息失败:', err);
             setError('加载失败，请稍后再试');
@@ -250,9 +289,22 @@ const MayaBirthChart = () => {
           setLoading(false);
         }
       } else if (!configLoading) {
-        // 如果配置未加载且不处于加载状态，显示错误
-        setError('无法加载用户配置');
-        setLoading(false);
+        // 如果配置未加载且不处于加载状态，使用默认日期显示
+        console.warn('无法加载用户配置，使用默认日期');
+        const today = new Date();
+        const defaultDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        setUserInfo({
+          nickname: '用户',
+          birthDate: defaultDate
+        });
+        // 使用默认日期加载玛雅数据
+        try {
+          await loadBirthInfo(new Date(defaultDate));
+        } catch (err) {
+          console.error('加载默认日期失败:', err);
+          setError('加载失败，请稍后再试');
+          setLoading(false);
+        }
       }
     };
 
@@ -262,45 +314,6 @@ const MayaBirthChart = () => {
       isMounted = false;
     };
   }, [currentConfig, configLoading, loadBirthInfo]);
-
-  // 简化版数据生成函数 - 确保所有值都有默认值，避免undefined
-  const generateBirthInfo = useCallback((dateStr, kin, seal, tone, seed) => {
-    // 确保所有值都有默认值，避免undefined
-    const safeTone = tone || '磁性';
-    const safeSeal = seal || '红龙';
-    const sealInfo = sealInfoMap[safeSeal] || DEFAULT_SEAL_INFO;
-    const toneInfo = toneInfoMap[safeTone] || DEFAULT_TONE_INFO;
-
-    return {
-      date: dateStr || '未知日期',
-      weekday: WEEKDAYS[new Date(dateStr).getDay()] || '未知',
-      maya_kin: `KIN ${kin || 1}`,
-      maya_tone: `${safeTone}之音`,
-      maya_seal: safeSeal,
-      maya_seal_desc: `${safeTone}的${safeSeal}`,
-      maya_seal_info: sealInfo,
-      maya_tone_info: {
-        ...(toneInfo || {}),
-        数字: (toneInfo && toneInfo.数字) ? toneInfo.数字 : (kin ? ((kin - 1) % 13) + 1 : 1)
-      },
-      life_purpose: {
-        summary: `${safeTone}的${safeSeal}代表独特的生命能量`,
-        details: MayaCalendarCalculator.getRandomElement(lifePurposeDetailsOptions, seed) ||
-          "你的生命使命与创造和表达有关。",
-        action_guide: MayaCalendarCalculator.getRandomElement(lifePurposeActionGuideOptions, seed + 1) ||
-          "通过日常行动实现潜能。"
-      },
-      personal_traits: {
-        strengths: personalTraitsStrengthsPool?.slice(0, 3) || [],
-        challenges: personalTraitsChallengesPool?.slice(0, 2) || []
-      },
-      birth_energy_field: {
-        primary: { type: "个人能量场", info: { "描述": "反映个人状态的能场" } },
-        secondary: { type: "创造能量场", info: { "描述": "与创造力相关的能场" } },
-        balance_suggestion: "平衡能量发挥潜能"
-      }
-    };
-  }, [personalTraitsStrengthsPool, personalTraitsChallengesPool]);
 
   // 简化的用户信息栏 - 紧凑设计
   const UserHeader = () => (
@@ -341,17 +354,15 @@ const MayaBirthChart = () => {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <Suspense fallback={<LoadingSpinner />}>
-          {showResults && birthInfo ? (
-            <ResultsSection birthInfo={birthInfo} showResults={showResults} />
-          ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 text-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {!userInfo.birthDate ? '请先设置出生日期' : '正在加载星盘数据...'}
-              </p>
-            </div>
-          )}
-        </Suspense>
+        showResults && birthInfo ? (
+          <ResultsSection birthInfo={birthInfo} showResults={showResults} />
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {!userInfo.birthDate ? '请先设置出生日期' : '正在加载星盘数据...'}
+            </p>
+          </div>
+        )
       )}
     </div>
   );

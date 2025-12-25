@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { baziCacheManager } from '../utils/BaziCacheManager';
@@ -16,13 +16,11 @@ import { getShichenSimple, normalizeShichen } from '../utils/astronomy';
 import { getZiWeiDisplayData } from '../utils/ziweiHelper';
 import ZiWeiPalaceDisplay from './ZiWeiPalaceDisplay';
 import birthDataIntegrityManager from '../utils/BirthDataIntegrityManager'; // 新增：出生数据完整性管理器
-
-// 懒加载优化后的表单组件
-const ConfigEditModal = lazy(() => import('./ConfigEditModal'));
-const NameScoringModal = lazy(() => import('./NameScoringModal'));
+import ConfigEditModal from './ConfigEditModal';
+import NameScoringModal from './NameScoringModal';
 
 // 八字命理展示组件（优化版：优先从缓存中读取八字信息）
-const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname }) => {
+const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname }) => {
   const [baziInfo, setBaziInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -105,61 +103,21 @@ const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lu
     );
   }
 
-  // 使用useMemo来优化五行统计计算
-  // eslint-disable-next-line react-hooks/rules-of-hooks, react-hooks/exhaustive-deps
-  const { elementCounts, wuxingElements, dayMaster, fortuneType, luckyElement, masterElement, totalScore } = useMemo(() => {
-    const wuxingElements = ['木', '火', '土', '金', '水'];
-    const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+  // 验证 baziInfo 数据结构完整性
+  const hasValidBaziData = baziInfo && baziInfo.bazi && baziInfo.wuxing &&
+                           baziInfo.bazi.day && baziInfo.wuxing.text &&
+                           baziInfo.lunar && baziInfo.shichen && baziInfo.nayin;
 
-    // 统计四柱五行
-    const wuxingStr = baziInfo.wuxing.text; // "金土 火金 金金 土水"
-    const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
-    wuxingList.forEach(element => {
-      elementCounts[element]++;
-    });
+  if (!hasValidBaziData) {
+    return (
+      <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+        八字数据不完整，请检查配置
+      </div>
+    );
+  }
 
-    // 计算日主和五行得分
-    const dayMaster = baziInfo.bazi.day.charAt(0);
-    const elementToIndex = { '木': 0, '火': 1, '土': 2, '金': 3, '水': 4 };
-
-    // 简化版八字旺衰计算
-    const sameElementIndex = elementToIndex[baziInfo.wuxing.year[0]]; // 年干
-    const dayElementIndex = elementToIndex[dayMaster];
-
-    // 同类得分（日主和同类）
-    const sameTypeScore = (elementCounts['木'] * 1.68) + (elementCounts['火'] * 0.34) +
-                         (elementCounts['土'] * 0.75) + (elementCounts['金'] * 1.68) +
-                         (elementCounts['水'] * 0.60);
-
-    // 异类得分
-    const diffTypeScore = (8 - sameTypeScore);
-
-    // 综合旺衰分数
-    const totalScore = Math.abs(sameTypeScore - diffTypeScore);
-
-    // 判断旺衰和喜用神
-    let fortuneType = '八字中和';
-    let luckyElement = '无特别喜用';
-    const dayMasterElement = { '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
-                                '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水' }[dayMaster];
-    const masterElement = dayMasterElement || '未知';
-
-    if (totalScore > 3) {
-      if (sameTypeScore > diffTypeScore) {
-        fortuneType = '八字偏强';
-        // 找出最缺少的五行
-        const missingElements = wuxingElements.filter(e => elementCounts[e] === 0);
-        const minElements = wuxingElements.filter(e => elementCounts[e] === Math.min(...Object.values(elementCounts)));
-        luckyElement = minElements.length > 0 ? minElements[0] : '木';
-      } else {
-        fortuneType = '八字偏弱';
-        // 喜用神为日主同类五行
-        luckyElement = masterElement;
-      }
-    }
-    
-    return { elementCounts, wuxingElements, dayMaster, fortuneType, luckyElement, masterElement, totalScore };
-  }, [baziInfo]);
+  // 直接调用计算函数，避免使用 useMemo
+  const { elementCounts, wuxingElements, dayMaster, fortuneType, luckyElement, masterElement, totalScore } = calculateFiveElementStats(baziInfo);
 
   return (
     <div className="space-y-4">
@@ -168,14 +126,14 @@ const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lu
         <div className="flex justify-between items-start">
           <div>
             <h4 className="text-lg font-bold mb-1">农历生日</h4>
-            <p className="text-2xl font-semibold">{baziInfo.lunar.text}</p>
+            <p className="text-2xl font-semibold">{baziInfo.lunar?.text || '未知'}</p>
             <p className="text-sm opacity-80 mt-1">
-              公历：{baziInfo.solar.text}
+              公历：{baziInfo.solar?.text || '未知'}
             </p>
           </div>
           <div className="text-right">
             <p className="text-sm opacity-80">时辰</p>
-            <p className="text-lg font-semibold">{baziInfo.shichen.ganzhi}</p>
+            <p className="text-lg font-semibold">{baziInfo.shichen?.ganzhi || '未知'}</p>
           </div>
         </div>
       </div>
@@ -187,32 +145,32 @@ const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lu
             <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <th className="px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">柱</th>
               <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">辛丑年</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.lunar.monthStr}</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.lunar.dayStr}</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.shichen.ganzhi}</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.lunar?.monthStr || '未知'}</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.lunar?.dayStr || '未知'}</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.shichen?.ganzhi || '未知'}</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b border-gray-100 dark:border-gray-700">
               <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">八字</td>
-              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi.year}</td>
-              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi.month}</td>
-              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi.day}</td>
-              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi.hour}</td>
+              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi?.year || '未知'}</td>
+              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi?.month || '未知'}</td>
+              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi?.day || '未知'}</td>
+              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi?.hour || '未知'}</td>
             </tr>
             <tr className="border-b border-gray-100 dark:border-gray-700">
               <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">五行</td>
-              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing.year}</td>
-              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing.month}</td>
-              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing.day}</td>
-              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing.hour}</td>
+              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing?.year || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing?.month || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing?.day || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing?.hour || '未知'}</td>
             </tr>
             <tr>
               <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">纳音</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin.year}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin.month}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin.day}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin.hour}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin?.year || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin?.month || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin?.day || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin?.hour || '未知'}</td>
             </tr>
           </tbody>
         </table>
@@ -259,8 +217,8 @@ const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lu
         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">命局五行喜忌</h4>
         <div className="text-sm text-gray-800 dark:text-gray-200 space-y-2">
           {(() => {
-            const preferences = calculateWuxingPreferences(baziInfo);
-            if (!preferences) return null;
+              const preferences = calculateWuxingPreferences(baziInfo);
+              if (!preferences) return null;
             
             return (
               <div className="space-y-3">
@@ -315,7 +273,7 @@ const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lu
                 ))}
               </div>
             );
-          })()}
+          })()} 
         </div>
       </div>
 
@@ -324,10 +282,10 @@ const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lu
         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">大运</h4>
         <div className="text-sm text-gray-800 dark:text-gray-200">
           {(() => {
-            // 从出生日期中提取年份
-            const birthYear = birthDate ? parseInt(birthDate.split('-')[0]) : new Date().getFullYear();
-            const dayun = calculateDaYun(baziInfo, birthYear);
-            if (!dayun) return null;
+              // 从出生日期中提取年份
+              const birthYear = birthDate ? parseInt(birthDate.split('-')[0]) : new Date().getFullYear();
+              const dayun = calculateDaYun(baziInfo, birthYear);
+              if (!dayun) return null;
             
             return (
               <div className="space-y-1">
@@ -381,6 +339,87 @@ const LoadingSpinner = () => (
     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
   </div>
 );
+
+// 计算五行统计（独立函数，避免使用 useMemo）
+const calculateFiveElementStats = (baziInfo) => {
+  // 确保数据安全
+  if (!baziInfo || !baziInfo.bazi || !baziInfo.wuxing) {
+    return {
+      elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
+      wuxingElements: ['木', '火', '土', '金', '水'],
+      dayMaster: '未知',
+      fortuneType: '数据不可用',
+      luckyElement: '无',
+      masterElement: '未知',
+      totalScore: 0
+    };
+  }
+
+  const wuxingElements = ['木', '火', '土', '金', '水'];
+  const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+
+  try {
+    // 统计四柱五行
+    const wuxingStr = baziInfo.wuxing.text || ''; // "金土 火金 金金 土水"
+    const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
+    wuxingList.forEach(element => {
+      elementCounts[element]++;
+    });
+
+    // 计算日主和五行得分
+    const dayMaster = baziInfo.bazi.day ? baziInfo.bazi.day.charAt(0) : '未知';
+    const elementToIndex = { '木': 0, '火': 1, '土': 2, '金': 3, '水': 4 };
+
+    // 简化版八字旺衰计算
+    const sameElementIndex = baziInfo.wuxing.year ? elementToIndex[baziInfo.wuxing.year[0]] : -1; // 年干
+    const dayElementIndex = elementToIndex[dayMaster];
+
+    // 同类得分（日主和同类）
+    const sameTypeScore = (elementCounts['木'] * 1.68) + (elementCounts['火'] * 0.34) +
+                         (elementCounts['土'] * 0.75) + (elementCounts['金'] * 1.68) +
+                         (elementCounts['水'] * 0.60);
+
+    // 异类得分
+    const diffTypeScore = (8 - sameTypeScore);
+
+    // 综合旺衰分数
+    const totalScore = Math.abs(sameTypeScore - diffTypeScore);
+
+    // 判断旺衰和喜用神
+    let fortuneType = '八字中和';
+    let luckyElement = '无特别喜用';
+    const dayMasterElement = { '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+                                '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水' }[dayMaster] || '未知';
+    const masterElement = dayMasterElement || '未知';
+
+    if (totalScore > 3) {
+      if (sameTypeScore > diffTypeScore) {
+        fortuneType = '八字偏强';
+        // 找出最缺少的五行
+        const missingElements = wuxingElements.filter(e => elementCounts[e] === 0);
+        const minElements = wuxingElements.filter(e => elementCounts[e] === Math.min(...Object.values(elementCounts)));
+        luckyElement = minElements.length > 0 ? minElements[0] : '木';
+      } else {
+        fortuneType = '八字偏弱';
+        // 喜用神为日主同类五行
+        luckyElement = masterElement;
+      }
+    }
+
+    return { elementCounts, wuxingElements, dayMaster, fortuneType, luckyElement, masterElement, totalScore };
+  } catch (error) {
+    console.error('计算五行统计时出错:', error);
+    return {
+      elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
+      wuxingElements: ['木', '火', '土', '金', '水'],
+      dayMaster: '未知',
+      fortuneType: '计算出错',
+      luckyElement: '无',
+      masterElement: '未知',
+      totalScore: 0
+    };
+  }
+};
 
 // 将五格评分转换为100分制综合评分
 const calculateTotalScore = (scoreResult) => {
@@ -699,7 +738,7 @@ const calculateDaYun = (baziInfo, birthYear) => {
 };
 
 // 配置列表项组件
-const ConfigForm = React.memo(({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => {
+const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // 检查是否是系统默认配置（已被禁用）
@@ -2090,148 +2129,134 @@ const UserConfigManagerComponent = () => {
       </Card>
 
       {/* 临时评分弹窗 */}
-      <Suspense fallback={
-        <div className="flex justify-center items-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-        </div>
-      }>
-        <NameScoringModal
-          isOpen={isTempScoringOpen}
-          onClose={() => {
-            setIsTempScoringOpen(false);
-            setTempScoringConfigIndex(null);
-          }}
-          name={configs[tempScoringConfigIndex]?.realName || ''}
-          isPersonal={tempScoringConfigIndex !== null}
-          onSaveScore={async (score, inputName) => {
-            // 保存评分到配置（仅个人评分）
-            if (tempScoringConfigIndex !== null && score) {
-              const totalScore = calculateTotalScore(score);
-              const updateData = { nameScore: { ...score, totalScore } };
+      <NameScoringModal
+        isOpen={isTempScoringOpen}
+        onClose={() => {
+          setIsTempScoringOpen(false);
+          setTempScoringConfigIndex(null);
+        }}
+        name={configs[tempScoringConfigIndex]?.realName || ''}
+        isPersonal={tempScoringConfigIndex !== null}
+        onSaveScore={async (score, inputName) => {
+          // 保存评分到配置（仅个人评分）
+          if (tempScoringConfigIndex !== null && score) {
+            const totalScore = calculateTotalScore(score);
+            const updateData = { nameScore: { ...score, totalScore } };
 
-              // 如果用户输入了姓名且配置中没有姓名，则保存姓名
-              if (inputName && inputName.trim() && /[一-龥]/.test(inputName.trim())) {
+            // 如果用户输入了姓名且配置中没有姓名，则保存姓名
+            if (inputName && inputName.trim() && /[一-龥]/.test(inputName.trim())) {
+              const config = configs[tempScoringConfigIndex];
+              if (!config.realName) {
+                updateData.realName = inputName.trim();
+                console.log('保存姓名到配置:', updateData.realName);
+              }
+            }
+
+            // 使用异步操作队列管理评分保存操作
+            try {
+              const saveScoreOperation = async (operationData) => {
+                const { tempScoringConfigIndex, updateData, configs } = operationData;
+                
+                // 更新配置
+                await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, updateData);
+                console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+                
+                // 同步更新八字缓存
                 const config = configs[tempScoringConfigIndex];
-                if (!config.realName) {
-                  updateData.realName = inputName.trim();
-                  console.log('保存姓名到配置:', updateData.realName);
-                }
-              }
-
-              // 使用异步操作队列管理评分保存操作
-              try {
-                const saveScoreOperation = async (operationData) => {
-                  const { tempScoringConfigIndex, updateData, configs } = operationData;
+                if (config && config.bazi && config.nickname) {
+                  const birthInfo = {
+                    birthDate: config.birthDate,
+                    birthTime: config.birthTime || '12:30',
+                    longitude: config.birthLocation?.lng || 116.40
+                  };
                   
-                  // 更新配置
-                  await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, updateData);
-                  console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+                  const cacheSuccess = baziCacheManager.cacheBazi(
+                    config.nickname,
+                    birthInfo,
+                    config.bazi
+                  );
                   
-                  // 同步更新八字缓存
-                  const config = configs[tempScoringConfigIndex];
-                  if (config && config.bazi && config.nickname) {
-                    const birthInfo = {
-                      birthDate: config.birthDate,
-                      birthTime: config.birthTime || '12:30',
-                      longitude: config.birthLocation?.lng || 116.40
-                    };
-                    
-                    const cacheSuccess = baziCacheManager.cacheBazi(
-                      config.nickname,
-                      birthInfo,
-                      config.bazi
-                    );
-                    
-                    if (cacheSuccess) {
-                      console.log('八字信息已同步到缓存:', config.nickname);
-                    } else {
-                      console.warn('八字信息同步到缓存失败:', config.nickname);
-                    }
+                  if (cacheSuccess) {
+                    console.log('八字信息已同步到缓存:', config.nickname);
+                  } else {
+                    console.warn('八字信息同步到缓存失败:', config.nickname);
                   }
-                  
-                  return true;
-                };
-                
-                // 将评分保存操作添加到队列
-                await asyncOperationQueue.enqueue(
-                  saveScoreOperation,
-                  'save-name-score',
-                  { tempScoringConfigIndex, updateData, configs },
-                  // 乐观更新数据（可选）
-                  null
-                );
-              } catch (error) {
-                console.error('保存姓名评分失败:', error);
-                
-                // 使用错误处理管理器记录错误
-                errorHandlingManager.logError('save-name-score', error, {
-                  tempScoringConfigIndex,
-                  updateData
-                });
-                
-                // 尝试恢复
-                const recoveryResult = await errorHandlingManager.attemptRecovery(
-                  'save-name-score',
-                  async () => {
-                    // 尝试使用修复后的数据保存
-                    const repairedConfig = errorHandlingManager.validateAndRepairConfig({
-                      nameScore: updateData.nameScore,
-                      realName: updateData.realName
-                    });
-                    return await enhancedUserConfigManager.updateConfigWithNodeUpdate(
-                      tempScoringConfigIndex, 
-                      repairedConfig
-                    );
-                  },
-                  { tempScoringConfigIndex, updateData }
-                );
-                
-                if (recoveryResult) {
-                  showMessage && showMessage('✅ 姓名评分已通过修复后保存成功', 'success');
-                } else {
-                  showMessage && showMessage('保存评分失败: ' + error.message, 'error');
                 }
+                
+                return true;
+              };
+              
+              // 将评分保存操作添加到队列
+              await asyncOperationQueue.enqueue(
+                saveScoreOperation,
+                'save-name-score',
+                { tempScoringConfigIndex, updateData, configs },
+                // 乐观更新数据（可选）
+                null
+              );
+            } catch (error) {
+              console.error('保存姓名评分失败:', error);
+              
+              // 使用错误处理管理器记录错误
+              errorHandlingManager.logError('save-name-score', error, {
+                tempScoringConfigIndex,
+                updateData
+              });
+              
+              // 尝试恢复
+              const recoveryResult = await errorHandlingManager.attemptRecovery(
+                'save-name-score',
+                async () => {
+                  // 尝试使用修复后的数据保存
+                  const repairedConfig = errorHandlingManager.validateAndRepairConfig({
+                    nameScore: updateData.nameScore,
+                    realName: updateData.realName
+                  });
+                  return await enhancedUserConfigManager.updateConfigWithNodeUpdate(
+                    tempScoringConfigIndex, 
+                    repairedConfig
+                  );
+                },
+                { tempScoringConfigIndex, updateData }
+              );
+              
+              if (recoveryResult) {
+                showMessage && showMessage('✅ 姓名评分已通过修复后保存成功', 'success');
+              } else {
+                showMessage && showMessage('保存评分失败: ' + error.message, 'error');
               }
             }
-            // 临时为他人评分时不保存
-          }}
-          showMessage={showMessage}
-        />
-      </Suspense>
+          }
+          // 临时为他人评分时不保存
+        }}
+        showMessage={showMessage}
+      />
 
-      {/* 配置编辑弹窗 - 条件渲染避免提前加载 */}
-      {isEditModalOpen && (
-        <Suspense fallback={
-          <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          </div>
-        }>
-          <ConfigEditModal
-            isOpen={isEditModalOpen}
-            onClose={() => {
-              setIsEditModalOpen(false);
-              setEditingConfigIndex(null);
-            }}
-            config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : null}
-            index={editingConfigIndex}
-            isNew={editingConfigIndex < 0}
-            onSave={async (index, configData) => {
-              // 直接调用保存函数，弹窗已在 ConfigEditModal 内部关闭
-              try {
-                const result = await handleSaveConfig(index, configData);
-                // 保存成功，ConfigEditModal 会显示成功消息
-                console.log('配置保存完成，返回值:', result);
-              return result; // 返回保存结果
-            } catch (error) {
-              console.error('保存过程中发生错误:', error);
-              // 保存失败，重新抛出异常让 ConfigEditModal 能够捕获并显示错误消息
-              throw error;
-            }
-          }}
-          showMessage={showMessage}
-        />
-      </Suspense>
-      )}
+      {/* 配置编辑弹窗 */}
+      <ConfigEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingConfigIndex(null);
+        }}
+        config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : null}
+        index={editingConfigIndex}
+        isNew={editingConfigIndex < 0}
+        onSave={async (index, configData) => {
+          // 直接调用保存函数，弹窗已在 ConfigEditModal 内部关闭
+          try {
+            const result = await handleSaveConfig(index, configData);
+            // 保存成功，ConfigEditModal 会显示成功消息
+            console.log('配置保存完成，返回值:', result);
+          return result; // 返回保存结果
+        } catch (error) {
+          console.error('保存过程中发生错误:', error);
+          // 保存失败，重新抛出异常让 ConfigEditModal 能够捕获并显示错误消息
+          throw error;
+        }
+      }}
+      showMessage={showMessage}
+    />
 
       {/* 配置列表 */}
       <div className="space-y-3">
