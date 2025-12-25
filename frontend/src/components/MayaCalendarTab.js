@@ -632,39 +632,40 @@ const MayaCalendarTab = memo(() => {
           </div>
         </div>
 
-        {/* 玛雅历法核心信息 - 使用与穿衣养生页面一致的卡片样式 */}
+        {/* 玛雅历法核心信息 - 移动端优化的一行三列布局 */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="p-4 md:p-5">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              {/* KIN数 */}
-              <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3 md:p-4 text-center">
-                <div className="text-lg md:text-xl font-bold text-purple-600 dark:text-purple-400 mb-1">
+            {/* 紧凑的一行三列布局 - 响应式设计 */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {/* KIN数 - 能量编号 */}
+              <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3 text-center touch-manipulation active:scale-95 transition-transform duration-150">
+                <div className="text-xl md:text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
                   KIN {mayaData?.kin}
                 </div>
-                <div className="text-xs md:text-sm text-purple-800 dark:text-purple-300 font-medium">能量编号</div>
+                <div className="text-[11px] md:text-xs text-purple-800 dark:text-purple-300 font-medium leading-tight">能量编号</div>
               </div>
 
-              {/* 调性 */}
-              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 md:p-4 text-center">
-                <div className="text-sm md:text-base font-bold text-blue-600 dark:text-blue-400 mb-1">
+              {/* 调性 - 银河音调 */}
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 text-center touch-manipulation active:scale-95 transition-transform duration-150">
+                <div className="text-lg md:text-xl font-bold text-blue-600 dark:text-blue-400 mb-1 leading-tight">
                   {mayaData?.tone}
                 </div>
-                <div className="text-xs md:text-sm text-blue-800 dark:text-blue-300 font-medium">银河音调</div>
+                <div className="text-[11px] md:text-xs text-blue-800 dark:text-blue-300 font-medium leading-tight">银河音调</div>
               </div>
 
-              {/* 图腾 */}
-              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3 md:p-4 text-center">
-                <div className="text-sm md:text-base font-bold text-green-600 dark:text-green-400 mb-1">
+              {/* 图腾 - 太阳印记 */}
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3 text-center touch-manipulation active:scale-95 transition-transform duration-150">
+                <div className="text-lg md:text-xl font-bold text-green-600 dark:text-green-400 mb-1 leading-tight">
                   {mayaData?.seal}
                 </div>
-                <div className="text-xs md:text-sm text-green-800 dark:text-green-300 font-medium">太阳印记</div>
+                <div className="text-[11px] md:text-xs text-green-800 dark:text-green-300 font-medium leading-tight">太阳印记</div>
               </div>
             </div>
 
-            {/* 完整名称 - 使用与穿衣养生页面一致的渐变样式 */}
+            {/* 完整名称 - 渐变样式 */}
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-4 md:p-5 text-white text-center">
-              <div className="text-lg md:text-xl font-bold mb-2">{mayaData?.fullName}</div>
-              <div className="text-xs md:text-sm opacity-90">今日玛雅能量</div>
+              <div className="text-base md:text-xl font-bold mb-1 md:mb-2">{mayaData?.fullName}</div>
+              <div className="text-[11px] md:text-sm opacity-90">今日玛雅能量</div>
             </div>
           </div>
         </div>

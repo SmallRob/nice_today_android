@@ -15,24 +15,24 @@ import { concurrencyLock } from './ConcurrencyLock.js';
 import { nodeRecoveryManager } from './NodeRecoveryManager.js';
 import { operationLogger } from './OperationLogger.js';
 
-// 默认配置模板
-const DEFAULT_CONFIG = {
+// 默认配置模板（冻结的不可变对象，确保系统配置不会被意外修改）
+const DEFAULT_CONFIG = Object.freeze({
   nickname: '叉子',
   realName: '',
   birthDate: '1991-04-30',
   birthTime: '12:30',
   shichen: '午时',
-  birthLocation: {
+  birthLocation: Object.freeze({
     province: '北京市',
     city: '北京市',
     district: '海淀区',
     lng: 116.48,
     lat: 39.95
-  },
-  zodiac: '',
-  zodiacAnimal: '',
+  }),
+  zodiac: '金牛座',
+  zodiacAnimal: '羊',
   gender: 'secret',
-  mbti: '',
+  mbti: 'INFP',
   nameScore: null,
   bazi: null,
   isused: false,
@@ -41,7 +41,91 @@ const DEFAULT_CONFIG = {
   trueSolarTime: "12:30",  // 真太阳时，格式："12:30"
   lunarInfo: null,      // 完整的农历信息对象
   lastCalculated: null  // 最后计算时间
-};
+});
+
+/**
+ * 深拷贝配置对象，确保用户配置与默认配置完全隔离
+ * @param {Object} sourceConfig - 源配置对象
+ * @returns {Object} 深拷贝的新配置对象
+ */
+function deepCloneConfig(sourceConfig) {
+  if (!sourceConfig || typeof sourceConfig !== 'object') {
+    return sourceConfig;
+  }
+
+  // 使用安全的深拷贝方法处理可能的循环引用
+  const seen = new WeakSet();
+  
+  function safeClone(obj) {
+    if (!obj || typeof obj !== 'object') {
+      return obj;
+    }
+    
+    if (seen.has(obj)) {
+      // 发现循环引用，返回 undefined 避免错误
+      console.warn('发现循环引用，已跳过该对象');
+      return undefined;
+    }
+    
+    seen.add(obj);
+    
+    if (Array.isArray(obj)) {
+      const clonedArray = [];
+      for (let i = 0; i < obj.length; i++) {
+        clonedArray[i] = safeClone(obj[i]);
+      }
+      seen.delete(obj);
+      return clonedArray;
+    }
+    
+    const clonedObj = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        clonedObj[key] = safeClone(obj[key]);
+      }
+    }
+    seen.delete(obj);
+    return clonedObj;
+  }
+  
+  const cloned = safeClone(sourceConfig);
+  
+  // 确保 birthLocation 对象也被深拷贝
+  if (sourceConfig.birthLocation && cloned.birthLocation) {
+    cloned.birthLocation = { ...sourceConfig.birthLocation };
+  }
+  
+  // 如果存在八字信息，需要特殊处理 full 属性（可能包含循环引用的 lunar 对象）
+  if (cloned.bazi && cloned.bazi.full) {
+    // 只保留基本的八字信息，移除可能包含循环引用的完整 lunar 对象
+    const { full, ...baziWithoutFull } = cloned.bazi;
+    cloned.bazi = {
+      ...baziWithoutFull,
+      // 如果需要保留完整的 lunar 信息，可以只提取安全的属性
+      lunar: full ? {
+        yearStr: typeof full.getYearInGanZhi === 'function' ? full.getYearInGanZhi() + '年' : (full.yearStr || ''),
+        monthStr: typeof full.getMonthInChinese === 'function' ? full.getMonthInChinese() + '月' : (full.monthStr || ''),
+        dayStr: typeof full.getDayInChinese === 'function' ? full.getDayInChinese() : (full.dayStr || ''),
+        text: typeof full.getYearInGanZhi === 'function' && typeof full.getMonthInChinese === 'function' && typeof full.getDayInChinese === 'function' ? 
+              `${full.getYearInGanZhi()}年 ${full.getMonthInChinese()}月${full.getDayInChinese()}` : (full.text || '')
+      } : null
+    };
+  }
+
+  return cloned;
+}
+
+/**
+ * 从默认配置创建新配置模板
+ * @param {Object} overrides - 需要覆盖的字段
+ * @returns {Object} 新配置对象（深拷贝）
+ */
+function createConfigFromDefault(overrides = {}) {
+  return deepCloneConfig({
+    ...DEFAULT_CONFIG,
+    ...overrides
+  });
+}
 
 // 存储键名
 const STORAGE_KEYS = {
@@ -92,16 +176,16 @@ class EnhancedUserConfigManager {
         this.configs = loadResult.configs;
         this.activeConfigIndex = loadResult.activeIndex;
         this.metadata = loadResult.metadata;
-        
+
         console.log('配置加载成功:', {
           configCount: this.configs.length,
           activeIndex: this.activeConfigIndex,
           metadata: this.metadata
         });
       } else {
-        // 加载失败，使用默认配置
+        // 加载失败，使用默认配置（创建深拷贝）
         console.warn('配置加载失败，使用默认配置');
-        this.configs = [DEFAULT_CONFIG];
+        this.configs = [createConfigFromDefault()];
         this.activeConfigIndex = 0;
         await this.saveConfigsToStorage();
       }
@@ -122,12 +206,12 @@ class EnhancedUserConfigManager {
       
     } catch (error) {
       console.error('初始化增强版用户配置管理器失败:', error);
-      
-      // 紧急恢复机制
-      this.configs = [DEFAULT_CONFIG];
+
+      // 紧急恢复机制（使用深拷贝）
+      this.configs = [createConfigFromDefault()];
       this.activeConfigIndex = 0;
       this.initialized = true;
-      
+
       return false;
     }
   }
@@ -346,36 +430,36 @@ class EnhancedUserConfigManager {
   }
 
   /**
-   * 获取当前活跃配置
+   * 获取当前活跃配置（返回深拷贝以防止意外修改）
    */
   getCurrentConfig() {
     if (!this.initialized || this.configs.length === 0) {
-      return DEFAULT_CONFIG;
+      return createConfigFromDefault();
     }
-    
+
     const currentConfig = this.configs[this.activeConfigIndex];
-    
+
     // 验证配置完整性
     const validation = dataIntegrityManager.validateConfig(currentConfig);
-    
+
     if (!validation.valid) {
       console.warn('当前配置验证失败，进行紧急修复');
       const repair = dataIntegrityManager.suggestDataRepairs(currentConfig);
       return repair.repairedConfig;
     }
-    
-    return currentConfig;
+
+    return deepCloneConfig(currentConfig);
   }
 
   /**
-   * 获取所有配置
+   * 获取所有配置（返回深拷贝以防止意外修改）
    */
   getAllConfigs() {
     if (!this.initialized) {
-      return [DEFAULT_CONFIG];
+      return [createConfigFromDefault()];
     }
 
-    return [...this.configs];
+    return this.configs.map(config => deepCloneConfig(config));
   }
 
   /**
@@ -427,8 +511,8 @@ class EnhancedUserConfigManager {
           throw new Error(updateResult.error || '节点级更新失败');
         }
 
-        // 更新配置
-        let updatedConfig = updateResult.updatedConfig;
+        // 更新配置（深拷贝确保与原始配置隔离）
+        let updatedConfig = deepCloneConfig(updateResult.updatedConfig);
 
         // 如果更新了出生日期、时间或位置，重新计算农历和真太阳时
         const needsLunarRecalculation =
@@ -442,7 +526,7 @@ class EnhancedUserConfigManager {
 
         this.configs[index] = updatedConfig;
 
-        console.log('配置已更新到内存，准备保存到存储...');
+        console.log('配置已更新到内存（深拷贝），准备保存到存储...');
 
         // 保存到存储
         const saveResult = await this.saveConfigsToStorage();
@@ -541,19 +625,19 @@ class EnhancedUserConfigManager {
     try {
       // 验证配置数据
       const validation = dataIntegrityManager.validateConfig(config);
-      
+
       if (!validation.valid) {
         throw new Error(`配置验证失败: ${validation.errors.map(e => e.message).join(', ')}`);
       }
-      
+
       // 验证昵称唯一性
       const nicknameExists = this.configs.some(c => c.nickname === config.nickname);
       if (nicknameExists) {
         throw new Error(`昵称 '${config.nickname}' 已存在，请选择其他昵称`);
       }
-      
-      // 确保基础信息配置完整，八字信息单独处理
-      const finalConfig = {
+
+      // 确保基础信息配置完整，八字信息单独处理（深拷贝确保隔离）
+      const finalConfig = deepCloneConfig({
         ...config,
         // 如果没有八字信息，设置为null
         bazi: config.bazi || null,
@@ -561,20 +645,23 @@ class EnhancedUserConfigManager {
         trueSolarTime: config.trueSolarTime || null,
         lunarInfo: config.lunarInfo || null,
         lastCalculated: config.lastCalculated || null
-      };
-      
+      });
+
       // 添加配置
       this.configs.push(finalConfig);
-      
+
+      // 设置新添加的配置为活跃配置
+      this.activeConfigIndex = this.configs.length - 1;
+
       // 保存到存储
       await this.saveConfigsToStorage();
-      
-      // 通知监听器
-      this.notifyListeners();
-      
-      console.log('添加新配置成功', finalConfig.nickname);
+
+      // 通知监听器（强制刷新）
+      this.notifyListeners(true);
+
+      console.log('添加新配置成功（深拷贝）', finalConfig.nickname);
       return true;
-      
+
     } catch (error) {
       console.error('添加配置失败:', error);
       return false;
@@ -713,39 +800,42 @@ class EnhancedUserConfigManager {
     try {
       // 验证基础配置数据
       const validation = dataIntegrityManager.validateConfig(basicConfig);
-      
+
       if (!validation.valid) {
         throw new Error(`基础配置验证失败: ${validation.errors.map(e => e.message).join(', ')}`);
       }
-      
+
       // 验证昵称唯一性
       const nicknameExists = this.configs.some(c => c.nickname === basicConfig.nickname);
       if (nicknameExists) {
         throw new Error(`昵称 '${basicConfig.nickname}' 已存在，请选择其他昵称`);
       }
-      
-      // 确保基础信息配置完整，八字信息设置为null
-      const finalConfig = {
+
+      // 确保基础信息配置完整，八字信息设置为null（深拷贝确保隔离）
+      const finalConfig = deepCloneConfig({
         ...basicConfig,
         bazi: null, // 八字信息后续异步计算
         lunarBirthDate: null,
         trueSolarTime: null,
         lunarInfo: null,
         lastCalculated: null
-      };
-      
+      });
+
       // 添加配置
       this.configs.push(finalConfig);
-      
+
+      // 将新配置设为活跃配置
+      this.activeConfigIndex = this.configs.length - 1;
+
       // 保存到存储
       await this.saveConfigsToStorage();
-      
+
       // 通知监听器
       this.notifyListeners();
-      
-      console.log('添加基础配置成功', finalConfig.nickname);
+
+      console.log('添加基础配置成功（深拷贝）', finalConfig.nickname, 'activeIndex:', this.activeConfigIndex);
       return true;
-      
+
     } catch (error) {
       console.error('添加基础配置失败:', error);
       return false;
@@ -775,6 +865,58 @@ class EnhancedUserConfigManager {
     } catch (error) {
       console.error('设置活跃配置失败:', error);
       return false;
+    }
+  }
+
+  /**
+   * 重新排序配置（支持拖拽排序）
+   * @param {number} fromIndex - 源索引
+   * @param {number} toIndex - 目标索引
+   * @returns {Promise<boolean>} 是否排序成功
+   */
+  async reorderConfig(fromIndex, toIndex) {
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+
+    if (fromIndex < 0 || fromIndex >= this.configs.length ||
+        toIndex < 0 || toIndex >= this.configs.length) {
+      throw new Error('无效的配置索引');
+    }
+
+    if (fromIndex === toIndex) {
+      return true; // 无需排序
+    }
+
+    try {
+      // 保存旧的活跃索引
+      const oldActiveIndex = this.activeConfigIndex;
+
+      // 移动配置项
+      const [movedConfig] = this.configs.splice(fromIndex, 1);
+      this.configs.splice(toIndex, 0, movedConfig);
+
+      // 调整活跃配置索引
+      if (oldActiveIndex === fromIndex) {
+        this.activeConfigIndex = toIndex;
+      } else if (fromIndex < oldActiveIndex && toIndex >= oldActiveIndex) {
+        this.activeConfigIndex = oldActiveIndex - 1;
+      } else if (fromIndex > oldActiveIndex && toIndex <= oldActiveIndex) {
+        this.activeConfigIndex = oldActiveIndex + 1;
+      }
+
+      // 保存到存储
+      await this.saveConfigsToStorage();
+
+      // 通知监听器
+      this.notifyListeners();
+
+      console.log(`配置排序成功: 从索引 ${fromIndex} 移动到 ${toIndex}，活跃索引从 ${oldActiveIndex} 调整为 ${this.activeConfigIndex}`);
+      return true;
+
+    } catch (error) {
+      console.error('配置排序失败:', error);
+      throw error;
     }
   }
 
@@ -861,17 +1003,19 @@ class EnhancedUserConfigManager {
 
   /**
    * 通知所有监听器
+   * @param {Boolean} forceReload - 是否强制重新加载
    */
-  notifyListeners() {
+  notifyListeners(forceReload = false) {
     const currentConfig = this.getCurrentConfig();
-    
+
     this.listeners.forEach(listener => {
       try {
         listener({
           configs: [...this.configs],
           activeConfigIndex: this.activeConfigIndex,
           currentConfig,
-          metadata: { ...this.metadata }
+          metadata: { ...this.metadata },
+          forceReload
         });
       } catch (error) {
         console.error('监听器执行出错:', error);
@@ -1188,42 +1332,248 @@ class EnhancedUserConfigManager {
     };
   }
 
-  /**
-   * 清理过期的备份和锁
-   * @returns {Promise<Object>} 清理结果
-   */
-  async cleanupMaintenance() {
-    const results = {
-      backupsCleaned: 0,
-      logsCleaned: 0,
-      locksCleaned: 0
-    };
+/**
+ * 生成唯一的新用户昵称（格式：新用户123，数字自动递增）
+ * @returns {string} 唯一的昵称
+ */
+generateUniqueNickname() {
+  const basePrefix = '新用户';
+  let maxNumber = 0;
 
-    try {
-      // 清理过期的配置备份
-      results.backupsCleaned = nodeRecoveryManager.cleanupOldBackups();
+  // 查找现有配置中最大的数字
+  this.configs.forEach(config => {
+    if (config.nickname && config.nickname.startsWith(basePrefix)) {
+      const numberStr = config.nickname.substring(basePrefix.length);
+      const number = parseInt(numberStr, 10);
+      if (!isNaN(number) && number > maxNumber) {
+        maxNumber = number;
+      }
+    }
+  });
 
-      // 清理过期的日志
-      operationLogger.cleanExpiredLogs();
-      results.logsCleaned = 1;
+  // 生成新的昵称（从当前最大数字+1开始，或从1开始）
+  const newNumber = maxNumber + 1;
+  return `${basePrefix}${newNumber}`;
+}
 
-      // 清理过期的锁
-      results.locksCleaned = concurrencyLock.cleanupExpiredLocks();
+/**
+ * 从默认配置模板复制创建新配置
+ * @param {Object} overrides - 需要覆盖的字段（可选）
+ * @returns {Promise<Object>} 新创建的配置（深拷贝）
+ */
+async duplicateConfigFromTemplate(overrides = {}) {
+  if (!this.initialized) {
+    throw new Error('配置管理器未初始化');
+  }
 
-      operationLogger.log('info', 'MAINTENANCE_CLEANUP', {
-        ...results,
-        timestamp: new Date().toISOString()
-      });
+  try {
+    console.log('========== 开始从模板复制配置 ==========');
 
-    } catch (error) {
-      operationLogger.log('error', 'MAINTENANCE_ERROR', {
-        error: error.message,
-        timestamp: new Date().toISOString()
-      });
+    // 1. 深拷贝默认配置模板，确保不修改原始模板
+    const templateConfig = deepCloneConfig(DEFAULT_CONFIG);
+
+    // 2. 生成唯一的昵称（如果未指定）
+    const finalNickname = overrides.nickname || this.generateUniqueNickname();
+
+    // 3. 验证昵称唯一性
+    const nicknameExists = this.configs.some(c => c.nickname === finalNickname);
+    if (nicknameExists) {
+      throw new Error(`昵称 '${finalNickname}' 已存在，无法创建重复配置`);
     }
 
-    return results;
+    // 4. 应用用户指定的覆盖字段
+    const finalConfig = deepCloneConfig({
+      ...templateConfig,
+      nickname: finalNickname,
+      ...overrides,
+      // 确保以下字段被重置或保留
+      bazi: overrides.bazi || null,  // 八字信息不复制，需要重新计算
+      lunarBirthDate: null,
+      trueSolarTime: null,
+      lunarInfo: null,
+      lastCalculated: null,
+      isSystemDefault: false,  // 标记为非系统默认配置
+      isused: false  // 初始状态为未使用
+    });
+
+    console.log('模板配置复制成功:', {
+      templateNickname: DEFAULT_CONFIG.nickname,
+      newNickname: finalConfig.nickname,
+      birthDate: finalConfig.birthDate,
+      overrides: Object.keys(overrides)
+    });
+
+    console.log('========== 模板配置复制完成 ==========');
+
+    return finalConfig;
+
+  } catch (error) {
+    console.error('从模板复制配置失败:', error);
+    throw error;
   }
+}
+
+/**
+ * 从默认配置模板直接添加新配置（保存到存储）
+ * @param {Object} overrides - 需要覆盖的字段（可选）
+ * @returns {Promise<boolean>} 是否添加成功
+ */
+async addConfigFromTemplate(overrides = {}) {
+  try {
+    // 生成新配置
+    const newConfig = await this.duplicateConfigFromTemplate(overrides);
+
+    // 验证配置数据
+    const validation = dataIntegrityManager.validateConfig(newConfig);
+    if (!validation.valid) {
+      throw new Error(`配置验证失败: ${validation.errors.map(e => e.message).join(', ')}`);
+    }
+
+    // 添加到配置列表
+    this.configs.push(newConfig);
+
+    // 设置新配置为活跃配置
+    this.activeConfigIndex = this.configs.length - 1;
+
+    // 保存到存储
+    await this.saveConfigsToStorage();
+
+    // 通知监听器
+    this.notifyListeners(true);
+
+    console.log('从模板添加配置成功:', newConfig.nickname);
+    return true;
+
+  } catch (error) {
+    console.error('从模板添加配置失败:', error);
+    throw error;
+  }
+}
+
+/**
+ * 批量从模板复制配置
+ * @param {number} count - 要复制的数量
+ * @param {Object} overrides - 需要覆盖的字段（可选）
+ * @returns {Promise<Array>} 新创建的配置列表
+ */
+async batchDuplicateFromTemplate(count, overrides = {}) {
+  if (!this.initialized) {
+    throw new Error('配置管理器未初始化');
+  }
+
+  if (count <= 0) {
+    throw new Error('复制数量必须大于0');
+  }
+
+  const newConfigs = [];
+  const lockKey = 'batch-duplicate-template';
+  const operationId = `batch-duplicate-${Date.now()}`;
+
+  operationLogger.log('info', 'BATCH_DUPLICATE_STARTED', {
+    operationId,
+    count,
+    overrides: Object.keys(overrides)
+  });
+
+  return await concurrencyLock.withLock(lockKey, async () => {
+    try {
+      for (let i = 0; i < count; i++) {
+        // 为每个配置生成唯一的昵称
+        const configOverrides = {
+          ...overrides,
+          nickname: this.generateUniqueNickname()
+        };
+
+        const newConfig = await this.duplicateConfigFromTemplate(configOverrides);
+
+        // 验证配置
+        const validation = dataIntegrityManager.validateConfig(newConfig);
+        if (!validation.valid) {
+          throw new Error(`第 ${i + 1} 个配置验证失败: ${validation.errors.map(e => e.message).join(', ')}`);
+        }
+
+        newConfigs.push(newConfig);
+      }
+
+      // 批量添加到配置列表
+      this.configs.push(...newConfigs);
+
+      // 设置最后一个新配置为活跃配置
+      this.activeConfigIndex = this.configs.length - 1;
+
+      // 保存到存储
+      await this.saveConfigsToStorage();
+
+      // 通知监听器
+      this.notifyListeners(true);
+
+      operationLogger.log('success', 'BATCH_DUPLICATE_SUCCESS', {
+        operationId,
+        count: newConfigs.length,
+        newNicknames: newConfigs.map(c => c.nickname)
+      });
+
+      console.log(`批量从模板复制配置成功: ${newConfigs.length} 个配置`);
+      return newConfigs;
+
+    } catch (error) {
+      operationLogger.log('error', 'BATCH_DUPLICATE_ERROR', {
+        operationId,
+        count,
+        error: error.message
+      });
+      throw error;
+    }
+  }, {
+    owner: `config-manager-${operationId}`,
+    timeout: 120000 // 2分钟超时（批量操作可能需要更长时间）
+  });
+}
+
+/**
+ * 获取默认配置模板（只读，深拷贝）
+ * @returns {Object} 默认配置的深拷贝
+ */
+getDefaultTemplate() {
+  return deepCloneConfig(DEFAULT_CONFIG);
+}
+
+/**
+ * 清理过期的备份和锁
+ * @returns {Promise<Object>} 清理结果
+ */
+async cleanupMaintenance() {
+  const results = {
+    backupsCleaned: 0,
+    logsCleaned: 0,
+    locksCleaned: 0
+  };
+
+  try {
+    // 清理过期的配置备份
+    results.backupsCleaned = nodeRecoveryManager.cleanupOldBackups();
+
+    // 清理过期的日志
+    operationLogger.cleanExpiredLogs();
+    results.logsCleaned = 1;
+
+    // 清理过期的锁
+    results.locksCleaned = concurrencyLock.cleanupExpiredLocks();
+
+    operationLogger.log('info', 'MAINTENANCE_CLEANUP', {
+      ...results,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    operationLogger.log('error', 'MAINTENANCE_ERROR', {
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  return results;
+}
 }
 
 // 创建单例实例

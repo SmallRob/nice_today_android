@@ -1,0 +1,1125 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八字应用测试报告</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; }
+        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .card.passed { border-left: 4px solid #28a745; }
+        .card.failed { border-left: 4px solid #dc3545; }
+        .card.skipped { border-left: 4px solid #ffc107; }
+        .card.total { border-left: 4px solid #007bff; }
+        .card h3 { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .card .number { font-size: 32px; font-weight: bold; }
+        .section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .section h2 { color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
+        .error-item { background: #fff5f5; border-left: 4px solid #dc3545; padding: 15px; margin-bottom: 10px; border-radius: 4px; }
+        .recommendation { background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin-bottom: 10px; border-radius: 4px; }
+        .recommendation.high { border-left-color: #dc3545; }
+        .recommendation.medium { border-left-color: #ffc107; }
+        .recommendation.low { border-left-color: #28a745; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        .timestamp { color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 八字应用测试报告</h1>
+            <p class="timestamp">生成时间: 2025-12-25T08:25:07.885Z</p>
+        </div>
+
+        <!-- 测试摘要 -->
+        <div class="summary-cards">
+            <div class="card total">
+                <h3>总测试数</h3>
+                <div class="number">0</div>
+            </div>
+            <div class="card passed">
+                <h3>通过</h3>
+                <div class="number">0</div>
+            </div>
+            <div class="card failed">
+                <h3>失败</h3>
+                <div class="number">0</div>
+            </div>
+            <div class="card skipped">
+                <h3>跳过</h3>
+                <div class="number">0</div>
+            </div>
+        </div>
+
+        <!-- 套件详情 -->
+        <div class="section">
+            <h2>📋 测试套件详情</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>套件名称</th>
+                        <th>总数</th>
+                        <th>通过</th>
+                        <th>失败</th>
+                        <th>通过率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 错误分析 -->
+        <div class="section">
+            <h2>❌ 错误分析</h2>
+            <p>总错误数: 4</p>
+            
+            <h3>错误类型分布</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>错误类型</th>
+                        <th>数量</th>
+                        <th>占比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                        <tr>
+                            <td>Command failed</td>
+                            <td>4</td>
+                            <td>100.00%</td>
+                        </tr>
+                    
+                </tbody>
+            </table>
+
+            <h3>常见错误详情</h3>
+            
+                <div class="error-item">
+                    <strong>用户配置数据测试</strong><br>
+                    Command failed: npx jest ./__tests__/config.test.js --config=./test/jest.config.js --verbose --json --outputFile=./test/results/用户配置数据测试.json
+FAIL test/__tests__/config.test.js
+  用户配置数据测试套件
+    配置数据存储和读取
+      ✕ 应该正确添加和读取基本配置 (11 ms)
+      ✓ 应该正确设置和获取活跃配置 (2 ms)
+    配置数据修改和一致性
+      ✓ 应该正确更新配置数据 (12 ms)
+      ✓ 修改配置后应保持数据完整性 (4 ms)
+    八字运算算法验证
+      ✓ 应该正确计算八字: 标准八字案例1 (5 ms)
+      ✓ 应该正确计算八字: 标准八字案例2 (10 ms)
+      ✕ 应该正确处理时辰计算 (5 ms)
+    边界条件和异常输入处理
+      ✕ 应该正确处理边界年龄数据 (1 ms)
+      ✓ 应该正确处理无效日期输入 (1 ms)
+      ✓ 应该正确处理缺少位置信息的情况 (1 ms)
+    性能测试
+      ✓ 批量操作应该保持良好性能 (1 ms)
+      ✓ 八字计算应该高效 (17 ms)
+
+  ● 用户配置数据测试套件 › 配置数据存储和读取 › 应该正确添加和读取基本配置
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      111 |     test('应该正确添加和读取基本配置', async () => {
+      112 |       const result = await enhancedUserConfigManager.addBasicConfig(TEST_CONFIGS.basic);
+    > 113 |       expect(result).toBeTruthy();
+          |                      ^
+      114 |
+      115 |       const configs = enhancedUserConfigManager.getAllConfigs();
+      116 |       expect(configs.length).toBeGreaterThan(0);
+
+      at Object.<anonymous> (__tests__/config.test.js:113:22)
+
+  ● 用户配置数据测试套件 › 八字运算算法验证 › 应该正确处理时辰计算
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "子"
+    Received: undefined
+
+      238 |       testTimes.forEach(({ time, expectedShichen }) => {
+      239 |         const shichen = getShichen(time);
+    > 240 |         expect(shichen.name).toBe(expectedShichen);
+          |                              ^
+      241 |       });
+      242 |     });
+      243 |   });
+
+      at forEach (__tests__/config.test.js:240:30)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/config.test.js:238:17)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 用户配置数据测试套件 › 边界条件和异常输入处理 › 应该正确处理边界年龄数据
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      247 |     test('应该正确处理边界年龄数据', async () => {
+      248 |       const result = await enhancedUserConfigManager.addBasicConfig(TEST_CONFIGS.edgeCases.minAge);
+    > 249 |       expect(result).toBeTruthy();
+          |                      ^
+      250 |
+      251 |       const configs = enhancedUserConfigManager.getAllConfigs();
+      252 |       const config = configs[configs.length - 1];
+
+      at Object.<anonymous> (__tests__/config.test.js:249:22)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 9 passed, 12 total
+Snapshots:   0 total
+Time:        1.263 s, estimated 2 s
+Ran all test suites matching /.\/__tests__\/config.test.js/i.
+Test results written to: test/results/用户配置数据测试.json
+<br>
+                    <span class="timestamp">2025-12-25T08:24:47.878Z</span>
+                </div>
+            
+                <div class="error-item">
+                    <strong>数据一致性测试</strong><br>
+                    Command failed: npx jest ./__tests__/consistency.test.js --config=./test/jest.config.js --verbose --json --outputFile=./test/results/数据一致性测试.json
+FAIL test/__tests__/consistency.test.js
+  配置数据一致性测试套件
+    数据完整性验证
+      ✓ 应该验证完整配置数据的完整性 (10 ms)
+      ✓ 应该检测部分配置数据的问题 (2 ms)
+      ✓ 应该拒绝损坏的配置数据 (1 ms)
+    配置数据一致性检查
+      ✕ 保存和读取的配置数据应该一致 (3 ms)
+      ✕ 修改配置后相关字段应该同步更新 (11 ms)
+    错误恢复和容错机制
+      ✓ 应该自动修复部分损坏的数据 (12 ms)
+      ✓ 应该处理缺失字段的默认值填充 (1 ms)
+    数据完整性管理器测试
+      ✕ 应该检测配置数据的完整性 (1 ms)
+      ✕ 应该自动修复不完整的数据 (4 ms)
+    并发操作测试
+      ✓ 应该正确处理并发配置修改 (122 ms)
+    数据版本兼容性测试
+      ✓ 应该处理旧版本配置数据格式 (1 ms)
+
+  ● 配置数据一致性测试套件 › 配置数据一致性检查 › 保存和读取的配置数据应该一致
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "完整配置测试"
+    Received: "叉子"
+
+      150 |       
+      151 |       // 验证数据一致性
+    > 152 |       expect(savedConfig.nickname).toBe(TEST_CONFIGS.complete.nickname);
+          |                                    ^
+      153 |       expect(savedConfig.birthDate).toBe(TEST_CONFIGS.complete.birthDate);
+      154 |       expect(savedConfig.birthTime).toBe(TEST_CONFIGS.complete.birthTime);
+      155 |       
+
+      at Object.<anonymous> (__tests__/consistency.test.js:152:36)
+
+  ● 配置数据一致性测试套件 › 配置数据一致性检查 › 修改配置后相关字段应该同步更新
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "完整配置测试"
+    Received: "叉子"
+
+      191 |       
+      192 |       // 验证其他字段保持不变
+    > 193 |       expect(modifiedConfig.nickname).toBe(TEST_CONFIGS.complete.nickname);
+          |                                       ^
+      194 |       expect(modifiedConfig.gender).toBe(TEST_CONFIGS.complete.gender);
+      195 |     });
+      196 |   });
+
+      at Object.<anonymous> (__tests__/consistency.test.js:193:39)
+
+  ● 配置数据一致性测试套件 › 数据完整性管理器测试 › 应该检测配置数据的完整性
+
+    TypeError: birthDataIntegrityManager.checkDataIntegrity is not a function
+
+      243 |   describe('数据完整性管理器测试', () => {
+      244 |     test('应该检测配置数据的完整性', () => {
+    > 245 |       const completeCheck = birthDataIntegrityManager.checkDataIntegrity(TEST_CONFIGS.complete);
+          |                                                       ^
+      246 |       expect(completeCheck.isComplete).toBe(true);
+      247 |       expect(completeCheck.missingFields).toHaveLength(0);
+      248 |
+
+      at Object.<anonymous> (__tests__/consistency.test.js:245:55)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 配置数据一致性测试套件 › 数据完整性管理器测试 › 应该自动修复不完整的数据
+
+    TypeError: birthDataIntegrityManager.autoFixMissingData is not a function
+
+      253 |
+      254 |     test('应该自动修复不完整的数据', () => {
+    > 255 |       const fixedConfig = birthDataIntegrityManager.autoFixMissingData(TEST_CONFIGS.partial);
+          |                                                     ^
+      256 |       
+      257 |       expect(fixedConfig.birthLocation).toBeDefined();
+      258 |       expect(fixedConfig.birthLocation.lng).toBeDefined();
+
+      at Object.<anonymous> (__tests__/consistency.test.js:255:53)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 7 passed, 11 total
+Snapshots:   0 total
+Time:        1.006 s, estimated 2 s
+Ran all test suites matching /.\/__tests__\/consistency.test.js/i.
+Test results written to: test/results/数据一致性测试.json
+<br>
+                    <span class="timestamp">2025-12-25T08:24:51.190Z</span>
+                </div>
+            
+                <div class="error-item">
+                    <strong>八字运算算法测试</strong><br>
+                    Command failed: npx jest ./__tests__/bazi.test.js --config=./test/jest.config.js --verbose --json --outputFile=./test/results/八字运算算法测试.json
+FAIL test/__tests__/bazi.test.js
+  八字运算算法测试套件
+    八字算法准确性验证
+      ✓ 应该准确计算八字: 1990年1月1日12:30北京 (9 ms)
+      ✓ 应该准确计算八字: 1985年5月15日8:45上海 (5 ms)
+      ✕ 应该准确计算八字: 2000年2月29日0:00广州 (12 ms)
+      ✕ 应该正确处理不同经度的真太阳时 (4 ms)
+    时辰计算准确性验证
+      ✕ 应该正确计算时辰: 23:00 -> 子
+      ✕ 应该正确计算时辰: 01:30 -> 丑
+      ✕ 应该正确计算时辰: 03:45 -> 寅 (1 ms)
+      ✕ 应该正确计算时辰: 05:15 -> 卯
+      ✕ 应该正确计算时辰: 07:30 -> 辰
+      ✕ 应该正确计算时辰: 09:45 -> 巳
+      ✕ 应该正确计算时辰: 11:15 -> 午
+      ✕ 应该正确计算时辰: 13:30 -> 未
+      ✕ 应该正确计算时辰: 15:45 -> 申
+      ✕ 应该正确计算时辰: 17:15 -> 酉
+      ✕ 应该正确计算时辰: 19:30 -> 戌
+      ✕ 应该正确计算时辰: 21:45 -> 亥 (1 ms)
+      ✕ 简化版时辰计算应该与完整版一致
+      ✕ 时辰标准化应该正确处理边界值
+    五行分析准确性验证
+      ✓ 应该正确统计五行数量 (1 ms)
+      ✓ 应该正确分析日主和旺衰 (1 ms)
+    边界条件和异常输入处理
+      ✕ 应该处理无效日期输入 (10 ms)
+      ✕ 应该处理无效时间输入
+      ✓ 应该处理极端经度值 (23 ms)
+    性能测试
+      ✓ 八字计算应该在合理时间内完成 (11 ms)
+      ✓ 时辰计算应该高效 (1 ms)
+    农历和节气验证
+      ✕ 应该正确计算农历日期 (2 ms)
+      ✓ 应该正确处理闰月 (2 ms)
+    纳音五行验证
+      ✕ 应该正确计算纳音五行 (4 ms)
+
+  ● 八字运算算法测试套件 › 八字算法准确性验证 › 应该准确计算八字: 2000年2月29日0:00广州
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "丁巳"
+    Received: "丙辰"
+
+      130 |         expect(baziInfo.bazi.year).toBe(testCase.expected.bazi.year);
+      131 |         expect(baziInfo.bazi.month).toBe(testCase.expected.bazi.month);
+    > 132 |         expect(baziInfo.bazi.day).toBe(testCase.expected.bazi.day);
+          |                                   ^
+      133 |         expect(baziInfo.bazi.hour).toBe(testCase.expected.bazi.hour);
+      134 |
+      135 |         // 验证五行准确性
+
+      at Object.<anonymous> (__tests__/bazi.test.js:132:35)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 八字算法准确性验证 › 应该正确处理不同经度的真太阳时
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "午"
+    Received: undefined
+
+      152 |       testCases.forEach(({ longitude, birthTime, expectedHour }) => {
+      153 |         const baziInfo = calculateDetailedBazi('1990-01-01', birthTime, longitude);
+    > 154 |         expect(baziInfo.shichen.name).toBe(expectedHour);
+          |                                       ^
+      155 |       });
+      156 |     });
+      157 |   });
+
+      at forEach (__tests__/bazi.test.js:154:39)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/bazi.test.js:152:17)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 23:00 -> 子
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "子"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 01:30 -> 丑
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "丑"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 03:45 -> 寅
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "寅"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 05:15 -> 卯
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "卯"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 07:30 -> 辰
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "辰"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 09:45 -> 巳
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "巳"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 11:15 -> 午
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "午"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 13:30 -> 未
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "未"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 15:45 -> 申
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "申"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 17:15 -> 酉
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "酉"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 19:30 -> 戌
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "戌"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 应该正确计算时辰: 21:45 -> 亥
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "亥"
+    Received: undefined
+
+      164 |         
+      165 |         expect(shichen).toBeDefined();
+    > 166 |         expect(shichen.name).toBe(testCase.expected);
+          |                              ^
+      167 |         expect(shichen.index).toBe(testCase.expectedIndex);
+      168 |         expect(shichen.startTime).toBeDefined();
+      169 |         expect(shichen.endTime).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:166:30)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 简化版时辰计算应该与完整版一致
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "子"
+    Received: "子时"
+
+      176 |         const simpleShichen = getShichenSimple(testCase.time);
+      177 |         
+    > 178 |         expect(simpleShichen).toBe(testCase.expected);
+          |                               ^
+      179 |         expect(simpleShichen).toBe(fullShichen.name);
+      180 |       });
+      181 |     });
+
+      at forEach (__tests__/bazi.test.js:178:31)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/bazi.test.js:174:26)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 时辰计算准确性验证 › 时辰标准化应该正确处理边界值
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "午"
+    Received: "午时"
+
+      191 |       edgeCases.forEach(({ input, expected }) => {
+      192 |         const normalized = normalizeShichen(input);
+    > 193 |         expect(normalized).toBe(expected);
+          |                            ^
+      194 |       });
+      195 |     });
+      196 |   });
+
+      at forEach (__tests__/bazi.test.js:193:28)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/bazi.test.js:191:17)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 边界条件和异常输入处理 › 应该处理无效日期输入
+
+    expect(received).toThrow()
+
+    Received function did not throw
+
+      250 |         expect(() => {
+      251 |           calculateDetailedBazi(date, '12:30', 116.40);
+    > 252 |         }).toThrow(); // 或者返回合理的默认值
+          |            ^
+      253 |       });
+      254 |     });
+      255 |
+
+      at forEach (__tests__/bazi.test.js:252:12)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/bazi.test.js:249:20)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 边界条件和异常输入处理 › 应该处理无效时间输入
+
+    wrong hour 25
+
+      20 |
+      21 |     // 1. 创建公历对象
+    > 22 |     const solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+         |                         ^
+      23 |
+      24 |     // 2. 转换为农历对象 (lunar-javascript 会自动处理节气等八字计算)
+      25 |     let lunar = solar.getLunar();
+
+      at _fromYmdHms (../node_modules/lunar-javascript/lunar.js:106:15)
+      at Object.fromYmdHms (../node_modules/lunar-javascript/lunar.js:624:60)
+      at calculateDetailedBazi (../src/utils/baziHelper.js:22:25)
+      at forEach (__tests__/bazi.test.js:260:26)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/bazi.test.js:259:20)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 农历和节气验证 › 应该正确计算农历日期
+
+    expect(received).toBeDefined()
+
+    Received: undefined
+
+      322 |       
+      323 |       // 验证农历日期结构
+    > 324 |       expect(baziInfo.lunar.year).toBeDefined();
+          |                                   ^
+      325 |       expect(baziInfo.lunar.month).toBeDefined();
+      326 |       expect(baziInfo.lunar.day).toBeDefined();
+      327 |       expect(baziInfo.lunar.isLeapMonth).toBeDefined();
+
+      at Object.<anonymous> (__tests__/bazi.test.js:324:35)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 八字运算算法测试套件 › 纳音五行验证 › 应该正确计算纳音五行
+
+    expect(received).toMatch(expected)
+
+    Expected pattern: /[木火土金水]\w+/
+    Received string:  "大林木"
+
+      350 |       
+      351 |       expect(baziInfo.nayin).toBeDefined();
+    > 352 |       expect(baziInfo.nayin.year).toMatch(/[木火土金水]\w+/);
+          |                                   ^
+      353 |       expect(baziInfo.nayin.month).toMatch(/[木火土金水]\w+/);
+      354 |       expect(baziInfo.nayin.day).toMatch(/[木火土金水]\w+/);
+      355 |       expect(baziInfo.nayin.hour).toMatch(/[木火土金水]\w+/);
+
+      at Object.<anonymous> (__tests__/bazi.test.js:352:35)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+Test Suites: 1 failed, 1 total
+Tests:       20 failed, 8 passed, 28 total
+Snapshots:   0 total
+Time:        0.881 s, estimated 1 s
+Ran all test suites matching /.\/__tests__\/bazi.test.js/i.
+Test results written to: test/results/八字运算算法测试.json
+<br>
+                    <span class="timestamp">2025-12-25T08:24:54.521Z</span>
+                </div>
+            
+                <div class="error-item">
+                    <strong>边界条件测试</strong><br>
+                    Command failed: npx jest ./__tests__/edge-cases.test.js --config=./test/jest.config.js --verbose --json --outputFile=./test/results/边界条件测试.json
+FAIL test/__tests__/edge-cases.test.js
+  边界条件和异常输入测试套件
+    极端日期和时间处理
+      ✕ 应该处理极早和极晚的日期 (10 ms)
+      ✕ 应该正确处理闰年日期 (1 ms)
+      ✓ 应该拒绝明显无效的日期 (2 ms)
+      ✕ 应该处理边界时间值 (1 ms)
+    极端地理位置处理
+      ✕ 应该处理极地坐标 (1 ms)
+      ✓ 应该处理超出范围的坐标 (1 ms)
+    特殊姓名处理
+      ✕ 应该处理极端长度的姓名
+      ✕ 应该处理特殊字符和表情符号
+    错误恢复和容错机制
+      ✕ 应该正确处理部分缺失数据 (1 ms)
+      ✕ 应该正确处理格式错误数据 (5 ms)
+      ✕ 应该正确处理空数据 (1 ms)
+      ✕ 应该正确处理null数据 (1 ms)
+      ✕ 应该正确处理数据完整性检查 (1 ms)
+      ✕ 应该正确自动修复数据 (1 ms)
+    并发操作测试
+      ✕ 应该正确处理并发配置添加 (2 ms)
+      ✓ 应该正确处理并发配置修改 (148 ms)
+    性能压力测试
+      ✓ 应该处理大量八字计算 (107 ms)
+      ✓ 应该处理大量时辰计算 (6 ms)
+    内存和资源管理
+      ✓ 应该正确处理大量配置存储 (2 ms)
+      ✕ 应该正确清理临时数据 (1 ms)
+
+  ● 边界条件和异常输入测试套件 › 极端日期和时间处理 › 应该处理极早和极晚的日期
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      134 |       });
+      135 |       
+    > 136 |       expect(earlyResult).toBeTruthy();
+          |                           ^
+      137 |
+      138 |       // 测试极晚日期
+      139 |       const lateResult = await enhancedUserConfigManager.addBasicConfig({
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:136:27)
+
+  ● 边界条件和异常输入测试套件 › 极端日期和时间处理 › 应该正确处理闰年日期
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      155 |       });
+      156 |       
+    > 157 |       expect(result).toBeTruthy();
+          |                      ^
+      158 |     });
+      159 |
+      160 |     test('应该拒绝明显无效的日期', async () => {
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:157:22)
+
+  ● 边界条件和异常输入测试套件 › 极端日期和时间处理 › 应该处理边界时间值
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "子"
+    Received: undefined
+
+      187 |       boundaryTimes.forEach(({ time, expectedShichen }) => {
+      188 |         const shichen = getShichen(time);
+    > 189 |         expect(shichen.name).toBe(expectedShichen);
+          |                              ^
+      190 |       });
+      191 |     });
+      192 |   });
+
+      at forEach (__tests__/edge-cases.test.js:189:30)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/edge-cases.test.js:187:21)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 边界条件和异常输入测试套件 › 极端地理位置处理 › 应该处理极地坐标
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      205 |         });
+      206 |         
+    > 207 |         expect(result).toBeTruthy();
+          |                        ^
+      208 |       }
+      209 |     });
+      210 |
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:207:24)
+
+  ● 边界条件和异常输入测试套件 › 特殊姓名处理 › 应该处理极端长度的姓名
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      247 |         });
+      248 |         
+    > 249 |         expect(result).toBeTruthy();
+          |                        ^
+      250 |         
+      251 |         // 验证姓名被正确保存
+      252 |         if (result) {
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:249:24)
+
+  ● 边界条件和异常输入测试套件 › 特殊姓名处理 › 应该处理特殊字符和表情符号
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      276 |         });
+      277 |         
+    > 278 |         expect(result).toBeTruthy();
+          |                        ^
+      279 |       }
+      280 |     });
+      281 |   });
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:278:24)
+
+  ● 边界条件和异常输入测试套件 › 错误恢复和容错机制 › 应该正确处理部分缺失数据
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      288 |         
+      289 |         if (testCase.shouldRecover) {
+    > 290 |           expect(result).toBeTruthy();
+          |                          ^
+      291 |           
+      292 |           // 验证数据被正确恢复
+      293 |           const configs = enhancedUserConfigManager.getAllConfigs();
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:290:26)
+
+  ● 边界条件和异常输入测试套件 › 错误恢复和容错机制 › 应该正确处理格式错误数据
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      288 |         
+      289 |         if (testCase.shouldRecover) {
+    > 290 |           expect(result).toBeTruthy();
+          |                          ^
+      291 |           
+      292 |           // 验证数据被正确恢复
+      293 |           const configs = enhancedUserConfigManager.getAllConfigs();
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:290:26)
+
+  ● 边界条件和异常输入测试套件 › 错误恢复和容错机制 › 应该正确处理空数据
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      288 |         
+      289 |         if (testCase.shouldRecover) {
+    > 290 |           expect(result).toBeTruthy();
+          |                          ^
+      291 |           
+      292 |           // 验证数据被正确恢复
+      293 |           const configs = enhancedUserConfigManager.getAllConfigs();
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:290:26)
+
+  ● 边界条件和异常输入测试套件 › 错误恢复和容错机制 › 应该正确处理null数据
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      288 |         
+      289 |         if (testCase.shouldRecover) {
+    > 290 |           expect(result).toBeTruthy();
+          |                          ^
+      291 |           
+      292 |           // 验证数据被正确恢复
+      293 |           const configs = enhancedUserConfigManager.getAllConfigs();
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:290:26)
+
+  ● 边界条件和异常输入测试套件 › 错误恢复和容错机制 › 应该正确处理数据完整性检查
+
+    TypeError: birthDataIntegrityManager.checkDataIntegrity is not a function
+
+      309 |     test('应该正确处理数据完整性检查', () => {
+      310 |       ERROR_RECOVERY_CASES.forEach(testCase => {
+    > 311 |         const integrityCheck = birthDataIntegrityManager.checkDataIntegrity(testCase.config);
+          |                                                          ^
+      312 |         
+      313 |         // 验证完整性检查返回合理结果
+      314 |         expect(integrityCheck).toBeDefined();
+
+      at forEach (__tests__/edge-cases.test.js:311:58)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/edge-cases.test.js:310:28)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 边界条件和异常输入测试套件 › 错误恢复和容错机制 › 应该正确自动修复数据
+
+    TypeError: birthDataIntegrityManager.autoFixMissingData is not a function
+
+      321 |     test('应该正确自动修复数据', () => {
+      322 |       ERROR_RECOVERY_CASES.forEach(testCase => {
+    > 323 |         const fixedConfig = birthDataIntegrityManager.autoFixMissingData(testCase.config);
+          |                                                       ^
+      324 |         
+      325 |         // 验证修复后的配置
+      326 |         expect(fixedConfig).toBeDefined();
+
+      at forEach (__tests__/edge-cases.test.js:323:55)
+          at Array.forEach (<anonymous>)
+      at Object.<anonymous> (__tests__/edge-cases.test.js:322:28)
+      at TestScheduler.scheduleTests (../node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (../node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (../node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (../node_modules/@jest/core/build/cli/index.js:173:3)
+
+  ● 边界条件和异常输入测试套件 › 并发操作测试 › 应该正确处理并发配置添加
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      367 |       
+      368 |       // 至少应该有一些配置成功添加
+    > 369 |       expect(successful).toBeGreaterThan(0);
+          |                          ^
+      370 |     }, CONCURRENCY_TEST_CONFIG.timeout);
+      371 |
+      372 |     test('应该正确处理并发配置修改', async () => {
+
+      at Object.<anonymous> (__tests__/edge-cases.test.js:369:26)
+
+  ● 边界条件和异常输入测试套件 › 内存和资源管理 › 应该正确清理临时数据
+
+    无法删除配置：索引无效或只剩一个配置
+
+      674 |   async removeConfig(index) {
+      675 |     if (!this.initialized || index < 0 || index >= this.configs.length || this.configs.length <= 1) {
+    > 676 |       throw new Error('无法删除配置：索引无效或只剩一个配置');
+          |             ^
+      677 |     }
+      678 |     
+      679 |     try {
+
+      at EnhancedUserConfigManager.removeConfig (../src/utils/EnhancedUserConfigManager.js:676:13)
+      at Object.<anonymous> (__tests__/edge-cases.test.js:485:41)
+
+Test Suites: 1 failed, 1 total
+Tests:       14 failed, 6 passed, 20 total
+Snapshots:   0 total
+Time:        1.071 s
+Ran all test suites matching /.\/__tests__\/edge-cases.test.js/i.
+Test results written to: test/results/边界条件测试.json
+<br>
+                    <span class="timestamp">2025-12-25T08:24:57.810Z</span>
+                </div>
+            
+        </div>
+
+        <!-- 性能分析 -->
+        <div class="section">
+            <h2>⚡ 性能分析</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>指标名称</th>
+                        <th>样本数</th>
+                        <th>最小值</th>
+                        <th>最大值</th>
+                        <th>平均值</th>
+                        <th>中位数</th>
+                        <th>趋势</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                        <tr>
+                            <td>八字计算性能</td>
+                            <td>1</td>
+                            <td>11.78ms</td>
+                            <td>11.78ms</td>
+                            <td>11.78ms</td>
+                            <td>11.78ms</td>
+                            <td>稳定</td>
+                        </tr>
+                    
+                        <tr>
+                            <td>时辰计算性能</td>
+                            <td>1</td>
+                            <td>100.64ms</td>
+                            <td>100.64ms</td>
+                            <td>100.64ms</td>
+                            <td>100.64ms</td>
+                            <td>稳定</td>
+                        </tr>
+                    
+                        <tr>
+                            <td>配置存储性能</td>
+                            <td>1</td>
+                            <td>6.33ms</td>
+                            <td>6.33ms</td>
+                            <td>6.33ms</td>
+                            <td>6.33ms</td>
+                            <td>稳定</td>
+                        </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 改进建议 -->
+        <div class="section">
+            <h2>💡 改进建议</h2>
+            
+                <div class="recommendation 中">
+                    <strong>[中优先级] 错误处理</strong><br>
+                    频繁出现 Command failed 错误，建议加强相关错误处理机制<br>
+                    <em>建议操作: improve_error_handling</em>
+                </div>
+            
+        </div>
+    </div>
+</body>
+</html>

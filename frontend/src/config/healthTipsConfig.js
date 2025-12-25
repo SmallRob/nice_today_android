@@ -149,6 +149,109 @@ export const fiveElementsInfo = {
   }
 };
 
+// 中国传统节日配置
+export const chineseFestivals = {
+  "春节": {
+    name: "春节",
+    date: "农历正月初一",
+    desc: "岁首之节，万象更新",
+    advice: "阖家团圆，饮食有节",
+    action: "祈福纳祥，辞旧迎新",
+    color: "from-red-500 to-red-600",
+    emoji: "🧧"
+  },
+  "元宵节": {
+    name: "元宵节",
+    date: "农历正月十五",
+    desc: "灯火万盏，月圆人圆",
+    advice: "食汤圆养胃，不宜过量",
+    action: "赏灯猜谜，欢度良宵",
+    color: "from-pink-500 to-rose-600",
+    emoji: "🏮"
+  },
+  "清明节": {
+    name: "清明节",
+    date: "公历4月4-6日",
+    desc: "慎终追远，踏青赏春",
+    advice: "饮食宜温，多食柔肝养肺之物",
+    action: "祭祖踏青，亲近自然",
+    color: "from-green-500 to-emerald-600",
+    emoji: "🌿"
+  },
+  "端午节": {
+    name: "端午节",
+    date: "农历五月初五",
+    desc: "端午安康，驱邪避毒",
+    advice: "吃粽子宜温，配茶解腻",
+    action: "挂艾辟邪，佩戴香囊",
+    color: "from-green-600 to-teal-600",
+    emoji: "🎋"
+  },
+  "七夕节": {
+    name: "七夕节",
+    date: "农历七月初七",
+    desc: "银河迢迢，鹊桥相会",
+    advice: "宜食瓜果，清热解暑",
+    action: "赏星观月，寄托相思",
+    color: "from-purple-500 to-indigo-600",
+    emoji: "🌌"
+  },
+  "中元节": {
+    name: "中元节",
+    date: "农历七月十五",
+    desc: "追思先人，慎终追远",
+    advice: "饮食清淡，避免刺激性食物",
+    action: "缅怀先祖，弘扬孝道",
+    color: "from-slate-500 to-gray-600",
+    emoji: "🕯️"
+  },
+  "中秋节": {
+    name: "中秋节",
+    date: "农历八月十五",
+    desc: "月圆人圆，花好月圆",
+    advice: "月饼适量，配茶助消化",
+    action: "赏月品茗，家人团聚",
+    color: "from-amber-500 to-orange-600",
+    emoji: "🌕"
+  },
+  "重阳节": {
+    name: "重阳节",
+    date: "农历九月初九",
+    desc: "登高赏菊，敬老尊贤",
+    advice: "吃糕登高，注意保暖",
+    action: "插茱萸草，饮菊花酒",
+    color: "from-yellow-500 to-amber-600",
+    emoji: "🌼"
+  },
+  "冬至": {
+    name: "冬至",
+    date: "公历12月21-23日",
+    desc: "阴极之至，阳气始生",
+    advice: "补益阳气，多吃饺子汤圆",
+    action: "注意防寒，避免过度劳累",
+    color: "from-blue-500 to-indigo-600",
+    emoji: "❄️"
+  },
+  "腊八节": {
+    name: "腊八节",
+    date: "农历腊月初八",
+    desc: "腊八时节，祈福纳祥",
+    advice: "食腊八粥，温补脾胃",
+    action: "祭祀先祖，准备过年",
+    color: "from-orange-500 to-red-600",
+    emoji: "🍲"
+  },
+  "除夕": {
+    name: "除夕",
+    date: "农历大年三十",
+    desc: "辞旧迎新，合家团圆",
+    advice: "饮食有度，勿暴饮暴食",
+    action: "守岁迎春，阖家欢乐",
+    color: "from-red-600 to-rose-700",
+    emoji: "🎆"
+  }
+};
+
 // 24节气养生小贴士
 export const solarTermHealthTips = {
   "立春": {
@@ -281,7 +384,8 @@ const healthTipsConfig = {
   seasonGeneralTips,
   warmReminders,
   fiveElementsInfo,
-  solarTermHealthTips
+  solarTermHealthTips,
+  chineseFestivals
 };
 
 export default healthTipsConfig;

@@ -1,10 +1,19 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { userConfigManager, DEFAULT_CONFIG } from '../utils/userConfigManager';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import { errorLogger } from '../utils/errorLogger';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 
 // 创建全局配置上下文
 const UserConfigContext = createContext();
+
+// 默认出生时间（当数据缺失时使用）
+const DEFAULT_BIRTH_TIME = '12:30';
+
+// 默认经度（当数据缺失时使用）
+const DEFAULT_LONGITUDE = 116.40;
+
+// 默认纬度（当数据缺失时使用）
+const DEFAULT_LATITUDE = 39.90;
 
 // 全局配置提供者组件
 export const UserConfigProvider = ({ children }) => {
@@ -22,12 +31,12 @@ export const UserConfigProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      if (!userConfigManager.initialized) {
-        await userConfigManager.initialize();
+      if (!enhancedUserConfigManager.initialized) {
+        await enhancedUserConfigManager.initialize();
       }
       
-      const configData = userConfigManager.getCurrentConfig();
-      const allConfigs = userConfigManager.getAllConfigs();
+      const configData = enhancedUserConfigManager.getCurrentConfig();
+      const allConfigs = enhancedUserConfigManager.getAllConfigs();
       
       setCurrentConfig(configData);
       setConfigs(allConfigs);
@@ -54,15 +63,20 @@ export const UserConfigProvider = ({ children }) => {
 
     const handleConfigChange = ({
       configs: updatedConfigs,
-      activeConfigIndex: updatedActiveIndex,
       currentConfig: updatedCurrentConfig,
       forceReload
     }) => {
+      console.log('UserConfigContext 配置变更:', {
+        configsLength: updatedConfigs.length,
+        currentConfigNickname: updatedCurrentConfig?.nickname,
+        forceReload
+      });
+      // 立即更新所有状态，确保UI能实时刷新
       setCurrentConfig(updatedCurrentConfig);
       setConfigs(updatedConfigs);
     };
 
-    const removeListener = userConfigManager.addListener(handleConfigChange);
+    const removeListener = enhancedUserConfigManager.addListener(handleConfigChange);
 
     return () => {
       if (removeListener) removeListener();
@@ -77,9 +91,9 @@ export const UserConfigProvider = ({ children }) => {
   // 更新配置
   const updateConfig = useCallback(async (index, config) => {
     try {
-      userConfigManager.updateConfig(index, config);
+      const result = await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, config);
       // 监听器会自动更新状态
-      return true;
+      return result && result.success;
     } catch (err) {
       errorLogger.log(err, {
         component: 'UserConfigContext',
@@ -95,10 +109,10 @@ export const UserConfigProvider = ({ children }) => {
   // 添加新配置
   const addConfig = useCallback(async (config) => {
     try {
-      userConfigManager.addConfig(config);
-      // addConfig 方法内部已经自动设置新配置为活跃配置，不需要额外调用 setActiveConfig
+      const result = await enhancedUserConfigManager.addBasicConfig(config);
+      // addBasicConfig 方法内部已经自动设置新配置为活跃配置，不需要额外调用 setActiveConfig
       // 监听器会自动更新状态
-      return true;
+      return result;
     } catch (err) {
       errorLogger.log(err, {
         component: 'UserConfigContext',
@@ -114,7 +128,7 @@ export const UserConfigProvider = ({ children }) => {
   // 删除配置
   const deleteConfig = useCallback(async (index) => {
     try {
-      await userConfigManager.deleteConfig(index);
+      await enhancedUserConfigManager.removeConfig(index);
       // 监听器会自动更新状态
       return true;
     } catch (err) {
@@ -132,7 +146,7 @@ export const UserConfigProvider = ({ children }) => {
   // 切换当前配置
   const switchConfig = useCallback(async (index) => {
     try {
-      await userConfigManager.switchToConfig(index);
+      await enhancedUserConfigManager.setActiveConfig(index);
       // 监听器会自动更新状态
       return true;
     } catch (err) {
@@ -147,6 +161,64 @@ export const UserConfigProvider = ({ children }) => {
     }
   }, []);
 
+  /**
+   * 更新八字信息到配置
+   * @param {string} nickname - 用户昵称
+   * @param {Object} baziInfo - 八字信息对象
+   * @returns {Promise<boolean>} 是否更新成功
+   */
+  const updateBaziInfo = useCallback(async (nickname, baziInfo) => {
+    try {
+      const success = await enhancedUserConfigManager.updateBaziInfo(nickname, baziInfo);
+      return success;
+    } catch (err) {
+      errorLogger.log(err, {
+        component: 'UserConfigContext',
+        action: 'updateBaziInfo',
+        nickname,
+        errorType: 'BaziUpdateError'
+      });
+      console.error('更新八字信息失败:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * 从出生信息计算并更新八字
+   * @param {string} nickname - 用户昵称
+   * @param {Object} birthInfo - 出生信息
+   * @returns {Promise<boolean>} 是否更新成功
+   */
+  const calculateAndSyncBazi = useCallback(async (nickname, birthInfo) => {
+    try {
+      const success = await enhancedUserConfigManager.calculateAndSyncBaziInfo(nickname, birthInfo);
+      return success;
+    } catch (err) {
+      errorLogger.log(err, {
+        component: 'UserConfigContext',
+        action: 'calculateAndSyncBazi',
+        nickname,
+        errorType: 'BaziCalculationError'
+      });
+      console.error('计算并同步八字信息失败:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * 获取有效的出生信息（使用默认值回退）
+   * @param {Object} config - 配置对象
+   * @returns {Object} 包含 birthDate, birthTime, longitude 的对象
+   */
+  const getValidBirthInfo = useCallback((config) => {
+    return {
+      birthDate: config?.birthDate || null,
+      birthTime: config?.birthTime || DEFAULT_BIRTH_TIME,
+      longitude: config?.birthLocation?.lng ?? DEFAULT_LONGITUDE,
+      latitude: config?.birthLocation?.lat ?? DEFAULT_LATITUDE
+    };
+  }, []);
+
   const value = {
     configManagerReady,
     currentConfig,
@@ -157,7 +229,10 @@ export const UserConfigProvider = ({ children }) => {
     updateConfig,
     addConfig,
     deleteConfig,
-    switchConfig
+    switchConfig,
+    updateBaziInfo,
+    calculateAndSyncBazi,
+    getValidBirthInfo
   };
 
   return (
@@ -170,104 +245,48 @@ export const UserConfigProvider = ({ children }) => {
 // 使用配置的Hook
 export const useUserConfig = () => {
   const context = useContext(UserConfigContext);
-  
+
   if (!context) {
     // 降级处理：直接使用配置管理器
     return {
-      configManagerReady: userConfigManager.initialized === true,
-      currentConfig: userConfigManager.getCurrentConfig?.() || DEFAULT_CONFIG,
-      configs: userConfigManager.getAllConfigs?.() || [DEFAULT_CONFIG],
+      configManagerReady: enhancedUserConfigManager.initialized === true,
+      currentConfig: enhancedUserConfigManager.getCurrentConfig?.() || DEFAULT_CONFIG,
+      configs: enhancedUserConfigManager.getAllConfigs?.() || [DEFAULT_CONFIG],
       loading: false,
       error: null,
-      initializeConfigManager: () => userConfigManager.initialize?.() || Promise.resolve(false),
-      updateConfig: (index, config) => {
-        try {
-          userConfigManager.updateConfig?.(index, config);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      addConfig: (config) => {
-        try {
-          userConfigManager.addConfig?.(config);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      deleteConfig: (index) => {
-        try {
-          userConfigManager.deleteConfig?.(index);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      switchConfig: (index) => {
-        try {
-          userConfigManager.switchToConfig?.(index);
-          return true;
-        } catch {
-          return false;
-        }
-      }
+      initializeConfigManager: () => enhancedUserConfigManager.initialize(),
+      updateConfig: (index, config) => enhancedUserConfigManager.updateConfigWithNodeUpdate(index, config),
+      addConfig: (config) => enhancedUserConfigManager.addBasicConfig(config),
+      deleteConfig: (index) => enhancedUserConfigManager.removeConfig(index),
+      switchConfig: (index) => enhancedUserConfigManager.setActiveConfig(index),
+      updateBaziInfo: (nickname, baziInfo) => enhancedUserConfigManager.updateBaziInfo(nickname, baziInfo),
+      calculateAndSyncBazi: (nickname, birthInfo) => enhancedUserConfigManager.calculateAndSyncBaziInfo(nickname, birthInfo),
+      getValidBirthInfo: (config) => ({
+        birthDate: config?.birthDate || null,
+        birthTime: config?.birthTime || '12:30',
+        longitude: config?.birthLocation?.lng ?? 116.40,
+        latitude: config?.birthLocation?.lat ?? 39.90
+      })
     };
   }
-  
+
   return context;
 };
 
 // 配置数据Hook（简化版，只返回当前配置）
 export const useCurrentConfig = () => {
-  const { currentConfig, configManagerReady, loading, error } = useUserConfig();
+  const { currentConfig, configManagerReady } = useUserConfig();
 
   // 如果全局上下文不可用，直接返回配置管理器的当前配置
-  if (!configManagerReady && !userConfigManager.initialized) {
+  if (!configManagerReady && !enhancedUserConfigManager.initialized) {
     // 尝试初始化
-    userConfigManager.initialize().catch(console.error);
+    enhancedUserConfigManager.initialize().catch(console.error);
   }
 
-  // 获取当前配置
-  const config = currentConfig || userConfigManager.getCurrentConfig();
+  // enhancedUserConfigManager 的 getCurrentConfig 不支持 allowNull 参数，直接调用即可
+  const configFromManager = enhancedUserConfigManager.getCurrentConfig();
 
-  // 提供辅助方法
-  const getCurrentConfig = () => {
-    return config;
-  };
-
-  // 更新八字信息的方法（降级处理）
-  const updateBaziInfo = async (nickname, baziInfo) => {
-    try {
-      // 尝试使用 enhancedUserConfigManager
-      if (enhancedUserConfigManager && enhancedUserConfigManager.updateBaziInfo) {
-        return await enhancedUserConfigManager.updateBaziInfo(nickname, baziInfo);
-      }
-      // 如果不可用，使用旧版 userConfigManager
-      const configIndex = userConfigManager.configs.findIndex(c => c.nickname === nickname);
-      if (configIndex !== -1) {
-        userConfigManager.configs[configIndex] = {
-          ...userConfigManager.configs[configIndex],
-          ...baziInfo
-        };
-        userConfigManager.saveToStorage();
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('更新八字信息失败:', error);
-      return false;
-    }
-  };
-
-  // 返回结果对象（保持清晰的API结构）
-  return {
-    currentConfig: config,
-    isLoading: loading,
-    error: error,
-    getCurrentConfig,
-    updateBaziInfo
-  };
+  return currentConfig || configFromManager;
 };
 
 export default UserConfigContext;

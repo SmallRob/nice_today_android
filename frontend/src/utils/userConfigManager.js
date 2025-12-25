@@ -4,20 +4,20 @@
  * 支持多组配置，默认加载第一组配置数据
  */
 
-// 默认配置模板
-const DEFAULT_CONFIG = {
+// 默认配置模板（冻结的不可变对象，确保系统配置不会被意外修改）
+const DEFAULT_CONFIG = Object.freeze({
   nickname: '叉子',
   realName: '', // 真实姓名（用于五格评分和八字测算）
   birthDate: '1991-04-30',
   birthTime: '12:30',
   shichen: '午时',
-  birthLocation: {
+  birthLocation: Object.freeze({
     province: '北京市',
     city: '北京市',
-    district: '朝阳区',
+    district: '海淀区',
     lng: 116.48,
     lat: 39.95
-  },
+  }),
   zodiac: '金牛座',
   zodiacAnimal: '羊',
   gender: 'male',
@@ -26,7 +26,40 @@ const DEFAULT_CONFIG = {
   bazi: null, // 八字命格信息（包含四柱、时辰、经纬度等）
   isused: false, // 是否为当前使用的配置
   isSystemDefault: true // 标记为系统默认配置
-};
+});
+
+/**
+ * 深拷贝配置对象，确保用户配置与默认配置完全隔离
+ * @param {Object} sourceConfig - 源配置对象
+ * @returns {Object} 深拷贝的新配置对象
+ */
+function deepCloneConfig(sourceConfig) {
+  if (!sourceConfig || typeof sourceConfig !== 'object') {
+    return sourceConfig;
+  }
+
+  // 使用 JSON 方法进行深拷贝，确保完全隔离
+  const cloned = JSON.parse(JSON.stringify(sourceConfig));
+
+  // 确保 birthLocation 对象也被深拷贝
+  if (sourceConfig.birthLocation) {
+    cloned.birthLocation = { ...sourceConfig.birthLocation };
+  }
+
+  return cloned;
+}
+
+/**
+ * 从默认配置创建新配置模板
+ * @param {Object} overrides - 需要覆盖的字段
+ * @returns {Object} 新配置对象（深拷贝）
+ */
+function createConfigFromDefault(overrides = {}) {
+  return deepCloneConfig({
+    ...DEFAULT_CONFIG,
+    ...overrides
+  });
+}
 
 // 空配置默认值
 const EMPTY_CONFIG_DEFAULTS = {
@@ -81,13 +114,13 @@ class UserConfigManager {
         configsLength: storedConfigs ? storedConfigs.length : 0
       });
 
-      // 解析配置数据
-      this.configs = storedConfigs ? JSON.parse(storedConfigs) : [DEFAULT_CONFIG];
+      // 解析配置数据（加载失败时创建深拷贝）
+      this.configs = storedConfigs ? JSON.parse(storedConfigs) : [createConfigFromDefault()];
       this.activeConfigIndex = storedIndex ? parseInt(storedIndex, 10) : 0;
 
-      // 确保至少有一组配置
+      // 确保至少有一组配置（深拷贝）
       if (this.configs.length === 0) {
-        this.configs = [DEFAULT_CONFIG];
+        this.configs = [createConfigFromDefault()];
         this.activeConfigIndex = 0;
       }
 
@@ -111,7 +144,7 @@ class UserConfigManager {
       }));
 
       // 检查是否存在系统默认配置（只有一个默认配置的系统默认标记为 true）
-      const systemDefaultIndex = this.configs.findIndex(c => c.nickname === '叉子' && c.birthDate === '1991-04-30');
+      const systemDefaultIndex = this.configs.findIndex(c => c.nickname === '叉子');
       if (systemDefaultIndex !== -1 && systemDefaultIndex === 0) {
         this.configs[systemDefaultIndex].isSystemDefault = true;
       }
@@ -166,43 +199,41 @@ class UserConfigManager {
   /**
    * 获取当前活跃配置
    * @returns {Object} 当前配置对象
+   * @param {Boolean} allowNull 是否允许返回null（不使用默认值覆盖）
    */
-  getCurrentConfig() {
+  getCurrentConfig(allowNull = false) {
     if (!this.initialized || this.configs.length === 0) {
-      return DEFAULT_CONFIG;
-    }
-
-    // 从存储中重新读取配置，确保获取最新数据
-    try {
-      const storedConfigs = localStorage.getItem(STORAGE_KEYS.USER_CONFIGS);
-      const storedIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
-
-      if (storedConfigs && storedIndex) {
-        const parsedConfigs = JSON.parse(storedConfigs);
-        const parsedIndex = parseInt(storedIndex, 10);
-
-        // 更新内存中的配置以匹配存储
-        if (parsedConfigs.length > 0 && parsedIndex < parsedConfigs.length) {
-          this.configs = parsedConfigs;
-          this.activeConfigIndex = parsedIndex;
-        }
-      }
-    } catch (error) {
-      console.error('从存储读取配置失败，使用内存缓存:', error);
+      return allowNull ? null : DEFAULT_CONFIG;
     }
 
     const currentConfig = this.configs[this.activeConfigIndex];
 
-    // 如果是空配置，返回默认值
-    if (!currentConfig ||
-      !currentConfig.nickname ||
-      !currentConfig.birthDate ||
-      !currentConfig.zodiac ||
-      !currentConfig.zodiacAnimal) {
+    // 如果允许null且配置为空，直接返回null，不使用默认值覆盖
+    if (!allowNull && (!currentConfig || !currentConfig.nickname)) {
       return { ...EMPTY_CONFIG_DEFAULTS, ...currentConfig };
     }
 
-    return currentConfig;
+    // 如果配置不完整，只补充必要的默认字段，不覆盖已有字段
+    if (currentConfig) {
+      const normalizedConfig = { ...currentConfig };
+      
+      // 只补充缺失的字段，不覆盖已有字段
+      if (!normalizedConfig.nickname) normalizedConfig.nickname = EMPTY_CONFIG_DEFAULTS.nickname;
+      if (!normalizedConfig.birthDate) normalizedConfig.birthDate = EMPTY_CONFIG_DEFAULTS.birthDate;
+      if (!normalizedConfig.birthTime) normalizedConfig.birthTime = EMPTY_CONFIG_DEFAULTS.birthTime;
+      if (!normalizedConfig.shichen) normalizedConfig.shichen = EMPTY_CONFIG_DEFAULTS.shichen;
+      if (!normalizedConfig.birthLocation) normalizedConfig.birthLocation = { ...EMPTY_CONFIG_DEFAULTS.birthLocation };
+      if (!normalizedConfig.zodiac) normalizedConfig.zodiac = EMPTY_CONFIG_DEFAULTS.zodiac;
+      if (!normalizedConfig.zodiacAnimal) normalizedConfig.zodiacAnimal = EMPTY_CONFIG_DEFAULTS.zodiacAnimal;
+      if (!normalizedConfig.gender) normalizedConfig.gender = EMPTY_CONFIG_DEFAULTS.gender;
+      if (!normalizedConfig.mbti) normalizedConfig.mbti = EMPTY_CONFIG_DEFAULTS.mbti;
+      if (normalizedConfig.isused === undefined) normalizedConfig.isused = false;
+      if (normalizedConfig.isSystemDefault === undefined) normalizedConfig.isSystemDefault = false;
+      
+      return normalizedConfig;
+    }
+
+    return allowNull ? null : { ...EMPTY_CONFIG_DEFAULTS };
   }
 
   /**
@@ -312,8 +343,8 @@ class UserConfigManager {
       }
     }
 
-    // 通知监听器
-    this.notifyListeners(true); // 强制重新加载标志
+    // 通知监听器（添加新配置需要强制重新加载）
+    this.notifyListeners(true, true); // 强制重新加载并标记为配置更新
 
     console.log('添加新配置成功并设为活跃配置', {
       index: this.activeConfigIndex,
@@ -340,6 +371,10 @@ class UserConfigManager {
     if (!updates || typeof updates !== 'object') {
       throw new Error('更新数据无效');
     }
+
+    // 检测是否修改了基础配置（出生日期、时间、位置）
+    const basicFields = ['birthDate', 'birthTime', 'birthLocation'];
+    const hasBasicConfigChange = Object.keys(updates).some(key => basicFields.includes(key));
 
     // 保留原配置的 isused 状态（除非明确指定）
     const keepIsused = this.configs[index].isused && updates.isused === undefined;
@@ -378,10 +413,10 @@ class UserConfigManager {
       }
     }
 
-    // 通知监听器
-    this.notifyListeners(true); // 强制重新加载标志
+    // 通知监听器（只有修改了基础配置才强制重新加载）
+    this.notifyListeners(hasBasicConfigChange, hasBasicConfigChange);
 
-    console.log(`更新配置 ${index} 成功，isused: ${this.configs[index].isused}`, this.configs[index]);
+    console.log(`更新配置 ${index} 成功，isused: ${this.configs[index].isused}, 基础配置变更: ${hasBasicConfigChange}`, this.configs[index]);
     return true;
   }
 
@@ -401,6 +436,9 @@ class UserConfigManager {
     if (this.configs.length <= 1) {
       throw new Error('至少需要保留一个配置');
     }
+
+    // 检查是否删除了当前活跃配置
+    const wasActiveConfig = index === this.activeConfigIndex;
 
     // 删除配置
     this.configs.splice(index, 1);
@@ -443,10 +481,10 @@ class UserConfigManager {
       }
     }
 
-    // 通知监听器
-    this.notifyListeners(true); // 强制重新加载标志
+    // 通知监听器（删除了活跃配置才强制重新加载）
+    this.notifyListeners(wasActiveConfig, wasActiveConfig);
 
-    console.log(`删除配置 ${index} 成功，当前活跃索引 ${this.activeConfigIndex}`);
+    console.log(`删除配置 ${index} 成功，当前活跃索引 ${this.activeConfigIndex}, 是否为活跃配置: ${wasActiveConfig}`);
     return true;
   }
 
@@ -494,8 +532,8 @@ class UserConfigManager {
       }
     }
 
-    // 通知监听器
-    this.notifyListeners(true); // 强制重新加载标志
+    // 通知监听器（不强制重新加载，只更新索引）
+    this.notifyListeners(false, false); // 仅切换配置，不触发数据重新加载
 
     console.log(`设置活跃配置为 ${index} 成功，isused 状态已更新`);
     return true;
@@ -711,8 +749,10 @@ class UserConfigManager {
 
   /**
    * 通知所有监听器
+   * @param {Boolean} forceReload 是否强制重新加载
+   * @param {Boolean} isConfigUpdate 是否是配置更新（区别于仅切换活跃配置）
    */
-  notifyListeners(forceReload = false) {
+  notifyListeners(forceReload = false, isConfigUpdate = false) {
     const currentConfig = this.getCurrentConfig();
     this.listeners.forEach(listener => {
       try {
@@ -720,7 +760,8 @@ class UserConfigManager {
           configs: [...this.configs],
           activeConfigIndex: this.activeConfigIndex,
           currentConfig,
-          forceReload // 强制重新加载标志
+          forceReload, // 强制重新加载标志
+          isConfigUpdate // 是否是配置内容更新
         });
       } catch (error) {
         console.error('监听器执行出错:', error);

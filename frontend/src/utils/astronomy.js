@@ -8,7 +8,7 @@ const EARTHLY_BRANCHES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未'
 
 // 获取时辰 (例如: 12:30 -> 午时二刻)
 export const getShichen = (timeStr) => {
-    if (!timeStr) return '';
+    if (!timeStr) return { name: '', index: -1, startTime: '', endTime: '' };
 
     const [hourStr, minuteStr] = timeStr.split(':');
     const hour = parseInt(hourStr, 10);
@@ -27,7 +27,17 @@ export const getShichen = (timeStr) => {
     const keMap = ['初刻', '一刻', '二刻', '三刻'];
     const ke = keMap[keIndex] || '初刻';
 
-    return `${branch}时${ke}`;
+    // 计算起止时间
+    const startTime = `${((branchIndex * 2 + 23) % 24).toString().padStart(2, '0')}:00`;
+    const endTime = `${((branchIndex * 2 + 1) % 24).toString().padStart(2, '0')}:59`;
+    
+    return {
+        name: branch,
+        index: branchIndex,
+        startTime: startTime,
+        endTime: endTime,
+        full: `${branch}时${ke}`
+    };
 };
 
 /**
@@ -46,7 +56,7 @@ export const getShichenSimple = (timeStr) => {
     const branchIndex = Math.floor((hour + 1) / 2) % 12;
     const branch = EARTHLY_BRANCHES[branchIndex];
 
-    return `${branch}时`;
+    return branch;
 };
 
 /**
@@ -60,7 +70,14 @@ export const normalizeShichen = (shichen) => {
     if (!shichen) return '';
 
     // 移除刻度部分（初刻、一刻、二刻、三刻）
-    return shichen.replace(/(初刻|一刻|二刻|三刻)/g, '');
+    let result = shichen.replace(/(初刻|一刻|二刻|三刻)/g, '');
+    
+    // 如果结果以"时"结尾，移除"时"以匹配测试期望
+    if (result.endsWith('时')) {
+        result = result.slice(0, -1);
+    }
+    
+    return result;
 };
 
 /**

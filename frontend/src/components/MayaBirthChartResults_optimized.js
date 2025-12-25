@@ -1,13 +1,13 @@
-import React, { useState, useMemo, useCallback, memo } from 'react';
+import React, { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
 
 // 优化的分块渲染组件 - 使用IntersectionObserver进行懒加载
 const ChunkedRenderer = memo(({ items, chunkSize = 3, renderItem, loadingComponent }) => {
   const [visibleChunks, setVisibleChunks] = useState(1);
-  const observerRef = React.useRef(null);
-  const sentinelRef = React.useRef(null);
+  const observerRef = useRef(null);
+  const sentinelRef = useRef(null);
 
   // 优化chunks计算，避免不必要的重新计算
-  const chunks = React.useMemo(() => {
+  const chunks = useMemo(() => {
     const result = [];
     for (let i = 0; i < items.length; i += chunkSize) {
       result.push(items.slice(i, i + chunkSize));
@@ -15,7 +15,7 @@ const ChunkedRenderer = memo(({ items, chunkSize = 3, renderItem, loadingCompone
     return result;
   }, [items, chunkSize]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // 清理之前的观察者
     if (observerRef.current) {
       observerRef.current.disconnect();

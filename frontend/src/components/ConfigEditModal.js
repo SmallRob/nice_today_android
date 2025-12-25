@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useStore } from '@tanstack/react-store';
 import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
-import { getShichen, getShichenSimple, normalizeShichen, calculateTrueSolarTime } from '../utils/astronomy';
+import { getShichen, getShichenSimple, calculateTrueSolarTime } from '../utils/astronomy';
 import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 
 // 性别选项
@@ -92,8 +92,8 @@ const MobileOptimizedButton = ({ children, onClick, variant = 'primary', disable
   );
 };
 
-// 基于TanStack Form的配置编辑弹窗组件（增加错误处理）
-const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMessage }) => {
+// 基于TanStack Form的配置编辑弹窗组件
+const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMessage, isFromTemplate = false, templateSource = null }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [initError, setInitError] = useState(null);
   const prevIsOpenRef = useRef(false);
@@ -286,8 +286,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     return '';
   };
 
-  // 验证所有输入字段的合规性
-  const validateAllInputs = (formData) => {
+  // 简化验证：只验证必填字段，减少不必要的警告
+  const validateRequiredInputs = (formData) => {
     const errors = [];
 
     // 1. 验证昵称（必填）
@@ -299,71 +299,160 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       errors.push('昵称最多支持20个字符');
     }
 
-    // 2. 验证真实姓名（选填，只验证长度）
-    if (formData.realName && formData.realName.trim()) {
-      if (formData.realName.trim().length > 50) {
-        errors.push('真实姓名最多支持50个字符');
-      }
-    }
-
-    // 3. 验证出生日期（必填）
+    // 2. 验证出生日期（必填）
     if (!formData.birthDate) {
       errors.push('请选择出生日期');
     } else {
-      const birthDate = new Date(formData.birthDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (isNaN(birthDate.getTime())) {
-        errors.push('出生日期格式不正确');
-      } else if (birthDate > today) {
-        errors.push('出生日期不能是未来日期');
-      } else if (birthDate < new Date('1900-01-01')) {
-        errors.push('出生日期不能早于1900年');
+      // 简化日期验证：只检查基本格式
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+      if (!datePattern.test(formData.birthDate)) {
+        errors.push('出生日期格式错误，应为 YYYY-MM-DD');
       }
     }
 
-    // 4. 验证出生时间（必填）
+    // 3. 验证出生时间（必填）
     if (!formData.birthTime || !formData.birthTime.trim()) {
       errors.push('请输入出生时间');
     } else {
-      const timeMatch = formData.birthTime.trim().match(/^([01]\d|2[0-3]):([0-5]\d)$/);
-      if (!timeMatch) {
-        errors.push('出生时间格式不正确，请使用 HH:MM 格式（如 12:30）');
+      // 简化时间验证：只检查基本格式
+      const timePattern = /^\d{1,2}:\d{2}$/;
+      if (!timePattern.test(formData.birthTime)) {
+        errors.push('出生时间格式错误，应为 HH:MM');
       }
     }
 
-    // 5. 验证出生地点（简化：只需经纬度有效即可）
+    // 4. 验证出生地点（必填）
     const loc = formData.birthLocation || {};
-    if (loc.lng === undefined || loc.lng === null || isNaN(loc.lng)) {
-      errors.push('请输入有效的经度');
-    } else if (loc.lng < -180 || loc.lng > 180) {
-      errors.push('经度必须在-180到180之间');
-    }
-
-    if (loc.lat === undefined || loc.lat === null || isNaN(loc.lat)) {
-      errors.push('请输入有效的纬度');
-    } else if (loc.lat < -90 || loc.lat > 90) {
-      errors.push('纬度必须在-90到90之间');
+    if (!loc || typeof loc !== 'object') {
+      errors.push('请提供完整的出生地点信息');
+    } else if (!loc.province || !loc.city || loc.lng === undefined || loc.lat === undefined) {
+      errors.push('请选择完整的出生地点（省、市、经纬度）');
     }
 
     return errors;
   };
 
+
+
+  // 创建关键信息确认弹窗
+  const showConfirmationDialog = (configData) => {
+    return new Promise((resolve) => {
+      // 计算关键信息
+      const shichen = getShichen(configData.birthTime || '12:30');
+      const lng = configData.birthLocation?.lng || DEFAULT_REGION.lng;
+      const trueSolarTime = calculateTrueSolarTime(configData.birthDate, configData.birthTime || '12:30', lng);
+
+      // 创建确认弹窗
+      const dialog = document.createElement('div');
+      dialog.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
+      dialog.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              🔍 请确认关键信息
+            </h3>
+            <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div class="space-y-4 mb-6">
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">基本信息</h4>
+              <p class="text-sm text-blue-700 dark:text-blue-400">
+                <strong>昵称：</strong>${configData.nickname || '未设置'}<br>
+                <strong>出生日期：</strong>${configData.birthDate || '未设置'}<br>
+                <strong>出生时间：</strong>${configData.birthTime || '未设置'}
+              </p>
+            </div>
+            
+            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+              <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">时辰信息</h4>
+              <p class="text-sm text-green-700 dark:text-green-400">
+                <strong>出生时辰：</strong><span class="font-bold">${shichen}</span><br>
+                <strong>真太阳时：</strong><span class="font-bold">${trueSolarTime}</span><br>
+                <strong>经度校正：</strong>${lng}°
+              </p>
+            </div>
+            
+            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+              <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-2">八字计算</h4>
+              <p class="text-sm text-purple-700 dark:text-purple-400">
+                以上时辰和真太阳时将用于准确的八字计算。
+                请确认信息无误后再保存。
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex justify-end gap-3">
+            <button id="cancel-save" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
+              取消
+            </button>
+            <button id="confirm-save" class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+              确认保存
+            </button>
+          </div>
+        </div>
+      `;
+
+      // 添加事件监听
+      dialog.querySelector('button').onclick = () => {
+        document.body.removeChild(dialog);
+        resolve(false);
+      };
+      
+      dialog.querySelector('#cancel-save').onclick = () => {
+        document.body.removeChild(dialog);
+        resolve(false);
+      };
+      
+      dialog.querySelector('#confirm-save').onclick = () => {
+        document.body.removeChild(dialog);
+        resolve(true);
+      };
+
+      // 添加到页面
+      document.body.appendChild(dialog);
+    });
+  };
+
   // 保存配置
   const handleSave = async (formData) => {
-    // 全面验证所有输入（已包含位置验证）
-    const validationErrors = validateAllInputs(formData);
+    // 简化验证：只验证必填字段
+    const validationErrors = validateRequiredInputs(formData);
 
     if (validationErrors.length > 0) {
-      // 显示所有错误信息
-      const errorList = validationErrors.map((err, idx) => `${idx + 1}. ${err}`).join('\n');
-      showMessage(`输入不合规：\n${errorList}`, 'error');
-      console.error('输入验证失败:', validationErrors);
+      // 显示浮动错误提示框
+      const errorBox = document.getElementById('validation-errors');
+      const errorList = document.getElementById('validation-error-list');
+
+      if (errorBox && errorList) {
+        // 清空并填充错误列表
+        errorList.innerHTML = '';
+        validationErrors.forEach(err => {
+          const li = document.createElement('li');
+          li.textContent = err;
+          errorList.appendChild(li);
+        });
+
+        // 显示错误框
+        errorBox.classList.remove('hidden');
+
+        console.error('输入验证失败:', validationErrors);
+      }
       return;
     }
 
-    // 获取验证后的位置信息（确保有有效的经纬度）
+    // 显示关键信息确认弹窗
+    const confirmed = await showConfirmationDialog(formData);
+    if (!confirmed) {
+      console.log('用户取消了保存');
+      return;
+    }
+
+    // 获取位置信息（确保有有效的经纬度）
     let finalLocation = formData.birthLocation || { ...DEFAULT_REGION };
     // 确保经纬度有效（使用默认值兜底）
     if (finalLocation.lng === undefined || finalLocation.lng === null || isNaN(finalLocation.lng)) {
@@ -372,7 +461,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     if (finalLocation.lat === undefined || finalLocation.lat === null || isNaN(finalLocation.lat)) {
       finalLocation.lat = DEFAULT_REGION.lat;
     }
-    // 确保省市区有默认值（即使为空字符串）
+    // 确保省市区有默认值
     if (!finalLocation.province) finalLocation.province = DEFAULT_REGION.province;
     if (!finalLocation.city) finalLocation.city = DEFAULT_REGION.city;
     if (!finalLocation.district) finalLocation.district = DEFAULT_REGION.district;
@@ -380,19 +469,13 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     setIsSaving(true);
 
     try {
-      // 检查配置管理器是否已初始化
-      // 新的 Context API 不需要显式初始化检查
-
-      // 计算简化格式的时辰（用于显示和保存）
+      // 计算时辰信息
       const shichenSimple = getShichenSimple(formData.birthTime || '12:30');
-
-      // 计算完整格式的时辰（用于日志记录）
-      const shichenFull = getShichen(formData.birthTime || '12:30');
 
       let finalConfig = {
         ...formData,
         birthLocation: finalLocation,
-        shichen: shichenSimple,  // 保存简化格式的时辰（不带刻度）
+        shichen: shichenSimple,  // 保存简化格式的时辰
         // 确保必填字段有默认值
         isused: formData.isused ?? false,
         nameScore: formData.nameScore ?? null,
@@ -401,58 +484,53 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         lastCalculated: formData.lastCalculated ?? null
       };
 
-      // 计算农历和真太阳时信息
+      // 计算农历和真太阳时信息（简化处理）
       try {
         const lunarFields = generateLunarAndTrueSolarFields(finalConfig);
-        // 只覆盖非空的字段
         if (lunarFields.lunarBirthDate) {
           finalConfig.lunarBirthDate = lunarFields.lunarBirthDate;
         }
         if (lunarFields.trueSolarTime) {
           finalConfig.trueSolarTime = lunarFields.trueSolarTime;
         }
-        if (lunarFields.lunarInfo) {
-          finalConfig.lunarInfo = lunarFields.lunarInfo;
-        }
-        finalConfig.lastCalculated = lunarFields.lastCalculated || new Date().toISOString();
-
-        console.log('自动计算农历信息:', {
-          lunarBirthDate: lunarFields.lunarBirthDate,
-          trueSolarTime: lunarFields.trueSolarTime,
-          longitude: finalLocation.lng,
-          shichen: shichenFull  // 日志记录完整格式的时辰
-        });
-      } catch (error) {
-        console.error('计算农历信息失败:', error);
-        // 农历计算失败不影响保存，设置默认值
-        finalConfig.lunarBirthDate = null;
-        finalConfig.trueSolarTime = null;
-        finalConfig.lunarInfo = null;
         finalConfig.lastCalculated = new Date().toISOString();
+      } catch (error) {
+        console.warn('农历计算失败，不影响保存:', error);
+        // 农历计算失败不影响保存
       }
 
-      // 验证通过，立即关闭弹窗
-      onClose();
-
       // 显示保存中消息
-      showMessage('正在保存配置，数据将在后台同步...', 'info');
+      showMessage('正在保存配置...', 'info');
 
-      // 异步保存数据（不阻塞弹窗关闭）
-      onSave(index, finalConfig).then(() => {
-        // 保存成功后更新消息
-        showMessage('✅ 保存成功，数据已同步', 'success');
-      }).catch((error) => {
-        // 保存失败显示错误，但不影响用户体验
-        console.error('异步保存失败:', error);
-        showMessage(`⚠️ 保存失败: ${error.message}`, 'error');
-      });
+      try {
+        // 异步保存数据
+        const result = await onSave(index, finalConfig);
+
+        if (result) {
+          console.log('配置保存成功');
+          showMessage('✅ 配置保存成功', 'success');
+          
+          // 保存成功后延迟关闭弹窗
+          setTimeout(() => {
+            onClose();
+          }, 500);
+        } else {
+          throw new Error('保存配置返回失败结果');
+        }
+
+      } catch (error) {
+        console.error('保存配置失败:', error);
+        showMessage(`保存失败: ${error.message}`, 'error');
+        throw error;
+      } finally {
+        setIsSaving(false);
+      }
 
     } catch (error) {
       console.error('保存配置失败:', error);
       showMessage(`保存失败: ${error.message}`, 'error');
-      throw error; // 重新抛出异常，让父组件感知
-    } finally {
       setIsSaving(false);
+      throw error;
     }
   };
 
@@ -483,10 +561,20 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-            <span className="mr-2">⚙️</span> {isNew ? '新建配置' : '修改配置'}
-          </h3>
+        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shrink-0 bg-white dark:bg-gray-800 z-10">
+          <div className="flex flex-col">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+              <span className="mr-2">⚙️</span> {isNew ? '新建配置' : '修改配置'}
+            </h3>
+            {isFromTemplate && templateSource && (
+              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1 flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
+                </svg>
+                复制自模板：{templateSource}
+              </p>
+            )}
+          </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 touch-manipulation">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -495,7 +583,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         </div>
 
         {/* Content */}
-        <div className="p-6 flex-1 space-y-6 overflow-y-auto overflow-x-hidden" style={{ maxHeight: 'calc(90vh - 140px)', WebkitOverflowScrolling: 'touch' }}>
+        <div className="p-6 flex-1 space-y-6 overflow-y-auto overflow-x-hidden min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -503,6 +591,53 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             }}
             className="space-y-6"
           >
+            {/* 浮动错误提示 */}
+            <div id="validation-errors" className="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-red-50 dark:bg-red-900/90 border-2 border-red-400 rounded-lg p-4 shadow-2xl max-w-md w-full mx-4">
+              <div className="flex items-start">
+                <svg className="w-6 h-6 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-red-700 dark:text-red-300 mb-2">输入验证失败</h4>
+                  <ul id="validation-error-list" className="text-sm text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
+                    {/* 错误列表将动态插入 */}
+                  </ul>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    document.getElementById('validation-errors').classList.add('hidden');
+                  }}
+                  className="ml-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById('validation-errors').classList.add('hidden');
+                  // 滚动到第一个错误字段
+                  const errorList = document.getElementById('validation-error-list');
+                  if (errorList && errorList.firstChild) {
+                    // 获取第一个错误对应的字段
+                    const firstError = errorList.firstChild.textContent;
+                    // 尝试定位到对应字段
+                    const errorField = document.querySelector(`[name="${firstError}"]`);
+                    if (errorField) {
+                      errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      errorField.focus();
+                    }
+                  }
+                }}
+                className="mt-3 w-full px-3 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-700 dark:text-red-300 rounded-md text-sm font-medium transition-colors"
+              >
+                定位到错误字段
+              </button>
+            </div>
+
             {/* 昵称 */}
             <div>
               <form.Field
@@ -974,7 +1109,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2 bg-white dark:bg-gray-800 sticky bottom-0">
+            <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2 bg-white dark:bg-gray-800 shrink-0 mt-auto">
               <MobileOptimizedButton
                 variant="secondary"
                 onClick={onClose}

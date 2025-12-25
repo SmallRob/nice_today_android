@@ -509,7 +509,7 @@ function SettingsPage() {
                 }`}
               onClick={() => handleTabChange('userConfigs')}
             >
-              用户配置
+              用户面板
             </button>
             <button
               className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'app'

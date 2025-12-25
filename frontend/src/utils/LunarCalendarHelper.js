@@ -326,7 +326,8 @@ export const batchValidateLunarDates = (configs) => {
             
             // 检查是否需要修复
             const needsFix = !config.lunarBirthDate || !config.trueSolarTime || 
-                            config.lunarBirthDate !== lunarFields.lunarBirthDate;
+                            config.lunarBirthDate !== lunarFields.lunarBirthDate ||
+                            config.trueSolarTime !== lunarFields.trueSolarTime;
             
             if (needsFix) {
                 results.fixed++;
@@ -336,7 +337,8 @@ export const batchValidateLunarDates = (configs) => {
                     fixed: true,
                     original: {
                         lunarBirthDate: config.lunarBirthDate,
-                        trueSolarTime: config.trueSolarTime
+                        trueSolarTime: config.trueSolarTime,
+                        lastCalculated: config.lastCalculated
                     },
                     corrected: lunarFields
                 });
@@ -352,6 +354,133 @@ export const batchValidateLunarDates = (configs) => {
     });
     
     return results;
+};
+
+/**
+ * 增强的农历日期验证函数
+ * @param {Object} config 用户配置
+ * @returns {Object} 验证结果
+ */
+export const enhancedValidateLunarDate = (config) => {
+    if (!config || !config.birthDate) {
+        return { valid: false, error: '缺少出生日期', warnings: [], corrections: {} };
+    }
+
+    const warnings = [];
+    const corrections = {};
+
+    try {
+        // 1. 重新计算农历和真太阳时
+        const lunarFields = generateLunarAndTrueSolarFields(config);
+        
+        // 2. 验证农历日期
+        if (!config.lunarBirthDate) {
+            warnings.push('缺少农历日期');
+            corrections.lunarBirthDate = lunarFields.lunarBirthDate;
+        } else if (config.lunarBirthDate !== lunarFields.lunarBirthDate) {
+            warnings.push(`农历日期不一致: ${config.lunarBirthDate} -> ${lunarFields.lunarBirthDate}`);
+            corrections.lunarBirthDate = lunarFields.lunarBirthDate;
+        }
+
+        // 3. 验证真太阳时
+        if (!config.trueSolarTime) {
+            warnings.push('缺少真太阳时');
+            corrections.trueSolarTime = lunarFields.trueSolarTime;
+        } else if (config.trueSolarTime !== lunarFields.trueSolarTime) {
+            warnings.push(`真太阳时不一致: ${config.trueSolarTime} -> ${lunarFields.trueSolarTime}`);
+            corrections.trueSolarTime = lunarFields.trueSolarTime;
+        }
+
+        // 4. 验证时辰一致性
+        if (config.shichen) {
+            const { calculateShichenForZiWei } = require('./ConfigValidationHelper');
+            const shichenResult = calculateShichenForZiWei(
+                config.birthTime || '12:30', 
+                config.birthLocation?.lng || 116.48, 
+                config.birthDate
+            );
+            
+            if (!shichenResult.error && shichenResult.shichenSimple !== config.shichen) {
+                warnings.push(`时辰不一致: ${config.shichen} -> ${shichenResult.shichenSimple}`);
+                corrections.shichen = shichenResult.shichenSimple;
+            }
+        }
+
+        // 5. 更新时间戳
+        corrections.lastCalculated = new Date().toISOString();
+
+        return {
+            valid: warnings.length === 0,
+            error: null,
+            warnings,
+            corrections,
+            lunarFields
+        };
+
+    } catch (error) {
+        return {
+            valid: false,
+            error: error.message,
+            warnings: [],
+            corrections: {}
+        };
+    }
+};
+
+/**
+ * 自动修复配置中的农历和时辰数据
+ * @param {Object} config 用户配置
+ * @returns {Object} 修复后的配置
+ */
+export const autoFixLunarAndShichenData = (config) => {
+    if (!config || !config.birthDate) {
+        return config;
+    }
+
+    try {
+        const validation = enhancedValidateLunarDate(config);
+        
+        if (!validation.valid && Object.keys(validation.corrections).length > 0) {
+            console.log(`自动修复配置 ${config.nickname} 的农历数据:`, validation.corrections);
+            return { ...config, ...validation.corrections };
+        }
+        
+        return config;
+    } catch (error) {
+        console.error('自动修复农历数据失败:', error);
+        return config;
+    }
+};
+
+/**
+ * 检查配置是否需要农历数据更新
+ * @param {Object} config 用户配置
+ * @returns {boolean} 是否需要更新
+ */
+export const needsLunarDataUpdate = (config) => {
+    if (!config || !config.birthDate) {
+        return false;
+    }
+
+    // 检查是否缺少必要字段
+    if (!config.lunarBirthDate || !config.trueSolarTime || !config.shichen) {
+        return true;
+    }
+
+    // 检查最后计算时间（如果超过30天，需要重新计算）
+    if (config.lastCalculated) {
+        const lastCalc = new Date(config.lastCalculated);
+        const now = new Date();
+        const daysDiff = (now - lastCalc) / (1000 * 60 * 60 * 24);
+        
+        if (daysDiff > 30) {
+            return true;
+        }
+    }
+
+    // 验证一致性
+    const validation = enhancedValidateLunarDate(config);
+    return !validation.valid;
 };
 
 // 导出默认实例
