@@ -122,9 +122,13 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
 
   // 显示计算元数据（用于调试）
   const getMetadataDisplay = () => {
-    if (!ziweiData || !ziweiData.metadata) return null;
+    // getZiWeiDisplayData 返回的结构是 { ziweiData: { ... }, metadata: { ... } }
+    // metadata 在外层，不在 ziweiData.ziweiData 内部
+    const metadata = ziweiData?.metadata || ziweiData?.ziweiData?.metadata;
 
-    const { birthDate, birthTime, trueSolarTime, longitude, latitude } = ziweiData.metadata;
+    if (!metadata) return null;
+
+    const { birthDate, birthTime, trueSolarTime, longitude, latitude } = metadata;
 
     return (
       <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
@@ -191,7 +195,34 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
     );
   }
 
-  const { palaces, mingGong, summary } = ziweiData;
+  // 从 ziweiData 中提取实际的紫微命宫数据
+  // getZiWeiDisplayData 返回的结构是 { ziweiData: { palaces, mingGong, summary, ... }, ... }
+  const actualZiweiData = ziweiData?.ziweiData || ziweiData;
+
+  // 检查是否有实际的紫微命宫数据
+  if (!actualZiweiData || !actualZiweiData.palaces) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-4 text-white shadow-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-bold mb-1">🌟 紫微命宫</h3>
+              <p className="text-sm opacity-90">基于出生时间的命盘分析</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
+          <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2">⚠️ 数据不完整</h4>
+          <div className="text-sm text-orange-600 dark:text-orange-400">
+            <p>紫微命盘数据不完整或计算失败。</p>
+            <p className="text-xs mt-2 opacity-80">请检查出生信息是否完整，或点击"刷新八字信息"按钮重新计算。</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { palaces, mingGong, summary } = actualZiweiData;
 
   // 显示警告（如果有的话）
   const warningDisplay = getWarningDisplay();

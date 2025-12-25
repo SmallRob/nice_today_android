@@ -5,118 +5,31 @@
  */
 
 import { Solar, Lunar } from 'lunar-javascript';
+import { createStandardBaziData, DEFAULT_VALUES } from './baziSchema';
 
 /**
- * 计算完整的八字及详细信息
+ * 计算完整的八字及详细信息（使用标准Schema）
  * @param {string} birthDateStr YYYY-MM-DD
  * @param {string} birthTimeStr HH:mm
  * @param {number} longitude 经度
  */
 export const calculateDetailedBazi = (birthDateStr, birthTimeStr, longitude) => {
     if (!birthDateStr) return null;
-    
-    // 验证输入参数
-    if (!birthDateStr || typeof birthDateStr !== 'string') {
-        throw new Error('出生日期格式错误');
-    }
-    
-    if (birthDateStr && !/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(birthDateStr)) {
-        throw new Error('出生日期格式错误');
-    }
 
-    const dateParts = birthDateStr.split('-');
-    if (dateParts.length !== 3) {
-        throw new Error('出生日期格式错误');
-    }
-    
-    const [year, month, day] = dateParts.map(Number);
-    
-    // 验证日期有效性
-    if (isNaN(year) || isNaN(month) || isNaN(day) || year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
-        throw new Error('出生日期格式错误');
-    }
-
-    const timeParts = (birthTimeStr || '12:00').split(':');
-    if (timeParts.length !== 2) {
-        throw new Error('出生时间格式错误');
-    }
-    const [hour, minute] = timeParts.map(Number);
-    
-    // 验证时间有效性
-    if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-        throw new Error('出生时间格式错误');
-    }
-
-    let solar;
     try {
-        // 1. 创建公历对象
-        solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+        // 使用标准Schema创建八字数据
+        return createStandardBaziData({
+            birthDate: birthDateStr,
+            birthTime: birthTimeStr || DEFAULT_VALUES.BIRTH_TIME,
+            birthLocation: {
+                lng: longitude || DEFAULT_VALUES.LONGITUDE,
+                lat: DEFAULT_VALUES.LATITUDE
+            }
+        });
     } catch (error) {
-        throw new Error('无效的日期或时间');
+        console.error('计算八字失败:', error);
+        throw error;
     }
-
-    // 2. 转换为农历对象 (lunar-javascript 会自动处理节气等八字计算)
-    let lunar = solar.getLunar();
-
-    // 3. 如果有经度，使用真太阳时获取更准确的八字
-    if (longitude !== undefined && longitude !== null) {
-        // 简单真太阳时调整逻辑 (120度为基准)
-        // 经度差1度 = 4分钟
-        const offsetMinutes = (longitude - 120) * 4;
-
-        // 手动调整时间戳
-        const newDate = new Date(year, month - 1, day, hour, minute);
-        newDate.setMinutes(newDate.getMinutes() + offsetMinutes);
-
-        const adjustSolar = Solar.fromDate(newDate);
-        lunar = adjustSolar.getLunar();
-    }
-
-    const eightChar = lunar.getEightChar();
-
-    // 获取详细信息
-    return {
-        solar: {
-            year: solar.getYear(),
-            month: solar.getMonth(),
-            day: solar.getDay(),
-            hour: solar.getHour(),
-            minute: solar.getMinute(),
-            text: `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日`
-        },
-        lunar: {
-            yearStr: lunar.getYearInGanZhi() + '年', // 辛丑年
-            monthStr: lunar.getMonthInChinese() + '月', // 八月
-            dayStr: lunar.getDayInChinese(), // 初四
-            text: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`
-        },
-        bazi: {
-            year: eightChar.getYear(), // 辛丑
-            month: eightChar.getMonth(), // 丁酉
-            day: eightChar.getDay(), // 辛酉
-            hour: eightChar.getTime(), // 己亥
-            text: `${eightChar.getYear()} ${eightChar.getMonth()} ${eightChar.getDay()} ${eightChar.getTime()}`
-        },
-        wuxing: {
-            year: eightChar.getYearWuXing(), // 金土
-            month: eightChar.getMonthWuXing(), // 火金
-            day: eightChar.getDayWuXing(), // 金金
-            hour: eightChar.getTimeWuXing(), // 土水
-            text: `${eightChar.getYearWuXing()} ${eightChar.getMonthWuXing()} ${eightChar.getDayWuXing()} ${eightChar.getTimeWuXing()}`
-        },
-        nayin: {
-            year: eightChar.getYearNaYin(), // 壁上土
-            month: eightChar.getMonthNaYin(), // 山下火
-            day: eightChar.getDayNaYin(), // 石榴木
-            hour: eightChar.getTimeNaYin(), // 平地木
-            text: `${eightChar.getYearNaYin()} ${eightChar.getMonthNaYin()} ${eightChar.getDayNaYin()} ${eightChar.getTimeNaYin()}`
-        },
-        shichen: {
-            time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
-            ganzhi: lunar.getTimeInGanZhi() // 亥时 or 己亥，注意 lunar库 timeInGanZhi 返回可能是 己亥
-        },
-        full: lunar
-    };
 };
 
 /**
@@ -245,12 +158,44 @@ export const solarToLunarDescription = (dateStr) => {
 
 /**
  * 计算流年大运
- * @param {Object} baziData 八字数据
+ * @param {Object} baziData 八字数据（兼容标准Schema和旧版格式）
  * @param {number} targetYear 目标年份
  * @returns {Object} 流年运势信息
  */
 export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullYear()) => {
-    if (!baziData || !baziData.bazi) {
+    if (!baziData) {
+        return null;
+    }
+
+    // 兼容标准Schema和旧版格式：提取八字四柱
+    let dayGanZhi, dayGan, dayZhi;
+
+    // 标准格式：bazi.bazi.day.ganZhi
+    if (baziData.bazi && baziData.bazi.day && baziData.bazi.day.ganZhi) {
+        dayGanZhi = baziData.bazi.day.ganZhi;
+        dayGan = baziData.bazi.day.gan;
+        dayZhi = baziData.bazi.day.zhi;
+    }
+    // 旧版格式：bazi.bazi.day
+    else if (baziData.bazi && baziData.bazi.day) {
+        dayGanZhi = baziData.bazi.day;
+        dayGan = baziData.bazi.day.charAt(0);
+        dayZhi = baziData.bazi.day.charAt(1);
+    }
+    // 顶层属性（兼容）
+    else if (baziData.day) {
+        dayGanZhi = baziData.day;
+        dayGan = baziData.day.charAt(0);
+        dayZhi = baziData.day.charAt(1);
+    }
+    // 日主信息（标准格式）
+    else if (baziData.dayMaster) {
+        dayGanZhi = baziData.dayMaster.ganZhi;
+        dayGan = baziData.dayMaster.gan;
+        dayZhi = baziData.dayMaster.zhi;
+    }
+    else {
+        console.error('无法从八字数据中提取日柱信息');
         return null;
     }
 
@@ -258,10 +203,6 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
     const solar = Solar.fromYmd(targetYear, 1, 1);
     const lunar = solar.getLunar();
     const yearGanZhi = lunar.getYearInGanZhi(); // 如"乙巳"
-
-    // 解析八字五行信息
-    const dayMaster = baziData.bazi.day.charAt(0); // 日主（日干）
-    const dayBranch = baziData.bazi.day.charAt(1); // 日支
 
     // 五行对应表
     const wuxingMap = {
@@ -273,7 +214,7 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
     };
 
     // 获取日主五行
-    const dayMasterElement = wuxingMap[dayMaster] || '未知';
+    const dayMasterElement = wuxingMap[dayGan] || '未知';
 
     // 获取流年天干地支五行
     const liuNianGan = yearGanZhi.charAt(0);
@@ -551,12 +492,57 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
 
 /**
  * 计算今日能量提示（基于当日五行信息结合用户八字动态计算）
- * @param {Object} baziData 八字数据
+ * @param {Object} baziData 八字数据（兼容标准Schema和旧版格式）
  * @param {Date} targetDate 目标日期（默认为今天）
  * @returns {Object} 今日能量提示信息
  */
 export const calculateDailyEnergy = (baziData, targetDate = new Date()) => {
-    if (!baziData || !baziData.bazi) {
+    // 兼容标准Schema和旧版格式：提取日柱信息
+    let dayGan, dayGanZhi, dayMasterElement;
+
+    if (!baziData) {
+        // 返回默认值
+        return {
+            overallScore: 75,
+            description: '今天能量平稳，适合处理日常事务和规划未来。保持耐心，稳步前进。',
+            suggestions: [
+                { icon: '🎤', label: '积极工作', type: 'good' }
+            ],
+            attentions: [
+                { icon: '💰', label: '谨慎消费', type: 'warning' }
+            ],
+            dailyWuxing: {
+                gan: '未知',
+                ganElement: '未知',
+                branch: '未知',
+                branchElement: '未知',
+                ganzhi: '未知'
+            }
+        };
+    }
+
+    // 标准格式：bazi.bazi.day.ganZhi
+    if (baziData.bazi && baziData.bazi.day && baziData.bazi.day.ganZhi) {
+        dayGanZhi = baziData.bazi.day.ganZhi;
+        dayGan = baziData.bazi.day.gan;
+    }
+    // 旧版格式：bazi.bazi.day
+    else if (baziData.bazi && baziData.bazi.day) {
+        dayGanZhi = baziData.bazi.day;
+        dayGan = baziData.bazi.day.charAt(0);
+    }
+    // 顶层属性（兼容）
+    else if (baziData.day) {
+        dayGanZhi = baziData.day;
+        dayGan = baziData.day.charAt(0);
+    }
+    // 日主信息（标准格式）
+    else if (baziData.dayMaster) {
+        dayGanZhi = baziData.dayMaster.ganZhi;
+        dayGan = baziData.dayMaster.gan;
+    }
+    else {
+        console.error('无法从八字数据中提取日柱信息');
         // 返回默认值
         return {
             overallScore: 75,
@@ -580,10 +566,7 @@ export const calculateDailyEnergy = (baziData, targetDate = new Date()) => {
     // 获取当日干支
     const solar = Solar.fromDate(targetDate);
     const lunar = solar.getLunar();
-    const dayGanZhi = lunar.getDayInGanZhi(); // 当日日柱干支
-
-    // 解析八字五行信息
-    const dayMaster = baziData.bazi.day.charAt(0); // 日主（日干）
+    const targetDayGanZhi = lunar.getDayInGanZhi(); // 当日日柱干支
     
     // 五行对应表
     const wuxingMap = {
@@ -595,11 +578,11 @@ export const calculateDailyEnergy = (baziData, targetDate = new Date()) => {
     };
 
     // 获取日主五行
-    const dayMasterElement = wuxingMap[dayMaster] || '未知';
+    dayMasterElement = wuxingMap[dayGan] || '未知';
 
     // 获取当日天干地支五行
-    const dailyGan = dayGanZhi.charAt(0);
-    const dailyBranch = dayGanZhi.charAt(1);
+    const dailyGan = targetDayGanZhi.charAt(0);
+    const dailyBranch = targetDayGanZhi.charAt(1);
     const dailyGanElement = wuxingMap[dailyGan];
     const dailyBranchElement = wuxingMap[dailyBranch];
 
@@ -614,11 +597,11 @@ export const calculateDailyEnergy = (baziData, targetDate = new Date()) => {
 
     // 分析当日与日主的关系
     const getRelation = (element1, element2) => {
-        if (element1 === element2) return '比劫';
-        if (wuxingRelations[element1]['生'] === element2) return '食伤';
-        if (wuxingRelations[element1]['克'] === element2) return '财星';
-        if (wuxingRelations[element1]['被克'] === element2) return '官杀';
-        if (wuxingRelations[element1]['被生'] === element2) return '印星';
+        if (element1 === element2) return '比劫'; // 同为比劫
+        if (wuxingRelations[element1]['生'] === element2) return '食伤'; // 我生者为食伤
+        if (wuxingRelations[element1]['克'] === element2) return '财星'; // 我克者为财星
+        if (wuxingRelations[element1]['被克'] === element2) return '官杀'; // 克我者为官杀
+        if (wuxingRelations[element1]['被生'] === element2) return '印星'; // 生我者为印星
         return '未知';
     };
 

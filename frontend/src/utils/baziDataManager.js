@@ -26,7 +26,7 @@ export const BaziStatus = {
 
 /**
  * 验证八字数据的完整性
- * @param {Object} baziData - 八字数据对象
+ * @param {Object} baziData - 八字数据对象（统一格式）
  * @returns {Object} { valid: boolean, error: string }
  */
 export const validateBaziData = (baziData) => {
@@ -34,14 +34,14 @@ export const validateBaziData = (baziData) => {
     return { valid: false, error: '八字数据为空' };
   }
 
-  // 检查 bazi.bazi 字段（新格式）
-  if (baziData.bazi && baziData.bazi.bazi) {
-    const { bazi: baziInfo } = baziData;
+  // 检查统一格式：baziData.bazi 包含八字四柱
+  if (baziData.bazi) {
+    const baziInfo = baziData.bazi;
     if (!baziInfo.year || !baziInfo.month || !baziInfo.day || !baziInfo.hour) {
       return { valid: false, error: '八字四柱信息不完整' };
     }
-  } else if (!baziData.bazi) {
-    // 检查旧格式（直接有 year, month, day, hour）
+  } else {
+    // 检查旧格式：直接有 year, month, day, hour（顶层属性）
     if (!baziData.year || !baziData.month || !baziData.day || !baziData.hour) {
       return { valid: false, error: '八字四柱信息不完整' };
     }
@@ -54,7 +54,7 @@ export const validateBaziData = (baziData) => {
  * 获取有效的时辰显示
  * 优先级：配置中的 shichen > 八字计算结果 > 根据 birthTime 计算
  * @param {Object} config - 用户配置
- * @param {Object} baziData - 八字数据
+ * @param {Object} baziData - 八字数据（统一格式）
  * @returns {string} 时辰显示文本
  */
 export const getValidShichen = (config, baziData) => {
@@ -66,16 +66,9 @@ export const getValidShichen = (config, baziData) => {
     }
   }
 
-  // 2. 使用八字计算结果中的时辰
+  // 2. 使用八字计算结果中的时辰（统一格式）
   if (baziData) {
-    // 新格式：baziData.bazi.shichen.ganzhi
-    if (baziData.bazi && baziData.bazi.bazi && baziData.bazi.bazi.shichen) {
-      const ganzhi = baziData.bazi.bazi.shichen.ganzhi;
-      if (ganzhi && ganzhi.endsWith('时')) {
-        return ganzhi;
-      }
-    }
-    // 旧格式：baziData.shichen.ganzhi
+    // 新格式：baziData.shichen.ganzhi
     if (baziData.shichen && baziData.shichen.ganzhi) {
       const ganzhi = baziData.shichen.ganzhi;
       if (ganzhi && ganzhi.endsWith('时')) {

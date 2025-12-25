@@ -705,41 +705,45 @@ class EnhancedUserConfigManager {
   /**
    * 更新八字信息
    * @param {string} nickname - 用户昵称
-   * @param {Object} baziInfo - 八字信息
+   * @param {Object} baziInfo - 八字信息（统一格式，包含顶层属性）
    * @returns {Promise<boolean>} 是否更新成功
    */
   async updateBaziInfo(nickname, baziInfo) {
     if (!this.initialized) {
       throw new Error('配置管理器未初始化');
     }
-    
+
     try {
       // 查找对应用户
       const configIndex = this.configs.findIndex(config => config.nickname === nickname);
-      
+
       if (configIndex === -1) {
         throw new Error(`未找到昵称为 '${nickname}' 的用户配置`);
       }
-      
-      // 更新八字信息
+
+      // 如果 baziInfo.bazi 存在，使用它作为八字数据
+      // 否则如果 baziInfo 本身就是八字数据（旧格式），直接使用它
+      const finalBaziData = baziInfo.bazi || baziInfo;
+
+      // 更新八字信息（保存完整的八字数据，包括顶层属性）
       this.configs[configIndex] = {
         ...this.configs[configIndex],
-        bazi: baziInfo.bazi || this.configs[configIndex].bazi,
-        lunarBirthDate: baziInfo.lunarBirthDate || this.configs[configIndex].lunarBirthDate,
+        bazi: finalBaziData,
+        lunarBirthDate: baziInfo.lunarBirthDate || finalBaziData?.lunar?.text || this.configs[configIndex].lunarBirthDate,
         trueSolarTime: baziInfo.trueSolarTime || this.configs[configIndex].trueSolarTime,
         lunarInfo: baziInfo.lunarInfo || this.configs[configIndex].lunarInfo,
         lastCalculated: baziInfo.lastCalculated || new Date().toISOString()
       };
-      
+
       // 保存到存储
       await this.saveConfigsToStorage();
-      
+
       // 通知监听器
       this.notifyListeners();
-      
+
       console.log('八字信息更新成功', nickname);
       return true;
-      
+
     } catch (error) {
       console.error('更新八字信息失败:', error);
       return false;

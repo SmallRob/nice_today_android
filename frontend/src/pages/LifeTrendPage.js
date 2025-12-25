@@ -101,11 +101,12 @@ const LifeTrendPage = () => {
       return tempBazi;
     }
 
-    // 优先从全局配置中获取八字
+    // 优先从全局配置中获取八字（统一格式）
     if (config && config.bazi) {
+      // 验证八字数据完整性
       if (config.bazi.bazi) {
-        const { bazi: baziInfo } = config.bazi;
-        if (!baziInfo || !baziInfo.year || !baziInfo.month || !baziInfo.day || !baziInfo.hour) {
+        const baziInfo = config.bazi.bazi;
+        if (!baziInfo.year || !baziInfo.month || !baziInfo.day || !baziInfo.hour) {
           console.warn('配置中的八字数据不完整');
         }
       }
@@ -117,26 +118,87 @@ const LifeTrendPage = () => {
     if (configError) {
       console.warn('配置获取失败，返回默认八字数据');
       return {
-        bazi: { year: '甲子', month: '乙丑', day: '丙寅', hour: '丁卯' },
+        bazi: { 
+          year: '甲子', 
+          month: '乙丑', 
+          day: '丙寅', 
+          hour: '丁卯' 
+        },
         shichen: { ganzhi: '丁卯' },
-        lunar: { text: '降级数据' }
+        lunar: { text: '降级数据' },
+        wuxing: { text: '木火 火火 土水' },
+        // 添加顶层属性以避免访问错误
+        year: '甲子',
+        month: '乙丑',
+        day: '丙寅',
+        hour: '丁卯'
       };
     }
 
     console.warn('没有可用的八字数据');
     return {
-      bazi: { year: '', month: '', day: '', hour: '' },
-      shichen: { ganzhi: '未知' },
-      lunar: { text: '' }
+      bazi: { 
+        year: '甲子', 
+        month: '乙丑', 
+        day: '丙寅', 
+        hour: '丁卯' 
+      },
+      shichen: { ganzhi: '丁卯' },
+      lunar: { text: '请设置出生信息' },
+      wuxing: { text: '木火 火火 土水' },
+      // 添加顶层属性以避免访问错误
+      year: '甲子',
+      month: '乙丑',
+      day: '丙寅',
+      hour: '丁卯'
     };
   }, [isTempCalcMode, tempBazi, getCurrentConfig]);
 
   // 统一获取时辰显示文字（使用新的 BaziDataManager）- 必须在其他函数之前定义
   const getShichenDisplay = useCallback(() => {
-    const config = getCurrentConfig();
-    const baziData = isTempCalcMode ? tempBazi : (config && config.bazi);
+    try {
+      const config = getCurrentConfig();
+      const baziData = isTempCalcMode ? tempBazi : (config && config.bazi);
 
-    return getValidShichen(config, baziData);
+      // 如果没有八字数据，返回默认时辰
+      if (!baziData || !baziData.bazi) {
+        return '午时 (12:00)';
+      }
+
+      // 获取时辰显示
+      const shichenResult = getValidShichen(config, baziData);
+      
+      // 确保 shichenResult 是有效的字符串
+      if (shichenResult && typeof shichenResult === 'string') {
+        return shichenResult;
+      }
+      
+      // 降级：从八字时柱中提取时辰
+      if (baziData.bazi && baziData.bazi.hour) {
+        const hourGan = baziData.bazi.hour.charAt(0);
+        const hourZhi = baziData.bazi.hour.charAt(1);
+        const shichenMap = {
+          '子': '子时 (23:00-01:00)',
+          '丑': '丑时 (01:00-03:00)',
+          '寅': '寅时 (03:00-05:00)',
+          '卯': '卯时 (05:00-07:00)',
+          '辰': '辰时 (07:00-09:00)',
+          '巳': '巳时 (09:00-11:00)',
+          '午': '午时 (11:00-13:00)',
+          '未': '未时 (13:00-15:00)',
+          '申': '申时 (15:00-17:00)',
+          '酉': '酉时 (17:00-19:00)',
+          '戌': '戌时 (19:00-21:00)',
+          '亥': '亥时 (21:00-23:00)'
+        };
+        return shichenMap[hourZhi] || '午时 (12:00)';
+      }
+      
+      return '午时 (12:00)';
+    } catch (error) {
+      console.warn('获取时辰显示失败:', error);
+      return '午时 (12:00)';
+    }
   }, [isTempCalcMode, tempBazi, getCurrentConfig]);
 
   // 加载用户配置的函数（使用统一的八字数据管理器）
@@ -160,14 +222,15 @@ const LifeTrendPage = () => {
       } catch (error) {
         configError = error;
         console.warn('获取或验证配置失败，使用默认配置:', error.message);
-        // 使用默认配置继续
+        // 使用默认配置继续（使用固定日期）
+        const today = new Date();
         config = {
           nickname: '默认用户',
-          birthDate: new Date().toISOString().split('T')[0],
+          birthDate: '1990-01-01', // 使用固定的默认日期
           birthTime: '12:00',
           birthLocation: { province: '北京', city: '北京市', district: '东城区', lng: 116.40, lat: 39.90 },
-          zodiac: '水瓶座',
-          zodiacAnimal: '蛇',
+          zodiac: '摩羯座', // 1990年1月1日是摩羯座
+          zodiacAnimal: '蛇', // 1990年是蛇年
           mbti: 'ISTJ'
         };
       }
@@ -179,7 +242,7 @@ const LifeTrendPage = () => {
         } catch (error) {
           console.warn('标准化出生信息失败，使用默认值:', error.message);
           birthInfo = {
-            birthDate: config.birthDate || new Date().toISOString().split('T')[0],
+            birthDate: config.birthDate || '1990-01-01', // 使用固定的默认日期
             birthTime: config.birthTime || '12:00',
             latitude: 39.90,
             longitude: 116.40

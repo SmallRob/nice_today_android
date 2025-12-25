@@ -302,7 +302,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
       </div>
     </div>
   );
-});
+};
 
 BaziFortuneDisplay.displayName = 'BaziFortuneDisplay';
 
@@ -948,7 +948,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
       )}
     </div>
   );
-});
+};
 
 ConfigForm.displayName = 'ConfigForm';
 
@@ -1254,6 +1254,9 @@ const UserConfigManagerComponent = () => {
       
       // 显示成功消息
       showMessage('✅ 配置保存成功', 'success');
+
+      // 刷新八字和紫微命宫数据
+      setBaziKey(prev => prev + 1);
 
       // 延迟后清除消息，让用户看到成功提示
       setTimeout(() => {
@@ -1594,6 +1597,66 @@ const UserConfigManagerComponent = () => {
       showMessage('导出配置失败: ' + error.message, 'error');
     }
   }, [showMessage]);
+
+  // 计算紫微命宫数据（当配置或活跃配置索引变化时）
+  useEffect(() => {
+    const loadZiweiData = async () => {
+      // 检查是否有有效的配置
+      if (!configs || configs.length === 0 || activeConfigIndex < 0 || activeConfigIndex >= configs.length) {
+        setZiweiData(null);
+        return;
+      }
+
+      const currentConfig = configs[activeConfigIndex];
+      if (!currentConfig) {
+        setZiweiData(null);
+        return;
+      }
+
+      // 检查是否有必要的出生信息
+      if (!currentConfig.birthDate) {
+        // 没有出生日期，返回降级数据
+        setZiweiData({
+          error: '缺少出生日期',
+          baziInfo: null,
+          ziweiData: null,
+          calculatedAt: new Date().toISOString()
+        });
+        return;
+      }
+
+      setZiweiLoading(true);
+
+      try {
+        // 使用 getZiWeiDisplayData 计算紫微命宫
+        const result = await getZiWeiDisplayData(currentConfig);
+
+        if (result) {
+          setZiweiData(result);
+        } else {
+          // 计算失败，返回降级数据
+          setZiweiData({
+            error: '紫微命宫计算失败',
+            baziInfo: null,
+            ziweiData: null,
+            calculatedAt: new Date().toISOString()
+          });
+        }
+      } catch (error) {
+        console.error('计算紫微命宫失败:', error);
+        setZiweiData({
+          error: error.message,
+          baziInfo: null,
+          ziweiData: null,
+          calculatedAt: new Date().toISOString()
+        });
+      } finally {
+        setZiweiLoading(false);
+      }
+    };
+
+    loadZiweiData();
+  }, [configs, activeConfigIndex, baziKey]); // 当配置、活跃配置索引或八字刷新键变化时重新计算
 
   // 拖拽开始
   const handleDragStart = useCallback((e, index) => {
