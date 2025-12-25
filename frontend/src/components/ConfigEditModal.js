@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useStore } from '@tanstack/react-store';
 import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
-import { getShichen, getShichenSimple, normalizeShichen, calculateTrueSolarTime } from '../utils/astronomy';
+import { getShichen, getShichenSimple, calculateTrueSolarTime } from '../utils/astronomy';
 import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 
 // 性别选项
@@ -267,8 +267,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     return '';
   };
 
-  // 验证所有输入字段的合规性
-  const validateAllInputs = (formData) => {
+  // 简化验证：只验证必填字段，减少不必要的警告
+  const validateRequiredInputs = (formData) => {
     const errors = [];
 
     // 1. 验证昵称（必填）
@@ -280,61 +280,129 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       errors.push('昵称最多支持20个字符');
     }
 
-    // 2. 验证真实姓名（选填，只验证长度）
-    if (formData.realName && formData.realName.trim()) {
-      if (formData.realName.trim().length > 50) {
-        errors.push('真实姓名最多支持50个字符');
-      }
-    }
-
-    // 3. 验证出生日期（必填）
+    // 2. 验证出生日期（必填）
     if (!formData.birthDate) {
       errors.push('请选择出生日期');
     } else {
-      const birthDate = new Date(formData.birthDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (isNaN(birthDate.getTime())) {
-        errors.push('出生日期格式不正确');
-      } else if (birthDate > today) {
-        errors.push('出生日期不能是未来日期');
-      } else if (birthDate < new Date('1900-01-01')) {
-        errors.push('出生日期不能早于1900年');
+      // 简化日期验证：只检查基本格式
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+      if (!datePattern.test(formData.birthDate)) {
+        errors.push('出生日期格式错误，应为 YYYY-MM-DD');
       }
     }
 
-    // 4. 验证出生时间（必填）
+    // 3. 验证出生时间（必填）
     if (!formData.birthTime || !formData.birthTime.trim()) {
       errors.push('请输入出生时间');
     } else {
-      const timeMatch = formData.birthTime.trim().match(/^([01]\d|2[0-3]):([0-5]\d)$/);
-      if (!timeMatch) {
-        errors.push('出生时间格式不正确，请使用 HH:MM 格式（如 12:30）');
+      // 简化时间验证：只检查基本格式
+      const timePattern = /^\d{1,2}:\d{2}$/;
+      if (!timePattern.test(formData.birthTime)) {
+        errors.push('出生时间格式错误，应为 HH:MM');
       }
     }
 
-    // 5. 验证出生地点（简化：只需经纬度有效即可）
+    // 4. 验证出生地点（必填）
     const loc = formData.birthLocation || {};
-    if (loc.lng === undefined || loc.lng === null || isNaN(loc.lng)) {
-      errors.push('请输入有效的经度');
-    } else if (loc.lng < -180 || loc.lng > 180) {
-      errors.push('经度必须在-180到180之间');
-    }
-
-    if (loc.lat === undefined || loc.lat === null || isNaN(loc.lat)) {
-      errors.push('请输入有效的纬度');
-    } else if (loc.lat < -90 || loc.lat > 90) {
-      errors.push('纬度必须在-90到90之间');
+    if (!loc || typeof loc !== 'object') {
+      errors.push('请提供完整的出生地点信息');
+    } else if (!loc.province || !loc.city || loc.lng === undefined || loc.lat === undefined) {
+      errors.push('请选择完整的出生地点（省、市、经纬度）');
     }
 
     return errors;
   };
 
+
+
+  // 创建关键信息确认弹窗
+  const showConfirmationDialog = (configData) => {
+    return new Promise((resolve) => {
+      // 计算关键信息
+      const shichen = getShichen(configData.birthTime || '12:30');
+      const lng = configData.birthLocation?.lng || DEFAULT_REGION.lng;
+      const trueSolarTime = calculateTrueSolarTime(configData.birthDate, configData.birthTime || '12:30', lng);
+
+      // 创建确认弹窗
+      const dialog = document.createElement('div');
+      dialog.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm';
+      dialog.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              🔍 请确认关键信息
+            </h3>
+            <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div class="space-y-4 mb-6">
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">基本信息</h4>
+              <p class="text-sm text-blue-700 dark:text-blue-400">
+                <strong>昵称：</strong>${configData.nickname || '未设置'}<br>
+                <strong>出生日期：</strong>${configData.birthDate || '未设置'}<br>
+                <strong>出生时间：</strong>${configData.birthTime || '未设置'}
+              </p>
+            </div>
+            
+            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+              <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">时辰信息</h4>
+              <p class="text-sm text-green-700 dark:text-green-400">
+                <strong>出生时辰：</strong><span class="font-bold">${shichen}</span><br>
+                <strong>真太阳时：</strong><span class="font-bold">${trueSolarTime}</span><br>
+                <strong>经度校正：</strong>${lng}°
+              </p>
+            </div>
+            
+            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+              <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-2">八字计算</h4>
+              <p class="text-sm text-purple-700 dark:text-purple-400">
+                以上时辰和真太阳时将用于准确的八字计算。
+                请确认信息无误后再保存。
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex justify-end gap-3">
+            <button id="cancel-save" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
+              取消
+            </button>
+            <button id="confirm-save" class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+              确认保存
+            </button>
+          </div>
+        </div>
+      `;
+
+      // 添加事件监听
+      dialog.querySelector('button').onclick = () => {
+        document.body.removeChild(dialog);
+        resolve(false);
+      };
+      
+      dialog.querySelector('#cancel-save').onclick = () => {
+        document.body.removeChild(dialog);
+        resolve(false);
+      };
+      
+      dialog.querySelector('#confirm-save').onclick = () => {
+        document.body.removeChild(dialog);
+        resolve(true);
+      };
+
+      // 添加到页面
+      document.body.appendChild(dialog);
+    });
+  };
+
   // 保存配置
   const handleSave = async (formData) => {
-    // 全面验证所有输入（已包含位置验证）
-    const validationErrors = validateAllInputs(formData);
+    // 简化验证：只验证必填字段
+    const validationErrors = validateRequiredInputs(formData);
 
     if (validationErrors.length > 0) {
       // 显示浮动错误提示框
@@ -358,7 +426,14 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       return;
     }
 
-    // 获取验证后的位置信息（确保有有效的经纬度）
+    // 显示关键信息确认弹窗
+    const confirmed = await showConfirmationDialog(formData);
+    if (!confirmed) {
+      console.log('用户取消了保存');
+      return;
+    }
+
+    // 获取位置信息（确保有有效的经纬度）
     let finalLocation = formData.birthLocation || { ...DEFAULT_REGION };
     // 确保经纬度有效（使用默认值兜底）
     if (finalLocation.lng === undefined || finalLocation.lng === null || isNaN(finalLocation.lng)) {
@@ -367,7 +442,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     if (finalLocation.lat === undefined || finalLocation.lat === null || isNaN(finalLocation.lat)) {
       finalLocation.lat = DEFAULT_REGION.lat;
     }
-    // 确保省市区有默认值（即使为空字符串）
+    // 确保省市区有默认值
     if (!finalLocation.province) finalLocation.province = DEFAULT_REGION.province;
     if (!finalLocation.city) finalLocation.city = DEFAULT_REGION.city;
     if (!finalLocation.district) finalLocation.district = DEFAULT_REGION.district;
@@ -375,19 +450,13 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     setIsSaving(true);
 
     try {
-      // 检查配置管理器是否已初始化
-      // 新的 Context API 不需要显式初始化检查
-
-      // 计算简化格式的时辰（用于显示和保存）
+      // 计算时辰信息
       const shichenSimple = getShichenSimple(formData.birthTime || '12:30');
-
-      // 计算完整格式的时辰（用于日志记录）
-      const shichenFull = getShichen(formData.birthTime || '12:30');
 
       let finalConfig = {
         ...formData,
         birthLocation: finalLocation,
-        shichen: shichenSimple,  // 保存简化格式的时辰（不带刻度）
+        shichen: shichenSimple,  // 保存简化格式的时辰
         // 确保必填字段有默认值
         isused: formData.isused ?? false,
         nameScore: formData.nameScore ?? null,
@@ -396,60 +465,44 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         lastCalculated: formData.lastCalculated ?? null
       };
 
-      // 计算农历和真太阳时信息
+      // 计算农历和真太阳时信息（简化处理）
       try {
         const lunarFields = generateLunarAndTrueSolarFields(finalConfig);
-        // 只覆盖非空的字段
         if (lunarFields.lunarBirthDate) {
           finalConfig.lunarBirthDate = lunarFields.lunarBirthDate;
         }
         if (lunarFields.trueSolarTime) {
           finalConfig.trueSolarTime = lunarFields.trueSolarTime;
         }
-        if (lunarFields.lunarInfo) {
-          finalConfig.lunarInfo = lunarFields.lunarInfo;
-        }
-        finalConfig.lastCalculated = lunarFields.lastCalculated || new Date().toISOString();
-
-        console.log('自动计算农历信息:', {
-          lunarBirthDate: lunarFields.lunarBirthDate,
-          trueSolarTime: lunarFields.trueSolarTime,
-          longitude: finalLocation.lng,
-          shichen: shichenFull  // 日志记录完整格式的时辰
-        });
-      } catch (error) {
-        console.error('计算农历信息失败:', error);
-        // 农历计算失败不影响保存，设置默认值
-        finalConfig.lunarBirthDate = null;
-        finalConfig.trueSolarTime = null;
-        finalConfig.lunarInfo = null;
         finalConfig.lastCalculated = new Date().toISOString();
+      } catch (error) {
+        console.warn('农历计算失败，不影响保存:', error);
+        // 农历计算失败不影响保存
       }
 
-      // 验证通过，显示保存中消息
-      setIsSaving(true);
-      showMessage('正在保存配置，数据将在后台同步...', 'info');
+      // 显示保存中消息
+      showMessage('正在保存配置...', 'info');
 
       try {
         // 异步保存数据
         const result = await onSave(index, finalConfig);
 
         if (result) {
-          // 保存成功
           console.log('配置保存成功');
+          showMessage('✅ 配置保存成功', 'success');
+          
+          // 保存成功后延迟关闭弹窗
+          setTimeout(() => {
+            onClose();
+          }, 500);
         } else {
           throw new Error('保存配置返回失败结果');
         }
 
-        // 保存成功后延迟关闭弹窗，让用户看到成功消息
-        setTimeout(() => {
-          onClose();
-        }, 300);
-
       } catch (error) {
         console.error('保存配置失败:', error);
         showMessage(`保存失败: ${error.message}`, 'error');
-        throw error; // 重新抛出异常
+        throw error;
       } finally {
         setIsSaving(false);
       }
@@ -457,7 +510,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     } catch (error) {
       console.error('保存配置失败:', error);
       showMessage(`保存失败: ${error.message}`, 'error');
-      throw error; // 重新抛出异常
+      setIsSaving(false);
+      throw error;
     }
   };
 

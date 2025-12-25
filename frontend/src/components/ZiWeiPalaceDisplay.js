@@ -1,47 +1,115 @@
 import React, { useState, useEffect } from 'react';
 
 /**
- * 紫微命宫展示组件
+ * 紫微命宫展示组件（增强版）
+ * 显示紫微命盘各宫位信息，包含详细的错误和警告提示
  */
 const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
   const [loading, setLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // 宫位卡片颜色配置
-  const getCardColor = (strength) => {
-    switch (strength) {
-      case '强':
-      case '偏强':
-        return 'from-green-50 to-emerald-50 border-green-200';
-      case '弱':
-      case '偏弱':
-        return 'from-red-50 to-rose-50 border-red-200';
-      default:
-        return 'from-blue-50 to-indigo-50 border-blue-200';
+  // 检查是否有错误或警告
+  const hasError = ziweiData && (ziweiData.error || ziweiData.missingFields);
+  const hasWarnings = ziweiData && (ziweiData.validationWarnings || ziweiData.calculationWarnings);
+  
+  // 获取错误信息
+  const getErrorDisplay = () => {
+    if (!ziweiData) return null;
+    
+    if (ziweiData.error) {
+      return (
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
+          <h4 className="text-sm font-semibold text-red-700 dark:text-red-400 mb-2">⚠️ 计算错误</h4>
+          <div className="text-sm text-red-600 dark:text-red-400 space-y-1">
+            <p>{ziweiData.error}</p>
+            <p className="text-xs opacity-80">建议：请检查出生日期、时间和经纬度是否正确</p>
+          </div>
+        </div>
+      );
     }
-  };
 
-  const getCardColorDark = (strength) => {
-    switch (strength) {
-      case '强':
-      case '偏强':
-        return 'from-green-900/30 to-emerald-900/30 border-green-700';
-      case '弱':
-      case '偏弱':
-        return 'from-red-900/30 to-rose-900/30 border-red-700';
-      default:
-        return 'from-blue-900/30 to-indigo-900/30 border-blue-700';
+    if (ziweiData.missingFields && ziweiData.missingFields.length > 0) {
+      const fieldNames = {
+        'birthDate': '出生日期',
+        'birthTime': '出生时间',
+        'birthLocation': '出生地点（经纬度）'
+      };
+
+      return (
+        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
+          <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2">📋 缺少必要信息</h4>
+          <div className="text-sm text-orange-600 dark:text-orange-400">
+            <p className="mb-2">请完善以下信息以计算紫微命盘：</p>
+            <ul className="list-disc list-inside space-y-1">
+              {ziweiData.missingFields.map(field => (
+                <li key={field} className="font-medium">{fieldNames[field] || field}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
     }
+
+    return null;
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return 'bg-green-500';
-    if (score >= 60) return 'bg-blue-500';
-    if (score >= 40) return 'bg-yellow-500';
-    return 'bg-red-500';
+  // 获取警告信息
+  const getWarningDisplay = () => {
+    if (!ziweiData) return null;
+
+    const allWarnings = [
+      ...(ziweiData.validationWarnings || []),
+      ...(ziweiData.calculationWarnings || [])
+    ];
+
+    if (allWarnings.length === 0) return null;
+
+    return (
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+        <h4 className="text-sm font-semibold text-yellow-700 dark:text-yellow-400 mb-2">⚡ 数据质量警告</h4>
+        <div className="text-sm text-yellow-600 dark:text-yellow-400 space-y-1">
+          {allWarnings.map((warning, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <span className="text-lg">⚠️</span>
+              <p>{warning.message}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
-  if (!ziweiData || !ziweiData.palaces) {
+  // 显示计算元数据（用于调试）
+  const getMetadataDisplay = () => {
+    if (!ziweiData || !ziweiData.metadata) return null;
+
+    const { birthDate, birthTime, trueSolarTime, longitude, latitude } = ziweiData.metadata;
+
+    return (
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+        <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">📊 计算参数</h4>
+        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
+          <div>出生日期：{birthDate}</div>
+          <div>出生时间：{birthTime}</div>
+          <div>经度：{longitude?.toFixed(4)}°</div>
+          <div>纬度：{latitude?.toFixed(4)}°</div>
+          <div className="col-span-2">真太阳时：{trueSolarTime}</div>
+        </div>
+      </div>
+    );
+  };
+
+  // 显示加载或空状态
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+        <p className="ml-3 text-gray-500 dark:text-gray-400">正在计算紫微命盘...</p>
+      </div>
+    );
+  }
+
+  if (!ziweiData) {
     return (
       <div className="text-center py-6 text-gray-500 dark:text-gray-400">
         <p>请先设置完整的出生信息以查看紫微命宫</p>
@@ -50,7 +118,45 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
     );
   }
 
+  // 显示错误状态
+  const errorDisplay = getErrorDisplay();
+  if (errorDisplay) {
+    return (
+      <div className="space-y-4">
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-4 text-white shadow-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-bold mb-1">🌟 紫微命宫</h3>
+              <p className="text-sm opacity-90">基于出生时间的命盘分析</p>
+            </div>
+          </div>
+        </div>
+        {errorDisplay}
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">💡</span>
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">如何修复</h4>
+              <div className="text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
+                <p>• 确保出生日期格式为 YYYY-MM-DD（如：1991-04-30）</p>
+                <p>• 确保出生时间格式为 HH:MM（如：12:30）</p>
+                <p>• 确保经纬度在有效范围内（经度：-180 到 180，纬度：-90 到 90）</p>
+                <p>• 建议使用"编辑"按钮修改配置后保存</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const { palaces, mingGong, summary } = ziweiData;
+
+  // 显示警告（如果有的话）
+  const warningDisplay = getWarningDisplay();
+
+  // 显示元数据（用于调试）
+  const metadataDisplay = getMetadataDisplay();
 
   // 重点宫位（命宫、事业宫、财帛宫、夫妻宫）
   const keyPalaces = palaces.filter(p =>
@@ -75,6 +181,12 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
           </div>
         </div>
       </div>
+
+      {/* 计算元数据（可选显示，用于调试） */}
+      {process.env.NODE_ENV === 'development' && metadataDisplay}
+
+      {/* 警告信息（如果有） */}
+      {warningDisplay}
 
       {/* 命宫总结 */}
       {summary && (

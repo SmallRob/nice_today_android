@@ -12,6 +12,7 @@ import { DEFAULT_REGION } from '../data/ChinaLocationData';
 import { getShichen, getShichenSimple, normalizeShichen } from '../utils/astronomy';
 import { getZiWeiDisplayData } from '../utils/ziweiHelper';
 import ZiWeiPalaceDisplay from './ZiWeiPalaceDisplay';
+import birthDataIntegrityManager from '../utils/BirthDataIntegrityManager'; // 新增：出生数据完整性管理器
 
 // 懒加载优化后的表单组件
 const ConfigEditModal = lazy(() => import('./ConfigEditModal'));
@@ -931,7 +932,7 @@ const UserConfigManagerComponent = () => {
     }
   }, []); // 移除依赖，确保每次都能执行
 
-  // 加载紫微命宫数据 - 添加加载状态提示
+  // 加载紫微命宫数据 - 添加加载状态提示和增强验证
   useEffect(() => {
     const loadZiWeiData = async () => {
       const config = configs[activeConfigIndex];
@@ -944,12 +945,47 @@ const UserConfigManagerComponent = () => {
       try {
         setZiweiLoading(true);
         console.log('开始加载紫微命宫数据...');
+
+        // 导入验证工具
+        const { validateZiWeiCalculationRequirements } = await import('../utils/ConfigValidationHelper');
+        
+        // 验证计算所需的数据
+        const validation = validateZiWeiCalculationRequirements(config);
+        
+        if (!validation.valid) {
+          console.error('紫微命宫计算：数据验证失败', validation.errors);
+          setZiweiData({
+            error: `数据验证失败: ${validation.errors.map(e => e.message).join(', ')}`,
+            missingFields: validation.missingFields
+          });
+          setZiweiLoading(false);
+          return;
+        }
+
+        if (validation.warnings && validation.warnings.length > 0) {
+          console.warn('紫微命宫计算：数据质量警告', validation.warnings);
+        }
+
+        // 计算紫微命宫数据
         const data = await getZiWeiDisplayData(config);
-        setZiweiData(data);
-        console.log('紫微命宫数据加载完成');
+        
+        if (data && data.error) {
+          console.error('紫微命宫数据加载失败:', data.error);
+          setZiweiData({
+            error: data.error,
+            validationErrors: data.validationErrors,
+            calculationWarnings: data.calculationWarnings
+          });
+        } else {
+          setZiweiData(data);
+          console.log('紫微命宫数据加载完成');
+        }
       } catch (error) {
         console.error('加载紫微命宫失败:', error);
-        setZiweiData(null);
+        setZiweiData({
+          error: error.message,
+          stack: error.stack
+        });
       } finally {
         setZiweiLoading(false);
       }
@@ -1039,7 +1075,7 @@ const UserConfigManagerComponent = () => {
     }, displayTime);
   }, []);
 
-  // 处理配置保存 - 添加加载状态和反馈
+  // 处理配置保存 - 简化验证流程，减少不必要的警告
   const handleSaveConfig = useCallback(async (index, configData) => {
     // 检查是否是新建配置（index < 0 表示新建，或 index 超出存储范围）
     const storedConfigs = enhancedUserConfigManager.getAllConfigs();
@@ -1054,9 +1090,24 @@ const UserConfigManagerComponent = () => {
     // 显示保存中状态
     showMessage('正在保存配置...', 'info');
 
-    // 自动为中文姓名打分（只有当 nameScore 不存在时才计算）
+    // 简化验证：只进行基本的数据完整性检查，不显示警告
     let finalConfigData = { ...configData };
-    if (configData.realName && /[一-龥]/.test(configData.realName) && !configData.nameScore) {
+    
+    // 确保基本字段存在
+    if (!finalConfigData.birthLocation) {
+      finalConfigData.birthLocation = { ...DEFAULT_REGION };
+    }
+    
+    // 确保经纬度有效
+    if (finalConfigData.birthLocation.lng === undefined || finalConfigData.birthLocation.lng === null || isNaN(finalConfigData.birthLocation.lng)) {
+      finalConfigData.birthLocation.lng = DEFAULT_REGION.lng;
+    }
+    if (finalConfigData.birthLocation.lat === undefined || finalConfigData.birthLocation.lat === null || isNaN(finalConfigData.birthLocation.lat)) {
+      finalConfigData.birthLocation.lat = DEFAULT_REGION.lat;
+    }
+    
+    // 第二步：自动为中文姓名打分（只有当 nameScore 不存在时才计算）
+    if (finalConfigData.realName && /[一-龥]/.test(finalConfigData.realName) && !finalConfigData.nameScore) {
       try {
         // 智能拆分姓名
         const compoundSurnames = [
@@ -1072,7 +1123,7 @@ const UserConfigManagerComponent = () => {
         ];
 
         let surname = '', firstName = '';
-        const name = configData.realName.trim();
+        const name = finalConfigData.realName.trim();
 
         // 检查是否包含中文圆点
         if (name.includes('·') || name.includes('•')) {
@@ -1137,52 +1188,38 @@ const UserConfigManagerComponent = () => {
       finalConfigData.nameScore.totalScore = totalScore;
     }
 
-    // 自动计算并同步八字信息（当存在有效的出生日期时）
-    const needsCalculateBazi = finalConfigData.birthDate && !finalConfigData.bazi;
-    let calculatedBaziInfo = null;
-
-    if (needsCalculateBazi) {
+    // 第三步：简化八字计算（仅在必要且数据完整时计算）
+    if (finalConfigData.birthDate && !finalConfigData.bazi) {
       try {
         const birthDate = finalConfigData.birthDate;
         const birthTime = finalConfigData.birthTime || '12:30';
         const longitude = finalConfigData.birthLocation?.lng || 116.40;
 
-        console.log('开始计算八字信息:', { birthDate, birthTime, longitude });
-
-        // 计算八字
+        // 简化八字计算，只计算基本信息
         const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
         if (baziInfo) {
-          calculatedBaziInfo = {
-            bazi: baziInfo,
-            lunarBirthDate: baziInfo.lunar?.text,
-            trueSolarTime: birthTime,
-            lastCalculated: new Date().toISOString()
-          };
-
-          // 计算并添加农历和真太阳时信息
+          finalConfigData.bazi = baziInfo;
+          
+          // 计算农历信息（简化处理）
           try {
             const { generateLunarAndTrueSolarFields } = await import('../utils/LunarCalendarHelper');
             const lunarFields = generateLunarAndTrueSolarFields({
               ...finalConfigData,
               birthLocation: finalConfigData.birthLocation || { lng: longitude, lat: 39.90 }
             });
-            Object.assign(calculatedBaziInfo, lunarFields);
-            console.log('计算并保存农历信息:', lunarFields);
+            if (lunarFields.lunarBirthDate) {
+              finalConfigData.lunarBirthDate = lunarFields.lunarBirthDate;
+            }
+            if (lunarFields.trueSolarTime) {
+              finalConfigData.trueSolarTime = lunarFields.trueSolarTime;
+            }
           } catch (error) {
-            console.error('计算农历信息失败:', error);
+            // 农历计算失败不影响保存
           }
-
-          finalConfigData.bazi = calculatedBaziInfo.bazi;
-          finalConfigData.lunarBirthDate = calculatedBaziInfo.lunarBirthDate;
-          finalConfigData.trueSolarTime = calculatedBaziInfo.trueSolarTime;
-          console.log('✓ 八字信息计算成功');
         }
       } catch (error) {
-        console.error('计算八字信息失败:', error);
-        // 失败时不中断保存流程
+        // 八字计算失败不影响保存
       }
-    } else if (finalConfigData.bazi) {
-      console.log('配置中已有八字信息，保留');
     }
 
     try {
@@ -1895,6 +1932,44 @@ const UserConfigManagerComponent = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
               <span>导出配置</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                // 批量检查数据完整性
+                try {
+                  console.log('开始批量检查数据完整性...');
+                  const results = birthDataIntegrityManager.batchValidateConfigs(configs);
+                  
+                  if (results.summary.errors > 0 || results.summary.warnings > 0) {
+                    const report = birthDataIntegrityManager.generateReport(results);
+                    console.log('数据完整性检查报告:', report);
+                    
+                    // 显示检查结果
+                    const errorCount = results.summary.errors;
+                    const warningCount = results.summary.warnings;
+                    const correctionCount = results.summary.corrections;
+                    
+                    let message = `数据完整性检查完成：`;
+                    if (errorCount > 0) message += ` ❌ ${errorCount}个错误`;
+                    if (warningCount > 0) message += ` ⚠️ ${warningCount}个警告`;
+                    if (correctionCount > 0) message += ` 🔧 ${correctionCount}个可修复项`;
+                    if (errorCount === 0 && warningCount === 0) message += ` ✅ 所有配置数据完整`;
+                    
+                    showMessage(message, errorCount > 0 ? 'error' : warningCount > 0 ? 'info' : 'success');
+                  } else {
+                    showMessage('✅ 所有配置数据完整，无需修复', 'success');
+                  }
+                } catch (error) {
+                  console.error('数据完整性检查失败:', error);
+                  showMessage('❌ 数据完整性检查失败: ' + error.message, 'error');
+                }
+              }}
+              className="flex items-center justify-center space-x-2 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all duration-200"
+            >
+              <span className="text-lg">🔍</span>
+              <span>数据检查</span>
             </Button>
 
             <Button

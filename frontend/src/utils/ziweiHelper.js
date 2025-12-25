@@ -1,9 +1,14 @@
 /**
- * 紫微命宫计算工具
+ * 紫微命宫计算工具（增强版）
  * 根据出生日期、时辰、经纬度计算紫微命盘各宫位信息
+ * 支持精确的真太阳时计算和全面的数据验证
  */
 
 import { Solar, Lunar } from 'lunar-javascript';
+import { 
+  validateBirthInfoForZiWei, 
+  calculateShichenForZiWei 
+} from './ConfigValidationHelper.js';
 
 /**
  * 紫微十二宫位定义
@@ -24,35 +29,125 @@ const ZIWEI_PALACES = {
 };
 
 /**
- * 根据时辰计算命宫位置（简化版）
+ * 根据真太阳时计算命宫位置（增强版）
  * @param {string} birthTimeStr 出生时间 HH:mm
  * @param {number} longitude 经度
- * @returns {Object} 命宫信息
+ * @param {string} birthDateStr 出生日期 YYYY-MM-DD（可选，用于季节性调整）
+ * @returns {Object} 命宫信息 { zhi, gan, ganzhi, shichenIndex, error }
  */
-const calculateMingGong = (birthTimeStr, longitude) => {
-  const [hours, minutes] = birthTimeStr.split(':').map(Number);
-  const totalMinutes = hours * 60 + minutes;
+const calculateMingGong = (birthTimeStr, longitude, birthDateStr = null) => {
+  try {
+    // 验证输入
+    if (!birthTimeStr || longitude === undefined || longitude === null) {
+      return {
+        zhi: null,
+        gan: null,
+        ganzhi: null,
+        shichenIndex: null,
+        error: '缺少必要参数：birthTimeStr 或 longitude'
+      };
+    }
 
-  // 根据经度调整真太阳时
-  const timeOffset = (longitude - 120) * 4;
-  const adjustedMinutes = totalMinutes + timeOffset;
-  const adjustedHours = Math.floor((adjustedMinutes % 1440) / 60);
+    // 验证时间格式
+    const timePattern = /^\d{1,2}:\d{2}$/;
+    if (!timePattern.test(birthTimeStr)) {
+      return {
+        zhi: null,
+        gan: null,
+        ganzhi: null,
+        shichenIndex: null,
+        error: '出生时间格式错误，应为 HH:MM'
+      };
+    }
 
-  // 简化命宫计算（基于时辰）
-  const shichen = Math.floor(adjustedHours / 2) % 12;
+    const [hours, minutes] = birthTimeStr.split(':').map(Number);
 
-  const diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-  const tianGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+    // 验证时间范围
+    if (hours < 0 || hours > 23) {
+      return {
+        zhi: null,
+        gan: null,
+        ganzhi: null,
+        shichenIndex: null,
+        error: '小时数应在 0-23 之间'
+      };
+    }
+    if (minutes < 0 || minutes > 59) {
+      return {
+        zhi: null,
+        gan: null,
+        ganzhi: null,
+        shichenIndex: null,
+        error: '分钟数应在 0-59 之间'
+      };
+    }
 
-  const mingGongZhi = diZhi[shichen];
-  const mingGongGan = tianGan[(Math.floor(new Date().getHours() / 2)) % 10];
+    // 验证经度
+    if (longitude < -180 || longitude > 180) {
+      return {
+        zhi: null,
+        gan: null,
+        ganzhi: null,
+        shichenIndex: null,
+        error: '经度应在 -180 到 180 之间'
+      };
+    }
 
-  return {
-    zhi: mingGongZhi,
-    gan: mingGongGan,
-    ganzhi: mingGongGan + mingGongZhi,
-    shichenIndex: shichen
-  };
+    // 使用增强的时辰计算函数（包含真太阳时）
+    const shichenResult = calculateShichenForZiWei(birthTimeStr, longitude, birthDateStr);
+
+    if (shichenResult.error) {
+      return {
+        zhi: null,
+        gan: null,
+        ganzhi: null,
+        shichenIndex: null,
+        error: `时辰计算失败: ${shichenResult.error}`
+      };
+    }
+
+    const { shichenIndex } = shichenResult;
+    const diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+    const tianGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+
+    // 根据真太阳时确定天干（基于日期）
+    let mingGongGan;
+    if (birthDateStr) {
+      try {
+        const solar = Solar.fromLunar(Lunar.fromYmd(birthDateStr.replace(/-/g, '')));
+        const yearGan = tianGan[(solar.year - 4) % 10];
+        mingGongGan = yearGan;
+      } catch (error) {
+        console.warn('从日期计算天干失败，使用简化方法:', error);
+        // 简化方法：使用当前时间计算天干
+        mingGongGan = tianGan[(Math.floor(new Date().getHours() / 2)) % 10];
+      }
+    } else {
+      mingGongGan = tianGan[(Math.floor(new Date().getHours() / 2)) % 10];
+    }
+
+    const mingGongZhi = diZhi[shichenIndex];
+
+    return {
+      zhi: mingGongZhi,
+      gan: mingGongGan,
+      ganzhi: mingGongGan + mingGongZhi,
+      shichenIndex,
+      trueSolarTime: shichenResult.trueSolarTime,
+      shichenSimple: shichenResult.shichenSimple,
+      shichenFull: shichenResult.shichenFull,
+      error: null
+    };
+  } catch (error) {
+    console.error('计算命宫失败:', error);
+    return {
+      zhi: null,
+      gan: null,
+      ganzhi: null,
+      shichenIndex: null,
+      error: error.message
+    };
+  }
 };
 
 /**
@@ -265,37 +360,119 @@ const generateAdvice = (strongest, weakest, caiBo, luanYan) => {
 };
 
 /**
- * 获取紫微命宫展示数据
+ * 获取紫微命宫展示数据（增强版）
  * @param {Object} config 用户配置
  * @returns {Promise<Object>} 紫微命宫数据
  */
 export const getZiWeiDisplayData = async (config) => {
   if (!config || !config.birthDate) {
+    console.warn('紫微命宫计算：缺少出生日期');
     return null;
   }
 
   try {
-    const birthDate = config.birthDate;
-    const birthTime = config.birthTime || '12:30';
-    const longitude = config.birthLocation?.lng || 116.40;
+    // 1. 验证配置数据（使用增强的验证）
+    const validation = validateBirthInfoForZiWei(config);
+    
+    if (!validation.valid) {
+      console.error('紫微命宫计算：配置数据验证失败', validation.errors);
+      
+      // 返回包含错误信息的结果
+      return {
+        baziInfo: null,
+        ziweiData: null,
+        validationErrors: validation.errors,
+        validationWarnings: validation.warnings,
+        calculatedAt: new Date().toISOString(),
+        error: validation.errors.map(e => e.message).join('; ')
+      };
+    }
 
-    // 使用八字信息计算
+    // 如果有警告，记录到控制台
+    if (validation.warnings && validation.warnings.length > 0) {
+      console.warn('紫微命宫计算：数据质量警告', validation.warnings);
+    }
+
+    // 使用验证后的标准化数据
+    const normalizedConfig = validation.normalizedData || config;
+    
+    const birthDate = normalizedConfig.birthDate;
+    const birthTime = normalizedConfig.birthTime || '12:30';
+    const longitude = normalizedConfig.birthLocation?.lng || 116.40;
+    const latitude = normalizedConfig.birthLocation?.lat || 39.90;
+
+    // 2. 验证计算所需的参数
+    const calculationValidation = validateZiWeiCalculationRequirements(normalizedConfig);
+    
+    if (!calculationValidation.valid) {
+      console.error('紫微命宫计算：缺少必要字段', calculationValidation.missingFields);
+      
+      return {
+        baziInfo: null,
+        ziweiData: null,
+        missingFields: calculationValidation.missingFields,
+        calculationErrors: calculationValidation.errors,
+        calculatedAt: new Date().toISOString(),
+        error: `缺少必要字段: ${calculationValidation.missingFields.join(', ')}`
+      };
+    }
+
+    // 3. 使用八字信息计算
     const { calculateDetailedBazi } = await import('./baziHelper');
     const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
 
     if (!baziInfo) {
-      return null;
+      console.error('紫微命宫计算：八字信息计算失败');
+      
+      return {
+        baziInfo: null,
+        ziweiData: null,
+        calculatedAt: new Date().toISOString(),
+        error: '八字信息计算失败，请检查出生日期和时间格式'
+      };
     }
 
+    // 4. 计算紫微命宫（使用增强的命宫计算）
     const ziweiData = calculateZiWeiPalaces(baziInfo, birthDate, birthTime, longitude);
 
+    if (!ziweiData) {
+      console.error('紫微命宫计算：紫微命盘生成失败');
+      
+      return {
+        baziInfo: baziInfo,
+        ziweiData: null,
+        calculatedAt: new Date().toISOString(),
+        error: '紫微命盘生成失败'
+      };
+    }
+
+    // 5. 返回完整的结果
     return {
       baziInfo,
       ziweiData,
-      calculatedAt: new Date().toISOString()
+      validationWarnings: validation.warnings,
+      calculationWarnings: calculationValidation.warnings,
+      calculatedAt: new Date().toISOString(),
+      // 元数据
+      metadata: {
+        birthDate: birthDate,
+        birthTime: birthTime,
+        longitude: longitude,
+        latitude: latitude,
+        trueSolarTime: ziweiData.mingGong?.trueSolarTime,
+        shichen: ziweiData.mingGong?.shichenSimple
+      },
+      error: null
     };
   } catch (error) {
     console.error('获取紫微命宫数据失败:', error);
-    return null;
+    
+    return {
+      baziInfo: null,
+      ziweiData: null,
+      calculatedAt: new Date().toISOString(),
+      error: error.message,
+      stack: error.stack
+    };
   }
 };
