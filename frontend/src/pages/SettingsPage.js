@@ -15,6 +15,49 @@ import { errorLogger } from '../utils/errorLogger';
 import versionData from '../version.json';
 import '../index.css';
 
+// 配置错误边界组件
+const ConfigErrorBoundary = ({ children, fallback }) => {
+  const [hasError, setHasError] = useState(false);
+  const [errorInfo, setErrorInfo] = useState(null);
+
+  useEffect(() => {
+    const handleError = (error) => {
+      console.error('ConfigErrorBoundary 捕获到错误:', error);
+      setHasError(true);
+      setErrorInfo(error?.message || '未知错误');
+      errorLogger.log(error, { component: 'ConfigErrorBoundary' });
+    };
+
+    // 监听全局错误
+    const errorHandler = (event) => {
+      event.preventDefault();
+      handleError(event.error);
+    };
+
+    window.addEventListener('error', errorHandler);
+    return () => window.removeEventListener('error', errorHandler);
+  }, []);
+
+  if (hasError) {
+    return fallback || (
+      <div className="p-6 bg-red-50 dark:bg-red-900 border-l-4 border-red-400 rounded-lg">
+        <h3 className="text-lg font-bold text-red-900 dark:text-red-100 mb-2">配置加载失败</h3>
+        <p className="text-sm text-red-700 dark:text-red-300 mb-4">
+          {errorInfo || '配置管理器加载失败，请刷新页面重试'}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
+        >
+          刷新页面
+        </button>
+      </div>
+    );
+  }
+
+  return children;
+};
+
 function SettingsPage() {
   // 从URL查询参数获取当前标签
   const urlParams = new URLSearchParams(window.location.search);
@@ -818,7 +861,41 @@ function SettingsPage() {
 
               {activeTab === 'userConfigs' && (
                 <div>
-                  <UserConfigManager />
+                  <ConfigErrorBoundary fallback={
+                    <div className="p-6">
+                      <div className="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 rounded-lg mb-4">
+                        <h3 className="font-bold text-yellow-900 dark:text-yellow-100 mb-2">用户配置加载失败</h3>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                          配置管理器遇到问题。可能是网络问题或存储空间不足。
+                        </p>
+                      </div>
+                      <div className="space-y-3">
+                        <button
+                          onClick={() => {
+                            console.log('尝试清除存储并重置');
+                            try {
+                              localStorage.clear();
+                              sessionStorage.clear();
+                              window.location.reload();
+                            } catch (e) {
+                              console.error('清除存储失败:', e);
+                            }
+                          }}
+                          className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-md"
+                        >
+                          清除存储并重置
+                        </button>
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+                        >
+                          刷新页面
+                        </button>
+                      </div>
+                    </div>
+                  }>
+                    <UserConfigManager />
+                  </ConfigErrorBoundary>
                 </div>
               )}
 

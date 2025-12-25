@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { userConfigManager } from '../utils/userConfigManager';
+import { userConfigManager, DEFAULT_CONFIG } from '../utils/userConfigManager';
 import { errorLogger } from '../utils/errorLogger';
+import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 
 // 创建全局配置上下文
 const UserConfigContext = createContext();
@@ -173,16 +174,44 @@ export const useUserConfig = () => {
   if (!context) {
     // 降级处理：直接使用配置管理器
     return {
-      configManagerReady: userConfigManager.initialized,
-      currentConfig: userConfigManager.getCurrentConfig(),
-      configs: userConfigManager.getAllConfigs(),
+      configManagerReady: userConfigManager.initialized === true,
+      currentConfig: userConfigManager.getCurrentConfig?.() || DEFAULT_CONFIG,
+      configs: userConfigManager.getAllConfigs?.() || [DEFAULT_CONFIG],
       loading: false,
       error: null,
-      initializeConfigManager: () => userConfigManager.initialize(),
-      updateConfig: (index, config) => userConfigManager.updateConfig(index, config),
-      addConfig: (config) => userConfigManager.addConfig(config),
-      deleteConfig: (index) => userConfigManager.deleteConfig(index),
-      switchConfig: (index) => userConfigManager.switchToConfig(index)
+      initializeConfigManager: () => userConfigManager.initialize?.() || Promise.resolve(false),
+      updateConfig: (index, config) => {
+        try {
+          userConfigManager.updateConfig?.(index, config);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      addConfig: (config) => {
+        try {
+          userConfigManager.addConfig?.(config);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      deleteConfig: (index) => {
+        try {
+          userConfigManager.deleteConfig?.(index);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      switchConfig: (index) => {
+        try {
+          userConfigManager.switchToConfig?.(index);
+          return true;
+        } catch {
+          return false;
+        }
+      }
     };
   }
   
@@ -191,15 +220,54 @@ export const useUserConfig = () => {
 
 // 配置数据Hook（简化版，只返回当前配置）
 export const useCurrentConfig = () => {
-  const { currentConfig, configManagerReady } = useUserConfig();
-  
+  const { currentConfig, configManagerReady, loading, error } = useUserConfig();
+
   // 如果全局上下文不可用，直接返回配置管理器的当前配置
   if (!configManagerReady && !userConfigManager.initialized) {
     // 尝试初始化
     userConfigManager.initialize().catch(console.error);
   }
-  
-  return currentConfig || userConfigManager.getCurrentConfig();
+
+  // 获取当前配置
+  const config = currentConfig || userConfigManager.getCurrentConfig();
+
+  // 提供辅助方法
+  const getCurrentConfig = () => {
+    return config;
+  };
+
+  // 更新八字信息的方法（降级处理）
+  const updateBaziInfo = async (nickname, baziInfo) => {
+    try {
+      // 尝试使用 enhancedUserConfigManager
+      if (enhancedUserConfigManager && enhancedUserConfigManager.updateBaziInfo) {
+        return await enhancedUserConfigManager.updateBaziInfo(nickname, baziInfo);
+      }
+      // 如果不可用，使用旧版 userConfigManager
+      const configIndex = userConfigManager.configs.findIndex(c => c.nickname === nickname);
+      if (configIndex !== -1) {
+        userConfigManager.configs[configIndex] = {
+          ...userConfigManager.configs[configIndex],
+          ...baziInfo
+        };
+        userConfigManager.saveToStorage();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('更新八字信息失败:', error);
+      return false;
+    }
+  };
+
+  // 返回结果对象（保持清晰的API结构）
+  return {
+    currentConfig: config,
+    isLoading: loading,
+    error: error,
+    getCurrentConfig,
+    updateBaziInfo
+  };
 };
 
 export default UserConfigContext;

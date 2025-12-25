@@ -304,9 +304,14 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     initDataMigration();
   }, []);
 
-  // 使用全局配置上下文
+  // 使用全局配置上下文（降级处理）
   const { configManagerReady, initializeConfigManager } = useUserConfig();
-  const currentConfig = useCurrentConfig();
+  const configData = useCurrentConfig();
+
+  // 兼容旧版本：如果configData是对象，则解构；如果是null/undefined，使用默认值
+  const currentConfig = configData?.currentConfig || {};
+  const configLoading = configData?.isLoading || false;
+  const configError = configData?.error || null;
 
   // 从全局配置获取用户信息
   const [birthDate, setBirthDate] = useState(null);

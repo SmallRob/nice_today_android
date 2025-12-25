@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
-import { useCurrentConfig } from '../contexts/UserConfigContext';
 import { baziCacheManager } from '../utils/BaziCacheManager';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
+import '../styles/user-info-card.css';
 import { calculateFiveGrids, getCharStrokes, getMeaning } from '../utils/nameScoring';
 import { calculateDetailedBazi } from '../utils/baziHelper';
 import { DEFAULT_REGION } from '../data/ChinaLocationData';
-import { getShichen, getShichenSimple, normalizeShichen } from '../utils/astronomy';
+import { getShichenSimple, normalizeShichen } from '../utils/astronomy';
 
 // 懒加载优化后的表单组件
 const ConfigEditModal = lazy(() => import('./ConfigEditModal'));
@@ -849,6 +849,9 @@ const UserConfigManagerComponent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 编辑弹窗状态
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
 
+  // 降级处理：如果 enhancedUserConfigManager 不可用，使用基本的默认配置
+  const [useFallbackMode, setUseFallbackMode] = useState(false);
+
   // 配置监听器回调 - 统一处理配置变更
   const handleConfigChange = useCallback(({
     configs: updatedConfigs,
@@ -860,17 +863,22 @@ const UserConfigManagerComponent = () => {
       activeIndex: updatedActiveIndex,
       currentConfigNickname: currentConfig?.nickname
     });
-    
-    setConfigs([...updatedConfigs]);
-    setActiveConfigIndex(updatedActiveIndex);
-    
-    // 确保展开索引在有效范围内
-    if (expandedIndex >= updatedConfigs.length) {
-      setExpandedIndex(updatedActiveIndex);
+
+    try {
+      setConfigs([...updatedConfigs]);
+      setActiveConfigIndex(updatedActiveIndex);
+
+      // 确保展开索引在有效范围内
+      if (expandedIndex >= updatedConfigs.length) {
+        setExpandedIndex(updatedActiveIndex);
+      }
+    } catch (err) {
+      console.error('配置变更处理失败:', err);
+      setError('配置更新失败: ' + err.message);
     }
   }, [expandedIndex]);
 
-  // 初始化配置管理器 - 类似轻量版AppLite的初始化逻辑
+  // 初始化配置管理器 - 类似轻量版AppLite的初始化逻辑（增强版降级处理）
   useEffect(() => {
     let isMounted = true;
     let removeListener = null;
@@ -878,45 +886,101 @@ const UserConfigManagerComponent = () => {
     const init = async () => {
       try {
         if (!isMounted) return;
-        
+
         setLoading(true);
         setError(null);
+        setUseFallbackMode(false);
 
         console.log('开始初始化UserConfigManager组件...');
-        
+
+        // 降级处理：检查配置管理器是否可用
+        if (!enhancedUserConfigManager) {
+          console.warn('enhancedUserConfigManager 不可用，使用降级模式');
+          throw new Error('配置管理器未定义');
+        }
+
         // 检查配置管理器是否已初始化
         if (!enhancedUserConfigManager.initialized) {
           console.log('配置管理器未初始化，开始初始化...');
-          await enhancedUserConfigManager.initialize();
-          console.log('配置管理器初始化完成');
+          try {
+            await enhancedUserConfigManager.initialize();
+            console.log('配置管理器初始化完成');
+          } catch (initError) {
+            console.error('配置管理器初始化失败，尝试降级处理:', initError);
+            // 初始化失败时启用降级模式
+            if (!isMounted) return;
+            setUseFallbackMode(true);
+            // 使用默认配置
+            const defaultConfig = {
+              nickname: '默认用户',
+              birthDate: '1990-01-01',
+              birthTime: '12:30',
+              gender: 'male',
+              isused: false
+            };
+            setConfigs([defaultConfig]);
+            setActiveConfigIndex(0);
+            setExpandedIndex(0);
+            setLoading(false);
+            setIsInitialized(true);
+            setError('配置管理器初始化失败，已切换到降级模式');
+            return;
+          }
         } else {
           console.log('配置管理器已初始化，跳过重复初始化');
         }
-        
+
         if (!isMounted) return;
         setIsInitialized(true);
 
-        // 获取当前用户配置
-        const currentConfig = enhancedUserConfigManager.getCurrentConfig();
-        const allConfigs = enhancedUserConfigManager.getAllConfigs();
-        const activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
+        // 获取当前用户配置（增加错误处理）
+        let currentConfig, allConfigs, activeIndex;
+        try {
+          currentConfig = enhancedUserConfigManager.getCurrentConfig();
+          allConfigs = enhancedUserConfigManager.getAllConfigs();
+          activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
 
-        console.log('获取配置数据:', {
-          configCount: allConfigs.length,
-          activeIndex,
-          currentNickname: currentConfig.nickname
-        });
+          console.log('获取配置数据:', {
+            configCount: allConfigs.length,
+            activeIndex,
+            currentNickname: currentConfig?.nickname
+          });
+        } catch (getError) {
+          console.error('获取配置数据失败，使用降级模式:', getError);
+          if (!isMounted) return;
+          setUseFallbackMode(true);
+          const defaultConfig = {
+            nickname: '默认用户',
+            birthDate: '1990-01-01',
+            birthTime: '12:30',
+            gender: 'male',
+            isused: false
+          };
+          setConfigs([defaultConfig]);
+          setActiveConfigIndex(0);
+          setExpandedIndex(0);
+          setLoading(false);
+          setError('获取配置失败，已切换到降级模式');
+          return;
+        }
 
         if (!isMounted) return;
-        setConfigs(allConfigs);
-        setActiveConfigIndex(activeIndex);
+        setConfigs(allConfigs || []);
+        setActiveConfigIndex(activeIndex || 0);
 
         // 默认展开当前配置
-        setExpandedIndex(activeIndex);
-        
-        // 立即设置监听器，确保后续变更能及时响应
-        removeListener = enhancedUserConfigManager.addListener(handleConfigChange);
-        
+        setExpandedIndex(activeIndex || 0);
+
+        // 立即设置监听器，确保后续变更能及时响应（增加错误处理）
+        try {
+          if (enhancedUserConfigManager.addListener) {
+            removeListener = enhancedUserConfigManager.addListener(handleConfigChange);
+          }
+        } catch (listenerError) {
+          console.warn('设置监听器失败:', listenerError);
+          // 监听器失败不影响主要功能
+        }
+
         if (!isMounted) return;
         setLoading(false);
         console.log('UserConfigManager组件初始化完成');
@@ -924,19 +988,37 @@ const UserConfigManagerComponent = () => {
       } catch (error) {
         console.error('初始化用户配置失败:', error);
         if (!isMounted) return;
-        setError('初始化失败: ' + error.message);
+
+        // 降级处理：显示错误并设置降级模式
+        setUseFallbackMode(true);
+        const defaultConfig = {
+          nickname: '默认用户',
+          birthDate: '1990-01-01',
+          birthTime: '12:30',
+          gender: 'male',
+          isused: false
+        };
+        setConfigs([defaultConfig]);
+        setActiveConfigIndex(0);
+        setExpandedIndex(0);
         setLoading(false);
+        setIsInitialized(true);
+        setError('初始化失败: ' + error.message + '，已切换到降级模式');
       }
     };
 
     init();
-    
+
     // 返回清理函数
     return () => {
       isMounted = false;
       if (removeListener && typeof removeListener === 'function') {
-        removeListener();
-        console.log('UserConfigManager组件监听器已清理');
+        try {
+          removeListener();
+          console.log('UserConfigManager组件监听器已清理');
+        } catch (e) {
+          console.warn('清理监听器失败:', e);
+        }
       }
     };
   }, [handleConfigChange]);
@@ -1275,6 +1357,150 @@ const UserConfigManagerComponent = () => {
     );
   }
 
+  // 用户信息卡片组件 - 仿Steam风格
+  const UserInfoCard = ({ config }) => {
+    if (!config) return null;
+
+    // 获取显示姓名（优先使用真实姓名，否则使用昵称或"匿名者"）
+    const displayName = config.realName || config.nickname || '匿名者';
+    const nickName = config.nickname || '未设置昵称';
+
+    // 获取姓名首字用于头像
+    const avatarText = displayName ? displayName.charAt(0) : '?';
+
+    // 评分等级
+    const getScoreLevel = (score) => {
+      if (score >= 90) return 'excellent';
+      if (score >= 80) return 'good';
+      if (score >= 70) return 'fair';
+      return 'poor';
+    };
+
+    const scoreLevel = config.nameScore ? getScoreLevel(config.nameScore.totalScore) : null;
+
+    // 格式化地点
+    const formatLocation = (loc) => {
+      if (!loc) return '未设置';
+      const parts = [loc.province, loc.city, loc.district].filter(Boolean);
+      if (parts.length === 0) return '未设置';
+      return parts.join(' ') + (loc.lng && loc.lat ?
+        ` (经度: ${parseFloat(loc.lng).toFixed(2)}, 纬度: ${parseFloat(loc.lat).toFixed(2)})` : '');
+    };
+
+    return (
+      <div className="user-info-card">
+        {/* 装饰性顶部条 */}
+        <div className="decorative-bar"></div>
+
+        {/* 用户头部信息 */}
+        <div className="user-header">
+          {/* 头像 */}
+          <div className="default-avatar">
+            <span className="avatar-text">{avatarText}</span>
+          </div>
+
+          {/* 用户名称区域 */}
+          <div className="user-names">
+            {/* 姓名行 */}
+            <div className="username-row">
+              <h3 className="username">{displayName}</h3>
+              {/* 评分徽章 */}
+              {config.nameScore && (
+                <span className={`score-badge score-${scoreLevel}`}>
+                  {config.nameScore.totalScore}分
+                </span>
+              )}
+            </div>
+
+            {/* 昵称标签 */}
+            <p className="user-tag">@{nickName}</p>
+          </div>
+        </div>
+
+        {/* 用户详情区域 */}
+        <div className="user-details">
+          <div className="detail-row">
+            <span className="detail-label">出生日期</span>
+            <span className="detail-value birthdate">{config.birthDate || '未设置'}</span>
+          </div>
+
+          <div className="detail-row">
+            <span className="detail-label">出生时间</span>
+            <span className="detail-value birthtime">
+              {config.birthTime || '12:30'}
+              <span className="text-xs text-gray-500 ml-2">
+                ({normalizeShichen(config.shichen || getShichenSimple(config.birthTime || '12:30'))})
+              </span>
+            </span>
+          </div>
+
+          <div className="detail-row">
+            <span className="detail-label">性别</span>
+            <span className="detail-value gender">
+              {GENDER_OPTIONS.find(opt => opt.value === config.gender)?.label || '保密'}
+            </span>
+          </div>
+
+          <div className="detail-row">
+            <span className="detail-label">星座</span>
+            <span className="detail-value zodiac">{config.zodiac || '未设置'}</span>
+          </div>
+
+          <div className="detail-row">
+            <span className="detail-label">生肖</span>
+            <span className="detail-value zodiac">{config.zodiacAnimal || '未设置'}</span>
+          </div>
+
+          <div className="detail-row">
+            <span className="detail-label">MBTI类型</span>
+            <span className="detail-value mbti">{config.mbti || '未设置'}</span>
+          </div>
+
+          <div className="detail-row">
+            <span className="detail-label">出生地点</span>
+            <span className="detail-value location">{formatLocation(config.birthLocation)}</span>
+          </div>
+
+          {/* 姓名评分按钮行 */}
+          {/[一-龥]/.test(config.realName || '') && (
+            <div className="detail-row" style={{ border: 'none', marginBottom: 0, paddingBottom: 0 }}>
+              <span className="detail-label"></span>
+              <div style={{ flex: 1 }}>
+                <button
+                  className="score-btn"
+                  onClick={() => {
+                    setTempScoringConfigIndex(activeConfigIndex);
+                    setIsTempScoringOpen(true);
+                  }}
+                >
+                  {config.nameScore ? '🔄 重新计算评分' : '✏️ 填写姓名并评分'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 未填写姓名时的评分入口 */}
+          {!config.realName && (
+            <div className="detail-row" style={{ border: 'none', marginBottom: 0, paddingBottom: 0 }}>
+              <span className="detail-label"></span>
+              <div style={{ flex: 1 }}>
+                <button
+                  className="score-btn"
+                  onClick={() => {
+                    setTempScoringConfigIndex(activeConfigIndex);
+                    setIsTempScoringOpen(true);
+                  }}
+                >
+                  ✏️ 填写姓名并评分
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* 消息提示 */}
@@ -1285,100 +1511,11 @@ const UserConfigManagerComponent = () => {
           </p>
         </div>
       )}
-      {/* 用户信息 */}
+      {/* 用户信息 - 使用优化的卡片样式 */}
       <Card title="用户信息">
-        <div className="p-4 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
+        <div className="p-4">
           {configs[activeConfigIndex] ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">昵称：</span>
-                <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].nickname}</span>
-              </div>
-              {/* 真实姓名或姓名评分入口 */}
-              {configs[activeConfigIndex].realName ? (
-                <div>
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">真实姓名：</span>
-                  <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].realName}</span>
-                  {configs[activeConfigIndex]?.nameScore && (
-                    <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${configs[activeConfigIndex].nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      configs[activeConfigIndex].nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      configs[activeConfigIndex].nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                      configs[activeConfigIndex].nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                      }`}>
-                      {configs[activeConfigIndex].nameScore.totalScore || 0}分
-                    </span>
-                  )}
-                  {/[一-龥]/.test(configs[activeConfigIndex].realName) && (
-                    <button
-                      className="ml-2 px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
-                      onClick={() => {
-                        setTempScoringConfigIndex(activeConfigIndex);
-                        setIsTempScoringOpen(true);
-                      }}
-                    >
-                      {configs[activeConfigIndex]?.nameScore ? '重新计算评分' : '计算评分'}
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">姓名评分：</span>
-                  <button
-                    className="ml-2 px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
-                    onClick={() => {
-                      setTempScoringConfigIndex(activeConfigIndex);
-                      setIsTempScoringOpen(true);
-                    }}
-                  >
-                    填写姓名并评分
-                  </button>
-                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">（可选，用于五格评分与八字测算）</span>
-                </div>
-              )}
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生日期：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].birthDate}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">性别：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">
-                  {GENDER_OPTIONS.find(opt => opt.value === (configs[activeConfigIndex].gender || 'secret'))?.label || '保密'}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生时间：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">
-                  {configs[activeConfigIndex].birthTime || '12:30'}
-                  <span className="text-xs text-gray-500 ml-1">
-                    ({normalizeShichen(configs[activeConfigIndex].shichen || getShichenSimple(configs[activeConfigIndex].birthTime || '12:30'))})
-                  </span>
-                </span>
-              </div>
-              <div className="col-span-1 md:col-span-2">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生地点：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">
-                  {configs[activeConfigIndex].birthLocation?.province || '北京市'} {configs[activeConfigIndex].birthLocation?.city || '北京市'} {configs[activeConfigIndex].birthLocation?.district || '朝阳区'}
-                  {configs[activeConfigIndex].birthLocation?.lng && configs[activeConfigIndex].birthLocation?.lat && (
-                    <span className="text-xs text-gray-500 ml-2">
-                      (经度: {configs[activeConfigIndex].birthLocation.lng.toFixed(2)}, 纬度: {configs[activeConfigIndex].birthLocation.lat.toFixed(2)})
-                    </span>
-                  )}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">星座：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiac}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">生肖：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiacAnimal}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">MBTI类型：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].mbti || 'ISFP'}</span>
-              </div>
-            </div>
+            <UserInfoCard config={configs[activeConfigIndex]} />
           ) : (
             <p className="text-gray-500 dark:text-gray-400">当前没有可用配置</p>
           )}
@@ -1522,60 +1659,63 @@ const UserConfigManagerComponent = () => {
         </div>
       </Card>
 
-      {/* 临时评分弹窗 */}
-      <Suspense fallback={
-        <div className="flex justify-center items-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-        </div>
-      }>
-        <NameScoringModal
-          isOpen={isTempScoringOpen}
-          onClose={() => {
-            setIsTempScoringOpen(false);
-            setTempScoringConfigIndex(null);
-          }}
-          name={configs[tempScoringConfigIndex]?.realName || ''}
-          isPersonal={tempScoringConfigIndex !== null}
-          onSaveScore={async (score) => {
-            // 保存评分到配置（仅个人评分）
-            if (tempScoringConfigIndex !== null && score) {
-              const totalScore = calculateTotalScore(score);
-              // 直接更新配置的 nameScore 字段
-              try {
-                await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
-                console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
-              } catch (error) {
-                console.error('保存姓名评分失败:', error);
-                showMessage && showMessage('保存评分失败: ' + error.message, 'error');
+      {/* 临时评分弹窗 - 条件渲染避免提前加载 */}
+      {isTempScoringOpen && (
+        <Suspense fallback={
+          <div className="flex justify-center items-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          </div>
+        }>
+          <NameScoringModal
+            isOpen={isTempScoringOpen}
+            onClose={() => {
+              setIsTempScoringOpen(false);
+              setTempScoringConfigIndex(null);
+            }}
+            name={configs[tempScoringConfigIndex]?.realName || ''}
+            isPersonal={tempScoringConfigIndex !== null}
+            onSaveScore={async (score) => {
+              // 保存评分到配置（仅个人评分）
+              if (tempScoringConfigIndex !== null && score) {
+                const totalScore = calculateTotalScore(score);
+                // 直接更新配置的 nameScore 字段
+                try {
+                  await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
+                  console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+                } catch (error) {
+                  console.error('保存姓名评分失败:', error);
+                  showMessage && showMessage('保存评分失败: ' + error.message, 'error');
+                }
               }
-            }
-            // 临时为他人评分时不保存
-          }}
-          showMessage={showMessage}
-        />
-      </Suspense>
+              // 临时为他人评分时不保存
+            }}
+            showMessage={showMessage}
+          />
+        </Suspense>
+      )}
 
-      {/* 配置编辑弹窗 */}
-      <Suspense fallback={
-        <div className="flex justify-center items-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-        </div>
-      }>
-        <ConfigEditModal
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setEditingConfigIndex(null);
-          }}
-          config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : null}
-          index={editingConfigIndex}
-          isNew={editingConfigIndex < 0}
-          onSave={async (index, configData) => {
-            // 直接调用保存函数，弹窗已在 ConfigEditModal 内部关闭
-            try {
-              const result = await handleSaveConfig(index, configData);
-              // 保存成功，ConfigEditModal 会显示成功消息
-              console.log('配置保存完成，返回值:', result);
+      {/* 配置编辑弹窗 - 条件渲染避免提前加载 */}
+      {isEditModalOpen && (
+        <Suspense fallback={
+          <div className="flex justify-center items-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          </div>
+        }>
+          <ConfigEditModal
+            isOpen={isEditModalOpen}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setEditingConfigIndex(null);
+            }}
+            config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : null}
+            index={editingConfigIndex}
+            isNew={editingConfigIndex < 0}
+            onSave={async (index, configData) => {
+              // 直接调用保存函数，弹窗已在 ConfigEditModal 内部关闭
+              try {
+                const result = await handleSaveConfig(index, configData);
+                // 保存成功，ConfigEditModal 会显示成功消息
+                console.log('配置保存完成，返回值:', result);
               return result; // 返回保存结果
             } catch (error) {
               console.error('保存过程中发生错误:', error);
@@ -1586,6 +1726,7 @@ const UserConfigManagerComponent = () => {
           showMessage={showMessage}
         />
       </Suspense>
+      )}
 
       {/* 配置列表 */}
       <div className="space-y-3">

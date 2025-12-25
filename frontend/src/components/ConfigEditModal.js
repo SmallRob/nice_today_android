@@ -92,9 +92,10 @@ const MobileOptimizedButton = ({ children, onClick, variant = 'primary', disable
   );
 };
 
-// 基于TanStack Form的配置编辑弹窗组件
+// 基于TanStack Form的配置编辑弹窗组件（增加错误处理）
 const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMessage }) => {
   const [isSaving, setIsSaving] = useState(false);
+  const [initError, setInitError] = useState(null);
   const prevIsOpenRef = useRef(false);
 
   // 真太阳时和时辰信息
@@ -103,9 +104,43 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     trueSolarTime: ''
   });
 
-  // 初始化默认值
+  // 初始化默认值（增加错误处理）
   const defaultValues = useMemo(() => {
-    if (isNew) {
+    try {
+      if (isNew) {
+        return {
+          nickname: '',
+          realName: '',
+          birthDate: '',
+          birthTime: '12:30',
+          birthLocation: { ...DEFAULT_REGION },
+          gender: 'secret',
+          zodiac: '',
+          zodiacAnimal: '',
+          mbti: '',
+          isused: false
+        };
+      } else if (config) {
+        // 确保深拷贝 birthLocation 对象，避免引用问题
+        return {
+          nickname: config.nickname || '',
+          realName: config.realName || '',
+          birthDate: config.birthDate || '',
+          birthTime: config.birthTime || '12:30',
+          birthLocation: config.birthLocation ? {
+            province: config.birthLocation.province || '',
+            city: config.birthLocation.city || '',
+            district: config.birthLocation.district || '',
+            lng: config.birthLocation.lng ?? DEFAULT_REGION.lng,
+            lat: config.birthLocation.lat ?? DEFAULT_REGION.lat
+          } : { ...DEFAULT_REGION },
+          gender: config.gender || 'secret',
+          zodiac: config.zodiac || '',
+          zodiacAnimal: config.zodiacAnimal || '',
+          mbti: config.mbti || '',
+          isused: config.isused ?? false
+        };
+      }
       return {
         nickname: '',
         realName: '',
@@ -118,39 +153,23 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         mbti: '',
         isused: false
       };
-    } else if (config) {
-      // 确保深拷贝 birthLocation 对象，避免引用问题
+    } catch (error) {
+      console.error('ConfigEditModal defaultValues 计算失败:', error);
+      setInitError('初始化表单失败: ' + error.message);
+      // 返回最小化的默认值
       return {
-        nickname: config.nickname || '',
-        realName: config.realName || '',
-        birthDate: config.birthDate || '',
-        birthTime: config.birthTime || '12:30',
-        birthLocation: config.birthLocation ? {
-          province: config.birthLocation.province || '',
-          city: config.birthLocation.city || '',
-          district: config.birthLocation.district || '',
-          lng: config.birthLocation.lng ?? DEFAULT_REGION.lng,
-          lat: config.birthLocation.lat ?? DEFAULT_REGION.lat
-        } : { ...DEFAULT_REGION },
-        gender: config.gender || 'secret',
-        zodiac: config.zodiac || '',
-        zodiacAnimal: config.zodiacAnimal || '',
-        mbti: config.mbti || '',
-        isused: config.isused ?? false
+        nickname: '',
+        realName: '',
+        birthDate: '',
+        birthTime: '12:30',
+        birthLocation: { ...DEFAULT_REGION },
+        gender: 'secret',
+        zodiac: '',
+        zodiacAnimal: '',
+        mbti: '',
+        isused: false
       };
     }
-    return {
-      nickname: '',
-      realName: '',
-      birthDate: '',
-      birthTime: '12:30',
-      birthLocation: { ...DEFAULT_REGION },
-      gender: 'secret',
-      zodiac: '',
-      zodiacAnimal: '',
-      mbti: '',
-      isused: false
-    };
   }, [isNew, config]);
 
   // 使用 TanStack Form hook
@@ -438,6 +457,27 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
   };
 
   if (!isOpen) return null;
+
+  // 如果有初始化错误，显示错误信息
+  if (initError) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md">
+          <h3 className="text-lg font-bold text-red-600 mb-2">表单初始化失败</h3>
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">{initError}</p>
+          <button
+            onClick={() => {
+              setInitError(null);
+              onClose();
+            }}
+            className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
+          >
+            关闭
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">

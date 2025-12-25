@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from '
 
 import './MayaBirthChart.css';
 import { formatDateString } from '../services/apiServiceRefactored';
-import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
+import { useCurrentConfig } from '../contexts/UserConfigContext';
 import { useTheme } from '../context/ThemeContext';
 import {
   sealInfoMap,

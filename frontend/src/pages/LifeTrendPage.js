@@ -13,7 +13,22 @@ import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
-  const { getCurrentConfig, updateBaziInfo } = useCurrentConfig();
+  const configData = useCurrentConfig();
+
+  // 降级处理：确保有 getCurrentConfig 和 updateBaziInfo 方法
+  // useCurrentConfig() 返回的 configData 包含 currentConfig, isLoading, error, getCurrentConfig, updateBaziInfo
+  const getCurrentConfig = configData?.getCurrentConfig || (() => {
+    return configData?.currentConfig || enhancedUserConfigManager.getCurrentConfig();
+  });
+  const updateBaziInfo = configData?.updateBaziInfo || (async (nickname, baziInfo) => {
+    try {
+      const result = await enhancedUserConfigManager.updateBaziInfo(nickname, baziInfo);
+      return result;
+    } catch (error) {
+      console.error('更新八字信息失败:', error);
+      return false;
+    }
+  });
 
   // 视图和图表状态
   const [selectedView, setSelectedView] = useState('kline');

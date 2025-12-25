@@ -1,0 +1,355 @@
+/* 用户信息卡片 - 仿Steam风格深色主题 */
+
+.user-info-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: #1b2838;
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  color: #c6d4df;
+  position: relative;
+}
+
+/* 装饰性顶部条 */
+.decorative-bar {
+  height: 4px;
+  background: linear-gradient(90deg, #171a21 0%, #67c1f5 50%, #171a21 100%);
+  margin-bottom: 16px;
+}
+
+/* 用户头部信息 */
+.user-header {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  margin-bottom: 20px;
+}
+
+/* 默认头像（第一个字） */
+.default-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #2a475e 0%, #1b2838 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  border: 2px solid #67c1f5;
+  box-shadow: 0 2px 8px rgba(103, 193, 245, 0.3);
+}
+
+.avatar-text {
+  font-size: 28px;
+  font-weight: bold;
+  color: #67c1f5;
+}
+
+/* 用户名称区域 */
+.user-names {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* 姓名行 */
+.username-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.username {
+  margin: 0;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 评分徽章 */
+.score-badge {
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.score-excellent {
+  background-color: #5c7e10;
+  color: #a4d007;
+}
+
+.score-good {
+  background-color: #1b2838;
+  color: #66c0f4;
+  border: 1px solid #66c0f4;
+}
+
+.score-fair {
+  background-color: #2a475e;
+  color: #f59e0b;
+  border: 1px solid #f59e0b;
+}
+
+.score-poor {
+  background-color: #4a1c1c;
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+}
+
+/* 用户昵称标签 */
+.user-tag {
+  margin: 4px 0 0;
+  color: #8f98a0;
+  font-size: 14px;
+}
+
+/* 用户详情区域 */
+.user-details {
+  background-color: #16202d;
+  padding: 18px 20px;
+  border-top: 1px solid #2a475e;
+  border-bottom: 1px solid #2a475e;
+}
+
+/* 详情行 */
+.detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #2a475e;
+  position: relative;
+}
+
+.detail-row:last-of-type {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.detail-label {
+  width: 100px;
+  font-size: 14px;
+  color: #8f98a0;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  flex-grow: 1;
+  font-size: 16px;
+  font-weight: 500;
+  color: #c6d4df;
+}
+
+/* 特殊值的样式 */
+.detail-value.gender {
+  color: #66c0f4;
+}
+
+.detail-value.zodiac {
+  color: #66c0f4;
+}
+
+.detail-value.mbti {
+  color: #66c0f4;
+}
+
+.detail-value.birthdate {
+  color: #b0b8c1;
+}
+
+.detail-value.birthtime {
+  color: #b0b8c1;
+}
+
+.detail-value.location {
+  color: #c6d4df;
+}
+
+/* 复制按钮 */
+.copy-btn {
+  background: #2a475e;
+  border: none;
+  border-radius: 3px;
+  color: #c6d4df;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  transition: background-color 0.2s;
+}
+
+.copy-btn:hover {
+  background-color: #3a5673;
+}
+
+.copy-btn:active {
+  background-color: #1b2838;
+}
+
+.copy-icon {
+  font-size: 14px;
+}
+
+/* 在线状态指示器 */
+.online-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #57cbde;
+  margin-left: 10px;
+  box-shadow: 0 0 6px #57cbde;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+/* 评分按钮 */
+.score-btn {
+  background: #2a475e;
+  border: 1px solid #66c0f4;
+  border-radius: 3px;
+  color: #66c0f4;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.score-btn:hover {
+  background: #3a5673;
+  box-shadow: 0 0 8px rgba(102, 192, 244, 0.3);
+}
+
+/* 卡片底部 */
+.card-footer {
+  padding: 12px 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.steam-badge {
+  background-color: #171a21;
+  color: #c6d4df;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .user-info-card {
+    max-width: 100%;
+  }
+
+  .detail-label {
+    width: 90px;
+    font-size: 13px;
+  }
+
+  .detail-value {
+    font-size: 14px;
+  }
+
+  .username {
+    font-size: 20px;
+  }
+
+  .default-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .avatar-text {
+    font-size: 24px;
+  }
+}
+
+/* 暗色模式适配 */
+.dark .user-info-card {
+  background-color: #1e293b;
+}
+
+.dark .user-details {
+  background-color: #0f172a;
+}
+
+.dark .detail-label {
+  color: #94a3b8;
+}
+
+.dark .detail-value {
+  color: #e2e8f0;
+}
+
+/* 浅色模式（可选） */
+.light .user-info-card {
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #1e293b;
+}
+
+.light .decorative-bar {
+  background: linear-gradient(90deg, #f1f5f9 0%, #3b82f6 50%, #f1f5f9 100%);
+}
+
+.light .default-avatar {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border: 2px solid #3b82f6;
+}
+
+.light .avatar-text {
+  color: #3b82f6;
+}
+
+.light .user-details {
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.light .detail-row {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.light .detail-label {
+  color: #64748b;
+}
+
+.light .detail-value {
+  color: #1e293b;
+}
+
+.light .username {
+  color: #0f172a;
+}
+
+.light .user-tag {
+  color: #94a3b8;
+}
+
+/* 加载动画 */
+.loading-skeleton {
+  background: linear-gradient(90deg, #1b2838 25%, #2a475e 50%, #1b2838 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
