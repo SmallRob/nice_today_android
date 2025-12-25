@@ -849,26 +849,36 @@ const UserConfigManagerComponent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 编辑弹窗状态
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
 
-  // 配置监听器回调 - 统一处理配置变更
+  // 配置监听器回调 - 只在必要时更新状态
   const handleConfigChange = useCallback(({
     configs: updatedConfigs,
     activeConfigIndex: updatedActiveIndex,
-    currentConfig
+    currentConfig,
+    forceReload
   }) => {
     console.log('配置变更监听器触发:', {
       configsLength: updatedConfigs.length,
       activeIndex: updatedActiveIndex,
-      currentConfigNickname: currentConfig?.nickname
+      currentConfigNickname: currentConfig?.nickname,
+      forceReload
     });
     
-    setConfigs([...updatedConfigs]);
-    setActiveConfigIndex(updatedActiveIndex);
-    
-    // 确保展开索引在有效范围内
-    if (expandedIndex >= updatedConfigs.length) {
+    // 只有在强制刷新或配置数量变化时才更新状态
+    // 避免不必要的频繁更新导致页面刷新
+    if (forceReload || updatedConfigs.length !== configs.length) {
+      setConfigs([...updatedConfigs]);
+      setActiveConfigIndex(updatedActiveIndex);
+      
+      // 确保展开索引在有效范围内
+      if (expandedIndex >= updatedConfigs.length) {
+        setExpandedIndex(updatedActiveIndex);
+      }
+    } else if (updatedActiveIndex !== activeConfigIndex) {
+      // 只有活跃索引变化时才更新
+      setActiveConfigIndex(updatedActiveIndex);
       setExpandedIndex(updatedActiveIndex);
     }
-  }, [expandedIndex]);
+  }, [configs.length, activeConfigIndex, expandedIndex]);
 
   // 初始化配置管理器 - 类似轻量版AppLite的初始化逻辑
   useEffect(() => {

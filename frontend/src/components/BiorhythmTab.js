@@ -325,14 +325,14 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
       initializeConfigManager();
     }
 
-    // 只有当配置数据有效时才更新
+    // 只有当配置数据有效且出生日期确实发生变化时才更新
     if (currentConfig && currentConfig.birthDate) {
       const userBirthDate = new Date(currentConfig.birthDate);
+      const newBirthDateTimestamp = userBirthDate.getTime();
+      const currentBirthDateTimestamp = birthDate ? birthDate.getTime() : 0;
       
-      // 避免无效日期（如默认值）覆盖用户配置
-      const isDefaultDate = currentConfig.birthDate === DEFAULT_BIRTH_DATE;
-      
-      if (!isDefaultDate || !birthDate) { // 如果是默认日期且已有用户数据，则不覆盖
+      // 只有当出生日期真正变化时才更新（避免使用默认值覆盖）
+      if (newBirthDateTimestamp !== currentBirthDateTimestamp) {
         setBirthDate(userBirthDate);
         setUserInfo({
           nickname: currentConfig.nickname || '',
@@ -340,7 +340,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         });
       }
     }
-  }, [configManagerReady, currentConfig, initializeConfigManager, birthDate]);
+  }, [configManagerReady, currentConfig?.birthDate, currentConfig?.nickname, initializeConfigManager, birthDate]);
 
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
@@ -622,11 +622,13 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
     const loadData = async () => {
       // 只有当出生日期发生变化时才重新加载
-      if (currentConfig.birthDate && currentConfig.birthDate !== DEFAULT_BIRTH_DATE) {
+      if (currentConfig.birthDate) {
         const userBirthDate = new Date(currentConfig.birthDate);
+        const newBirthDateTimestamp = userBirthDate.getTime();
+        const currentBirthDateTimestamp = birthDate ? birthDate.getTime() : 0;
         
-        // 避免重复加载相同的数据
-        if (!birthDate || userBirthDate.getTime() !== birthDate.getTime()) {
+        // 只有当出生日期真正变化时才重新加载（避免默认值触发）
+        if (newBirthDateTimestamp !== currentBirthDateTimestamp) {
           setBirthDate(userBirthDate);
           await loadBiorhythmData(userBirthDate);
         }
@@ -634,29 +636,32 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     };
 
     loadData();
-  }, [currentConfig, configManagerReady, birthDate, loadBiorhythmData, DEFAULT_BIRTH_DATE]);
+  }, [configManagerReady, currentConfig?.birthDate, birthDate, loadBiorhythmData]);
 
-  // 组件挂载时自动加载数据
+  // 组件挂载时自动加载数据（只执行一次）
   useEffect(() => {
     const loadData = async () => {
       // 等待配置管理器初始化完成
       if (!configManagerReady) return;
 
-      // 优先使用用户配置的出生日期
-      if (currentConfig && currentConfig.birthDate && currentConfig.birthDate !== DEFAULT_BIRTH_DATE) {
-        const userBirthDate = new Date(currentConfig.birthDate);
-        setBirthDate(userBirthDate);
-        await loadBiorhythmData(userBirthDate);
-        return;
-      }
-
-      // 如果没有用户配置或使用默认日期，检查是否有存储的出生日期
+      // 如果已经有birthDate，不再重复加载
       if (birthDate) {
         await loadBiorhythmData(birthDate);
         return;
       }
 
-      // 最后才使用默认日期
+      // 优先使用用户配置的出生日期
+      if (currentConfig && currentConfig.birthDate) {
+        // 只有当不是默认日期时才使用
+        if (currentConfig.birthDate !== DEFAULT_BIRTH_DATE) {
+          const userBirthDate = new Date(currentConfig.birthDate);
+          setBirthDate(userBirthDate);
+          await loadBiorhythmData(userBirthDate);
+          return;
+        }
+      }
+
+      // 最后才使用默认日期（仅在首次加载且无有效配置时）
       const defaultDate = parseDateLocal(DEFAULT_BIRTH_DATE);
       setBirthDate(defaultDate);
       await loadBiorhythmData(defaultDate);
@@ -666,7 +671,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
     // 初始化实践活动
     setPracticeActivities(getRandomActivities(0, 0, 0));
-  }, [loadBiorhythmData, birthDate, currentConfig, DEFAULT_BIRTH_DATE, configManagerReady, getRandomActivities]);
+  }, [configManagerReady]); // 只依赖 configManagerReady，避免每次 currentConfig 变化都重新执行
 
   // 检测节律极值并发送通知，同时生成动态提示
   useEffect(() => {
@@ -685,7 +690,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
       // 更新实践活动（根据节律动态推荐）
       setPracticeActivities(getRandomActivities(todayData.physical, todayData.emotional, todayData.intellectual));
     }
-  }, [todayData, generateDailyTip, lastTipRefresh, getRandomActivities]);
+  }, [todayData, lastTipRefresh]);
 
   // 更换实践活动
   const refreshActivities = () => {

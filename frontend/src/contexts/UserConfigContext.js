@@ -199,7 +199,10 @@ export const useCurrentConfig = () => {
     userConfigManager.initialize().catch(console.error);
   }
   
-  return currentConfig || userConfigManager.getCurrentConfig();
+  // 使用 allowNull=true 避免用默认值覆盖用户配置
+  const configFromManager = userConfigManager.getCurrentConfig(true);
+  
+  return currentConfig || configFromManager;
 };
 
 export default UserConfigContext;
