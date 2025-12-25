@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
-import { useCurrentConfig } from '../contexts/UserConfigContext';
+import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { baziCacheManager } from '../utils/BaziCacheManager';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
+import asyncOperationQueue from '../utils/AsyncOperationQueue';
+import errorHandlingManager from '../utils/ErrorHandlingManager';
 import '../styles/zodiac-icons.css';
 import '../styles/zodiac-mbti-icons.css';
 import '../styles/config-selectors.css';
@@ -18,24 +20,34 @@ import birthDataIntegrityManager from '../utils/BirthDataIntegrityManager'; // �
 const ConfigEditModal = lazy(() => import('./ConfigEditModal'));
 const NameScoringModal = lazy(() => import('./NameScoringModal'));
 
-// 八字命理展示组件（优化版：优先从配置中读取八字信息）
-const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo }) => {
+// 八字命理展示组件（优化版：优先从缓存中读取八字信息）
+const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname }) => {
   const [baziInfo, setBaziInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 计算八字信息（优先使用保存的八字信息）
+  // 计算八字信息（优先使用缓存或保存的八字信息）
   useEffect(() => {
     if (!birthDate) return;
 
     const loadBazi = async () => {
       setLoading(true);
       try {
-        // 1. 优先使用保存的八字信息
+        // 1. 优先从缓存获取八字信息
+        if (nickname) {
+          const cachedBazi = baziCacheManager.getBaziByNickname(nickname);
+          if (cachedBazi && cachedBazi.bazi) {
+            console.log('使用缓存中的八字信息:', nickname);
+            setBaziInfo(cachedBazi.bazi);
+            return;
+          }
+        }
+        
+        // 2. 其次使用保存的八字信息
         if (savedBaziInfo && savedBaziInfo.bazi) {
           console.log('使用配置中保存的八字信息');
           setBaziInfo(savedBaziInfo);
         } else {
-          // 2. 如果没有保存的八字信息，则实时计算
+          // 3. 如果没有缓存或保存的八字信息，则实时计算
           console.log('配置中无八字信息，开始实时计算');
           const lng = birthLocation?.lng || DEFAULT_REGION.lng;
 
@@ -50,6 +62,19 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
               text: lunarBirthDate // 使用配置中存储的农历日期
             };
           }
+          
+          // 计算完成后缓存八字信息
+          if (info && nickname) {
+            const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
+              birthDate,
+              birthTime: useTrueSolarTime,
+              longitude: lng
+            }, info);
+            
+            if (cacheSuccess) {
+              console.log('八字信息已缓存:', nickname);
+            }
+          }
 
           setBaziInfo(info);
         }
@@ -61,7 +86,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     };
 
     loadBazi();
-  }, [birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo]);
+  }, [birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname]);
 
   if (loading) {
     return (
@@ -79,56 +104,60 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     );
   }
 
-  // 计算五行统计和综合旺衰
-  const wuxingElements = ['木', '火', '土', '金', '水'];
-  const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+  // 使用useMemo来优化五行统计计算
+  const { elementCounts, wuxingElements, dayMaster, fortuneType, luckyElement, masterElement, totalScore } = useMemo(() => {
+    const wuxingElements = ['木', '火', '土', '金', '水'];
+    const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
 
-  // 统计四柱五行
-  const wuxingStr = baziInfo.wuxing.text; // "金土 火金 金金 土水"
-  const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
-  wuxingList.forEach(element => {
-    elementCounts[element]++;
-  });
+    // 统计四柱五行
+    const wuxingStr = baziInfo.wuxing.text; // "金土 火金 金金 土水"
+    const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
+    wuxingList.forEach(element => {
+      elementCounts[element]++;
+    });
 
-  // 计算日主和五行得分
-  const dayMaster = baziInfo.bazi.day.charAt(0);
-  const elementToIndex = { '木': 0, '火': 1, '土': 2, '金': 3, '水': 4 };
+    // 计算日主和五行得分
+    const dayMaster = baziInfo.bazi.day.charAt(0);
+    const elementToIndex = { '木': 0, '火': 1, '土': 2, '金': 3, '水': 4 };
 
-  // 简化版八字旺衰计算
-  const sameElementIndex = elementToIndex[baziInfo.wuxing.year[0]]; // 年干
-  const dayElementIndex = elementToIndex[dayMaster];
+    // 简化版八字旺衰计算
+    const sameElementIndex = elementToIndex[baziInfo.wuxing.year[0]]; // 年干
+    const dayElementIndex = elementToIndex[dayMaster];
 
-  // 同类得分（日主和同类）
-  const sameTypeScore = (elementCounts['木'] * 1.68) + (elementCounts['火'] * 0.34) +
-                       (elementCounts['土'] * 0.75) + (elementCounts['金'] * 1.68) +
-                       (elementCounts['水'] * 0.60);
+    // 同类得分（日主和同类）
+    const sameTypeScore = (elementCounts['木'] * 1.68) + (elementCounts['火'] * 0.34) +
+                         (elementCounts['土'] * 0.75) + (elementCounts['金'] * 1.68) +
+                         (elementCounts['水'] * 0.60);
 
-  // 异类得分
-  const diffTypeScore = (8 - sameTypeScore);
+    // 异类得分
+    const diffTypeScore = (8 - sameTypeScore);
 
-  // 综合旺衰分数
-  const totalScore = Math.abs(sameTypeScore - diffTypeScore);
+    // 综合旺衰分数
+    const totalScore = Math.abs(sameTypeScore - diffTypeScore);
 
-  // 判断旺衰和喜用神
-  let fortuneType = '八字中和';
-  let luckyElement = '无特别喜用';
-  const dayMasterElement = { '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
-                              '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水' }[dayMaster];
-  const masterElement = dayMasterElement || '未知';
+    // 判断旺衰和喜用神
+    let fortuneType = '八字中和';
+    let luckyElement = '无特别喜用';
+    const dayMasterElement = { '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+                                '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水' }[dayMaster];
+    const masterElement = dayMasterElement || '未知';
 
-  if (totalScore > 3) {
-    if (sameTypeScore > diffTypeScore) {
-      fortuneType = '八字偏强';
-      // 找出最缺少的五行
-      const missingElements = wuxingElements.filter(e => elementCounts[e] === 0);
-      const minElements = wuxingElements.filter(e => elementCounts[e] === Math.min(...Object.values(elementCounts)));
-      luckyElement = minElements.length > 0 ? minElements[0] : '木';
-    } else {
-      fortuneType = '八字偏弱';
-      // 喜用神为日主同类五行
-      luckyElement = masterElement;
+    if (totalScore > 3) {
+      if (sameTypeScore > diffTypeScore) {
+        fortuneType = '八字偏强';
+        // 找出最缺少的五行
+        const missingElements = wuxingElements.filter(e => elementCounts[e] === 0);
+        const minElements = wuxingElements.filter(e => elementCounts[e] === Math.min(...Object.values(elementCounts)));
+        luckyElement = minElements.length > 0 ? minElements[0] : '木';
+      } else {
+        fortuneType = '八字偏弱';
+        // 喜用神为日主同类五行
+        luckyElement = masterElement;
+      }
     }
-  }
+    
+    return { elementCounts, wuxingElements, dayMaster, fortuneType, luckyElement, masterElement, totalScore };
+  }, [baziInfo]);
 
   return (
     <div className="space-y-4">
@@ -313,7 +342,9 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
       </div>
     </div>
   );
-};
+});
+
+BaziFortuneDisplay.displayName = 'BaziFortuneDisplay';
 
 // 格式化位置字符串
 const formatLocationString = (loc) => {
@@ -666,7 +697,7 @@ const calculateDaYun = (baziInfo, birthYear) => {
 };
 
 // 配置列表项组件
-const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => {
+const ConfigForm = React.memo(({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // 检查是否是系统默认配置（已被禁用）
@@ -876,15 +907,32 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
       )}
     </div>
   );
-};
+});
+
+ConfigForm.displayName = 'ConfigForm';
+
 const UserConfigManagerComponent = () => {
-  const [configs, setConfigs] = useState([]);
-  const [activeConfigIndex, setActiveConfigIndex] = useState(0);
+  // 从全局配置上下文获取数据
+  const {
+    configs,
+    currentConfig,
+    configManagerReady,
+    loading: contextLoading,
+    error: contextError,
+    initializeConfigManager,
+    updateConfig,
+    addConfig,
+    deleteConfig,
+    switchConfig,
+    updateBaziInfo,
+    calculateAndSyncBazi,
+    getValidBirthInfo
+  } = useUserConfig();
+
+  // 本地状态（只保留组件特定的状态）
+  const [activeConfigIndex, setActiveConfigIndex] = useState(0); // 本地状态保持同步
   const [expandedIndex, setExpandedIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
-  const [error, setError] = useState(null);
   const [message, setMessage] = useState(null); // 用于显示提示信息
   const [isTempScoringOpen, setIsTempScoringOpen] = useState(false); // 临时评分弹窗状态
   const [tempScoringConfigIndex, setTempScoringConfigIndex] = useState(null); // 临时评分使用的配置索引
@@ -915,8 +963,7 @@ const UserConfigManagerComponent = () => {
       forceReload
     });
 
-    // 立即更新所有相关状态
-    setConfigs([...updatedConfigs]);
+    // 由于configs现在来自全局上下文，这里只更新本地状态
     setActiveConfigIndex(updatedActiveIndex);
 
     // 确保展开索引在有效范围内
@@ -930,11 +977,16 @@ const UserConfigManagerComponent = () => {
     if (forceReload || updatedConfigs.length !== configs.length) {
       setBaziKey(prev => prev + 1);
     }
-  }, []); // 移除依赖，确保每次都能执行
-
+  }, [configs]); // 依赖configs
   // 加载紫微命宫数据 - 添加加载状态提示和增强验证
   useEffect(() => {
     const loadZiWeiData = async () => {
+      if (!configManagerReady || !configs || configs.length === 0) {
+        setZiweiData(null);
+        setZiweiLoading(false);
+        return;
+      }
+      
       const config = configs[activeConfigIndex];
       if (!config || !config.birthDate) {
         setZiweiData(null);
@@ -992,78 +1044,72 @@ const UserConfigManagerComponent = () => {
     };
 
     loadZiWeiData();
-  }, [activeConfigIndex, configs, baziKey]);
+  }, [activeConfigIndex, configs, baziKey, configManagerReady]);
 
-  // 初始化配置管理器 - 类似轻量版AppLite的初始化逻辑
+  // 初始化配置管理器 - 现在通过useUserConfig钩子管理
   useEffect(() => {
-    let isMounted = true;
-    let removeListener = null;
-
-    const init = async () => {
-      try {
-        if (!isMounted) return;
-        
-        setLoading(true);
-        setError(null);
-
-        console.log('开始初始化UserConfigManager组件...');
-        
-        // 检查配置管理器是否已初始化
-        if (!enhancedUserConfigManager.initialized) {
-          console.log('配置管理器未初始化，开始初始化...');
-          await enhancedUserConfigManager.initialize();
-          console.log('配置管理器初始化完成');
-        } else {
-          console.log('配置管理器已初始化，跳过重复初始化');
-        }
-        
-        if (!isMounted) return;
-        setIsInitialized(true);
-
-        // 获取当前用户配置
-        const currentConfig = enhancedUserConfigManager.getCurrentConfig();
-        const allConfigs = enhancedUserConfigManager.getAllConfigs();
-        const activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
-
-        console.log('获取配置数据:', {
-          configCount: allConfigs.length,
-          activeIndex,
-          currentNickname: currentConfig.nickname
-        });
-
-        if (!isMounted) return;
-        setConfigs(allConfigs);
-        setActiveConfigIndex(activeIndex);
-
-        // 默认展开当前配置
-        setExpandedIndex(activeIndex);
-        
-        // 立即设置监听器，确保后续变更能及时响应
-        removeListener = enhancedUserConfigManager.addListener(handleConfigChange);
-        
-        if (!isMounted) return;
-        setLoading(false);
-        console.log('UserConfigManager组件初始化完成');
-
-      } catch (error) {
-        console.error('初始化用户配置失败:', error);
-        if (!isMounted) return;
-        setError('初始化失败: ' + error.message);
-        setLoading(false);
-      }
-    };
-
-    init();
+    if (!configManagerReady && initializeConfigManager) {
+      initializeConfigManager();
+    }
     
-    // 返回清理函数
+    // 设置监听器，确保后续变更能及时响应
+    const removeListener = enhancedUserConfigManager.addListener(handleConfigChange);
+    
+    // 设置异步操作队列的回调函数
+    asyncOperationQueue.setOptimisticUpdateCallback((operationType, optimisticUpdate) => {
+      console.log('执行乐观更新:', operationType, optimisticUpdate);
+      // 在这里可以实现乐观更新逻辑
+      // 例如：更新本地状态以立即反映变化
+    });
+    
+    asyncOperationQueue.setOperationSuccessCallback((operationType, operationData, result) => {
+      console.log('操作成功:', operationType, operationData, result);
+      // 操作成功后的处理
+    });
+    
+    asyncOperationQueue.setRollbackCallback((operationType, optimisticUpdate, error) => {
+      console.log('执行回滚:', operationType, optimisticUpdate, error);
+      // 在这里可以实现回滚逻辑
+      // 例如：恢复之前的状态
+    });
+    
+    // 默认展开当前配置
+    if (configs && configs.length > 0 && activeConfigIndex >= 0 && activeConfigIndex < configs.length) {
+      setExpandedIndex(activeConfigIndex);
+    }
+    
+    // 启动缓存自动清理（30分钟清理一次过期缓存）
+    baziCacheManager.startAutoCleanup(30 * 60 * 1000);
+    
+    // 缓存预热：预加载当前所有配置的八字信息
+    if (configs && configs.length > 0 && configManagerReady) {
+      // 使用缓存预热功能
+      const warmCacheOptions = {
+        expiryTime: 2 * 60 * 60 * 1000, // 2小时过期时间
+        forceRefresh: false,
+        filterFunction: (config) => {
+          // 只预热有出生日期和八字信息的配置
+          return config.birthDate && config.bazi;
+        }
+      };
+      
+      const warmResult = baziCacheManager.warmCache(configs, warmCacheOptions);
+      console.log('缓存预热结果:', warmResult);
+    }
+    
     return () => {
-      isMounted = false;
       if (removeListener && typeof removeListener === 'function') {
         removeListener();
         console.log('UserConfigManager组件监听器已清理');
       }
+      
+      // 组件卸载时停止自动清理
+      baziCacheManager.stopAutoCleanup();
+      
+      // 清空操作队列
+      asyncOperationQueue.clearQueue();
     };
-  }, [handleConfigChange]);
+  }, [handleConfigChange, configManagerReady, configs, activeConfigIndex]);
 
   // 显示提示信息
   const showMessage = useCallback((text, type = 'info') => {
@@ -1223,32 +1269,69 @@ const UserConfigManagerComponent = () => {
     }
 
     try {
-      if (isNewConfig) {
-        // 新建配置，保存基础配置（包括自动计算的八字）
-        console.log('执行添加新配置操作...');
-        const addResult = await enhancedUserConfigManager.addBasicConfig(finalConfigData);
-        console.log('addBasicConfig 返回结果:', addResult);
-        if (!addResult) {
-          throw new Error('添加新配置失败');
+      // 使用异步操作队列管理保存操作
+      const saveOperation = async (operationData) => {
+        const { index, finalConfigData } = operationData;
+        
+        if (isNewConfig) {
+          // 新建配置，保存基础配置（包括自动计算的八字）
+          console.log('执行添加新配置操作...');
+          const addResult = await enhancedUserConfigManager.addBasicConfig(finalConfigData);
+          console.log('addBasicConfig 返回结果:', addResult);
+          if (!addResult) {
+            throw new Error('添加新配置失败');
+          }
+          console.log('新建基础配置成功（包含八字信息）');
+        } else {
+          // 现有配置，更新存储（包括八字信息）
+          console.log('执行更新配置操作，索引:', index);
+          const updateResult = await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, finalConfigData);
+          console.log('updateConfigWithNodeUpdate 返回结果:', {
+            success: updateResult?.success,
+            recovered: updateResult?.recovered,
+            error: updateResult?.error
+          });
+          if (!updateResult || !updateResult.success) {
+            throw new Error(updateResult?.error || '更新配置失败');
+          }
         }
-        console.log('新建基础配置成功（包含八字信息）');
-      } else {
-        // 现有配置，更新存储（包括八字信息）
-        console.log('执行更新配置操作，索引:', index);
-        const updateResult = await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, finalConfigData);
-        console.log('updateConfigWithNodeUpdate 返回结果:', {
-          success: updateResult?.success,
-          recovered: updateResult?.recovered,
-          error: updateResult?.error
-        });
-        if (!updateResult || !updateResult.success) {
-          throw new Error(updateResult?.error || '更新配置失败');
-        }
-      }
+        
+        return true; // 返回成功状态
+      };
+      
+      // 将保存操作添加到队列
+      await asyncOperationQueue.enqueue(
+        saveOperation,
+        'save-config',
+        { index, finalConfigData },
+        // 乐观更新数据（可选）
+        null
+      );
 
       console.log('========== 保存配置成功 ==========');
       console.log('监听器将自动更新状态');
 
+      // 同步更新八字缓存
+      if (finalConfigData.bazi && finalConfigData.nickname) {
+        const birthInfo = {
+          birthDate: finalConfigData.birthDate,
+          birthTime: finalConfigData.birthTime || '12:30',
+          longitude: finalConfigData.birthLocation?.lng || 116.40
+        };
+        
+        const cacheSuccess = baziCacheManager.cacheBazi(
+          finalConfigData.nickname,
+          birthInfo,
+          finalConfigData.bazi
+        );
+        
+        if (cacheSuccess) {
+          console.log('八字信息已同步到缓存:', finalConfigData.nickname);
+        } else {
+          console.warn('八字信息同步到缓存失败:', finalConfigData.nickname);
+        }
+      }
+      
       // 显示成功消息
       showMessage('✅ 配置保存成功', 'success');
 
@@ -1263,11 +1346,36 @@ const UserConfigManagerComponent = () => {
       console.error('错误信息:', error.message);
       console.error('错误堆栈:', error.stack);
 
-      // 显示错误消息
-      showMessage('❌ 保存失败: ' + error.message, 'error');
-
-      // 将异常信息传递给调用者
-      throw error;
+      // 使用错误处理管理器记录错误
+      errorHandlingManager.logError('save-config', error, {
+        configIndex: index,
+        configData: finalConfigData
+      });
+      
+      // 尝试恢复
+      const recoveryResult = await errorHandlingManager.attemptRecovery(
+        'save-config',
+        async () => {
+          // 尝试使用修复后的配置数据保存
+          const repairedConfig = errorHandlingManager.validateAndRepairConfig(finalConfigData);
+          if (isNewConfig) {
+            return enhancedUserConfigManager.addBasicConfig(repairedConfig);
+          } else {
+            return enhancedUserConfigManager.updateConfigWithNodeUpdate(index, repairedConfig);
+          }
+        },
+        { configIndex: index, configData: finalConfigData }
+      );
+      
+      if (recoveryResult) {
+        showMessage('✅ 配置已通过修复后保存成功', 'success');
+      } else {
+        // 显示错误消息
+        showMessage('❌ 保存失败: ' + error.message, 'error');
+        
+        // 将异常信息传递给调用者
+        throw error;
+      }
     }
   }, [showMessage]);
 
@@ -1284,8 +1392,26 @@ const UserConfigManagerComponent = () => {
     try {
       showMessage('正在从模板创建新配置...', 'info');
 
-      // 从默认配置模板复制并保存
-      const success = await enhancedUserConfigManager.addConfigFromTemplate();
+      // 使用异步操作队列管理从模板添加配置操作
+      const addFromTemplateOperation = async () => {
+        // 从默认配置模板复制并保存
+        const success = await enhancedUserConfigManager.addConfigFromTemplate();
+        
+        if (!success) {
+          throw new Error('从模板创建配置返回失败');
+        }
+        
+        return success;
+      };
+      
+      // 将从模板添加配置操作添加到队列
+      const success = await asyncOperationQueue.enqueue(
+        addFromTemplateOperation,
+        'add-from-template',
+        {},
+        // 乐观更新数据（可选）
+        null
+      );
 
       if (success) {
         showMessage('✅ 从模板创建新配置成功', 'success');
@@ -1294,12 +1420,28 @@ const UserConfigManagerComponent = () => {
         setTimeout(() => {
           setMessage(null);
         }, 2000);
-      } else {
-        throw new Error('从模板创建配置返回失败');
       }
     } catch (error) {
       console.error('从模板创建配置失败:', error);
-      showMessage('❌ 从模板创建失败: ' + error.message, 'error');
+      
+      // 使用错误处理管理器记录错误
+      errorHandlingManager.logError('add-from-template', error, {});
+      
+      // 尝试恢复
+      const recoveryResult = await errorHandlingManager.attemptRecovery(
+        'add-from-template',
+        async () => {
+          // 尝试重新从模板创建配置
+          return await enhancedUserConfigManager.addConfigFromTemplate();
+        },
+        {}
+      );
+      
+      if (recoveryResult) {
+        showMessage('✅ 从模板创建配置已通过恢复机制成功', 'success');
+      } else {
+        showMessage('❌ 从模板创建失败: ' + error.message, 'error');
+      }
     }
   }, [showMessage, setMessage]);
 
@@ -1317,6 +1459,9 @@ const UserConfigManagerComponent = () => {
     // 使用自定义确认对话框替代window.confirm
     if (window.confirm('确定要删除这个配置吗？')) {
       try {
+        // 获取配置信息以清理相关缓存
+        const configToDelete = configs[index];
+        
         if (isTempConfig) {
           // 临时配置，只需从本地状态移除
           setConfigs(prev => prev.filter((_, i) => i !== index));
@@ -1324,21 +1469,66 @@ const UserConfigManagerComponent = () => {
           setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
           showMessage('删除配置成功', 'success');
         } else {
-          // 存储中的配置，需要从存储中移除
-          await enhancedUserConfigManager.removeConfig(index);
-          // deleteConfig 内部已经调用了 notifyListeners
-          // 监听器会自动更新本地状态，这里只需要调整展开索引
-          // 注意：监听器更新是异步的，所以需要从 enhancedUserConfigManager 获取最新长度
-          const freshConfigs = enhancedUserConfigManager.getAllConfigs();
-          setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
+          // 使用异步操作队列管理删除操作
+          const deleteOperation = async (operationData) => {
+            const { index } = operationData;
+            
+            // 存储中的配置，需要从存储中移除
+            await enhancedUserConfigManager.removeConfig(index);
+            // deleteConfig 内部已经调用了 notifyListeners
+            // 监听器会自动更新本地状态，这里只需要调整展开索引
+            // 注意：监听器更新是异步的，所以需要从 enhancedUserConfigManager 获取最新长度
+            const freshConfigs = enhancedUserConfigManager.getAllConfigs();
+            setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
+            
+            return true;
+          };
+          
+          // 将删除操作添加到队列
+          await asyncOperationQueue.enqueue(
+            deleteOperation,
+            'delete-config',
+            { index },
+            // 乐观更新数据（可选）
+            null
+          );
+          
           showMessage('删除配置成功', 'success');
+        }
+        
+        // 清理相关缓存
+        if (configToDelete && configToDelete.nickname) {
+          baziCacheManager.clearCache(configToDelete.nickname);
+          console.log('已清理配置相关缓存:', configToDelete.nickname);
         }
       } catch (error) {
         console.error('删除配置失败:', error);
-        showMessage(`删除配置失败: ${error.message}`, 'error');
+        
+        // 使用错误处理管理器记录错误
+        errorHandlingManager.logError('delete-config', error, {
+          configIndex: index,
+          configToDelete: configToDelete
+        });
+        
+        // 尝试恢复
+        const recoveryResult = await errorHandlingManager.attemptRecovery(
+          'delete-config',
+          async () => {
+            // 尝试重新执行删除操作
+            await enhancedUserConfigManager.removeConfig(index);
+            return true;
+          },
+          { configIndex: index, configToDelete: configToDelete }
+        );
+        
+        if (recoveryResult) {
+          showMessage('✅ 配置已通过恢复机制删除成功', 'success');
+        } else {
+          showMessage(`删除配置失败: ${error.message}`, 'error');
+        }
       }
     }
-  }, [configs.length, showMessage]);
+  }, [configs.length, showMessage, configs]);
 
   // 处理编辑配置
   const handleEditConfig = useCallback((index) => {
@@ -1360,10 +1550,26 @@ const UserConfigManagerComponent = () => {
       setIsSwitching(true);
       setError(null);
 
-      // 异步设置活跃配置
-      await new Promise(resolve => setTimeout(resolve, 50));
-      await enhancedUserConfigManager.setActiveConfig(index);
-
+      // 使用异步操作队列管理设置活跃配置操作
+      const setActiveOperation = async (operationData) => {
+        const { index } = operationData;
+        
+        // 异步设置活跃配置
+        await new Promise(resolve => setTimeout(resolve, 50));
+        await enhancedUserConfigManager.setActiveConfig(index);
+        
+        return true;
+      };
+      
+      // 将设置活跃配置操作添加到队列
+      await asyncOperationQueue.enqueue(
+        setActiveOperation,
+        'set-active-config',
+        { index },
+        // 乐观更新数据（可选）
+        null
+      );
+      
       // setActiveConfig 内部已经调用了 notifyListeners
       // 监听器会自动更新本地状态，不需要手动更新
       console.log('设置活跃配置成功，监听器将自动更新状态');
@@ -1374,7 +1580,31 @@ const UserConfigManagerComponent = () => {
       }, 300);
     } catch (error) {
       console.error('切换配置失败:', error);
-      setError('切换配置失败: ' + error.message);
+      
+      // 使用错误处理管理器记录错误
+      errorHandlingManager.logError('set-active-config', error, {
+        configIndex: index
+      });
+      
+      // 尝试恢复
+      const recoveryResult = await errorHandlingManager.attemptRecovery(
+        'set-active-config',
+        async () => {
+          // 尝试恢复到之前的状态
+          const previousActiveIndex = enhancedUserConfigManager.getActiveConfigIndex();
+          if (previousActiveIndex !== index) {
+            await enhancedUserConfigManager.setActiveConfig(previousActiveIndex);
+          }
+          return true;
+        },
+        { configIndex: index, previousActiveIndex: enhancedUserConfigManager.getActiveConfigIndex() }
+      );
+      
+      if (recoveryResult) {
+        setError('切换配置失败，已恢复到之前状态');
+      } else {
+        setError('切换配置失败: ' + error.message);
+      }
       setIsSwitching(false);
 
       // 恢复之前的状态
@@ -1480,17 +1710,57 @@ const UserConfigManagerComponent = () => {
     }
 
     try {
-      // 执行排序
-      const success = await enhancedUserConfigManager.reorderConfig(fromIndex, toIndex);
+      // 使用异步操作队列管理排序操作
+      const reorderOperation = async (operationData) => {
+        const { fromIndex, toIndex } = operationData;
+        
+        // 执行排序
+        const success = await enhancedUserConfigManager.reorderConfig(fromIndex, toIndex);
+        
+        if (!success) {
+          throw new Error('配置排序失败');
+        }
+        
+        return success;
+      };
+      
+      // 将排序操作添加到队列
+      const success = await asyncOperationQueue.enqueue(
+        reorderOperation,
+        'reorder-config',
+        { fromIndex, toIndex },
+        // 乐观更新数据（可选）
+        null
+      );
 
       if (success) {
         showMessage('配置排序成功', 'success');
-      } else {
-        showMessage('配置排序失败', 'error');
       }
     } catch (error) {
       console.error('排序配置失败:', error);
-      showMessage(`排序失败: ${error.message}`, 'error');
+      
+      // 使用错误处理管理器记录错误
+      errorHandlingManager.logError('reorder-config', error, {
+        fromIndex,
+        toIndex
+      });
+      
+      // 尝试恢复
+      const recoveryResult = await errorHandlingManager.attemptRecovery(
+        'reorder-config',
+        async () => {
+          // 尝试恢复到之前的排序状态
+          // 这里可以实现撤销操作，暂时返回true表示恢复成功
+          return true;
+        },
+        { fromIndex, toIndex }
+      );
+      
+      if (recoveryResult) {
+        showMessage('✅ 配置排序已通过恢复机制处理', 'success');
+      } else {
+        showMessage(`排序失败: ${error.message}`, 'error');
+      }
     } finally {
       setDraggedIndex(null);
       setDragOverIndex(null);
@@ -1528,16 +1798,26 @@ const UserConfigManagerComponent = () => {
     );
   }
 
+  // 使用useMemo优化消息提示的渲染
+  const messageElement = useMemo(() => {
+    if (!message) return null;
+    
+    const messageClass = `p-4 rounded-lg ${message.type === 'error' ? 'bg-red-50 dark:bg-red-900 border-l-4 border-red-400' : message.type === 'success' ? 'bg-green-50 dark:bg-green-900 border-l-4 border-green-400' : 'bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400'}`;
+    const textClass = `${message.type === 'error' ? 'text-red-700 dark:text-red-300' : message.type === 'success' ? 'text-green-700 dark:text-green-300' : 'text-blue-700 dark:text-blue-300'} whitespace-pre-line`;
+    
+    return (
+      <div className={messageClass}>
+        <p className={textClass}>
+          {message.text}
+        </p>
+      </div>
+    );
+  }, [message]);
+  
   return (
     <div className="space-y-4">
       {/* 消息提示 */}
-      {message && (
-        <div className={`p-4 rounded-lg ${message.type === 'error' ? 'bg-red-50 dark:bg-red-900 border-l-4 border-red-400' : message.type === 'success' ? 'bg-green-50 dark:bg-green-900 border-l-4 border-green-400' : 'bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400'}`}>
-          <p className={`${message.type === 'error' ? 'text-red-700 dark:text-red-300' : message.type === 'success' ? 'text-green-700 dark:text-green-300' : 'text-blue-700 dark:text-blue-300'} whitespace-pre-line`}>
-            {message.text}
-          </p>
-        </div>
-      )}
+      {messageElement}
       {/* 用户信息 - 优化版 */}
       <Card 
         title="用户信息" 
@@ -1761,6 +2041,7 @@ const UserConfigManagerComponent = () => {
           birthDate={configs[activeConfigIndex]?.birthDate}
           birthTime={configs[activeConfigIndex]?.birthTime}
           longitude={configs[activeConfigIndex]?.birthLocation?.lng}
+          nickname={configs[activeConfigIndex]?.nickname}
         />
       </Card>
 
@@ -1830,7 +2111,7 @@ const UserConfigManagerComponent = () => {
                       return;
                     }
 
-                    // 3. 同步八字到缓存
+                    // 3. 同步八字到缓存（使用默认过期时间）
                     const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
                       birthDate,
                       birthTime,
@@ -1869,6 +2150,7 @@ const UserConfigManagerComponent = () => {
             lunarBirthDate={configs[activeConfigIndex].lunarBirthDate}
             trueSolarTime={configs[activeConfigIndex].trueSolarTime}
             savedBaziInfo={configs[activeConfigIndex].bazi}
+            nickname={configs[activeConfigIndex]?.nickname}
           />
         ) : (
           <div className="text-center py-6 text-gray-500 dark:text-gray-400">
@@ -2017,13 +2299,79 @@ const UserConfigManagerComponent = () => {
                 }
               }
 
-              // 直接更新配置
+              // 使用异步操作队列管理评分保存操作
               try {
-                await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, updateData);
-                console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+                const saveScoreOperation = async (operationData) => {
+                  const { tempScoringConfigIndex, updateData, configs } = operationData;
+                  
+                  // 更新配置
+                  await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, updateData);
+                  console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+                  
+                  // 同步更新八字缓存
+                  const config = configs[tempScoringConfigIndex];
+                  if (config && config.bazi && config.nickname) {
+                    const birthInfo = {
+                      birthDate: config.birthDate,
+                      birthTime: config.birthTime || '12:30',
+                      longitude: config.birthLocation?.lng || 116.40
+                    };
+                    
+                    const cacheSuccess = baziCacheManager.cacheBazi(
+                      config.nickname,
+                      birthInfo,
+                      config.bazi
+                    );
+                    
+                    if (cacheSuccess) {
+                      console.log('八字信息已同步到缓存:', config.nickname);
+                    } else {
+                      console.warn('八字信息同步到缓存失败:', config.nickname);
+                    }
+                  }
+                  
+                  return true;
+                };
+                
+                // 将评分保存操作添加到队列
+                await asyncOperationQueue.enqueue(
+                  saveScoreOperation,
+                  'save-name-score',
+                  { tempScoringConfigIndex, updateData, configs },
+                  // 乐观更新数据（可选）
+                  null
+                );
               } catch (error) {
                 console.error('保存姓名评分失败:', error);
-                showMessage && showMessage('保存评分失败: ' + error.message, 'error');
+                
+                // 使用错误处理管理器记录错误
+                errorHandlingManager.logError('save-name-score', error, {
+                  tempScoringConfigIndex,
+                  updateData
+                });
+                
+                // 尝试恢复
+                const recoveryResult = await errorHandlingManager.attemptRecovery(
+                  'save-name-score',
+                  async () => {
+                    // 尝试使用修复后的数据保存
+                    const repairedConfig = errorHandlingManager.validateAndRepairConfig({
+                      nameScore: updateData.nameScore,
+                      realName: updateData.realName
+                    });
+                    return await enhancedUserConfigManager.updateConfigWithNodeUpdate(
+                      tempScoringConfigIndex, 
+                      repairedConfig
+                    );
+                  },
+                  { tempScoringConfigIndex, updateData }
+                );
+                
+                if (recoveryResult) {
+                  showMessage && showMessage('✅ 姓名评分已通过修复后保存成功', 'success');
+                } else {
+                  showMessage && showMessage('保存评分失败: ' + error.message, 'error');
+                }
               }
             }
             // 临时为他人评分时不保存

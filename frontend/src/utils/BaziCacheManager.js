@@ -13,6 +13,12 @@ class BaziCacheManager {
     this.cache = new Map();
     this.index = {}; // { nickname: cacheKey } 映射表
     this.initialized = false;
+    // 默认缓存过期时间：最小10分钟，最大12小时
+    this.minCacheExpiryTime = 10 * 60 * 1000; // 10分钟
+    this.maxCacheExpiryTime = 12 * 60 * 60 * 1000; // 12小时
+    
+    // 自动清理定时器
+    this.cleanupIntervalId = null;
   }
 
   /**
@@ -35,6 +41,10 @@ class BaziCacheManager {
         this.index = JSON.parse(cachedIndex);
         console.log('加载八字缓存索引成功:', Object.keys(this.index).length);
       }
+      
+      // 清理过期缓存
+      const expiredCount = this.clearExpiredCache();
+      console.log('清理过期缓存完成，删除了', expiredCount, '个过期缓存');
       
       this.initialized = true;
       console.log('八字缓存管理器初始化完成');
@@ -59,6 +69,23 @@ class BaziCacheManager {
   }
 
   /**
+   * 检查缓存是否过期
+   * @param {Object} cachedData 缓存数据
+   * @returns {boolean} 是否过期
+   */
+  isCacheExpired(cachedData) {
+    if (!cachedData.expiresAt) {
+      // 如果没有过期时间，认为已过期（向后兼容）
+      return true;
+    }
+    
+    const now = new Date();
+    const expiryTime = new Date(cachedData.expiresAt);
+    
+    return now > expiryTime;
+  }
+
+  /**
    * 获取缓存的八字信息
    * @param {string} nickname 用户昵称
    * @returns {Object|null} 八字信息
@@ -73,7 +100,19 @@ class BaziCacheManager {
       return null;
     }
     
-    return this.cache.get(cacheKey);
+    const cachedData = this.cache.get(cacheKey);
+    
+    // 检查缓存是否过期
+    if (cachedData && this.isCacheExpired(cachedData)) {
+      // 如果缓存过期，删除它并返回null
+      this.cache.delete(cacheKey);
+      delete this.index[nickname];
+      this.saveToStorage();
+      console.log('缓存已过期，已删除:', nickname);
+      return null;
+    }
+    
+    return cachedData;
   }
 
   /**
@@ -89,7 +128,25 @@ class BaziCacheManager {
     }
     
     const cacheKey = this.generateCacheKey(birthDate, birthTime, longitude);
-    return this.cache.get(cacheKey);
+    const cachedData = this.cache.get(cacheKey);
+    
+    // 检查缓存是否过期
+    if (cachedData && this.isCacheExpired(cachedData)) {
+      // 如果缓存过期，删除它并返回null
+      this.cache.delete(cacheKey);
+      // 同时删除索引中的引用
+      for (const [nickname, key] of Object.entries(this.index)) {
+        if (key === cacheKey) {
+          delete this.index[nickname];
+          break;
+        }
+      }
+      this.saveToStorage();
+      console.log('缓存已过期，已删除:', cacheKey);
+      return null;
+    }
+    
+    return cachedData;
   }
 
   /**
@@ -100,7 +157,7 @@ class BaziCacheManager {
    * @param {string} configIndex 配置索引（可选）
    * @returns {boolean} 是否缓存成功
    */
-  cacheBazi(nickname, birthInfo, baziInfo, configIndex = null) {
+  cacheBazi(nickname, birthInfo, baziInfo, configIndex = null, expiryTime = null) {
     if (!this.initialized) {
       console.warn('八字缓存管理器未初始化');
       return false;
@@ -113,6 +170,10 @@ class BaziCacheManager {
         birthInfo.longitude || 116.40
       );
       
+      // 确保过期时间在允许范围内
+      let actualExpiryTime = expiryTime || this.maxCacheExpiryTime; // 默认使用最大过期时间
+      actualExpiryTime = Math.max(this.minCacheExpiryTime, Math.min(actualExpiryTime, this.maxCacheExpiryTime));
+      
       // 保存八字信息到缓存
       this.cache.set(cacheKey, {
         nickname,
@@ -120,6 +181,7 @@ class BaziCacheManager {
         bazi: baziInfo,
         configIndex,
         cachedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + actualExpiryTime).toISOString(),
         // 添加八字相关字段
         lunarBirthDate: baziInfo.lunar?.text,
         trueSolarTime: baziInfo.shichen?.time || birthInfo.birthTime,
@@ -132,7 +194,7 @@ class BaziCacheManager {
       // 保存到 localStorage
       this.saveToStorage();
       
-      console.log('八字信息已缓存:', { nickname, cacheKey, birthInfo });
+      console.log('八字信息已缓存:', { nickname, cacheKey, birthInfo, expiresAt: new Date(Date.now() + actualExpiryTime) });
       return true;
     } catch (error) {
       console.error('缓存八字信息失败:', error);
@@ -145,7 +207,7 @@ class BaziCacheManager {
    * @param {Object} config 用户配置对象
    * @returns {boolean} 是否同步成功
    */
-  syncConfigBaziToCache(config) {
+  syncConfigBaziToCache(config, expiryTime = null) {
     if (!config || !config.bazi) {
       console.warn('配置缺少八字信息，跳过同步');
       return false;
@@ -161,7 +223,8 @@ class BaziCacheManager {
       config.nickname,
       birthInfo,
       config.bazi,
-      null // configIndex 不需要保存到缓存
+      null, // configIndex 不需要保存到缓存
+      expiryTime
     );
   }
 
@@ -175,8 +238,7 @@ class BaziCacheManager {
       return false;
     }
     
-    const cacheKey = this.index[nickname];
-    return cacheKey !== undefined && this.cache.has(cacheKey);
+    return this.hasValidCache(nickname);
   }
 
   /**
@@ -218,6 +280,147 @@ class BaziCacheManager {
   }
 
   /**
+   * 清理所有过期的缓存
+   * @returns {number} 清理的缓存数量
+   */
+  clearExpiredCache() {
+    let clearedCount = 0;
+    const keysToDelete = [];
+    
+    for (const [cacheKey, cachedData] of this.cache.entries()) {
+      if (this.isCacheExpired(cachedData)) {
+        keysToDelete.push(cacheKey);
+      }
+    }
+    
+    for (const cacheKey of keysToDelete) {
+      this.cache.delete(cacheKey);
+      
+      // 从索引中删除对应的引用
+      for (const [nickname, key] of Object.entries(this.index)) {
+        if (key === cacheKey) {
+          delete this.index[nickname];
+          break;
+        }
+      }
+      clearedCount++;
+    }
+    
+    if (clearedCount > 0) {
+      this.saveToStorage();
+      console.log(`清理了 ${clearedCount} 个过期的缓存`);
+    }
+    
+    return clearedCount;
+  }
+
+  /**
+   * 缓存预热 - 预先加载可能需要的八字信息
+   * @param {Array} configs 配置列表
+   * @param {Object} options 预热选项
+   * @returns {Object} 预热统计
+   */
+  warmCache(configs, options = {}) {
+    if (!configs || !Array.isArray(configs)) {
+      return { success: false, message: '无效的配置数组' };
+    }
+    
+    const {
+      expiryTime = null, // 自定义过期时间
+      forceRefresh = false, // 是否强制刷新
+      filterFunction = null // 过滤函数
+    } = options;
+    
+    let successCount = 0;
+    let skipCount = 0;
+    let errorCount = 0;
+    
+    for (const config of configs) {
+      // 检查过滤条件
+      if (filterFunction && typeof filterFunction === 'function' && !filterFunction(config)) {
+        skipCount++;
+        continue;
+      }
+      
+      // 检查是否已有有效缓存（除非强制刷新）
+      if (!forceRefresh && this.hasValidCache(config.nickname)) {
+        skipCount++;
+        continue;
+      }
+      
+      if (config && config.birthDate && config.bazi) {
+        try {
+          const birthInfo = {
+            birthDate: config.birthDate,
+            birthTime: config.birthTime || '12:30',
+            longitude: config.birthLocation?.lng || 116.40
+          };
+          
+          const result = this.cacheBazi(
+            config.nickname,
+            birthInfo,
+            config.bazi,
+            null,
+            expiryTime
+          );
+          
+          if (result) {
+            successCount++;
+          } else {
+            errorCount++;
+          }
+        } catch (error) {
+          console.error('缓存预热失败:', error);
+          errorCount++;
+        }
+      } else {
+        skipCount++;
+      }
+    }
+    
+    const stats = {
+      success: true,
+      total: configs.length,
+      successCount,
+      skipCount,
+      errorCount,
+      stats: this.getCacheStats()
+    };
+    
+    console.log('缓存预热完成:', stats);
+    return stats;
+  }
+
+  /**
+   * 检查是否有有效的缓存（未过期）
+   * @param {string} nickname 用户昵称
+   * @returns {boolean} 是否有有效缓存
+   */
+  hasValidCache(nickname) {
+    if (!this.initialized) {
+      return false;
+    }
+    
+    const cacheKey = this.index[nickname];
+    if (!cacheKey) {
+      return false;
+    }
+    
+    const cachedData = this.cache.get(cacheKey);
+    
+    // 检查缓存是否过期
+    if (cachedData && this.isCacheExpired(cachedData)) {
+      // 如果缓存过期，删除它
+      this.cache.delete(cacheKey);
+      delete this.index[nickname];
+      this.saveToStorage();
+      return false;
+    }
+    
+    return !!cachedData;
+  }
+
+  /**
    * 获取缓存统计信息
    */
   getCacheStats() {
@@ -228,6 +431,42 @@ class BaziCacheManager {
       oldestCache: this.getOldestCache(),
       newestCache: this.getNewestCache()
     };
+  }
+  
+  /**
+   * 启动定时清理过期缓存
+   * @param {number} interval 清理间隔（毫秒），默认30分钟
+   * @returns {number} 定时器ID
+   */
+  startAutoCleanup(interval = 30 * 60 * 1000) {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+    }
+    
+    this.cleanupIntervalId = setInterval(() => {
+      try {
+        const clearedCount = this.clearExpiredCache();
+        if (clearedCount > 0) {
+          console.log(`自动清理完成，删除了 ${clearedCount} 个过期缓存`);
+        }
+      } catch (error) {
+        console.error('自动清理过期缓存时出错:', error);
+      }
+    }, interval);
+    
+    console.log(`已启动自动清理，间隔: ${interval}ms`);
+    return this.cleanupIntervalId;
+  }
+  
+  /**
+   * 停止自动清理
+   */
+  stopAutoCleanup() {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = null;
+      console.log('已停止自动清理');
+    }
   }
 
   /**
@@ -269,7 +508,7 @@ class BaziCacheManager {
    * @param {Array} configs 用户配置数组
    * @returns {Object} 缓存统计
    */
-  batchSyncConfigs(configs) {
+  batchSyncConfigs(configs, expiryTime = null) {
     if (!configs || !Array.isArray(configs)) {
       return { success: false, message: '无效的配置数组' };
     }
@@ -280,7 +519,7 @@ class BaziCacheManager {
     
     for (const config of configs) {
       if (config && config.bazi && config.birthDate) {
-        const result = this.syncConfigBaziToCache(config);
+        const result = this.syncConfigBaziToCache(config, expiryTime);
         if (result) {
           successCount++;
         } else {
