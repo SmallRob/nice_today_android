@@ -1837,7 +1837,7 @@ const UserConfigManagerComponent = () => {
       >
         <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl shadow-inner border border-blue-100 dark:border-blue-800">
           {configs[activeConfigIndex] ? (
-            <div className={`space-y-4 transition-all ${isUserInfoExpanded ? '' : 'max-h-24 overflow-hidden'}`}>
+            <div className={`space-y-4 transition-all duration-300 ${isUserInfoExpanded ? 'max-h-[1000px]' : 'max-h-24 overflow-hidden'}`}>
               {/* 昵称 - 突出显示 */}
               <div className="flex items-center justify-between pb-3 border-b border-blue-200 dark:border-blue-800">
                 <div className="flex items-center">
