@@ -14,7 +14,7 @@ const DEFAULT_CONFIG = Object.freeze({
   birthLocation: Object.freeze({
     province: '北京市',
     city: '北京市',
-    district: '朝阳区',
+    district: '海淀区',
     lng: 116.48,
     lat: 39.95
   }),
@@ -144,7 +144,7 @@ class UserConfigManager {
       }));
 
       // 检查是否存在系统默认配置（只有一个默认配置的系统默认标记为 true）
-      const systemDefaultIndex = this.configs.findIndex(c => c.nickname === '叉子' && c.birthDate === '1991-04-30');
+      const systemDefaultIndex = this.configs.findIndex(c => c.nickname === '叉子');
       if (systemDefaultIndex !== -1 && systemDefaultIndex === 0) {
         this.configs[systemDefaultIndex].isSystemDefault = true;
       }

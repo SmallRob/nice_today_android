@@ -1242,6 +1242,30 @@ const UserConfigManagerComponent = () => {
     showMessage('请填写配置信息', 'info');
   }, [showMessage]);
 
+  // 处理从模板复制新建配置
+  const handleAddFromTemplate = useCallback(async () => {
+    try {
+      showMessage('正在从模板创建新配置...', 'info');
+
+      // 从默认配置模板复制并保存
+      const success = await enhancedUserConfigManager.addConfigFromTemplate();
+
+      if (success) {
+        showMessage('✅ 从模板创建新配置成功', 'success');
+
+        // 延迟后清除消息
+        setTimeout(() => {
+          setMessage(null);
+        }, 2000);
+      } else {
+        throw new Error('从模板创建配置返回失败');
+      }
+    } catch (error) {
+      console.error('从模板创建配置失败:', error);
+      showMessage('❌ 从模板创建失败: ' + error.message, 'error');
+    }
+  }, [showMessage, setMessage]);
+
   // 处理删除配置
   const handleDeleteConfig = useCallback(async (index) => {
     if (configs.length <= 1) {
@@ -1837,6 +1861,18 @@ const UserConfigManagerComponent = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               <span>添加新配置</span>
+            </Button>
+
+            <Button
+              variant="primary"
+              onClick={handleAddFromTemplate}
+              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+              title="以系统默认用户'叉子'的配置为模板创建新用户"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+              </svg>
+              <span>从模板新建</span>
             </Button>
 
             <Button

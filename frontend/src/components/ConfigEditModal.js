@@ -93,7 +93,7 @@ const MobileOptimizedButton = ({ children, onClick, variant = 'primary', disable
 };
 
 // 基于TanStack Form的配置编辑弹窗组件
-const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMessage }) => {
+const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMessage, isFromTemplate = false, templateSource = null }) => {
   const [isSaving, setIsSaving] = useState(false);
   const prevIsOpenRef = useRef(false);
 
@@ -426,28 +426,38 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         finalConfig.lastCalculated = new Date().toISOString();
       }
 
-      // 验证通过，立即关闭弹窗
-      onClose();
-
-      // 显示保存中消息
+      // 验证通过，显示保存中消息
+      setIsSaving(true);
       showMessage('正在保存配置，数据将在后台同步...', 'info');
 
-      // 异步保存数据（不阻塞弹窗关闭）
-      onSave(index, finalConfig).then(() => {
-        // 保存成功后更新消息
-        showMessage('✅ 保存成功，数据已同步', 'success');
-      }).catch((error) => {
-        // 保存失败显示错误，但不影响用户体验
-        console.error('异步保存失败:', error);
-        showMessage(`⚠️ 保存失败: ${error.message}`, 'error');
-      });
+      try {
+        // 异步保存数据
+        const result = await onSave(index, finalConfig);
+
+        if (result) {
+          // 保存成功
+          console.log('配置保存成功');
+        } else {
+          throw new Error('保存配置返回失败结果');
+        }
+
+        // 保存成功后延迟关闭弹窗，让用户看到成功消息
+        setTimeout(() => {
+          onClose();
+        }, 300);
+
+      } catch (error) {
+        console.error('保存配置失败:', error);
+        showMessage(`保存失败: ${error.message}`, 'error');
+        throw error; // 重新抛出异常
+      } finally {
+        setIsSaving(false);
+      }
 
     } catch (error) {
       console.error('保存配置失败:', error);
       showMessage(`保存失败: ${error.message}`, 'error');
-      throw error; // 重新抛出异常，让父组件感知
-    } finally {
-      setIsSaving(false);
+      throw error; // 重新抛出异常
     }
   };
 
@@ -458,9 +468,19 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shrink-0 bg-white dark:bg-gray-800 z-10">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-            <span className="mr-2">⚙️</span> {isNew ? '新建配置' : '修改配置'}
-          </h3>
+          <div className="flex flex-col">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+              <span className="mr-2">⚙️</span> {isNew ? '新建配置' : '修改配置'}
+            </h3>
+            {isFromTemplate && templateSource && (
+              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1 flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clipRule="evenodd" />
+                </svg>
+                复制自模板：{templateSource}
+              </p>
+            )}
+          </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 touch-manipulation">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
