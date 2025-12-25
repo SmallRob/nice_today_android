@@ -7,7 +7,8 @@
 import { Solar, Lunar } from 'lunar-javascript';
 import { 
   validateBirthInfoForZiWei, 
-  calculateShichenForZiWei 
+  calculateShichenForZiWei,
+  validateZiWeiCalculationRequirements 
 } from './ConfigValidationHelper.js';
 
 /**

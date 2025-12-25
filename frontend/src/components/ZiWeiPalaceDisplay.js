@@ -1,6 +1,47 @@
 import React, { useState, useEffect } from 'react';
 
 /**
+ * 获取卡片颜色（基于强度）
+ */
+const getCardColor = (strength) => {
+  switch (strength) {
+    case '强': return 'from-green-100 to-green-200';
+    case '偏强': return 'from-blue-100 to-blue-200';
+    case '中偏强': return 'from-indigo-100 to-indigo-200';
+    case '中': return 'from-gray-100 to-gray-200';
+    case '偏弱': return 'from-orange-100 to-orange-200';
+    case '弱': return 'from-red-100 to-red-200';
+    default: return 'from-gray-100 to-gray-200';
+  }
+};
+
+/**
+ * 获取卡片颜色（深色模式）
+ */
+const getCardColorDark = (strength) => {
+  switch (strength) {
+    case '强': return 'from-green-900/20 to-green-800/20';
+    case '偏强': return 'from-blue-900/20 to-blue-800/20';
+    case '中偏强': return 'from-indigo-900/20 to-indigo-800/20';
+    case '中': return 'from-gray-900/20 to-gray-800/20';
+    case '偏弱': return 'from-orange-900/20 to-orange-800/20';
+    case '弱': return 'from-red-900/20 to-red-800/20';
+    default: return 'from-gray-900/20 to-gray-800/20';
+  }
+};
+
+/**
+ * 获取分数颜色
+ */
+const getScoreColor = (score) => {
+  if (score >= 85) return 'bg-green-500';
+  if (score >= 75) return 'bg-blue-500';
+  if (score >= 65) return 'bg-yellow-500';
+  if (score >= 50) return 'bg-orange-500';
+  return 'bg-red-500';
+};
+
+/**
  * 紫微命宫展示组件（增强版）
  * 显示紫微命盘各宫位信息，包含详细的错误和警告提示
  */

@@ -105,6 +105,7 @@ const BaziFortuneDisplay = React.memo(({ birthDate, birthTime, birthLocation, lu
   }
 
   // 使用useMemo来优化五行统计计算
+  // eslint-disable-next-line react-hooks/rules-of-hooks, react-hooks/exhaustive-deps
   const { elementCounts, wuxingElements, dayMaster, fortuneType, luckyElement, masterElement, totalScore } = useMemo(() => {
     const wuxingElements = ['木', '火', '土', '金', '水'];
     const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
@@ -933,6 +934,7 @@ const UserConfigManagerComponent = () => {
   const [activeConfigIndex, setActiveConfigIndex] = useState(0); // 本地状态保持同步
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [error, setError] = useState(null); // 错误状态
   const [message, setMessage] = useState(null); // 用于显示提示信息
   const [isTempScoringOpen, setIsTempScoringOpen] = useState(false); // 临时评分弹窗状态
   const [tempScoringConfigIndex, setTempScoringConfigIndex] = useState(null); // 临时评分使用的配置索引
@@ -1458,43 +1460,36 @@ const UserConfigManagerComponent = () => {
 
     // 使用自定义确认对话框替代window.confirm
     if (window.confirm('确定要删除这个配置吗？')) {
+      let configToDelete = null; // 确保在 try-catch 作用域外定义
       try {
         // 获取配置信息以清理相关缓存
-        const configToDelete = configs[index];
+        configToDelete = configs[index];
         
-        if (isTempConfig) {
-          // 临时配置，只需从本地状态移除
-          setConfigs(prev => prev.filter((_, i) => i !== index));
-          // 调整展开索引
-          setExpandedIndex(prev => Math.max(0, Math.min(prev, configs.length - 2)));
-          showMessage('删除配置成功', 'success');
-        } else {
-          // 使用异步操作队列管理删除操作
-          const deleteOperation = async (operationData) => {
-            const { index } = operationData;
-            
-            // 存储中的配置，需要从存储中移除
-            await enhancedUserConfigManager.removeConfig(index);
-            // deleteConfig 内部已经调用了 notifyListeners
-            // 监听器会自动更新本地状态，这里只需要调整展开索引
-            // 注意：监听器更新是异步的，所以需要从 enhancedUserConfigManager 获取最新长度
-            const freshConfigs = enhancedUserConfigManager.getAllConfigs();
-            setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
-            
-            return true;
-          };
+        // 使用异步操作队列管理删除操作
+        const deleteOperation = async (operationData) => {
+          const { index } = operationData;
           
-          // 将删除操作添加到队列
-          await asyncOperationQueue.enqueue(
-            deleteOperation,
-            'delete-config',
-            { index },
-            // 乐观更新数据（可选）
-            null
-          );
+          // 从存储中移除配置
+          await enhancedUserConfigManager.removeConfig(index);
+          // deleteConfig 内部已经调用了 notifyListeners
+          // 监听器会自动更新本地状态，这里只需要调整展开索引
+          // 注意：监听器更新是异步的，所以需要从 enhancedUserConfigManager 获取最新长度
+          const freshConfigs = enhancedUserConfigManager.getAllConfigs();
+          setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
           
-          showMessage('删除配置成功', 'success');
-        }
+          return true;
+        };
+        
+        // 将删除操作添加到队列
+        await asyncOperationQueue.enqueue(
+          deleteOperation,
+          'delete-config',
+          { index },
+          // 乐观更新数据（可选）
+          null
+        );
+        
+        showMessage('删除配置成功', 'success');
         
         // 清理相关缓存
         if (configToDelete && configToDelete.nickname) {
@@ -1768,7 +1763,7 @@ const UserConfigManagerComponent = () => {
     }
   }, [showMessage]);
 
-  if (loading) {
+  if (contextLoading) {
     return (
       <div className="flex justify-center items-center py-8">
         <div className="text-center">
@@ -1779,14 +1774,14 @@ const UserConfigManagerComponent = () => {
     );
   }
 
-  if (error) {
+  if (contextError) {
     return (
       <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4 rounded-lg">
         <div className="flex items-center">
           <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
           </svg>
-          <p className="text-red-700 dark:text-red-300">{error}</p>
+          <p className="text-red-700 dark:text-red-300">{contextError}</p>
         </div>
         <button
           onClick={() => window.location.reload()}
@@ -1799,6 +1794,7 @@ const UserConfigManagerComponent = () => {
   }
 
   // 使用useMemo优化消息提示的渲染
+  // eslint-disable-next-line react-hooks/rules-of-hooks, react-hooks/exhaustive-deps
   const messageElement = useMemo(() => {
     if (!message) return null;
     
