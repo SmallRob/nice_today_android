@@ -7,9 +7,6 @@ module.exports = {
   // 测试环境
   testEnvironment: 'jsdom',
   
-  // 支持ES6模块
-  preset: 'react-scripts',
-  
   // 测试文件匹配模式
   testMatch: [
     '<rootDir>/__tests__/**/*.test.js',
@@ -23,7 +20,8 @@ module.exports = {
     '/node_modules/',
     '/build/',
     '/dist/',
-    '/test/results/'
+    '/test/results/',
+    '/test/reports/'
   ],
   
   // 模块路径映射
@@ -71,16 +69,6 @@ module.exports = {
   
   // 显示测试结果
   verbose: true,
-  
-  // 变换配置 - 使用react-scripts内置的transform
-  transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest'
-  },
-  
-  // 变换忽略模式
-  transformIgnorePatterns: [
-    '/node_modules/(?!.*\\.js$)'
-  ],
   
   // 全局变量
   globals: {

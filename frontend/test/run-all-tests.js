@@ -47,7 +47,7 @@ class TestRunner {
     
     try {
       // 使用 Jest 运行测试
-      const command = `npx jest ${suite.file} --verbose --json --outputFile=./test/results/${suite.name.replace(/\s+/g, '_')}.json`;
+      const command = `npx jest ${suite.file} --config=./test/jest.config.js --verbose --json --outputFile=./test/results/${suite.name.replace(/\s+/g, '_')}.json`;
       
       console.log(`🚀 执行命令: ${command}`);
       

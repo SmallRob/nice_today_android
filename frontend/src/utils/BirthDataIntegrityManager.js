@@ -450,6 +450,56 @@ class BirthDataIntegrityManager {
     getLog() {
         return [...this.log];
     }
+    
+    /**
+     * 检查数据完整性
+     * @param {Object} config 配置对象
+     * @returns {Object} 检查结果
+     */
+    checkDataIntegrity(config) {
+        const result = this.validateConfig(config);
+        return {
+            isComplete: result.valid,
+            missingFields: result.errors.map(error => error.field),
+            warnings: result.warnings,
+            errors: result.errors,
+            validation: result
+        };
+    }
+    
+    /**
+     * 自动修复缺失数据
+     * @param {Object} config 配置对象
+     * @returns {Object} 修复后的配置
+     */
+    autoFixMissingData(config) {
+        // 验证配置
+        const validation = this.validateConfig(config);
+        
+        // 自动修复配置
+        let fixedConfig = this.autoFixConfig(config);
+        
+        // 如果某些字段缺失，提供默认值
+        if (!fixedConfig.birthLocation) {
+            fixedConfig.birthLocation = {
+                lng: 116.40,
+                lat: 39.90,
+                province: '北京',
+                city: '北京市',
+                district: '朝阳区'
+            };
+        }
+        
+        if (!fixedConfig.birthTime) {
+            fixedConfig.birthTime = '12:00';
+        }
+        
+        if (!fixedConfig.gender) {
+            fixedConfig.gender = 'secret';
+        }
+        
+        return fixedConfig;
+    }
 }
 
 // 创建单例实例
