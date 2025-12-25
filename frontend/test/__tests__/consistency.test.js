@@ -3,8 +3,8 @@
  * 测试配置数据的完整性、一致性验证和错误恢复机制
  */
 
-import { enhancedUserConfigManager } from '../../src/utils/EnhancedUserConfigManager';
-import birthDataIntegrityManager from '../../src/utils/BirthDataIntegrityManager';
+const { enhancedUserConfigManager } = require('../../src/utils/EnhancedUserConfigManager.js');
+const birthDataIntegrityManager = require('../../src/utils/BirthDataIntegrityManager.js');
 
 // 测试数据：完整配置和部分配置
 const TEST_CONFIGS = {

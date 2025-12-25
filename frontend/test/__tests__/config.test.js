@@ -3,9 +3,9 @@
  * 测试用户配置数据的存储、读取、修改和一致性检查
  */
 
-const { enhancedUserConfigManager } = require('../../src/utils/EnhancedUserConfigManager');
-const { calculateDetailedBazi } = require('../../src/utils/baziHelper');
-const { getShichen } = require('../../src/utils/astronomy');
+const { enhancedUserConfigManager } = require('../../src/utils/EnhancedUserConfigManager.js');
+const { calculateDetailedBazi } = require('../../src/utils/baziHelper.js');
+const { getShichen, getShichenSimple, normalizeShichen } = require('../../src/utils/astronomy.js');
 
 // 测试数据配置
 const TEST_CONFIGS = {

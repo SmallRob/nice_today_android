@@ -14,12 +14,46 @@ import { Solar, Lunar } from 'lunar-javascript';
  */
 export const calculateDetailedBazi = (birthDateStr, birthTimeStr, longitude) => {
     if (!birthDateStr) return null;
+    
+    // 验证输入参数
+    if (!birthDateStr || typeof birthDateStr !== 'string') {
+        throw new Error('出生日期格式错误');
+    }
+    
+    if (birthDateStr && !/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(birthDateStr)) {
+        throw new Error('出生日期格式错误');
+    }
 
-    const [year, month, day] = birthDateStr.split('-').map(Number);
-    const [hour, minute] = (birthTimeStr || '12:00').split(':').map(Number);
+    const dateParts = birthDateStr.split('-');
+    if (dateParts.length !== 3) {
+        throw new Error('出生日期格式错误');
+    }
+    
+    const [year, month, day] = dateParts.map(Number);
+    
+    // 验证日期有效性
+    if (isNaN(year) || isNaN(month) || isNaN(day) || year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+        throw new Error('出生日期格式错误');
+    }
 
-    // 1. 创建公历对象
-    const solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+    const timeParts = (birthTimeStr || '12:00').split(':');
+    if (timeParts.length !== 2) {
+        throw new Error('出生时间格式错误');
+    }
+    const [hour, minute] = timeParts.map(Number);
+    
+    // 验证时间有效性
+    if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+        throw new Error('出生时间格式错误');
+    }
+
+    let solar;
+    try {
+        // 1. 创建公历对象
+        solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+    } catch (error) {
+        throw new Error('无效的日期或时间');
+    }
 
     // 2. 转换为农历对象 (lunar-javascript 会自动处理节气等八字计算)
     let lunar = solar.getLunar();

@@ -3,8 +3,8 @@
  * 测试八字计算、五行分析、纳音等核心算法的准确性
  */
 
-import { calculateDetailedBazi } from '../../src/utils/baziHelper';
-import { getShichen, getShichenSimple, normalizeShichen } from '../../src/utils/astronomy';
+const { calculateDetailedBazi } = require('../../src/utils/baziHelper.js');
+const { getShichen, getShichenSimple, normalizeShichen } = require('../../src/utils/astronomy.js');
 
 // 八字测试案例 - 基于已知的准确结果
 const BAZI_ACCURACY_TEST_CASES = [

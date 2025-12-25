@@ -3,10 +3,10 @@
  * 测试极端情况、异常输入、错误恢复等场景
  */
 
-import { enhancedUserConfigManager } from '../../src/utils/EnhancedUserConfigManager';
-import { calculateDetailedBazi } from '../../src/utils/baziHelper';
-import { getShichen } from '../../src/utils/astronomy';
-import birthDataIntegrityManager from '../../src/utils/BirthDataIntegrityManager';
+const { enhancedUserConfigManager } = require('../../src/utils/EnhancedUserConfigManager.js');
+const { calculateDetailedBazi } = require('../../src/utils/baziHelper.js');
+const { getShichen } = require('../../src/utils/astronomy.js');
+const birthDataIntegrityManager = require('../../src/utils/BirthDataIntegrityManager.js');
 
 // 极端边界测试数据
 const EXTREME_TEST_CASES = {

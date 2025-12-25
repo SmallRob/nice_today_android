@@ -56,7 +56,7 @@ export const getShichenSimple = (timeStr) => {
     const branchIndex = Math.floor((hour + 1) / 2) % 12;
     const branch = EARTHLY_BRANCHES[branchIndex];
 
-    return `${branch}时`;
+    return branch;
 };
 
 /**
@@ -70,7 +70,14 @@ export const normalizeShichen = (shichen) => {
     if (!shichen) return '';
 
     // 移除刻度部分（初刻、一刻、二刻、三刻）
-    return shichen.replace(/(初刻|一刻|二刻|三刻)/g, '');
+    let result = shichen.replace(/(初刻|一刻|二刻|三刻)/g, '');
+    
+    // 如果结果以"时"结尾，移除"时"以匹配测试期望
+    if (result.endsWith('时')) {
+        result = result.slice(0, -1);
+    }
+    
+    return result;
 };
 
 /**
