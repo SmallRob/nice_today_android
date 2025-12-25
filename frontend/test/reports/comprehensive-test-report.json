@@ -1,0 +1,83 @@
+{
+  "summary": {
+    "totalTests": 0,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "passRate": "NaN%",
+    "duration": "46.01 秒",
+    "startTime": "2025/12/25 16:11:57",
+    "endTime": "2025/12/25 16:12:43"
+  },
+  "suiteDetails": [],
+  "errorAnalysis": {
+    "totalErrors": 4,
+    "errorTypes": [
+      {
+        "type": "Command failed",
+        "count": 4,
+        "percentage": "100.00%"
+      }
+    ],
+    "frequentErrors": [
+      {
+        "testName": "用户配置数据测试",
+        "error": "Command failed: npx jest ./__tests__/config.test.js --verbose --json --outputFile=./test/results/用户配置数据测试.json\nFAIL test/__tests__/config.test.js\n  ● Test suite failed to run\n\n    Jest encountered an unexpected token\n\n    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.\n\n    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.\n\n    By default \"node_modules\" folder is ignored by transformers.\n\n    Here's what you can do:\n     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.\n     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript\n     • To have some of your \"node_modules\" files transformed, you can specify a custom \"transformIgnorePatterns\" in your config.\n     • If you need a custom transformation specify a \"transform\" option in your config.\n     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option.\n\n    You'll find more details and examples of these config options in the docs:\n    https://jestjs.io/docs/configuration\n    For information about custom transformations, see:\n    https://jestjs.io/docs/code-transformation\n\n    Details:\n\n    /Users/healer2027/AndroidStudioProjects/nice_today_android/frontend/test/__tests__/config.test.js:6\n    import { enhancedUserConfigManager } from '../../src/utils/EnhancedUserConfigManager';\n    ^^^^^^\n\n    SyntaxError: Cannot use import statement outside a module\n\n      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1728:14)\n      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)\n      at runJest (node_modules/@jest/core/build/runJest.js:404:19)\n      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)\n      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)\n\nTest Suites: 1 failed, 1 total\nTests:       0 total\nSnapshots:   0 total\nTime:        0.339 s\nRan all test suites matching /.\\/__tests__\\/config.test.js/i.\nTest results written to: test/results/用户配置数据测试.json\n",
+        "timestamp": "2025-12-25T08:12:12.985Z"
+      },
+      {
+        "testName": "数据一致性测试",
+        "error": "Command failed: npx jest ./__tests__/consistency.test.js --verbose --json --outputFile=./test/results/数据一致性测试.json\nFAIL test/__tests__/consistency.test.js\n  ● Test suite failed to run\n\n    Jest encountered an unexpected token\n\n    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.\n\n    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.\n\n    By default \"node_modules\" folder is ignored by transformers.\n\n    Here's what you can do:\n     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.\n     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript\n     • To have some of your \"node_modules\" files transformed, you can specify a custom \"transformIgnorePatterns\" in your config.\n     • If you need a custom transformation specify a \"transform\" option in your config.\n     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option.\n\n    You'll find more details and examples of these config options in the docs:\n    https://jestjs.io/docs/configuration\n    For information about custom transformations, see:\n    https://jestjs.io/docs/code-transformation\n\n    Details:\n\n    /Users/healer2027/AndroidStudioProjects/nice_today_android/frontend/test/__tests__/consistency.test.js:6\n    import { enhancedUserConfigManager } from '../../src/utils/EnhancedUserConfigManager';\n    ^^^^^^\n\n    SyntaxError: Cannot use import statement outside a module\n\n      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1728:14)\n      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)\n      at runJest (node_modules/@jest/core/build/runJest.js:404:19)\n      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)\n      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)\n\nTest Suites: 1 failed, 1 total\nTests:       0 total\nSnapshots:   0 total\nTime:        0.288 s\nRan all test suites matching /.\\/__tests__\\/consistency.test.js/i.\nTest results written to: test/results/数据一致性测试.json\n",
+        "timestamp": "2025-12-25T08:12:20.922Z"
+      },
+      {
+        "testName": "八字运算算法测试",
+        "error": "Command failed: npx jest ./__tests__/bazi.test.js --verbose --json --outputFile=./test/results/八字运算算法测试.json\nFAIL test/__tests__/bazi.test.js\n  ● Test suite failed to run\n\n    Jest encountered an unexpected token\n\n    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.\n\n    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.\n\n    By default \"node_modules\" folder is ignored by transformers.\n\n    Here's what you can do:\n     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.\n     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript\n     • To have some of your \"node_modules\" files transformed, you can specify a custom \"transformIgnorePatterns\" in your config.\n     • If you need a custom transformation specify a \"transform\" option in your config.\n     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option.\n\n    You'll find more details and examples of these config options in the docs:\n    https://jestjs.io/docs/configuration\n    For information about custom transformations, see:\n    https://jestjs.io/docs/code-transformation\n\n    Details:\n\n    /Users/healer2027/AndroidStudioProjects/nice_today_android/frontend/test/__tests__/bazi.test.js:6\n    import { calculateDetailedBazi } from '../../src/utils/baziHelper';\n    ^^^^^^\n\n    SyntaxError: Cannot use import statement outside a module\n\n      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1728:14)\n      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)\n      at runJest (node_modules/@jest/core/build/runJest.js:404:19)\n      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)\n      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)\n\nTest Suites: 1 failed, 1 total\nTests:       0 total\nSnapshots:   0 total\nTime:        0.28 s\nRan all test suites matching /.\\/__tests__\\/bazi.test.js/i.\nTest results written to: test/results/八字运算算法测试.json\n",
+        "timestamp": "2025-12-25T08:12:28.243Z"
+      },
+      {
+        "testName": "边界条件测试",
+        "error": "Command failed: npx jest ./__tests__/edge-cases.test.js --verbose --json --outputFile=./test/results/边界条件测试.json\nFAIL test/__tests__/edge-cases.test.js\n  ● Test suite failed to run\n\n    Jest encountered an unexpected token\n\n    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.\n\n    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.\n\n    By default \"node_modules\" folder is ignored by transformers.\n\n    Here's what you can do:\n     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.\n     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript\n     • To have some of your \"node_modules\" files transformed, you can specify a custom \"transformIgnorePatterns\" in your config.\n     • If you need a custom transformation specify a \"transform\" option in your config.\n     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option.\n\n    You'll find more details and examples of these config options in the docs:\n    https://jestjs.io/docs/configuration\n    For information about custom transformations, see:\n    https://jestjs.io/docs/code-transformation\n\n    Details:\n\n    /Users/healer2027/AndroidStudioProjects/nice_today_android/frontend/test/__tests__/edge-cases.test.js:6\n    import { enhancedUserConfigManager } from '../../src/utils/EnhancedUserConfigManager';\n    ^^^^^^\n\n    SyntaxError: Cannot use import statement outside a module\n\n      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1728:14)\n      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)\n      at runJest (node_modules/@jest/core/build/runJest.js:404:19)\n      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)\n      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)\n\nTest Suites: 1 failed, 1 total\nTests:       0 total\nSnapshots:   0 total\nTime:        0.301 s\nRan all test suites matching /.\\/__tests__\\/edge-cases.test.js/i.\nTest results written to: test/results/边界条件测试.json\n",
+        "timestamp": "2025-12-25T08:12:35.288Z"
+      }
+    ]
+  },
+  "performanceAnalysis": [
+    {
+      "name": "八字计算性能",
+      "count": 1,
+      "min": "11.16ms",
+      "max": "11.16ms",
+      "average": "11.16ms",
+      "median": "11.16ms",
+      "trend": "稳定"
+    },
+    {
+      "name": "时辰计算性能",
+      "count": 1,
+      "min": "101.13ms",
+      "max": "101.13ms",
+      "average": "101.13ms",
+      "median": "101.13ms",
+      "trend": "稳定"
+    },
+    {
+      "name": "配置存储性能",
+      "count": 1,
+      "min": "5.71ms",
+      "max": "5.71ms",
+      "average": "5.71ms",
+      "median": "5.71ms",
+      "trend": "稳定"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "中",
+      "category": "错误处理",
+      "suggestion": "频繁出现 Command failed 错误，建议加强相关错误处理机制",
+      "action": "improve_error_handling"
+    }
+  ],
+  "timestamp": "2025-12-25T08:12:43.784Z"
+}
