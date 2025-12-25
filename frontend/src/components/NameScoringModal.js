@@ -434,7 +434,8 @@ export const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, on
                     variant="primary"
                     onClick={() => {
                       if (onSaveScore) {
-                        onSaveScore(analysisResult);
+                        // 传递评分结果和输入的姓名
+                        onSaveScore(analysisResult, tempName || name || '');
                         showMessage && showMessage('评分已保存', 'success');
                         // 自动关闭评分弹窗
                         onClose();

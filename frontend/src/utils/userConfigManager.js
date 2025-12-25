@@ -4,20 +4,20 @@
  * 支持多组配置，默认加载第一组配置数据
  */
 
-// 默认配置模板
-const DEFAULT_CONFIG = {
+// 默认配置模板（冻结的不可变对象，确保系统配置不会被意外修改）
+const DEFAULT_CONFIG = Object.freeze({
   nickname: '叉子',
   realName: '', // 真实姓名（用于五格评分和八字测算）
   birthDate: '1991-04-30',
   birthTime: '12:30',
   shichen: '午时',
-  birthLocation: {
+  birthLocation: Object.freeze({
     province: '北京市',
     city: '北京市',
     district: '朝阳区',
     lng: 116.48,
     lat: 39.95
-  },
+  }),
   zodiac: '金牛座',
   zodiacAnimal: '羊',
   gender: 'male',
@@ -26,7 +26,40 @@ const DEFAULT_CONFIG = {
   bazi: null, // 八字命格信息（包含四柱、时辰、经纬度等）
   isused: false, // 是否为当前使用的配置
   isSystemDefault: true // 标记为系统默认配置
-};
+});
+
+/**
+ * 深拷贝配置对象，确保用户配置与默认配置完全隔离
+ * @param {Object} sourceConfig - 源配置对象
+ * @returns {Object} 深拷贝的新配置对象
+ */
+function deepCloneConfig(sourceConfig) {
+  if (!sourceConfig || typeof sourceConfig !== 'object') {
+    return sourceConfig;
+  }
+
+  // 使用 JSON 方法进行深拷贝，确保完全隔离
+  const cloned = JSON.parse(JSON.stringify(sourceConfig));
+
+  // 确保 birthLocation 对象也被深拷贝
+  if (sourceConfig.birthLocation) {
+    cloned.birthLocation = { ...sourceConfig.birthLocation };
+  }
+
+  return cloned;
+}
+
+/**
+ * 从默认配置创建新配置模板
+ * @param {Object} overrides - 需要覆盖的字段
+ * @returns {Object} 新配置对象（深拷贝）
+ */
+function createConfigFromDefault(overrides = {}) {
+  return deepCloneConfig({
+    ...DEFAULT_CONFIG,
+    ...overrides
+  });
+}
 
 // 空配置默认值
 const EMPTY_CONFIG_DEFAULTS = {
@@ -81,13 +114,13 @@ class UserConfigManager {
         configsLength: storedConfigs ? storedConfigs.length : 0
       });
 
-      // 解析配置数据
-      this.configs = storedConfigs ? JSON.parse(storedConfigs) : [DEFAULT_CONFIG];
+      // 解析配置数据（加载失败时创建深拷贝）
+      this.configs = storedConfigs ? JSON.parse(storedConfigs) : [createConfigFromDefault()];
       this.activeConfigIndex = storedIndex ? parseInt(storedIndex, 10) : 0;
 
-      // 确保至少有一组配置
+      // 确保至少有一组配置（深拷贝）
       if (this.configs.length === 0) {
-        this.configs = [DEFAULT_CONFIG];
+        this.configs = [createConfigFromDefault()];
         this.activeConfigIndex = 0;
       }
 

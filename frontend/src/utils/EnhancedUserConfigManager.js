@@ -15,20 +15,20 @@ import { concurrencyLock } from './ConcurrencyLock.js';
 import { nodeRecoveryManager } from './NodeRecoveryManager.js';
 import { operationLogger } from './OperationLogger.js';
 
-// 默认配置模板
-const DEFAULT_CONFIG = {
+// 默认配置模板（冻结的不可变对象，确保系统配置不会被意外修改）
+const DEFAULT_CONFIG = Object.freeze({
   nickname: '叉子',
   realName: '',
   birthDate: '1991-04-30',
   birthTime: '12:30',
   shichen: '午时',
-  birthLocation: {
+  birthLocation: Object.freeze({
     province: '北京市',
     city: '北京市',
     district: '海淀区',
     lng: 116.48,
     lat: 39.95
-  },
+  }),
   zodiac: '',
   zodiacAnimal: '',
   gender: 'secret',
@@ -41,7 +41,40 @@ const DEFAULT_CONFIG = {
   trueSolarTime: "12:30",  // 真太阳时，格式："12:30"
   lunarInfo: null,      // 完整的农历信息对象
   lastCalculated: null  // 最后计算时间
-};
+});
+
+/**
+ * 深拷贝配置对象，确保用户配置与默认配置完全隔离
+ * @param {Object} sourceConfig - 源配置对象
+ * @returns {Object} 深拷贝的新配置对象
+ */
+function deepCloneConfig(sourceConfig) {
+  if (!sourceConfig || typeof sourceConfig !== 'object') {
+    return sourceConfig;
+  }
+
+  // 使用 JSON 方法进行深拷贝，确保完全隔离
+  const cloned = JSON.parse(JSON.stringify(sourceConfig));
+
+  // 确保 birthLocation 对象也被深拷贝
+  if (sourceConfig.birthLocation) {
+    cloned.birthLocation = { ...sourceConfig.birthLocation };
+  }
+
+  return cloned;
+}
+
+/**
+ * 从默认配置创建新配置模板
+ * @param {Object} overrides - 需要覆盖的字段
+ * @returns {Object} 新配置对象（深拷贝）
+ */
+function createConfigFromDefault(overrides = {}) {
+  return deepCloneConfig({
+    ...DEFAULT_CONFIG,
+    ...overrides
+  });
+}
 
 // 存储键名
 const STORAGE_KEYS = {
@@ -92,16 +125,16 @@ class EnhancedUserConfigManager {
         this.configs = loadResult.configs;
         this.activeConfigIndex = loadResult.activeIndex;
         this.metadata = loadResult.metadata;
-        
+
         console.log('配置加载成功:', {
           configCount: this.configs.length,
           activeIndex: this.activeConfigIndex,
           metadata: this.metadata
         });
       } else {
-        // 加载失败，使用默认配置
+        // 加载失败，使用默认配置（创建深拷贝）
         console.warn('配置加载失败，使用默认配置');
-        this.configs = [DEFAULT_CONFIG];
+        this.configs = [createConfigFromDefault()];
         this.activeConfigIndex = 0;
         await this.saveConfigsToStorage();
       }
@@ -122,12 +155,12 @@ class EnhancedUserConfigManager {
       
     } catch (error) {
       console.error('初始化增强版用户配置管理器失败:', error);
-      
-      // 紧急恢复机制
-      this.configs = [DEFAULT_CONFIG];
+
+      // 紧急恢复机制（使用深拷贝）
+      this.configs = [createConfigFromDefault()];
       this.activeConfigIndex = 0;
       this.initialized = true;
-      
+
       return false;
     }
   }
@@ -346,36 +379,36 @@ class EnhancedUserConfigManager {
   }
 
   /**
-   * 获取当前活跃配置
+   * 获取当前活跃配置（返回深拷贝以防止意外修改）
    */
   getCurrentConfig() {
     if (!this.initialized || this.configs.length === 0) {
-      return DEFAULT_CONFIG;
+      return createConfigFromDefault();
     }
-    
+
     const currentConfig = this.configs[this.activeConfigIndex];
-    
+
     // 验证配置完整性
     const validation = dataIntegrityManager.validateConfig(currentConfig);
-    
+
     if (!validation.valid) {
       console.warn('当前配置验证失败，进行紧急修复');
       const repair = dataIntegrityManager.suggestDataRepairs(currentConfig);
       return repair.repairedConfig;
     }
-    
-    return currentConfig;
+
+    return deepCloneConfig(currentConfig);
   }
 
   /**
-   * 获取所有配置
+   * 获取所有配置（返回深拷贝以防止意外修改）
    */
   getAllConfigs() {
     if (!this.initialized) {
-      return [DEFAULT_CONFIG];
+      return [createConfigFromDefault()];
     }
 
-    return [...this.configs];
+    return this.configs.map(config => deepCloneConfig(config));
   }
 
   /**
@@ -427,8 +460,8 @@ class EnhancedUserConfigManager {
           throw new Error(updateResult.error || '节点级更新失败');
         }
 
-        // 更新配置
-        let updatedConfig = updateResult.updatedConfig;
+        // 更新配置（深拷贝确保与原始配置隔离）
+        let updatedConfig = deepCloneConfig(updateResult.updatedConfig);
 
         // 如果更新了出生日期、时间或位置，重新计算农历和真太阳时
         const needsLunarRecalculation =
@@ -442,7 +475,7 @@ class EnhancedUserConfigManager {
 
         this.configs[index] = updatedConfig;
 
-        console.log('配置已更新到内存，准备保存到存储...');
+        console.log('配置已更新到内存（深拷贝），准备保存到存储...');
 
         // 保存到存储
         const saveResult = await this.saveConfigsToStorage();
@@ -541,19 +574,19 @@ class EnhancedUserConfigManager {
     try {
       // 验证配置数据
       const validation = dataIntegrityManager.validateConfig(config);
-      
+
       if (!validation.valid) {
         throw new Error(`配置验证失败: ${validation.errors.map(e => e.message).join(', ')}`);
       }
-      
+
       // 验证昵称唯一性
       const nicknameExists = this.configs.some(c => c.nickname === config.nickname);
       if (nicknameExists) {
         throw new Error(`昵称 '${config.nickname}' 已存在，请选择其他昵称`);
       }
-      
-      // 确保基础信息配置完整，八字信息单独处理
-      const finalConfig = {
+
+      // 确保基础信息配置完整，八字信息单独处理（深拷贝确保隔离）
+      const finalConfig = deepCloneConfig({
         ...config,
         // 如果没有八字信息，设置为null
         bazi: config.bazi || null,
@@ -561,20 +594,20 @@ class EnhancedUserConfigManager {
         trueSolarTime: config.trueSolarTime || null,
         lunarInfo: config.lunarInfo || null,
         lastCalculated: config.lastCalculated || null
-      };
-      
+      });
+
       // 添加配置
       this.configs.push(finalConfig);
-      
+
       // 保存到存储
       await this.saveConfigsToStorage();
-      
+
       // 通知监听器
       this.notifyListeners();
-      
-      console.log('添加新配置成功', finalConfig.nickname);
+
+      console.log('添加新配置成功（深拷贝）', finalConfig.nickname);
       return true;
-      
+
     } catch (error) {
       console.error('添加配置失败:', error);
       return false;
@@ -713,42 +746,42 @@ class EnhancedUserConfigManager {
     try {
       // 验证基础配置数据
       const validation = dataIntegrityManager.validateConfig(basicConfig);
-      
+
       if (!validation.valid) {
         throw new Error(`基础配置验证失败: ${validation.errors.map(e => e.message).join(', ')}`);
       }
-      
+
       // 验证昵称唯一性
       const nicknameExists = this.configs.some(c => c.nickname === basicConfig.nickname);
       if (nicknameExists) {
         throw new Error(`昵称 '${basicConfig.nickname}' 已存在，请选择其他昵称`);
       }
-      
-      // 确保基础信息配置完整，八字信息设置为null
-      const finalConfig = {
+
+      // 确保基础信息配置完整，八字信息设置为null（深拷贝确保隔离）
+      const finalConfig = deepCloneConfig({
         ...basicConfig,
         bazi: null, // 八字信息后续异步计算
         lunarBirthDate: null,
         trueSolarTime: null,
         lunarInfo: null,
         lastCalculated: null
-      };
-      
+      });
+
       // 添加配置
       this.configs.push(finalConfig);
-      
+
       // 将新配置设为活跃配置
       this.activeConfigIndex = this.configs.length - 1;
-      
+
       // 保存到存储
       await this.saveConfigsToStorage();
-      
+
       // 通知监听器
       this.notifyListeners();
-      
-      console.log('添加基础配置成功', finalConfig.nickname, 'activeIndex:', this.activeConfigIndex);
+
+      console.log('添加基础配置成功（深拷贝）', finalConfig.nickname, 'activeIndex:', this.activeConfigIndex);
       return true;
-      
+
     } catch (error) {
       console.error('添加基础配置失败:', error);
       return false;

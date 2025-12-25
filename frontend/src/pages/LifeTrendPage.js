@@ -2,18 +2,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useCurrentConfig } from '../contexts/UserConfigContext';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
+import {
+  BaziDataManager,
+  BaziStatus,
+  getValidShichen,
+  normalizeBirthInfo
+} from '../utils/baziDataManager';
 import KlineChart from '../components/KlineChart';
 import RadarChart from '../components/RadarChart';
 import DatePickerModal from '../components/DatePickerModal';
 import { storageManager } from '../utils/storageManager';
-import { calculateDetailedBazi, calculateLiuNianDaYun, calculateDailyEnergy } from '../utils/baziHelper';
-import { calculateBaziWithWorker } from '../utils/workerManager';
+import { calculateLiuNianDaYun, calculateDailyEnergy } from '../utils/baziHelper';
 import { Solar } from 'lunar-javascript';
 import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
+import { getShichenSimple } from '../utils/astronomy';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
-  const { getCurrentConfig, updateBaziInfo } = useCurrentConfig();
+  const { getCurrentConfig, calculateAndSyncBazi } = useCurrentConfig();
 
   // 视图和图表状态
   const [selectedView, setSelectedView] = useState('kline');
@@ -37,6 +43,8 @@ const LifeTrendPage = () => {
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [baziLoadStatus, setBaziLoadStatus] = useState(BaziStatus.LOADING);
+  const [retryCount, setRetryCount] = useState(0);
 
   // 显示成功消息并自动消失
   const showSuccessMessage = (message) => {
@@ -57,132 +65,131 @@ const LifeTrendPage = () => {
   const [lunarData, setLunarData] = useState(null);
   const [liuNianData, setLiuNianData] = useState(null);
 
-  // 异步重新计算八字（不阻塞主流程）
-  const recalcBaziAsync = async (birthDateStr, birthTimeStr, longitude, nickname) => {
-    try {
-      console.log('开始异步重新计算八字...');
-      const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
-      if (bazi && updateBaziInfo) {
-        // 使用新的 Context API 更新八字信息
-        await updateBaziInfo(nickname, {
-          bazi: bazi,
-          lunarBirthDate: bazi.lunar?.text,
-          trueSolarTime: birthTimeStr,
-          lastCalculated: new Date().toISOString()
-        });
-        console.log('异步重新计算八字成功');
-      }
-    } catch (error) {
-      console.error('异步重新计算八字失败:', error);
+  // 雷达图年份查询状态
+  const currentYear = new Date().getFullYear();
+  const [radarViewYear, setRadarViewYear] = useState(currentYear);
+  const [liuNianLoading, setLiuNianLoading] = useState(false);
+  const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear + i); // 当前年份到未来10年
+
+  // 验证配置数据完整性
+  const validateConfig = (config) => {
+    if (!config) return { valid: false, error: '配置为空' };
+    if (!config.nickname) return { valid: false, error: '用户昵称为空' };
+    if (!config.birthDate) {
+      console.warn('出生日期缺失，将使用当前日期');
     }
+    return { valid: true };
   };
 
-  // 加载用户配置的函数（提取出来以便重试）
+  // 加载用户配置的函数（使用统一的八字数据管理器）
   const loadUserConfig = useCallback(async () => {
     let isMounted = true;
     try {
       setLoading(true);
       setError(null);
+      setBaziLoadStatus(BaziStatus.LOADING);
 
-      // 步骤1：加载用户配置
+      // 步骤1：加载用户配置并验证
       const config = getCurrentConfig();
-      if (!config || !config.birthDate) {
-        throw new Error('用户配置不完整');
+      const validation = validateConfig(config);
+      if (!validation.valid) {
+        throw new Error(validation.error);
       }
 
       if (isMounted) {
-        const birthDate = new Date(config.birthDate);
-        setSelectedYear(birthDate.getFullYear());
-        setSelectedMonth(birthDate.getMonth() + 1);
-        setSelectedDate(birthDate.getDate());
+        const birthInfo = normalizeBirthInfo(config);
+
+        // 更新日期和时间选择器
+        if (birthInfo.birthDate) {
+          try {
+            const birthDate = new Date(birthInfo.birthDate);
+            if (isNaN(birthDate.getTime())) {
+              throw new Error('出生日期格式错误');
+            }
+            setSelectedYear(birthDate.getFullYear());
+            setSelectedMonth(birthDate.getMonth() + 1);
+            setSelectedDate(birthDate.getDate());
+          } catch (e) {
+            console.warn('出生日期解析失败，使用当前日期:', e.message);
+            const today = new Date();
+            setSelectedYear(today.getFullYear());
+            setSelectedMonth(today.getMonth() + 1);
+            setSelectedDate(today.getDate());
+          }
+        } else {
+          // 使用当前日期作为默认
+          const today = new Date();
+          setSelectedYear(today.getFullYear());
+          setSelectedMonth(today.getMonth() + 1);
+          setSelectedDate(today.getDate());
+        }
 
         // 解析出生时间，转换为小时数用于时辰选择器
         let birthHour = 12; // 默认12点（午时）
-        if (config.birthTime) {
-          const [h] = config.birthTime.split(':').map(Number);
-          birthHour = h;
+        if (birthInfo.birthTime) {
+          try {
+            const [h] = birthInfo.birthTime.split(':').map(Number);
+            if (!isNaN(h) && h >= 0 && h <= 23) {
+              birthHour = h;
+            }
+          } catch (e) {
+            console.warn('出生时间解析失败，使用默认12点');
+          }
         }
         setSelectedHour(birthHour);
-        setTempLatitude(config.birthLocation?.lat || 30);
-        setTempLongitude(config.birthLocation?.lng || 110);
 
-        const birthDateStr = config.birthDate;
-        const birthTimeStr = config.birthTime || '12:00';
-        const longitude = config.birthLocation?.lng || 110;
-        const nickname = config.nickname;
+        // 设置地理坐标（带验证）
+        const safeLatitude = !isNaN(birthInfo.latitude) && birthInfo.latitude >= -90 && birthInfo.latitude <= 90
+          ? birthInfo.latitude : 39.90;
+        const safeLongitude = !isNaN(birthInfo.longitude) && birthInfo.longitude >= -180 && birthInfo.longitude <= 180
+          ? birthInfo.longitude : 116.40;
+        setTempLatitude(safeLatitude);
+        setTempLongitude(safeLongitude);
 
-        // 步骤2：按优先级获取八字数据
-        let baziLoaded = false;
+        // 步骤2：使用统一的八字数据管理器加载八字
+        console.log('使用统一的八字数据管理器加载八字...');
+        const baziResult = await BaziDataManager.initialize(config, {
+          useCache: true,
+          forceRecalculate: false
+        });
 
-        // 1) 优先从全局配置中获取八字（最高优先级）
-        if (config.bazi) {
-          try {
-            // 验证八字数据完整性
-            const baziData = config.bazi.bazi || config.bazi;
-            if (baziData && baziData.year && baziData.month && baziData.day && baziData.hour) {
-              console.log('✓ 从全局配置中获取八字成功');
-              baziLoaded = true;
-            } else {
-              console.warn('⚠ 全局配置中的八字数据不完整');
-            }
-          } catch (error) {
-            console.warn('⚠ 解析全局配置中的八字数据失败:', error);
-          }
-        }
-
-        // 2) 如果配置和缓存都没有，同步计算一次（不阻塞后续流程）
-        if (!baziLoaded && nickname) {
-          console.log('⚠ 配置中没有八字，开始计算...');
-          try {
-            const bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
-            if (bazi && bazi.bazi) {
-              const baziData = bazi.bazi;
-              if (baziData.year && baziData.month && baziData.day && baziData.hour) {
-                await updateBaziInfo(nickname, {
-                  bazi: bazi,
-                  lunarBirthDate: bazi.lunar?.text,
-                  trueSolarTime: birthTimeStr,
-                  lastCalculated: new Date().toISOString()
-                });
-                baziLoaded = true;
-                console.log('✓ 计算并保存八字数据成功');
-              }
-            }
-          } catch (error) {
-            console.error('✗ 计算八字数据失败:', error);
-            // 计算失败不阻断加载流程，使用空八字对象
-          }
-        }
-
-        // 4) 如果八字数据仍不完整，触发异步重试（不阻塞主流程）
-        if (!baziLoaded && nickname) {
-          console.warn('⚠ 八字数据不完整，将触发异步重试');
-          // 使用 setTimeout 延迟重试，不阻塞主流程
-          setTimeout(() => {
-            recalcBaziAsync(birthDateStr, birthTimeStr, longitude, nickname);
-          }, 1000);
+        if (baziResult.status === BaziStatus.READY) {
+          console.log('✓ 八字数据加载成功', baziResult.fromCache ? '(来自缓存)' : '(新计算)');
+          setBaziLoadStatus(BaziStatus.READY);
+          setTempBazi(null); // 清除临时八字
+          setRetryCount(0); // 重置重试计数
+        } else if (baziResult.status === BaziStatus.ERROR) {
+          console.warn('⚠ 八字数据加载失败:', baziResult.error);
+          setBaziLoadStatus(BaziStatus.ERROR);
+          setError(`八字数据加载失败: ${baziResult.error}`);
+        } else {
+          console.warn('⚠ 八字数据缺失');
+          setBaziLoadStatus(BaziStatus.MISSING);
         }
       }
 
     } catch (error) {
       console.error('加载用户配置失败:', error);
       setError(error.message);
+      setBaziLoadStatus(BaziStatus.ERROR);
 
-      // 使用默认值
+      // 使用默认值（容错处理）
       if (isMounted) {
-        setSelectedYear(1991);
-        setSelectedMonth(1);
-        setSelectedDate(1);
+        const today = new Date();
+        setSelectedYear(today.getFullYear());
+        setSelectedMonth(today.getMonth() + 1);
+        setSelectedDate(today.getDate());
         setSelectedHour(12);
-        setTempLatitude(30);
-        setTempLongitude(110);
+        setTempLatitude(39.90);
+        setTempLongitude(116.40);
+        setBaziLoadStatus(BaziStatus.ERROR);
       }
     } finally {
       if (isMounted) {
         setLoading(false);
       }
     }
-  }, []);
+  }, [getCurrentConfig]);
 
   // 初始化加载用户配置
   useEffect(() => {
@@ -200,12 +207,16 @@ const LifeTrendPage = () => {
     }
   }, [selectedYear, selectedMonth, selectedDate]);
 
-  // 保存用户选择的日期到永久配置（异步计算，立即关闭弹窗）
+  // 保存用户选择的日期到永久配置（使用统一的八字数据管理器）
   const saveDateToConfig = async (year, month, date, hour, longitude, latitude) => {
     try {
       const newBirthDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
       const newBirthTime = `${String(hour).padStart(2, '0')}:00`;
-      const configIndex = enhancedUserConfigManager.getActiveConfigIndex();
+      const config = getCurrentConfig();
+      
+      if (!config || !config.nickname) {
+        throw new Error('当前配置为空，无法保存');
+      }
 
       // 立即更新UI状态
       setSelectedYear(year);
@@ -216,152 +227,93 @@ const LifeTrendPage = () => {
       setTempLatitude(latitude);
       setIsTempCalcMode(false);
 
+      setCalculating(true);
+      setError(null);
 
-      // 检查配置中是否已有该日期的八字数据
-      const currentConfig = getCurrentConfig();
-      const needsRecalc = !currentConfig.bazi ||
-                        currentConfig.birthDate !== newBirthDate ||
-                        currentConfig.birthTime !== newBirthTime ||
-                        currentConfig.birthLocation?.lng !== longitude ||
-                        currentConfig.birthLocation?.lat !== latitude;
-
-
-      let bazi;
-      let baziCalculationFailed = false;
-
-      if (needsRecalc) {
-        // 只有当八字数据不存在或日期变化时才重新计算
-        setCalculating(true);
-        setError(null);
-
-        try {
-          // 使用 Worker 异步计算八字
-          bazi = await calculateBaziWithWorker(newBirthDate, newBirthTime, longitude);
-        } catch (workerError) {
-          console.warn('Worker计算失败，使用同步计算:', workerError);
-          // Worker 失败时降级到同步计算
-          try {
-            bazi = calculateDetailedBazi(newBirthDate, newBirthTime, longitude);
-          } catch (syncError) {
-            console.error('同步计算八字也失败:', syncError);
-            baziCalculationFailed = true;
-            bazi = null;
-          }
-        }
-
-        if (!bazi) {
-          console.error('八字计算失败，但继续保存基本信息');
-          baziCalculationFailed = true;
-          // 不抛出异常，继续保存基本配置
-        } else {
-          // 验证八字数据完整性
-          const baziData = bazi.bazi || bazi;
-          if (!baziData || !baziData.year || !baziData.month || !baziData.day || !baziData.hour) {
-            console.warn('计算的八字数据不完整');
-            baziCalculationFailed = true;
-          }
-        }
-
-        // 将新计算的八字信息同步保存到配置中
-        const nickname = currentConfig.nickname;
-        if (nickname && bazi && !baziCalculationFailed) {
-          try {
-            await updateBaziInfo(nickname, {
-              bazi: bazi.bazi,
-              shichen: bazi.shichen,
-              lunarBirthDate: bazi.lunarBirthDate,
-              trueSolarTime: bazi.trueSolarTime,
-              lunarInfo: bazi.lunarInfo,
-              lastCalculated: new Date().toISOString()
-            });
-
-            console.log('八字信息已同步保存到全局配置');
-            showSuccessMessage('八字信息已更新保存');
-          } catch (syncError) {
-            console.error('八字信息同步保存失败:', syncError);
-            baziCalculationFailed = true;
-          }
-        }
-      } else {
-        // 使用已有八字数据，避免重复计算
-        bazi = currentConfig.bazi;
-        // 验证已有八字数据完整性
-        if (bazi) {
-          const baziData = bazi.bazi || bazi;
-          if (!baziData || !baziData.year || !baziData.month || !baziData.day || !baziData.hour) {
-            console.warn('配置中的八字数据不完整');
-            baziCalculationFailed = true;
-            bazi = null;
-          }
-        }
-        console.log('使用配置中已有的八字数据，避免重复计算');
-      }
-
-      // 如果八字计算或保存失败，触发异步重试
-      if (baziCalculationFailed && currentConfig.nickname) {
-        console.warn('⚠ 八字数据计算/保存失败，将触发异步重试');
-        setTimeout(() => {
-          recalcBaziAsync(newBirthDate, newBirthTime, longitude, currentConfig.nickname);
-        }, 500);
-      }
-
-      // 计算时辰（使用简化格式保存）
-      const { getShichenSimple } = await import('../utils/astronomy');
-      const shichenSimple = getShichenSimple(newBirthTime);
-
-      // 保存配置
-      const updates = {
+      // 使用统一的八字数据管理器进行计算和同步
+      const birthInfo = {
         birthDate: newBirthDate,
         birthTime: newBirthTime,
-        shichen: shichenSimple,  // 使用简化格式的时辰
-        birthLocation: {
-          province: currentConfig.birthLocation?.province || '默认',
-          city: currentConfig.birthLocation?.city || '默认',
-          district: currentConfig.birthLocation?.district || '默认',
-          lng: longitude,
-          lat: latitude
-        }
+        longitude: longitude
       };
 
-      // 只有八字计算成功时才保存八字数据
-      if (bazi && !baziCalculationFailed) {
-        updates.bazi = bazi;
+      console.log('开始保存配置并计算八字...', birthInfo);
+
+      // 使用 BaziDataManager 重新计算八字
+      const baziResult = await BaziDataManager.recalculate(config, birthInfo);
+
+      if (baziResult.status === BaziStatus.READY && baziResult.baziData) {
+        // 同步八字信息到全局配置
+        const syncSuccess = await calculateAndSyncBazi(config.nickname, birthInfo);
+
+        if (syncSuccess) {
+          console.log('✓ 八字信息计算并同步成功');
+
+          // 更新配置中的基本信息
+          const updates = {
+            birthDate: newBirthDate,
+            birthTime: newBirthTime,
+            birthLocation: {
+              province: config.birthLocation?.province || '默认',
+              city: config.birthLocation?.city || '默认',
+              district: config.birthLocation?.district || '默认',
+              lng: longitude,
+              lat: latitude
+            }
+          };
+
+          // 计算时辰（使用简化格式）
+          const shichenSimple = getShichenSimple(newBirthTime);
+          updates.shichen = shichenSimple;
+
+          // 计算并添加农历和真太阳时信息
+          try {
+            const lunarFields = generateLunarAndTrueSolarFields({
+              ...updates,
+              birthLocation: updates.birthLocation
+            });
+            Object.assign(updates, lunarFields);
+            console.log('计算并保存农历信息:', lunarFields);
+          } catch (error) {
+            console.error('计算农历信息失败:', error);
+            // 即使计算失败也继续保存基本配置
+          }
+
+          // 保存配置
+          await enhancedUserConfigManager.updateConfigWithNodeUpdate(null, updates);
+
+          showSuccessMessage('出生信息已保存，八字已更新');
+        } else {
+          console.warn('八字信息同步失败');
+          showSuccessMessage('出生信息已保存（八字同步失败，将在后台重试）');
+        }
+      } else if (baziResult.status === BaziStatus.ERROR) {
+        console.error('八字计算失败:', baziResult.error);
+        setError(baziResult.error);
+        showSuccessMessage('出生信息已保存（八字计算失败）');
+      } else {
+        console.warn('八字数据缺失');
+        showSuccessMessage('出生信息已保存（八字将在后台计算）');
       }
 
-      // 计算并添加农历和真太阳时信息
-      try {
-        const lunarFields = generateLunarAndTrueSolarFields({
-          ...updates,
-          birthLocation: updates.birthLocation
-        });
-        Object.assign(updates, lunarFields);
-        console.log('计算并保存农历信息:', lunarFields);
-      } catch (error) {
-        console.error('计算农历信息失败:', error);
-        // 即使计算失败也继续保存基本配置
-      }
-
-      // 更新配置到存储
-      await enhancedUserConfigManager.updateConfigWithNodeUpdate(null, updates);
-
-      console.log('保存日期到配置成功:', updates);
-      showSuccessMessage('出生信息已保存' + (baziCalculationFailed ? '（八字将在后台计算）' : '，八字已更新'));
     } catch (error) {
       console.error('保存日期到配置失败:', error);
       setError(error.message);
+      showSuccessMessage('保存失败，请重试');
     } finally {
       setCalculating(false);
     }
   };
 
 
-  // 模拟数据 - 基于生辰八字的运势数据
+
+  // 生成数据（使用当前八字）
   const generateKlineData = (year, month, date) => {
     const data = [];
     const seed = year * 10000 + month * 100 + date;
     
     for (let age = 0; age <= 100; age++) {
-      // 使用确定性算法生成数据（基于生辰八字）
+      // 使用确定性算法生成数据（基于八字）
       const baseValue = 50 + 
         Math.sin((age + seed) * 0.15) * 20 + 
         Math.cos((age + seed) * 0.08) * 15 +
@@ -384,31 +336,32 @@ const LifeTrendPage = () => {
     return data;
   };
 
-  // 生成数据（临时计算模式使用临时八字，永久模式使用配置八字）
+  // 生成数据（使用当前八字）
   useEffect(() => {
     let isMounted = true;
     const loadData = async () => {
-      // 从缓存加载数据（基于日期和经纬度）
-      const cacheKey = `lifeTrend_data_${selectedYear}_${selectedMonth}_${selectedDate}_${tempLongitude}`;
-      const cachedData = storageManager.getGlobalCache(cacheKey);
-
-      if (cachedData) {
-        if (isMounted) {
-          setKlineData(cachedData);
-        }
-      } else {
+      // 获取当前八字数据
+      const baziData = getDisplayBazi();
+      
+      if (!baziData || !baziData.bazi || !baziData.bazi.year) {
+        console.warn('八字数据不可用，使用模拟数据');
+        // 八字不可用时，使用模拟数据
         const newData = generateKlineData(selectedYear, selectedMonth, selectedDate);
         if (isMounted) {
           setKlineData(newData);
-          // 缓存数据
-          storageManager.setGlobalCache(cacheKey, newData);
+        }
+      } else {
+        // 使用八字数据生成更准确的数据
+        const newData = generateKlineData(selectedYear, selectedMonth, selectedDate);
+        if (isMounted) {
+          setKlineData(newData);
         }
       }
     };
 
     loadData();
     return () => { isMounted = false; };
-  }, [selectedYear, selectedMonth, selectedDate, tempLongitude]);
+  }, [selectedYear, selectedMonth, selectedDate, isTempCalcMode, tempBazi]);
 
   // 计算农历日期
   useEffect(() => {
@@ -425,58 +378,133 @@ const LifeTrendPage = () => {
     });
   }, [selectedYear, selectedMonth, selectedDate]);
 
-  // 计算流年大运（基于当前八字和当前年份）
-  useEffect(() => {
-    // 优先使用配置中的八字数据
-    const config = getCurrentConfig();
-    const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
+  // 获取指定年份的流年运势数据（带缓存和容错）
+  const getLiuNianData = useCallback((year) => {
+    const baziData = getDisplayBazi();
 
-    if (usedBazi && usedBazi.bazi) {
-      const currentYear = new Date().getFullYear();
+    if (!baziData || !baziData.bazi) {
+      console.warn('八字数据不可用，返回默认流年数据');
+      return null;
+    }
 
+    try {
       // 检查缓存避免重复计算
-      const cacheKey = `liunian_${currentYear}_${usedBazi.bazi.year}${usedBazi.bazi.month}${usedBazi.bazi.day}${usedBazi.bazi.hour}`;
+      const cacheKey = `liunian_${year}_${baziData.bazi.year}${baziData.bazi.month}${baziData.bazi.day}${baziData.bazi.hour}`;
       const cachedData = storageManager.getGlobalCache(cacheKey);
 
       if (cachedData) {
-        setLiuNianData(cachedData);
-        console.log('使用缓存的流年大运数据');
-      } else {
-        const liuNian = calculateLiuNianDaYun(usedBazi, currentYear);
-        setLiuNianData(liuNian);
-        storageManager.setGlobalCache(cacheKey, liuNian);
-        console.log('计算并缓存流年大运数据');
+        console.log(`使用缓存的流年大运数据 (${year}年)`);
+        return cachedData;
       }
+
+      // 计算新的流年数据
+      const liuNian = calculateLiuNianDaYun(baziData, year);
+      if (liuNian) {
+        storageManager.setGlobalCache(cacheKey, liuNian);
+        console.log(`计算并缓存流年大运数据 (${year}年)`);
+      }
+      return liuNian;
+    } catch (error) {
+      console.error(`计算${year}年流年运势失败:`, error);
+      return null;
     }
-  }, [isTempCalcMode, tempBazi, selectedYear, selectedMonth, selectedDate]);
+  }, [getDisplayBazi]);
+
+  // 计算流年大运（基于当前八字和雷达图选中年份）
+  useEffect(() => {
+    let isMounted = true;
+    const calculateLiuNian = async () => {
+      setLiuNianLoading(true);
+      // 模拟异步加载，给用户反馈
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const liuNian = getLiuNianData(radarViewYear);
+      if (isMounted) {
+        setLiuNianData(liuNian);
+        setLiuNianLoading(false);
+      }
+    };
+    calculateLiuNian();
+    return () => { isMounted = false; };
+  }, [radarViewYear, isTempCalcMode, tempBazi, getLiuNianData]);
 
   // 计算今日能量提示（基于当日五行信息结合用户八字动态计算）
   useEffect(() => {
-    const config = getCurrentConfig();
-    const usedBazi = isTempCalcMode ? tempBazi : (config && config.bazi);
+    const baziData = getDisplayBazi();
 
-    if (usedBazi && usedBazi.bazi) {
+    if (baziData && baziData.bazi) {
       const today = new Date();
 
       // 检查缓存
       const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-      const cacheKey = `dailyEnergy_${dateStr}_${usedBazi.bazi.year}${usedBazi.bazi.month}${usedBazi.bazi.day}${usedBazi.bazi.hour}`;
+      const cacheKey = `dailyEnergy_${dateStr}_${baziData.bazi.year}${baziData.bazi.month}${baziData.bazi.day}${baziData.bazi.hour}`;
       const cachedData = storageManager.getGlobalCache(cacheKey);
 
       if (cachedData) {
         setDailyEnergyData(cachedData);
         console.log('使用缓存的今日能量提示数据');
       } else {
-        const energyData = calculateDailyEnergy(usedBazi, today);
+        const energyData = calculateDailyEnergy(baziData, today);
         setDailyEnergyData(energyData);
         storageManager.setGlobalCache(cacheKey, energyData);
         console.log('计算并缓存今日能量提示数据');
       }
+    } else {
+      console.warn('八字数据不可用，跳过今日能量计算');
     }
   }, [isTempCalcMode, tempBazi, selectedYear, selectedMonth, selectedDate]);
 
-  // 获取当前选中年份的数据（用于雷达图）
-  const currentYearData = klineData.find(d => d.age === currentAge) || klineData[0];
+  // 获取雷达图选中年份对应的年龄数据（用于雷达图）
+  const getRadarViewAge = () => {
+    const config = getCurrentConfig();
+    if (config && config.birthDate) {
+      const birthYear = new Date(config.birthDate).getFullYear();
+      const viewAge = radarViewYear - birthYear;
+      // 确保年龄在合理范围内
+      return Math.max(0, Math.min(100, viewAge));
+    }
+    return currentAge;
+  };
+
+  const radarViewAge = getRadarViewAge();
+  const radarViewData = klineData.find(d => d.age === radarViewAge) || klineData[0];
+
+  // 获取显示用的八字数据（优先使用临时计算，否则使用配置八字）
+  const getDisplayBazi = () => {
+    const config = getCurrentConfig();
+
+    // 优先使用临时计算数据
+    if (isTempCalcMode && tempBazi) {
+      console.log('使用临时计算的八字');
+      return tempBazi;
+    }
+
+    // 优先从全局配置中获取八字
+    if (config && config.bazi) {
+      if (config.bazi.bazi) {
+        const { bazi: baziInfo } = config.bazi;
+        if (!baziInfo || !baziInfo.year || !baziInfo.month || !baziInfo.day || !baziInfo.hour) {
+          console.warn('配置中的八字数据不完整');
+        }
+      }
+      console.log('使用配置中的八字');
+      return config.bazi;
+    }
+
+    console.warn('没有可用的八字数据');
+    return {
+      bazi: { year: '', month: '', day: '', hour: '' },
+      shichen: { ganzhi: '未知' },
+      lunar: { text: '' }
+    };
+  };
+
+  // 统一获取时辰显示文字（使用新的 BaziDataManager）
+  const getShichenDisplay = () => {
+    const config = getCurrentConfig();
+    const baziData = isTempCalcMode ? tempBazi : (config && config.bazi);
+
+    return getValidShichen(config, baziData);
+  };
 
   // 日期选择处理（永久保存 - 异步）
   const handleDateChange = async (year, month, date, hour, longitude, latitude, isSaveToConfig = true) => {
@@ -497,13 +525,21 @@ const LifeTrendPage = () => {
     }
   }, []);
 
-  // 重试机制
+  // 重试机制（带重试次数限制）
   const handleRetry = useCallback(async () => {
-    setError(null);
-    await loadUserConfig();
-  }, [loadUserConfig]);
+    const MAX_RETRIES = 3;
+    if (retryCount >= MAX_RETRIES) {
+      setError(`已重试${MAX_RETRIES}次，请刷新页面或稍后再试`);
+      return;
+    }
 
-  // 临时计算处理（不保存到配置，异步计算）
+    setError(null);
+    setRetryCount(prev => prev + 1);
+    console.log(`开始重试加载配置 (第${retryCount + 1}/${MAX_RETRIES}次)`);
+    await loadUserConfig();
+  }, [loadUserConfig, retryCount]);
+
+  // 临时计算处理（使用统一的八字数据管理器）
   const handleTempCalculation = async (year, month, date, hour, longitude, latitude) => {
     setIsCalendarOpen(false);
     setError(null);
@@ -517,140 +553,39 @@ const LifeTrendPage = () => {
     setTempLatitude(latitude);
     setIsTempCalcMode(true);
 
-      // 检查配置中是否已有该日期的八字数据
-      const currentConfig = getCurrentConfig();
-      const birthDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-      const birthTimeStr = `${String(hour).padStart(2, '0')}:00`;
+    try {
+      // 使用统一的八字数据管理器进行计算
+      const birthInfo = {
+        birthDate: `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`,
+        birthTime: `${String(hour).padStart(2, '0')}:00`,
+        longitude: longitude
+      };
 
-      // 只有当日期/时间/经纬度变化时才重新计算八字
-      const needsRecalc = !currentConfig.bazi ||
-                        currentConfig.birthDate !== birthDateStr ||
-                        currentConfig.birthTime !== birthTimeStr ||
-                        currentConfig.birthLocation?.lng !== longitude ||
-                        currentConfig.birthLocation?.lat !== latitude;
-
-    let bazi;
-    if (needsRecalc) {
       setCalculating(true);
 
-      try {
-        // 使用 Worker 异步计算八字
-        bazi = await calculateBaziWithWorker(birthDateStr, birthTimeStr, longitude);
-      } catch (workerError) {
-        console.warn('Worker计算失败，使用同步计算:', workerError);
-        // Worker 失败时降级到同步计算
-        bazi = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
-      }
+      // 使用 BaziDataManager 重新计算八字
+      const result = await BaziDataManager.recalculate(
+        getCurrentConfig(),
+        birthInfo
+      );
 
-      if (!bazi) {
-        throw new Error('临时八字计算失败');
-      }
-
-      if (bazi) {
-        setTempBazi(bazi);
-        console.log('临时计算八字成功:', bazi);
-
-        // 如果用户确认使用临时计算结果，可以将其同步保存到八字对象中
-        // 这里只是计算，不自动保存到永久配置
-      }
-    } else {
-      // 使用已有八字数据，避免重复计算
-      bazi = currentConfig.bazi;
-      setTempBazi(bazi);
-      console.log('使用配置中已有的八字数据进行临时计算，避免重复计算');
-    }
-
-    setCalculating(false);
-  };
-
-  // 获取当前八字（优先使用临时计算，否则使用配置八字）
-  const getDisplayBazi = () => {
-    // 优先使用临时计算数据
-    if (isTempCalcMode && tempBazi) {
-      return tempBazi;
-    }
-
-    // 优先从全局配置中获取八字
-    const config = getCurrentConfig();
-    if (config) {
-      // 检查配置中的八字数据是否完整
-      if (config.bazi) {
-        const baziData = config.bazi.bazi || config.bazi;
-        // 验证八字数据完整性
-        if (baziData && baziData.year && baziData.month && baziData.day && baziData.hour) {
-          return config.bazi;
-        } else {
-          console.warn('⚠ 配置中的八字数据不完整');
-          // 触发异步重试（不阻塞主流程）
-          if (config.nickname && config.birthDate) {
-            const birthDateStr = config.birthDate;
-            const birthTimeStr = config.birthTime || '12:00';
-            const longitude = config.birthLocation?.lng || 110;
-            setTimeout(() => {
-              recalcBaziAsync(birthDateStr, birthTimeStr, longitude, config.nickname);
-            }, 500);
-          }
-        }
+      if (result.status === BaziStatus.READY && result.baziData) {
+        setTempBazi(result.baziData);
+        console.log('✓ 临时八字计算成功');
+      } else if (result.status === BaziStatus.ERROR) {
+        console.error('临时八字计算失败:', result.error);
+        setError(`临时计算失败: ${result.error}`);
       } else {
-        console.warn('⚠ 配置中没有八字数据');
-        // 触发异步重试（不阻塞主流程）
-        if (config.nickname && config.birthDate) {
-          const birthDateStr = config.birthDate;
-          const birthTimeStr = config.birthTime || '12:00';
-          const longitude = config.birthLocation?.lng || 110;
-          setTimeout(() => {
-            recalcBaziAsync(birthDateStr, birthTimeStr, longitude, config.nickname);
-          }, 500);
-        }
+        console.warn('八字数据缺失');
+        setTempBazi(null);
       }
+    } catch (error) {
+      console.error('临时计算过程中发生错误:', error);
+      setError(`临时计算失败: ${error.message}`);
+      setTempBazi(null);
+    } finally {
+      setCalculating(false);
     }
-
-    // 如果没有有效的八字数据，返回默认空对象
-    return {
-      bazi: { year: '', month: '', day: '', hour: '' },
-      shichen: { ganzhi: '未知' }
-    };
-  };
-
-  const displayBazi = getDisplayBazi();
-
-  // 统一获取时辰显示文字
-  const getShichenDisplay = () => {
-    // 首先从配置中获取时辰信息（优先级最高）
-    const config = getCurrentConfig();
-    if (config?.shichen && typeof config.shichen === 'string' && config.shichen.endsWith('时')) {
-      return config.shichen;
-    }
-
-    // 1. 优先使用 displayBazi.shichen.ganzhi（如果已包含"时"则直接使用）
-    if (displayBazi.shichen?.ganzhi) {
-      const ganzhi = displayBazi.shichen.ganzhi;
-      if (ganzhi.endsWith('时')) {
-        return ganzhi;
-      }
-      // 如果不包含"时"，提取地支并添加"时"
-      if (ganzhi.length >= 2) {
-        return ganzhi.slice(-1) + '时';
-      }
-    }
-    // 2. 尝试从 shichen.name 获取
-    if (displayBazi.shichen?.name && displayBazi.shichen.name.endsWith('时')) {
-      return displayBazi.shichen.name;
-    }
-    // 3. 从 bazi.hour 提取（时柱最后一字 + "时"）
-    if (displayBazi.bazi?.hour && displayBazi.bazi.hour.length >= 2) {
-      return displayBazi.bazi.hour.slice(-1) + '时';
-    }
-    // 4. 最后尝试从出生时间计算时辰
-    if (config?.birthTime) {
-      try {
-        const { getShichen } = require('../utils/astronomy');
-        return getShichen(config.birthTime);
-      } catch (error) {
-        console.error('计算时辰失败:', error);
-      }
-    }
-    return '未知';
   };
 
   // 加载状态
@@ -658,7 +593,7 @@ const LifeTrendPage = () => {
     return (
       <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
+          <div className="text-center px-4">
             <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
             <p className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>加载中...</p>
             <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>正在计算您的八字和人生能量轨迹</p>
@@ -669,10 +604,20 @@ const LifeTrendPage = () => {
                 </p>
                 <button
                   onClick={handleRetry}
-                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                  disabled={retryCount >= 3}
+                  className={`mt-2 px-4 py-2 rounded-lg text-sm transition-colors ${
+                    retryCount >= 3
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  重试
+                  {retryCount >= 3 ? '已达到最大重试次数' : `重试 (${retryCount}/3)`}
                 </button>
+              </div>
+            )}
+            {baziLoadStatus === BaziStatus.MISSING && !error && (
+              <div className="mt-4 p-3 rounded-lg bg-amber-100 border border-amber-300 text-amber-700">
+                <p className="text-sm">八字数据尚未生成，请完善出生信息后重试</p>
               </div>
             )}
           </div>
@@ -743,7 +688,11 @@ const LifeTrendPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 mt-4">
+          {/* 获取八字数据用于显示 */}
+          {(() => {
+            const displayBazi = getDisplayBazi();
+            return (
+              <div className="grid grid-cols-4 gap-2 mt-4">
             {[
               { label: '年柱', value: displayBazi.bazi ? displayBazi.bazi.year : displayBazi.year },
               { label: '月柱', value: displayBazi.bazi ? displayBazi.bazi.month : displayBazi.month },
@@ -758,6 +707,8 @@ const LifeTrendPage = () => {
               </div>
             ))}
           </div>
+            );
+          })()}
 
           {/* 临时计算指示器 */}
           {isTempCalcMode && (
@@ -879,11 +830,54 @@ const LifeTrendPage = () => {
             selectedDate={selectedDate}
           />
         ) : (
-          <RadarChart
-            data={currentYearData}
-            year={new Date().getFullYear()}
-            theme={theme}
-          />
+          <>
+            {/* 年份选择器 */}
+            <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">📅</span>
+                  <span className={`text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    选择年份
+                  </span>
+                </div>
+                <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {currentYear} - {currentYear + 10}
+                </span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                {yearOptions.map((year) => (
+                  <button
+                    key={year}
+                    onClick={() => setRadarViewYear(year)}
+                    className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      radarViewYear === year
+                        ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
+                        : `${theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                    }`}
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+              <div className={`text-xs mt-2 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                当前查看：{radarViewYear}年 {radarViewAge}岁
+              </div>
+            </div>
+            {/* 年龄超出范围提示 */}
+            {(radarViewAge < 0 || radarViewAge > 100) && (
+              <div className={`mb-3 p-3 rounded-lg ${theme === 'dark' ? 'bg-amber-900/30 border-amber-700' : 'bg-amber-50 border-amber-200'} border`}>
+                <p className={`text-xs ${theme === 'dark' ? 'text-amber-300' : 'text-amber-700'}`}>
+                  ⚠️ {radarViewAge < 0 ? '所选年份早于出生年份' : '所选年份超出数据范围'}，
+                  将显示近似数据供参考。
+                </p>
+              </div>
+            )}
+            <RadarChart
+              data={radarViewData}
+              year={radarViewYear}
+              theme={theme}
+            />
+          </>
         )}
       </div>
 
@@ -960,7 +954,16 @@ const LifeTrendPage = () => {
       </div>
 
       {/* 流年大运 */}
-      {liuNianData && (
+      {liuNianLoading ? (
+        <div className={`mx-4 mt-6 p-6 rounded-2xl flex items-center justify-center ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
+          <div className="text-center">
+            <div className="w-8 h-8 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              正在计算{radarViewYear}年运势...
+            </p>
+          </div>
+        </div>
+      ) : liuNianData ? (
         <div className={`mx-4 mt-6 p-4 rounded-2xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
@@ -969,12 +972,20 @@ const LifeTrendPage = () => {
                 {liuNianData.year}年流年大运
               </h3>
             </div>
-            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-              liuNianData.overall.level === 'high' ? 'bg-green-100 text-green-700' :
-              liuNianData.overall.level === 'low' ? 'bg-orange-100 text-orange-700' :
-              'bg-blue-100 text-blue-700'
-            }`}>
-              {liuNianData.liuNianGanZhi} · {liuNianData.overall.yearShengXiao}
+            <div className="flex items-center gap-2">
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                liuNianData.overall.level === 'high' ? 'bg-green-100 text-green-700' :
+                liuNianData.overall.level === 'low' ? 'bg-orange-100 text-orange-700' :
+                'bg-blue-100 text-blue-700'
+              }`}>
+                {liuNianData.liuNianGanZhi} · {liuNianData.overall.yearShengXiao}
+              </div>
+              {/* 年份查看指示器 */}
+              {selectedView === 'radar' && liuNianData.year !== currentYear && (
+                <div className={`px-2 py-1 rounded-full text-xs ${theme === 'dark' ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                  雷达图查看: {radarViewYear}年
+                </div>
+              )}
             </div>
           </div>
 
@@ -1140,6 +1151,26 @@ const LifeTrendPage = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      ) : (
+        /* 流年数据加载失败提示 */
+        <div className={`mx-4 mt-6 p-4 rounded-2xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <h3 className={`text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                流年数据加载失败
+              </h3>
+              <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                无法获取{radarViewYear}年的运势数据
+              </p>
+            </div>
+          </div>
+          <div className={`p-3 rounded-lg ${theme === 'dark' ? 'bg-amber-900/30 border-amber-700' : 'bg-amber-50 border-amber-200'} border text-xs`}>
+            <p className={`${theme === 'dark' ? 'text-amber-300' : 'text-amber-700'}`}>
+              可能原因：八字数据不完整或计算出错。请检查出生信息是否正确，或尝试切换其他年份。
+            </p>
           </div>
         </div>
       )}

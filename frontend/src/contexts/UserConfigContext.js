@@ -5,6 +5,15 @@ import { errorLogger } from '../utils/errorLogger';
 // 创建全局配置上下文
 const UserConfigContext = createContext();
 
+// 默认出生时间（当数据缺失时使用）
+const DEFAULT_BIRTH_TIME = '12:30';
+
+// 默认经度（当数据缺失时使用）
+const DEFAULT_LONGITUDE = 116.40;
+
+// 默认纬度（当数据缺失时使用）
+const DEFAULT_LATITUDE = 39.90;
+
 // 全局配置提供者组件
 export const UserConfigProvider = ({ children }) => {
   const [configManagerReady, setConfigManagerReady] = useState(false);
@@ -144,6 +153,64 @@ export const UserConfigProvider = ({ children }) => {
     }
   }, []);
 
+  /**
+   * 更新八字信息到配置
+   * @param {string} nickname - 用户昵称
+   * @param {Object} baziInfo - 八字信息对象
+   * @returns {Promise<boolean>} 是否更新成功
+   */
+  const updateBaziInfo = useCallback(async (nickname, baziInfo) => {
+    try {
+      const success = await enhancedUserConfigManager.updateBaziInfo(nickname, baziInfo);
+      return success;
+    } catch (err) {
+      errorLogger.log(err, {
+        component: 'UserConfigContext',
+        action: 'updateBaziInfo',
+        nickname,
+        errorType: 'BaziUpdateError'
+      });
+      console.error('更新八字信息失败:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * 从出生信息计算并更新八字
+   * @param {string} nickname - 用户昵称
+   * @param {Object} birthInfo - 出生信息
+   * @returns {Promise<boolean>} 是否更新成功
+   */
+  const calculateAndSyncBazi = useCallback(async (nickname, birthInfo) => {
+    try {
+      const success = await enhancedUserConfigManager.calculateAndSyncBaziInfo(nickname, birthInfo);
+      return success;
+    } catch (err) {
+      errorLogger.log(err, {
+        component: 'UserConfigContext',
+        action: 'calculateAndSyncBazi',
+        nickname,
+        errorType: 'BaziCalculationError'
+      });
+      console.error('计算并同步八字信息失败:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * 获取有效的出生信息（使用默认值回退）
+   * @param {Object} config - 配置对象
+   * @returns {Object} 包含 birthDate, birthTime, longitude 的对象
+   */
+  const getValidBirthInfo = useCallback((config) => {
+    return {
+      birthDate: config?.birthDate || null,
+      birthTime: config?.birthTime || DEFAULT_BIRTH_TIME,
+      longitude: config?.birthLocation?.lng ?? DEFAULT_LONGITUDE,
+      latitude: config?.birthLocation?.lat ?? DEFAULT_LATITUDE
+    };
+  }, []);
+
   const value = {
     configManagerReady,
     currentConfig,
@@ -154,7 +221,10 @@ export const UserConfigProvider = ({ children }) => {
     updateConfig,
     addConfig,
     deleteConfig,
-    switchConfig
+    switchConfig,
+    updateBaziInfo,
+    calculateAndSyncBazi,
+    getValidBirthInfo
   };
 
   return (
@@ -180,7 +250,15 @@ export const useUserConfig = () => {
       updateConfig: (index, config) => enhancedUserConfigManager.updateConfigWithNodeUpdate(index, config),
       addConfig: (config) => enhancedUserConfigManager.addBasicConfig(config),
       deleteConfig: (index) => enhancedUserConfigManager.removeConfig(index),
-      switchConfig: (index) => enhancedUserConfigManager.setActiveConfig(index)
+      switchConfig: (index) => enhancedUserConfigManager.setActiveConfig(index),
+      updateBaziInfo: (nickname, baziInfo) => enhancedUserConfigManager.updateBaziInfo(nickname, baziInfo),
+      calculateAndSyncBazi: (nickname, birthInfo) => enhancedUserConfigManager.calculateAndSyncBaziInfo(nickname, birthInfo),
+      getValidBirthInfo: (config) => ({
+        birthDate: config?.birthDate || null,
+        birthTime: config?.birthTime || '12:30',
+        longitude: config?.birthLocation?.lng ?? 116.40,
+        latitude: config?.birthLocation?.lat ?? 39.90
+      })
     };
   }
 

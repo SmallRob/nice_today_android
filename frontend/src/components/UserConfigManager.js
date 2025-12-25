@@ -10,47 +10,57 @@ import { calculateFiveGrids, getCharStrokes, getMeaning } from '../utils/nameSco
 import { calculateDetailedBazi } from '../utils/baziHelper';
 import { DEFAULT_REGION } from '../data/ChinaLocationData';
 import { getShichen, getShichenSimple, normalizeShichen } from '../utils/astronomy';
+import { getZiWeiDisplayData } from '../utils/ziweiHelper';
+import ZiWeiPalaceDisplay from './ZiWeiPalaceDisplay';
 
 // 懒加载优化后的表单组件
 const ConfigEditModal = lazy(() => import('./ConfigEditModal'));
 const NameScoringModal = lazy(() => import('./NameScoringModal'));
 
-// 八字命理展示组件
-const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime }) => {
+// 八字命理展示组件（优化版：优先从配置中读取八字信息）
+const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo }) => {
   const [baziInfo, setBaziInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 计算八字信息（使用统一算法）
+  // 计算八字信息（优先使用保存的八字信息）
   useEffect(() => {
     if (!birthDate) return;
 
-    const calculate = () => {
+    const loadBazi = async () => {
       setLoading(true);
       try {
-        const lng = birthLocation?.lng || DEFAULT_REGION.lng;
-        
-        // 使用统一的真太阳时计算，确保与农历日期一致
-        const useTrueSolarTime = trueSolarTime || birthTime || '12:30';
-        const info = calculateDetailedBazi(birthDate, useTrueSolarTime, lng);
-        
-        // 如果提供了农历日期，确保显示一致性
-        if (lunarBirthDate && info) {
-          info.lunar = {
-            ...info.lunar,
-            text: lunarBirthDate // 使用配置中存储的农历日期
-          };
+        // 1. 优先使用保存的八字信息
+        if (savedBaziInfo && savedBaziInfo.bazi) {
+          console.log('使用配置中保存的八字信息');
+          setBaziInfo(savedBaziInfo);
+        } else {
+          // 2. 如果没有保存的八字信息，则实时计算
+          console.log('配置中无八字信息，开始实时计算');
+          const lng = birthLocation?.lng || DEFAULT_REGION.lng;
+
+          // 使用统一的真太阳时计算，确保与农历日期一致
+          const useTrueSolarTime = trueSolarTime || birthTime || '12:30';
+          const info = calculateDetailedBazi(birthDate, useTrueSolarTime, lng);
+
+          // 如果提供了农历日期，确保显示一致性
+          if (lunarBirthDate && info) {
+            info.lunar = {
+              ...info.lunar,
+              text: lunarBirthDate // 使用配置中存储的农历日期
+            };
+          }
+
+          setBaziInfo(info);
         }
-        
-        setBaziInfo(info);
       } catch (e) {
-        console.error('八字计算失败:', e);
+        console.error('八字加载失败:', e);
       } finally {
         setLoading(false);
       }
     };
 
-    calculate();
-  }, [birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime]);
+    loadBazi();
+  }, [birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo]);
 
   if (loading) {
     return (
@@ -880,6 +890,11 @@ const UserConfigManagerComponent = () => {
   const [baziKey, setBaziKey] = useState(0); // 八字计算刷新键
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 编辑弹窗状态
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
+  // 用户信息折叠状态
+  const [isUserInfoExpanded, setIsUserInfoExpanded] = useState(true);
+  // 紫微命宫数据
+  const [ziweiData, setZiweiData] = useState(null);
+  const [ziweiLoading, setZiweiLoading] = useState(false);
   // 拖拽相关状态
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -915,6 +930,29 @@ const UserConfigManagerComponent = () => {
       setExpandedIndex(updatedActiveIndex);
     }
   }, [configs.length, activeConfigIndex, expandedIndex]);
+
+  // 加载紫微命宫数据
+  useEffect(() => {
+    const loadZiWeiData = async () => {
+      const config = configs[activeConfigIndex];
+      if (!config || !config.birthDate) {
+        setZiweiData(null);
+        return;
+      }
+
+      try {
+        setZiweiLoading(true);
+        const data = await getZiWeiDisplayData(config);
+        setZiweiData(data);
+      } catch (error) {
+        console.error('加载紫微命宫失败:', error);
+      } finally {
+        setZiweiLoading(false);
+      }
+    };
+
+    loadZiWeiData();
+  }, [activeConfigIndex, configs, baziKey]);
 
   // 初始化配置管理器 - 类似轻量版AppLite的初始化逻辑
   useEffect(() => {
@@ -1092,24 +1130,66 @@ const UserConfigManagerComponent = () => {
       finalConfigData.nameScore.totalScore = totalScore;
     }
 
-    // 优化：保存时不同步计算八字，只保存基础信息
-    // 八字计算将在后台异步完成，或通过手动同步按钮触发
-    if (finalConfigData.bazi) {
+    // 自动计算并同步八字信息（当存在有效的出生日期时）
+    const needsCalculateBazi = finalConfigData.birthDate && !finalConfigData.bazi;
+    let calculatedBaziInfo = null;
+
+    if (needsCalculateBazi) {
+      try {
+        const birthDate = finalConfigData.birthDate;
+        const birthTime = finalConfigData.birthTime || '12:30';
+        const longitude = finalConfigData.birthLocation?.lng || 116.40;
+
+        console.log('开始计算八字信息:', { birthDate, birthTime, longitude });
+
+        // 计算八字
+        const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
+        if (baziInfo) {
+          calculatedBaziInfo = {
+            bazi: baziInfo,
+            lunarBirthDate: baziInfo.lunar?.text,
+            trueSolarTime: birthTime,
+            lastCalculated: new Date().toISOString()
+          };
+
+          // 计算并添加农历和真太阳时信息
+          try {
+            const { generateLunarAndTrueSolarFields } = await import('../utils/LunarCalendarHelper');
+            const lunarFields = generateLunarAndTrueSolarFields({
+              ...finalConfigData,
+              birthLocation: finalConfigData.birthLocation || { lng: longitude, lat: 39.90 }
+            });
+            Object.assign(calculatedBaziInfo, lunarFields);
+            console.log('计算并保存农历信息:', lunarFields);
+          } catch (error) {
+            console.error('计算农历信息失败:', error);
+          }
+
+          finalConfigData.bazi = calculatedBaziInfo.bazi;
+          finalConfigData.lunarBirthDate = calculatedBaziInfo.lunarBirthDate;
+          finalConfigData.trueSolarTime = calculatedBaziInfo.trueSolarTime;
+          console.log('✓ 八字信息计算成功');
+        }
+      } catch (error) {
+        console.error('计算八字信息失败:', error);
+        // 失败时不中断保存流程
+      }
+    } else if (finalConfigData.bazi) {
       console.log('配置中已有八字信息，保留');
     }
 
     try {
       if (isNewConfig) {
-        // 新建配置，使用基础配置保存方式（不计算八字）
+        // 新建配置，保存基础配置（包括自动计算的八字）
         console.log('执行添加新配置操作...');
         const addResult = await enhancedUserConfigManager.addBasicConfig(finalConfigData);
         console.log('addBasicConfig 返回结果:', addResult);
         if (!addResult) {
           throw new Error('添加新配置失败');
         }
-        console.log('新建基础配置成功（八字将异步计算）');
+        console.log('新建基础配置成功（包含八字信息）');
       } else {
-        // 现有配置，更新存储（不计算八字）
+        // 现有配置，更新存储（包括八字信息）
         console.log('执行更新配置操作，索引:', index);
         const updateResult = await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, finalConfigData);
         console.log('updateConfigWithNodeUpdate 返回结果:', {
@@ -1377,104 +1457,230 @@ const UserConfigManagerComponent = () => {
           </p>
         </div>
       )}
-      {/* 用户信息 */}
-      <Card title="用户信息">
-        <div className="p-4 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
+      {/* 用户信息 - 优化版 */}
+      <Card 
+        title="用户信息" 
+        className="mb-6"
+        headerExtra={
+          <button
+            onClick={() => setIsUserInfoExpanded(!isUserInfoExpanded)}
+            className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
+              isUserInfoExpanded
+                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+            }`}
+          >
+            {isUserInfoExpanded ? '收起' : '展开'}
+          </button>
+        }
+      >
+        <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl shadow-inner border border-blue-100 dark:border-blue-800">
           {configs[activeConfigIndex] ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">昵称：</span>
-                <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].nickname}</span>
+            <div className={`space-y-4 transition-all ${isUserInfoExpanded ? '' : 'max-h-24 overflow-hidden'}`}>
+              {/* 昵称 - 突出显示 */}
+              <div className="flex items-center justify-between pb-3 border-b border-blue-200 dark:border-blue-800">
+                <div className="flex items-center">
+                  <span className="text-2xl mr-2">👤</span>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">昵称</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">
+                      {configs[activeConfigIndex].nickname}
+                    </p>
+                  </div>
+                </div>
+                {/* 当前使用标签 */}
+                <span className="px-3 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full shadow-md">
+                  当前使用
+                </span>
               </div>
-              {/* 真实姓名或姓名评分入口 */}
-              {configs[activeConfigIndex].realName ? (
-                <div>
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">真实姓名：</span>
-                  <span className="ml-2 font-bold text-gray-900 dark:text-white">{configs[activeConfigIndex].realName}</span>
-                  {configs[activeConfigIndex]?.nameScore && (
-                    <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${configs[activeConfigIndex].nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      configs[activeConfigIndex].nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      configs[activeConfigIndex].nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                      configs[activeConfigIndex].nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                      }`}>
-                      {configs[activeConfigIndex].nameScore.totalScore || 0}分
-                    </span>
-                  )}
-                  {/[一-龥]/.test(configs[activeConfigIndex].realName) && (
+
+              {/* 信息网格 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 真实姓名或姓名评分入口 */}
+                {configs[activeConfigIndex].realName ? (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center flex-1">
+                        <span className="text-xl mr-2">📝</span>
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">真实姓名</p>
+                          <p className="text-base font-semibold text-gray-900 dark:text-white">
+                            {configs[activeConfigIndex].realName}
+                          </p>
+                        </div>
+                      </div>
+                      {configs[activeConfigIndex]?.nameScore ? (
+                        <div className="ml-3">
+                          <div className={`px-3 py-1.5 rounded-lg font-bold text-sm shadow-sm ${
+                            configs[activeConfigIndex].nameScore.totalScore >= 90 ? 'bg-green-500 text-white' :
+                            configs[activeConfigIndex].nameScore.totalScore >= 80 ? 'bg-blue-500 text-white' :
+                            configs[activeConfigIndex].nameScore.totalScore >= 70 ? 'bg-yellow-500 text-white' :
+                            configs[activeConfigIndex].nameScore.totalScore >= 60 ? 'bg-orange-500 text-white' :
+                              'bg-red-500 text-white'
+                          }`}>
+                            {configs[activeConfigIndex].nameScore.totalScore || 0}分
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                    {/[一-龥]/.test(configs[activeConfigIndex].realName) && (
+                      <button
+                        className="mt-2 w-full px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-800/70 transition-all duration-200 font-medium"
+                        onClick={() => {
+                          setTempScoringConfigIndex(activeConfigIndex);
+                          setIsTempScoringOpen(true);
+                        }}
+                      >
+                        {configs[activeConfigIndex]?.nameScore ? '重新评分' : '开始评分'}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center mb-3">
+                      <span className="text-xl mr-2">🔮</span>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">姓名评分</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">完善姓名可获取五格评分</p>
+                      </div>
+                    </div>
                     <button
-                      className="ml-2 px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
+                      className="w-full px-4 py-2 text-sm bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 dark:from-indigo-600 dark:to-purple-700 dark:hover:from-indigo-700 dark:hover:to-purple-800 transition-all duration-200 font-medium shadow-md"
                       onClick={() => {
                         setTempScoringConfigIndex(activeConfigIndex);
                         setIsTempScoringOpen(true);
                       }}
                     >
-                      {configs[activeConfigIndex]?.nameScore ? '重新计算评分' : '计算评分'}
+                      填写姓名并评分
                     </button>
-                  )}
+                  </div>
+                )}
+
+                {/* 出生日期 */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center">
+                    <span className="text-xl mr-2">📅</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">出生日期</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-white">
+                        {configs[activeConfigIndex].birthDate || '未设置'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div>
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">姓名评分：</span>
-                  <button
-                    className="ml-2 px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
-                    onClick={() => {
-                      setTempScoringConfigIndex(activeConfigIndex);
-                      setIsTempScoringOpen(true);
-                    }}
-                  >
-                    填写姓名并评分
-                  </button>
-                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">（可选，用于五格评分与八字测算）</span>
+
+                {/* 出生时间 */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center">
+                    <span className="text-xl mr-2">🕐</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">出生时间</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-white">
+                        {configs[activeConfigIndex].birthTime || '12:30'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        ({normalizeShichen(configs[activeConfigIndex].shichen || getShichenSimple(configs[activeConfigIndex].birthTime || '12:30'))})
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              )}
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生日期：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].birthDate}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">性别：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">
-                  {GENDER_OPTIONS.find(opt => opt.value === (configs[activeConfigIndex].gender || 'secret'))?.label || '保密'}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生时间：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">
-                  {configs[activeConfigIndex].birthTime || '12:30'}
-                  <span className="text-xs text-gray-500 ml-1">
-                    ({normalizeShichen(configs[activeConfigIndex].shichen || getShichenSimple(configs[activeConfigIndex].birthTime || '12:30'))})
-                  </span>
-                </span>
-              </div>
-              <div className="col-span-1 md:col-span-2">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">出生地点：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">
-                  {configs[activeConfigIndex].birthLocation?.province || '北京市'} {configs[activeConfigIndex].birthLocation?.city || '北京市'} {configs[activeConfigIndex].birthLocation?.district || '朝阳区'}
-                  {configs[activeConfigIndex].birthLocation?.lng && configs[activeConfigIndex].birthLocation?.lat && (
-                    <span className="text-xs text-gray-500 ml-2">
-                      (经度: {configs[activeConfigIndex].birthLocation.lng.toFixed(2)}, 纬度: {configs[activeConfigIndex].birthLocation.lat.toFixed(2)})
-                    </span>
-                  )}
-                </span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">星座：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiac}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">生肖：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].zodiacAnimal}</span>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">MBTI类型：</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{configs[activeConfigIndex].mbti || 'ISFP'}</span>
+
+                {/* 出生地点 */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700 md:col-span-2">
+                  <div className="flex items-start">
+                    <span className="text-xl mr-2 mt-0.5">📍</span>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">出生地点</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-white">
+                        {configs[activeConfigIndex].birthLocation?.province || '北京市'} {configs[activeConfigIndex].birthLocation?.city || '北京市'} {configs[activeConfigIndex].birthLocation?.district || '朝阳区'}
+                      </p>
+                      {configs[activeConfigIndex].birthLocation?.lng && configs[activeConfigIndex].birthLocation?.lat && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          经度: {configs[activeConfigIndex].birthLocation.lng.toFixed(2)} · 纬度: {configs[activeConfigIndex].birthLocation.lat.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 星座 */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center">
+                    <span className="text-xl mr-2">♈</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">星座</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-white">
+                        {configs[activeConfigIndex].zodiac || '未设置'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 生肖 */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center">
+                    <span className="text-xl mr-2">🐉</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">生肖</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-white">
+                        {configs[activeConfigIndex].zodiacAnimal || '未设置'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 性别 */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center">
+                    <span className="text-xl mr-2">⚥</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">性别</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-white">
+                        {GENDER_OPTIONS.find(opt => opt.value === (configs[activeConfigIndex].gender || 'secret'))?.label || '保密'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* MBTI类型 */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center">
+                    <span className="text-xl mr-2">🧠</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">MBTI类型</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-white">
+                        {configs[activeConfigIndex].mbti || 'ISFP'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
-            <p className="text-gray-500 dark:text-gray-400">当前没有可用配置</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-4">当前没有可用配置</p>
           )}
         </div>
+      </Card>
+
+      {/* 紫微命宫展示栏目 */}
+      <Card
+        title="紫微命宫"
+        className="mb-6"
+        headerExtra={
+          ziweiLoading && (
+            <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-transparent"></div>
+              计算中...
+            </div>
+          )
+        }
+      >
+        <ZiWeiPalaceDisplay
+          ziweiData={ziweiData}
+          birthDate={configs[activeConfigIndex]?.birthDate}
+          birthTime={configs[activeConfigIndex]?.birthTime}
+          longitude={configs[activeConfigIndex]?.birthLocation?.lng}
+        />
       </Card>
 
       {/* 八字命格展示栏目 */}
@@ -1572,6 +1778,9 @@ const UserConfigManagerComponent = () => {
             birthDate={configs[activeConfigIndex].birthDate}
             birthTime={configs[activeConfigIndex].birthTime || '12:30'}
             birthLocation={configs[activeConfigIndex].birthLocation}
+            lunarBirthDate={configs[activeConfigIndex].lunarBirthDate}
+            trueSolarTime={configs[activeConfigIndex].trueSolarTime}
+            savedBaziInfo={configs[activeConfigIndex].bazi}
           />
         ) : (
           <div className="text-center py-6 text-gray-500 dark:text-gray-400">
@@ -1580,24 +1789,51 @@ const UserConfigManagerComponent = () => {
         )}
       </Card>
 
+      {/* 用户配置管理 - 优化版 */}
       <Card title="用户配置" className="mb-6">
         <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            在这里管理您的个人信息配置，包括昵称、出生日期、星座和生肖。
-            您可以创建多个配置，并随时切换使用哪个配置。
-          </p>
+          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+              <span className="font-semibold text-blue-700 dark:text-blue-400">🎯 配置管理</span>
+              在这里管理您的个人信息配置，包括昵称、出生日期、星座和生肖。
+              您可以创建多个配置，并随时切换使用哪个配置。
+            </p>
+          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button variant="primary" onClick={handleAddConfig}>
-              添加新配置
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Button
+              variant="primary"
+              onClick={handleAddConfig}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>添加新配置</span>
             </Button>
 
-            <Button variant="outline" onClick={handleImportConfigs}>
-              导入配置
+            <Button
+              variant="outline"
+              onClick={handleImportConfigs}
+              className="flex items-center justify-center space-x-2 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>导入配置</span>
             </Button>
-            <Button variant="outline" onClick={handleExportConfigs}>
-              导出配置
+
+            <Button
+              variant="outline"
+              onClick={handleExportConfigs}
+              className="flex items-center justify-center space-x-2 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>导出配置</span>
             </Button>
+
             <Button
               variant="outline"
               onClick={() => {
@@ -1605,9 +1841,9 @@ const UserConfigManagerComponent = () => {
                 setTempScoringConfigIndex(null);
                 setIsTempScoringOpen(true);
               }}
-              className="flex items-center space-x-1"
+              className="flex items-center justify-center space-x-2 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all duration-200"
             >
-              <span>💯</span>
+              <span className="text-lg">💯</span>
               <span>为他人评分</span>
             </Button>
           </div>
@@ -1628,13 +1864,24 @@ const UserConfigManagerComponent = () => {
           }}
           name={configs[tempScoringConfigIndex]?.realName || ''}
           isPersonal={tempScoringConfigIndex !== null}
-          onSaveScore={async (score) => {
+          onSaveScore={async (score, inputName) => {
             // 保存评分到配置（仅个人评分）
             if (tempScoringConfigIndex !== null && score) {
               const totalScore = calculateTotalScore(score);
-              // 直接更新配置的 nameScore 字段
+              const updateData = { nameScore: { ...score, totalScore } };
+
+              // 如果用户输入了姓名且配置中没有姓名，则保存姓名
+              if (inputName && inputName.trim() && /[一-龥]/.test(inputName.trim())) {
+                const config = configs[tempScoringConfigIndex];
+                if (!config.realName) {
+                  updateData.realName = inputName.trim();
+                  console.log('保存姓名到配置:', updateData.realName);
+                }
+              }
+
+              // 直接更新配置
               try {
-                await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, { nameScore: { ...score, totalScore } });
+                await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, updateData);
                 console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
               } catch (error) {
                 console.error('保存姓名评分失败:', error);
