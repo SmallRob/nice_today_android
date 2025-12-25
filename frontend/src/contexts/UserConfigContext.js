@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
+import { enhancedUserConfigManager, DEFAULT_CONFIG } from '../utils/EnhancedUserConfigManager';
 import { errorLogger } from '../utils/errorLogger';
-import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 
 // 创建全局配置上下文
 const UserConfigContext = createContext();

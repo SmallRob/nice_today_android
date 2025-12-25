@@ -81,6 +81,63 @@ const LifeTrendPage = () => {
     return { valid: true };
   };
 
+  // 获取显示用的八字数据（优先使用临时计算，否则使用配置八字）- 必须在其他函数之前定义
+  const getDisplayBazi = useCallback(() => {
+    let config = null;
+    let configError = null;
+
+    // 安全地获取配置，带错误处理
+    try {
+      config = getCurrentConfig();
+    } catch (error) {
+      configError = error;
+      console.warn('获取当前配置失败，使用降级方案:', error.message);
+    }
+
+    // 优先使用临时计算数据
+    if (isTempCalcMode && tempBazi) {
+      console.log('使用临时计算的八字');
+      return tempBazi;
+    }
+
+    // 优先从全局配置中获取八字
+    if (config && config.bazi) {
+      if (config.bazi.bazi) {
+        const { bazi: baziInfo } = config.bazi;
+        if (!baziInfo || !baziInfo.year || !baziInfo.month || !baziInfo.day || !baziInfo.hour) {
+          console.warn('配置中的八字数据不完整');
+        }
+      }
+      console.log('使用配置中的八字');
+      return config.bazi;
+    }
+
+    // 如果配置获取失败，返回默认八字数据（降级方案）
+    if (configError) {
+      console.warn('配置获取失败，返回默认八字数据');
+      return {
+        bazi: { year: '甲子', month: '乙丑', day: '丙寅', hour: '丁卯' },
+        shichen: { ganzhi: '丁卯' },
+        lunar: { text: '降级数据' }
+      };
+    }
+
+    console.warn('没有可用的八字数据');
+    return {
+      bazi: { year: '', month: '', day: '', hour: '' },
+      shichen: { ganzhi: '未知' },
+      lunar: { text: '' }
+    };
+  }, [isTempCalcMode, tempBazi, getCurrentConfig]);
+
+  // 统一获取时辰显示文字（使用新的 BaziDataManager）- 必须在其他函数之前定义
+  const getShichenDisplay = useCallback(() => {
+    const config = getCurrentConfig();
+    const baziData = isTempCalcMode ? tempBazi : (config && config.bazi);
+
+    return getValidShichen(config, baziData);
+  }, [isTempCalcMode, tempBazi, getCurrentConfig]);
+
   // 加载用户配置的函数（使用统一的八字数据管理器）
   const loadUserConfig = useCallback(async () => {
     let isMounted = true;
@@ -89,15 +146,44 @@ const LifeTrendPage = () => {
       setError(null);
       setBaziLoadStatus(BaziStatus.LOADING);
 
-      // 步骤1：加载用户配置并验证
-      const config = getCurrentConfig();
-      const validation = validateConfig(config);
-      if (!validation.valid) {
-        throw new Error(validation.error);
+      // 步骤1：加载用户配置并验证（带错误处理）
+      let config = null;
+      let configError = null;
+
+      try {
+        config = getCurrentConfig();
+        const validation = validateConfig(config);
+        if (!validation.valid) {
+          throw new Error(validation.error);
+        }
+      } catch (error) {
+        configError = error;
+        console.warn('获取或验证配置失败，使用默认配置:', error.message);
+        // 使用默认配置继续
+        config = {
+          nickname: '默认用户',
+          birthDate: new Date().toISOString().split('T')[0],
+          birthTime: '12:00',
+          birthLocation: { province: '北京', city: '北京市', district: '东城区', lng: 116.40, lat: 39.90 },
+          zodiac: '水瓶座',
+          zodiacAnimal: '蛇',
+          mbti: 'ISTJ'
+        };
       }
 
       if (isMounted) {
-        const birthInfo = normalizeBirthInfo(config);
+        let birthInfo = null;
+        try {
+          birthInfo = normalizeBirthInfo(config);
+        } catch (error) {
+          console.warn('标准化出生信息失败，使用默认值:', error.message);
+          birthInfo = {
+            birthDate: config.birthDate || new Date().toISOString().split('T')[0],
+            birthTime: config.birthTime || '12:00',
+            latitude: 39.90,
+            longitude: 116.40
+          };
+        }
 
         // 更新日期和时间选择器
         if (birthInfo.birthDate) {
@@ -146,32 +232,39 @@ const LifeTrendPage = () => {
         setTempLatitude(safeLatitude);
         setTempLongitude(safeLongitude);
 
-        // 步骤2：使用统一的八字数据管理器加载八字
+        // 步骤2：使用统一的八字数据管理器加载八字（带错误处理）
         console.log('使用统一的八字数据管理器加载八字...');
-        const baziResult = await BaziDataManager.initialize(config, {
-          useCache: true,
-          forceRecalculate: false
-        });
+        try {
+          const baziResult = await BaziDataManager.initialize(config, {
+            useCache: true,
+            forceRecalculate: false
+          });
 
-        if (baziResult.status === BaziStatus.READY) {
-          console.log('✓ 八字数据加载成功', baziResult.fromCache ? '(来自缓存)' : '(新计算)');
-          setBaziLoadStatus(BaziStatus.READY);
-          setTempBazi(null); // 清除临时八字
-          setRetryCount(0); // 重置重试计数
-        } else if (baziResult.status === BaziStatus.ERROR) {
-          console.warn('⚠ 八字数据加载失败:', baziResult.error);
-          setBaziLoadStatus(BaziStatus.ERROR);
-          setError(`八字数据加载失败: ${baziResult.error}`);
-        } else {
-          console.warn('⚠ 八字数据缺失');
+          if (baziResult.status === BaziStatus.READY) {
+            console.log('✓ 八字数据加载成功', baziResult.fromCache ? '(来自缓存)' : '(新计算)');
+            setBaziLoadStatus(BaziStatus.READY);
+            setTempBazi(null); // 清除临时八字
+            setRetryCount(0); // 重置重试计数
+          } else if (baziResult.status === BaziStatus.ERROR) {
+            console.warn('⚠ 八字数据加载失败:', baziResult.error);
+            setBaziLoadStatus(BaziStatus.ERROR);
+            // 八字加载失败时，不显示错误给用户，继续使用降级数据
+            console.log('使用降级方案继续运行');
+          } else {
+            console.warn('⚠ 八字数据缺失');
+            setBaziLoadStatus(BaziStatus.MISSING);
+          }
+        } catch (baziError) {
+          console.warn('八字数据管理器初始化失败，使用降级方案:', baziError.message);
           setBaziLoadStatus(BaziStatus.MISSING);
+          // 不设置错误，继续运行
         }
       }
 
     } catch (error) {
       console.error('加载用户配置失败:', error);
-      setError(error.message);
-      setBaziLoadStatus(BaziStatus.ERROR);
+      // 在降级模式下不显示错误，继续使用默认值运行
+      console.log('降级到默认配置模式');
 
       // 使用默认值（容错处理）
       if (isMounted) {
@@ -182,7 +275,7 @@ const LifeTrendPage = () => {
         setSelectedHour(12);
         setTempLatitude(39.90);
         setTempLongitude(116.40);
-        setBaziLoadStatus(BaziStatus.ERROR);
+        setBaziLoadStatus(BaziStatus.MISSING); // 使用 MISSING 而非 ERROR
       }
     } finally {
       if (isMounted) {
@@ -380,11 +473,44 @@ const LifeTrendPage = () => {
 
   // 获取指定年份的流年运势数据（带缓存和容错）
   const getLiuNianData = useCallback((year) => {
-    const baziData = getDisplayBazi();
+    let baziData = null;
+    try {
+      baziData = getDisplayBazi();
+    } catch (error) {
+      console.warn('获取八字数据失败，使用默认数据:', error.message);
+    }
 
     if (!baziData || !baziData.bazi) {
-      console.warn('八字数据不可用，返回默认流年数据');
-      return null;
+      console.warn('八字数据不可用，返回默认流年数据（降级方案）');
+      // 返回默认的流年数据，而不是 null
+      return {
+        year: year,
+        liuNianGanZhi: '未知',
+        liuNianGan: '未知',
+        liuNianBranch: '未知',
+        liuNianGanElement: '未知',
+        liuNianBranchElement: '未知',
+        dayMaster: '未知',
+        dayMasterElement: '未知',
+        ganRelation: '未知',
+        branchRelation: '未知',
+        overall: {
+          score: 60,
+          level: 'medium',
+          yearShengXiao: '未知',
+          description: '八字数据不可用，显示默认数据'
+        },
+        love: { score: 60, level: 'medium', description: '八字数据不可用', advice: '建议完善出生信息' },
+        career: { score: 60, level: 'medium', description: '八字数据不可用', advice: '建议完善出生信息' },
+        study: { score: 60, level: 'medium', description: '八字数据不可用', advice: '建议完善出生信息' },
+        health: { score: 60, level: 'medium', description: '八字数据不可用', advice: '建议完善出生信息' },
+        wealth: { score: 60, level: 'medium', description: '八字数据不可用', advice: '建议完善出生信息' },
+        social: { score: 60, level: 'medium', description: '八字数据不可用', advice: '建议完善出生信息' },
+        reminders: [
+          { icon: '⚠️', text: '八字数据不可用，建议完善出生信息', type: 'warning' },
+          { icon: '💡', text: '可以在设置页面完善个人出生信息', type: 'info' }
+        ]
+      };
     }
 
     try {
@@ -402,11 +528,70 @@ const LifeTrendPage = () => {
       if (liuNian) {
         storageManager.setGlobalCache(cacheKey, liuNian);
         console.log(`计算并缓存流年大运数据 (${year}年)`);
+      } else {
+        // 计算失败，返回默认数据
+        console.warn(`计算${year}年流年运势失败，返回默认数据`);
+        return {
+          year: year,
+          liuNianGanZhi: '未知',
+          liuNianGan: '未知',
+          liuNianBranch: '未知',
+          liuNianGanElement: '未知',
+          liuNianBranchElement: '未知',
+          dayMaster: '未知',
+          dayMasterElement: '未知',
+          ganRelation: '未知',
+          branchRelation: '未知',
+          overall: {
+            score: 60,
+            level: 'medium',
+            yearShengXiao: '未知',
+            description: '流年数据计算失败，显示默认数据'
+          },
+          love: { score: 60, level: 'medium', description: '流年数据计算失败', advice: '建议重试' },
+          career: { score: 60, level: 'medium', description: '流年数据计算失败', advice: '建议重试' },
+          study: { score: 60, level: 'medium', description: '流年数据计算失败', advice: '建议重试' },
+          health: { score: 60, level: 'medium', description: '流年数据计算失败', advice: '建议重试' },
+          wealth: { score: 60, level: 'medium', description: '流年数据计算失败', advice: '建议重试' },
+          social: { score: 60, level: 'medium', description: '流年数据计算失败', advice: '建议重试' },
+          reminders: [
+            { icon: '⚠️', text: '流年数据计算失败，建议稍后重试', type: 'warning' },
+            { icon: '💡', text: '可以在设置页面完善个人出生信息', type: 'info' }
+          ]
+        };
       }
       return liuNian;
     } catch (error) {
       console.error(`计算${year}年流年运势失败:`, error);
-      return null;
+      // 返回默认数据而不是 null
+      return {
+        year: year,
+        liuNianGanZhi: '未知',
+        liuNianGan: '未知',
+        liuNianBranch: '未知',
+        liuNianGanElement: '未知',
+        liuNianBranchElement: '未知',
+        dayMaster: '未知',
+        dayMasterElement: '未知',
+        ganRelation: '未知',
+        branchRelation: '未知',
+        overall: {
+          score: 60,
+          level: 'medium',
+          yearShengXiao: '未知',
+          description: '流年数据计算出错，显示默认数据'
+        },
+        love: { score: 60, level: 'medium', description: '流年数据计算出错', advice: '建议重试' },
+        career: { score: 60, level: 'medium', description: '流年数据计算出错', advice: '建议重试' },
+        study: { score: 60, level: 'medium', description: '流年数据计算出错', advice: '建议重试' },
+        health: { score: 60, level: 'medium', description: '流年数据计算出错', advice: '建议重试' },
+        wealth: { score: 60, level: 'medium', description: '流年数据计算出错', advice: '建议重试' },
+        social: { score: 60, level: 'medium', description: '流年数据计算出错', advice: '建议重试' },
+        reminders: [
+          { icon: '⚠️', text: '流年数据计算出错，建议稍后重试', type: 'warning' },
+          { icon: '💡', text: '可以在设置页面完善个人出生信息', type: 'info' }
+        ]
+      };
     }
   }, [getDisplayBazi]);
 
@@ -429,82 +614,91 @@ const LifeTrendPage = () => {
 
   // 计算今日能量提示（基于当日五行信息结合用户八字动态计算）
   useEffect(() => {
-    const baziData = getDisplayBazi();
+    let baziData = null;
+    try {
+      baziData = getDisplayBazi();
+    } catch (error) {
+      console.warn('获取八字数据失败，使用默认今日能量数据:', error.message);
+    }
 
     if (baziData && baziData.bazi) {
       const today = new Date();
 
-      // 检查缓存
-      const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-      const cacheKey = `dailyEnergy_${dateStr}_${baziData.bazi.year}${baziData.bazi.month}${baziData.bazi.day}${baziData.bazi.hour}`;
-      const cachedData = storageManager.getGlobalCache(cacheKey);
+      try {
+        // 检查缓存
+        const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        const cacheKey = `dailyEnergy_${dateStr}_${baziData.bazi.year}${baziData.bazi.month}${baziData.bazi.day}${baziData.bazi.hour}`;
+        const cachedData = storageManager.getGlobalCache(cacheKey);
 
-      if (cachedData) {
-        setDailyEnergyData(cachedData);
-        console.log('使用缓存的今日能量提示数据');
-      } else {
-        const energyData = calculateDailyEnergy(baziData, today);
-        setDailyEnergyData(energyData);
-        storageManager.setGlobalCache(cacheKey, energyData);
-        console.log('计算并缓存今日能量提示数据');
+        if (cachedData) {
+          setDailyEnergyData(cachedData);
+          console.log('使用缓存的今日能量提示数据');
+        } else {
+          const energyData = calculateDailyEnergy(baziData, today);
+          setDailyEnergyData(energyData);
+          storageManager.setGlobalCache(cacheKey, energyData);
+          console.log('计算并缓存今日能量提示数据');
+        }
+      } catch (error) {
+        console.warn('计算今日能量提示失败，使用默认数据:', error.message);
+        // 设置默认的今日能量数据
+        setDailyEnergyData({
+          overallScore: 60,
+          description: '今日能量平稳，建议保持平常心，合理规划日常事务。',
+          suggestions: [
+            { icon: '🎯', label: '保持专注' },
+            { icon: '📚', label: '学习新知' }
+          ],
+          attentions: [
+            { icon: '⚠️', label: '注意休息' },
+            { icon: '💧', label: '多喝温水' }
+          ]
+        });
       }
     } else {
-      console.warn('八字数据不可用，跳过今日能量计算');
+      console.warn('八字数据不可用，使用默认今日能量数据');
+      // 设置默认的今日能量数据（降级方案）
+      setDailyEnergyData({
+        overallScore: 60,
+        description: '今日能量平稳，建议保持平常心，合理规划日常事务。八字数据不可用时显示默认数据。',
+        suggestions: [
+          { icon: '🎯', label: '保持专注' },
+          { icon: '📚', label: '学习新知' },
+          { icon: '💡', label: '可以在设置页面完善出生信息' }
+        ],
+        attentions: [
+          { icon: '⚠️', label: '注意休息' },
+          { icon: '💧', label: '多喝温水' },
+          { icon: '📝', label: '建议完善个人信息' }
+        ]
+      });
     }
   }, [isTempCalcMode, tempBazi, selectedYear, selectedMonth, selectedDate]);
 
   // 获取雷达图选中年份对应的年龄数据（用于雷达图）
   const getRadarViewAge = () => {
-    const config = getCurrentConfig();
+    let config = null;
+    try {
+      config = getCurrentConfig();
+    } catch (error) {
+      console.warn('获取当前配置失败，使用默认年龄:', error.message);
+    }
+
     if (config && config.birthDate) {
-      const birthYear = new Date(config.birthDate).getFullYear();
-      const viewAge = radarViewYear - birthYear;
-      // 确保年龄在合理范围内
-      return Math.max(0, Math.min(100, viewAge));
+      try {
+        const birthYear = new Date(config.birthDate).getFullYear();
+        const viewAge = radarViewYear - birthYear;
+        // 确保年龄在合理范围内
+        return Math.max(0, Math.min(100, viewAge));
+      } catch (error) {
+        console.warn('计算年龄失败，使用默认年龄:', error.message);
+      }
     }
     return currentAge;
   };
 
   const radarViewAge = getRadarViewAge();
   const radarViewData = klineData.find(d => d.age === radarViewAge) || klineData[0];
-
-  // 获取显示用的八字数据（优先使用临时计算，否则使用配置八字）- 使用 useCallback 稳定引用
-  const getDisplayBazi = useCallback(() => {
-    const config = getCurrentConfig();
-
-    // 优先使用临时计算数据
-    if (isTempCalcMode && tempBazi) {
-      console.log('使用临时计算的八字');
-      return tempBazi;
-    }
-
-    // 优先从全局配置中获取八字
-    if (config && config.bazi) {
-      if (config.bazi.bazi) {
-        const { bazi: baziInfo } = config.bazi;
-        if (!baziInfo || !baziInfo.year || !baziInfo.month || !baziInfo.day || !baziInfo.hour) {
-          console.warn('配置中的八字数据不完整');
-        }
-      }
-      console.log('使用配置中的八字');
-      return config.bazi;
-    }
-
-    console.warn('没有可用的八字数据');
-    return {
-      bazi: { year: '', month: '', day: '', hour: '' },
-      shichen: { ganzhi: '未知' },
-      lunar: { text: '' }
-    };
-  }, [isTempCalcMode, tempBazi, getCurrentConfig]);
-
-  // 统一获取时辰显示文字（使用新的 BaziDataManager）- 使用 useCallback 稳定引用
-  const getShichenDisplay = useCallback(() => {
-    const config = getCurrentConfig();
-    const baziData = isTempCalcMode ? tempBazi : (config && config.bazi);
-
-    return getValidShichen(config, baziData);
-  }, [isTempCalcMode, tempBazi, getCurrentConfig]);
 
   // 日期选择处理（永久保存 - 异步）
   const handleDateChange = async (year, month, date, hour, longitude, latitude, isSaveToConfig = true) => {

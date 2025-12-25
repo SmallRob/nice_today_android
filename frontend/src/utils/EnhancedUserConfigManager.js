@@ -31,7 +31,7 @@ const DEFAULT_CONFIG = Object.freeze({
   }),
   zodiac: '金牛座',
   zodiacAnimal: '羊',
-  gender: 'secret',
+  gender: 'male',
   mbti: 'INFP',
   nameScore: null,
   bazi: null,
@@ -1580,3 +1580,4 @@ async cleanupMaintenance() {
 export const enhancedUserConfigManager = new EnhancedUserConfigManager();
 
 export default EnhancedUserConfigManager;
+export { DEFAULT_CONFIG };

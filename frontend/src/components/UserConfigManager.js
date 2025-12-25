@@ -956,6 +956,9 @@ const UserConfigManagerComponent = () => {
   const [useFallbackMode, setUseFallbackMode] = useState(false);
 
   // 配置监听器回调 - 立即更新状态确保刷新
+  // 使用 ref 来跟踪前一个 configs.length，避免无限循环
+  const prevConfigsLengthRef = React.useRef(0);
+
   const handleConfigChange = useCallback(({
     configs: updatedConfigs,
     activeConfigIndex: updatedActiveIndex,
@@ -980,152 +983,14 @@ const UserConfigManagerComponent = () => {
     }
 
     // 如果配置数据变化，强制刷新八字和紫微数据
-    if (forceReload || updatedConfigs.length !== configs.length) {
+    // 使用 ref 来避免依赖 configs
+    const lengthChanged = updatedConfigs.length !== prevConfigsLengthRef.current;
+    if (forceReload || lengthChanged) {
       setBaziKey(prev => prev + 1);
     }
-  }, [configs]); // 依赖configs
-  // 加载紫微命宫数据 - 添加加载状态提示和增强验证
-  useEffect(() => {
-    const loadZiWeiData = async () => {
-      if (!configManagerReady || !configs || configs.length === 0) {
-        setZiweiData(null);
-        setZiweiLoading(false);
-        return;
-      }
-      
-      const config = configs[activeConfigIndex];
-      if (!config || !config.birthDate) {
-        setZiweiData(null);
-        setZiweiLoading(false);
-        return;
-      }
-
-      try {
-        setZiweiLoading(true);
-        console.log('开始加载紫微命宫数据...');
-
-        // 导入验证工具
-        const { validateZiWeiCalculationRequirements } = await import('../utils/ConfigValidationHelper');
-        
-        // 验证计算所需的数据
-        const validation = validateZiWeiCalculationRequirements(config);
-        
-        if (!validation.valid) {
-          console.error('紫微命宫计算：数据验证失败', validation.errors);
-          setZiweiData({
-            error: `数据验证失败: ${validation.errors.map(e => e.message).join(', ')}`,
-            missingFields: validation.missingFields
-          });
-          setZiweiLoading(false);
-          return;
-        }
-
-        if (validation.warnings && validation.warnings.length > 0) {
-          console.warn('紫微命宫计算：数据质量警告', validation.warnings);
-        }
-
-        // 计算紫微命宫数据
-        const data = await getZiWeiDisplayData(config);
-        
-        if (data && data.error) {
-          console.error('紫微命宫数据加载失败:', data.error);
-          setZiweiData({
-            error: data.error,
-            validationErrors: data.validationErrors,
-            calculationWarnings: data.calculationWarnings
-          });
-        } else {
-          setZiweiData(data);
-          console.log('紫微命宫数据加载完成');
-        }
-
-        if (!isMounted) return;
-        setIsInitialized(true);
-
-        // 获取当前用户配置（增加错误处理）
-        let currentConfig, allConfigs, activeIndex;
-        try {
-          currentConfig = enhancedUserConfigManager.getCurrentConfig();
-          allConfigs = enhancedUserConfigManager.getAllConfigs();
-          activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
-
-          console.log('获取配置数据:', {
-            configCount: allConfigs.length,
-            activeIndex,
-            currentNickname: currentConfig?.nickname
-          });
-        } catch (getError) {
-          console.error('获取配置数据失败，使用降级模式:', getError);
-          if (!isMounted) return;
-          setUseFallbackMode(true);
-          const defaultConfig = {
-            nickname: '默认用户',
-            birthDate: '1990-01-01',
-            birthTime: '12:30',
-            gender: 'male',
-            isused: false
-          };
-          setConfigs([defaultConfig]);
-          setActiveConfigIndex(0);
-          setExpandedIndex(0);
-          setLoading(false);
-          setError('获取配置失败，已切换到降级模式');
-          return;
-        }
-
-        if (!isMounted) return;
-        setConfigs(allConfigs || []);
-        setActiveConfigIndex(activeIndex || 0);
-
-        // 默认展开当前配置
-        setExpandedIndex(activeIndex || 0);
-
-        // 立即设置监听器，确保后续变更能及时响应（增加错误处理）
-        try {
-          if (enhancedUserConfigManager.addListener) {
-            removeListener = enhancedUserConfigManager.addListener(handleConfigChange);
-          }
-        } catch (listenerError) {
-          console.warn('设置监听器失败:', listenerError);
-          // 监听器失败不影响主要功能
-        }
-
-        if (!isMounted) return;
-        setLoading(false);
-        console.log('UserConfigManager组件初始化完成');
-
-      } catch (error) {
-        console.error('初始化用户配置失败:', error);
-        if (!isMounted) return;
-
-        // 降级处理：显示错误并设置降级模式
-        setUseFallbackMode(true);
-        const defaultConfig = {
-          nickname: '默认用户',
-          birthDate: '1990-01-01',
-          birthTime: '12:30',
-          gender: 'male',
-          isused: false
-        };
-        setConfigs([defaultConfig]);
-        setActiveConfigIndex(0);
-        setExpandedIndex(0);
-        setLoading(false);
-        setIsInitialized(true);
-        setError('初始化失败: ' + error.message + '，已切换到降级模式');
-      }
-    };
-
-    init();
-
-    // 返回清理函数
-    return () => {
-      if (removeListener && typeof removeListener === 'function') {
-        removeListener();
-        console.log('UserConfigManager组件监听器已清理');
-      }
-    };
-  }, [handleConfigChange, configManagerReady, configs, activeConfigIndex]);
+    // 更新 ref
+    prevConfigsLengthRef.current = updatedConfigs.length;
+  }, []); // 移除 configs 依赖，避免无限循环
 
   // 显示提示信息
   const showMessage = useCallback((text, type = 'info') => {
@@ -2091,16 +1956,21 @@ const UserConfigManagerComponent = () => {
         }
       >
         {configs[activeConfigIndex]?.birthDate ? (
-          <BaziFortuneDisplay
-            key={`${baziKey}-${configs[activeConfigIndex]?.nickname}-${configs[activeConfigIndex]?.birthDate}`}
-            birthDate={configs[activeConfigIndex].birthDate}
-            birthTime={configs[activeConfigIndex].birthTime || '12:30'}
-            birthLocation={configs[activeConfigIndex].birthLocation}
-            lunarBirthDate={configs[activeConfigIndex].lunarBirthDate}
-            trueSolarTime={configs[activeConfigIndex].trueSolarTime}
-            savedBaziInfo={configs[activeConfigIndex].bazi}
-            nickname={configs[activeConfigIndex]?.nickname}
-          />
+          (() => {
+            const currentConfig = configs[activeConfigIndex];
+            return currentConfig ? (
+              <BaziFortuneDisplay
+                key={`${baziKey}-${currentConfig.nickname}-${currentConfig.birthDate}`}
+                birthDate={currentConfig.birthDate}
+                birthTime={currentConfig.birthTime || '12:30'}
+                birthLocation={currentConfig.birthLocation}
+                lunarBirthDate={currentConfig.lunarBirthDate}
+                trueSolarTime={currentConfig.trueSolarTime}
+                savedBaziInfo={currentConfig.bazi}
+                nickname={currentConfig.nickname}
+              />
+            ) : null;
+          })()
         ) : (
           <div className="text-center py-6 text-gray-500 dark:text-gray-400">
             <p>请先设置出生日期以查看八字命格信息</p>
