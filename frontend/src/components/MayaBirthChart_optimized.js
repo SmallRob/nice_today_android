@@ -194,8 +194,21 @@ const MayaBirthChart = () => {
 
         if (currentConfig.birthDate) {
           // 直接加载用户配置中的出生日期数据
-          loadBirthInfo(new Date(currentConfig.birthDate));
+          try {
+            await loadBirthInfo(new Date(currentConfig.birthDate));
+          } catch (err) {
+            console.error('加载出生信息失败:', err);
+            setError('加载失败，请稍后再试');
+            setLoading(false);
+          }
+        } else {
+          // 如果没有出生日期，显示加载完成但没有数据
+          setLoading(false);
         }
+      } else if (!configLoading) {
+        // 如果配置未加载且不处于加载状态，显示错误
+        setError('无法加载用户配置');
+        setLoading(false);
       }
     };
 
@@ -204,7 +217,7 @@ const MayaBirthChart = () => {
     return () => {
       isMounted = false;
     };
-  }, [currentConfig]);
+  }, [currentConfig, configLoading, loadBirthInfo]);
 
   // 简化版数据生成函数 - 确保所有值都有默认值，避免undefined
   const generateBirthInfo = useCallback((dateStr, kin, seal, tone, seed) => {
@@ -245,83 +258,48 @@ const MayaBirthChart = () => {
     };
   }, [personalTraitsStrengthsPool, personalTraitsChallengesPool]);
 
-  // 优化版加载函数 - 添加防抖和取消机制
+  // 优化版加载函数 - 添加超时机制和可靠的加载流程
   const loadBirthInfo = useCallback(async (date) => {
-    if (!date) return;
+    if (!date) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
-    // 使用requestIdleCallback推迟非紧急计算
-    if ('requestIdleCallback' in window) {
-      return new Promise((resolve) => {
-        requestIdleCallback(async () => {
-          try {
-            const dateStr = typeof date === 'string' ? date : formatDateString(date);
+    try {
+      const dateStr = typeof date === 'string' ? date : formatDateString(date);
 
-            // 检查缓存
-            if (cacheRef.current.has(dateStr)) {
-              setBirthInfo(cacheRef.current.get(dateStr));
-              setShowResults(true);
-              setLoading(false);
-              resolve();
-              return;
-            }
-
-            // 计算玛雅数据
-            const { kin, seal, tone } = MayaCalendarCalculator.calculateMayaDate(date);
-            const seed = MayaCalendarCalculator.generateDeterministicHash(dateStr);
-
-            // 生成出生信息
-            const birthInfoData = generateBirthInfo(dateStr, kin, seal, tone, seed);
-
-            // 缓存结果
-            cacheRef.current.set(dateStr, birthInfoData);
-
-            // 更新状态
-            setBirthInfo(birthInfoData);
-            setShowResults(true);
-
-          } catch (err) {
-            setError('计算失败，请稍后再试');
-          } finally {
-            setLoading(false);
-            resolve();
-          }
-        }, { timeout: 1000 }); // 设置1秒超时
-      });
-    } else {
-      // 降级到直接执行
-      try {
-        const dateStr = typeof date === 'string' ? date : formatDateString(date);
-
-        // 检查缓存
-        if (cacheRef.current.has(dateStr)) {
-          setBirthInfo(cacheRef.current.get(dateStr));
-          setShowResults(true);
-          setLoading(false);
-          return;
-        }
-
-        // 计算玛雅数据
-        const { kin, seal, tone } = MayaCalendarCalculator.calculateMayaDate(date);
-        const seed = MayaCalendarCalculator.generateDeterministicHash(dateStr);
-
-        // 生成出生信息
-        const birthInfoData = generateBirthInfo(dateStr, kin, seal, tone, seed);
-
-        // 缓存结果
-        cacheRef.current.set(dateStr, birthInfoData);
-
-        // 更新状态
-        setBirthInfo(birthInfoData);
+      // 检查缓存
+      if (cacheRef.current.has(dateStr)) {
+        const cachedData = cacheRef.current.get(dateStr);
+        setBirthInfo(cachedData);
         setShowResults(true);
-
-      } catch (err) {
-        setError('计算失败，请稍后再试');
-      } finally {
-        setLoading(false);
+        return;
       }
+
+      // 计算玛雅数据 - 直接执行，不使用 requestIdleCallback 避免延迟问题
+      const { kin, seal, tone } = MayaCalendarCalculator.calculateMayaDate(date);
+      const seed = MayaCalendarCalculator.generateDeterministicHash(dateStr);
+
+      // 生成出生信息
+      const birthInfoData = generateBirthInfo(dateStr, kin, seal, tone, seed);
+
+      // 缓存结果
+      cacheRef.current.set(dateStr, birthInfoData);
+
+      // 更新状态 - 确保状态更新成功
+      setBirthInfo(birthInfoData);
+      setShowResults(true);
+
+    } catch (err) {
+      console.error('加载玛雅数据失败:', err);
+      setError('计算失败，请稍后再试');
+      setShowResults(false);
+    } finally {
+      // 确保无论如何都更新 loading 状态
+      setLoading(false);
     }
   }, [generateBirthInfo, cacheRef]);
 
@@ -369,7 +347,9 @@ const MayaBirthChart = () => {
             <ResultsSection birthInfo={birthInfo} showResults={showResults} />
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 text-center">
-              <p className="text-sm text-gray-500 dark:text-gray-400">加载中...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {!userInfo.birthDate ? '请先设置出生日期' : '正在加载星盘数据...'}
+              </p>
             </div>
           )}
         </Suspense>
