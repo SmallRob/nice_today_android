@@ -468,8 +468,8 @@ const LifeTrendPage = () => {
   const radarViewAge = getRadarViewAge();
   const radarViewData = klineData.find(d => d.age === radarViewAge) || klineData[0];
 
-  // 获取显示用的八字数据（优先使用临时计算，否则使用配置八字）
-  const getDisplayBazi = () => {
+  // 获取显示用的八字数据（优先使用临时计算，否则使用配置八字）- 使用 useCallback 稳定引用
+  const getDisplayBazi = useCallback(() => {
     const config = getCurrentConfig();
 
     // 优先使用临时计算数据
@@ -496,15 +496,15 @@ const LifeTrendPage = () => {
       shichen: { ganzhi: '未知' },
       lunar: { text: '' }
     };
-  };
+  }, [isTempCalcMode, tempBazi, getCurrentConfig]);
 
-  // 统一获取时辰显示文字（使用新的 BaziDataManager）
-  const getShichenDisplay = () => {
+  // 统一获取时辰显示文字（使用新的 BaziDataManager）- 使用 useCallback 稳定引用
+  const getShichenDisplay = useCallback(() => {
     const config = getCurrentConfig();
     const baziData = isTempCalcMode ? tempBazi : (config && config.bazi);
 
     return getValidShichen(config, baziData);
-  };
+  }, [isTempCalcMode, tempBazi, getCurrentConfig]);
 
   // 日期选择处理（永久保存 - 异步）
   const handleDateChange = async (year, month, date, hour, longitude, latitude, isSaveToConfig = true) => {
@@ -689,26 +689,25 @@ const LifeTrendPage = () => {
           </div>
 
           {/* 获取八字数据用于显示 */}
-          {(() => {
-            const displayBazi = getDisplayBazi();
-            return (
-              <div className="grid grid-cols-4 gap-2 mt-4">
-            {[
-              { label: '年柱', value: displayBazi.bazi ? displayBazi.bazi.year : displayBazi.year },
-              { label: '月柱', value: displayBazi.bazi ? displayBazi.bazi.month : displayBazi.month },
-              { label: '日柱', value: displayBazi.bazi ? displayBazi.bazi.day : displayBazi.day },
-              { label: '时柱', value: displayBazi.bazi ? displayBazi.bazi.hour : displayBazi.hour },
-            ].map((item, index) => (
-              <div key={index} className="text-center">
-                <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</div>
-                <div className={`text-base font-semibold mt-1 py-1.5 rounded-lg ${theme === 'dark' ? 'text-yellow-400 bg-yellow-900/20' : 'text-yellow-600 bg-yellow-50'}`}>
-                  {item.value}
+          <div className="grid grid-cols-4 gap-2 mt-4">
+            {(() => {
+              const displayBazi = getDisplayBazi();
+              const baziItems = [
+                { label: '年柱', value: displayBazi.bazi ? displayBazi.bazi.year : displayBazi.year },
+                { label: '月柱', value: displayBazi.bazi ? displayBazi.bazi.month : displayBazi.month },
+                { label: '日柱', value: displayBazi.bazi ? displayBazi.bazi.day : displayBazi.day },
+                { label: '时柱', value: displayBazi.bazi ? displayBazi.bazi.hour : displayBazi.hour },
+              ];
+              return baziItems.map((item, index) => (
+                <div key={index} className="text-center">
+                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</div>
+                  <div className={`text-base font-semibold mt-1 py-1.5 rounded-lg ${theme === 'dark' ? 'text-yellow-400 bg-yellow-900/20' : 'text-yellow-600 bg-yellow-50'}`}>
+                    {item.value}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ));
+            })()}
           </div>
-            );
-          })()}
 
           {/* 临时计算指示器 */}
           {isTempCalcMode && (

@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense, memo } from '
 
 import './MayaBirthChart.css';
 import { formatDateString } from '../services/apiServiceRefactored';
-import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
-import { useTheme } from '../context/ThemeContext';
+import { useCurrentConfig } from '../contexts/UserConfigContext';
 import {
   sealInfoMap,
   toneInfoMap,
@@ -165,10 +164,9 @@ class MayaCalendarCalculator {
 
 // 主组件 - 极简移动端优化版本
 const MayaBirthChart = () => {
-  const { theme } = useTheme();
   // 使用新的配置上下文
-  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
-  
+  const { currentConfig, isLoading: configLoading } = useCurrentConfig();
+
   const [birthInfo, setBirthInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

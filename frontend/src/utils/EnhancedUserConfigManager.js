@@ -53,12 +53,63 @@ function deepCloneConfig(sourceConfig) {
     return sourceConfig;
   }
 
-  // 使用 JSON 方法进行深拷贝，确保完全隔离
-  const cloned = JSON.parse(JSON.stringify(sourceConfig));
-
+  // 使用安全的深拷贝方法处理可能的循环引用
+  const seen = new WeakSet();
+  
+  function safeClone(obj) {
+    if (!obj || typeof obj !== 'object') {
+      return obj;
+    }
+    
+    if (seen.has(obj)) {
+      // 发现循环引用，返回 undefined 避免错误
+      console.warn('发现循环引用，已跳过该对象');
+      return undefined;
+    }
+    
+    seen.add(obj);
+    
+    if (Array.isArray(obj)) {
+      const clonedArray = [];
+      for (let i = 0; i < obj.length; i++) {
+        clonedArray[i] = safeClone(obj[i]);
+      }
+      seen.delete(obj);
+      return clonedArray;
+    }
+    
+    const clonedObj = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        clonedObj[key] = safeClone(obj[key]);
+      }
+    }
+    seen.delete(obj);
+    return clonedObj;
+  }
+  
+  const cloned = safeClone(sourceConfig);
+  
   // 确保 birthLocation 对象也被深拷贝
-  if (sourceConfig.birthLocation) {
+  if (sourceConfig.birthLocation && cloned.birthLocation) {
     cloned.birthLocation = { ...sourceConfig.birthLocation };
+  }
+  
+  // 如果存在八字信息，需要特殊处理 full 属性（可能包含循环引用的 lunar 对象）
+  if (cloned.bazi && cloned.bazi.full) {
+    // 只保留基本的八字信息，移除可能包含循环引用的完整 lunar 对象
+    const { full, ...baziWithoutFull } = cloned.bazi;
+    cloned.bazi = {
+      ...baziWithoutFull,
+      // 如果需要保留完整的 lunar 信息，可以只提取安全的属性
+      lunar: full ? {
+        yearStr: typeof full.getYearInGanZhi === 'function' ? full.getYearInGanZhi() + '年' : (full.yearStr || ''),
+        monthStr: typeof full.getMonthInChinese === 'function' ? full.getMonthInChinese() + '月' : (full.monthStr || ''),
+        dayStr: typeof full.getDayInChinese === 'function' ? full.getDayInChinese() : (full.dayStr || ''),
+        text: typeof full.getYearInGanZhi === 'function' && typeof full.getMonthInChinese === 'function' && typeof full.getDayInChinese === 'function' ? 
+              `${full.getYearInGanZhi()}年 ${full.getMonthInChinese()}月${full.getDayInChinese()}` : (full.text || '')
+      } : null
+    };
   }
 
   return cloned;
@@ -599,11 +650,14 @@ class EnhancedUserConfigManager {
       // 添加配置
       this.configs.push(finalConfig);
 
+      // 设置新添加的配置为活跃配置
+      this.activeConfigIndex = this.configs.length - 1;
+
       // 保存到存储
       await this.saveConfigsToStorage();
 
-      // 通知监听器
-      this.notifyListeners();
+      // 通知监听器（强制刷新）
+      this.notifyListeners(true);
 
       console.log('添加新配置成功（深拷贝）', finalConfig.nickname);
       return true;
@@ -949,17 +1003,19 @@ class EnhancedUserConfigManager {
 
   /**
    * 通知所有监听器
+   * @param {Boolean} forceReload - 是否强制重新加载
    */
-  notifyListeners() {
+  notifyListeners(forceReload = false) {
     const currentConfig = this.getCurrentConfig();
-    
+
     this.listeners.forEach(listener => {
       try {
         listener({
           configs: [...this.configs],
           activeConfigIndex: this.activeConfigIndex,
           currentConfig,
-          metadata: { ...this.metadata }
+          metadata: { ...this.metadata },
+          forceReload
         });
       } catch (error) {
         console.error('监听器执行出错:', error);

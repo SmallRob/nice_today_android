@@ -62,8 +62,15 @@ export const UserConfigProvider = ({ children }) => {
 
     const handleConfigChange = ({
       configs: updatedConfigs,
-      currentConfig: updatedCurrentConfig
+      currentConfig: updatedCurrentConfig,
+      forceReload
     }) => {
+      console.log('UserConfigContext 配置变更:', {
+        configsLength: updatedConfigs.length,
+        currentConfigNickname: updatedCurrentConfig?.nickname,
+        forceReload
+      });
+      // 立即更新所有状态，确保UI能实时刷新
       setCurrentConfig(updatedCurrentConfig);
       setConfigs(updatedConfigs);
     };

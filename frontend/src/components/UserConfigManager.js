@@ -900,7 +900,7 @@ const UserConfigManagerComponent = () => {
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // 配置监听器回调 - 只在必要时更新状态
+  // 配置监听器回调 - 立即更新状态确保刷新
   const handleConfigChange = useCallback(({
     configs: updatedConfigs,
     activeConfigIndex: updatedActiveIndex,
@@ -913,39 +913,43 @@ const UserConfigManagerComponent = () => {
       currentConfigNickname: currentConfig?.nickname,
       forceReload
     });
-    
-    // 只有在强制刷新或配置数量变化时才更新状态
-    // 避免不必要的频繁更新导致页面刷新
-    if (forceReload || updatedConfigs.length !== configs.length) {
-      setConfigs([...updatedConfigs]);
-      setActiveConfigIndex(updatedActiveIndex);
-      
-      // 确保展开索引在有效范围内
-      if (expandedIndex >= updatedConfigs.length) {
-        setExpandedIndex(updatedActiveIndex);
-      }
-    } else if (updatedActiveIndex !== activeConfigIndex) {
-      // 只有活跃索引变化时才更新
-      setActiveConfigIndex(updatedActiveIndex);
-      setExpandedIndex(updatedActiveIndex);
-    }
-  }, [configs.length, activeConfigIndex, expandedIndex]);
 
-  // 加载紫微命宫数据
+    // 立即更新所有相关状态
+    setConfigs([...updatedConfigs]);
+    setActiveConfigIndex(updatedActiveIndex);
+
+    // 确保展开索引在有效范围内
+    if (updatedActiveIndex >= 0 && updatedActiveIndex < updatedConfigs.length) {
+      setExpandedIndex(updatedActiveIndex);
+    } else if (updatedConfigs.length > 0) {
+      setExpandedIndex(0);
+    }
+
+    // 如果配置数据变化，强制刷新八字和紫微数据
+    if (forceReload || updatedConfigs.length !== configs.length) {
+      setBaziKey(prev => prev + 1);
+    }
+  }, []); // 移除依赖，确保每次都能执行
+
+  // 加载紫微命宫数据 - 添加加载状态提示
   useEffect(() => {
     const loadZiWeiData = async () => {
       const config = configs[activeConfigIndex];
       if (!config || !config.birthDate) {
         setZiweiData(null);
+        setZiweiLoading(false);
         return;
       }
 
       try {
         setZiweiLoading(true);
+        console.log('开始加载紫微命宫数据...');
         const data = await getZiWeiDisplayData(config);
         setZiweiData(data);
+        console.log('紫微命宫数据加载完成');
       } catch (error) {
         console.error('加载紫微命宫失败:', error);
+        setZiweiData(null);
       } finally {
         setZiweiLoading(false);
       }
@@ -1035,7 +1039,7 @@ const UserConfigManagerComponent = () => {
     }, displayTime);
   }, []);
 
-  // 处理配置保存
+  // 处理配置保存 - 添加加载状态和反馈
   const handleSaveConfig = useCallback(async (index, configData) => {
     // 检查是否是新建配置（index < 0 表示新建，或 index 超出存储范围）
     const storedConfigs = enhancedUserConfigManager.getAllConfigs();
@@ -1046,6 +1050,9 @@ const UserConfigManagerComponent = () => {
     console.log('配置数据:', JSON.parse(JSON.stringify(configData, (k, v) =>
       (k === 'bazi' || k === 'lunarInfo' || k === 'nameScore') ? '[对象]' : v
     )));
+
+    // 显示保存中状态
+    showMessage('正在保存配置...', 'info');
 
     // 自动为中文姓名打分（只有当 nameScore 不存在时才计算）
     let finalConfigData = { ...configData };
@@ -1204,11 +1211,24 @@ const UserConfigManagerComponent = () => {
 
       console.log('========== 保存配置成功 ==========');
       console.log('监听器将自动更新状态');
+
+      // 显示成功消息
+      showMessage('✅ 配置保存成功', 'success');
+
+      // 延迟后清除消息，让用户看到成功提示
+      setTimeout(() => {
+        setMessage(null);
+      }, 2000);
+
       return true; // 返回成功状态
     } catch (error) {
       console.error('========== 保存配置失败 ==========');
       console.error('错误信息:', error.message);
       console.error('错误堆栈:', error.stack);
+
+      // 显示错误消息
+      showMessage('❌ 保存失败: ' + error.message, 'error');
+
       // 将异常信息传递给调用者
       throw error;
     }
@@ -1695,6 +1715,9 @@ const UserConfigManagerComponent = () => {
                 // 触发重新计算
                 if (configs[activeConfigIndex]?.birthDate) {
                   setBaziKey(prev => prev + 1);
+                  showMessage('🔄 正在刷新八字信息...', 'info');
+                } else {
+                  showMessage('请先设置出生日期', 'error');
                 }
               }}
               title="刷新八字信息"
@@ -1722,14 +1745,18 @@ const UserConfigManagerComponent = () => {
 
                     console.log('开始同步八字信息:', { nickname, birthDate, birthTime, longitude });
 
+                    // 显示加载状态
+                    showMessage('⏳ 正在计算八字信息...', 'info');
+
                     // 1. 计算八字信息
                     const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
                     if (!baziInfo) {
-                      showMessage('八字计算失败', 'error');
+                      showMessage('❌ 八字计算失败', 'error');
                       return;
                     }
 
                     // 2. 同步八字到全局配置
+                    showMessage('⏳ 正在保存八字信息到配置...', 'info');
                     const updateSuccess = await enhancedUserConfigManager.updateBaziInfo(nickname, {
                       bazi: baziInfo,
                       lunarBirthDate: baziInfo.lunar?.text,
@@ -1738,7 +1765,7 @@ const UserConfigManagerComponent = () => {
                     });
 
                     if (!updateSuccess) {
-                      showMessage('八字信息更新到配置失败', 'error');
+                      showMessage('❌ 八字信息更新到配置失败', 'error');
                       return;
                     }
 
@@ -1759,7 +1786,7 @@ const UserConfigManagerComponent = () => {
 
                   } catch (error) {
                     console.error('同步八字信息失败:', error);
-                    showMessage('同步八字信息失败: ' + error.message, 'error');
+                    showMessage('❌ 同步八字信息失败: ' + error.message, 'error');
                   }
                 }
               }}
@@ -1774,7 +1801,7 @@ const UserConfigManagerComponent = () => {
       >
         {configs[activeConfigIndex]?.birthDate ? (
           <BaziFortuneDisplay
-            key={baziKey}
+            key={`${baziKey}-${configs[activeConfigIndex]?.nickname}-${configs[activeConfigIndex]?.birthDate}`}
             birthDate={configs[activeConfigIndex].birthDate}
             birthTime={configs[activeConfigIndex].birthTime || '12:30'}
             birthLocation={configs[activeConfigIndex].birthLocation}
