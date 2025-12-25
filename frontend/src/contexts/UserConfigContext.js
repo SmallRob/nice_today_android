@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { userConfigManager } from '../utils/userConfigManager';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import { errorLogger } from '../utils/errorLogger';
 
 // 创建全局配置上下文
@@ -21,12 +21,12 @@ export const UserConfigProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      if (!userConfigManager.initialized) {
-        await userConfigManager.initialize();
+      if (!enhancedUserConfigManager.initialized) {
+        await enhancedUserConfigManager.initialize();
       }
       
-      const configData = userConfigManager.getCurrentConfig();
-      const allConfigs = userConfigManager.getAllConfigs();
+      const configData = enhancedUserConfigManager.getCurrentConfig();
+      const allConfigs = enhancedUserConfigManager.getAllConfigs();
       
       setCurrentConfig(configData);
       setConfigs(allConfigs);
@@ -53,15 +53,13 @@ export const UserConfigProvider = ({ children }) => {
 
     const handleConfigChange = ({
       configs: updatedConfigs,
-      activeConfigIndex: updatedActiveIndex,
-      currentConfig: updatedCurrentConfig,
-      forceReload
+      currentConfig: updatedCurrentConfig
     }) => {
       setCurrentConfig(updatedCurrentConfig);
       setConfigs(updatedConfigs);
     };
 
-    const removeListener = userConfigManager.addListener(handleConfigChange);
+    const removeListener = enhancedUserConfigManager.addListener(handleConfigChange);
 
     return () => {
       if (removeListener) removeListener();
@@ -76,9 +74,9 @@ export const UserConfigProvider = ({ children }) => {
   // 更新配置
   const updateConfig = useCallback(async (index, config) => {
     try {
-      userConfigManager.updateConfig(index, config);
+      const result = await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, config);
       // 监听器会自动更新状态
-      return true;
+      return result && result.success;
     } catch (err) {
       errorLogger.log(err, {
         component: 'UserConfigContext',
@@ -94,10 +92,10 @@ export const UserConfigProvider = ({ children }) => {
   // 添加新配置
   const addConfig = useCallback(async (config) => {
     try {
-      userConfigManager.addConfig(config);
-      // addConfig 方法内部已经自动设置新配置为活跃配置，不需要额外调用 setActiveConfig
+      const result = await enhancedUserConfigManager.addBasicConfig(config);
+      // addBasicConfig 方法内部已经自动设置新配置为活跃配置，不需要额外调用 setActiveConfig
       // 监听器会自动更新状态
-      return true;
+      return result;
     } catch (err) {
       errorLogger.log(err, {
         component: 'UserConfigContext',
@@ -113,7 +111,7 @@ export const UserConfigProvider = ({ children }) => {
   // 删除配置
   const deleteConfig = useCallback(async (index) => {
     try {
-      await userConfigManager.deleteConfig(index);
+      await enhancedUserConfigManager.removeConfig(index);
       // 监听器会自动更新状态
       return true;
     } catch (err) {
@@ -131,7 +129,7 @@ export const UserConfigProvider = ({ children }) => {
   // 切换当前配置
   const switchConfig = useCallback(async (index) => {
     try {
-      await userConfigManager.switchToConfig(index);
+      await enhancedUserConfigManager.setActiveConfig(index);
       // 监听器会自动更新状态
       return true;
     } catch (err) {
@@ -169,39 +167,39 @@ export const UserConfigProvider = ({ children }) => {
 // 使用配置的Hook
 export const useUserConfig = () => {
   const context = useContext(UserConfigContext);
-  
+
   if (!context) {
     // 降级处理：直接使用配置管理器
     return {
-      configManagerReady: userConfigManager.initialized,
-      currentConfig: userConfigManager.getCurrentConfig(),
-      configs: userConfigManager.getAllConfigs(),
+      configManagerReady: enhancedUserConfigManager.initialized,
+      currentConfig: enhancedUserConfigManager.getCurrentConfig(),
+      configs: enhancedUserConfigManager.getAllConfigs(),
       loading: false,
       error: null,
-      initializeConfigManager: () => userConfigManager.initialize(),
-      updateConfig: (index, config) => userConfigManager.updateConfig(index, config),
-      addConfig: (config) => userConfigManager.addConfig(config),
-      deleteConfig: (index) => userConfigManager.deleteConfig(index),
-      switchConfig: (index) => userConfigManager.switchToConfig(index)
+      initializeConfigManager: () => enhancedUserConfigManager.initialize(),
+      updateConfig: (index, config) => enhancedUserConfigManager.updateConfigWithNodeUpdate(index, config),
+      addConfig: (config) => enhancedUserConfigManager.addBasicConfig(config),
+      deleteConfig: (index) => enhancedUserConfigManager.removeConfig(index),
+      switchConfig: (index) => enhancedUserConfigManager.setActiveConfig(index)
     };
   }
-  
+
   return context;
 };
 
 // 配置数据Hook（简化版，只返回当前配置）
 export const useCurrentConfig = () => {
   const { currentConfig, configManagerReady } = useUserConfig();
-  
+
   // 如果全局上下文不可用，直接返回配置管理器的当前配置
-  if (!configManagerReady && !userConfigManager.initialized) {
+  if (!configManagerReady && !enhancedUserConfigManager.initialized) {
     // 尝试初始化
-    userConfigManager.initialize().catch(console.error);
+    enhancedUserConfigManager.initialize().catch(console.error);
   }
-  
-  // 使用 allowNull=true 避免用默认值覆盖用户配置
-  const configFromManager = userConfigManager.getCurrentConfig(true);
-  
+
+  // enhancedUserConfigManager 的 getCurrentConfig 不支持 allowNull 参数，直接调用即可
+  const configFromManager = enhancedUserConfigManager.getCurrentConfig();
+
   return currentConfig || configFromManager;
 };
 

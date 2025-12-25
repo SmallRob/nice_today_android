@@ -737,13 +737,16 @@ class EnhancedUserConfigManager {
       // 添加配置
       this.configs.push(finalConfig);
       
+      // 将新配置设为活跃配置
+      this.activeConfigIndex = this.configs.length - 1;
+      
       // 保存到存储
       await this.saveConfigsToStorage();
       
       // 通知监听器
       this.notifyListeners();
       
-      console.log('添加基础配置成功', finalConfig.nickname);
+      console.log('添加基础配置成功', finalConfig.nickname, 'activeIndex:', this.activeConfigIndex);
       return true;
       
     } catch (error) {
@@ -775,6 +778,58 @@ class EnhancedUserConfigManager {
     } catch (error) {
       console.error('设置活跃配置失败:', error);
       return false;
+    }
+  }
+
+  /**
+   * 重新排序配置（支持拖拽排序）
+   * @param {number} fromIndex - 源索引
+   * @param {number} toIndex - 目标索引
+   * @returns {Promise<boolean>} 是否排序成功
+   */
+  async reorderConfig(fromIndex, toIndex) {
+    if (!this.initialized) {
+      throw new Error('配置管理器未初始化');
+    }
+
+    if (fromIndex < 0 || fromIndex >= this.configs.length ||
+        toIndex < 0 || toIndex >= this.configs.length) {
+      throw new Error('无效的配置索引');
+    }
+
+    if (fromIndex === toIndex) {
+      return true; // 无需排序
+    }
+
+    try {
+      // 保存旧的活跃索引
+      const oldActiveIndex = this.activeConfigIndex;
+
+      // 移动配置项
+      const [movedConfig] = this.configs.splice(fromIndex, 1);
+      this.configs.splice(toIndex, 0, movedConfig);
+
+      // 调整活跃配置索引
+      if (oldActiveIndex === fromIndex) {
+        this.activeConfigIndex = toIndex;
+      } else if (fromIndex < oldActiveIndex && toIndex >= oldActiveIndex) {
+        this.activeConfigIndex = oldActiveIndex - 1;
+      } else if (fromIndex > oldActiveIndex && toIndex <= oldActiveIndex) {
+        this.activeConfigIndex = oldActiveIndex + 1;
+      }
+
+      // 保存到存储
+      await this.saveConfigsToStorage();
+
+      // 通知监听器
+      this.notifyListeners();
+
+      console.log(`配置排序成功: 从索引 ${fromIndex} 移动到 ${toIndex}，活跃索引从 ${oldActiveIndex} 调整为 ${this.activeConfigIndex}`);
+      return true;
+
+    } catch (error) {
+      console.error('配置排序失败:', error);
+      throw error;
     }
   }
 

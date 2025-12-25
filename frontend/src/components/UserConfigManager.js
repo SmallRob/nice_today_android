@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
 import { useCurrentConfig } from '../contexts/UserConfigContext';
 import { baziCacheManager } from '../utils/BaziCacheManager';
@@ -655,21 +655,53 @@ const calculateDaYun = (baziInfo, birthYear) => {
 };
 
 // 配置列表项组件
-const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName }) => {
+const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // 检查是否是系统默认配置（已被禁用）
   const isSystemDefault = config.isSystemDefault === true;
 
+  // 拖拽相关样式
+  const getDragStyles = () => {
+    let styles = '';
+    if (isDragging) {
+      styles = 'opacity-50 scale-95 shadow-lg';
+    } else if (dragOverIndex === index) {
+      styles = 'border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/20';
+    }
+    return styles;
+  };
+
   return (
-    <div className={`border rounded-lg overflow-hidden transition-shadow duration-200 performance-optimized ${isActive ? 'border-blue-500 dark:border-blue-400 shadow-md' : isSystemDefault ? 'border-gray-300 dark:border-gray-600 opacity-60' : 'border-gray-200 dark:border-gray-700'
-      }`}>
+    <div
+      className={`border rounded-lg overflow-hidden transition-all duration-200 performance-optimized touch-manipulation
+        ${isActive ? 'border-blue-500 dark:border-blue-400 shadow-md' : isSystemDefault ? 'border-gray-300 dark:border-gray-600 opacity-60' : 'border-gray-200 dark:border-gray-700'}
+        ${getDragStyles()}
+      `}
+      draggable={!isSystemDefault}
+      onDragStart={(e) => !isSystemDefault && onDragStart && onDragStart(e, index)}
+      onDragOver={(e) => !isSystemDefault && onDragOver && onDragOver(e, index)}
+      onDrop={(e) => !isSystemDefault && onDrop && onDrop(e, index)}
+      onDragEnd={() => !isSystemDefault && onDragStart && onDragStart({ target: { dataset: { dragging: false } } }, index)}
+    >
       {/* 标题区域 */}
       <div
-        className={`bg-gray-50 dark:bg-gray-800 px-4 py-3 flex items-center justify-between cursor-pointer ${isSystemDefault ? 'cursor-default' : ''}`}
+        className={`bg-gray-50 dark:bg-gray-800 px-4 py-3 flex items-center justify-between ${isSystemDefault ? 'cursor-default' : ''}`}
         onClick={() => !isSystemDefault && setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center space-x-3">
+          {/* 拖拽把手 */}
+          {!isSystemDefault && (
+            <div
+              className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 touch-manipulation"
+              style={{ cursor: 'grab' }}
+              onDragStart={(e) => e.stopPropagation()}
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+              </svg>
+            </div>
+          )}
           <div className="flex items-center space-x-2">
             {isActive && (
               <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
@@ -848,6 +880,10 @@ const UserConfigManagerComponent = () => {
   const [baziKey, setBaziKey] = useState(0); // 八字计算刷新键
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 编辑弹窗状态
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
+  // 拖拽相关状态
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // 配置监听器回调 - 只在必要时更新状态
   const handleConfigChange = useCallback(({
@@ -1255,6 +1291,52 @@ const UserConfigManagerComponent = () => {
     }
   }, [showMessage]);
 
+  // 拖拽开始
+  const handleDragStart = useCallback((e, index) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+    setDraggedIndex(index);
+    setIsDragging(true);
+  }, []);
+
+  // 拖拽经过
+  const handleDragOver = useCallback((e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  }, []);
+
+  // 拖拽放置
+  const handleDrop = useCallback(async (e, toIndex) => {
+    e.preventDefault();
+    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+
+    if (isNaN(fromIndex) || fromIndex === toIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      setIsDragging(false);
+      return;
+    }
+
+    try {
+      // 执行排序
+      const success = await enhancedUserConfigManager.reorderConfig(fromIndex, toIndex);
+
+      if (success) {
+        showMessage('配置排序成功', 'success');
+      } else {
+        showMessage('配置排序失败', 'error');
+      }
+    } catch (error) {
+      console.error('排序配置失败:', error);
+      showMessage(`排序失败: ${error.message}`, 'error');
+    } finally {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      setIsDragging(false);
+    }
+  }, [showMessage]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -1609,6 +1691,11 @@ const UserConfigManagerComponent = () => {
             onSetActive={handleSetActiveConfig}
             onEdit={handleEditConfig}
             onScoreName={handleScoreName}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            isDragging={isDragging && draggedIndex === index}
+            dragOverIndex={dragOverIndex}
           />
         ))}
       </div>
