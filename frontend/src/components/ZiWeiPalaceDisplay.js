@@ -182,7 +182,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
           <div className="flex items-start gap-3">
             <span className="text-2xl">💡</span>
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-1">如何修复</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-white mb-1">如何修复</h4>
               <div className="text-xs text-gray-600 dark:text-gray-300 space-y-0.5">
                 <p>• 确保出生日期格式为 YYYY-MM-DD（如：1991-04-30）</p>
                 <p>• 确保出生时间格式为 HH:MM（如：12:30）</p>
@@ -264,7 +264,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       {/* 命宫总结 */}
       {summary && (
         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/60 dark:to-purple-900/60 rounded-lg p-4 border border-indigo-200 dark:border-indigo-600">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">📊 命盘总述</h4>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-white mb-2">📊 命盘总述</h4>
           <div className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
             <p>
               <span className="font-medium">整体格局：</span>
@@ -285,7 +285,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       {/* 重点宫位 */}
       <div className="bg-white dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-base font-semibold text-gray-700 dark:text-gray-100">🎯 重点宫位</h4>
+          <h4 className="text-base font-semibold text-gray-700 dark:text-white">🎯 重点宫位</h4>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
@@ -333,7 +333,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       {/* 十二宫位展开/收起 */}
       <div className="bg-white dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-base font-semibold text-gray-700 dark:text-gray-100">🔮 十二宫位详解</h4>
+          <h4 className="text-base font-semibold text-gray-700 dark:text-white">🔮 十二宫位详解</h4>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
@@ -439,7 +439,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
         <div className="flex items-start gap-3">
           <span className="text-2xl">📜</span>
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-1">紫微命宫说明</h4>
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-white mb-1">紫微命宫说明</h4>
             <div className="text-xs text-gray-600 dark:text-gray-300 space-y-0.5">
               <p>• 紫微命宫基于出生时间、经纬度等精确信息计算</p>
               <p>• 十二宫位代表人生不同领域，强度分数（20-100）反映该领域的先天运势</p>

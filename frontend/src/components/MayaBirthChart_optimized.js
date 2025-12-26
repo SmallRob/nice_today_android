@@ -254,7 +254,7 @@ const MayaBirthChart = () => {
     }
   }, [generateBirthInfo, cacheRef]);
 
-  // 加载用户配置 - 初始化时只执行一次
+  // 加载用户配置 - 优化出生日期获取逻辑，确保向后兼容性
   useEffect(() => {
     let isMounted = true;
 
@@ -273,37 +273,58 @@ const MayaBirthChart = () => {
       // 如果超时后仍在加载，使用当前配置状态继续
       if (!isMounted) return;
 
-      // 从用户配置上下文获取用户信息（带错误处理）
+      // 从用户配置上下文获取用户信息（带错误处理和向后兼容性）
       let config = null;
+      let birthDate = null;
+      
       try {
         config = currentConfig;
+        
+        // 多层级获取出生日期，确保兼容性
+        if (config) {
+          // 优先从标准配置获取
+          birthDate = config.birthDate;
+          
+          // 如果标准配置中没有，尝试从其他可能的位置获取
+          if (!birthDate && config.birthInfo) {
+            birthDate = config.birthInfo.birthDate;
+          }
+          
+          // 如果仍然没有，尝试从用户信息中获取
+          if (!birthDate && config.userInfo) {
+            birthDate = config.userInfo.birthDate;
+          }
+          
+          // 最后尝试使用默认值（确保向后兼容性）
+          if (!birthDate) {
+            birthDate = '1991-01-01'; // 默认出生日期
+            console.warn('未找到用户出生日期，使用默认值:', birthDate);
+          }
+        }
       } catch (error) {
         console.warn('获取用户配置失败:', error.message);
+        // 使用默认出生日期确保功能可用
+        birthDate = '1991-01-01';
       }
 
-      if (config) {
-        setUserInfo({
-          nickname: config.nickname || '用户',
-          birthDate: config.birthDate || ''
-        });
+      // 设置用户信息
+      setUserInfo({
+        nickname: config?.nickname || '用户',
+        birthDate: birthDate || ''
+      });
 
-        if (config.birthDate) {
-          // 直接加载用户配置中的出生日期数据
-          try {
-            await loadBirthInfo(new Date(config.birthDate));
-          } catch (err) {
-            console.error('加载出生信息失败:', err);
-            setError('加载失败，请稍后再试');
-          } finally {
-            setLoading(false);
-          }
-        } else {
-          // 如果没有出生日期，显示提示信息
+      if (birthDate) {
+        // 直接加载用户配置中的出生日期数据
+        try {
+          await loadBirthInfo(new Date(birthDate));
+        } catch (err) {
+          console.error('加载出生信息失败:', err);
+          setError('加载失败，请稍后再试');
+        } finally {
           setLoading(false);
         }
       } else {
-        // 如果没有配置，显示提示信息，不使用默认日期
-        console.warn('用户配置为空，请先设置用户信息');
+        // 如果没有出生日期，显示提示信息
         setLoading(false);
       }
 

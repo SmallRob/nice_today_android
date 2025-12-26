@@ -1,11 +1,15 @@
 /**
- * 八字对象缓存管理器
- * 用于独立缓存八字计算结果，与用户配置分离存储
+ * 八字对象缓存管理器 - 双格式存储优化版
+ * 支持数字格式和汉字格式的双格式缓存，提高数据一致性和健壮性
  */
 
-// 存储键名
-const BAZI_CACHE_KEY = 'nice_today_bazi_cache_v1';
-const BAZI_CACHE_INDEX_KEY = 'nice_today_bazi_cache_index_v1';
+import { createDualFormatBaziData, convertLegacyToDualFormat } from './baziDataManager';
+import { baziValidator } from './BaziValidationLayer';
+import { baziDataMigrationManager } from './BaziDataMigrationManager';
+
+// 存储键名（升级版本号）
+const BAZI_CACHE_KEY = 'nice_today_bazi_cache_v2';
+const BAZI_CACHE_INDEX_KEY = 'nice_today_bazi_cache_index_v2';
 
 // 八字缓存数据结构
 class BaziCacheManager {
@@ -22,19 +26,27 @@ class BaziCacheManager {
   }
 
   /**
-   * 初始化缓存管理器
+   * 初始化缓存管理器（集成数据迁移功能）
    */
   async initialize() {
     try {
-      console.log('开始初始化八字缓存管理器...');
+      console.log('开始初始化八字缓存管理器（双格式优化版）...');
       
       // 从 localStorage 加载缓存
       const cachedData = localStorage.getItem(BAZI_CACHE_KEY);
       const cachedIndex = localStorage.getItem(BAZI_CACHE_INDEX_KEY);
       
       if (cachedData) {
-        this.cache = new Map(JSON.parse(cachedData));
-        console.log('加载八字缓存成功，缓存数量:', this.cache.size);
+        const parsedCache = JSON.parse(cachedData);
+        
+        // 执行数据迁移和升级
+        const migratedCache = await this.migrateCacheData(parsedCache);
+        
+        this.cache = new Map(migratedCache);
+        console.log('加载并迁移八字缓存成功，缓存数量:', this.cache.size);
+      } else {
+        this.cache = new Map();
+        console.log('未找到八字缓存，使用空缓存');
       }
       
       if (cachedIndex) {
@@ -46,8 +58,11 @@ class BaziCacheManager {
       const expiredCount = this.clearExpiredCache();
       console.log('清理过期缓存完成，删除了', expiredCount, '个过期缓存');
       
+      // 启动自动清理定时器
+      this.startAutoCleanup();
+      
       this.initialized = true;
-      console.log('八字缓存管理器初始化完成');
+      console.log('八字缓存管理器初始化完成（双格式优化版）');
       return true;
     } catch (error) {
       console.error('初始化八字缓存管理器失败:', error);
@@ -86,14 +101,21 @@ class BaziCacheManager {
   }
 
   /**
-   * 获取缓存的八字信息
+   * 获取缓存的八字信息（双格式存储优化）
    * @param {string} nickname 用户昵称
+   * @param {Object} options 获取选项
    * @returns {Object|null} 八字信息
    */
-  getBaziByNickname(nickname) {
+  getBaziByNickname(nickname, options = {}) {
     if (!this.initialized) {
       return null;
     }
+    
+    const { 
+      format = 'dual', // 'dual' | 'numeric' | 'chinese' | 'legacy'
+      validate = true, // 是否验证数据有效性
+      fallbackToLegacy = true // 是否回退到旧版格式
+    } = options;
     
     const cacheKey = this.index[nickname];
     if (!cacheKey) {
@@ -112,20 +134,32 @@ class BaziCacheManager {
       return null;
     }
     
-    return cachedData;
+    if (!cachedData) {
+      return null;
+    }
+    
+    // 根据请求的格式返回数据
+    return this.getFormattedBaziData(cachedData, format, validate, fallbackToLegacy);
   }
 
   /**
-   * 获取缓存的八字信息（通过出生信息）
+   * 获取缓存的八字信息（通过出生信息，双格式存储优化）
    * @param {string} birthDate 出生日期
    * @param {string} birthTime 出生时间
    * @param {number} longitude 经度
+   * @param {Object} options 获取选项
    * @returns {Object|null} 八字信息
    */
-  getBaziByBirthInfo(birthDate, birthTime, longitude) {
+  getBaziByBirthInfo(birthDate, birthTime, longitude, options = {}) {
     if (!this.initialized) {
       return null;
     }
+    
+    const { 
+      format = 'dual', // 'dual' | 'numeric' | 'chinese' | 'legacy'
+      validate = true, // 是否验证数据有效性
+      fallbackToLegacy = true // 是否回退到旧版格式
+    } = options;
     
     const cacheKey = this.generateCacheKey(birthDate, birthTime, longitude);
     const cachedData = this.cache.get(cacheKey);
@@ -146,14 +180,19 @@ class BaziCacheManager {
       return null;
     }
     
-    return cachedData;
+    if (!cachedData) {
+      return null;
+    }
+    
+    // 根据请求的格式返回数据
+    return this.getFormattedBaziData(cachedData, format, validate, fallbackToLegacy);
   }
 
   /**
-   * 缓存八字信息
+   * 缓存八字信息（双格式存储优化）
    * @param {string} nickname 用户昵称
    * @param {Object} birthInfo 出生信息 {birthDate, birthTime, longitude}
-   * @param {Object} baziInfo 八字信息
+   * @param {Object} baziInfo 八字信息（支持标准格式、旧版格式或双格式）
    * @param {string} configIndex 配置索引（可选）
    * @returns {boolean} 是否缓存成功
    */
@@ -174,18 +213,48 @@ class BaziCacheManager {
       let actualExpiryTime = expiryTime || this.maxCacheExpiryTime; // 默认使用最大过期时间
       actualExpiryTime = Math.max(this.minCacheExpiryTime, Math.min(actualExpiryTime, this.maxCacheExpiryTime));
       
-      // 保存八字信息到缓存
+      // 转换为双格式八字数据
+      let dualFormatData;
+      if (baziInfo.meta && baziInfo.numeric && baziInfo.chinese) {
+        // 已经是双格式数据
+        dualFormatData = baziInfo;
+      } else if (baziInfo.meta && baziInfo.birth && baziInfo.bazi) {
+        // 标准Schema格式，转换为双格式
+        dualFormatData = createDualFormatBaziData({
+          birthDate: birthInfo.birthDate,
+          birthTime: birthInfo.birthTime || '12:30',
+          birthLocation: { lng: birthInfo.longitude || 116.40 },
+          nickname
+        });
+      } else {
+        // 旧版格式，转换为双格式
+        dualFormatData = convertLegacyToDualFormat({
+          ...baziInfo,
+          birthDate: birthInfo.birthDate,
+          birthTime: birthInfo.birthTime || '12:30',
+          birthLocation: { lng: birthInfo.longitude || 116.40 },
+          nickname
+        });
+      }
+
+      // 验证数据有效性
+      const validation = baziValidator.validatePillars(dualFormatData);
+      
+      // 保存八字信息到缓存（双格式优化）
       this.cache.set(cacheKey, {
         nickname,
         birthInfo,
-        bazi: baziInfo,
+        bazi: baziInfo, // 保持旧版兼容性
+        dualFormatBazi: dualFormatData, // 新增：双格式八字数据
         configIndex,
         cachedAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + actualExpiryTime).toISOString(),
         // 添加八字相关字段
         lunarBirthDate: baziInfo.lunar?.text,
         trueSolarTime: baziInfo.shichen?.time || birthInfo.birthTime,
-        shichen: baziInfo.shichen?.ganzhi
+        shichen: baziInfo.shichen?.ganzhi,
+        version: '2.0.0', // 标记为双格式版本
+        validation: validation // 新增：验证信息
       });
       
       // 更新索引
@@ -194,7 +263,7 @@ class BaziCacheManager {
       // 保存到 localStorage
       this.saveToStorage();
       
-      console.log('八字信息已缓存:', { nickname, cacheKey, birthInfo, expiresAt: new Date(Date.now() + actualExpiryTime) });
+      console.log('八字信息已缓存（双格式）:', { nickname, cacheKey, validity: validation.isValid });
       return true;
     } catch (error) {
       console.error('缓存八字信息失败:', error);
@@ -565,6 +634,406 @@ class BaziCacheManager {
     }
     
     return null;
+  }
+
+  /**
+   * 根据格式获取格式化后的八字数据
+   * @param {Object} cachedData 缓存数据
+   * @param {string} format 格式类型
+   * @param {boolean} validate 是否验证
+   * @param {boolean} fallbackToLegacy 是否回退
+   * @returns {Object|null} 格式化后的八字数据
+   */
+  getFormattedBaziData(cachedData, format = 'dual', validate = true, fallbackToLegacy = true) {
+    if (!cachedData) {
+      return null;
+    }
+
+    try {
+      let resultData = null;
+
+      // 优先使用双格式数据
+      if (cachedData.dualFormatBazi) {
+        const dualData = cachedData.dualFormatBazi;
+        
+        // 验证数据有效性
+        if (validate && cachedData.validation) {
+          const validation = baziValidator.validatePillars(dualData);
+          if (!validation.isValid) {
+            console.warn('双格式八字数据验证失败:', validation.errors);
+            if (validate === 'strict') {
+              return null;
+            }
+          }
+        }
+
+        // 根据格式返回相应数据
+        switch (format) {
+          case 'numeric':
+            resultData = dualData.numeric;
+            break;
+          case 'chinese':
+            resultData = dualData.chinese;
+            break;
+          case 'legacy':
+            // 转换为旧版格式
+            resultData = this.convertDualToLegacyFormat(dualData, cachedData);
+            break;
+          case 'dual':
+          default:
+            resultData = dualData;
+            break;
+        }
+      } else if (fallbackToLegacy && cachedData.bazi) {
+        // 回退到旧版格式
+        console.warn('使用旧版八字数据格式，建议升级到双格式');
+        resultData = cachedData.bazi;
+      }
+
+      // 添加元数据
+      if (resultData) {
+        return {
+          ...resultData,
+          _meta: {
+            cachedAt: cachedData.cachedAt,
+            expiresAt: cachedData.expiresAt,
+            version: cachedData.version || '1.0.0',
+            format: format,
+            validation: cachedData.validation
+          }
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('获取格式化八字数据失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 将双格式数据转换为旧版格式
+   * @param {Object} dualData 双格式数据
+   * @param {Object} cachedData 缓存数据
+   * @returns {Object} 旧版格式数据
+   */
+  convertDualToLegacyFormat(dualData, cachedData) {
+    const { numeric, chinese } = dualData;
+    
+    return {
+      // 四柱信息
+      year: {
+        gan: numeric.year.gan,
+        zhi: numeric.year.zhi,
+        ganzhi: chinese.year
+      },
+      month: {
+        gan: numeric.month.gan,
+        zhi: numeric.month.zhi,
+        ganzhi: chinese.month
+      },
+      day: {
+        gan: numeric.day.gan,
+        zhi: numeric.day.zhi,
+        ganzhi: chinese.day
+      },
+      hour: {
+        gan: numeric.hour.gan,
+        zhi: numeric.hour.zhi,
+        ganzhi: chinese.hour
+      },
+      // 其他字段保持兼容
+      lunar: cachedData.lunarBirthDate ? { text: cachedData.lunarBirthDate } : null,
+      shichen: cachedData.shichen ? { ganzhi: cachedData.shichen } : null
+    };
+  }
+
+  /**
+   * 获取所有缓存的统计信息
+   * @returns {Object} 统计信息
+   */
+  getCacheStatistics() {
+    const stats = {
+      totalCount: this.cache.size,
+      dualFormatCount: 0,
+      legacyFormatCount: 0,
+      validCount: 0,
+      invalidCount: 0,
+      expiredCount: 0
+    };
+
+    for (const [cacheKey, cachedData] of this.cache.entries()) {
+      if (this.isCacheExpired(cachedData)) {
+        stats.expiredCount++;
+        continue;
+      }
+
+      if (cachedData.dualFormatBazi) {
+        stats.dualFormatCount++;
+      } else {
+        stats.legacyFormatCount++;
+      }
+
+      if (cachedData.validation && cachedData.validation.isValid) {
+        stats.validCount++;
+      } else {
+        stats.invalidCount++;
+      }
+    }
+
+    return stats;
+  }
+
+  /**
+   * 迁移缓存数据（处理版本升级和数据格式转换）
+   * @param {Array} cachedArray 原始缓存数组
+   * @returns {Array} 迁移后的缓存数组
+   */
+  async migrateCacheData(cachedArray) {
+    const migratedCache = [];
+    let migratedCount = 0;
+    let errorCount = 0;
+
+    console.log('开始迁移缓存数据...');
+
+    for (const [cacheKey, cachedData] of cachedArray) {
+      try {
+        // 检查数据是否需要迁移
+        if (this.needsMigration(cachedData)) {
+          // 执行数据迁移
+          const migratedData = await this.migrateSingleCacheEntry(cachedData);
+          migratedCache.push([cacheKey, migratedData]);
+          migratedCount++;
+        } else {
+          // 不需要迁移，直接保留
+          migratedCache.push([cacheKey, cachedData]);
+        }
+      } catch (error) {
+        console.error(`迁移缓存数据失败 (${cacheKey}):`, error);
+        errorCount++;
+        
+        // 如果迁移失败，尝试保留原始数据并标记为需要修复
+        const fallbackData = {
+          ...cachedData,
+          _meta: {
+            ...(cachedData._meta || {}),
+            migrationError: error.message,
+            needsRepair: true
+          }
+        };
+        migratedCache.push([cacheKey, fallbackData]);
+      }
+    }
+
+    console.log(`缓存数据迁移完成: ${migratedCount}个数据迁移, ${errorCount}个错误`);
+    return migratedCache;
+  }
+
+  /**
+   * 检查数据是否需要迁移
+   * @param {Object} cachedData 缓存数据
+   * @returns {boolean} 是否需要迁移
+   */
+  needsMigration(cachedData) {
+    // 检查数据版本
+    const version = cachedData.version || '1.0.0';
+    
+    // 如果版本低于当前版本，需要迁移
+    if (version < '2.0.0') {
+      return true;
+    }
+
+    // 检查是否缺少双格式数据
+    if (!cachedData.dualFormatBazi) {
+      return true;
+    }
+
+    // 检查数据有效性
+    if (cachedData.validation && !cachedData.validation.isValid) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 迁移单个缓存条目
+   * @param {Object} cachedData 原始缓存数据
+   * @returns {Object} 迁移后的缓存数据
+   */
+  async migrateSingleCacheEntry(cachedData) {
+    const migrationContext = {
+      cacheKey: cachedData.nickname || 'unknown',
+      originalVersion: cachedData.version || '1.0.0',
+      timestamp: new Date().toISOString()
+    };
+
+    // 使用数据迁移管理器进行迁移
+    const migratedData = baziDataMigrationManager.migrateData(cachedData, migrationContext);
+
+    // 确保迁移后的数据包含必要的字段
+    return this.ensureMigratedDataIntegrity(migratedData, cachedData);
+  }
+
+  /**
+   * 确保迁移后数据的完整性
+   * @param {Object} migratedData 迁移后的数据
+   * @param {Object} originalData 原始数据
+   * @returns {Object} 完整性检查后的数据
+   */
+  ensureMigratedDataIntegrity(migratedData, originalData) {
+    const ensuredData = { ...migratedData };
+
+    // 确保保留原始的重要字段
+    if (!ensuredData.nickname && originalData.nickname) {
+      ensuredData.nickname = originalData.nickname;
+    }
+
+    if (!ensuredData.birthInfo && originalData.birthInfo) {
+      ensuredData.birthInfo = originalData.birthInfo;
+    }
+
+    if (!ensuredData.cachedAt && originalData.cachedAt) {
+      ensuredData.cachedAt = originalData.cachedAt;
+    }
+
+    if (!ensuredData.expiresAt && originalData.expiresAt) {
+      ensuredData.expiresAt = originalData.expiresAt;
+    }
+
+    // 设置版本信息
+    ensuredData.version = '2.0.0';
+    ensuredData._meta = {
+      ...(ensuredData._meta || {}),
+      migratedFrom: originalData.version || '1.0.0',
+      migratedAt: new Date().toISOString()
+    };
+
+    return ensuredData;
+  }
+
+  /**
+   * 启动自动清理定时器
+   */
+  startAutoCleanup() {
+    // 每隔1小时自动清理一次过期缓存
+    this.cleanupIntervalId = setInterval(() => {
+      if (this.initialized) {
+        const clearedCount = this.clearExpiredCache();
+        if (clearedCount > 0) {
+          console.log(`自动清理完成，删除了 ${clearedCount} 个过期缓存`);
+        }
+      }
+    }, 60 * 60 * 1000); // 1小时
+  }
+
+  /**
+   * 停止自动清理定时器
+   */
+  stopAutoCleanup() {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = null;
+    }
+  }
+
+  /**
+   * 获取详细的缓存诊断信息
+   * @returns {Object} 诊断信息
+   */
+  getDiagnosticInfo() {
+    const cacheStats = this.getCacheStatistics();
+    const migrationStats = baziDataMigrationManager.getMigrationStatistics();
+
+    return {
+      cache: cacheStats,
+      migration: migrationStats,
+      system: {
+        initialized: this.initialized,
+        cacheSize: this.cache.size,
+        indexSize: Object.keys(this.index).length,
+        autoCleanup: !!this.cleanupIntervalId
+      }
+    };
+  }
+
+  /**
+   * 修复损坏的缓存数据
+   * @param {string} nickname 用户昵称
+   * @returns {boolean} 是否修复成功
+   */
+  repairCacheData(nickname) {
+    try {
+      const cacheKey = this.index[nickname];
+      if (!cacheKey) {
+        console.warn(`未找到用户 ${nickname} 的缓存数据`);
+        return false;
+      }
+
+      const cachedData = this.cache.get(cacheKey);
+      if (!cachedData) {
+        console.warn(`缓存数据不存在: ${cacheKey}`);
+        return false;
+      }
+
+      // 执行数据修复
+      const repairedData = baziDataMigrationManager.migrateData(cachedData, {
+        repairMode: true,
+        nickname
+      });
+
+      // 更新缓存
+      this.cache.set(cacheKey, repairedData);
+      this.saveToStorage();
+
+      console.log(`修复缓存数据成功: ${nickname}`);
+      return true;
+
+    } catch (error) {
+      console.error(`修复缓存数据失败 (${nickname}):`, error);
+      return false;
+    }
+  }
+
+  /**
+   * 批量修复所有有问题的缓存数据
+   * @returns {Object} 修复统计
+   */
+  repairAllCacheData() {
+    const stats = {
+      total: 0,
+      repaired: 0,
+      failed: 0,
+      errors: []
+    };
+
+    for (const [cacheKey, cachedData] of this.cache.entries()) {
+      stats.total++;
+
+      // 检查数据是否有效
+      const isValid = cachedData.validation && cachedData.validation.isValid;
+      const needsRepair = cachedData._meta && cachedData._meta.needsRepair;
+
+      if (!isValid || needsRepair) {
+        try {
+          const nickname = cachedData.nickname || `cache_${cacheKey}`;
+          const success = this.repairCacheData(nickname);
+          
+          if (success) {
+            stats.repaired++;
+          } else {
+            stats.failed++;
+            stats.errors.push(`修复失败: ${nickname}`);
+          }
+        } catch (error) {
+          stats.failed++;
+          stats.errors.push(`修复异常: ${error.message}`);
+        }
+      }
+    }
+
+    console.log(`批量修复完成: ${stats.repaired}个成功, ${stats.failed}个失败`);
+    return stats;
   }
 }
 

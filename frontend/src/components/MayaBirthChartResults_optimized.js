@@ -291,7 +291,7 @@ const EnergyFieldSection = memo(({ birthInfo }) => {
           </div>
           <div className="flex-1">
             <div className="text-[11px] text-indigo-700 dark:text-indigo-300 font-bold">主能量场</div>
-            <div className="text-xs text-gray-800 dark:text-gray-100 font-medium mt-0.5 tracking-wide">{birthInfo.birth_energy_field?.primary?.type || '个人能量场'}</div>
+            <div className="text-xs text-gray-800 dark:text-white font-medium mt-0.5 tracking-wide">{birthInfo.birth_energy_field?.primary?.type || '个人能量场'}</div>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 leading-normal">{birthInfo.birth_energy_field?.primary?.info?.描述 || '反映个人状态的能场'}</p>
           </div>
         </div>
@@ -302,7 +302,7 @@ const EnergyFieldSection = memo(({ birthInfo }) => {
           </div>
           <div className="flex-1">
             <div className="text-[11px] text-purple-700 dark:text-purple-300 font-bold">次要能量场</div>
-            <div className="text-xs text-gray-800 dark:text-gray-100 font-medium mt-0.5 tracking-wide">{birthInfo.birth_energy_field?.secondary?.type || '创造能量场'}</div>
+            <div className="text-xs text-gray-800 dark:text-white font-medium mt-0.5 tracking-wide">{birthInfo.birth_energy_field?.secondary?.type || '创造能量场'}</div>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 leading-normal">{birthInfo.birth_energy_field?.secondary?.info?.描述 || '与创造力相关的能场'}</p>
           </div>
         </div>

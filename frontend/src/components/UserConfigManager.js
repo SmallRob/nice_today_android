@@ -34,13 +34,19 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
       try {
         let finalBaziData = null;
 
-        // 1. 优先从缓存获取八字信息（增强容错性）
+        // 1. 优先从缓存获取八字信息（双格式存储优化）
         if (nickname) {
-          const cachedBazi = baziCacheManager.getBaziByNickname(nickname);
-          if (cachedBazi && cachedBazi.bazi) {
-            console.log('使用缓存中的八字信息:', nickname);
+          const cachedBazi = baziCacheManager.getBaziByNickname(nickname, {
+            format: 'legacy', // 保持与现有代码兼容
+            validate: true,
+            fallbackToLegacy: true
+          });
+          
+          if (cachedBazi && (cachedBazi.bazi || cachedBazi.dualFormatBazi)) {
+            console.log('使用缓存中的八字信息（双格式优化）:', nickname);
+            
             // 使用兼容函数确保数据格式正确
-            const displayBazi = getDisplayBaziInfo(cachedBazi.bazi);
+            const displayBazi = getDisplayBaziInfo(cachedBazi.bazi || cachedBazi.dualFormatBazi);
             
             // 验证缓存数据是否与当前配置一致
             if (validateBaziDataConsistency(displayBazi, birthDate, birthTime, birthLocation)) {
@@ -49,7 +55,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
             } else {
               console.log('缓存数据与当前配置不一致，重新计算');
               // 清除过期缓存（使用现有的缓存管理方法）
-              baziCacheManager.clearCache();
+              baziCacheManager.clearCache(nickname);
             }
           }
         }

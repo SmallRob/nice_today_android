@@ -162,7 +162,7 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
               </svg>
               穿衣养生使用指南
             </h3>
-            <div className="text-xs md:text-sm text-gray-600 dark:text-gray-100 space-y-3">
+            <div className="text-xs md:text-sm text-gray-600 dark:text-gray-200 space-y-3">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-md">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -171,7 +171,7 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-1">五行穿衣</h4>
-                  <p className="text-gray-600 dark:text-gray-100">根据当日五行属性，查看吉祥配色和饮食建议，趋吉避凶，调和身心能量。按照推荐颜色搭配日常着装，可增强个人运势。</p>
+                  <p className="text-gray-600 dark:text-gray-200">根据当日五行属性，查看吉祥配色和饮食建议，趋吉避凶，调和身心能量。按照推荐颜色搭配日常着装，可增强个人运势。</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -182,7 +182,7 @@ const DressHealthTab = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-1">时令养生</h4>
-                  <p className="text-gray-600 dark:text-gray-100">结合四季五行规律和器官节律，了解当前季节养生要点，合理安排作息，根据个性化养生建议调整生活方式，促进身心健康。</p>
+                  <p className="text-gray-600 dark:text-gray-200">结合四季五行规律和器官节律，了解当前季节养生要点，合理安排作息，根据个性化养生建议调整生活方式，促进身心健康。</p>
                 </div>
               </div>
             </div>

@@ -1159,23 +1159,33 @@ class EnhancedUserConfigManager {
   }
 
   /**
-   * 从八字缓存获取八字信息
+   * 从八字缓存获取八字信息（双格式存储优化）
    * @param {string} nickname 用户昵称
+   * @param {Object} options 获取选项
    * @returns {Object|null} 八字信息
    */
-  getBaziFromCache(nickname) {
-    return baziCacheManager.getBaziByNickname(nickname);
+  getBaziFromCache(nickname, options = {}) {
+    return baziCacheManager.getBaziByNickname(nickname, {
+      format: options.format || 'dual',
+      validate: options.validate !== false,
+      fallbackToLegacy: options.fallbackToLegacy !== false
+    });
   }
 
   /**
-   * 从八字缓存获取八字信息（通过出生信息）
+   * 从八字缓存获取八字信息（通过出生信息，双格式存储优化）
    * @param {string} birthDate 出生日期
    * @param {string} birthTime 出生时间
    * @param {number} longitude 经度
+   * @param {Object} options 获取选项
    * @returns {Object|null} 八字信息
    */
-  getBaziFromCacheByBirthInfo(birthDate, birthTime, longitude) {
-    return baziCacheManager.getBaziByBirthInfo(birthDate, birthTime, longitude);
+  getBaziFromCacheByBirthInfo(birthDate, birthTime, longitude, options = {}) {
+    return baziCacheManager.getBaziByBirthInfo(birthDate, birthTime, longitude, {
+      format: options.format || 'dual',
+      validate: options.validate !== false,
+      fallbackToLegacy: options.fallbackToLegacy !== false
+    });
   }
 
   /**

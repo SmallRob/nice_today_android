@@ -222,7 +222,7 @@ const SeasonalHealthTab = () => {
           </div>
           <div className="p-4 space-y-3">
             <div className="text-center">
-              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1">{tip.desc}</h3>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">{tip.desc}</h3>
             </div>
             <div className="flex flex-col space-y-2 text-sm">
               <div className={`p-2 rounded-lg border ${isFestival
@@ -466,13 +466,13 @@ const SeasonalHealthTab = () => {
             {/* 能量流转说明 */}
             <div className="bg-purple-500/5 p-3 rounded-xl mb-4">
               <h4 className="text-xs font-bold text-purple-800 dark:text-purple-300 mb-1">能量流转</h4>
-              <p className="text-sm leading-relaxed dark:text-gray-100">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).description}</p>
+              <p className="text-sm leading-relaxed dark:text-gray-200">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).description}</p>
             </div>
 
             {/* 建议行为 */}
             <div className="bg-purple-500/5 p-3 rounded-xl mb-4">
               <h4 className="text-xs font-bold text-purple-800 dark:text-purple-300 mb-1">建议行为</h4>
-              <p className="text-sm leading-relaxed dark:text-gray-100">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).suggestion}</p>
+              <p className="text-sm leading-relaxed dark:text-gray-200">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).suggestion}</p>
             </div>
 
             {/* 养生秘诀 */}

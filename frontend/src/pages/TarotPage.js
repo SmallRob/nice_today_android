@@ -581,36 +581,36 @@ function TarotPage() {
                     </div>
                   </Card>
 
-                  {/* 抽卡模式选择 */}
+                  {/* 抽卡模式选择 - 紧凑布局优化 */}
                   <Card>
-                    <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-6 text-center text-lg">🎴 选择抽卡模式</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-center text-lg">🎴 选择抽卡模式</h3>
+                    <div className="grid grid-cols-2 gap-3">
                       <Button
                         onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                        className={`p-5 rounded-xl text-center transition-all duration-300 ${
+                        className={`p-4 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[120px] ${
                           drawMode === DRAW_MODES.SINGLE
                             ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-2xl scale-105 ring-2 ring-purple-300 dark:ring-purple-700'
                             : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
                         }`}
                       >
-                        <div className="text-5xl mb-3">🃏</div>
-                        <div className="font-bold text-base mb-2 leading-tight">单张抽卡</div>
-                        <div className="text-xs opacity-90 leading-relaxed px-1">
-                          简明扼要<br/>即时解答
+                        <div className="text-4xl mb-2">🃏</div>
+                        <div className="font-bold text-sm leading-tight">单张抽卡</div>
+                        <div className="text-xs opacity-90 mt-1 leading-tight whitespace-nowrap">
+                          简明扼要·即时解答
                         </div>
                       </Button>
                       <Button
                         onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                        className={`p-5 rounded-xl text-center transition-all duration-300 ${
+                        className={`p-4 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[120px] ${
                           drawMode === DRAW_MODES.TRIPLE
                             ? 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-2xl scale-105 ring-2 ring-pink-300 dark:ring-pink-700'
                             : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
                         }`}
                       >
-                        <div className="text-5xl mb-3">🃏🃏🃏</div>
-                        <div className="font-bold text-base mb-2 leading-tight">三张抽卡</div>
-                        <div className="text-xs opacity-90 leading-relaxed px-1">
-                          时间线分析<br/>深度解读
+                        <div className="text-4xl mb-2">🃏🃏🃏</div>
+                        <div className="font-bold text-sm leading-tight">三张抽卡</div>
+                        <div className="text-xs opacity-90 mt-1 leading-tight whitespace-nowrap">
+                          时间线分析·深度解读
                         </div>
                       </Button>
                     </div>
@@ -1080,42 +1080,42 @@ function TarotPage() {
                   <Card>
                     <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-lg">✨ 能量管理</h3>
                     
-                    {/* 功能按钮网格 */}
+                    {/* 功能按钮网格 - 优化标签显示 */}
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <Button 
                         onClick={generateFortuneReading}
                         disabled={isDrawing}
-                        className="p-3 sm:p-4 bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px]"
+                        className="p-3 sm:p-4 bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
                       >
                         <div className="text-xl sm:text-2xl mb-1">🎯</div>
-                        <div className="font-semibold text-xs sm:text-sm mb-1 leading-tight">命运指引</div>
-                        <div className="text-xs opacity-80 leading-tight">查看近期运势</div>
+                        <div className="font-bold text-sm sm:text-base mb-1 leading-tight">命运指引</div>
+                        <div className="text-xs opacity-80 leading-tight text-center">查看近期运势</div>
                       </Button>
                       <Button 
                         onClick={performEnergyCleansing}
                         disabled={isDrawing}
-                        className="p-3 sm:p-4 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px]"
+                        className="p-3 sm:p-4 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
                       >
                         <div className="text-xl sm:text-2xl mb-1">💎</div>
-                        <div className="font-semibold text-xs sm:text-sm mb-1 leading-tight">能量清理</div>
-                        <div className="text-xs opacity-80 leading-tight">清理负面能量</div>
+                        <div className="font-bold text-sm sm:text-base mb-1 leading-tight">能量清理</div>
+                        <div className="text-xs opacity-80 leading-tight text-center">清理负面能量</div>
                       </Button>
                       <Button 
                         onClick={receiveStarBlessing}
                         disabled={isDrawing}
-                        className="p-3 sm:p-4 bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px]"
+                        className="p-3 sm:p-4 bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
                       >
                         <div className="text-xl sm:text-2xl mb-1">🔥</div>
-                        <div className="font-semibold text-xs sm:text-sm mb-1 leading-tight">星象祝福</div>
-                        <div className="text-xs opacity-80 leading-tight">获取星辰祝福</div>
+                        <div className="font-bold text-sm sm:text-base mb-1 leading-tight">星象祝福</div>
+                        <div className="text-xs opacity-80 leading-tight text-center">获取星辰祝福</div>
                       </Button>
                       <Button 
                         onClick={recordMoonPhase}
-                        className="p-3 sm:p-4 bg-gradient-to-br from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px]"
+                        className="p-3 sm:p-4 bg-gradient-to-br from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
                       >
                         <div className="text-xl sm:text-2xl mb-1">🌙</div>
-                        <div className="font-semibold text-xs sm:text-sm mb-1 leading-tight">月相记录</div>
-                        <div className="text-xs opacity-80 leading-tight">记录月相变化</div>
+                        <div className="font-bold text-sm sm:text-base mb-1 leading-tight">月相记录</div>
+                        <div className="text-xs opacity-80 leading-tight text-center">记录月相变化</div>
                       </Button>
                     </div>
                     
