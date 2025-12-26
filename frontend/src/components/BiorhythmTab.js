@@ -641,7 +641,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     if (symbol === '↑') return 'text-green-500 dark:text-green-400';
     if (symbol === '↓↓') return 'text-rose-600 dark:text-rose-300 font-bold';
     if (symbol === '↓') return 'text-rose-500 dark:text-rose-400';
-    return 'text-gray-400 dark:text-gray-500';
+    return 'text-gray-400 dark:text-gray-400';
   };
 
   // 计算未来7天趋势
@@ -846,13 +846,13 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-2">
                 <span className="text-lg">💬</span>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed flex-1">
+                <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed flex-1">
                   {dailyTip}
                 </p>
               </div>
               <button
                 onClick={refreshTip}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center ml-2 whitespace-nowrap"
+                className="text-xs text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 font-medium flex items-center ml-2 whitespace-nowrap"
                 title="换一换"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1004,37 +1004,37 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                 {/* 今日节律状态 */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center border border-green-100 dark:border-green-800/40">
-                    <div className="text-xl font-bold text-green-600 dark:text-green-300 mb-2">
+                    <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
                       {todayData.physical}%
                     </div>
-                    <div className="text-sm text-green-800 dark:text-green-300 font-medium">体力</div>
+                    <div className="text-sm text-green-800 dark:text-green-200 font-medium">体力</div>
                   </div>
 
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center border border-blue-100 dark:border-blue-800/40">
-                    <div className="text-xl font-bold text-blue-600 dark:text-blue-300 mb-2">
+                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                       {todayData.emotional}%
                     </div>
-                    <div className="text-sm text-blue-800 dark:text-blue-300 font-medium">情绪</div>
+                    <div className="text-sm text-blue-800 dark:text-blue-200 font-medium">情绪</div>
                   </div>
 
                   <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-800/40">
-                    <div className="text-xl font-bold text-purple-600 dark:text-purple-300 mb-2">
+                    <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                       {todayData.intellectual}%
                     </div>
-                    <div className="text-sm text-purple-800 dark:text-purple-300 font-medium">智力</div>
+                    <div className="text-sm text-purple-800 dark:text-purple-200 font-medium">智力</div>
                   </div>
                 </div>
 
                 {/* 状态解读 */}
                 <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
                   <div className="flex flex-wrap justify-center gap-y-2 gap-x-4 text-sm">
-                    <span className={`px-2 py-0.5 rounded ${todayData.physical >= 0 ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'}`}>
+                    <span className={`px-2 py-0.5 rounded ${todayData.physical >= 0 ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-200' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-200'}`}>
                       {todayData.physical >= 0 ? '✓ 体力充沛' : '⚠ 体力偏低'}
                     </span>
-                    <span className={`px-2 py-0.5 rounded ${todayData.emotional >= 0 ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'}`}>
+                    <span className={`px-2 py-0.5 rounded ${todayData.emotional >= 0 ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-200' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-200'}`}>
                       {todayData.emotional >= 0 ? '😊 情绪稳定' : '🌪️ 情绪波动'}
                     </span>
-                    <span className={`px-2 py-0.5 rounded ${todayData.intellectual >= 0 ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300' : 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300'}`}>
+                    <span className={`px-2 py-0.5 rounded ${todayData.intellectual >= 0 ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-200' : 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-200'}`}>
                       {todayData.intellectual >= 0 ? '💡 思维清晰' : '🧠 思考需谨慎'}
                     </span>
                   </div>
@@ -1055,12 +1055,12 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                     <span className="text-sm font-bold">能量UP+</span>
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    今日完成: <span className="font-semibold text-indigo-600 dark:text-indigo-400">{completedTasks.length}/4</span>
+                    今日完成: <span className="font-semibold text-indigo-600 dark:text-indigo-300">{completedTasks.length}/4</span>
                   </div>
                 </div>
                 <button
                   onClick={refreshActivities}
-                  className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium flex items-center px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 rounded-full border border-purple-200 dark:border-purple-700/50 shadow-sm transition-all hover:shadow-md"
+                  className="text-xs text-purple-600 dark:text-purple-300 hover:text-purple-800 dark:hover:text-purple-100 font-medium flex items-center px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 rounded-full border border-purple-200 dark:border-purple-700/50 shadow-sm transition-all hover:shadow-md"
                   title="换一批"
                 >
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1075,7 +1075,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                 <div className="mb-3 md:mb-4 bg-gradient-to-r from-indigo-100/80 to-purple-100/80 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg p-2.5 md:p-3 border border-indigo-200 dark:border-indigo-800/50">
                   <div className="flex items-start">
                     <span className="text-xl md:text-2xl mr-2 md:mr-3">🌟</span>
-                    <p className="text-xs md:text-sm text-indigo-800 dark:text-indigo-200 leading-relaxed font-medium">
+                    <p className="text-xs md:text-sm text-indigo-800 dark:text-indigo-100 leading-relaxed font-medium">
                       {energyGuidance}
                     </p>
                   </div>
@@ -1121,25 +1121,25 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-0.5 md:mb-1">
                             <h4 className={`text-xs md:text-sm font-semibold truncate ${
-                              isCompleted ? 'text-gray-500 dark:text-gray-400 line-through' : 'text-gray-900 dark:text-white'
+                              isCompleted ? 'text-gray-500 dark:text-gray-500 line-through' : 'text-gray-900 dark:text-gray-100'
                             }`}>
                               {activity.title}
                             </h4>
                             <div className="flex items-center space-x-2">
                               <span className={`text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full ${
-                                isCompleted ? 'opacity-50' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
+                                isCompleted ? 'opacity-50' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200'
                               }`}>
                                 {activity.duration}
                               </span>
                             </div>
                           </div>
                           <p className={`text-[10px] md:text-xs leading-relaxed ${
-                            isCompleted ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-300'
+                            isCompleted ? 'text-gray-400 dark:text-gray-600' : 'text-gray-600 dark:text-gray-300'
                           }`}>
                             {activity.description}
                           </p>
                           {!isCompleted && activity.positive && (
-                            <p className="text-[10px] md:text-xs text-green-600 dark:text-green-400 mt-1 md:mt-1.5 font-medium">
+                            <p className="text-[10px] md:text-xs text-green-600 dark:text-green-300 mt-1 md:mt-1.5 font-medium">
                               ✨ {activity.positive}
                             </p>
                           )}
@@ -1163,7 +1163,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
               {/* 底部提示 */}
               <div className="mt-3 md:mt-4 pt-2.5 md:pt-3 border-t border-indigo-100 dark:border-indigo-800/50">
-                <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
+                <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-500 text-center leading-relaxed">
                   💡 点击任务标记完成，每日每个任务只能标记一次
                   <br />
                   完成任务后可立即感受到能量的提升 🌈
@@ -1193,15 +1193,15 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
               <div className="flex items-center justify-center space-x-6">
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">体力</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">体力</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">情绪</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">情绪</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">智力</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">智力</span>
                 </div>
               </div>
             </div>
@@ -1218,16 +1218,16 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                     <thead className="bg-gray-50 dark:bg-gray-900 dark:bg-opacity-50">
                       <tr>
                         <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">日期</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-green-600 dark:text-green-300 uppercase tracking-wider">体力</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-blue-600 dark:text-blue-300 uppercase tracking-wider">情绪</th>
-                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-purple-600 dark:text-purple-300 uppercase tracking-wider">智力</th>
+                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-green-600 dark:text-green-200 uppercase tracking-wider">体力</th>
+                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-blue-600 dark:text-blue-200 uppercase tracking-wider">情绪</th>
+                        <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-purple-600 dark:text-purple-200 uppercase tracking-wider">智力</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                       {futureTrends.map((trend, index) => (
                         <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <td className="px-3 py-3 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">{trend.day}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{trend.day}</div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">{trend.date.substring(5)}</div>
                           </td>
                           <td className="px-3 py-3 whitespace-nowrap text-center">
@@ -1245,7 +1245,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                   </table>
                 </div>
 
-                <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-500">
                   <span>↑↑: 大幅上升</span>
                   <span>↑: 上升</span>
                   <span>→: 平稳</span>
@@ -1257,10 +1257,10 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
             {/* 节律说明 - 优化间距 */}
             <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-100 dark:border-blue-700/50 rounded-lg p-4">
-              <h4 className="text-base font-semibold text-blue-800 dark:text-blue-300 mb-3">
+              <h4 className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-3">
                 节律知识
               </h4>
-              <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
+              <p className="text-sm text-blue-700 dark:text-blue-200 leading-relaxed">
                 生物节律理论包含23天体力周期、28天情绪周期和33天智力周期。正值表示能量充沛，负值表示能量偏低。每日节律状态可作为参考，帮助您合理安排活动。
               </p>
             </div>

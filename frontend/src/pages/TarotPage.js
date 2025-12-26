@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import PageLayout, { Card, Button } from '../components/PageLayout';
 import { userConfigManager } from '../utils/userConfigManager';
+import tarotCardImage from '../images/tarot-card.png';
 import '../index.css';
 
 // 塔罗牌数据 - 大阿卡纳牌（22张）
@@ -181,6 +182,7 @@ function TarotPage() {
   const [fortuneReading, setFortuneReading] = useState(null);
   const [showUserInfoModal, setShowUserInfoModal] = useState(false);
   const [globalUserConfig, setGlobalUserConfig] = useState(null);
+  const [cardsRevealed, setCardsRevealed] = useState(false);
   
   const scrollContainerRef = useRef(null);
 
@@ -202,12 +204,14 @@ function TarotPage() {
     setDrawMode(mode);
     setDrawnCards(null);
     setShowDetailedReading(false);
+    setCardsRevealed(false);
     setWish('');
   };
 
   // 随机抽取塔罗牌
   const drawCards = () => {
     setIsDrawing(true);
+    setCardsRevealed(false);
     setTimeout(() => {
       const allCards = [...MAJOR_ARCANA];
 
@@ -229,6 +233,11 @@ function TarotPage() {
       }
 
       setIsDrawing(false);
+      
+      // 延迟翻牌动画
+      setTimeout(() => {
+        setCardsRevealed(true);
+      }, 500);
     }, 1000);
   };
 
@@ -510,7 +519,32 @@ function TarotPage() {
   };
 
   return (
-    <PageLayout title="神秘塔罗">
+    <>
+      <style>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        
+        @keyframes cardReveal {
+          0% {
+            opacity: 0;
+            transform: rotateY(90deg) scale(0.8);
+          }
+          50% {
+            opacity: 0.5;
+            transform: rotateY(45deg) scale(0.9);
+          }
+          100% {
+            opacity: 1;
+            transform: rotateY(0deg) scale(1);
+          }
+        }
+        
+        .animate-card-reveal {
+          animation: cardReveal 0.8s ease-out forwards;
+        }
+      `}</style>
+      <PageLayout title="神秘塔罗">
       <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
         {/* 标签导航 */}
         <div className="flex-shrink-0 bg-white dark:bg-gray-800 shadow-sm">
@@ -648,23 +682,44 @@ function TarotPage() {
                                   <>
                                     <div className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-2xl p-6 shadow-2xl border border-purple-100 dark:border-purple-800">
                                       <div className="text-center">
-                                        <div className="text-7xl mb-4 animate-pulse">🃏</div>
-                                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2 tracking-wide">
-                                          {drawnCards.cards[0].name}
-                                        </h3>
-                                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 font-medium">
-                                          {drawnCards.cards[0].nameEn}
-                                        </p>
-                                        <div className="flex flex-wrap justify-center gap-2 mb-4">
-                                          {drawnCards.cards[0].keywords.map((keyword, index) => (
-                                            <span
-                                              key={index}
-                                              className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
-                                            >
-                                              {keyword}
-                                            </span>
-                                          ))}
-                                        </div>
+                                        {!cardsRevealed ? (
+                                          <div className="flex justify-center">
+                                            <div className="w-48 h-72 sm:w-64 sm:h-96 relative perspective-1000">
+                                              <div className="relative w-full h-full transition-transform duration-700">
+                                                <img
+                                                  src={tarotCardImage}
+                                                  alt="塔罗牌背面"
+                                                  className="w-full h-full object-cover rounded-xl shadow-lg animate-pulse"
+                                                  style={{ transform: 'rotateY(0deg)' }}
+                                                />
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <div className="flex justify-center">
+                                            <div className="w-48 h-72 sm:w-64 sm:h-96 relative perspective-1000">
+                                              <div className="relative w-full h-full transition-transform duration-700 animate-card-reveal">
+                                                <div className="text-7xl mb-4 animate-pulse">🃏</div>
+                                                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2 tracking-wide">
+                                                  {drawnCards.cards[0].name}
+                                                </h3>
+                                                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 font-medium">
+                                                  {drawnCards.cards[0].nameEn}
+                                                </p>
+                                                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                                                  {drawnCards.cards[0].keywords.map((keyword, index) => (
+                                                    <span
+                                                      key={index}
+                                                      className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
+                                                    >
+                                                      {keyword}
+                                                    </span>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
 
@@ -708,7 +763,7 @@ function TarotPage() {
                                 {/* 重新抽卡 */}
                                 <div className="flex gap-3">
                                   <Button
-                                    onClick={() => { setDrawnCards(null); drawCards(); }}
+                                    onClick={() => { setDrawnCards(null); setCardsRevealed(false); drawCards(); }}
                                     className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
                                   >
                                     🔄 重新抽卡
@@ -730,16 +785,37 @@ function TarotPage() {
                                   {drawnCards.cards.map((card, index) => (
                                     <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-4 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
                                       <div className="text-center">
-                                        <div className="text-5xl mb-2 animate-pulse">🃏</div>
-                                        <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-3 py-1.5 mb-2 shadow-sm">
-                                          <h4 className="font-bold text-xs text-purple-700 dark:text-purple-300 tracking-wide">{CARD_POSITIONS[index]}</h4>
-                                        </div>
-                                        <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1 leading-tight">
-                                          {card.name}
-                                        </h3>
-                                        <p className="text-gray-600 dark:text-gray-300 text-xs font-medium mb-2">
-                                          {card.nameEn}
-                                        </p>
+                                        {!cardsRevealed ? (
+                                          <div className="flex justify-center">
+                                            <div className="w-32 h-48 sm:w-40 sm:h-60 relative perspective-1000">
+                                              <div className="relative w-full h-full transition-transform duration-700" style={{ animationDelay: `${index * 150}ms` }}>
+                                                <img
+                                                  src={tarotCardImage}
+                                                  alt="塔罗牌背面"
+                                                  className="w-full h-full object-cover rounded-xl shadow-lg animate-pulse"
+                                                  style={{ transform: 'rotateY(0deg)' }}
+                                                />
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <div className="flex justify-center">
+                                            <div className="w-32 h-48 sm:w-40 sm:h-60 relative perspective-1000">
+                                              <div className="relative w-full h-full transition-transform duration-700 animate-card-reveal" style={{ animationDelay: `${index * 200}ms` }}>
+                                                <div className="text-4xl mb-2 animate-pulse">🃏</div>
+                                                <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-2 py-1 mb-2 shadow-sm">
+                                                  <h4 className="font-bold text-xs text-purple-700 dark:text-purple-300 tracking-wide">{CARD_POSITIONS[index]}</h4>
+                                                </div>
+                                                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1 leading-tight">
+                                                  {card.name}
+                                                </h3>
+                                                <p className="text-gray-600 dark:text-gray-300 text-xs font-medium mb-2">
+                                                  {card.nameEn}
+                                                </p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   ))}
@@ -960,7 +1036,7 @@ function TarotPage() {
                                 {/* 重新抽卡按钮 */}
                                 <div className="flex gap-3">
                                   <Button
-                                    onClick={() => { setDrawnCards(null); setShowDetailedReading(false); drawCards(); }}
+                                    onClick={() => { setDrawnCards(null); setShowDetailedReading(false); setCardsRevealed(false); drawCards(); }}
                                     className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
                                   >
                                     🔄 重新抽卡
@@ -1431,6 +1507,7 @@ function TarotPage() {
         </div>
       )}
     </PageLayout>
+    </>
   );
 }
 
