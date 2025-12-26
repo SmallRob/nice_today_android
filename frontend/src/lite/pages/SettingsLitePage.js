@@ -9,7 +9,8 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
   const [formData, setFormData] = useState({
     nickname: '',
     gender: 'secret',
-    birthDate: ''
+    birthDate: '',
+    birthTime: ''
   });
   const [saveStatus, setSaveStatus] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -23,14 +24,16 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
         setFormData({
           nickname: userInfo.nickname || '',
           gender: userInfo.gender || 'secret',
-          birthDate: userInfo.birthDate || ''
+          birthDate: userInfo.birthDate || '',
+          birthTime: userInfo.birthTime || ''
         });
       } else {
         // 如果没有用户信息，使用默认值
         setFormData({
           nickname: '',
           gender: 'secret',
-          birthDate: ''
+          birthDate: '',
+          birthTime: ''
         });
       }
       setIsLoading(false);
@@ -63,7 +66,8 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
       const success = liteUserConfigManager.updateCurrentConfig({
         nickname: formData.nickname,
         gender: formData.gender,
-        birthDate: formData.birthDate
+        birthDate: formData.birthDate,
+        birthTime: formData.birthTime
       });
 
       if (success) {
@@ -71,7 +75,8 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
         setUserInfo({
           nickname: formData.nickname,
           gender: formData.gender,
-          birthDate: formData.birthDate
+          birthDate: formData.birthDate,
+          birthTime: formData.birthTime
         });
 
         setSaveStatus('success');
@@ -250,6 +255,31 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
                 onChange={handleChange}
                 className="lite-input"
               />
+            </div>
+
+            <div>
+              <label htmlFor="birthTime">出生时辰:</label>
+              <select
+                id="birthTime"
+                name="birthTime"
+                value={formData.birthTime}
+                onChange={handleChange}
+                className="lite-input"
+              >
+                <option value="">未知</option>
+                <option value="子">子时 (23:00-01:00)</option>
+                <option value="丑">丑时 (01:00-03:00)</option>
+                <option value="寅">寅时 (03:00-05:00)</option>
+                <option value="卯">卯时 (05:00-07:00)</option>
+                <option value="辰">辰时 (07:00-09:00)</option>
+                <option value="巳">巳时 (09:00-11:00)</option>
+                <option value="午">午时 (11:00-13:00)</option>
+                <option value="未">未时 (13:00-15:00)</option>
+                <option value="申">申时 (15:00-17:00)</option>
+                <option value="酉">酉时 (17:00-19:00)</option>
+                <option value="戌">戌时 (19:00-21:00)</option>
+                <option value="亥">亥时 (21:00-23:00)</option>
+              </select>
             </div>
 
             <button type="submit" className="lite-button">

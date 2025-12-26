@@ -8,6 +8,7 @@ import './styles/liteStyles.css';
 // 轻量版页面组件 - 使用 lazy 延迟加载以优化启动速度
 const BiorhythmLitePage = React.lazy(() => import('./pages/BiorhythmLitePage'));
 const MayaCalendarLitePage = React.lazy(() => import('./pages/MayaCalendarLitePage'));
+const BirthChartLitePage = React.lazy(() => import('./pages/BirthChartLitePage'));
 const DressGuideLitePage = React.lazy(() => import('./pages/DressGuideLitePage'));
 const SettingsLitePage = React.lazy(() => import('./pages/SettingsLitePage'));
 
@@ -87,7 +88,8 @@ const AppLite = () => {
   const [userInfo, setUserInfo] = useState({
     nickname: '',
     gender: 'secret',
-    birthDate: ''
+    birthDate: '',
+    birthTime: ''
   });
   const [activeTab, setActiveTab] = useState('maya');
   const [isLoading, setIsLoading] = useState(true);
@@ -111,7 +113,8 @@ const AppLite = () => {
         setUserInfo({
           nickname: currentConfig.nickname || '',
           gender: currentConfig.gender || 'secret',
-          birthDate: currentConfig.birthDate || ''
+          birthDate: currentConfig.birthDate || '',
+          birthTime: currentConfig.birthTime || ''
         });
 
         // 添加配置变更监听器
@@ -120,7 +123,8 @@ const AppLite = () => {
             setUserInfo({
               nickname: configData.currentConfig.nickname || '',
               gender: configData.currentConfig.gender || 'secret',
-              birthDate: configData.currentConfig.birthDate || ''
+              birthDate: configData.currentConfig.birthDate || '',
+              birthTime: configData.currentConfig.birthTime || ''
             });
           }
         });
@@ -146,6 +150,7 @@ const AppLite = () => {
       const prefetchModules = () => {
         // 预加载人体节律界面及其他功能模块
         import('./pages/BiorhythmLitePage').catch(() => { });
+        import('./pages/BirthChartLitePage').catch(() => { });
         import('./pages/DressGuideLitePage').catch(() => { });
         import('./pages/SettingsLitePage').catch(() => { });
         import('./components/LiteTabNavigation').catch(() => { });
@@ -168,15 +173,16 @@ const AppLite = () => {
     <Router basename="/lite">
       <ThemeProvider>
         <AppLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-          <Routes>
-            <Route path="/" element={<MayaCalendarLitePage userInfo={userInfo} />} />
-            <Route path="/maya" element={<MayaCalendarLitePage userInfo={userInfo} />} />
-            <Route path="/biorhythm" element={<BiorhythmLitePage userInfo={userInfo} />} />
-            <Route path="/dress" element={<DressGuideLitePage userInfo={userInfo} />} />
-            <Route path="/settings" element={<SettingsLitePage userInfo={userInfo} setUserInfo={setUserInfo} />} />
-            {/* 兜底跳转，避免白屏 */}
-            <Route path="*" element={<MayaCalendarLitePage userInfo={userInfo} />} />
-          </Routes>
+        <Routes>
+          <Route path="/" element={<MayaCalendarLitePage userInfo={userInfo} />} />
+          <Route path="/maya" element={<MayaCalendarLitePage userInfo={userInfo} />} />
+          <Route path="/biorhythm" element={<BiorhythmLitePage userInfo={userInfo} />} />
+          <Route path="/birthchart" element={<BirthChartLitePage userInfo={userInfo} />} />
+          <Route path="/dress" element={<DressGuideLitePage userInfo={userInfo} />} />
+          <Route path="/settings" element={<SettingsLitePage userInfo={userInfo} setUserInfo={setUserInfo} />} />
+          {/* 兜底跳转，避免白屏 */}
+          <Route path="*" element={<MayaCalendarLitePage userInfo={userInfo} />} />
+        </Routes>
         </AppLayout>
       </ThemeProvider>
     </Router>

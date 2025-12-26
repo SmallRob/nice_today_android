@@ -8,6 +8,7 @@ const LiteTabNavigation = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'biorhythm', label: '生物节律', icon: '📊' },
     { id: 'maya', label: '玛雅日历', icon: '📅' },
+    { id: 'birthchart', label: '八字分析', icon: '🌟' },
     { id: 'dress', label: '穿衣指南', icon: '👕' },
     { id: 'settings', label: '设置', icon: '⚙️' }
   ];
@@ -22,6 +23,9 @@ const LiteTabNavigation = ({ activeTab, onTabChange }) => {
         break;
       case 'biorhythm':
         navigate('/biorhythm');
+        break;
+      case 'birthchart':
+        navigate('/birthchart');
         break;
       case 'dress':
         navigate('/dress');
@@ -41,12 +45,14 @@ const LiteTabNavigation = ({ activeTab, onTabChange }) => {
         return 'maya';
       case '/biorhythm':
         return 'biorhythm';
+      case '/birthchart':
+        return 'birthchart';
       case '/dress':
         return 'dress';
       case '/settings':
         return 'settings';
       default:
-        return 'biorhythm';
+        return 'maya';
     }
   };
 
