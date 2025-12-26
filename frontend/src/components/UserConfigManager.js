@@ -206,8 +206,31 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     baziInfo = { ...defaultBaziInfo, ...baziInfo };
   }
 
-  // 直接调用计算函数，避免使用 useMemo
-  const { elementCounts, wuxingElements, dayMaster, fortuneType, luckyElement, masterElement, totalScore } = calculateFiveElementStats(baziInfo);
+  // 验证 baziInfo 数据结构，如果验证失败则使用默认值
+  const isValidBaziInfo = validateBaziInfoStructure(baziInfo);
+  
+  const stats = isValidBaziInfo 
+    ? calculateFiveElementStats(baziInfo)
+    : {
+        elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
+        wuxingElements: ['木', '火', '土', '金', '水'],
+        dayMaster: '未知',
+        fortuneType: '数据不可用',
+        luckyElement: '无',
+        masterElement: '未知',
+        totalScore: 0
+      };
+  
+  // 安全解构，防止 stats 为 undefined
+  const { 
+    elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 }, 
+    wuxingElements = ['木', '火', '土', '金', '水'], 
+    dayMaster = '未知', 
+    fortuneType = '数据不可用', 
+    luckyElement = '无', 
+    masterElement = '未知', 
+    totalScore = 0 
+  } = stats || {};
 
   return (
     <div className="space-y-4">
@@ -216,14 +239,14 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
         <div className="flex justify-between items-start">
           <div>
             <h4 className="text-lg font-bold mb-1">农历生日</h4>
-            <p className="text-2xl font-semibold">{baziInfo.lunar?.text || '未知'}</p>
+            <p className="text-2xl font-semibold">{(baziInfo && baziInfo.lunar && baziInfo.lunar.text) || '未知'}</p>
             <p className="text-sm opacity-80 mt-1">
-              公历：{baziInfo.solar?.text || '未知'}
+              公历：{(baziInfo && baziInfo.solar && baziInfo.solar.text) || '未知'}
             </p>
           </div>
           <div className="text-right">
             <p className="text-sm opacity-80">时辰</p>
-            <p className="text-lg font-semibold">{baziInfo.shichen?.ganzhi || '未知'}</p>
+            <p className="text-lg font-semibold">{(baziInfo && baziInfo.shichen && baziInfo.shichen.ganzhi) || '未知'}</p>
           </div>
         </div>
       </div>
@@ -235,32 +258,32 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
             <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <th className="px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">柱</th>
               <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">辛丑年</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.lunar?.monthStr || '未知'}</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.lunar?.dayStr || '未知'}</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{baziInfo.shichen?.ganzhi || '未知'}</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{(baziInfo && baziInfo.lunar && baziInfo.lunar.monthStr) || '未知'}</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{(baziInfo && baziInfo.lunar && baziInfo.lunar.dayStr) || '未知'}</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{(baziInfo && baziInfo.shichen && baziInfo.shichen.ganzhi) || '未知'}</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b border-gray-100 dark:border-gray-700">
               <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">八字</td>
-              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi?.year || '未知'}</td>
-              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi?.month || '未知'}</td>
-              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi?.day || '未知'}</td>
-              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{baziInfo.bazi?.hour || '未知'}</td>
+              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.year) || '未知'}</td>
+              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.month) || '未知'}</td>
+              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.day) || '未知'}</td>
+              <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.hour) || '未知'}</td>
             </tr>
             <tr className="border-b border-gray-100 dark:border-gray-700">
               <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">五行</td>
-              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing?.year || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing?.month || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing?.day || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{baziInfo.wuxing?.hour || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.year) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.month) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.day) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.hour) || '未知'}</td>
             </tr>
             <tr>
               <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">纳音</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin?.year || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin?.month || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin?.day || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{baziInfo.nayin?.hour || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.year) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.month) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.day) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.hour) || '未知'}</td>
             </tr>
           </tbody>
         </table>
@@ -512,6 +535,63 @@ const getFallbackBaziData = (birthDate, birthTime) => {
   return defaultBaziData;
 };
 
+// 验证 baziInfo 数据结构的完整性
+const validateBaziInfoStructure = (baziInfo) => {
+  if (!baziInfo) {
+    console.warn('baziInfo 为 null 或 undefined');
+    return false;
+  }
+
+  // 检查 bazi 对象是否存在且包含必需的字段
+  if (!baziInfo.bazi) {
+    console.warn('baziInfo.bazi 为 null 或 undefined');
+    return false;
+  }
+
+  // 检查四个柱子是否存在
+  const requiredBaziFields = ['year', 'month', 'day', 'hour'];
+  for (const field of requiredBaziFields) {
+    if (!baziInfo.bazi[field]) {
+      console.warn(`baziInfo.bazi.${field} 为 null 或 undefined 或空字符串`);
+      return false;
+    }
+    
+    // 检查是否为字符串类型
+    if (typeof baziInfo.bazi[field] !== 'string') {
+      console.warn(`baziInfo.bazi.${field} 不是字符串类型，实际类型为: ${typeof baziInfo.bazi[field]}`);
+      return false;
+    }
+    
+    // 检查字符串长度是否足够
+    if (baziInfo.bazi[field].length < 1) {
+      console.warn(`baziInfo.bazi.${field} 字符串长度不足`);
+      return false;
+    }
+  }
+
+  // 检查 wuxing 对象是否存在且包含必需的字段
+  if (!baziInfo.wuxing) {
+    console.warn('baziInfo.wuxing 为 null 或 undefined');
+    return false;
+  }
+
+  const requiredWuxingFields = ['year', 'month', 'day', 'hour', 'text'];
+  for (const field of requiredWuxingFields) {
+    if (!baziInfo.wuxing[field]) {
+      console.warn(`baziInfo.wuxing.${field} 为 null 或 undefined 或空字符串`);
+      return false;
+    }
+    
+    // 检查是否为字符串类型
+    if (typeof baziInfo.wuxing[field] !== 'string') {
+      console.warn(`baziInfo.wuxing.${field} 不是字符串类型，实际类型为: ${typeof baziInfo.wuxing[field]}`);
+      return false;
+    }
+  }
+
+  return true;
+};
+
 // 格式化位置字符串
 const formatLocationString = (loc) => {
   if (!loc) return '';
@@ -560,6 +640,51 @@ const calculateFiveElementStats = (baziInfo) => {
       totalScore: 0
     };
   }
+  
+  // 额外验证 bazi 和 wuxing 中的字段是否为字符串
+  const hasValidBaziFields = baziInfo.bazi &&
+    typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 &&
+    typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
+    typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
+    typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
+  
+  const hasValidWuxingFields = baziInfo.wuxing &&
+    typeof baziInfo.wuxing.text === 'string' &&
+    typeof baziInfo.wuxing.year === 'string' && baziInfo.wuxing.year.length > 0 &&
+    typeof baziInfo.wuxing.month === 'string' && baziInfo.wuxing.month.length > 0 &&
+    typeof baziInfo.wuxing.day === 'string' && baziInfo.wuxing.day.length > 0 &&
+    typeof baziInfo.wuxing.hour === 'string' && baziInfo.wuxing.hour.length > 0;
+  
+  if (!hasValidBaziFields || !hasValidWuxingFields) {
+    console.warn('baziInfo 数据结构不完整或字段类型不正确，使用默认值', {
+      hasBazi: !!baziInfo.bazi,
+      hasValidBaziFields,
+      hasValidWuxingFields,
+      baziTypes: baziInfo.bazi ? {
+        year: typeof baziInfo.bazi.year,
+        month: typeof baziInfo.bazi.month,
+        day: typeof baziInfo.bazi.day,
+        hour: typeof baziInfo.bazi.hour
+      } : 'undefined',
+      wuxingTypes: baziInfo.wuxing ? {
+        text: typeof baziInfo.wuxing.text,
+        year: typeof baziInfo.wuxing.year,
+        month: typeof baziInfo.wuxing.month,
+        day: typeof baziInfo.wuxing.day,
+        hour: typeof baziInfo.wuxing.hour
+      } : 'undefined'
+    });
+    
+    return {
+      elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
+      wuxingElements: ['木', '火', '土', '金', '水'],
+      dayMaster: '未知',
+      fortuneType: '数据不可用',
+      luckyElement: '无',
+      masterElement: '未知',
+      totalScore: 0
+    };
+  }
 
   const wuxingElements = ['木', '火', '土', '金', '水'];
   const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
@@ -573,11 +698,11 @@ const calculateFiveElementStats = (baziInfo) => {
     });
 
     // 计算日主和五行得分
-    const dayMaster = baziInfo.bazi.day ? baziInfo.bazi.day.charAt(0) : '未知';
+    const dayMaster = baziInfo.bazi.day && typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 ? baziInfo.bazi.day.charAt(0) : '未知';
     const elementToIndex = { '木': 0, '火': 1, '土': 2, '金': 3, '水': 4 };
 
     // 简化版八字旺衰计算
-    const sameElementIndex = baziInfo.wuxing.year ? elementToIndex[baziInfo.wuxing.year[0]] : -1; // 年干
+    const sameElementIndex = baziInfo.wuxing.year && typeof baziInfo.wuxing.year === 'string' && baziInfo.wuxing.year.length > 0 ? elementToIndex[baziInfo.wuxing.year[0]] : -1; // 年干
     const dayElementIndex = elementToIndex[dayMaster];
 
     // 同类得分（日主和同类）
@@ -655,8 +780,45 @@ const calculateWuxingPreferences = (baziInfo) => {
     return null;
   }
 
+  // 额外验证 bazi 和 wuxing 中的字段是否为字符串
+  const hasValidBaziFields = baziInfo.bazi &&
+    typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 &&
+    typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
+    typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
+    typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
+  
+  const hasValidWuxingFields = baziInfo.wuxing &&
+    typeof baziInfo.wuxing.text === 'string' &&
+    typeof baziInfo.wuxing.year === 'string' && baziInfo.wuxing.year.length > 0 &&
+    typeof baziInfo.wuxing.month === 'string' && baziInfo.wuxing.month.length > 0 &&
+    typeof baziInfo.wuxing.day === 'string' && baziInfo.wuxing.day.length > 0 &&
+    typeof baziInfo.wuxing.hour === 'string' && baziInfo.wuxing.hour.length > 0;
+  
+  if (!hasValidBaziFields || !hasValidWuxingFields) {
+    console.warn('calculateWuxingPreferences: baziInfo 数据结构不完整或字段类型不正确', {
+      hasBazi: !!baziInfo.bazi,
+      hasValidBaziFields,
+      hasValidWuxingFields,
+      baziTypes: baziInfo.bazi ? {
+        year: typeof baziInfo.bazi.year,
+        month: typeof baziInfo.bazi.month,
+        day: typeof baziInfo.bazi.day,
+        hour: typeof baziInfo.bazi.hour
+      } : 'undefined',
+      wuxingTypes: baziInfo.wuxing ? {
+        text: typeof baziInfo.wuxing.text,
+        year: typeof baziInfo.wuxing.year,
+        month: typeof baziInfo.wuxing.month,
+        day: typeof baziInfo.wuxing.day,
+        hour: typeof baziInfo.wuxing.hour
+      } : 'undefined'
+    });
+    
+    return null;
+  }
+
   // 获取日主（日干）
-  const dayMaster = baziInfo.bazi.day.charAt(0);
+  const dayMaster = baziInfo.bazi.day && typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 ? baziInfo.bazi.day.charAt(0) : '未知';
   
   // 五行对应表
   const wuxingMap = {
@@ -683,7 +845,7 @@ const calculateWuxingPreferences = (baziInfo) => {
   const wuxingElements = ['木', '火', '土', '金', '水'];
   const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
   
-  const wuxingStr = baziInfo.wuxing.text; // "金土 火金 金金 土水"
+  const wuxingStr = (baziInfo.wuxing && baziInfo.wuxing.text) || ''; // "金土 火金 金金 土水"
   const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
   wuxingList.forEach(element => {
     elementCounts[element]++;
@@ -872,8 +1034,30 @@ const calculateDaYun = (baziInfo, birthYear) => {
     return null;
   }
 
+  // 额外验证 bazi 中的字段是否为字符串
+  const hasValidBaziFields = baziInfo.bazi &&
+    typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 &&
+    typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
+    typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
+    typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
+  
+  if (!hasValidBaziFields) {
+    console.warn('calculateDaYun: baziInfo 数据结构不完整或字段类型不正确', {
+      hasBazi: !!baziInfo.bazi,
+      hasValidBaziFields,
+      baziTypes: baziInfo.bazi ? {
+        year: typeof baziInfo.bazi.year,
+        month: typeof baziInfo.bazi.month,
+        day: typeof baziInfo.bazi.day,
+        hour: typeof baziInfo.bazi.hour
+      } : 'undefined'
+    });
+    
+    return null;
+  }
+
   // 获取日主（日干）
-  const dayMaster = baziInfo.bazi.day.charAt(0);
+  const dayMaster = baziInfo.bazi.day && typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 ? baziInfo.bazi.day.charAt(0) : '未知';
   
   // 天干
   const gan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
@@ -885,7 +1069,8 @@ const calculateDaYun = (baziInfo, birthYear) => {
   const dayMasterIndex = gan.indexOf(dayMaster);
   
   // 简化版本：根据年干判断阴阳（奇数为阳，偶数为阴）
-  const yearGanIndex = gan.indexOf(baziInfo.bazi.year.charAt(0));
+  const yearGan = baziInfo.bazi.year && typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 ? baziInfo.bazi.year.charAt(0) : '甲';
+  const yearGanIndex = gan.indexOf(yearGan);
   const isYangYear = yearGanIndex % 2 === 0; // 甲、丙、戊、庚、壬为阳
   
   // 男性大运顺排，女性大运逆排
@@ -899,8 +1084,8 @@ const calculateDaYun = (baziInfo, birthYear) => {
   const isForward = (isMale && isYangYear) || (!isMale && !isYangYear);
   
   // 从月柱开始排大运
-  const monthGan = baziInfo.bazi.month.charAt(0);
-  const monthZhi = baziInfo.bazi.month.charAt(1);
+  const monthGan = baziInfo.bazi.month && typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 ? baziInfo.bazi.month.charAt(0) : '子';
+  const monthZhi = baziInfo.bazi.month && typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 1 ? baziInfo.bazi.month.charAt(1) : '子';
   
   const monthGanIndex = gan.indexOf(monthGan);
   const monthZhiIndex = zhi.indexOf(monthZhi);
