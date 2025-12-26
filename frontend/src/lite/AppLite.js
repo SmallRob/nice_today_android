@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { userConfigManager } from '../utils/userConfigManager';
+import { liteUserConfigManager } from '../utils/liteUserConfigManager';
 import { ThemeProvider } from '../context/ThemeContext';
 import { useThemeColor } from '../hooks/useThemeColor';
 import './styles/liteStyles.css';
@@ -22,6 +22,32 @@ const LiteLoadingView = ({ message = '正在加载...' }) => (
   </div>
 );
 
+// 顶部标题栏组件 - 包含版本切换按钮
+const TopHeader = () => {
+  const handleSwitchToFull = () => {
+    // 设置版本标记
+    localStorage.setItem('appVersion', 'full');
+    // 重新加载页面以切换到完整版
+    window.location.href = '/';
+  };
+
+  return (
+    <div className="lite-top-header">
+      <div className="lite-header-title">Nice Today</div>
+      <button
+        className="lite-version-switch-btn"
+        onClick={handleSwitchToFull}
+        title="切换到炫彩版"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span>炫彩版</span>
+      </button>
+    </div>
+  );
+};
+
 // 应用布局组件 - 包含主题颜色管理
 const AppLayout = ({ children, activeTab, setActiveTab }) => {
   // 使用主题颜色Hook确保状态栏颜色与主题同步
@@ -39,6 +65,9 @@ const AppLayout = ({ children, activeTab, setActiveTab }) => {
 
   return (
     <div className="lite-app-container">
+      {/* 顶部标题栏 */}
+      <TopHeader />
+      
       {/* 主要内容区域 */}
       <div className="lite-main-content">
         <React.Suspense fallback={<LiteLoadingView />}>
@@ -67,13 +96,18 @@ const AppLite = () => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // 确保用户配置管理器已初始化
-        if (!userConfigManager.initialized) {
-          await userConfigManager.initialize();
+        console.log('轻量版应用开始初始化...');
+        
+        // 确保轻量版用户配置管理器已初始化
+        if (!liteUserConfigManager.initialized) {
+          console.log('初始化轻量版用户配置管理器...');
+          await liteUserConfigManager.initialize();
         }
 
         // 获取当前用户配置
-        const currentConfig = userConfigManager.getCurrentConfig();
+        const currentConfig = liteUserConfigManager.getCurrentConfig();
+        console.log('轻量版当前配置:', currentConfig);
+        
         setUserInfo({
           nickname: currentConfig.nickname || '',
           gender: currentConfig.gender || 'secret',
@@ -81,7 +115,7 @@ const AppLite = () => {
         });
 
         // 添加配置变更监听器
-        const removeListener = userConfigManager.addListener((configData) => {
+        const removeListener = liteUserConfigManager.addListener((configData) => {
           if (configData.currentConfig) {
             setUserInfo({
               nickname: configData.currentConfig.nickname || '',

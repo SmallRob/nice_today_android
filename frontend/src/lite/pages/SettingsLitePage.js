@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { userConfigManager } from '../../utils/userConfigManager';
+import { liteUserConfigManager } from '../../utils/liteUserConfigManager';
 import { useNotification } from '../../context/NotificationContext';
 import versionDetector from '../../utils/versionDetector';
 import { restartApp } from '../../utils/restartApp';
@@ -7,19 +7,38 @@ import versionData from '../../version.json';
 
 const SettingsLitePage = ({ userInfo, setUserInfo }) => {
   const [formData, setFormData] = useState({
-    nickname: userInfo.nickname || '',
-    gender: userInfo.gender || 'secret',
-    birthDate: userInfo.birthDate || ''
+    nickname: '',
+    gender: 'secret',
+    birthDate: ''
   });
   const [saveStatus, setSaveStatus] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const { showNotification } = useNotification();
 
+  // 初始化表单数据
   useEffect(() => {
-    setFormData({
-      nickname: userInfo.nickname || '',
-      gender: userInfo.gender || 'secret',
-      birthDate: userInfo.birthDate || ''
-    });
+    try {
+      if (userInfo && userInfo.nickname) {
+        setFormData({
+          nickname: userInfo.nickname || '',
+          gender: userInfo.gender || 'secret',
+          birthDate: userInfo.birthDate || ''
+        });
+      } else {
+        // 如果没有用户信息，使用默认值
+        setFormData({
+          nickname: '',
+          gender: 'secret',
+          birthDate: ''
+        });
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error('设置页面数据加载失败:', error);
+      setLoadError(error);
+      setIsLoading(false);
+    }
   }, [userInfo]);
 
   const handleChange = (e) => {
@@ -35,11 +54,13 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
     setSaveStatus('saving');
 
     try {
-      // 获取当前配置索引
-      const activeIndex = userConfigManager.getActiveConfigIndex();
+      // 确保配置管理器已初始化
+      if (!liteUserConfigManager.initialized) {
+        await liteUserConfigManager.initialize();
+      }
 
-      // 更新配置
-      const success = userConfigManager.updateConfig(activeIndex, {
+      // 更新轻量版配置
+      const success = liteUserConfigManager.updateCurrentConfig({
         nickname: formData.nickname,
         gender: formData.gender,
         birthDate: formData.birthDate
@@ -54,13 +75,31 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
         });
 
         setSaveStatus('success');
+        showNotification({
+          type: 'success',
+          title: '保存成功',
+          message: '用户信息已更新',
+          duration: 3000
+        });
         setTimeout(() => setSaveStatus(''), 3000);
       } else {
         setSaveStatus('error');
+        showNotification({
+          type: 'error',
+          title: '保存失败',
+          message: '保存用户信息时出错，请重试',
+          duration: 3000
+        });
       }
     } catch (error) {
       console.error('保存配置失败:', error);
       setSaveStatus('error');
+      showNotification({
+        type: 'error',
+        title: '保存失败',
+        message: error.message || '保存用户信息时出错',
+        duration: 3000
+      });
     }
   };
 
@@ -102,6 +141,66 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
       duration: 3000
     });
   };
+
+  // 加载错误处理
+  if (loadError) {
+    return (
+      <div className="lite-page-container" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '20px'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          maxWidth: '400px'
+        }}>
+          <h3 style={{ color: '#e74c3c', marginBottom: '16px' }}>设置页面加载失败</h3>
+          <p style={{ color: '#666', marginBottom: '20px' }}>
+            加载用户配置时发生错误
+          </p>
+          <button
+            onClick={() => window.location.href = '/lite'}
+            className="lite-button"
+          >
+            返回首页
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 加载状态
+  if (isLoading) {
+    return (
+      <div className="lite-page-container" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #f3f3f3',
+          borderTop: '4px solid #3498db',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          marginBottom: '16px'
+        }}></div>
+        <p style={{ color: '#666' }}>正在加载设置...</p>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="lite-page-container">

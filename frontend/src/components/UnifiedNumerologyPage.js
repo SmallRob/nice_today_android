@@ -10,14 +10,26 @@ const UnifiedNumerologyPage = () => {
   const currentConfig = useCurrentConfig();
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' 或 'enhanced'
   const [userInfo, setUserInfo] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   // 初始化用户信息
   useEffect(() => {
-    if (currentConfig && currentConfig.birthDate) {
-      setUserInfo({
-        birthDate: currentConfig.birthDate,
-        nickname: currentConfig.nickname || '神秘用户'
-      });
+    try {
+      if (currentConfig && currentConfig.birthDate) {
+        setUserInfo({
+          birthDate: currentConfig.birthDate,
+          nickname: currentConfig.nickname || '神秘用户'
+        });
+      } else {
+        // 如果没有用户配置，使用默认值
+        setUserInfo({
+          birthDate: '1991-04-21',
+          nickname: '神秘用户'
+        });
+      }
+    } catch (error) {
+      console.error('UnifiedNumerologyPage初始化失败:', error);
+      setLoadError(error);
     }
   }, [currentConfig]);
 
@@ -32,6 +44,58 @@ const UnifiedNumerologyPage = () => {
       </div>
     </div>
   );
+
+  // 渲染错误状态
+  const renderError = (error) => (
+    <div className="unified-numerology-container" style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      padding: '20px',
+      textAlign: 'center'
+    }}>
+      <div style={{
+        width: '80px',
+        height: '80px',
+        borderRadius: '50%',
+        backgroundColor: '#fee2e2',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: '20px'
+      }}>
+        <svg style={{ width: '40px', height: '40px', color: '#ef4444' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h3 style={{ color: '#1f2937', fontSize: '20px', marginBottom: '12px' }}>生命灵数加载失败</h3>
+      <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '20px' }}>
+        {error?.message || '加载生命灵数功能时发生错误'}
+      </p>
+      <button
+        onClick={() => window.location.href = '/settings'}
+        style={{
+          padding: '10px 20px',
+          backgroundColor: '#3b82f6',
+          color: '#ffffff',
+          border: 'none',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '600',
+          cursor: 'pointer'
+        }}
+      >
+        返回设置
+      </button>
+    </div>
+  );
+
+  // 如果有错误，显示错误界面
+  if (loadError) {
+    return renderError(loadError);
+  }
 
   return (
     <div className="unified-numerology-container">

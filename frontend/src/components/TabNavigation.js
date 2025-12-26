@@ -1,63 +1,249 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
+import { useTheme } from '../context/ThemeContext';
+import { storageManager } from '../utils/storageManager';
 
 const TabNavigation = () => {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  
+  // 检测是否为iOS设备，用于调整底部安全区域
+  const isIOS = Capacitor.getPlatform() === 'ios';
+  
+  // 页面切换时更新缓存
+  useEffect(() => {
+    let isMounted = true;
+    
+    const updateCache = async () => {
+      if (!isMounted) return;
+      
+      try {
+        // 从本地存储获取缓存超时设置
+        const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+        const timeout = savedCacheTimeout ? parseInt(savedCacheTimeout) : 180000; // 默认3分钟
+        storageManager.setGlobalCacheTimeout(timeout);
+        
+        // 根据当前路径触发相应页面的缓存更新逻辑
+        const updatePageCache = async () => {
+          if (!isMounted) return;
+          // 这里可以根据不同路径触发不同页面的缓存更新逻辑
+          // 例如：
+          // if (location.pathname === '/') {
+          //   // 触发首页缓存更新
+          // }
+          // if (location.pathname === '/maya') {
+          //   // 触发玛雅页面缓存更新
+          // }
+          // if (location.pathname === '/dress') {
+          //   // 触发穿衣指南页面缓存更新
+          // }
+        };
+        
+        await updatePageCache();
+      } catch (error) {
+        console.warn('缓存更新失败:', error);
+      }
+    };
+    
+    updateCache();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [location.pathname]);
 
-  const tabs = [
-    { id: 'home', label: '首页', icon: '🏠', path: '/' },
-    { id: 'maya', label: '玛雅', icon: '📅', path: '/maya' },
-    { id: 'dress', label: '穿衣', icon: '👕', path: '/dress' },
-    { id: 'trend', label: '运势', icon: '📊', path: '/trend' },
-    { id: 'tarot', label: '塔罗', icon: '🔮', path: '/tarot' },
-    { id: 'numerology', label: '灵数', icon: '🔢', path: '/numerology' },
-    { id: 'settings', label: '设置', icon: '⚙️', path: '/settings' }
-  ];
-
-  // 根据当前路径确定活动标签
-  const getActiveTab = () => {
-    const path = location.pathname;
-    if (path === '/') return 'home';
-    if (path.startsWith('/maya')) return 'maya';
-    if (path.startsWith('/dress')) return 'dress';
-    if (path.startsWith('/trend')) return 'trend';
-    if (path.startsWith('/tarot')) return 'tarot';
-    if (path.startsWith('/numerology')) return 'numerology';
-    if (path.startsWith('/settings')) return 'settings';
-    return 'home';
+  // 优化的Tab样式类 - 根据文本长度自适应宽度
+  const getTabClassName = (isActive) => {
+    const baseClasses = "flex flex-col items-center justify-center h-full transition-all duration-200 relative min-w-0 flex-1 px-1";
+    
+    if (isActive) {
+      return `${baseClasses} text-blue-600 dark:text-blue-400`;
+    } else {
+      return `${baseClasses} text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`;
+    }
   };
 
-  const currentActiveTab = getActiveTab();
+  // 活跃Tab指示器样式
+  const activeIndicatorClass = theme === 'dark' 
+    ? 'bg-blue-400' 
+    : 'bg-blue-600';
 
-  const handleTabClick = (tab) => {
-    navigate(tab.path);
+  const tabs = [
+    {
+      id: 'dashboard',
+      label: '首页',
+      path: '/',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>
+      )
+    },
+    {
+      id: 'maya',
+      label: '玛雅图腾',
+      path: '/maya',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="10" r="5" strokeWidth={2} />
+          <path strokeWidth={2} d="M12 2v3m0 13v4M2 10h3m14 0h3M4.93 4.93l2.12 2.12m9.9 9.9l2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9l2.12-2.12" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16l4-4 4 4M8 16a2 2 0 00-2 2v2a2 2 0 002 2h8a2 2 0 002-2v-2a2 2 0 00-2-2" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M12 2v2m0 12v2M2 8h2m16 0h2M5 5l1.41 1.41M17.59 15.59L19 17M5 15.59l1.41-1.41M17.59 8.41L19 7M8 15l4-4 4 4M8 15a1 1 0 00-1 1v3a1 1 0 001 1h6a1 1 0 001-1v-3a1 1 0 00-1-1z" />
+        </svg>
+      )
+    },
+    {
+      id: 'trend',
+      label: '人生趋势',
+      path: '/trend',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 20h18M5 16l4-4 6 6M15 12l4 4" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 20h18M5 16l4-4 6 6M15 12l4 4" />
+        </svg>
+      )
+    },
+    {
+      id: 'dress',
+      label: '穿衣养生',
+      path: '/dress',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+      )
+    },
+    {
+      id: 'numerology',
+      label: '生命灵数',
+      path: '/numerology',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+          <circle cx="12" cy="12" r="9" strokeWidth={1.5} />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+          <circle cx="12" cy="12" r="9" strokeWidth={1.5} />
+        </svg>
+      )
+    },
+    {
+      id: 'settings',
+      label: '更多功能',
+      path: '/settings',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
+        </svg>
+      )
+    }
+  ];
+
+  const handleTabClick = (path) => {
+    // 在切换Tab前清除相关页面的缓存，确保获取最新数据
+    if (path === '/') {
+      // 清除首页相关缓存
+      storageManager.removeGlobalCache('dashboard_data');
+    } else if (path === '/maya') {
+      // 清除玛雅页面相关缓存
+      storageManager.removeGlobalCache('maya_data');
+    } else if (path === '/trend') {
+      // 清除人生趋势页面相关缓存
+      storageManager.removeGlobalCache('lifeTrend_data');
+    } else if (path === '/dress') {
+      // 清除穿衣指南页面相关缓存
+      storageManager.removeGlobalCache('dress_data');
+    } else if (path === '/tarot') {
+      // 清除塔罗页面相关缓存
+      storageManager.removeGlobalCache('tarot_data');
+    } else if (path === '/settings') {
+      // 清除设置页面相关缓存
+      storageManager.removeGlobalCache('settings_data');
+    } else if (path === '/numerology') {
+      // 清除生命灵数页面相关缓存
+      storageManager.removeGlobalCache('numerology_data');
+    }
+
+    navigate(path);
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50">
-      <div className="flex justify-around items-center h-16 max-w-md mx-auto px-2">
+    <div 
+      className={`bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 ${
+        isIOS ? 'pb-safe-bottom' : ''
+      } shadow-lg`}
+    >
+      {/* 减少高度，优化间距 */}
+      <div className="flex justify-around items-center h-12 relative px-0.5">
         {tabs.map((tab) => {
-          const isActive = currentActiveTab === tab.id;
+          const isActive = location.pathname === tab.path;
           return (
             <button
               key={tab.id}
-              onClick={() => handleTabClick(tab)}
-              className={`flex flex-col items-center justify-center flex-1 py-2 px-1 transition-all duration-200 ${
-                isActive
-                  ? 'text-blue-600 dark:text-blue-400 scale-105'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-              }`}
-              aria-label={tab.label}
-              aria-current={isActive ? 'page' : undefined}
+              onClick={() => handleTabClick(tab.path)}
+              className={getTabClassName(isActive)}
             >
-              <span className="text-xl mb-1">{tab.icon}</span>
-              <span className="text-xs font-medium">{tab.label}</span>
+              {/* 活跃指示器 - 增强高亮效果 */}
+              {isActive && (
+                <>
+                  <div className={`absolute top-0 w-full h-0.5 ${activeIndicatorClass}`}></div>
+                  <div className={`absolute inset-0 rounded-lg ${activeIndicatorClass} opacity-10`}></div>
+                </>
+              )}
+              
+              {/* 图标和文字容器 - 超紧凑布局 */}
+              <div className="flex flex-col items-center justify-center space-y-0 max-w-full overflow-hidden">
+                {/* 图标 - 保持适当大小 */}
+                <div className="relative flex-shrink-0">
+                  {isActive ? 
+                    React.cloneElement(tab.activeIcon, { className: "w-5 h-5" }) : 
+                    React.cloneElement(tab.icon, { className: "w-5 h-5" })
+                  }
+                </div>
+                
+                {/* 标签文字 - 减小字体大小，去除内边距 */}
+                <span className="text-xs font-medium truncate w-full leading-tight">{tab.label}</span>
+              </div>
             </button>
           );
         })}
       </div>
-    </nav>
+    </div>
   );
 };
 

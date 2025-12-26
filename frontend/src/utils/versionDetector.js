@@ -14,11 +14,20 @@ class VersionDetector {
    */
   async initialize() {
     try {
-      // 1. 检查localStorage中的版本设置
+      // 1. 检查URL参数中的版本设置（优先级最高）
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlVersion = urlParams.get('version');
+      
+      // 2. 检查localStorage中的版本设置
       const savedVersion = localStorage.getItem('appVersion');
       
-      // 2. 如果没有保存的版本设置，使用默认版本
-      if (savedVersion) {
+      // 3. 确定当前版本（URL参数 > localStorage > 默认）
+      if (urlVersion && (urlVersion === 'lite' || urlVersion === 'full')) {
+        this.version = urlVersion;
+        // 保存URL设置的版本到localStorage
+        localStorage.setItem('appVersion', urlVersion);
+        console.log(`从URL参数设置版本: ${this.getVersionName()}`);
+      } else if (savedVersion) {
         this.version = savedVersion;
       } else {
         // 默认使用轻量版
@@ -26,10 +35,10 @@ class VersionDetector {
         localStorage.setItem('appVersion', 'lite');
       }
 
-      // 3. 检查是否为Capacitor原生应用
+      // 4. 检查是否为Capacitor原生应用
       this.isNativeApp = this.checkIsNativeApp();
       
-      // 4. 记录版本信息
+      // 5. 记录版本信息
       console.log(`应用版本检测完成: ${this.getVersionName()}, 运行环境: ${this.isNativeApp ? 'Android原生' : 'Web浏览器'}`);
       
       this.isInitialized = true;

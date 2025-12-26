@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/animations.css';
 
-const WelcomeScreen = ({ onComplete }) => {
+const WelcomeScreen = ({ onComplete, version = 'lite' }) => {
   const [loadingText, setLoadingText] = useState('初始化应用...');
   const [progress, setProgress] = useState(0);
   
   useEffect(() => {
+    const versionName = version === 'lite' ? '轻量版' : '炫彩版';
     const loadingSteps = [
-      { text: '初始化应用...', duration: 800 },
+      { text: `正在启动${versionName}...`, duration: 800 },
       { text: '加载用户配置...', duration: 600 },
       { text: '准备数据缓存...', duration: 700 },
       { text: '优化性能...', duration: 900 }
@@ -66,7 +67,15 @@ const WelcomeScreen = ({ onComplete }) => {
         
         {/* 应用名称 */}
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Nice Today</h1>
-        <p className="text-gray-600 dark:text-gray-300 mb-8">每一天都是美好的开始</p>
+        <p className="text-gray-600 dark:text-gray-300 mb-2">每一天都是美好的开始</p>
+        
+        {/* 版本指示 */}
+        <div className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm font-medium mb-8 shadow-md">
+          <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          {version === 'lite' ? '轻量版' : '炫彩版'}
+        </div>
       </div>
       
       {/* 加载进度条 */}
