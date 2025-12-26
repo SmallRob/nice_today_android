@@ -8,7 +8,7 @@
 import { dataPersistenceManager } from './DataPersistenceManager.js';
 import { dataIntegrityManager } from './DataIntegrityManager.js';
 import { baziUpdateManager } from './BaziUpdateManager.js';
-import { generateLunarAndTrueSolarFields, validateAndFixLunarDate, batchValidateLunarDates } from './LunarCalendarHelper.js';
+import { validateAndFixLunarDate, batchValidateLunarDates } from './LunarCalendarHelper.js';
 import { calculateDetailedBazi } from './baziHelper.js';
 import { baziCacheManager } from './BaziCacheManager.js';
 import { concurrencyLock } from './ConcurrencyLock.js';
@@ -1435,20 +1435,62 @@ async duplicateConfigFromTemplate(overrides = {}) {
       throw new Error(`昵称 '${finalNickname}' 已存在，无法创建重复配置`);
     }
 
-    // 4. 应用用户指定的覆盖字段
-    const finalConfig = deepCloneConfig({
-      ...templateConfig,
+    // 4. 创建安全、可序列化的配置对象，避免React错误#31
+    const finalConfig = {
+      // 基础字段
       nickname: finalNickname,
-      ...overrides,
-      // 确保以下字段被重置或保留
-      bazi: overrides.bazi || null,  // 八字信息不复制，需要重新计算
+      realName: overrides.realName || templateConfig.realName || '',
+      birthDate: overrides.birthDate || templateConfig.birthDate || '',
+      birthTime: overrides.birthTime || templateConfig.birthTime || '12:30',
+      shichen: overrides.shichen || templateConfig.shichen || '',
+      zodiac: overrides.zodiac || templateConfig.zodiac || '',
+      zodiacAnimal: overrides.zodiacAnimal || templateConfig.zodiacAnimal || '',
+      gender: overrides.gender || templateConfig.gender || 'secret',
+      mbti: overrides.mbti || templateConfig.mbti || '',
+      isused: false,  // 初始状态为未使用
+      
+      // 结构化数据（确保可序列化）
+      birthLocation: overrides.birthLocation ? {
+        province: overrides.birthLocation.province || '',
+        city: overrides.birthLocation.city || '',
+        district: overrides.birthLocation.district || '',
+        lng: overrides.birthLocation.lng ?? 116.48,
+        lat: overrides.birthLocation.lat ?? 39.95
+      } : templateConfig.birthLocation ? {
+        province: templateConfig.birthLocation.province || '',
+        city: templateConfig.birthLocation.city || '',
+        district: templateConfig.birthLocation.district || '',
+        lng: templateConfig.birthLocation.lng ?? 116.48,
+        lat: templateConfig.birthLocation.lat ?? 39.95
+      } : null,
+      
+      // 复杂对象（确保为null或简单对象）
+      nameScore: overrides.nameScore ? {
+        tian: overrides.nameScore.tian || 0,
+        ren: overrides.nameScore.ren || 0,
+        di: overrides.nameScore.di || 0,
+        wai: overrides.nameScore.wai || 0,
+        zong: overrides.nameScore.zong || 0,
+        mainType: overrides.nameScore.mainType || '',
+        totalScore: overrides.nameScore.totalScore || 0
+      } : templateConfig.nameScore ? {
+        tian: templateConfig.nameScore.tian || 0,
+        ren: templateConfig.nameScore.ren || 0,
+        di: templateConfig.nameScore.di || 0,
+        wai: templateConfig.nameScore.wai || 0,
+        zong: templateConfig.nameScore.zong || 0,
+        mainType: templateConfig.nameScore.mainType || '',
+        totalScore: templateConfig.nameScore.totalScore || 0
+      } : null,
+      
+      // 八字信息不复制，需要重新计算
+      bazi: null,
       lunarBirthDate: null,
       trueSolarTime: null,
       lunarInfo: null,
       lastCalculated: null,
-      isSystemDefault: false,  // 标记为非系统默认配置
-      isused: false  // 初始状态为未使用
-    });
+      isSystemDefault: false  // 标记为非系统默认配置
+    };
 
     console.log('模板配置复制成功:', {
       templateNickname: DEFAULT_CONFIG.nickname,

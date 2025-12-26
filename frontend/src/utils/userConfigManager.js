@@ -4,7 +4,7 @@
  * 支持多组配置，默认加载第一组配置数据
  */
 
-// 默认配置模板（冻结的不可变对象，确保系统配置不会被意外修改）
+// 默认配置模板（安全的、可序列化的数据结构，避免React错误#31）
 const DEFAULT_CONFIG = Object.freeze({
   nickname: '叉子',
   realName: '', // 真实姓名（用于五格评分和八字测算）
@@ -22,14 +22,19 @@ const DEFAULT_CONFIG = Object.freeze({
   zodiacAnimal: '羊',
   gender: 'male',
   mbti: 'INFP',
-  nameScore: null, // 姓名评分结果
-  bazi: null, // 八字命格信息（包含四柱、时辰、经纬度等）
+  nameScore: null, // 姓名评分结果（确保为null或简单对象）
+  bazi: null, // 八字命格信息（确保为null或简单对象）
+  lunarBirthDate: null,
+  trueSolarTime: null,
+  lunarInfo: null,
+  lastCalculated: null,
   isused: false, // 是否为当前使用的配置
   isSystemDefault: true // 标记为系统默认配置
 });
 
 /**
  * 深拷贝配置对象，确保用户配置与默认配置完全隔离
+ * 使用安全的序列化方法，避免React错误#31
  * @param {Object} sourceConfig - 源配置对象
  * @returns {Object} 深拷贝的新配置对象
  */
@@ -38,15 +43,89 @@ function deepCloneConfig(sourceConfig) {
     return sourceConfig;
   }
 
-  // 使用 JSON 方法进行深拷贝，确保完全隔离
-  const cloned = JSON.parse(JSON.stringify(sourceConfig));
+  // 创建安全的配置对象副本，避免序列化错误
+  const safeConfig = {
+    // 基础字段
+    nickname: sourceConfig.nickname || '',
+    realName: sourceConfig.realName || '',
+    birthDate: sourceConfig.birthDate || '',
+    birthTime: sourceConfig.birthTime || '12:30',
+    shichen: sourceConfig.shichen || '',
+    zodiac: sourceConfig.zodiac || '',
+    zodiacAnimal: sourceConfig.zodiacAnimal || '',
+    gender: sourceConfig.gender || 'secret',
+    mbti: sourceConfig.mbti || '',
+    isused: sourceConfig.isused ?? false,
+    
+    // 结构化数据（确保可序列化）
+    birthLocation: sourceConfig.birthLocation ? {
+      province: sourceConfig.birthLocation.province || '',
+      city: sourceConfig.birthLocation.city || '',
+      district: sourceConfig.birthLocation.district || '',
+      lng: sourceConfig.birthLocation.lng ?? 116.48,
+      lat: sourceConfig.birthLocation.lat ?? 39.95
+    } : null,
+    
+    // 复杂对象（确保为null或简单对象）
+    nameScore: sourceConfig.nameScore ? {
+      tian: sourceConfig.nameScore.tian || 0,
+      ren: sourceConfig.nameScore.ren || 0,
+      di: sourceConfig.nameScore.di || 0,
+      wai: sourceConfig.nameScore.wai || 0,
+      zong: sourceConfig.nameScore.zong || 0,
+      mainType: sourceConfig.nameScore.mainType || '',
+      totalScore: sourceConfig.nameScore.totalScore || 0
+    } : null,
+    
+    bazi: sourceConfig.bazi ? {
+      year: sourceConfig.bazi.year || '',
+      month: sourceConfig.bazi.month || '',
+      day: sourceConfig.bazi.day || '',
+      hour: sourceConfig.bazi.hour || '',
+      lunar: sourceConfig.bazi.lunar ? {
+        year: sourceConfig.bazi.lunar.year || '',
+        month: sourceConfig.bazi.lunar.month || '',
+        day: sourceConfig.bazi.lunar.day || '',
+        text: sourceConfig.bazi.lunar.text || '',
+        monthStr: sourceConfig.bazi.lunar.monthStr || '',
+        dayStr: sourceConfig.bazi.lunar.dayStr || ''
+      } : null,
+      wuxing: sourceConfig.bazi.wuxing ? {
+        year: sourceConfig.bazi.wuxing.year || '',
+        month: sourceConfig.bazi.wuxing.month || '',
+        day: sourceConfig.bazi.wuxing.day || '',
+        hour: sourceConfig.bazi.wuxing.hour || '',
+        text: sourceConfig.bazi.wuxing.text || ''
+      } : null,
+      nayin: sourceConfig.bazi.nayin ? {
+        year: sourceConfig.bazi.nayin.year || '',
+        month: sourceConfig.bazi.nayin.month || '',
+        day: sourceConfig.bazi.nayin.day || '',
+        hour: sourceConfig.bazi.nayin.hour || ''
+      } : null,
+      shichen: sourceConfig.bazi.shichen ? {
+        ganzhi: sourceConfig.bazi.shichen.ganzhi || '',
+        name: sourceConfig.bazi.shichen.name || ''
+      } : null,
+      solar: sourceConfig.bazi.solar ? {
+        text: sourceConfig.bazi.solar.text || ''
+      } : null
+    } : null,
+    
+    lunarInfo: sourceConfig.lunarInfo ? {
+      lunarBirthDate: sourceConfig.lunarInfo.lunarBirthDate || '',
+      lunarBirthMonth: sourceConfig.lunarInfo.lunarBirthMonth || '',
+      lunarBirthDay: sourceConfig.lunarInfo.lunarBirthDay || '',
+      trueSolarTime: sourceConfig.lunarInfo.trueSolarTime || ''
+    } : null,
+    
+    lunarBirthDate: sourceConfig.lunarBirthDate || null,
+    trueSolarTime: sourceConfig.trueSolarTime || null,
+    lastCalculated: sourceConfig.lastCalculated || null,
+    isSystemDefault: sourceConfig.isSystemDefault ?? false
+  };
 
-  // 确保 birthLocation 对象也被深拷贝
-  if (sourceConfig.birthLocation) {
-    cloned.birthLocation = { ...sourceConfig.birthLocation };
-  }
-
-  return cloned;
+  return safeConfig;
 }
 
 /**

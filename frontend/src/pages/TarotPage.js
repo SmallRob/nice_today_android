@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import PageLayout, { Card, Button } from '../components/PageLayout';
+import { userConfigManager } from '../utils/userConfigManager';
 import '../index.css';
 
 // 塔罗牌数据 - 大阿卡纳牌（22张）
@@ -134,6 +135,30 @@ const DRAW_MODES = {
 // 三张牌阵位置
 const CARD_POSITIONS = ['过去', '现在', '未来'];
 
+// 星座数据
+const ZODIAC_SIGNS = [
+  { id: 1, name: '白羊座', element: '火', dates: '3.21-4.19', traits: ['勇敢', '热情', '冲动'] },
+  { id: 2, name: '金牛座', element: '土', dates: '4.20-5.20', traits: ['稳重', '务实', '固执'] },
+  { id: 3, name: '双子座', element: '风', dates: '5.21-6.21', traits: ['聪明', '灵活', '善变'] },
+  { id: 4, name: '巨蟹座', element: '水', dates: '6.22-7.22', traits: ['温柔', '敏感', '恋家'] },
+  { id: 5, name: '狮子座', element: '火', dates: '7.23-8.22', traits: ['自信', '慷慨', '骄傲'] },
+  { id: 6, name: '处女座', element: '土', dates: '8.23-9.22', traits: ['细心', '完美主义', '挑剔'] },
+  { id: 7, name: '天秤座', element: '风', dates: '9.23-10.23', traits: ['优雅', '公正', '犹豫'] },
+  { id: 8, name: '天蝎座', element: '水', dates: '10.24-11.22', traits: ['神秘', '深情', '嫉妒'] },
+  { id: 9, name: '射手座', element: '火', dates: '11.23-12.21', traits: ['乐观', '自由', '粗心'] },
+  { id: 10, name: '摩羯座', element: '土', dates: '12.22-1.19', traits: ['勤奋', '责任感强', '保守'] },
+  { id: 11, name: '水瓶座', element: '风', dates: '1.20-2.18', traits: ['创新', '独立', '叛逆'] },
+  { id: 12, name: '双鱼座', element: '水', dates: '2.19-3.20', traits: ['浪漫', '同情心强', '逃避'] }
+];
+
+// 月相数据
+const MOON_PHASES = [
+  { name: '新月', emoji: '🌑', description: '新的开始，设定目标' },
+  { name: '上弦月', emoji: '🌓', description: '行动与成长' },
+  { name: '满月', emoji: '🌕', description: '收获与完成' },
+  { name: '下弦月', emoji: '🌗', description: '释放与清理' }
+];
+
 function TarotPage() {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('daily');
@@ -144,6 +169,19 @@ function TarotPage() {
   const [wishHistory, setWishHistory] = useState([]);
   const [expandedSuit, setExpandedSuit] = useState(null);
   const [showDetailedReading, setShowDetailedReading] = useState(false);
+  
+  // 新增状态
+  const [userInfo, setUserInfo] = useState({
+    birthDate: '',
+    zodiac: '',
+    zodiacSign: null
+  });
+  const [energyLevel, setEnergyLevel] = useState(80);
+  const [moonPhase, setMoonPhase] = useState(null);
+  const [fortuneReading, setFortuneReading] = useState(null);
+  const [showUserInfoModal, setShowUserInfoModal] = useState(false);
+  const [globalUserConfig, setGlobalUserConfig] = useState(null);
+  
   const scrollContainerRef = useRef(null);
 
   // 获取塔罗牌元素对应的颜色
@@ -284,6 +322,193 @@ function TarotPage() {
     }
   };
 
+  // 计算星座
+  const calculateZodiac = (birthDate) => {
+    if (!birthDate) return null;
+    
+    const date = new Date(birthDate);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    
+    for (const sign of ZODIAC_SIGNS) {
+      const [startMonth, startDay] = sign.dates.split('.')[0].split('-')[0].split('.').map(Number);
+      const [endMonth, endDay] = sign.dates.split('.')[1].split('-')[0].split('.').map(Number);
+      
+      if ((month === startMonth && day >= startDay) || (month === endMonth && day <= endDay)) {
+        return sign;
+      }
+    }
+    return null;
+  };
+
+  // 保存用户信息（独立存储，不与全局配置冲突）
+  const saveUserInfo = (birthDate) => {
+    const zodiacSign = calculateZodiac(birthDate);
+    const newUserInfo = {
+      birthDate,
+      zodiac: zodiacSign ? zodiacSign.name : '',
+      zodiacSign
+    };
+    setUserInfo(newUserInfo);
+    // 使用独立的键名保存塔罗牌页面的用户信息
+    localStorage.setItem('tarotUserInfo', JSON.stringify(newUserInfo));
+    setShowUserInfoModal(false);
+  };
+
+  // 从全局配置获取默认用户信息
+  const getDefaultUserInfo = () => {
+    try {
+      const globalConfig = userConfigManager.getCurrentConfig();
+      if (globalConfig && globalConfig.birthDate) {
+        const defaultBirthDate = globalConfig.birthDate === '1991-04-30' ? '1991-01-01' : globalConfig.birthDate;
+        const zodiacSign = calculateZodiac(defaultBirthDate);
+        return {
+          birthDate: defaultBirthDate,
+          zodiac: zodiacSign ? zodiacSign.name : globalConfig.zodiac || '',
+          zodiacSign
+        };
+      }
+    } catch (error) {
+      console.error('获取全局配置失败:', error);
+    }
+    // 默认返回1991-01-01
+    const defaultZodiac = calculateZodiac('1991-01-01');
+    return {
+      birthDate: '1991-01-01',
+      zodiac: defaultZodiac ? defaultZodiac.name : '摩羯座',
+      zodiacSign: defaultZodiac
+    };
+  };
+
+  // 加载用户信息
+  useEffect(() => {
+    // 初始化用户配置管理器
+    const initUserConfig = async () => {
+      try {
+        await userConfigManager.initialize();
+        const globalConfig = userConfigManager.getCurrentConfig();
+        setGlobalUserConfig(globalConfig);
+      } catch (error) {
+        console.error('初始化用户配置管理器失败:', error);
+      }
+    };
+
+    initUserConfig();
+
+    // 加载塔罗牌页面的用户信息
+    const savedInfo = localStorage.getItem('tarotUserInfo');
+    if (savedInfo) {
+      try {
+        const parsedInfo = JSON.parse(savedInfo);
+        setUserInfo(parsedInfo);
+      } catch (error) {
+        console.error('解析塔罗牌用户信息失败:', error);
+        // 如果解析失败，使用全局配置的默认值
+        setUserInfo(getDefaultUserInfo());
+      }
+    } else {
+      // 如果没有保存的塔罗牌用户信息，使用全局配置的默认值
+      setUserInfo(getDefaultUserInfo());
+    }
+    
+    // 随机生成当前月相
+    const randomMoonPhase = MOON_PHASES[Math.floor(Math.random() * MOON_PHASES.length)];
+    setMoonPhase(randomMoonPhase);
+  }, []);
+
+  // 命运指引功能
+  const generateFortuneReading = () => {
+    setIsDrawing(true);
+    setTimeout(() => {
+      const today = new Date();
+      const randomCard = MAJOR_ARCANA[Math.floor(Math.random() * MAJOR_ARCANA.length)];
+      
+      const energyLevels = ['低', '中', '高'];
+      const luckLevels = ['一般', '不错', '很好'];
+      const focusAreas = ['爱情', '事业', '健康', '财富', '人际关系'];
+      
+      const reading = {
+        date: today.toLocaleDateString(),
+        zodiac: userInfo.zodiacSign,
+        energyLevel: energyLevels[Math.floor(Math.random() * energyLevels.length)],
+        luckLevel: luckLevels[Math.floor(Math.random() * luckLevels.length)],
+        focusArea: focusAreas[Math.floor(Math.random() * focusAreas.length)],
+        guidanceCard: randomCard,
+        advice: `今日${userInfo.zodiacSign ? userInfo.zodiacSign.name + '的' : ''}能量主要集中在${focusAreas[Math.floor(Math.random() * focusAreas.length)]}方面，建议保持${['积极', '耐心', '开放'][Math.floor(Math.random() * 3)]}的心态。`,
+        luckyColor: ['红色', '蓝色', '绿色', '黄色', '紫色'][Math.floor(Math.random() * 5)],
+        luckyNumber: Math.floor(Math.random() * 9) + 1
+      };
+      
+      setFortuneReading(reading);
+      setIsDrawing(false);
+      
+      // 滚动到命运指引区域
+      setTimeout(() => {
+        const element = document.getElementById('fortune-reading');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }, 1000);
+  };
+
+  // 能量清理功能
+  const performEnergyCleansing = () => {
+    setIsDrawing(true);
+    setTimeout(() => {
+      const cleansingMethods = [
+        { name: '冥想净化', emoji: '🧘', description: '通过深呼吸和冥想，清理负面能量' },
+        { name: '水晶疗愈', emoji: '💎', description: '使用水晶的能量净化身心' },
+        { name: '声音疗愈', emoji: '🎵', description: '通过音波振动清理能量场' },
+        { name: '烟雾净化', emoji: '💨', description: '使用草药烟雾净化空间' }
+      ];
+      
+      const method = cleansingMethods[Math.floor(Math.random() * cleansingMethods.length)];
+      const newEnergyLevel = Math.min(100, energyLevel + Math.floor(Math.random() * 20) + 10);
+      
+      setEnergyLevel(newEnergyLevel);
+      setIsDrawing(false);
+      
+      alert(`✨ 能量清理完成！\n使用方式：${method.name} ${method.emoji}\n效果：${method.description}\n当前能量水平：${newEnergyLevel}%`);
+    }, 1500);
+  };
+
+  // 星象祝福功能
+  const receiveStarBlessing = () => {
+    setIsDrawing(true);
+    setTimeout(() => {
+      const blessings = [
+        { name: '金星祝福', emoji: '⭐', effect: '增强爱情运和人际关系', duration: '3天' },
+        { name: '木星祝福', emoji: '🪐', effect: '带来好运和扩张机会', duration: '7天' },
+        { name: '水星祝福', emoji: '☄️', effect: '提升沟通和思维能力', duration: '5天' },
+        { name: '火星祝福', emoji: '🔥', effect: '增强行动力和勇气', duration: '2天' }
+      ];
+      
+      const blessing = blessings[Math.floor(Math.random() * blessings.length)];
+      setIsDrawing(false);
+      
+      alert(`🌟 星象祝福已接收！\n祝福类型：${blessing.name} ${blessing.emoji}\n效果：${blessing.effect}\n持续时间：${blessing.duration}`);
+    }, 1500);
+  };
+
+  // 月相记录功能
+  const recordMoonPhase = () => {
+    const today = new Date();
+    const moonRecords = JSON.parse(localStorage.getItem('moonRecords') || '[]');
+    
+    const newRecord = {
+      date: today.toLocaleDateString(),
+      phase: moonPhase,
+      notes: '',
+      emotions: ['平静', '兴奋', '沉思', '感恩'][Math.floor(Math.random() * 4)]
+    };
+    
+    moonRecords.unshift(newRecord);
+    localStorage.setItem('moonRecords', JSON.stringify(moonRecords.slice(0, 30)));
+    
+    alert(`🌙 月相记录已保存！\n日期：${newRecord.date}\n月相：${moonPhase.name} ${moonPhase.emoji}\n情绪：${newRecord.emotions}`);
+  };
+
   return (
     <PageLayout title="神秘塔罗">
       <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -334,38 +559,57 @@ function TarotPage() {
                       <div className="text-5xl mb-3">🔮</div>
                       <h2 className="text-2xl font-bold mb-2">神秘塔罗</h2>
                       <p className="text-purple-100">每日抽卡，聆听命运的指引</p>
+                      
+                      {/* 用户信息显示 */}
+                      <div className="mt-4 bg-white/20 rounded-lg p-3">
+                        <div className="flex items-center justify-center space-x-3 text-sm">
+                          <span>🎂 {userInfo.birthDate}</span>
+                          <span>✨ {userInfo.zodiac}</span>
+                          <button 
+                            onClick={() => setShowUserInfoModal(true)}
+                            className="bg-white/30 hover:bg-white/40 px-2 py-1 rounded text-xs transition-all"
+                          >
+                            修改
+                          </button>
+                        </div>
+                        {globalUserConfig && globalUserConfig.birthDate && globalUserConfig.birthDate !== userInfo.birthDate && (
+                          <div className="text-xs text-center mt-2 opacity-80">
+                            全局配置: {globalUserConfig.birthDate} · {globalUserConfig.zodiac}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </Card>
 
                   {/* 抽卡模式选择 */}
                   <Card>
-                    <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-center">🎴 选择抽卡模式</h3>
+                    <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-6 text-center text-lg">🎴 选择抽卡模式</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <Button
                         onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                        className={`p-6 rounded-xl text-center transition-all ${
+                        className={`p-5 rounded-xl text-center transition-all duration-300 ${
                           drawMode === DRAW_MODES.SINGLE
-                            ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-xl scale-105'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-2xl scale-105 ring-2 ring-purple-300 dark:ring-purple-700'
+                            : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
                         }`}
                       >
-                        <div className="text-4xl mb-2">🃏</div>
-                        <div className="font-bold text-lg mb-1">单张抽卡</div>
-                        <div className="text-sm opacity-80">
+                        <div className="text-5xl mb-3">🃏</div>
+                        <div className="font-bold text-base mb-2 leading-tight">单张抽卡</div>
+                        <div className="text-xs opacity-90 leading-relaxed px-1">
                           简明扼要<br/>即时解答
                         </div>
                       </Button>
                       <Button
                         onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                        className={`p-6 rounded-xl text-center transition-all ${
+                        className={`p-5 rounded-xl text-center transition-all duration-300 ${
                           drawMode === DRAW_MODES.TRIPLE
-                            ? 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-xl scale-105'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-2xl scale-105 ring-2 ring-pink-300 dark:ring-pink-700'
+                            : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
                         }`}
                       >
-                        <div className="text-4xl mb-2">🃏🃏🃏</div>
-                        <div className="font-bold text-lg mb-1">三张抽卡</div>
-                        <div className="text-sm opacity-80">
+                        <div className="text-5xl mb-3">🃏🃏🃏</div>
+                        <div className="font-bold text-base mb-2 leading-tight">三张抽卡</div>
+                        <div className="text-xs opacity-90 leading-relaxed px-1">
                           时间线分析<br/>深度解读
                         </div>
                       </Button>
@@ -385,11 +629,11 @@ function TarotPage() {
                           <Button
                             onClick={drawCards}
                             disabled={isDrawing}
-                            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-3 rounded-full text-lg font-medium shadow-lg transition-all transform hover:scale-105"
+                            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-4 rounded-full text-base font-medium shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
                           >
                             {isDrawing ? '正在抽牌中...' : drawMode === DRAW_MODES.SINGLE ? '开始单张抽卡' : '开始三张抽卡'}
                           </Button>
-                          <p className="text-gray-500 dark:text-gray-400 mt-4 text-sm">
+                          <p className="text-gray-500 dark:text-gray-400 mt-4 text-sm px-4">
                             {drawMode === DRAW_MODES.SINGLE
                               ? '深呼吸，放松身心，点击抽取今日的核心指引'
                               : '深呼吸，放松身心，点击抽取三张牌进行深度解读'}
@@ -399,30 +643,30 @@ function TarotPage() {
                         <div className="py-6 space-y-6">
                           {/* 卡片展示区域 */}
                           <div className="space-y-6">
-                            {/* 单张牌展示 */}
-                            {drawnCards.mode === DRAW_MODES.SINGLE && drawnCards.cards[0] && (
-                              <>
-                                <div className="bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-lg p-6 shadow-lg">
-                                  <div className="text-center">
-                                    <div className="text-7xl mb-4">🃏</div>
-                                    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                                      {drawnCards.cards[0].name}
-                                    </h3>
-                                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
-                                      {drawnCards.cards[0].nameEn}
-                                    </p>
-                                    <div className="flex flex-wrap justify-center gap-2 mb-4">
-                                      {drawnCards.cards[0].keywords.map((keyword, index) => (
-                                        <span
-                                          key={index}
-                                          className="px-3 py-1 bg-white dark:bg-gray-800 rounded-full text-xs font-medium text-purple-600 dark:text-purple-300"
-                                        >
-                                          {keyword}
-                                        </span>
-                                      ))}
+                                {/* 单张牌展示 */}
+                                {drawnCards.mode === DRAW_MODES.SINGLE && drawnCards.cards[0] && (
+                                  <>
+                                    <div className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-2xl p-6 shadow-2xl border border-purple-100 dark:border-purple-800">
+                                      <div className="text-center">
+                                        <div className="text-7xl mb-4 animate-pulse">🃏</div>
+                                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2 tracking-wide">
+                                          {drawnCards.cards[0].name}
+                                        </h3>
+                                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 font-medium">
+                                          {drawnCards.cards[0].nameEn}
+                                        </p>
+                                        <div className="flex flex-wrap justify-center gap-2 mb-4">
+                                          {drawnCards.cards[0].keywords.map((keyword, index) => (
+                                            <span
+                                              key={index}
+                                              className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
+                                            >
+                                              {keyword}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
                                     </div>
-                                  </div>
-                                </div>
 
                                 {/* 单张牌解读 */}
                                 <Card>
@@ -465,13 +709,13 @@ function TarotPage() {
                                 <div className="flex gap-3">
                                   <Button
                                     onClick={() => { setDrawnCards(null); drawCards(); }}
-                                    className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-6 py-3 rounded-lg text-sm font-medium transition-all"
+                                    className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
                                   >
                                     🔄 重新抽卡
                                   </Button>
                                   <Button
                                     onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all"
+                                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
                                   >
                                     📊 尝试三张抽卡
                                   </Button>
@@ -482,18 +726,18 @@ function TarotPage() {
                             {/* 三张牌展示 */}
                             {drawnCards.mode === DRAW_MODES.TRIPLE && (
                               <>
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-3 gap-3">
                                   {drawnCards.cards.map((card, index) => (
-                                    <div key={index} className="bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-lg p-4 shadow-lg">
+                                    <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-4 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
                                       <div className="text-center">
-                                        <div className="text-5xl mb-2">🃏</div>
-                                        <div className="bg-white dark:bg-gray-800 rounded-lg px-2 py-1 mb-2">
-                                          <h4 className="font-bold text-sm text-gray-800 dark:text-white">{CARD_POSITIONS[index]}</h4>
+                                        <div className="text-5xl mb-2 animate-pulse">🃏</div>
+                                        <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-3 py-1.5 mb-2 shadow-sm">
+                                          <h4 className="font-bold text-xs text-purple-700 dark:text-purple-300 tracking-wide">{CARD_POSITIONS[index]}</h4>
                                         </div>
-                                        <h3 className="text-base font-bold text-gray-800 dark:text-white mb-1">
+                                        <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1 leading-tight">
                                           {card.name}
                                         </h3>
-                                        <p className="text-gray-600 dark:text-gray-300 text-xs mb-2">
+                                        <p className="text-gray-600 dark:text-gray-300 text-xs font-medium mb-2">
                                           {card.nameEn}
                                         </p>
                                       </div>
@@ -503,33 +747,33 @@ function TarotPage() {
 
                                 {/* 三张牌解读模式选择 */}
                                 <Card>
-                                  <h4 className="font-bold text-gray-800 dark:text-white mb-4 text-center">📖 选择解读方式</h4>
+                                  <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 text-center text-base">📖 选择解读方式</h4>
                                   <div className="grid grid-cols-2 gap-3">
                                     <Button
                                       onClick={() => setShowDetailedReading(!showDetailedReading)}
-                                      className={`p-4 rounded-lg text-center transition-all ${
+                                      className={`p-4 rounded-xl text-center transition-all duration-300 ${
                                         !showDetailedReading
-                                          ? 'bg-gradient-to-br from-blue-400 to-cyan-600 text-white shadow-lg'
-                                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                          ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-2xl scale-105 ring-2 ring-blue-300 dark:ring-blue-700'
+                                          : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
                                       }`}
                                     >
-                                      <div className="text-2xl mb-1">🕐</div>
-                                      <div className="font-bold text-sm mb-1">时间线分析</div>
-                                      <div className="text-xs opacity-80">
+                                      <div className="text-2xl mb-2">🕐</div>
+                                      <div className="font-bold text-sm mb-1 leading-tight">时间线分析</div>
+                                      <div className="text-xs opacity-90 leading-relaxed">
                                         过去·现在·未来
                                       </div>
                                     </Button>
                                     <Button
-                                      onClick={() => setShowDetailedReading(showDetailedReading)}
-                                      className={`p-4 rounded-lg text-center transition-all ${
+                                      onClick={() => setShowDetailedReading(!showDetailedReading)}
+                                      className={`p-4 rounded-xl text-center transition-all duration-300 ${
                                         showDetailedReading
-                                          ? 'bg-gradient-to-br from-orange-400 to-red-600 text-white shadow-lg'
-                                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                          ? 'bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-2xl scale-105 ring-2 ring-orange-300 dark:ring-orange-700'
+                                          : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
                                       }`}
                                     >
-                                      <div className="text-2xl mb-1">🎯</div>
-                                      <div className="font-bold text-sm mb-1">关联性分析</div>
-                                      <div className="text-xs opacity-80">
+                                      <div className="text-2xl mb-2">🎯</div>
+                                      <div className="font-bold text-sm mb-1 leading-tight">关联性分析</div>
+                                      <div className="text-xs opacity-90 leading-relaxed">
                                         问题·阻碍·建议
                                       </div>
                                     </Button>
@@ -539,7 +783,7 @@ function TarotPage() {
                                 {/* 时间线解读 */}
                                 {!showDetailedReading && drawnCards.mode === DRAW_MODES.TRIPLE && (
                                   <Card>
-                                    <h4 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                                    <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
                                       <span className="mr-2">🕐</span>
                                       时间线解读（过去-现在-未来）
                                     </h4>
@@ -602,7 +846,7 @@ function TarotPage() {
                                 {/* 关联性解读 */}
                                 {showDetailedReading && drawnCards.mode === DRAW_MODES.TRIPLE && (
                                   <Card>
-                                    <h4 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                                    <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
                                       <span className="mr-2">🎯</span>
                                       关联性解读（问题-阻碍-建议）
                                     </h4>
@@ -717,13 +961,13 @@ function TarotPage() {
                                 <div className="flex gap-3">
                                   <Button
                                     onClick={() => { setDrawnCards(null); setShowDetailedReading(false); drawCards(); }}
-                                    className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-6 py-3 rounded-lg text-sm font-medium transition-all"
+                                    className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
                                   >
                                     🔄 重新抽卡
                                   </Button>
                                   <Button
                                     onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                                    className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-all"
+                                    className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
                                   >
                                     🎴 尝试单张抽卡
                                   </Button>
@@ -739,7 +983,7 @@ function TarotPage() {
                   {/* 许愿区域 */}
                   {drawnCards && (
                     <Card>
-                      <h3 className="font-bold text-gray-800 dark:text-white mb-4">🌟 许下心愿</h3>
+                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-lg">🌟 许下心愿</h3>
                       <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                         借助今日抽到的卡牌能量，许下你的心愿
                       </p>
@@ -747,12 +991,12 @@ function TarotPage() {
                         value={wish}
                         onChange={(e) => setWish(e.target.value)}
                         placeholder="在这里写下你的心愿..."
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white resize-none"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white resize-none transition-all duration-300 focus:border-purple-400 dark:focus:border-purple-600"
                         rows={3}
                       />
                       <Button
                         onClick={makeWish}
-                        className="mt-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-all"
+                        className="mt-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
                       >
                         ✨ 许下心愿
                       </Button>
@@ -789,30 +1033,109 @@ function TarotPage() {
                     </Card>
                   )}
 
-                  {/* 其他实用功能 */}
+                  {/* 命运指引功能 */}
+                  {fortuneReading && (
+                    <Card id="fortune-reading">
+                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <span className="mr-2">🎯</span>
+                        {userInfo.zodiacSign ? `${userInfo.zodiacSign.name}今日运势` : '今日运势指引'}
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div className="p-2 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                            <div className="text-xs text-gray-600 dark:text-gray-300">能量水平</div>
+                            <div className="font-bold text-sm text-blue-600 dark:text-blue-300">{fortuneReading.energyLevel}</div>
+                          </div>
+                          <div className="p-2 bg-green-50 dark:bg-green-900 rounded-lg">
+                            <div className="text-xs text-gray-600 dark:text-gray-300">幸运指数</div>
+                            <div className="font-bold text-sm text-green-600 dark:text-green-300">{fortuneReading.luckLevel}</div>
+                          </div>
+                          <div className="p-2 bg-purple-50 dark:bg-purple-900 rounded-lg">
+                            <div className="text-xs text-gray-600 dark:text-gray-300">关注领域</div>
+                            <div className="font-bold text-sm text-purple-600 dark:text-purple-300">{fortuneReading.focusArea}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 rounded-lg">
+                          <h4 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2 flex items-center text-sm">
+                            <span className="mr-2">💡</span>
+                            指引卡牌：{fortuneReading.guidanceCard.name}
+                          </h4>
+                          <p className="text-xs text-gray-700 dark:text-gray-300">{fortuneReading.guidanceCard.meaning}</p>
+                        </div>
+                        
+                        <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-lg">
+                          <h4 className="font-bold text-indigo-800 dark:text-indigo-200 mb-2 text-sm">今日建议</h4>
+                          <p className="text-xs text-gray-700 dark:text-gray-300">{fortuneReading.advice}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2 text-xs space-y-1 sm:space-y-0">
+                            <span>幸运色：{fortuneReading.luckyColor}</span>
+                            <span>幸运数字：{fortuneReading.luckyNumber}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* 实用功能区域 - 移动端优化 */}
                   <Card>
-                    <h3 className="font-bold text-gray-800 dark:text-white mb-4">🛠️ 更多功能</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button className="p-4 bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-lg text-sm font-medium transition-all">
-                        <div className="text-2xl mb-1">🎯</div>
-                        <div>命运指引</div>
-                        <div className="text-xs opacity-80">查看近期运势</div>
+                    <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-lg">✨ 能量管理</h3>
+                    
+                    {/* 功能按钮网格 */}
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <Button 
+                        onClick={generateFortuneReading}
+                        disabled={isDrawing}
+                        className="p-3 sm:p-4 bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px]"
+                      >
+                        <div className="text-xl sm:text-2xl mb-1">🎯</div>
+                        <div className="font-semibold text-xs sm:text-sm mb-1 leading-tight">命运指引</div>
+                        <div className="text-xs opacity-80 leading-tight">查看近期运势</div>
                       </Button>
-                      <Button className="p-4 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-lg text-sm font-medium transition-all">
-                        <div className="text-2xl mb-1">💎</div>
-                        <div>能量清理</div>
-                        <div className="text-xs opacity-80">清理负面能量</div>
+                      <Button 
+                        onClick={performEnergyCleansing}
+                        disabled={isDrawing}
+                        className="p-3 sm:p-4 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px]"
+                      >
+                        <div className="text-xl sm:text-2xl mb-1">💎</div>
+                        <div className="font-semibold text-xs sm:text-sm mb-1 leading-tight">能量清理</div>
+                        <div className="text-xs opacity-80 leading-tight">清理负面能量</div>
                       </Button>
-                      <Button className="p-4 bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white rounded-lg text-sm font-medium transition-all">
-                        <div className="text-2xl mb-1">🔥</div>
-                        <div>星象祝福</div>
-                        <div className="text-xs opacity-80">获取星辰祝福</div>
+                      <Button 
+                        onClick={receiveStarBlessing}
+                        disabled={isDrawing}
+                        className="p-3 sm:p-4 bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px]"
+                      >
+                        <div className="text-xl sm:text-2xl mb-1">🔥</div>
+                        <div className="font-semibold text-xs sm:text-sm mb-1 leading-tight">星象祝福</div>
+                        <div className="text-xs opacity-80 leading-tight">获取星辰祝福</div>
                       </Button>
-                      <Button className="p-4 bg-gradient-to-br from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white rounded-lg text-sm font-medium transition-all">
-                        <div className="text-2xl mb-1">🌙</div>
-                        <div>月相记录</div>
-                        <div className="text-xs opacity-80">记录月相变化</div>
+                      <Button 
+                        onClick={recordMoonPhase}
+                        className="p-3 sm:p-4 bg-gradient-to-br from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px]"
+                      >
+                        <div className="text-xl sm:text-2xl mb-1">🌙</div>
+                        <div className="font-semibold text-xs sm:text-sm mb-1 leading-tight">月相记录</div>
+                        <div className="text-xs opacity-80 leading-tight">记录月相变化</div>
                       </Button>
+                    </div>
+                    
+                    {/* 能量水平指示器 */}
+                    <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">当前能量水平</span>
+                        <span className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">{energyLevel}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${energyLevel}%` }}
+                        ></div>
+                      </div>
+                      <div className="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>低</span>
+                        <span>中</span>
+                        <span>高</span>
+                      </div>
                     </div>
                   </Card>
                 </div>
@@ -989,6 +1312,124 @@ function TarotPage() {
           </div>
         </div>
       </div>
+
+      {/* 用户信息设置模态框 */}
+      {showUserInfoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+              <span className="mr-2">✨</span>
+              设置塔罗牌个人信息
+            </h3>
+            
+            <div className="space-y-4">
+              {/* 全局配置信息显示 */}
+              {globalUserConfig && globalUserConfig.birthDate && (
+                <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-lg">
+                  <h4 className="font-bold text-blue-800 dark:text-blue-200 mb-2 text-sm flex items-center">
+                    <span className="mr-2">🌍</span>
+                    全局配置信息
+                  </h4>
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    生日: {globalUserConfig.birthDate} · 星座: {globalUserConfig.zodiac}
+                  </p>
+                  <button 
+                    onClick={() => {
+                      const zodiacSign = calculateZodiac(globalUserConfig.birthDate);
+                      setUserInfo({
+                        birthDate: globalUserConfig.birthDate,
+                        zodiac: zodiacSign ? zodiacSign.name : globalUserConfig.zodiac || '',
+                        zodiacSign
+                      });
+                    }}
+                    className="mt-2 text-xs bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 px-2 py-1 rounded text-blue-700 dark:text-blue-300 transition-all duration-300"
+                  >
+                    使用全局配置
+                  </button>
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  塔罗牌出生日期
+                </label>
+                <input
+                  type="date"
+                  value={userInfo.birthDate}
+                  onChange={(e) => {
+                    const zodiacSign = calculateZodiac(e.target.value);
+                    setUserInfo({
+                      ...userInfo,
+                      birthDate: e.target.value,
+                      zodiac: zodiacSign ? zodiacSign.name : '',
+                      zodiacSign
+                    });
+                  }}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  此设置仅用于塔罗牌功能，独立于全局配置
+                </p>
+              </div>
+              
+              {userInfo.zodiacSign && (
+                <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 rounded-lg">
+                  <h4 className="font-bold text-purple-800 dark:text-purple-200 mb-2">
+                    {userInfo.zodiacSign.name} ({userInfo.zodiacSign.element}象星座)
+                  </h4>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    出生日期范围：{userInfo.zodiacSign.dates}
+                  </p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {userInfo.zodiacSign.traits.map((trait, index) => (
+                      <span key={index} className="px-2 py-1 bg-white dark:bg-gray-800 rounded text-xs text-purple-600 dark:text-purple-300">
+                        {trait}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex gap-3 mt-6">
+                <Button
+                  onClick={() => {
+                    // 重置为全局配置
+                    setUserInfo(getDefaultUserInfo());
+                  }}
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300"
+                >
+                  重置
+                </Button>
+                <Button
+                  onClick={() => setShowUserInfoModal(false)}
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300"
+                >
+                  取消
+                </Button>
+                <Button
+                  onClick={() => saveUserInfo(userInfo.birthDate)}
+                  disabled={!userInfo.birthDate}
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  保存
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 加载动画 */}
+      {isDrawing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl">
+            <div className="text-center">
+              <div className="text-6xl animate-spin mb-4">🌀</div>
+              <p className="text-gray-700 dark:text-gray-300 font-medium">正在连接宇宙能量...</p>
+            </div>
+          </div>
+        </div>
+      )}
     </PageLayout>
   );
 }

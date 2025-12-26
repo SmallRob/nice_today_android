@@ -17,17 +17,17 @@ const getCardColor = (strength) => {
 
 /**
  * 获取卡片颜色（深色模式）
- * 增加不透明度以确保文字清晰可见
+ * 增加不透明度和对比度以确保文字清晰可见
  */
 const getCardColorDark = (strength) => {
   switch (strength) {
-    case '强': return 'from-green-900/40 to-green-800/40 dark:border-green-700/50';
-    case '偏强': return 'from-blue-900/40 to-blue-800/40 dark:border-blue-700/50';
-    case '中偏强': return 'from-indigo-900/40 to-indigo-800/40 dark:border-indigo-700/50';
-    case '中': return 'from-gray-800/50 to-gray-700/50 dark:border-gray-600/50';
-    case '偏弱': return 'from-orange-900/50 to-orange-800/50 dark:border-orange-600/50';
-    case '弱': return 'from-red-900/60 to-red-800/60 dark:border-red-600/50';
-    default: return 'from-gray-800/50 to-gray-700/50 dark:border-gray-600/50';
+    case '强': return 'from-green-900/80 to-green-800/80 dark:border-green-600';
+    case '偏强': return 'from-blue-900/80 to-blue-800/80 dark:border-blue-600';
+    case '中偏强': return 'from-indigo-900/80 to-indigo-800/80 dark:border-indigo-600';
+    case '中': return 'from-gray-800/80 to-gray-700/80 dark:border-gray-500';
+    case '偏弱': return 'from-orange-900/80 to-orange-800/80 dark:border-orange-500';
+    case '弱': return 'from-red-900/80 to-red-800/80 dark:border-red-500';
+    default: return 'from-gray-800/80 to-gray-700/80 dark:border-gray-500';
   }
 };
 
@@ -60,9 +60,9 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
     
     if (ziweiData.error) {
       return (
-        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
-          <h4 className="text-sm font-semibold text-red-700 dark:text-red-400 mb-2">⚠️ 计算错误</h4>
-          <div className="text-sm text-red-600 dark:text-red-400 space-y-1">
+        <div className="bg-red-50 dark:bg-red-900/50 rounded-lg p-4 border border-red-200 dark:border-red-600">
+          <h4 className="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">⚠️ 计算错误</h4>
+          <div className="text-sm text-red-600 dark:text-red-300 space-y-1">
             <p>{ziweiData.error}</p>
             <p className="text-xs opacity-80">建议：请检查出生日期、时间和经纬度是否正确</p>
           </div>
@@ -78,9 +78,9 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       };
 
       return (
-        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
-          <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2">📋 缺少必要信息</h4>
-          <div className="text-sm text-orange-600 dark:text-orange-400">
+        <div className="bg-orange-50 dark:bg-orange-900/50 rounded-lg p-4 border border-orange-200 dark:border-orange-600">
+          <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-2">📋 缺少必要信息</h4>
+          <div className="text-sm text-orange-600 dark:text-orange-300">
             <p className="mb-2">请完善以下信息以计算紫微命盘：</p>
             <ul className="list-disc list-inside space-y-1">
               {ziweiData.missingFields.map(field => (
@@ -107,9 +107,9 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
     if (allWarnings.length === 0) return null;
 
     return (
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
-        <h4 className="text-sm font-semibold text-yellow-700 dark:text-yellow-400 mb-2">⚡ 数据质量警告</h4>
-        <div className="text-sm text-yellow-600 dark:text-yellow-400 space-y-1">
+      <div className="bg-yellow-50 dark:bg-yellow-900/50 rounded-lg p-4 border border-yellow-200 dark:border-yellow-600">
+        <h4 className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 mb-2">⚡ 数据质量警告</h4>
+        <div className="text-sm text-yellow-600 dark:text-yellow-300 space-y-1">
           {allWarnings.map((warning, index) => (
             <div key={index} className="flex items-start gap-2">
               <span className="text-lg">⚠️</span>
@@ -132,9 +132,9 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
     const { birthDate, birthTime, trueSolarTime, longitude, latitude } = metadata;
 
     return (
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-        <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">📊 计算参数</h4>
-        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
+      <div className="bg-gray-50 dark:bg-gray-800/80 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+        <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-200 mb-2">📊 计算参数</h4>
+        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-300">
           <div>出生日期：{birthDate}</div>
           <div>出生时间：{birthTime}</div>
           <div>经度：{longitude?.toFixed(4)}°</div>
@@ -178,12 +178,12 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
           </div>
         </div>
         {errorDisplay}
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+        <div className="bg-blue-50 dark:bg-blue-900/50 rounded-lg p-4 border border-blue-200 dark:border-blue-600">
           <div className="flex items-start gap-3">
             <span className="text-2xl">💡</span>
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">如何修复</h4>
-              <div className="text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-1">如何修复</h4>
+              <div className="text-xs text-gray-600 dark:text-gray-300 space-y-0.5">
                 <p>• 确保出生日期格式为 YYYY-MM-DD（如：1991-04-30）</p>
                 <p>• 确保出生时间格式为 HH:MM（如：12:30）</p>
                 <p>• 确保经纬度在有效范围内（经度：-180 到 180，纬度：-90 到 90）</p>
@@ -212,9 +212,9 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
             </div>
           </div>
         </div>
-        <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
-          <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2">⚠️ 数据不完整</h4>
-          <div className="text-sm text-orange-600 dark:text-orange-400">
+        <div className="bg-orange-50 dark:bg-orange-900/50 rounded-lg p-4 border border-orange-200 dark:border-orange-600">
+          <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-2">⚠️ 数据不完整</h4>
+          <div className="text-sm text-orange-600 dark:text-orange-300">
             <p>紫微命盘数据不完整或计算失败。</p>
             <p className="text-xs mt-2 opacity-80">请检查出生信息是否完整，或点击"刷新八字信息"按钮重新计算。</p>
           </div>
@@ -263,9 +263,9 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
 
       {/* 命宫总结 */}
       {summary && (
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">📊 命盘总述</h4>
-          <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/60 dark:to-purple-900/60 rounded-lg p-4 border border-indigo-200 dark:border-indigo-600">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2">📊 命盘总述</h4>
+          <div className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
             <p>
               <span className="font-medium">整体格局：</span>
               {summary.overallStrength}
@@ -283,15 +283,15 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       )}
 
       {/* 重点宫位 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-base font-semibold text-gray-700 dark:text-gray-300">🎯 重点宫位</h4>
+          <h4 className="text-base font-semibold text-gray-700 dark:text-gray-100">🎯 重点宫位</h4>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
               isExpanded
-                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300'
+                : 'bg-gray-100 text-gray-700 dark:bg-gray-700/80 dark:text-gray-300'
             }`}
           >
             {isExpanded ? '收起' : '展开'}
@@ -331,15 +331,15 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       </div>
 
       {/* 十二宫位展开/收起 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-base font-semibold text-gray-700 dark:text-gray-300">🔮 十二宫位详解</h4>
+          <h4 className="text-base font-semibold text-gray-700 dark:text-gray-100">🔮 十二宫位详解</h4>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
               isExpanded
-                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300'
+                : 'bg-gray-100 text-gray-700 dark:bg-gray-700/80 dark:text-gray-300'
             }`}
           >
             {isExpanded ? '收起全部' : '展开全部'}
@@ -405,18 +405,18 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
 
       {/* 命理建议 */}
       {summary && summary.advice && summary.advice.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">💡 命理建议</h4>
+        <div className="bg-amber-50 dark:bg-amber-900/50 rounded-lg p-4 border border-amber-200 dark:border-amber-600">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-3">💡 命理建议</h4>
           <div className="space-y-2">
             {summary.advice.map((advice, index) => (
               <div
                 key={index}
                 className={`flex items-start gap-2 p-2 rounded-lg ${
                   advice.type === 'success'
-                    ? 'bg-green-100 dark:bg-green-900/30'
+                    ? 'bg-green-100 dark:bg-green-900/50'
                     : advice.type === 'warning'
-                      ? 'bg-red-100 dark:bg-red-900/30'
-                      : 'bg-blue-100 dark:bg-blue-900/30'
+                      ? 'bg-red-100 dark:bg-red-900/50'
+                      : 'bg-blue-100 dark:bg-blue-900/50'
                 }`}
               >
                 <span className="text-lg">{advice.type === 'success' ? '✅' : advice.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
@@ -424,7 +424,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-0.5">
                     {advice.title}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <p className="text-xs text-gray-600 dark:text-gray-300">
                     {advice.content}
                   </p>
                 </div>
@@ -435,12 +435,12 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       )}
 
       {/* 使用说明 */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+      <div className="bg-blue-50 dark:bg-blue-900/50 rounded-lg p-4 border border-blue-200 dark:border-blue-600">
         <div className="flex items-start gap-3">
           <span className="text-2xl">📜</span>
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">紫微命宫说明</h4>
-            <div className="text-xs text-gray-600 dark:text-gray-400 space-y-0.5">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-1">紫微命宫说明</h4>
+            <div className="text-xs text-gray-600 dark:text-gray-300 space-y-0.5">
               <p>• 紫微命宫基于出生时间、经纬度等精确信息计算</p>
               <p>• 十二宫位代表人生不同领域，强度分数（20-100）反映该领域的先天运势</p>
               <p>• 命宫最强代表您的先天优势领域，最弱宫位需要后天弥补</p>

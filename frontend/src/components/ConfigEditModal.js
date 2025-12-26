@@ -477,16 +477,77 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       // 计算时辰信息
       const shichenSimple = getShichenSimple(formData.birthTime || '12:30');
 
+      // 创建安全、可序列化的配置对象，避免React错误#31
       let finalConfig = {
-        ...formData,
+        // 基础字段
+        nickname: formData.nickname || '',
+        realName: formData.realName || '',
+        birthDate: formData.birthDate || '',
+        birthTime: formData.birthTime || '12:30',
+        gender: formData.gender || 'secret',
+        zodiac: formData.zodiac || '',
+        zodiacAnimal: formData.zodiacAnimal || '',
+        mbti: formData.mbti || '',
+        isused: formData.isused ?? false,
+        
+        // 结构化数据（确保可序列化）
         birthLocation: finalLocation,
         shichen: shichenSimple,  // 保存简化格式的时辰
-        // 确保必填字段有默认值
-        isused: formData.isused ?? false,
-        nameScore: formData.nameScore ?? null,
-        bazi: formData.bazi ?? null,
-        lunarInfo: formData.lunarInfo ?? null,
-        lastCalculated: formData.lastCalculated ?? null
+        
+        // 复杂对象（确保为null或简单对象）
+        nameScore: formData.nameScore ? {
+          tian: formData.nameScore.tian || 0,
+          ren: formData.nameScore.ren || 0,
+          di: formData.nameScore.di || 0,
+          wai: formData.nameScore.wai || 0,
+          zong: formData.nameScore.zong || 0,
+          mainType: formData.nameScore.mainType || '',
+          totalScore: formData.nameScore.totalScore || 0
+        } : null,
+        
+        bazi: formData.bazi ? {
+          year: formData.bazi.year || '',
+          month: formData.bazi.month || '',
+          day: formData.bazi.day || '',
+          hour: formData.bazi.hour || '',
+          lunar: formData.bazi.lunar ? {
+            year: formData.bazi.lunar.year || '',
+            month: formData.bazi.lunar.month || '',
+            day: formData.bazi.lunar.day || '',
+            text: formData.bazi.lunar.text || '',
+            monthStr: formData.bazi.lunar.monthStr || '',
+            dayStr: formData.bazi.lunar.dayStr || ''
+          } : null,
+          wuxing: formData.bazi.wuxing ? {
+            year: formData.bazi.wuxing.year || '',
+            month: formData.bazi.wuxing.month || '',
+            day: formData.bazi.wuxing.day || '',
+            hour: formData.bazi.wuxing.hour || '',
+            text: formData.bazi.wuxing.text || ''
+          } : null,
+          nayin: formData.bazi.nayin ? {
+            year: formData.bazi.nayin.year || '',
+            month: formData.bazi.nayin.month || '',
+            day: formData.bazi.nayin.day || '',
+            hour: formData.bazi.nayin.hour || ''
+          } : null,
+          shichen: formData.bazi.shichen ? {
+            ganzhi: formData.bazi.shichen.ganzhi || '',
+            name: formData.bazi.shichen.name || ''
+          } : null,
+          solar: formData.bazi.solar ? {
+            text: formData.bazi.solar.text || ''
+          } : null
+        } : null,
+        
+        lunarInfo: formData.lunarInfo ? {
+          lunarBirthDate: formData.lunarInfo.lunarBirthDate || '',
+          lunarBirthMonth: formData.lunarInfo.lunarBirthMonth || '',
+          lunarBirthDay: formData.lunarInfo.lunarBirthDay || '',
+          trueSolarTime: formData.lunarInfo.trueSolarTime || ''
+        } : null,
+        
+        lastCalculated: formData.lastCalculated || new Date().toISOString()
       };
 
       // 计算农历和真太阳时信息（简化处理）
