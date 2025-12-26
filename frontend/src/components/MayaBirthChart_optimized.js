@@ -254,89 +254,69 @@ const MayaBirthChart = () => {
     }
   }, [generateBirthInfo, cacheRef]);
 
-  // 加载用户配置 - 优化出生日期获取逻辑，确保向后兼容性
+  // 加载用户配置 - 简化出生日期获取逻辑，参考UnifiedNumerologyPage实现
   useEffect(() => {
-    let isMounted = true;
+    try {
+      let birthDate = null;
+      let nickname = '用户';
 
-    const init = async () => {
-      if (!isMounted || isInitialized) return;
+      // 从用户配置上下文获取用户信息
+      if (currentConfig) {
+        // 优先从标准配置获取
+        birthDate = currentConfig.birthDate;
+        nickname = currentConfig.nickname || '用户';
 
-      // 等待配置加载完成（最多等待5秒）
-      let retryCount = 0;
-      const maxRetries = 50; // 5秒，每100ms检查一次
-
-      while (configLoading && retryCount < maxRetries && isMounted) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        retryCount++;
+        // 如果没有，尝试从其他位置获取（兼容性）
+        if (!birthDate && currentConfig.birthInfo) {
+          birthDate = currentConfig.birthInfo.birthDate;
+        }
+        if (!birthDate && currentConfig.userInfo) {
+          birthDate = currentConfig.userInfo.birthDate;
+        }
       }
 
-      // 如果超时后仍在加载，使用当前配置状态继续
-      if (!isMounted) return;
-
-      // 从用户配置上下文获取用户信息（带错误处理和向后兼容性）
-      let config = null;
-      let birthDate = null;
-      
-      try {
-        config = currentConfig;
-        
-        // 多层级获取出生日期，确保兼容性
-        if (config) {
-          // 优先从标准配置获取
-          birthDate = config.birthDate;
-          
-          // 如果标准配置中没有，尝试从其他可能的位置获取
-          if (!birthDate && config.birthInfo) {
-            birthDate = config.birthInfo.birthDate;
-          }
-          
-          // 如果仍然没有，尝试从用户信息中获取
-          if (!birthDate && config.userInfo) {
-            birthDate = config.userInfo.birthDate;
-          }
-          
-          // 最后尝试使用默认值（确保向后兼容性）
-          if (!birthDate) {
-            birthDate = '1991-01-01'; // 默认出生日期
-            console.warn('未找到用户出生日期，使用默认值:', birthDate);
-          }
-        }
-      } catch (error) {
-        console.warn('获取用户配置失败:', error.message);
-        // 使用默认出生日期确保功能可用
-        birthDate = '1991-01-01';
+      // 使用默认日期（确保向后兼容性）
+      if (!birthDate) {
+        birthDate = '1991-04-21';
+        console.warn('未找到用户出生日期，使用默认值:', birthDate);
       }
 
       // 设置用户信息
       setUserInfo({
-        nickname: config?.nickname || '用户',
-        birthDate: birthDate || ''
+        nickname: nickname,
+        birthDate: birthDate
       });
 
+      // 如果有出生日期，加载玛雅数据
       if (birthDate) {
-        // 直接加载用户配置中的出生日期数据
         try {
-          await loadBirthInfo(new Date(birthDate));
-        } catch (err) {
-          console.error('加载出生信息失败:', err);
+          const newBirthDate = new Date(birthDate);
+          if (!isNaN(newBirthDate.getTime())) {
+            loadBirthInfo(newBirthDate);
+          }
+        } catch (error) {
+          console.error('加载出生信息失败:', error);
           setError('加载失败，请稍后再试');
-        } finally {
-          setLoading(false);
         }
-      } else {
-        // 如果没有出生日期，显示提示信息
-        setLoading(false);
       }
 
       setIsInitialized(true);
-    };
-
-    init();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isInitialized]);
+    } catch (error) {
+      console.error('初始化失败:', error);
+      // 出错时使用默认值
+      setUserInfo({
+        nickname: '用户',
+        birthDate: '1991-04-21'
+      });
+      try {
+        loadBirthInfo(new Date('1991-04-21'));
+      } catch (loadError) {
+        console.error('使用默认日期加载失败:', loadError);
+        setError('加载失败，请稍后再试');
+      }
+      setIsInitialized(true);
+    }
+  }, []);
 
   // 监听 currentConfig 变化 - 当配置更新时重新加载数据
   useEffect(() => {
@@ -376,7 +356,7 @@ const MayaBirthChart = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center text-white shadow-sm ring-2 ring-purple-100 dark:ring-purple-900/30">
-            <span className="text-lg font-bold">印</span>
+            <span className="text-lg font-bold">{userInfo.nickname?.charAt(0) || '印'}</span>
           </div>
           <div>
             <h1 className="text-base font-bold text-gray-900 dark:text-white tracking-tight leading-tight">

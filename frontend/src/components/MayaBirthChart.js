@@ -717,49 +717,64 @@ const MayaBirthChart = () => {
     [userInteracted, historyDates, saveHistory, saveBirthDateToGlobal, birthInfo, getCachedBirthInfo, setCachedBirthInfo, computeMayaData, generateSealInfo, generateToneInfo, generateLifePurpose, generatePersonalTraits, generateEnergyField, generateQuote, generateAuthor, ensureQuoteExists]
   );
 
-  const initializeComponent = useCallback(async () => {
+  const initializeComponent = useCallback(() => {
     // 创建新的AbortController用于初始化
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
 
-    // 精简用户信息，只保留必要字段
-    if (currentConfig) {
+    try {
+      // 简化用户信息初始化
+      let nickname = '';
+      let birthDateStr = '1991-04-21';
+
+      // 从配置获取信息
+      if (currentConfig) {
+        nickname = currentConfig.nickname || '';
+        birthDateStr = currentConfig.birthDate || birthDateStr;
+      }
+
       setUserInfo({
-        nickname: currentConfig.nickname || '',
-        birthDate: currentConfig.birthDate || ''
+        nickname: nickname,
+        birthDate: birthDateStr
       });
-    }
-    
-    // 获取出生日期
-    let birthDateToUse = DEFAULT_BIRTH_DATE;
-    if (currentConfig && currentConfig.birthDate) {
+
+      // 获取出生日期对象
+      let birthDateToUse = DEFAULT_BIRTH_DATE;
       try {
-        const parsedDate = new Date(currentConfig.birthDate);
+        const parsedDate = new Date(birthDateStr);
         if (!isNaN(parsedDate.getTime())) {
           birthDateToUse = parsedDate;
         }
       } catch (parseError) {
-        console.error("解析存储的日期失败:", parseError);
+        console.error("解析日期失败，使用默认日期:", parseError);
+        birthDateToUse = DEFAULT_BIRTH_DATE;
       }
+
+      setBirthDate(birthDateToUse);
+
+      // 延迟加载，避免阻塞UI
+      setTimeout(() => {
+        // 检查是否已取消
+        if (abortControllerRef.current?.signal.aborted) return;
+        loadBirthInfo(birthDateToUse, false);
+      }, 100);
+
+      // 加载历史记录
+      fetchHistory();
+    } catch (error) {
+      console.error('初始化失败:', error);
+      // 出错时使用默认值
+      setUserInfo({
+        nickname: '',
+        birthDate: '1991-04-21'
+      });
+      loadBirthInfo(DEFAULT_BIRTH_DATE, false);
     }
-    
-    setBirthDate(birthDateToUse);
-    
-    // 延迟加载，避免阻塞UI
-    setTimeout(() => {
-      // 检查是否已取消
-      if (abortControllerRef.current?.signal.aborted) return;
-      loadBirthInfo(birthDateToUse, false);
-    }, 100);
-    
-    // 加载历史记录
-    await fetchHistory();
-    
-    // 配置变更通过 currentConfig 自动更新，不需要手动添加监听器
+
     return null;
-  }, [fetchHistory, loadBirthInfo, loadFromStorage]);
+  }, [fetchHistory, loadBirthInfo]);
 
   // 监听 currentConfig 变化
   useEffect(() => {

@@ -3,30 +3,12 @@
  * 独立管理轻量版的用户配置，与炫彩版完全隔离
  */
 
-// 轻量版默认配置模板
+// 轻量版默认配置模板 - 简化版，只保留lite版本必需字段
 const LITE_DEFAULT_CONFIG = Object.freeze({
   nickname: '轻量版用户',
-  realName: '',
   birthDate: '1990-01-01',
   birthTime: '12:00',
-  shichen: '午时',
-  birthLocation: Object.freeze({
-    province: '北京市',
-    city: '北京市',
-    district: '朝阳区',
-    lng: 116.48,
-    lat: 39.95
-  }),
-  zodiac: '摩羯座',
-  zodiacAnimal: '马',
   gender: 'secret',
-  mbti: '',
-  nameScore: null,
-  bazi: null,
-  lunarBirthDate: null,
-  trueSolarTime: null,
-  lunarInfo: null,
-  lastCalculated: null,
   isused: false,
   isSystemDefault: true
 });
@@ -39,63 +21,20 @@ const LITE_STORAGE_KEYS = {
 
 /**
  * 深拷贝配置对象，确保用户配置与默认配置完全隔离
+ * 简化版 - 只处理lite版本需要的字段
  */
 function deepCloneConfig(sourceConfig) {
   if (!sourceConfig || typeof sourceConfig !== 'object') {
     return sourceConfig;
   }
 
-  // 创建安全的配置对象副本
+  // 创建安全的配置对象副本 - 简化版
   const safeConfig = {
-    // 基础字段
     nickname: sourceConfig.nickname || '',
-    realName: sourceConfig.realName || '',
     birthDate: sourceConfig.birthDate || '',
     birthTime: sourceConfig.birthTime || '12:00',
-    shichen: sourceConfig.shichen || '',
-    zodiac: sourceConfig.zodiac || '',
-    zodiacAnimal: sourceConfig.zodiacAnimal || '',
     gender: sourceConfig.gender || 'secret',
-    mbti: sourceConfig.mbti || '',
     isused: sourceConfig.isused ?? false,
-    
-    // 结构化数据
-    birthLocation: sourceConfig.birthLocation ? {
-      province: sourceConfig.birthLocation.province || '',
-      city: sourceConfig.birthLocation.city || '',
-      district: sourceConfig.birthLocation.district || '',
-      lng: sourceConfig.birthLocation.lng ?? 116.48,
-      lat: sourceConfig.birthLocation.lat ?? 39.95
-    } : null,
-    
-    // 复杂对象
-    nameScore: sourceConfig.nameScore ? {
-      tian: sourceConfig.nameScore.tian || 0,
-      ren: sourceConfig.nameScore.ren || 0,
-      di: sourceConfig.nameScore.di || 0,
-      wai: sourceConfig.nameScore.wai || 0,
-      zong: sourceConfig.nameScore.zong || 0,
-      mainType: sourceConfig.nameScore.mainType || '',
-      totalScore: sourceConfig.nameScore.totalScore || 0
-    } : null,
-    
-    bazi: sourceConfig.bazi ? {
-      year: sourceConfig.bazi.year || '',
-      month: sourceConfig.bazi.month || '',
-      day: sourceConfig.bazi.day || '',
-      hour: sourceConfig.bazi.hour || ''
-    } : null,
-    
-    lunarInfo: sourceConfig.lunarInfo ? {
-      lunarBirthDate: sourceConfig.lunarInfo.lunarBirthDate || '',
-      lunarBirthMonth: sourceConfig.lunarInfo.lunarBirthMonth || '',
-      lunarBirthDay: sourceConfig.lunarInfo.lunarBirthDay || '',
-      trueSolarTime: sourceConfig.lunarInfo.trueSolarTime || ''
-    } : null,
-    
-    lunarBirthDate: sourceConfig.lunarBirthDate || null,
-    trueSolarTime: sourceConfig.trueSolarTime || null,
-    lastCalculated: sourceConfig.lastCalculated || null,
     isSystemDefault: sourceConfig.isSystemDefault ?? false
   };
 
@@ -148,20 +87,11 @@ class LiteUserConfigManager {
       // 确保每个配置都有必要的字段
       this.configs = this.configs.map(config => ({
         nickname: config.nickname || LITE_DEFAULT_CONFIG.nickname,
-        realName: config.realName || '',
         birthDate: config.birthDate || LITE_DEFAULT_CONFIG.birthDate,
         birthTime: config.birthTime || LITE_DEFAULT_CONFIG.birthTime,
-        shichen: config.shichen || LITE_DEFAULT_CONFIG.shichen,
-        birthLocation: config.birthLocation || LITE_DEFAULT_CONFIG.birthLocation,
-        zodiac: config.zodiac || LITE_DEFAULT_CONFIG.zodiac,
-        zodiacAnimal: config.zodiacAnimal || LITE_DEFAULT_CONFIG.zodiacAnimal,
         gender: config.gender || LITE_DEFAULT_CONFIG.gender,
-        mbti: config.mbti || LITE_DEFAULT_CONFIG.mbti,
-        nameScore: config.nameScore || null,
-        bazi: config.bazi || null,
-        isused: config.isused || false,
-        isSystemDefault: config.isSystemDefault !== undefined ? config.isSystemDefault : false,
-        ...config
+        isused: config.isused ?? false,
+        isSystemDefault: config.isSystemDefault ?? false
       }));
 
       // 确保 activeConfigIndex 与 isused 状态一致

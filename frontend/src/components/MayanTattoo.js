@@ -26,31 +26,50 @@ class MayaCalendarCalculator {
   // 计算玛雅日期
   static calculateMayaDate(gregorianDate) {
     try {
+      // 确保传入有效的日期
+      if (!gregorianDate) {
+        console.warn('传入的日期为空，使用参考日期');
+        gregorianDate = this.REFERENCE_DATE;
+      }
+
       const targetDate = new Date(gregorianDate);
+
+      // 检查日期是否有效
+      if (isNaN(targetDate.getTime())) {
+        console.warn('无效的日期，使用参考日期');
+        targetDate.setTime(this.REFERENCE_DATE.getTime());
+      }
+
       const timeDiff = targetDate.getTime() - this.REFERENCE_DATE.getTime();
       const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
       let kin = this.REFERENCE_KIN + daysDiff;
       kin = ((kin - 1) % 260) + 1;
 
-      const toneIndex = (kin - 1) % 13;
-      const sealIndex = (kin - 1) % 20;
+      // 确保 kin 在有效范围内
+      if (kin < 1 || kin > 260 || isNaN(kin)) {
+        kin = 1;
+      }
+
+      const toneIndex = Math.max(0, (kin - 1) % 13);
+      const sealIndex = Math.max(0, (kin - 1) % 20);
 
       return {
         kin,
-        tone: this.TONES[toneIndex],
-        seal: this.SEALS[sealIndex],
-        fullName: `${this.TONES[toneIndex]}的${this.SEALS[sealIndex]}`,
+        tone: this.TONES[toneIndex] || "磁性",
+        seal: this.SEALS[sealIndex] || "红龙",
+        fullName: `${this.TONES[toneIndex] || "磁性"}的${this.SEALS[sealIndex] || "红龙"}`,
         toneIndex,
         sealIndex
       };
     } catch (error) {
       console.error('计算玛雅日期时出错:', error);
+      // 返回默认值，确保不会返回 undefined
       return {
         kin: 1,
-        tone: this.TONES[0],
-        seal: this.SEALS[0],
-        fullName: `${this.TONES[0]}的${this.SEALS[0]}`,
+        tone: this.TONES[0] || "磁性",
+        seal: this.SEALS[0] || "红龙",
+        fullName: `${this.TONES[0] || "磁性"}的${this.SEALS[0] || "红龙"}`,
         toneIndex: 0,
         sealIndex: 0
       };
@@ -59,31 +78,55 @@ class MayaCalendarCalculator {
 
   // 计算支持、挑战、指引、推动印记
   static calculateRelatedSeals(sealIndex) {
+    // 确保sealIndex是有效的数字
+    const validIndex = typeof sealIndex === 'number' && !isNaN(sealIndex) ? Math.max(0, Math.min(19, sealIndex)) : 0;
+
     return {
-      支持: this.SEALS[(sealIndex - 1 + 20) % 20], // 前一个
-      挑战: this.SEALS[(sealIndex + 1) % 20],       // 后一个
-      指引: this.SEALS[(sealIndex + 5) % 20],       // 对位
-      推动: this.SEALS[(sealIndex + 12) % 20]       // 隐匿
+      支持: this.SEALS[(validIndex - 1 + 20) % 20] || "黄太阳", // 前一个
+      挑战: this.SEALS[(validIndex + 1) % 20] || "白风",         // 后一个
+      指引: this.SEALS[(validIndex + 5) % 20] || "白巫师",       // 对位
+      推动: this.SEALS[(validIndex + 12) % 20] || "蓝风暴"        // 隐匿
     };
   }
 
   // 生成确定性哈希
   static generateDeterministicHash(birthDate) {
     try {
-      const dateStr = typeof birthDate === 'string' ? birthDate : formatDateString(birthDate);
-      let hash = 0;
-      if (dateStr.length === 0) return hash;
+      let dateStr;
 
+      if (typeof birthDate === 'string') {
+        dateStr = birthDate;
+      } else if (birthDate instanceof Date) {
+        // 如果是Date对象，转换为字符串
+        if (isNaN(birthDate.getTime())) {
+          dateStr = '1991-01-01'; // 使用默认日期字符串
+        } else {
+          dateStr = birthDate.toISOString().split('T')[0];
+        }
+      } else if (birthDate && typeof birthDate === 'object' && birthDate.toString) {
+        // 其他可转换为字符串的对象
+        dateStr = birthDate.toString();
+      } else {
+        dateStr = String(birthDate || '1991-01-01');
+      }
+
+      // 确保dateStr不为空
+      if (!dateStr || dateStr.length === 0) {
+        dateStr = '1991-01-01';
+      }
+
+      let hash = 0;
       for (let i = 0; i < dateStr.length; i++) {
         const char = dateStr.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
         hash = hash & hash;
       }
 
-      return Math.abs(hash);
+      const result = Math.abs(hash);
+      return isNaN(result) ? 123456 : result; // 确保返回有效数字
     } catch (error) {
       console.error('生成哈希值时出错:', error);
-      return 0;
+      return 123456; // 返回一个默认的哈希值
     }
   }
 
@@ -101,15 +144,24 @@ class MayaCalendarCalculator {
   }
 
   static getRandomElement(array, seed) {
-    if (!array || array.length === 0) return null;
-    const index = seed % array.length;
-    return array[index];
+    if (!array || !Array.isArray(array) || array.length === 0) return "默认";
+    const validSeed = typeof seed === 'number' && !isNaN(seed) ? Math.abs(seed) : 123456;
+    const index = validSeed % array.length;
+    return array[index] || "默认";
   }
 
   // 生成随机整数
   static getRandomInt(min, max, seed) {
-    const random = this.seededRandom(seed);
-    return Math.floor(random * (max - min + 1)) + min;
+    try {
+      const validMin = typeof min === 'number' && !isNaN(min) ? min : 0;
+      const validMax = typeof max === 'number' && !isNaN(max) ? max : 100;
+      const validSeed = typeof seed === 'number' && !isNaN(seed) ? seed : 123456;
+      const random = this.seededRandom(validSeed);
+      return Math.floor(random * (validMax - validMin + 1)) + validMin;
+    } catch (error) {
+      console.error('生成随机整数时出错:', error);
+      return 0; // 返回默认值
+    }
   }
 }
 
@@ -168,25 +220,45 @@ const MayanTattoo = () => {
 
   // 生成描述文本
   const generateDescription = useCallback((seal, kin) => {
-    const seed = MayaCalendarCalculator.generateDeterministicHash(new Date());
-    const baseDesc = descriptionPool[seal] || "独特能量";
-    const variations = [
-      "内在潜能无限",
-      "拥有独特天赋",
-      "散发生命光芒",
-      "连接宇宙能量"
-    ];
-    const variation = MayaCalendarCalculator.getRandomElement(variations, seed + kin);
-    return `${baseDesc}，${variation}`;
+    try {
+      // 确保seal和kin是有效的
+      const validSeal = seal && typeof seal === 'string' ? seal : "红龙";
+      const validKin = typeof kin === 'number' && !isNaN(kin) ? kin : 1;
+
+      const seed = MayaCalendarCalculator.generateDeterministicHash(new Date());
+      const baseDesc = descriptionPool[validSeal] || "独特能量";
+      const variations = [
+        "内在潜能无限",
+        "拥有独特天赋",
+        "散发生命光芒",
+        "连接宇宙能量"
+      ];
+      const variation = MayaCalendarCalculator.getRandomElement(variations, seed + validKin);
+      return `${baseDesc}，${variation || "独特能量"}`;
+    } catch (error) {
+      console.error('生成描述时出错:', error);
+      return "独特能量，内在潜能无限";
+    }
   }, []);
 
   // 计算图腾数据
   const calculateTattooData = useCallback((birthDate) => {
-    if (!birthDate) return null;
+    if (!birthDate) {
+      console.warn('出生日期为空，使用默认日期');
+      birthDate = DEFAULT_BIRTH_DATE;
+    }
 
     try {
       const mayaDate = MayaCalendarCalculator.calculateMayaDate(birthDate);
+      if (!mayaDate) {
+        throw new Error('计算玛雅日期失败');
+      }
+
       const relatedSeals = MayaCalendarCalculator.calculateRelatedSeals(mayaDate.sealIndex);
+      if (!relatedSeals) {
+        throw new Error('计算相关印记失败');
+      }
+
       const seed = MayaCalendarCalculator.generateDeterministicHash(birthDate);
 
       // 生成属性标签
@@ -196,19 +268,19 @@ const MayanTattoo = () => {
         "领导力", "分析能力", "治愈者", "探索者"
       ];
       const attributes = [
-        attributesPool[seed % attributesPool.length],
-        attributesPool[(seed + 1) % attributesPool.length],
-        attributesPool[(seed + 2) % attributesPool.length],
-        attributesPool[(seed + 3) % attributesPool.length]
+        attributesPool[seed % attributesPool.length] || "独特",
+        attributesPool[(seed + 1) % attributesPool.length] || "智慧",
+        attributesPool[(seed + 2) % attributesPool.length] || "敏锐",
+        attributesPool[(seed + 3) % attributesPool.length] || "潜能"
       ];
 
-      // 生成图腾网络
+      // 生成图腾网络 - 添加安全检查
       const guides = [
-        { type: "指引", name: relatedSeals.指引, description: generateDescription(relatedSeals.指引, mayaDate.kin + 1) },
-        { type: "主图腾", name: mayaDate.seal, description: generateDescription(mayaDate.seal, mayaDate.kin) },
-        { type: "挑战", name: relatedSeals.挑战, description: generateDescription(relatedSeals.挑战, mayaDate.kin + 2) },
-        { type: "支持", name: relatedSeals.支持, description: generateDescription(relatedSeals.支持, mayaDate.kin + 3) },
-        { type: "推动", name: relatedSeals.推动, description: generateDescription(relatedSeals.推动, mayaDate.kin + 4) }
+        { type: "指引", name: relatedSeals.指引 || "白巫师", description: generateDescription(relatedSeals.指引 || "白巫师", mayaDate.kin + 1) },
+        { type: "主图腾", name: mayaDate.seal || "红龙", description: generateDescription(mayaDate.seal || "红龙", mayaDate.kin) },
+        { type: "挑战", name: relatedSeals.挑战 || "白风", description: generateDescription(relatedSeals.挑战 || "白风", mayaDate.kin + 2) },
+        { type: "支持", name: relatedSeals.支持 || "黄太阳", description: generateDescription(relatedSeals.支持 || "黄太阳", mayaDate.kin + 3) },
+        { type: "推动", name: relatedSeals.推动 || "蓝风暴", description: generateDescription(relatedSeals.推动 || "蓝风暴", mayaDate.kin + 4) }
       ];
 
       // 格式化出生日期
@@ -220,58 +292,103 @@ const MayanTattoo = () => {
       const formattedCurrentDate = `${currentDateObj.getFullYear()}年${currentDateObj.getMonth() + 1}月${currentDateObj.getDate()}日`;
 
       return {
-        kinNumber: mayaDate.kin,
-        kinName: mayaDate.fullName,
-        description: generateDescription(mayaDate.seal, mayaDate.kin),
+        kinNumber: mayaDate.kin || 1,
+        kinName: mayaDate.fullName || "磁性的红龙",
+        description: generateDescription(mayaDate.seal || "红龙", mayaDate.kin || 1),
         guides,
         attributes,
         birthDate: formattedBirthDate,
         currentDate: formattedCurrentDate,
-        galacticTone: mayaDate.tone,
-        solarSeal: mayaDate.seal
+        galacticTone: mayaDate.tone || "磁性",
+        solarSeal: mayaDate.seal || "红龙"
       };
     } catch (error) {
       console.error('计算图腾数据时出错:', error);
-      return null;
+      // 返回默认数据，避免整个组件崩溃
+      return {
+        kinNumber: 1,
+        kinName: "磁性的红龙",
+        description: "开拓创新，生命之源，内在潜能无限",
+        guides: [
+          { type: "指引", name: "白巫师", description: "魅力魔法，接收直觉" },
+          { type: "主图腾", name: "红龙", description: "开拓创新，生命之源" },
+          { type: "挑战", name: "白风", description: "灵感涌动，自由呼吸" },
+          { type: "支持", name: "黄太阳", description: "启蒙生命，光明意识" },
+          { type: "推动", name: "蓝风暴", description: "催化能量，自我转变" }
+        ],
+        attributes: ["开拓者", "创造力强", "适应力佳", "探索者"],
+        birthDate: "1991年1月1日",
+        currentDate: `${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日`,
+        galacticTone: "磁性",
+        solarSeal: "红龙"
+      };
     }
   }, [generateDescription]);
 
-  // 初始化数据
+  // 初始化数据 - 简化出生日期获取逻辑，参考UnifiedNumerologyPage实现
   useEffect(() => {
-    const loadTattooData = () => {
-      setLoading(true);
-      let birthDateToUse = DEFAULT_BIRTH_DATE;
+    try {
+      setLoading(false);
+      let birthDateToUse = '1991-04-21'; // 默认出生日期
 
+      // 从用户配置获取出生日期
       if (currentConfig && currentConfig.birthDate) {
-        try {
-          const parsedDate = new Date(currentConfig.birthDate);
-          if (!isNaN(parsedDate.getTime())) {
-            birthDateToUse = currentConfig.birthDate;
-          }
-        } catch (error) {
-          console.error('解析出生日期失败:', error);
-        }
+        birthDateToUse = currentConfig.birthDate;
+      } else if (currentConfig && currentConfig.birthInfo && currentConfig.birthInfo.birthDate) {
+        birthDateToUse = currentConfig.birthInfo.birthDate;
+      } else if (currentConfig && currentConfig.userInfo && currentConfig.userInfo.birthDate) {
+        birthDateToUse = currentConfig.userInfo.birthDate;
       }
 
       const data = calculateTattooData(birthDateToUse);
       setTattooData(data);
+    } catch (error) {
+      console.error('加载图腾数据时出错:', error);
+      // 即使出错，也设置一个默认数据，避免整个组件崩溃
+      setTattooData({
+        kinNumber: 1,
+        kinName: "磁性的红龙",
+        description: "开拓创新，生命之源，内在潜能无限",
+        guides: [
+          { type: "指引", name: "白巫师", description: "魅力魔法，接收直觉" },
+          { type: "主图腾", name: "红龙", description: "开拓创新，生命之源" },
+          { type: "挑战", name: "白风", description: "灵感涌动，自由呼吸" },
+          { type: "支持", name: "黄太阳", description: "启蒙生命，光明意识" },
+          { type: "推动", name: "蓝风暴", description: "催化能量，自我转变" }
+        ],
+        attributes: ["开拓者", "创造力强", "适应力佳", "探索者"],
+        birthDate: "1991年4月21日",
+        currentDate: `${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日`,
+        galacticTone: "磁性",
+        solarSeal: "红龙"
+      });
+    } finally {
       setLoading(false);
-    };
-
-    loadTattooData();
-  }, [currentConfig, calculateTattooData]);
+    }
+  }, [calculateTattooData]);
 
   // 获取图腾颜色类名
   const getSealColorClass = (sealName) => {
+    if (!sealName || typeof sealName !== 'string') {
+      return "bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800";
+    }
     return sealColorClasses[sealName] || "bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800";
   };
 
   // 生成能量解读文本
   const generateInterpretation = useMemo(() => {
-    if (!tattooData) return null;
+    if (!tattooData || !tattooData.guides || !Array.isArray(tattooData.guides) || tattooData.guides.length < 5) {
+      return (
+        <div className="space-y-3">
+          <p>作为<strong className="text-sky-400 dark:text-sky-300">{tattooData?.kinName || '玛雅印记'}</strong>，你拥有独特的生命能量。</p>
+          <p>你的指引力量、支持力量、挑战力量和推动力量共同构成了你独特的能量网络。</p>
+          <p>信任这些能量的指引，在生活中找到你的节奏和方向。</p>
+        </div>
+      );
+    }
 
     const { kinName, guides } = tattooData;
-    const guideNames = guides.map(g => g.name);
+    const guideNames = guides.map(g => g.name || '未知');
 
     return (
       <div className="space-y-3">
@@ -318,24 +435,24 @@ const MayanTattoo = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
           <div className="text-center mb-4">
             <span className="inline-block bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-1.5 rounded-full text-sm font-bold mb-3">
-              Kin {tattooData.kinNumber}
+              Kin {tattooData?.kinNumber || 1}
             </span>
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-              {tattooData.kinName}
+              {tattooData?.kinName || '磁性的红龙'}
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 italic mb-4">
-              {tattooData.description}
+              {tattooData?.description || '独特能量'}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-purple-50 dark:bg-purple-950/20 rounded-lg p-4 text-center">
               <div className="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-1">银河音阶</div>
-              <div className="text-xl font-bold text-purple-700 dark:text-purple-300">{tattooData.galacticTone}</div>
+              <div className="text-xl font-bold text-purple-700 dark:text-purple-300">{tattooData?.galacticTone || '磁性'}</div>
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 text-center">
               <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mb-1">太阳印记</div>
-              <div className="text-xl font-bold text-blue-700 dark:text-blue-300">{tattooData.solarSeal}</div>
+              <div className="text-xl font-bold text-blue-700 dark:text-blue-300">{tattooData?.solarSeal || '红龙'}</div>
             </div>
           </div>
         </div>
@@ -344,14 +461,18 @@ const MayanTattoo = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
           <h3 className="text-lg font-bold text-green-600 dark:text-green-400 mb-3 text-center">能量属性</h3>
           <div className="flex flex-wrap justify-center gap-2">
-            {tattooData.attributes.map((attr, index) => (
+            {tattooData?.attributes && Array.isArray(tattooData.attributes) ? tattooData.attributes.map((attr, index) => (
               <span
                 key={index}
                 className="px-3 py-1.5 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-full text-sm text-gray-700 dark:text-gray-300"
               >
-                {attr}
+                {attr || '独特'}
               </span>
-            ))}
+            )) : (
+              <span className="px-3 py-1.5 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                暂无法显示属性数据
+              </span>
+            )}
           </div>
         </div>
 
@@ -359,16 +480,20 @@ const MayanTattoo = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
           <h3 className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-4 text-center">图腾能量网络</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {tattooData.guides.map((guide, index) => (
+            {tattooData.guides && Array.isArray(tattooData.guides) ? tattooData.guides.map((guide, index) => (
               <div
                 key={index}
-                className={`rounded-lg p-3 text-center border ${getSealColorClass(guide.name)} shadow-sm hover:shadow-md transition-shadow`}
+                className={`rounded-lg p-3 text-center border ${getSealColorClass(guide?.name || '')} shadow-sm hover:shadow-md transition-shadow`}
               >
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{guide.type}</div>
-                <div className="text-lg font-bold text-gray-800 dark:text-white mb-1">{guide.name}</div>
-                <div className="text-xs text-gray-600 dark:text-gray-400">{guide.description}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{guide?.type || '未知'}</div>
+                <div className="text-lg font-bold text-gray-800 dark:text-white mb-1">{guide?.name || '未知'}</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">{guide?.description || '暂无描述'}</div>
               </div>
-            ))}
+            )) : (
+              <div className="col-span-5 text-center text-gray-500 dark:text-gray-400">
+                暂无法显示图腾能量网络数据
+              </div>
+            )}
           </div>
         </div>
 
@@ -383,23 +508,23 @@ const MayanTattoo = () => {
             </div>
 
             {/* 支持节点 */}
-            <div className={`absolute top-4 left-4 w-16 h-16 ${getSealColorClass(tattooData.guides[3].name).split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
-              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[3].name.slice(0, 2)}</span>
+            <div className={`absolute top-4 left-4 w-16 h-16 ${getSealColorClass(tattooData.guides[3]?.name || '').split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
+              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[3]?.name?.slice(0, 2) || '支持'}</span>
             </div>
 
             {/* 挑战节点 */}
-            <div className={`absolute top-4 right-4 w-16 h-16 ${getSealColorClass(tattooData.guides[2].name).split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
-              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[2].name.slice(0, 2)}</span>
+            <div className={`absolute top-4 right-4 w-16 h-16 ${getSealColorClass(tattooData.guides[2]?.name || '').split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
+              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[2]?.name?.slice(0, 2) || '挑战'}</span>
             </div>
 
             {/* 指引节点 */}
-            <div className={`absolute bottom-4 left-4 w-16 h-16 ${getSealColorClass(tattooData.guides[0].name).split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
-              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[0].name.slice(0, 2)}</span>
+            <div className={`absolute bottom-4 left-4 w-16 h-16 ${getSealColorClass(tattooData.guides[0]?.name || '').split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
+              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[0]?.name?.slice(0, 2) || '指引'}</span>
             </div>
 
             {/* 推动节点 */}
-            <div className={`absolute bottom-4 right-4 w-16 h-16 ${getSealColorClass(tattooData.guides[4].name).split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
-              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[4].name.slice(0, 2)}</span>
+            <div className={`absolute bottom-4 right-4 w-16 h-16 ${getSealColorClass(tattooData.guides[4]?.name || '').split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
+              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[4]?.name?.slice(0, 2) || '推动'}</span>
             </div>
 
             {/* 连接标签 */}
@@ -421,7 +546,7 @@ const MayanTattoo = () => {
         {/* 底部信息 */}
         <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            玛雅历法解读 | 基于13月亮历法 | {tattooData.currentDate}
+            玛雅历法解读 | 基于13月亮历法 | {tattooData?.currentDate || `${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日`}
           </p>
         </div>
       </div>

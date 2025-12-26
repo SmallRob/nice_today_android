@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { calculateBiorhythm } from '../utils/biorhythmCalculator';
-import { userConfigManager } from '../../utils/userConfigManager';
+import { liteUserConfigManager } from '../../utils/liteUserConfigManager';
 import '../styles/globalLiteStyles.css';
 
 const BiorhythmLitePage = ({ userInfo: propsUserInfo }) => {
@@ -26,10 +26,10 @@ const BiorhythmLitePage = ({ userInfo: propsUserInfo }) => {
   useEffect(() => {
     const loadUserInfo = async () => {
       if (!userInfo.birthDate) {
-        if (!userConfigManager.initialized) {
-          await userConfigManager.initialize();
+        if (!liteUserConfigManager.initialized) {
+          await liteUserConfigManager.initialize();
         }
-        const currentConfig = userConfigManager.getCurrentConfig();
+        const currentConfig = liteUserConfigManager.getCurrentConfig();
         if (currentConfig) {
           setUserInfo({
             nickname: currentConfig.nickname || '',
@@ -52,7 +52,7 @@ const BiorhythmLitePage = ({ userInfo: propsUserInfo }) => {
 
   // 添加配置变更监听器
   useEffect(() => {
-    const removeListener = userConfigManager.addListener((configData) => {
+    const removeListener = liteUserConfigManager.addListener((configData) => {
       if (configData.currentConfig) {
         setUserInfo({
           nickname: configData.currentConfig.nickname || '',

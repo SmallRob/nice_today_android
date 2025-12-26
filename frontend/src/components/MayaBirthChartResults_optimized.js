@@ -9,8 +9,10 @@ const ChunkedRenderer = memo(({ items, chunkSize = 3, renderItem, loadingCompone
   // 优化chunks计算，避免不必要的重新计算
   const chunks = useMemo(() => {
     const result = [];
-    for (let i = 0; i < items.length; i += chunkSize) {
-      result.push(items.slice(i, i + chunkSize));
+    const safeItems = Array.isArray(items) ? items : [];
+
+    for (let i = 0; i < safeItems.length; i += chunkSize) {
+      result.push(safeItems.slice(i, i + chunkSize));
     }
     return result;
   }, [items, chunkSize]);
@@ -62,7 +64,7 @@ const ChunkedRenderer = memo(({ items, chunkSize = 3, renderItem, loadingCompone
 
   return (
     <>
-      {chunks.slice(0, visibleChunks).map((chunk, chunkIndex) => (
+      {(chunks || []).slice(0, visibleChunks).map((chunk, chunkIndex) => (
         <div key={chunkIndex} className="chunk-container">
           {chunk.map((item, index) => renderItem(item, chunkIndex * chunkSize + index))}
         </div>
@@ -115,7 +117,7 @@ const BasicInfoSection = memo(({ birthInfo }) => {
     } catch (error) {
       return '1';
     }
-  }, [birthInfo]);
+  }, [birthInfo?.maya_kin]);
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-700 dark:to-purple-900 rounded-2xl p-5 text-white shadow-lg shadow-purple-200 dark:shadow-none mb-2">
@@ -244,8 +246,8 @@ const LifePurposeSection = memo(({ birthInfo }) => {
 // 个人特质组件 - 优化长列表渲染
 const PersonalTraitsSection = memo(({ birthInfo }) => {
   const traits = useMemo(() => ({
-    strengths: birthInfo.personal_traits?.strengths || [],
-    challenges: birthInfo.personal_traits?.challenges || []
+    strengths: Array.isArray(birthInfo.personal_traits?.strengths) ? birthInfo.personal_traits.strengths : [],
+    challenges: Array.isArray(birthInfo.personal_traits?.challenges) ? birthInfo.personal_traits.challenges : []
   }), [birthInfo.personal_traits]);
 
   const renderTraitItem = useCallback((trait, index, isStrength = true) => (
@@ -264,7 +266,7 @@ const PersonalTraitsSection = memo(({ birthInfo }) => {
             <span className="mr-1.5 opacity-80">💎</span> 优势
           </div>
           <ul className="space-y-2">
-            {traits.strengths.slice(0, 3).map((trait, index) => renderTraitItem(trait, index, true))}
+            {(traits.strengths || []).slice(0, 3).map((trait, index) => renderTraitItem(trait, index, true))}
           </ul>
         </div>
         <div className="bg-rose-50/30 dark:bg-rose-950/20 p-3 rounded-xl border border-rose-100/50 dark:border-rose-900/20">
@@ -272,7 +274,7 @@ const PersonalTraitsSection = memo(({ birthInfo }) => {
             <span className="mr-1.5 opacity-80">⚖️</span> 挑战
           </div>
           <ul className="space-y-2">
-            {traits.challenges.slice(0, 3).map((trait, index) => renderTraitItem(trait, index, false))}
+            {(traits.challenges || []).slice(0, 3).map((trait, index) => renderTraitItem(trait, index, false))}
           </ul>
         </div>
       </div>
