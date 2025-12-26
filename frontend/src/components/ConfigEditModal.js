@@ -184,13 +184,18 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
   useEffect(() => {
     if (isOpen && form) {
       // 逐个设置字段值，兼容 TanStack Form v1.x
-      Object.entries(defaultValues).forEach(([key, value]) => {
-        try {
-          form.setFieldValue(key, value);
-        } catch (e) {
-          console.warn(`设置字段 ${key} 失败:`, e);
-        }
-      });
+      // 延迟执行，避免在渲染周期中修改表单状态
+      const timer = setTimeout(() => {
+        Object.entries(defaultValues).forEach(([key, value]) => {
+          try {
+            form.setFieldValue(key, value);
+          } catch (e) {
+            console.warn(`设置字段 ${key} 失败:`, e);
+          }
+        });
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
   }, [isOpen, defaultValues, form]);
 

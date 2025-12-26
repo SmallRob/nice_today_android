@@ -11,6 +11,7 @@ import '../styles/config-selectors.css';
 import '../styles/user-info-card.css';
 import { calculateFiveGrids, getCharStrokes, getMeaning } from '../utils/nameScoring';
 import { calculateDetailedBazi } from '../utils/baziHelper';
+import { getDisplayBaziInfo } from '../utils/baziSchema';
 import { DEFAULT_REGION } from '../data/ChinaLocationData';
 import { getShichenSimple, normalizeShichen } from '../utils/astronomy';
 import { getZiWeiDisplayData } from '../utils/ziweiHelper';
@@ -36,15 +37,19 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
           const cachedBazi = baziCacheManager.getBaziByNickname(nickname);
           if (cachedBazi && cachedBazi.bazi) {
             console.log('使用缓存中的八字信息:', nickname);
-            setBaziInfo(cachedBazi.bazi);
+            // 使用兼容函数确保数据格式正确
+            const displayBazi = getDisplayBaziInfo(cachedBazi.bazi);
+            setBaziInfo(displayBazi);
             return;
           }
         }
-        
+
         // 2. 其次使用保存的八字信息
-        if (savedBaziInfo && savedBaziInfo.bazi) {
+        if (savedBaziInfo) {
           console.log('使用配置中保存的八字信息');
-          setBaziInfo(savedBaziInfo);
+          // 使用兼容函数确保数据格式正确
+          const displayBazi = getDisplayBaziInfo(savedBaziInfo);
+          setBaziInfo(displayBazi);
         } else {
           // 3. 如果没有缓存或保存的八字信息，则实时计算
           console.log('配置中无八字信息，开始实时计算');
@@ -61,21 +66,24 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
               text: lunarBirthDate // 使用配置中存储的农历日期
             };
           }
-          
+
+          // 使用兼容函数确保数据格式正确
+          const displayBazi = getDisplayBaziInfo(info);
+
           // 计算完成后缓存八字信息
-          if (info && nickname) {
+          if (displayBazi && nickname) {
             const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
               birthDate,
               birthTime: useTrueSolarTime,
               longitude: lng
-            }, info);
-            
+            }, displayBazi);
+
             if (cacheSuccess) {
               console.log('八字信息已缓存:', nickname);
             }
           }
 
-          setBaziInfo(info);
+          setBaziInfo(displayBazi);
         }
       } catch (e) {
         console.error('八字加载失败:', e);
@@ -740,9 +748,27 @@ const calculateDaYun = (baziInfo, birthYear) => {
 // 配置列表项组件
 const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // 深拷贝 config 对象，避免直接修改原始对象
+  const safeConfig = useMemo(() => {
+    if (!config) return config;
+    
+    // 创建安全副本，移除可能导致问题的对象属性
+    const { bazi, ...configWithoutBazi } = config;
+    
+    // 清理 birthLocation 对象
+    const safeBirthLocation = configWithoutBazi.birthLocation 
+      ? { ...configWithoutBazi.birthLocation }
+      : undefined;
+    
+    return {
+      ...configWithoutBazi,
+      birthLocation: safeBirthLocation
+    };
+  }, [config]);
 
   // 检查是否是系统默认配置（已被禁用）
-  const isSystemDefault = config.isSystemDefault === true;
+  const isSystemDefault = safeConfig?.isSystemDefault === true;
 
   // 拖拽相关样式
   const getDragStyles = () => {
@@ -795,20 +821,20 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
               </span>
             )}
             <h3 className="font-medium text-gray-900 dark:text-white">
-              {config.nickname || `配置 ${index + 1}`}
+              {safeConfig.nickname || `配置 ${index + 1}`}
             </h3>
-            {config.realName && (
+            {safeConfig.realName && (
               <div className="flex items-center ml-2 space-x-2">
                 <span className="text-gray-500 text-xs">|</span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{config.realName}</span>
-                {config?.nameScore && (
-                  <span className={`px-2 py-0.5 text-xs rounded font-bold ${config.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                    config.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                    config.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                    config.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{safeConfig.realName}</span>
+                {safeConfig?.nameScore && (
+                  <span className={`px-2 py-0.5 text-xs rounded font-bold ${safeConfig.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                    safeConfig.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                    safeConfig.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                    safeConfig.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
                       'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                     }`}>
-                    {config.nameScore.totalScore || 0}分
+                    {safeConfig.nameScore.totalScore || 0}分
                   </span>
                 )}
               </div>
@@ -841,36 +867,36 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
             <div>
               <span className="text-gray-500 dark:text-gray-400">昵称：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{config.nickname || '-'}</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.nickname || '-'}</span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400">星座：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{config.zodiac || '-'}</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.zodiac || '-'}</span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400">生肖：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{config.zodiacAnimal || '-'}</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.zodiacAnimal || '-'}</span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400">MBTI：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{config.mbti || '-'}</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.mbti || '-'}</span>
             </div>
           </div>
 
           {/* 姓名评分入口 */}
-          {config.realName && /[一-龥]/.test(config.realName) ? (
+          {safeConfig.realName && /[一-龥]/.test(safeConfig.realName) ? (
             <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-gray-500 dark:text-gray-400 text-sm">姓名评分：</span>
-                  {config.nameScore && (
-                    <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${config.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      config.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      config.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                      config.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                  {safeConfig.nameScore && (
+                    <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${safeConfig.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      safeConfig.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                      safeConfig.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                      safeConfig.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
                         'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                       }`}>
-                      {config.nameScore.totalScore || 0}分
+                      {safeConfig.nameScore.totalScore || 0}分
                     </span>
                   )}
                 </div>
@@ -878,7 +904,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
                   className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
                   onClick={() => onScoreName && onScoreName(index)}
                 >
-                  {config.nameScore ? '重新评分' : '评分'}
+                  {safeConfig.nameScore ? '重新评分' : '评分'}
                 </button>
               </div>
             </div>
@@ -983,6 +1009,8 @@ const UserConfigManagerComponent = () => {
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
   // 用户信息折叠状态
   const [isUserInfoExpanded, setIsUserInfoExpanded] = useState(true);
+  const [isZiweiExpanded, setIsZiweiExpanded] = useState(true);
+  const [isBaziExpanded, setIsBaziExpanded] = useState(true);
   // 紫微命宫数据
   const [ziweiData, setZiweiData] = useState(null);
   const [ziweiLoading, setZiweiLoading] = useState(false);
@@ -1929,8 +1957,26 @@ const UserConfigManagerComponent = () => {
         </div>
       )}
       {/* 用户信息 - 使用优化的卡片样式 */}
-      <Card title="用户信息">
-        <div className="p-4">
+      <Card 
+        title="用户信息"
+        headerAction={
+          <button
+            onClick={() => setIsUserInfoExpanded(!isUserInfoExpanded)}
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            title={isUserInfoExpanded ? "收起" : "展开"}
+          >
+            <svg 
+              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isUserInfoExpanded ? 'rotate-180' : ''}`}
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        }
+      >
+        <div className={`p-4 ${!isUserInfoExpanded ? 'hidden' : ''}`}>
           {configs[activeConfigIndex] ? (
             <UserInfoCard config={configs[activeConfigIndex]} />
           ) : (
@@ -1943,121 +1989,160 @@ const UserConfigManagerComponent = () => {
       <Card
         title="紫微命宫"
         className="mb-6"
-        headerExtra={
-          ziweiLoading && (
-            <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-transparent"></div>
-              计算中...
-            </div>
-          )
+        headerAction={
+          <button
+            onClick={() => setIsZiweiExpanded(!isZiweiExpanded)}
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            title={isZiweiExpanded ? "收起" : "展开"}
+          >
+            <svg 
+              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isZiweiExpanded ? 'rotate-180' : ''}`}
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         }
       >
-        <ZiWeiPalaceDisplay
-          ziweiData={ziweiData}
-          birthDate={configs[activeConfigIndex]?.birthDate}
-          birthTime={configs[activeConfigIndex]?.birthTime}
-          longitude={configs[activeConfigIndex]?.birthLocation?.lng}
-          nickname={configs[activeConfigIndex]?.nickname}
-        />
+        {ziweiLoading && (
+          <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-transparent"></div>
+            计算中...
+          </div>
+        )}
+        {!isZiweiExpanded && ziweiLoading === false && ziweiData && ziweiData.error && (
+          <div className="p-4 text-red-600 dark:text-red-400 text-sm">
+            <p>{ziweiData.error}</p>
+          </div>
+        )}
+        {isZiweiExpanded && (
+          <ZiWeiPalaceDisplay
+            ziweiData={ziweiData}
+            birthDate={configs[activeConfigIndex]?.birthDate}
+            birthTime={configs[activeConfigIndex]?.birthTime}
+            longitude={configs[activeConfigIndex]?.birthLocation?.lng}
+            nickname={configs[activeConfigIndex]?.nickname}
+          />
+        )}
       </Card>
 
       {/* 八字命格展示栏目 */}
       <Card
         title="八字命格"
         className="mb-6"
+        headerAction={
+          <button
+            onClick={() => setIsBaziExpanded(!isBaziExpanded)}
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+            title={isBaziExpanded ? "收起" : "展开"}
+          >
+            <svg 
+              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isBaziExpanded ? 'rotate-180' : ''}`}
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        }
         headerExtra={
-          <div className="flex space-x-2">
-            <button
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              onClick={() => {
-                // 触发重新计算
-                if (configs[activeConfigIndex]?.birthDate) {
-                  setBaziKey(prev => prev + 1);
-                  showMessage('🔄 正在刷新八字信息...', 'info');
-                } else {
-                  showMessage('请先设置出生日期', 'error');
-                }
-              }}
-              title="刷新八字信息"
-            >
-              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-            <button
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              onClick={async () => {
-                // 从当前配置的出生信息重新计算八字并同步到缓存和配置
-                if (configs[activeConfigIndex]?.nickname) {
-                  try {
-                    const config = configs[activeConfigIndex];
-                    const nickname = config.nickname;
-                    const birthDate = config.birthDate;
-                    const birthTime = config.birthTime || '12:30';
-                    const longitude = config.birthLocation?.lng || 116.40;
-
-                    if (!birthDate) {
-                      showMessage('请先设置出生日期', 'error');
-                      return;
-                    }
-
-                    console.log('开始同步八字信息:', { nickname, birthDate, birthTime, longitude });
-
-                    // 显示加载状态
-                    showMessage('⏳ 正在计算八字信息...', 'info');
-
-                    // 1. 计算八字信息
-                    const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
-                    if (!baziInfo) {
-                      showMessage('❌ 八字计算失败', 'error');
-                      return;
-                    }
-
-                    // 2. 同步八字到全局配置
-                    showMessage('⏳ 正在保存八字信息到配置...', 'info');
-                    const updateSuccess = await enhancedUserConfigManager.updateBaziInfo(nickname, {
-                      bazi: baziInfo,
-                      lunarBirthDate: baziInfo.lunar?.text,
-                      trueSolarTime: birthTime,
-                      lastCalculated: new Date().toISOString()
-                    });
-
-                    if (!updateSuccess) {
-                      showMessage('❌ 八字信息更新到配置失败', 'error');
-                      return;
-                    }
-
-                    // 3. 同步八字到缓存（使用默认过期时间）
-                    const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
-                      birthDate,
-                      birthTime,
-                      longitude
-                    }, baziInfo);
-
-                    if (!cacheSuccess) {
-                      console.warn('八字信息同步到缓存失败，但已保存到配置');
-                    }
-
-                    // 4. 刷新显示
+          isBaziExpanded && (
+            <div className="flex space-x-2">
+              <button
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                onClick={() => {
+                  // 触发重新计算
+                  if (configs[activeConfigIndex]?.birthDate) {
                     setBaziKey(prev => prev + 1);
-                    showMessage('✅ 八字信息已成功同步', 'success');
-
-                  } catch (error) {
-                    console.error('同步八字信息失败:', error);
-                    showMessage('❌ 同步八字信息失败: ' + error.message, 'error');
+                    showMessage('🔄 正在刷新八字信息...', 'info');
+                  } else {
+                    showMessage('请先设置出生日期', 'error');
                   }
-                }
-              }}
-              title="同步八字到全局配置"
-            >
-              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-              </svg>
-            </button>
-          </div>
+                }}
+                title="刷新八字信息"
+              >
+                <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+              <button
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                onClick={async () => {
+                  // 从当前配置的出生信息重新计算八字并同步到缓存和配置
+                  if (configs[activeConfigIndex]?.nickname) {
+                    try {
+                      const config = configs[activeConfigIndex];
+                      const nickname = config.nickname;
+                      const birthDate = config.birthDate;
+                      const birthTime = config.birthTime || '12:30';
+                      const longitude = config.birthLocation?.lng || 116.40;
+
+                      if (!birthDate) {
+                        showMessage('请先设置出生日期', 'error');
+                        return;
+                      }
+
+                      console.log('开始同步八字信息:', { nickname, birthDate, birthTime, longitude });
+
+                      // 显示加载状态
+                      showMessage('⏳ 正在计算八字信息...', 'info');
+
+                      // 1. 计算八字信息
+                      const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
+                      if (!baziInfo) {
+                        showMessage('❌ 八字计算失败', 'error');
+                        return;
+                      }
+
+                      // 2. 同步八字到全局配置
+                      showMessage('⏳ 正在保存八字信息到配置...', 'info');
+                      const updateSuccess = await enhancedUserConfigManager.updateBaziInfo(nickname, {
+                        bazi: baziInfo,
+                        lunarBirthDate: baziInfo.lunar?.text,
+                        trueSolarTime: birthTime,
+                        lastCalculated: new Date().toISOString()
+                      });
+
+                      if (!updateSuccess) {
+                        showMessage('❌ 八字信息更新到配置失败', 'error');
+                        return;
+                      }
+
+                      // 3. 同步八字到缓存（使用默认过期时间）
+                      const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
+                        birthDate,
+                        birthTime,
+                        longitude
+                      }, baziInfo);
+
+                      if (!cacheSuccess) {
+                        console.warn('八字信息同步到缓存失败，但已保存到配置');
+                      }
+
+                      // 4. 刷新显示
+                      setBaziKey(prev => prev + 1);
+                      showMessage('✅ 八字信息已成功同步', 'success');
+
+                    } catch (error) {
+                      console.error('同步八字信息失败:', error);
+                      showMessage('❌ 同步八字信息失败: ' + error.message, 'error');
+                    }
+                  }
+                }}
+                title="同步八字到全局配置"
+              >
+                <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                </svg>
+              </button>
+            </div>
+          )
         }
       >
-        {configs[activeConfigIndex]?.birthDate ? (
+        {isBaziExpanded && configs[activeConfigIndex]?.birthDate ? (
           (() => {
             const currentConfig = configs[activeConfigIndex];
             return currentConfig ? (
@@ -2074,9 +2159,15 @@ const UserConfigManagerComponent = () => {
             ) : null;
           })()
         ) : (
-          <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-            <p>请先设置出生日期以查看八字命格信息</p>
-          </div>
+          !isBaziExpanded ? (
+            <div className="p-4 text-gray-500 dark:text-gray-400 text-sm text-center">
+              点击箭头展开八字命格信息
+            </div>
+          ) : (
+            <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+              <p>请先设置出生日期以查看八字命格信息</p>
+            </div>
+          )
         )}
       </Card>
 
@@ -2323,23 +2414,31 @@ const UserConfigManagerComponent = () => {
 
       {/* 配置列表 */}
       <div className="space-y-3">
-        {configs.map((config, index) => (
-          <ConfigForm
-            key={index}
-            config={config}
-            index={index}
-            isActive={index === activeConfigIndex}
-            onDelete={handleDeleteConfig}
-            onSetActive={handleSetActiveConfig}
-            onEdit={handleEditConfig}
-            onScoreName={handleScoreName}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            isDragging={isDragging && draggedIndex === index}
-            dragOverIndex={dragOverIndex}
-          />
-        ))}
+        {configs.map((config, index) => {
+          // 深拷贝 config 对象，避免直接修改原始数据
+          const safeConfig = {
+            ...config,
+            birthLocation: config.birthLocation ? { ...config.birthLocation } : undefined
+          };
+
+          return (
+            <ConfigForm
+              key={index}
+              config={safeConfig}
+              index={index}
+              isActive={index === activeConfigIndex}
+              onDelete={handleDeleteConfig}
+              onSetActive={handleSetActiveConfig}
+              onEdit={handleEditConfig}
+              onScoreName={handleScoreName}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              isDragging={isDragging && draggedIndex === index}
+              dragOverIndex={dragOverIndex}
+            />
+          );
+        })}
       </div>
 
 

@@ -115,12 +115,53 @@ const calculateMingGong = (birthTimeStr, longitude, birthDateStr = null) => {
     let mingGongGan;
     if (birthDateStr) {
       try {
-        const solar = Solar.fromLunar(Lunar.fromYmd(birthDateStr.replace(/-/g, '')));
-        const yearGan = tianGan[(solar.year - 4) % 10];
-        mingGongGan = yearGan;
+        // 使用 Lunar.fromDate 或 Lunar.fromYmd 方法
+        const dateStr = birthDateStr.replace(/-/g, '');
+        let lunar;
+        
+        // 尝试使用 Lunar.fromYmd（年、月、日三个参数）
+        if (dateStr.length === 8) {
+          const year = parseInt(dateStr.substring(0, 4));
+          const month = parseInt(dateStr.substring(4, 6));
+          const day = parseInt(dateStr.substring(6, 8));
+          
+          try {
+            lunar = Lunar.fromYmd(year, month, day);
+            if (lunar) {
+              const solar = Solar.fromLunar(lunar);
+              if (solar) {
+                const yearGan = tianGan[(solar.year - 4) % 10];
+                mingGongGan = yearGan;
+              }
+            }
+          } catch (e) {
+            // 忽略错误，继续使用备用方法
+          }
+        }
+        
+        // 如果 Lunar.fromYmd 失败，尝试使用 Lunar.fromDate
+        if (!mingGongGan) {
+          try {
+            const date = new Date(birthDateStr.replace(/-/g, '/'));
+            lunar = Lunar.fromDate(date);
+            if (lunar) {
+              const solar = Solar.fromLunar(lunar);
+              if (solar) {
+                const yearGan = tianGan[(solar.year - 4) % 10];
+                mingGongGan = yearGan;
+              }
+            }
+          } catch (e) {
+            // 忽略错误，使用备用方法
+          }
+        }
+        
+        if (!mingGongGan) {
+          console.warn('从日期计算天干失败，使用简化方法');
+          mingGongGan = tianGan[(Math.floor(new Date().getHours() / 2)) % 10];
+        }
       } catch (error) {
         console.warn('从日期计算天干失败，使用简化方法:', error);
-        // 简化方法：使用当前时间计算天干
         mingGongGan = tianGan[(Math.floor(new Date().getHours() / 2)) % 10];
       }
     } else {

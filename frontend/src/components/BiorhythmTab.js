@@ -1045,9 +1045,9 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             {renderTodaySummary()}
 
             {/* 每日正念卡片 - 重构为正能量导向 */}
-            <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 border border-indigo-100 dark:border-purple-700/50 rounded-lg shadow-sm p-4">
+            <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 border border-indigo-100 dark:border-purple-700/50 rounded-lg shadow-sm p-3 md:p-4">
               {/* 顶部：能量UP+ 指示器 */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3 md:mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1.5 rounded-full shadow-md">
                     <span className="text-lg mr-1.5">⚡</span>
@@ -1071,10 +1071,10 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
               {/* 能量指引 */}
               {energyGuidance && (
-                <div className="mb-4 bg-gradient-to-r from-indigo-100/80 to-purple-100/80 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg p-3 border border-indigo-200 dark:border-indigo-800/50">
+                <div className="mb-3 md:mb-4 bg-gradient-to-r from-indigo-100/80 to-purple-100/80 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg p-2.5 md:p-3 border border-indigo-200 dark:border-indigo-800/50">
                   <div className="flex items-start">
-                    <span className="text-2xl mr-3">🌟</span>
-                    <p className="text-sm text-indigo-800 dark:text-indigo-200 leading-relaxed font-medium">
+                    <span className="text-xl md:text-2xl mr-2 md:mr-3">🌟</span>
+                    <p className="text-xs md:text-sm text-indigo-800 dark:text-indigo-200 leading-relaxed font-medium">
                       {energyGuidance}
                     </p>
                   </div>
@@ -1082,14 +1082,14 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
               )}
 
               {/* 每日正念任务列表 */}
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {mindfulnessActivities.map((activity, index) => {
                   const isCompleted = completedTasks.includes(activity.id);
                   return (
                     <div
                       key={activity.id}
                       onClick={() => toggleTaskCompletion(activity.id)}
-                      className={`bg-white dark:bg-gray-800/60 rounded-lg p-3.5 cursor-pointer border-2 transition-all duration-300 hover:shadow-md ${
+                      className={`bg-white dark:bg-gray-800/60 rounded-lg p-2.5 md:p-3.5 cursor-pointer border-2 transition-all duration-300 hover:shadow-md ${
                         isCompleted
                           ? 'border-green-400 dark:border-green-500/70 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/20'
                           : 'border-gray-100 dark:border-gray-700/50'
@@ -1097,20 +1097,20 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                     >
                       <div className="flex items-center">
                         {/* 完成状态复选框 */}
-                        <div className={`flex-shrink-0 w-6 h-6 rounded-md border-2 mr-3 flex items-center justify-center transition-all duration-200 ${
+                        <div className={`flex-shrink-0 w-5 h-5 md:w-6 md:h-6 rounded-md border-2 mr-2 md:mr-3 flex items-center justify-center transition-all duration-200 ${
                           isCompleted
                             ? 'bg-green-500 border-green-500'
                             : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500'
                         }`}>
                           {isCompleted && (
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                           )}
                         </div>
 
                         {/* 活动图标 */}
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center mr-3 text-xl ${
+                        <div className={`flex-shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center mr-2 md:mr-3 text-lg md:text-xl ${
                           isCompleted ? 'opacity-50' : ''
                         }`}>
                           {activity.icon}
@@ -1118,27 +1118,27 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
                         {/* 活动信息 */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <h4 className={`text-sm font-semibold truncate ${
+                          <div className="flex items-center justify-between mb-0.5 md:mb-1">
+                            <h4 className={`text-xs md:text-sm font-semibold truncate ${
                               isCompleted ? 'text-gray-500 dark:text-gray-400 line-through' : 'text-gray-900 dark:text-white'
                             }`}>
                               {activity.title}
                             </h4>
                             <div className="flex items-center space-x-2">
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              <span className={`text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full ${
                                 isCompleted ? 'opacity-50' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
                               }`}>
                                 {activity.duration}
                               </span>
                             </div>
                           </div>
-                          <p className={`text-xs leading-relaxed ${
+                          <p className={`text-[10px] md:text-xs leading-relaxed ${
                             isCompleted ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-300'
                           }`}>
                             {activity.description}
                           </p>
                           {!isCompleted && activity.positive && (
-                            <p className="text-xs text-green-600 dark:text-green-400 mt-1.5 font-medium">
+                            <p className="text-[10px] md:text-xs text-green-600 dark:text-green-400 mt-1 md:mt-1.5 font-medium">
                               ✨ {activity.positive}
                             </p>
                           )}
@@ -1146,9 +1146,9 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
                         {/* 完成标记 */}
                         {isCompleted && (
-                          <div className="flex-shrink-0 ml-3">
-                            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-md">
-                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="flex-shrink-0 ml-2 md:ml-3">
+                            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-green-500 flex items-center justify-center shadow-md">
+                              <svg className="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                               </svg>
                             </div>
@@ -1161,8 +1161,8 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
               </div>
 
               {/* 底部提示 */}
-              <div className="mt-4 pt-3 border-t border-indigo-100 dark:border-indigo-800/50">
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
+              <div className="mt-3 md:mt-4 pt-2.5 md:pt-3 border-t border-indigo-100 dark:border-indigo-800/50">
+                <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
                   💡 点击任务标记完成，每日每个任务只能标记一次
                   <br />
                   完成任务后可立即感受到能量的提升 🌈

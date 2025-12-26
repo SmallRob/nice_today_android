@@ -339,7 +339,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
       {/* 标签页选择器 - 参考穿衣指南样式 */}
       <div className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
-        <div className="container mx-auto">
+        <div className="container mx-auto px-4">
           <div className="flex">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;

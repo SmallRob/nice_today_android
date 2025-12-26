@@ -94,22 +94,49 @@ function deepCloneConfig(sourceConfig) {
   if (sourceConfig.birthLocation && cloned.birthLocation) {
     cloned.birthLocation = { ...sourceConfig.birthLocation };
   }
-  
+
   // 如果存在八字信息，需要特殊处理 full 属性（可能包含循环引用的 lunar 对象）
-  if (cloned.bazi && cloned.bazi.full) {
-    // 只保留基本的八字信息，移除可能包含循环引用的完整 lunar 对象
-    const { full, ...baziWithoutFull } = cloned.bazi;
+  if (cloned.bazi && typeof cloned.bazi === 'object' && cloned.bazi.full) {
+    // 安全地提取 full 对象，避免循环引用
+    const full = cloned.bazi.full;
+
+    // 检查 full 是否是 lunar 对象
+    const hasLunarMethods = full && typeof full.getYearInGanZhi === 'function';
+
+    // 提取 lunar 对象的安全属性
+    const safeLunar = hasLunarMethods ? {
+      yearStr: full.getYearInGanZhi() + '年',
+      monthStr: full.getMonthInChinese() + '月',
+      dayStr: full.getDayInChinese(),
+      text: `${full.getYearInGanZhi()}年 ${full.getMonthInChinese()}月${full.getDayInChinese()}`,
+      // 添加其他必要属性
+      zodiacAnimal: full.getYearShengXiao ? full.getYearShengXiao() : '',
+      monthInChinese: full.getMonthInChinese(),
+      dayInChinese: full.getDayInChinese(),
+      yearInChinese: full.getYearInGanZhi ? full.getYearInGanZhi() : '',
+      monthGanZhi: full.getMonthInGanZhi ? full.getMonthInGanZhi() : '',
+      dayGanZhi: full.getDayInGanZhi ? full.getDayInGanZhi() : ''
+    } : null;
+
+    // 创建新的 bazi 对象，移除 full 属性避免循环引用
     cloned.bazi = {
-      ...baziWithoutFull,
-      // 如果需要保留完整的 lunar 信息，可以只提取安全的属性
-      lunar: full ? {
-        yearStr: typeof full.getYearInGanZhi === 'function' ? full.getYearInGanZhi() + '年' : (full.yearStr || ''),
-        monthStr: typeof full.getMonthInChinese === 'function' ? full.getMonthInChinese() + '月' : (full.monthStr || ''),
-        dayStr: typeof full.getDayInChinese === 'function' ? full.getDayInChinese() : (full.dayStr || ''),
-        text: typeof full.getYearInGanZhi === 'function' && typeof full.getMonthInChinese === 'function' && typeof full.getDayInChinese === 'function' ? 
-              `${full.getYearInGanZhi()}年 ${full.getMonthInChinese()}月${full.getDayInChinese()}` : (full.text || '')
-      } : null
+      ...cloned.bazi,
+      lunar: safeLunar,
+      // 移除 full 属性
+      full: undefined
     };
+  }
+
+  // 清理可能导致 React 问题的 undefined 属性
+  if (cloned.bazi && typeof cloned.bazi === 'object') {
+    // 移除 undefined 属性
+    const cleanedBazi = {};
+    for (const key in cloned.bazi) {
+      if (cloned.bazi[key] !== undefined) {
+        cleanedBazi[key] = cloned.bazi[key];
+      }
+    }
+    cloned.bazi = cleanedBazi;
   }
 
   return cloned;

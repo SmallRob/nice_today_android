@@ -288,7 +288,7 @@ export const createStandardBaziData = (params) => {
         month: lunar.getMonth(),
         monthInChinese: lunar.getMonthInChinese(),
         monthGanZhi: lunar.getMonthInGanZhi(),
-        isLeapMonth: lunar.getMonth() === lunar.getLeapMonth(),
+        isLeapMonth: (typeof lunar.getLeapMonth === 'function') ? (lunar.getMonth() === lunar.getLeapMonth()) : false,
         day: lunar.getDay(),
         dayInChinese: lunar.getDayInChinese(),
         dayGanZhi: lunar.getDayInGanZhi(),
@@ -617,8 +617,9 @@ export const getDisplayBaziInfo = (baziData) => {
     return {
       bazi: { year: '甲子', month: '乙丑', day: '丙寅', hour: '丁卯' },
       shichen: { ganzhi: '丁卯' },
-      lunar: { text: '请设置出生信息' },
-      wuxing: { text: '木火 火火 土水' },
+      lunar: { text: '请设置出生信息', monthStr: '请设置', dayStr: '请设置' },
+      wuxing: { text: '木火 火火 土水', year: '木', month: '火', day: '火', hour: '土' },
+      nayin: { year: '甲子', month: '乙丑', day: '丙寅', hour: '丁卯' },
       year: '甲子',
       month: '乙丑',
       day: '丙寅',
@@ -628,11 +629,92 @@ export const getDisplayBaziInfo = (baziData) => {
 
   // 如果已经是标准格式，直接返回
   if (baziData.meta && baziData.bazi) {
-    return baziData;
+    // 确保兼容字段存在
+    return ensureCompatibleFields(baziData);
   }
 
   // 如果是旧版格式，转换后返回
   return convertLegacyBaziToStandard(baziData);
+};
+
+/**
+ * 确保标准八字数据包含兼容旧版的字段
+ * @param {Object} standardBaziData - 标准八字数据
+ * @returns {Object} 包含兼容字段的八字数据
+ */
+export const ensureCompatibleFields = (standardBaziData) => {
+  if (!standardBaziData) return standardBaziData;
+
+  // 检查是否已经有兼容字段
+  if (standardBaziData.bazi &&
+      typeof standardBaziData.bazi.year === 'string') {
+    // 已经有兼容字段，直接返回
+    return standardBaziData;
+  }
+
+  // 添加兼容字段
+  const result = { ...standardBaziData };
+
+  // 确保 bazi 字段有字符串格式的 year/month/day/hour
+  if (standardBaziData.bazi) {
+    result.bazi = {
+      ...standardBaziData.bazi,
+      year: standardBaziData.bazi.year?.ganZhi || standardBaziData.bazi.year || '未知',
+      month: standardBaziData.bazi.month?.ganZhi || standardBaziData.bazi.month || '未知',
+      day: standardBaziData.bazi.day?.ganZhi || standardBaziData.bazi.day || '未知',
+      hour: standardBaziData.bazi.hour?.ganZhi || standardBaziData.bazi.hour || '未知'
+    };
+  }
+
+  // 确保 wuxing 字段有字符串格式的 year/month/day/hour
+  if (standardBaziData.wuXing) {
+    result.wuxing = {
+      ...standardBaziData.wuXing,
+      year: standardBaziData.wuXing.year || '未知',
+      month: standardBaziData.wuXing.month || '未知',
+      day: standardBaziData.wuXing.day || '未知',
+      hour: standardBaziData.wuXing.hour || '未知'
+    };
+  }
+
+  // 确保 nayin 字段有字符串格式的 year/month/day/hour
+  if (standardBaziData.naYin) {
+    result.nayin = {
+      ...standardBaziData.naYin,
+      year: standardBaziData.naYin.year || '未知',
+      month: standardBaziData.naYin.month || '未知',
+      day: standardBaziData.naYin.day || '未知',
+      hour: standardBaziData.naYin.hour || '未知'
+    };
+  }
+
+  // 确保 lunar 字段有 monthStr 和 dayStr
+  if (standardBaziData.lunar) {
+    result.lunar = {
+      ...standardBaziData.lunar,
+      monthStr: standardBaziData.lunar.monthStr || standardBaziData.lunar.monthInChinese + '月' || '未知',
+      dayStr: standardBaziData.lunar.dayStr || standardBaziData.lunar.dayInChinese || '未知'
+    };
+  }
+
+  // 确保 shichen 字段存在
+  if (!result.shichen) {
+    const timeGanzhi = standardBaziData.birth?.time?.shichenGanZhi || '未知';
+    result.shichen = {
+      ganzhi: timeGanzhi,
+      time: standardBaziData.birth?.time?.original || '12:30'
+    };
+  }
+
+  // 添加顶层兼容字段
+  if (standardBaziData.bazi) {
+    result.year = result.bazi.year;
+    result.month = result.bazi.month;
+    result.day = result.bazi.day;
+    result.hour = result.bazi.hour;
+  }
+
+  return result;
 };
 
 /**
