@@ -469,7 +469,7 @@ function SettingsPage() {
       {/* 顶部标题区域 */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">设置</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">更多个人功能</h1>
         </div>
       </div>
 
@@ -509,7 +509,13 @@ function SettingsPage() {
                 }`}
               onClick={() => { handleTabChange('tarot'); }}
             >
-              🔮 神秘塔罗
+              <svg className="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
+              </svg>
+              万象花园
             </button>
             <button
               className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'userConfigs'
@@ -548,23 +554,83 @@ function SettingsPage() {
               {activeTab === 'tarot' && (
                 <div>
                   <Card>
-                    <div className="text-center p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 rounded-lg text-white">
-                      <div className="text-5xl mb-3">🔮</div>
-                      <h2 className="text-2xl font-bold mb-2">神秘塔罗</h2>
-                      <p className="text-purple-100">聆听命运的指引</p>
+                    <div className="text-center p-6 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-600 rounded-lg text-white">
+                      <div className="mb-3">
+                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
+                        </svg>
+                      </div>
+                      <h2 className="text-2xl font-bold mb-2">万象花园</h2>
+                      <p className="text-green-100">探索趣味功能，发现无限可能</p>
                     </div>
                   </Card>
+                  
+                  {/* 神秘塔罗入口卡片 */}
+                  <Card>
+                    <button
+                      onClick={() => window.location.href = '/tarot'}
+                      className="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg group"
+                    >
+                      <div className="flex items-center space-x-4 p-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 8v8l4 4 4-4V8H8z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">神秘塔罗</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">聆听命运的指引</p>
+                        </div>
+                        <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+                  </Card>
+                  
+                  {/* 生命灵数入口卡片 */}
+                  <Card>
+                    <button
+                      onClick={() => window.location.href = '/numerology'}
+                      className="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg group"
+                    >
+                      <div className="flex items-center space-x-4 p-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12c0 4 3.582 7 7 7s7-3 7-7" />
+                              <circle cx="12" cy="12" r="9" strokeWidth={1.5} />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">生命灵数</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">探索数字的神秘力量</p>
+                        </div>
+                        <svg className="w-5 h-5 text-gray-400 group-hover:text-teal-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+                  </Card>
+                  
                   <Card>
                     <div className="text-center py-8">
                       <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        神秘塔罗功能正在建设中...
+                        更多好玩实用的功能正在开发中...
                       </p>
-                      <button
-                        onClick={() => window.location.href = '/tarot'}
-                        className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-all"
-                      >
-                        进入完整塔罗页面
-                      </button>
+                      <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                        敬请期待
+                      </p>
                     </div>
                   </Card>
                 </div>

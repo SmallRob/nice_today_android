@@ -5,6 +5,7 @@ import '../index.css';
 // 优化的懒加载组件预加载策略
 let MayaCalendarPromise;
 let MayaBirthChartPromise;
+let MayanTattooPromise;
 
 const preloadMayaCalendar = () => {
   if (!MayaCalendarPromise) {
@@ -20,9 +21,17 @@ const preloadMayaBirthChart = () => {
   return MayaBirthChartPromise;
 };
 
+const preloadMayanTattoo = () => {
+  if (!MayanTattooPromise) {
+    MayanTattooPromise = import('../components/MayanTattoo');
+  }
+  return MayanTattooPromise;
+};
+
 // 懒加载组件并预加载
 const MayaCalendar = lazy(() => preloadMayaCalendar());
 const MayaBirthChart = lazy(() => preloadMayaBirthChart());
+const MayanTattoo = lazy(() => preloadMayanTattoo());
 
 // 简化的加载组件 - 移动端优化
 const TabContentLoader = memo(() => (
@@ -44,6 +53,11 @@ const MayaPage = memo(() => {
     setActiveTab('birthChart');
   }, []);
 
+  // 显示图腾函数
+  const handleShowTattoo = useCallback(() => {
+    setActiveTab('tattoo');
+  }, []);
+
   // 返回历法函数
   const handleBackToCalendar = useCallback(() => {
     setActiveTab('calendar');
@@ -63,6 +77,7 @@ const MayaPage = memo(() => {
   useEffect(() => {
     preloadMayaCalendar();
     preloadMayaBirthChart();
+    preloadMayanTattoo();
   }, []);
 
 
@@ -118,7 +133,7 @@ const MayaPage = memo(() => {
                 <path d="M30,70 Q50,90 70,70" fill="none" stroke="currentColor" strokeWidth="8" />
               </svg>
             </div>
-            <h1 className="text-lg font-bold text-white">玛雅历法</h1>
+            <h1 className="text-lg font-bold text-white">玛雅图腾</h1>
           </div>
           <p className="text-xs text-white text-center opacity-90">探索古老的玛雅智慧</p>
         </div>
@@ -127,7 +142,7 @@ const MayaPage = memo(() => {
       {/* 标签导航 - 固定定位 */}
       <div className="maya-fixed-tabs bg-white dark:bg-gray-900">
         <div className="container mx-auto px-4 py-2">
-          <div className="flex bg-amber-100 dark:bg-amber-900 rounded-lg p-1 max-w-md mx-auto">
+          <div className="flex bg-amber-100 dark:bg-amber-900 rounded-lg p-1 max-w-lg mx-auto">
             <button
               className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md ${isMobile ? 'transition-none' : 'transition-colors'
                 } ${activeTab === 'calendar'
@@ -147,6 +162,16 @@ const MayaPage = memo(() => {
               onClick={handleShowBirthChart}
             >
               出生星盘
+            </button>
+            <button
+              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md ${isMobile ? 'transition-none' : 'transition-colors'
+                } ${activeTab === 'tattoo'
+                  ? 'bg-white dark:bg-gray-700 text-amber-800 dark:text-amber-200 shadow-sm font-semibold'
+                  : 'text-amber-900 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100'
+                }`}
+              onClick={handleShowTattoo}
+            >
+              玛雅图腾
             </button>
           </div>
         </div>
@@ -187,6 +212,14 @@ const MayaPage = memo(() => {
                 </Suspense>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'tattoo' && (
+          <div>
+            <Suspense fallback={<TabContentLoader />}>
+              <MayanTattoo />
+            </Suspense>
           </div>
         )}
       </div>

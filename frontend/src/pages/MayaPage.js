@@ -6,6 +6,7 @@ import '../index.css';
 // 懒加载组件以提升初始加载性能
 const MayaCalendar = lazy(() => import('../components/MayaCalendar_optimized'));
 const MayaBirthChart = lazy(() => import('../components/MayaBirthChart_optimized'));
+const MayanTattoo = lazy(() => import('../components/MayanTattoo'));
 
 // 优化的加载组件
 const TabContentLoader = memo(() => (
@@ -87,6 +88,13 @@ const MayaPage = memo(() => {
     };
   }, []);
 
+  // 优化的显示图腾函数
+  const handleShowTattoo = useCallback(() => {
+    requestAnimationFrame(() => {
+      setActiveTab('tattoo');
+    });
+  }, []);
+
   // 优化的Tab切换区域
   const TabNavigation = useMemo(() => (
     <Card padding="p-1">
@@ -103,15 +111,21 @@ const MayaPage = memo(() => {
         >
           出生星盘
         </TabButton>
+        <TabButton
+          isActive={activeTab === 'tattoo'}
+          onClick={handleShowTattoo}
+        >
+          玛雅图腾
+        </TabButton>
       </div>
     </Card>
-  ), [activeTab, handleBackToCalendar, handleShowBirthChart]);
+  ), [activeTab, handleBackToCalendar, handleShowBirthChart, handleShowTattoo]);
 
   // 优化的内容渲染
   const renderContent = useMemo(() => {
     // 使用CSS过渡而不是JS动画，提升性能
     const contentClass = "animate-fadeIn";
-    
+
     if (activeTab === 'calendar') {
       return (
         <div className={contentClass}>
@@ -121,11 +135,11 @@ const MayaPage = memo(() => {
         </div>
       );
     }
-    
+
     if (activeTab === 'birthChart') {
       return (
         <div className="space-y-4">
-          <Card 
+          <Card
             title="玛雅出生星盘"
             headerAction={<BackButton onClick={handleBackToCalendar} />}
           >
@@ -138,13 +152,23 @@ const MayaPage = memo(() => {
         </div>
       );
     }
-    
+
+    if (activeTab === 'tattoo') {
+      return (
+        <div className={contentClass}>
+          <Suspense fallback={<TabContentLoader />}>
+            <MayanTattoo />
+          </Suspense>
+        </div>
+      );
+    }
+
     return null;
   }, [activeTab, handleShowBirthChart, handleBackToCalendar]);
 
   return (
     <PageLayout
-      title="玛雅历法"
+      title="出生图腾"
       subtitle="探索古老的玛雅智慧"
       loading={!isLoaded}
       loadingMessage="正在加载玛雅历法..."

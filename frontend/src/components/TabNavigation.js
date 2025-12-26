@@ -88,16 +88,19 @@ const TabNavigation = () => {
     },
     {
       id: 'maya',
-      label: '玛雅历法',
+      label: '玛雅图腾',
       path: '/maya',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <circle cx="12" cy="10" r="5" strokeWidth={2} />
+          <path strokeWidth={2} d="M12 2v3m0 13v4M2 10h3m14 0h3M4.93 4.93l2.12 2.12m9.9 9.9l2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9l2.12-2.12" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16l4-4 4 4M8 16a2 2 0 00-2 2v2a2 2 0 002 2h8a2 2 0 002-2v-2a2 2 0 00-2-2" />
         </svg>
       ),
       activeIcon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+          <circle cx="12" cy="8" r="4" />
+          <path d="M12 2v2m0 12v2M2 8h2m16 0h2M5 5l1.41 1.41M17.59 15.59L19 17M5 15.59l1.41-1.41M17.59 8.41L19 7M8 15l4-4 4 4M8 15a1 1 0 00-1 1v3a1 1 0 001 1h6a1 1 0 001-1v-3a1 1 0 00-1-1z" />
         </svg>
       )
     },
@@ -107,12 +110,12 @@ const TabNavigation = () => {
       path: '/trend',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 20h18M5 16l4-4 6 6M15 12l4 4" />
         </svg>
       ),
       activeIcon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6M3 21h18" />
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 20h18M5 16l4-4 6 6M15 12l4 4" />
         </svg>
       )
     },
@@ -137,12 +140,18 @@ const TabNavigation = () => {
       path: '/settings',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
         </svg>
       ),
       activeIcon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/>
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
         </svg>
       )
     }
