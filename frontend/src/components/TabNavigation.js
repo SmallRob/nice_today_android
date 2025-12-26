@@ -135,23 +135,6 @@ const TabNavigation = () => {
       )
     },
     {
-      id: 'numerology',
-      label: '生命灵数',
-      path: '/numerology',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
-          <circle cx="12" cy="12" r="9" strokeWidth={1.5} />
-        </svg>
-      ),
-      activeIcon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
-          <circle cx="12" cy="12" r="9" strokeWidth={1.5} />
-        </svg>
-      )
-    },
-    {
       id: 'settings',
       label: '更多功能',
       path: '/settings',

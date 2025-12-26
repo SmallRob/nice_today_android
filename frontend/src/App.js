@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { UserConfigProvider } from './contexts/UserConfigContext';
 import { useThemeColor } from './hooks/useThemeColor';
 import EnhancedErrorBoundary from './components/EnhancedErrorBoundary';
@@ -184,12 +185,14 @@ function App() {
     <>
       <Router>
         <EnhancedErrorBoundary componentName="App">
-          <ThemeProvider>
-            <UserConfigProvider>
-              <AppLayout />
-              <ErrorDisplayPanel />
-            </UserConfigProvider>
-          </ThemeProvider>
+          <NotificationProvider>
+            <ThemeProvider>
+              <UserConfigProvider>
+                <AppLayout />
+                <ErrorDisplayPanel />
+              </UserConfigProvider>
+            </ThemeProvider>
+          </NotificationProvider>
         </EnhancedErrorBoundary>
       </Router>
     </>

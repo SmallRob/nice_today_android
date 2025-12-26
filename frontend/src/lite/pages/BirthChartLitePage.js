@@ -12,13 +12,22 @@ const BirthChartLitePage = ({ userInfo }) => {
   useEffect(() => {
     const calculate = async () => {
       try {
+        // 验证必要参数
         if (!userInfo || !userInfo.birthDate) {
+          console.warn('用户信息或出生日期缺失');
           setIsLoading(false);
           return;
         }
 
         const birthDate = userInfo.birthDate; // YYYY-MM-DD
         const birthTime = userInfo.birthTime || '';
+
+        // 验证出生日期格式
+        if (!birthDate || typeof birthDate !== 'string' || !birthDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          console.error('出生日期格式无效:', birthDate);
+          setIsLoading(false);
+          return;
+        }
 
         // 使用时辰映射到小时
         const timeMap = {
@@ -32,13 +41,32 @@ const BirthChartLitePage = ({ userInfo }) => {
           hour = timeMap[birthTime];
         }
 
-        const [year, month, day] = birthDate.split('-').map(Number);
+        const dateParts = birthDate.split('-');
+        if (dateParts.length !== 3) {
+          console.error('出生日期格式错误:', birthDate);
+          setIsLoading(false);
+          return;
+        }
+
+        const [year, month, day] = dateParts.map(Number);
+
+        // 验证日期数值
+        if (isNaN(year) || isNaN(month) || isNaN(day)) {
+          console.error('日期数值无效:', { year, month, day });
+          setIsLoading(false);
+          return;
+        }
 
         // 使用baziCalculator计算八字
         const bazi = BaziCalculator.calculateBazi(year, month, day, hour, 30, 110);
 
-        // 获取更详细的八字信息
-        const detailedBazi = calculateDetailedBazi(birthDate, '12:30', 110);
+        // 获取更详细的八字信息（使用安全的计算方式）
+        let detailedBazi = null;
+        try {
+          detailedBazi = calculateDetailedBazi(birthDate, '12:30', 110);
+        } catch (detailError) {
+          console.warn('获取详细八字信息失败，使用基础数据:', detailError);
+        }
 
         setBaziData({
           bazi,
@@ -51,6 +79,16 @@ const BirthChartLitePage = ({ userInfo }) => {
         });
       } catch (error) {
         console.error('八字计算失败:', error);
+        // 设置默认数据，避免白屏
+        setBaziData({
+          bazi: null,
+          detailed: null,
+          birthInfo: {
+            birthDate: userInfo?.birthDate || '',
+            birthTime: userInfo?.birthTime || '',
+            gender: userInfo?.gender || 'secret'
+          }
+        });
       } finally {
         setIsLoading(false);
       }
@@ -173,9 +211,25 @@ const BirthChartLitePage = ({ userInfo }) => {
   const { bazi, birthInfo } = baziData || {};
   const wuxingData = bazi ? calculateWuxing(bazi) : [];
   const dayGan = bazi?.details?.day?.gan || '辛';
-  const currentYear = new Date().getFullYear();
-  const yearlyFortune = generateYearlyFortune(currentYear, dayGan);
-  const decadeFortune = generateDecadeFortune(new Date(birthInfo.birthDate).getFullYear());
+
+  // 计算当前年份，防止出错
+  let currentYear = new Date().getFullYear();
+  let yearlyFortune = [];
+  let decadeFortune = [];
+
+  try {
+    if (!isNaN(currentYear) && currentYear > 1900 && currentYear < 2100) {
+      yearlyFortune = generateYearlyFortune(currentYear, dayGan);
+
+      // 计算出生年份
+      const birthYear = birthInfo?.birthDate ? new Date(birthInfo.birthDate).getFullYear() : 1990;
+      if (!isNaN(birthYear) && birthYear > 1900 && birthYear < 2100) {
+        decadeFortune = generateDecadeFortune(birthYear);
+      }
+    }
+  } catch (error) {
+    console.error('生成运势数据失败:', error);
+  }
 
   return (
     <div className="lite-birthchart-container">
