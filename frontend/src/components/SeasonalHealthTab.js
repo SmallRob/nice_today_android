@@ -168,9 +168,17 @@ const SeasonalHealthTab = () => {
 
   // 渲染节日/节气Banner
   const renderEventBanner = () => {
-    // 优先显示节日
-    const festivalState = getFestivalState;
-    const eventState = festivalState || solarTermState;
+    // 只有当天是节日才显示节日提醒，否则都显示节气提醒/预告
+    const isTodayFestival = getFestivalState?.active && getFestivalState?.diff === 0;
+
+    let eventState;
+    if (isTodayFestival) {
+      // 当天是节日：显示节日提醒
+      eventState = getFestivalState;
+    } else {
+      // 其他情况：显示节气提醒/预告
+      eventState = solarTermState;
+    }
 
     if (!eventState) return null;
 

@@ -477,7 +477,7 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
         wealth: generateDimensionFortune('wealth', calculateDimensionScore('wealth')),
         social: generateDimensionFortune('social', calculateDimensionScore('social')),
         reminders: generateReminders(),
-        dayMaster: dayMaster,
+        dayMaster: dayGan,
         dayMasterElement: dayMasterElement,
         liuNianGanZhi: yearGanZhi,
         liuNianGan: liuNianGan,

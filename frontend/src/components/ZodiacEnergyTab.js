@@ -92,7 +92,7 @@ const ZodiacEnergyTab = memo(() => {
     const bazi = calculateBazi(
       currentConfig.birthDate,
       currentConfig.birthTime,
-      currentConfig.birthLocation?.lng
+      currentConfig.birthLocation?.lng || 116.4  // 默认使用北京经度
     );
     setBaziInfo(bazi);
   }, [currentConfig, userZodiac, tempZodiac, userInfo.birthDate]);

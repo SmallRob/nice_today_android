@@ -219,8 +219,8 @@ export const createStandardBaziData = (params) => {
   // 统计五行数量
   const wuxingCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
   ['year', 'month', 'day', 'hour'].forEach(pillar => {
-    const pillar = eightChar[pillar === 'year' ? 'getYear' : pillar === 'month' ? 'getMonth' : pillar === 'day' ? 'getDay' : 'getTime']();
-    pillar.split('').forEach(char => {
+    const pillarGanzhi = eightChar[pillar === 'year' ? 'getYear' : pillar === 'month' ? 'getMonth' : pillar === 'day' ? 'getDay' : 'getTime']();
+    pillarGanzhi.split('').forEach(char => {
       const element = wuxingMap[char];
       if (element) {
         wuxingCounts[element]++;

@@ -278,14 +278,13 @@ export const useCurrentConfig = () => {
 
   // 如果全局上下文不可用，直接返回配置管理器的当前配置
   if (!configManagerReady && !enhancedUserConfigManager.initialized) {
-    // 尝试初始化
+    // 注意：初始化是异步的，此处不等待，组件需要处理可能的 null 值
     enhancedUserConfigManager.initialize().catch(console.error);
   }
 
   // enhancedUserConfigManager 的 getCurrentConfig 不支持 allowNull 参数，直接调用即可
-  const configFromManager = enhancedUserConfigManager.getCurrentConfig();
-
-  return currentConfig || configFromManager;
+  // 确保返回当前配置或管理器配置（不会为 null）
+  return currentConfig || enhancedUserConfigManager.getCurrentConfig() || DEFAULT_CONFIG;
 };
 
 export default UserConfigContext;

@@ -107,17 +107,27 @@ function App() {
 
       // 初始化用户配置管理器，确保在应用启动时加载配置
       try {
-        const { userConfigManager } = await import('./utils/userConfigManager');
-        await userConfigManager.initialize();
-        console.log('用户配置管理器初始化成功');
+        const { enhancedUserConfigManager } = await import('./utils/EnhancedUserConfigManager');
+        const { configMigrationTool } = await import('./utils/ConfigMigrationTool');
+
+        // 检查是否需要从旧版迁移数据
+        const migrationCheck = await configMigrationTool.checkMigrationNeeded();
+        if (migrationCheck.needed) {
+          console.log('检测到旧版配置数据，开始迁移...', migrationCheck);
+          await configMigrationTool.performMigration();
+        }
+
+        // 初始化新版管理器
+        await enhancedUserConfigManager.initialize();
+        console.log('增强版用户配置管理器初始化成功');
       } catch (error) {
         // 记录用户配置管理器初始化错误
         errorLogger.log(error, {
           component: 'App',
-          action: 'userConfigInit',
-          errorType: 'UserConfigInitError'
+          action: 'enhancedUserConfigInit',
+          errorType: 'EnhancedUserConfigInitError'
         });
-        console.warn('用户配置管理器初始化失败:', error);
+        console.warn('增强版用户配置管理器初始化失败:', error);
         // 继续执行，不阻止应用启动
       }
 

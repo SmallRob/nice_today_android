@@ -6,20 +6,20 @@ import { initDataMigration } from '../utils/dataMigration';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import notificationService from '../utils/notificationService';
 
-// 实践活动数据
-const PRACTICE_ACTIVITIES = [
-  { id: 1, title: "10分钟冥想", description: "专注呼吸，平静思绪", energy: "medium", duration: "10分钟", type: "all" },
-  { id: 2, title: "户外散步", description: "接触自然，呼吸新鲜空气", energy: "high", duration: "15分钟", type: "physical" },
-  { id: 3, title: "感恩日记", description: "写下三件感恩的事", energy: "low", duration: "5分钟", type: "emotional" },
-  { id: 4, title: "深呼吸练习", description: "5-5-5呼吸法", energy: "low", duration: "3分钟", type: "all" },
-  { id: 5, title: "能量伸展", description: "简单拉伸，唤醒身体", energy: "medium", duration: "8分钟", type: "physical" },
-  { id: 6, title: "积极肯定语", description: "对自己说积极的话", energy: "low", duration: "2分钟", type: "emotional" },
-  { id: 7, title: "饮水提醒", description: "喝一杯温水", energy: "low", duration: "1分钟", type: "all" },
-  { id: 8, title: "短暂静坐", description: "闭眼静坐，放松身心", energy: "medium", duration: "7分钟", type: "all" },
-  { id: 9, title: "能量音乐", description: "听一首提升能量的音乐", energy: "low", duration: "4分钟", type: "emotional" },
-  { id: 10, title: "阅读小憩", description: "读几页轻松的书", energy: "low", duration: "10分钟", type: "intellectual" },
-  { id: 11, title: "简单瑜伽", description: "几个基础瑜伽动作", energy: "medium", duration: "10分钟", type: "physical" },
-  { id: 12, title: "听轻音乐", description: "舒缓旋律放松心情", energy: "low", duration: "5分钟", type: "emotional" }
+// 每日正念活动数据 - 优化为正能量导向
+const MINDFULNESS_ACTIVITIES = [
+  { id: 1, title: "10分钟正念冥想", description: "专注呼吸，感受当下，平静思绪", energy: "medium", duration: "10分钟", type: "all", icon: "🧘", positive: "提升专注力，缓解压力" },
+  { id: 2, title: "感恩三件事", description: "写下今天最感恩的三件事", energy: "low", duration: "3分钟", type: "emotional", icon: "🙏", positive: "培养积极心态，提升幸福感" },
+  { id: 3, title: "晨间伸展", description: "简单的全身拉伸唤醒身体", energy: "medium", duration: "8分钟", type: "physical", icon: "🌅", positive: "促进血液循环，唤醒身体" },
+  { id: 4, title: "深呼吸练习", description: "4-7-8呼吸法，放松身心", energy: "low", duration: "5分钟", type: "all", icon: "🌬️", positive: "降低焦虑，改善睡眠质量" },
+  { id: 5, title: "欣赏美景", description: "观察身边的美，拍照或记录", energy: "low", duration: "10分钟", type: "emotional", icon: "🌸", positive: "发现美好，提升情绪" },
+  { id: 6, title: "积极肯定语", description: "对自己说三句积极的话", energy: "low", duration: "2分钟", type: "emotional", icon: "✨", positive: "增强自信，改善自我认知" },
+  { id: 7, title: "喝一杯温水", description: "清晨喝温水，滋养身体", energy: "low", duration: "1分钟", type: "all", icon: "💧", positive: "促进新陈代谢，温暖身体" },
+  { id: 8, title: "听治愈音乐", description: "选择一首让人平静的音乐", energy: "low", duration: "5分钟", type: "emotional", icon: "🎵", positive: "舒缓情绪，改善心情" },
+  { id: 9, title: "整理桌面", description: "整理工作或学习区域", energy: "low", duration: "10分钟", type: "all", icon: "📚", positive: "提升专注，减少干扰" },
+  { id: 10, title: "微笑练习", description: "对着镜子真诚微笑1分钟", energy: "low", duration: "2分钟", type: "emotional", icon: "😊", positive: "提升积极情绪，改善心情" },
+  { id: 11, title: "感恩联系", description: "给一位朋友或家人发感谢信息", energy: "low", duration: "3分钟", type: "emotional", icon: "💕", positive: "增强人际关系，提升幸福感" },
+  { id: 12, title: "自然连接", description: "走到户外，呼吸新鲜空气", energy: "medium", duration: "10分钟", type: "physical", icon: "🌿", positive: "提升能量，改善心情" }
 ];
 
 // 动态暖心提示库
@@ -306,12 +306,8 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
   // 使用全局配置上下文（降级处理）
   const { configManagerReady, initializeConfigManager } = useUserConfig();
-  const configData = useCurrentConfig();
-
-  // 兼容旧版本：如果configData是对象，则解构；如果是null/undefined，使用默认值
-  const currentConfig = configData?.currentConfig || {};
-  const configLoading = configData?.isLoading || false;
-  const configError = configData?.error || null;
+  // useCurrentConfig() 直接返回配置对象，不需要再解构
+  const currentConfig = useCurrentConfig() || {};
 
   // 从全局配置获取用户信息
   const [birthDate, setBirthDate] = useState(null);
@@ -351,7 +347,101 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
   const [todayData, setTodayData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [practiceActivities, setPracticeActivities] = useState([]);
+  const [mindfulnessActivities, setMindfulnessActivities] = useState([]);
+  const [completedTasks, setCompletedTasks] = useState({});
+  const [energyGuidance, setEnergyGuidance] = useState('');
+
+  // 每日任务存储键
+  const DAILY_TASKS_KEY = 'biorhythm_daily_tasks';
+
+  // 获取今天的日期字符串
+  const getTodayDate = useCallback(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  // 从localStorage加载今日任务完成状态
+  const loadCompletedTasks = useCallback(() => {
+    try {
+      const data = localStorage.getItem(DAILY_TASKS_KEY);
+      if (data) {
+        const tasksData = JSON.parse(data);
+        const today = getTodayDate();
+        return tasksData[today] || [];
+      }
+      return [];
+    } catch (error) {
+      console.error('加载任务完成状态失败:', error);
+      return [];
+    }
+  }, [DAILY_TASKS_KEY, getTodayDate]);
+
+  // 保存任务完成状态到localStorage
+  const saveCompletedTasks = useCallback((completedIds) => {
+    try {
+      const today = getTodayDate();
+      const data = localStorage.getItem(DAILY_TASKS_KEY);
+      const tasksData = data ? JSON.parse(data) : {};
+
+      // 保存今日任务
+      tasksData[today] = completedIds;
+
+      // 清理7天前的数据
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const cutoffDate = `${sevenDaysAgo.getFullYear()}-${String(sevenDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(sevenDaysAgo.getDate()).padStart(2, '0')}`;
+
+      Object.keys(tasksData).forEach(date => {
+        if (date < cutoffDate) {
+          delete tasksData[date];
+        }
+      });
+
+      localStorage.setItem(DAILY_TASKS_KEY, JSON.stringify(tasksData));
+      setCompletedTasks(completedIds);
+    } catch (error) {
+      console.error('保存任务完成状态失败:', error);
+    }
+  }, [DAILY_TASKS_KEY, getTodayDate]);
+
+  // 标记任务完成/取消完成
+  const toggleTaskCompletion = useCallback((taskId) => {
+    const completed = loadCompletedTasks();
+    if (completed.includes(taskId)) {
+      // 取消完成
+      const newCompleted = completed.filter(id => id !== taskId);
+      saveCompletedTasks(newCompleted);
+    } else {
+      // 标记完成
+      const newCompleted = [...completed, taskId];
+      saveCompletedTasks(newCompleted);
+    }
+  }, [loadCompletedTasks, saveCompletedTasks]);
+
+  // 生成能量指引文本
+  const generateEnergyGuidance = useCallback((physical, emotional, intellectual) => {
+    let guidance = '';
+    
+    // 综合能量判断
+    const averageEnergy = (physical + emotional + intellectual) / 3;
+    
+    if (averageEnergy < -10) {
+      guidance = '今日能量较低，建议选择轻松的活动，给自己多一点耐心和关怀。每一个小进步都值得庆祝！💪';
+    } else if (physical < -15) {
+      guidance = '今日体力偏低，身体需要更多休息。建议选择温和的活动，如冥想、深呼吸或听音乐。保重身体！🛡️';
+    } else if (emotional < -15) {
+      guidance = '今日情绪波动较大，建议选择能安抚心灵的活动。感恩练习和欣赏美景可以帮助你恢复平衡。抱抱自己！🤗';
+    } else if (intellectual < -15) {
+      guidance = '今日思维可能不够清晰，建议选择不需要复杂思考的活动。整理环境、感恩记录等简单任务会很有帮助。放轻松！🌿';
+    } else {
+      guidance = '今日状态还不错，建议选择一项喜欢的活动，保持这份美好。每个小行动都是成长的积累！✨';
+    }
+    
+    return guidance;
+  }, []);
 
   // 从配置文件获取默认出生日期
   const DEFAULT_BIRTH_DATE = elementConfig.defaultBirthDate || "1991-01-01";
@@ -378,35 +468,34 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     return new Date(dateStr);
   };
 
-  // 随机选择实践活动 - 根据节律动态推荐
-  const getRandomActivities = useCallback((physical, emotional, intellectual) => {
-    // 根据节律状态筛选合适的活动
+  // 智能推荐正念活动 - 根据节律动态推荐
+  const getMindfulnessActivities = useCallback((physical, emotional, intellectual) => {
     let filteredActivities = [];
 
     // 如果体力低，优先推荐低能量活动
-    if (physical < -10) {
-      filteredActivities = PRACTICE_ACTIVITIES.filter(a => a.energy === 'low');
+    if (physical < -15) {
+      filteredActivities = MINDFULNESS_ACTIVITIES.filter(a => a.energy === 'low');
     }
     // 如果情绪低，优先推荐情绪相关活动
-    else if (emotional < -10) {
-      filteredActivities = PRACTICE_ACTIVITIES.filter(a => a.type === 'emotional' || a.energy === 'low');
+    else if (emotional < -15) {
+      filteredActivities = MINDFULNESS_ACTIVITIES.filter(a => a.type === 'emotional' || a.energy === 'low');
     }
     // 如果智力低，优先推荐简单活动
-    else if (intellectual < -10) {
-      filteredActivities = PRACTICE_ACTIVITIES.filter(a => a.energy === 'low');
+    else if (intellectual < -15) {
+      filteredActivities = MINDFULNESS_ACTIVITIES.filter(a => a.energy === 'low');
     }
-    // 如果体力好，可以推荐高能量活动
+    // 如果体力好，可以推荐中高能量活动
     else if (physical > 20) {
-      filteredActivities = PRACTICE_ACTIVITIES.filter(a => a.type === 'physical' || a.energy === 'medium');
+      filteredActivities = MINDFULNESS_ACTIVITIES.filter(a => a.type === 'physical' || a.energy === 'medium');
     }
-    // 否则随机选择
+    // 否则选择所有活动
     else {
-      filteredActivities = [...PRACTICE_ACTIVITIES];
+      filteredActivities = [...MINDFULNESS_ACTIVITIES];
     }
 
-    // 随机打乱并取前3个
+    // 随机打乱并取前4个
     const shuffled = filteredActivities.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 3);
+    return shuffled.slice(0, 4);
   }, []);
 
   // 简化的状态确定函数 - 柔化暗黑主题颜色
@@ -674,9 +763,12 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
 
     loadData();
 
-    // 初始化实践活动
-    setPracticeActivities(getRandomActivities(0, 0, 0));
-  }, [configManagerReady]); // 只依赖 configManagerReady，避免每次 currentConfig 变化都重新执行
+    // 初始化正念活动
+    setMindfulnessActivities(getMindfulnessActivities(0, 0, 0));
+
+    // 加载今日任务完成状态
+    setCompletedTasks(loadCompletedTasks());
+  }, [configManagerReady, loadCompletedTasks]); // 添加依赖
 
   // 检测节律极值并发送通知，同时生成动态提示
   useEffect(() => {
@@ -692,17 +784,20 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         setLastTipRefresh(now);
       }
 
-      // 更新实践活动（根据节律动态推荐）
-      setPracticeActivities(getRandomActivities(todayData.physical, todayData.emotional, todayData.intellectual));
-    }
-  }, [todayData, lastTipRefresh]);
+      // 更新正念活动（根据节律动态推荐）
+      setMindfulnessActivities(getMindfulnessActivities(todayData.physical, todayData.emotional, todayData.intellectual));
 
-  // 更换实践活动
+      // 生成能量指引
+      setEnergyGuidance(generateEnergyGuidance(todayData.physical, todayData.emotional, todayData.intellectual));
+    }
+  }, [todayData, lastTipRefresh, generateEnergyGuidance]);
+
+  // 更换正念活动
   const refreshActivities = () => {
     if (todayData) {
-      setPracticeActivities(getRandomActivities(todayData.physical, todayData.emotional, todayData.intellectual));
+      setMindfulnessActivities(getMindfulnessActivities(todayData.physical, todayData.emotional, todayData.intellectual));
     } else {
-      setPracticeActivities(getRandomActivities(0, 0, 0));
+      setMindfulnessActivities(getMindfulnessActivities(0, 0, 0));
     }
   };
 
@@ -949,56 +1044,129 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             {/* 今日节律总结 */}
             {renderTodaySummary()}
 
-            {/* 今日实践建议卡片 */}
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-100 dark:border-purple-700/50 rounded-lg shadow-sm p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-semibold text-purple-800 dark:text-purple-300">
-                  实践建议
-                </h3>
+            {/* 每日正念卡片 - 重构为正能量导向 */}
+            <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 border border-indigo-100 dark:border-purple-700/50 rounded-lg shadow-sm p-4">
+              {/* 顶部：能量UP+ 指示器 */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1.5 rounded-full shadow-md">
+                    <span className="text-lg mr-1.5">⚡</span>
+                    <span className="text-sm font-bold">能量UP+</span>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    今日完成: <span className="font-semibold text-indigo-600 dark:text-indigo-400">{completedTasks.length}/4</span>
+                  </div>
+                </div>
                 <button
                   onClick={refreshActivities}
-                  className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium flex items-center"
+                  className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium flex items-center px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 rounded-full border border-purple-200 dark:border-purple-700/50 shadow-sm transition-all hover:shadow-md"
+                  title="换一批"
                 >
-                  换一批
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
+                  换一批
                 </button>
               </div>
 
-              <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
-                {todayData && todayData.physical < -10 ? '今日体力偏低，建议做些轻松的活动：' :
-                 todayData && todayData.emotional < -10 ? '今日情绪波动，建议做些放松心情的活动：' :
-                 todayData && todayData.intellectual < -10 ? '今日思考需要谨慎，建议做些简单的活动：' :
-                 '根据节律状态推荐活动：'}
-              </p>
-
-              <div className="space-y-2">
-                {practiceActivities.map((activity, index) => (
-                  <div
-                    key={activity.id}
-                    className="bg-white dark:bg-gray-800/40 bg-opacity-70 dark:bg-opacity-70 rounded-lg p-3 flex items-start"
-                  >
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-800/40 flex items-center justify-center mr-3 mt-0.5">
-                      <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                        {index + 1}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {activity.title}
-                        </h4>
-                        <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                          {activity.duration}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {activity.description}
-                      </p>
-                    </div>
+              {/* 能量指引 */}
+              {energyGuidance && (
+                <div className="mb-4 bg-gradient-to-r from-indigo-100/80 to-purple-100/80 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg p-3 border border-indigo-200 dark:border-indigo-800/50">
+                  <div className="flex items-start">
+                    <span className="text-2xl mr-3">🌟</span>
+                    <p className="text-sm text-indigo-800 dark:text-indigo-200 leading-relaxed font-medium">
+                      {energyGuidance}
+                    </p>
                   </div>
-                ))}
+                </div>
+              )}
+
+              {/* 每日正念任务列表 */}
+              <div className="space-y-3">
+                {mindfulnessActivities.map((activity, index) => {
+                  const isCompleted = completedTasks.includes(activity.id);
+                  return (
+                    <div
+                      key={activity.id}
+                      onClick={() => toggleTaskCompletion(activity.id)}
+                      className={`bg-white dark:bg-gray-800/60 rounded-lg p-3.5 cursor-pointer border-2 transition-all duration-300 hover:shadow-md ${
+                        isCompleted
+                          ? 'border-green-400 dark:border-green-500/70 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/20'
+                          : 'border-gray-100 dark:border-gray-700/50'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        {/* 完成状态复选框 */}
+                        <div className={`flex-shrink-0 w-6 h-6 rounded-md border-2 mr-3 flex items-center justify-center transition-all duration-200 ${
+                          isCompleted
+                            ? 'bg-green-500 border-green-500'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500'
+                        }`}>
+                          {isCompleted && (
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+
+                        {/* 活动图标 */}
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center mr-3 text-xl ${
+                          isCompleted ? 'opacity-50' : ''
+                        }`}>
+                          {activity.icon}
+                        </div>
+
+                        {/* 活动信息 */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className={`text-sm font-semibold truncate ${
+                              isCompleted ? 'text-gray-500 dark:text-gray-400 line-through' : 'text-gray-900 dark:text-white'
+                            }`}>
+                              {activity.title}
+                            </h4>
+                            <div className="flex items-center space-x-2">
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                isCompleted ? 'opacity-50' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
+                              }`}>
+                                {activity.duration}
+                              </span>
+                            </div>
+                          </div>
+                          <p className={`text-xs leading-relaxed ${
+                            isCompleted ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-300'
+                          }`}>
+                            {activity.description}
+                          </p>
+                          {!isCompleted && activity.positive && (
+                            <p className="text-xs text-green-600 dark:text-green-400 mt-1.5 font-medium">
+                              ✨ {activity.positive}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* 完成标记 */}
+                        {isCompleted && (
+                          <div className="flex-shrink-0 ml-3">
+                            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-md">
+                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 底部提示 */}
+              <div className="mt-4 pt-3 border-t border-indigo-100 dark:border-indigo-800/50">
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
+                  💡 点击任务标记完成，每日每个任务只能标记一次
+                  <br />
+                  完成任务后可立即感受到能量的提升 🌈
+                </p>
               </div>
             </div>
 

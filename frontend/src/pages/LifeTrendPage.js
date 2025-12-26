@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import { useCurrentConfig } from '../contexts/UserConfigContext';
+import { useUserConfig } from '../contexts/UserConfigContext';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import {
   BaziDataManager,
@@ -19,7 +19,7 @@ import { getShichenSimple } from '../utils/astronomy';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
-  const { getCurrentConfig, calculateAndSyncBazi } = useCurrentConfig();
+  const { currentConfig, calculateAndSyncBazi } = useUserConfig();
 
   // 视图和图表状态
   const [selectedView, setSelectedView] = useState('kline');
@@ -89,7 +89,7 @@ const LifeTrendPage = () => {
 
     // 安全地获取配置，带错误处理
     try {
-      config = getCurrentConfig();
+      config = currentConfig;
     } catch (error) {
       configError = error;
       console.warn('获取当前配置失败，使用降级方案:', error.message);
@@ -152,12 +152,12 @@ const LifeTrendPage = () => {
       day: '丙寅',
       hour: '丁卯'
     };
-  }, [isTempCalcMode, tempBazi, getCurrentConfig]);
+  }, [isTempCalcMode, tempBazi, currentConfig]);
 
   // 统一获取时辰显示文字（使用新的 BaziDataManager）- 必须在其他函数之前定义
   const getShichenDisplay = useCallback(() => {
     try {
-      const config = getCurrentConfig();
+      const config = currentConfig;
       const baziData = isTempCalcMode ? tempBazi : (config && config.bazi);
 
       // 如果没有八字数据，返回默认时辰
@@ -199,7 +199,7 @@ const LifeTrendPage = () => {
       console.warn('获取时辰显示失败:', error);
       return '午时 (12:00)';
     }
-  }, [isTempCalcMode, tempBazi, getCurrentConfig]);
+  }, [isTempCalcMode, tempBazi, currentConfig]);
 
   // 加载用户配置的函数（使用统一的八字数据管理器）
   const loadUserConfig = useCallback(async () => {
@@ -214,7 +214,7 @@ const LifeTrendPage = () => {
       let configError = null;
 
       try {
-        config = getCurrentConfig();
+        config = currentConfig;
         const validation = validateConfig(config);
         if (!validation.valid) {
           throw new Error(validation.error);
@@ -346,7 +346,7 @@ const LifeTrendPage = () => {
         setLoading(false);
       }
     }
-  }, [getCurrentConfig]);
+  }, [currentConfig]);
 
   // 初始化加载用户配置
   useEffect(() => {
@@ -355,7 +355,7 @@ const LifeTrendPage = () => {
 
   // 计算当前年龄
   useEffect(() => {
-    const config = getCurrentConfig();
+    const config = currentConfig;
     if (config && config.birthDate) {
       const birthDate = new Date(config.birthDate);
       const today = new Date();
@@ -369,7 +369,7 @@ const LifeTrendPage = () => {
     try {
       const newBirthDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
       const newBirthTime = `${String(hour).padStart(2, '0')}:00`;
-      const config = getCurrentConfig();
+      const config = currentConfig;
       
       if (!config || !config.nickname) {
         throw new Error('当前配置为空，无法保存');
@@ -753,7 +753,7 @@ const LifeTrendPage = () => {
   const getRadarViewAge = () => {
     let config = null;
     try {
-      config = getCurrentConfig();
+      config = currentConfig;
     } catch (error) {
       console.warn('获取当前配置失败，使用默认年龄:', error.message);
     }
@@ -833,7 +833,7 @@ const LifeTrendPage = () => {
 
       // 使用 BaziDataManager 重新计算八字
       const result = await BaziDataManager.recalculate(
-        getCurrentConfig(),
+        currentConfig,
         birthInfo
       );
 
