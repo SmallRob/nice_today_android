@@ -17,6 +17,7 @@ const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
 const TarotPage = React.lazy(() => import('./pages/TarotPage'));
 const NumerologyPage = React.lazy(() => import('./components/NumerologyPage'));
 const EnhancedNumerologyPage = React.lazy(() => import('./components/EnhancedNumerologyPage'));
+const UnifiedNumerologyPage = React.lazy(() => import('./components/UnifiedNumerologyPage'));
 const TabNavigation = React.lazy(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -46,7 +47,7 @@ const AppLayout = () => {
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/trend" element={<LifeTrendPage />} />
             <Route path="/tarot" element={<TarotPage />} />
-            <Route path="/numerology" element={<NumerologyPage />} />
+            <Route path="/numerology" element={<UnifiedNumerologyPage />} />
             <Route path="/enhanced-numerology" element={<EnhancedNumerologyPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>

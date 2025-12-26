@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useCurrentConfig } from '../contexts/UserConfigContext';
 import '../styles/unified-numerology.css';
 
@@ -93,7 +93,7 @@ const UnifiedNumerologyPage = () => {
 
       {/* 内容区域 */}
       <main className="unified-content">
-        <React.Suspense fallback={renderLoading()}>
+        <Suspense fallback={renderLoading()}>
           {activeTab === 'personal' ? (
             <div className="tab-content personal-tab">
               <PersonalNumerology />

@@ -595,7 +595,7 @@ function SettingsPage() {
                     </button>
                   </Card>
                   
-                  {/* 生命灵数入口卡片 */}
+                  {/* 生命灵数入口卡片 - 统一入口 */}
                   <Card>
                     <button
                       onClick={() => window.location.href = '/numerology'}
