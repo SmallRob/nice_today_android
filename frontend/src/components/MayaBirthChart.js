@@ -222,6 +222,7 @@ const HistorySection = memo(({ historyDates, handleHistoryClick }) => (
 const MayaBirthChart = () => {
   // 使用新的配置上下文
   const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+  const { configs } = useUserConfig();
   
   // 使用useRef管理不需要触发重渲染的状态
   const loadingRef = useRef(false);
@@ -722,10 +723,7 @@ const MayaBirthChart = () => {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
-    
-    // 使用新的配置上下文
-    const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
-    
+
     // 精简用户信息，只保留必要字段
     if (currentConfig) {
       setUserInfo({
@@ -759,36 +757,39 @@ const MayaBirthChart = () => {
     // 加载历史记录
     await fetchHistory();
     
-    // 添加配置变更监听器
-    const removeListener = userConfigManager.addListener(({
-      currentConfig: updatedConfig
-    }) => {
-      if (updatedConfig) {
-        setUserInfo({
-          nickname: updatedConfig.nickname || '',
-          birthDate: updatedConfig.birthDate || ''
-        });
-        
-        // 如果出生日期有变化，重新加载数据
-        if (updatedConfig.birthDate && updatedConfig.birthDate !== (birthDate ? formatDateLocal(birthDate) : '')) {
-          try {
-            const newBirthDate = new Date(updatedConfig.birthDate);
-            if (!isNaN(newBirthDate.getTime())) {
+    // 配置变更通过 currentConfig 自动更新，不需要手动添加监听器
+    return null;
+  }, [fetchHistory, loadBirthInfo, loadFromStorage]);
+
+  // 监听 currentConfig 变化
+  useEffect(() => {
+    if (currentConfig) {
+      // 更新用户信息
+      setUserInfo({
+        nickname: currentConfig.nickname || '',
+        birthDate: currentConfig.birthDate || ''
+      });
+      
+      // 如果出生日期有变化，更新出生日期
+      if (currentConfig.birthDate) {
+        try {
+          const newBirthDate = new Date(currentConfig.birthDate);
+          if (!isNaN(newBirthDate.getTime())) {
+            const currentDateStr = birthDate ? formatDateString(birthDate) : '';
+            if (currentConfig.birthDate !== currentDateStr) {
               setBirthDate(newBirthDate);
               setTimeout(() => {
                 if (abortControllerRef.current?.signal.aborted) return;
                 loadBirthInfo(newBirthDate, true);
               }, 0);
             }
-          } catch (error) {
-            console.error("处理新出生日期失败:", error);
           }
+        } catch (error) {
+          console.error("处理配置中的出生日期失败:", error);
         }
       }
-    });
-    
-    return removeListener;
-  }, [fetchHistory, loadBirthInfo, loadFromStorage]);
+    }
+  }, [currentConfig, loadBirthInfo]);
 
   useEffect(() => {
     let removeListener;

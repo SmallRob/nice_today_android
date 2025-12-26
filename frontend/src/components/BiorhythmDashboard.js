@@ -379,7 +379,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       {/* 内容展示区域 - 简化布局，移除不必要的容器嵌套 */}
       <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized -webkit-overflow-scrolling-touch">
         <div className="container mx-auto px-4 py-4 h-full">
-          <div className="mb-4 mx-auto max-w-6xl h-full">
+          <div className="mb-4 h-full">
             {/* 错误显示 */}
             {error && (
               <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4">

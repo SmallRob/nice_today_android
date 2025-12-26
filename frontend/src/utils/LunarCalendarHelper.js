@@ -57,22 +57,22 @@ export const calculateLunarDate = (solarDateStr, solarTimeStr = '12:00', longitu
             day: lunar.getDay(),
             
             // 干支信息
-            yearGanZhi: lunar.getYearInGanZhi(),
-            monthGanZhi: lunar.getMonthInGanZhi(),
-            dayGanZhi: lunar.getDayInGanZhi(),
-            
+            yearGanZhi: lunar?.getYearInGanZhi(),
+            monthGanZhi: lunar?.getMonthInGanZhi(),
+            dayGanZhi: lunar?.getDayInGanZhi(),
+
             // 中文显示（包含修正）
-            yearInChinese: lunar.getYearInChinese(),
+            yearInChinese: lunar?.getYearInChinese(),
             monthInChinese: lunarMonthName,
             dayInChinese: lunarDayName,
-            
+
             // 生肖
-            zodiacAnimal: lunar.getYearShengXiao(),
-            
+            zodiacAnimal: lunar?.getYearShengXiao ? lunar.getYearShengXiao() : '',
+
             // 完整显示（包含修正）
-            fullText: `${lunar.getYearInGanZhi()}年 ${lunarMonthName}${lunarDayName}`,
+            fullText: lunar ? `${lunar.getYearInGanZhi()}年 ${lunarMonthName}${lunarDayName}` : `${lunarMonthName}${lunarDayName}`,
             shortText: `${lunarMonthName}${lunarDayName}`,
-            
+
             // 农历对象
             lunarObject: lunar
         };

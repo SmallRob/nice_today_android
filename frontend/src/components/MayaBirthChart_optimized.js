@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import './MayaBirthChart.css';
 import { formatDateString } from '../services/apiServiceRefactored';
 import { useCurrentConfig } from '../contexts/UserConfigContext';
-import { useTheme } from '../context/ThemeContext';
 import {
   sealInfoMap,
   toneInfoMap,
@@ -165,6 +164,7 @@ const MayaBirthChart = () => {
   const [error, setError] = useState(null);
   const [showResults, setShowResults] = useState(false);
   const [userInfo, setUserInfo] = useState({ nickname: '', birthDate: '' });
+  const [isInitialized, setIsInitialized] = useState(false);
   // 不需要selectedDate状态，直接使用用户配置中的出生日期
 
   const cacheRef = useRef(new Map());
@@ -254,11 +254,23 @@ const MayaBirthChart = () => {
     }
   }, [generateBirthInfo, cacheRef]);
 
-  // 加载用户配置
+  // 加载用户配置 - 初始化时只执行一次
   useEffect(() => {
     let isMounted = true;
 
     const init = async () => {
+      if (!isMounted || isInitialized) return;
+
+      // 等待配置加载完成（最多等待5秒）
+      let retryCount = 0;
+      const maxRetries = 50; // 5秒，每100ms检查一次
+
+      while (configLoading && retryCount < maxRetries && isMounted) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retryCount++;
+      }
+
+      // 如果超时后仍在加载，使用当前配置状态继续
       if (!isMounted) return;
 
       // 从用户配置上下文获取用户信息（带错误处理）
@@ -266,7 +278,7 @@ const MayaBirthChart = () => {
       try {
         config = currentConfig;
       } catch (error) {
-        console.warn('获取用户配置失败，使用默认配置:', error.message);
+        console.warn('获取用户配置失败:', error.message);
       }
 
       if (config) {
@@ -282,30 +294,20 @@ const MayaBirthChart = () => {
           } catch (err) {
             console.error('加载出生信息失败:', err);
             setError('加载失败，请稍后再试');
+          } finally {
             setLoading(false);
           }
         } else {
-          // 如果没有出生日期，显示加载完成但没有数据
+          // 如果没有出生日期，显示提示信息
           setLoading(false);
         }
-      } else if (!configLoading) {
-        // 如果配置未加载且不处于加载状态，使用默认日期显示
-        console.warn('无法加载用户配置，使用默认日期');
-        const today = new Date();
-        const defaultDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        setUserInfo({
-          nickname: '用户',
-          birthDate: defaultDate
-        });
-        // 使用默认日期加载玛雅数据
-        try {
-          await loadBirthInfo(new Date(defaultDate));
-        } catch (err) {
-          console.error('加载默认日期失败:', err);
-          setError('加载失败，请稍后再试');
-          setLoading(false);
-        }
+      } else {
+        // 如果没有配置，显示提示信息，不使用默认日期
+        console.warn('用户配置为空，请先设置用户信息');
+        setLoading(false);
       }
+
+      setIsInitialized(true);
     };
 
     init();
@@ -313,7 +315,39 @@ const MayaBirthChart = () => {
     return () => {
       isMounted = false;
     };
-  }, [currentConfig, configLoading, loadBirthInfo]);
+  }, [isInitialized]);
+
+  // 监听 currentConfig 变化 - 当配置更新时重新加载数据
+  useEffect(() => {
+    if (!isInitialized || !currentConfig) return;
+
+    const { nickname, birthDate } = currentConfig;
+
+    // 更新用户信息
+    setUserInfo({
+      nickname: nickname || '用户',
+      birthDate: birthDate || ''
+    });
+
+    // 如果出生日期有变化，重新计算玛雅数据
+    if (birthDate) {
+      try {
+        const newBirthDate = new Date(birthDate);
+        if (!isNaN(newBirthDate.getTime())) {
+          // 重新计算玛雅数据
+          loadBirthInfo(newBirthDate);
+        }
+      } catch (error) {
+        console.error('处理配置变更失败:', error);
+        setError('加载失败，请稍后再试');
+      }
+    } else {
+      // 如果配置中没有出生日期，清除显示的数据
+      setBirthInfo(null);
+      setShowResults(false);
+      setError(null);
+    }
+  }, [currentConfig, isInitialized, loadBirthInfo]);
 
   // 简化的用户信息栏 - 紧凑设计
   const UserHeader = () => (

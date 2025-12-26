@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
+import '../styles/dashboard-layout.css';
 
 // MBTI配置管理器 - 仅用于读取默认配置
 class MBTIConfigManager {
@@ -1080,7 +1081,7 @@ const MBTIPersonalityTabHome = () => {
 
         {/* 内容展示区域 - 使用DressHealthTab的边距样式 */}
         <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
-          <div className="mb-4 mx-auto max-w-2xl h-full">
+          <div className="mb-4 h-full dashboard-content">
             <div className="space-y-3 h-full">
               {/* MBTI选择器 */}
               {renderMBTISelector()}

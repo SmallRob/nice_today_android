@@ -1,0 +1,259 @@
+/**
+ * 首页布局统一样式
+ * 
+ * 统一4个标签页面的内容宽度和字体大小
+ * 优化移动设备显示效果
+ */
+
+/* === 容器宽度统一 === */
+/* 所有内容区域使用 container mx-auto px-4，与装饰性banner保持一致 */
+.dashboard-content {
+  width: 100%;
+  max-width: none;
+}
+
+/* === 字体大小统一 === */
+/* 桌面端统一字体大小 */
+@media (min-width: 768px) {
+  .dashboard-content h1,
+  .dashboard-content .text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .dashboard-content h2,
+  .dashboard-content .text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .dashboard-content h3,
+  .dashboard-content .text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .dashboard-content p,
+  .dashboard-content .text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .dashboard-content .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .dashboard-content .text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+}
+
+/* 移动端字体大小优化 */
+@media (max-width: 767px) {
+  .dashboard-content h1,
+  .dashboard-content .text-2xl {
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+  }
+
+  .dashboard-content h2,
+  .dashboard-content .text-xl {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+  }
+
+  .dashboard-content h3,
+  .dashboard-content .text-lg {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .dashboard-content p,
+  .dashboard-content .text-base {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .dashboard-content .text-sm {
+    font-size: 0.8125rem;
+    line-height: 1.125rem;
+  }
+
+  .dashboard-content .text-xs {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+  }
+}
+
+/* === 卡片间距统一 === */
+@media (min-width: 768px) {
+  .dashboard-content .space-y-2 > * + * {
+    margin-top: 0.5rem;
+  }
+
+  .dashboard-content .space-y-3 > * + * {
+    margin-top: 0.75rem;
+  }
+
+  .dashboard-content .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard-content .space-y-2 > * + * {
+    margin-top: 0.375rem;
+  }
+
+  .dashboard-content .space-y-3 > * + * {
+    margin-top: 0.5rem;
+  }
+
+  .dashboard-content .space-y-4 > * + * {
+    margin-top: 0.625rem;
+  }
+}
+
+/* === 移动设备优化 === */
+/* 优化触摸交互 */
+@media (max-width: 767px) {
+  /* 增大点击区域 */
+  .dashboard-content button,
+  .dashboard-content [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 优化卡片内边距 */
+  .dashboard-content .p-4 {
+    padding: 0.75rem;
+  }
+
+  .dashboard-content .p-5 {
+    padding: 1rem;
+  }
+
+  /* 优化卡片圆角 */
+  .dashboard-content .rounded-lg {
+    border-radius: 0.5rem;
+  }
+
+  .dashboard-content .rounded-xl {
+    border-radius: 0.75rem;
+  }
+
+  /* 优化字体粗细 */
+  .dashboard-content .font-semibold {
+    font-weight: 600;
+  }
+
+  .dashboard-content .font-bold {
+    font-weight: 700;
+  }
+}
+
+/* === 横屏移动设备优化 === */
+@media (max-width: 767px) and (orientation: landscape) {
+  /* 减少垂直间距 */
+  .dashboard-content .space-y-2 > * + *,
+  .dashboard-content .space-y-3 > * + *,
+  .dashboard-content .space-y-4 > * + * {
+    margin-top: 0.25rem;
+  }
+
+  /* 压缩卡片内边距 */
+  .dashboard-content .p-4 {
+    padding: 0.5rem;
+  }
+
+  .dashboard-content .py-4 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* === 小屏设备优化 (iPhone SE 等) === */
+@media (max-width: 375px) {
+  .dashboard-content {
+    font-size: 0.875rem;
+  }
+
+  .dashboard-content h1,
+  .dashboard-content .text-2xl {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+  }
+
+  .dashboard-content h2,
+  .dashboard-content .text-xl {
+    font-size: 1rem;
+    line-height: 1.375rem;
+  }
+
+  /* 进一步减少间距 */
+  .dashboard-content .space-y-2 > * + * {
+    margin-top: 0.25rem;
+  }
+
+  .dashboard-content .space-y-3 > * + * {
+    margin-top: 0.375rem;
+  }
+
+  .dashboard-content .space-y-4 > * + * {
+    margin-top: 0.5rem;
+  }
+}
+
+/* === 动画优化 === */
+/* 移动设备禁用不必要的动画以提升性能 */
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+  .dashboard-content .animate-pulse,
+  .dashboard-content .animate-bounce {
+    animation-duration: 1s;
+  }
+
+  .dashboard-content .transition-all {
+    transition-duration: 200ms;
+  }
+}
+
+/* === 可读性优化 === */
+/* 确保文本对比度 */
+.dashboard-content .text-gray-900 {
+  color: #111827;
+}
+
+.dark .dashboard-content .text-white {
+  color: #f9fafb;
+}
+
+/* === 滚动优化 === */
+.dashboard-content {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* === 卡片阴影统一 === */
+@media (min-width: 768px) {
+  .dashboard-content .shadow-sm {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .dashboard-content .shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard-content .shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  .dashboard-content .shadow-md {
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+  }
+}

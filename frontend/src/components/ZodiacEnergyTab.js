@@ -5,6 +5,7 @@ import ChineseZodiacSelector from './ChineseZodiacSelector';
 import '../styles/zodiac-icons.css';
 import '../styles/chinese-zodiac-icons.css';
 import '../styles/responsive-zodiac.css';
+import '../styles/dashboard-layout.css';
 import { calculateBazi, getMonthlyBaziFortune } from '../utils/baziHelper';
 import { Line } from 'react-chartjs-2';
 import {
@@ -1285,7 +1286,7 @@ const ZodiacEnergyTab = memo(() => {
 
         {/* 内容展示区域 - 调整背景色以匹配传统风格 */}
         <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-transparent flex-1">
-          <div className="mb-4 mx-auto max-w-2xl">
+          <div className="mb-4 dashboard-content">
             <div className="space-y-3">              {/* 生肖选择器 */}
               {renderZodiacSelector()}
 

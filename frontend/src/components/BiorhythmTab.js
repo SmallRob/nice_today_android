@@ -5,6 +5,7 @@ import elementConfig from '../config/elementConfig.json';
 import { initDataMigration } from '../utils/dataMigration';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import notificationService from '../utils/notificationService';
+import '../styles/dashboard-layout.css';
 
 // 每日正念活动数据 - 优化为正能量导向
 const MINDFULNESS_ACTIVITIES = [
@@ -981,7 +982,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         </div>
 
         <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
-          <div className="mb-4 mx-auto max-w-2xl space-y-4 h-full">
+          <div className="mb-4 space-y-4 h-full dashboard-content">
             {/* 合并的用户信息与今日状态卡片 */}
             {todayData && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">

@@ -282,20 +282,20 @@ export const createStandardBaziData = (params) => {
 
       // 农历信息
       lunar: {
-        year: lunar.getYear(),
-        yearInChinese: lunar.getYearInChinese(),
-        yearGanZhi: lunar.getYearInGanZhi(),
-        month: lunar.getMonth(),
-        monthInChinese: lunar.getMonthInChinese(),
-        monthGanZhi: lunar.getMonthInGanZhi(),
-        isLeapMonth: (typeof lunar.getLeapMonth === 'function') ? (lunar.getMonth() === lunar.getLeapMonth()) : false,
-        day: lunar.getDay(),
-        dayInChinese: lunar.getDayInChinese(),
-        dayGanZhi: lunar.getDayInGanZhi(),
-        zodiacAnimal: lunar.getYearShengXiao(),
-        text: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`,
-        fullText: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()} ${lunar.getYearShengXiao()}`,
-        shortText: `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`
+        year: lunar?.getYear(),
+        yearInChinese: lunar?.getYearInChinese(),
+        yearGanZhi: lunar?.getYearInGanZhi(),
+        month: lunar?.getMonth(),
+        monthInChinese: lunar?.getMonthInChinese(),
+        monthGanZhi: lunar?.getMonthInGanZhi(),
+        isLeapMonth: (lunar && typeof lunar.getLeapMonth === 'function') ? (lunar.getMonth() === lunar.getLeapMonth()) : false,
+        day: lunar?.getDay(),
+        dayInChinese: lunar?.getDayInChinese(),
+        dayGanZhi: lunar?.getDayInGanZhi(),
+        zodiacAnimal: lunar?.getYearShengXiao ? lunar.getYearShengXiao() : '',
+        text: lunar ? `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}` : '未知',
+        fullText: lunar ? `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()} ${lunar.getYearShengXiao()}` : '未知',
+        shortText: lunar ? `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}` : '未知'
       },
 
       // 出生地点
@@ -397,31 +397,30 @@ export const createStandardBaziData = (params) => {
       description: `日主${dayGan}，五行${dayMasterElement}，${strengthType}`
     },
 
-    // 完整对象
-    lunar: adjustLunar,
-    solar: adjustSolar,
-
     // 兼容旧版的字段
     birthDate: birthDate,
     birthTime: birthTime,
-    lunarBirthDate: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`,
+    lunarBirthDate: lunar ? `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}` : '',
     trueSolarTime: trueSolarTime,
 
     // 兼容旧版的数据结构（用于兼容性）
-    solar: {
-      year: solar.getYear(),
-      month: solar.getMonth(),
-      day: solar.getDay(),
-      hour: solar.getHour(),
-      minute: solar.getMinute(),
-      text: `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日`
+    solarOld: {
+      year: solar?.getYear(),
+      month: solar?.getMonth(),
+      day: solar?.getDay(),
+      hour: solar?.getHour(),
+      minute: solar?.getMinute(),
+      text: solar ? `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日` : ''
     },
-    lunar: {
-      yearStr: lunar.getYearInGanZhi() + '年',
-      monthStr: lunar.getMonthInChinese() + '月',
-      dayStr: lunar.getDayInChinese(),
-      text: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`
+    lunarOld: {
+      yearStr: lunar ? lunar.getYearInGanZhi() + '年' : '',
+      monthStr: lunar ? lunar.getMonthInChinese() + '月' : '',
+      dayStr: lunar ? lunar.getDayInChinese() : '',
+      text: lunar ? `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}` : ''
     },
+    // 完整对象（用于高级用法）
+    lunar: adjustLunar,
+    solar: adjustSolar,
     bazi: {
       year: adjustEightChar.getYear(),
       month: adjustEightChar.getMonth(),

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { baziCacheManager } from '../utils/BaziCacheManager';

@@ -14,6 +14,7 @@ import { getToday } from '../utils/timeCache';
 import '../styles/mobileOptimization.css';
 import '../styles/animations.css';
 import '../styles/horoscope.css';
+import '../styles/dashboard-layout.css';
 import { Line } from 'react-chartjs-2';
 import {
   HoroscopeSelector,
@@ -492,7 +493,7 @@ const HoroscopeTab = () => {
           {renderHoroscopeSelector()}
 
           {/* 内容区域 - 简化布局 */}
-          <div className="space-y-4 mx-auto max-w-2xl">
+          <div className="space-y-4 dashboard-content">
             {/* 加载状态 */}
             {loading && <SkeletonLoader />}
 

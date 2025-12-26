@@ -41,14 +41,19 @@ export const calculateBazi = (birthDateStr, birthTimeStr, longitude) => {
         return {
             error: true,
             message: '缺失出生日期',
-            pillars: ['未知', '未知', '未知', '未知']
+            pillars: ['未知', '未知', '未知', '未知'],
+            zodiac: '未知'
         };
     }
     const info = calculateDetailedBazi(birthDateStr, birthTimeStr, longitude);
 
+    // 优先使用 birth.lunar.zodiacAnimal，如果不存在则从 lunar 对象获取
+    const zodiac = info?.birth?.lunar?.zodiacAnimal ||
+                   (info?.lunar && typeof info.lunar.getYearShengXiao === 'function' ? info.lunar.getYearShengXiao() : '未知');
+
     return {
-        pillars: [info.bazi.year, info.bazi.month, info.bazi.day, info.bazi.hour],
-        zodiac: info.full.getYearShengXiao(), // 生肖
+        pillars: [info?.bazi?.year, info?.bazi?.month, info?.bazi?.day, info?.bazi?.hour],
+        zodiac: zodiac,
         isApproximate: !birthTimeStr || !longitude
     };
 };
@@ -152,8 +157,9 @@ export const getMonthlyBaziFortune = (pillars, targetDate = new Date()) => {
 export const solarToLunarDescription = (dateStr) => {
     if (!dateStr) return '未知';
     const [year, month, day] = dateStr.split('-').map(Number);
-    const lunar = Solar.fromYmd(year, month, day).getLunar();
-    return `${lunar.getYearInGanZhi()}${lunar.getYearShengXiao()}年`;
+    const solar = Solar.fromYmd(year, month, day);
+    const lunar = solar?.getLunar();
+    return lunar ? `${lunar.getYearInGanZhi()}${lunar.getYearShengXiao()}年` : '未知年份';
 };
 
 /**
@@ -201,7 +207,11 @@ export const calculateLiuNianDaYun = (baziData, targetYear = new Date().getFullY
 
     // 获取流年干支
     const solar = Solar.fromYmd(targetYear, 1, 1);
-    const lunar = solar.getLunar();
+    const lunar = solar?.getLunar();
+    if (!lunar) {
+        console.error('无法创建农历对象');
+        return null;
+    }
     const yearGanZhi = lunar.getYearInGanZhi(); // 如"乙巳"
 
     // 五行对应表
