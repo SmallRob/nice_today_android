@@ -17,16 +17,17 @@ const getCardColor = (strength) => {
 
 /**
  * 获取卡片颜色（深色模式）
+ * 增加不透明度以确保文字清晰可见
  */
 const getCardColorDark = (strength) => {
   switch (strength) {
-    case '强': return 'from-green-900/20 to-green-800/20';
-    case '偏强': return 'from-blue-900/20 to-blue-800/20';
-    case '中偏强': return 'from-indigo-900/20 to-indigo-800/20';
-    case '中': return 'from-gray-900/20 to-gray-800/20';
-    case '偏弱': return 'from-orange-900/20 to-orange-800/20';
-    case '弱': return 'from-red-900/20 to-red-800/20';
-    default: return 'from-gray-900/20 to-gray-800/20';
+    case '强': return 'from-green-900/40 to-green-800/40 dark:border-green-700/50';
+    case '偏强': return 'from-blue-900/40 to-blue-800/40 dark:border-blue-700/50';
+    case '中偏强': return 'from-indigo-900/40 to-indigo-800/40 dark:border-indigo-700/50';
+    case '中': return 'from-gray-800/50 to-gray-700/50 dark:border-gray-600/50';
+    case '偏弱': return 'from-orange-900/50 to-orange-800/50 dark:border-orange-600/50';
+    case '弱': return 'from-red-900/60 to-red-800/60 dark:border-red-600/50';
+    default: return 'from-gray-800/50 to-gray-700/50 dark:border-gray-600/50';
   }
 };
 
@@ -299,27 +300,32 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
 
         {isExpanded && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {keyPalaces.map((palace, index) => (
-              <div
-                key={index}
-                className={`bg-gradient-to-br ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-3 border transition-all hover:shadow-md`}
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{palace.name}</h5>
-                  <div className="flex items-center gap-1">
-                    <span className={`text-xs px-2 py-0.5 rounded font-bold ${getScoreColor(palace.strength.score)} text-white`}>
-                      {palace.strength.strength}
-                    </span>
+            {keyPalaces.map((palace, index) => {
+              const isWeak = ['弱', '偏弱'].includes(palace.strength.strength);
+              return (
+                <div
+                  key={index}
+                  className={`bg-gradient-to-br ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-3 border transition-all hover:shadow-md ${isWeak ? 'dark:border-red-600/60' : ''}`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <h5 className={`text-sm font-semibold ${isWeak ? 'text-gray-900 dark:text-red-200' : 'text-gray-800 dark:text-gray-200'}`}>
+                      {palace.name}
+                    </h5>
+                    <div className="flex items-center gap-1">
+                      <span className={`text-xs px-2 py-0.5 rounded font-bold ${getScoreColor(palace.strength.score)} text-white`}>
+                        {palace.strength.strength}
+                      </span>
+                    </div>
                   </div>
+                  <div className={`text-xs mb-1 ${isWeak ? 'text-gray-700 dark:text-red-300/90' : 'text-gray-600 dark:text-gray-400'}`}>
+                    {palace.ganzhi} · {palace.strength.element}五行
+                  </div>
+                  <p className={`text-xs leading-relaxed ${isWeak ? 'text-gray-900 dark:text-red-100/90' : 'text-gray-700 dark:text-gray-300'}`}>
+                    {palace.description}
+                  </p>
                 </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                  {palace.ganzhi} · {palace.strength.element}五行
-                </div>
-                <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {palace.description}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -342,47 +348,57 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
 
         {isExpanded ? (
           <div className="space-y-2">
-            {palaces.map((palace, index) => (
-              <div
-                key={index}
-                className={`bg-gradient-to-r ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-3 border transition-all hover:shadow-md`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{palace.name}</h5>
-                      <span className={`text-xs px-2 py-0.5 rounded font-bold ${getScoreColor(palace.strength.score)} text-white`}>
-                        {palace.strength.score}分
-                      </span>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
-                        {palace.ganzhi}
-                      </span>
+            {palaces.map((palace, index) => {
+              const isWeak = ['弱', '偏弱'].includes(palace.strength.strength);
+              return (
+                <div
+                  key={index}
+                  className={`bg-gradient-to-r ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-3 border transition-all hover:shadow-md ${isWeak ? 'dark:border-red-600/60' : ''}`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h5 className={`text-sm font-semibold ${isWeak ? 'text-gray-900 dark:text-red-200' : 'text-gray-800 dark:text-gray-200'}`}>
+                          {palace.name}
+                        </h5>
+                        <span className={`text-xs px-2 py-0.5 rounded font-bold ${getScoreColor(palace.strength.score)} text-white`}>
+                          {palace.strength.score}分
+                        </span>
+                        <span className={`text-xs ${isWeak ? 'text-gray-700 dark:text-red-300/90' : 'text-gray-600 dark:text-gray-400'}`}>
+                          {palace.ganzhi}
+                        </span>
+                      </div>
+                      <p className={`text-xs leading-relaxed ${isWeak ? 'text-gray-900 dark:text-red-100/90' : 'text-gray-700 dark:text-gray-300'}`}>
+                        {palace.description}
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                      {palace.description}
-                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {palaces.slice(0, 6).map((palace, index) => (
-              <div
-                key={index}
-                className={`bg-gradient-to-br ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-2.5 border transition-all hover:shadow-md`}
-              >
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <h5 className="text-xs font-semibold text-gray-800 dark:text-gray-200">{palace.name}</h5>
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {palace.ganzhi}
+            {palaces.slice(0, 6).map((palace, index) => {
+              const isWeak = ['弱', '偏弱'].includes(palace.strength.strength);
+              return (
+                <div
+                  key={index}
+                  className={`bg-gradient-to-br ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-2.5 border transition-all hover:shadow-md ${isWeak ? 'dark:border-red-600/60' : ''}`}
+                >
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <h5 className={`text-xs font-semibold ${isWeak ? 'text-gray-900 dark:text-red-200' : 'text-gray-800 dark:text-gray-200'}`}>
+                        {palace.name}
+                      </h5>
+                    </div>
+                    <div className={`text-xs ${isWeak ? 'text-gray-700 dark:text-red-300/90' : 'text-gray-600 dark:text-gray-400'}`}>
+                      {palace.ganzhi}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

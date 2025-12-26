@@ -61,7 +61,7 @@ const ConfigErrorBoundary = ({ children, fallback }) => {
 function SettingsPage() {
   // 从URL查询参数获取当前标签
   const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab') || 'userConfigs';
+  const initialTab = urlParams.get('tab') || 'tarot';
 
   const [appVersion, setAppVersion] = useState({
     version: versionData.versionName,
@@ -503,13 +503,22 @@ function SettingsPage() {
         <div className="container mx-auto px-4 py-2">
           <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 max-w-md mx-auto">
             <button
+              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'tarot'
+                ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              onClick={() => { handleTabChange('tarot'); }}
+            >
+              🔮 神秘塔罗
+            </button>
+            <button
               className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'userConfigs'
                 ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
                 : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               onClick={() => handleTabChange('userConfigs')}
             >
-              用户面板
+              👤 用户配置
             </button>
             <button
               className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'app'
@@ -518,16 +527,7 @@ function SettingsPage() {
                 }`}
               onClick={() => handleTabChange('app')}
             >
-              应用设置
-            </button>
-            <button
-              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'about'
-                ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              onClick={() => handleTabChange('about')}
-            >
-              关于
+              ⚙️ 应用设置
             </button>
           </div>
         </div>
@@ -545,6 +545,31 @@ function SettingsPage() {
         >
           <div className="container mx-auto px-4 py-4 max-w-4xl">
             <div>
+              {activeTab === 'tarot' && (
+                <div>
+                  <Card>
+                    <div className="text-center p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 rounded-lg text-white">
+                      <div className="text-5xl mb-3">🔮</div>
+                      <h2 className="text-2xl font-bold mb-2">神秘塔罗</h2>
+                      <p className="text-purple-100">聆听命运的指引</p>
+                    </div>
+                  </Card>
+                  <Card>
+                    <div className="text-center py-8">
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        神秘塔罗功能正在建设中...
+                      </p>
+                      <button
+                        onClick={() => window.location.href = '/tarot'}
+                        className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-all"
+                      >
+                        进入完整塔罗页面
+                      </button>
+                    </div>
+                  </Card>
+                </div>
+              )}
+
               {activeTab === 'app' && (
                 <div className="space-y-6">
                   {/* 应用设置部分 */}
@@ -807,6 +832,36 @@ function SettingsPage() {
                     </div>
                   </Card>
 
+                  {/* 关于信息 - 合并到应用设置 */}
+                  <Card title="关于">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-2">
+                        <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
+                      </div>
+
+                      <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
+                        <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                          {platformInfo.isNative ?
+                            (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
+                            'Web'
+                          }
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
+                        <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
+                      </div>
+
+                      {/* 性能测试工具 */}
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <PerformanceTestTool />
+                      </div>
+                    </div>
+                  </Card>
+
                   {/* 其他设置 */}
                   <Card title="其他">
                     <div className="space-y-1">
@@ -896,39 +951,6 @@ function SettingsPage() {
                   }>
                     <UserConfigManager />
                   </ConfigErrorBoundary>
-                </div>
-              )}
-
-              {activeTab === 'about' && (
-                <div>
-                  <Card title="关于">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between py-2">
-                        <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                        <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-                          {platformInfo.isNative ?
-                            (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
-                            'Web'
-                          }
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                        <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
-                      </div>
-
-                      {/* 性能测试工具 */}
-                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <PerformanceTestTool />
-                      </div>
-                    </div>
-                  </Card>
                 </div>
               )}
             </div>

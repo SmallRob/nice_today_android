@@ -318,8 +318,8 @@ const ZodiacEnergyTab = memo(() => {
       try {
         if (!isMounted) return;
 
-        // 设置默认生肖为"鼠"，确保有数据可显示
-        setUserZodiac('鼠');
+        // 设置默认生肖为"羊"，确保有数据可显示
+        setUserZodiac('羊');
         setTempZodiac('');
 
         if (isMounted) {
@@ -329,7 +329,7 @@ const ZodiacEnergyTab = memo(() => {
         console.error('初始化生肖能量组件失败:', error);
 
         // 降级处理：使用默认逻辑
-        setUserZodiac('鼠');
+        setUserZodiac('羊');
         setTempZodiac('');
         if (isMounted) {
           setInitialized(true);
@@ -378,7 +378,7 @@ const ZodiacEnergyTab = memo(() => {
 
   // 重置为默认生肖
   const resetToDefaultZodiac = () => {
-    const defaultZodiac = userInfo.zodiacAnimal || '鼠';
+    const defaultZodiac = userInfo.zodiacAnimal || '羊';
     setTempZodiac('');
     setUserZodiac(defaultZodiac);
     setDataLoaded(false);

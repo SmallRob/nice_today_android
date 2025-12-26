@@ -74,8 +74,9 @@ const LifeTrendPage = () => {
 
   // 验证配置数据完整性
   const validateConfig = (config) => {
-    if (!config) return { valid: false, error: '配置为空' };
-    if (!config.nickname) return { valid: false, error: '用户昵称为空' };
+    // 使用可选链和 nullish coalescing 安全地检查配置
+    if (!config || typeof config !== 'object') return { valid: false, error: '配置为空' };
+    if (!config.nickname || typeof config.nickname !== 'string') return { valid: false, error: '用户昵称为空或无效' };
     if (!config.birthDate) {
       console.warn('出生日期缺失，将使用当前日期');
     }
@@ -370,10 +371,18 @@ const LifeTrendPage = () => {
       const newBirthDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
       const newBirthTime = `${String(hour).padStart(2, '0')}:00`;
       const config = currentConfig;
-      
-      if (!config || !config.nickname) {
-        throw new Error('当前配置为空，无法保存');
+
+      // 安全检查：确保配置和昵称都存在（使用可选链避免错误）
+      if (!config?.nickname) {
+        console.error('配置为空或昵称为空:', config);
+        throw new Error('当前配置为空或昵称为空，无法保存');
       }
+
+      console.log('保存配置 - 当前配置:', {
+        nickname: config.nickname,
+        birthDate: config.birthDate,
+        birthTime: config.birthTime
+      });
 
       // 立即更新UI状态
       setSelectedYear(year);
@@ -400,11 +409,22 @@ const LifeTrendPage = () => {
       const baziResult = await BaziDataManager.recalculate(config, birthInfo);
 
       if (baziResult.status === BaziStatus.READY && baziResult.baziData) {
-        // 同步八字信息到全局配置
+        // 同步八字信息到全局配置（传入 nickname 而非 config 对象）
         const syncSuccess = await calculateAndSyncBazi(config.nickname, birthInfo);
 
         if (syncSuccess) {
           console.log('✓ 八字信息计算并同步成功');
+
+          // 计算当前配置在数组中的索引
+          const configs = enhancedUserConfigManager.getAllConfigs();
+          const configIndex = configs.findIndex(c => c.nickname === config.nickname);
+
+          if (configIndex === -1) {
+            console.error('未找到配置对应的索引:', config.nickname);
+            throw new Error(`未找到昵称为 '${config.nickname}' 的配置`);
+          }
+
+          console.log('找到配置索引:', configIndex);
 
           // 更新配置中的基本信息
           const updates = {
@@ -436,10 +456,15 @@ const LifeTrendPage = () => {
             // 即使计算失败也继续保存基本配置
           }
 
-          // 保存配置
-          await enhancedUserConfigManager.updateConfigWithNodeUpdate(null, updates);
+          // 保存配置（使用正确的索引）
+          const saveResult = await enhancedUserConfigManager.updateConfigWithNodeUpdate(configIndex, updates);
 
-          showSuccessMessage('出生信息已保存，八字已更新');
+          if (saveResult && saveResult.success) {
+            console.log('✓ 配置保存成功');
+            showSuccessMessage('出生信息已保存，八字已更新');
+          } else {
+            throw new Error('配置保存失败');
+          }
         } else {
           console.warn('八字信息同步失败');
           showSuccessMessage('出生信息已保存（八字同步失败，将在后台重试）');
@@ -456,7 +481,7 @@ const LifeTrendPage = () => {
     } catch (error) {
       console.error('保存日期到配置失败:', error);
       setError(error.message);
-      showSuccessMessage('保存失败，请重试');
+      showSuccessMessage('保存失败: ' + error.message);
     } finally {
       setCalculating(false);
     }

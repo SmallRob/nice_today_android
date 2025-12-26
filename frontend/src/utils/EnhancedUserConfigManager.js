@@ -787,37 +787,60 @@ class EnhancedUserConfigManager {
     if (!this.initialized) {
       throw new Error('配置管理器未初始化');
     }
-    
+
+    // 验证参数
+    if (!nickname || typeof nickname !== 'string') {
+      console.error('calculateAndSyncBaziInfo: 昵称参数无效', nickname);
+      return false;
+    }
+
     try {
       // 查找对应用户
       const configIndex = this.configs.findIndex(config => config.nickname === nickname);
-      
+
       if (configIndex === -1) {
-        throw new Error(`未找到昵称为 '${nickname}' 的用户配置`);
+        console.error(`未找到昵称为 '${nickname}' 的用户配置`, {
+          configsLength: this.configs.length,
+          configNicknames: this.configs.map(c => c.nickname)
+        });
+        return false;
       }
-      
+
       const config = this.configs[configIndex];
-      
+
       // 如果没有提供出生信息，使用配置中的信息
       const birthDate = birthInfo.birthDate || config.birthDate;
       const birthTime = birthInfo.birthTime || config.birthTime;
       const longitude = birthInfo.longitude || config.birthLocation?.lng || 116.40;
-      
+
+      // 验证出生信息
+      if (!birthDate || !birthTime) {
+        console.error('出生信息不完整', { birthDate, birthTime, nickname });
+        return false;
+      }
+
       // 计算八字信息
       const baziInfo = calculateDetailedBazi(birthDate, birthTime, longitude);
-      
+
       if (!baziInfo) {
-        throw new Error('八字计算失败');
+        console.error('八字计算失败', { birthDate, birthTime, longitude, nickname });
+        return false;
       }
-      
+
       // 更新八字信息
-      return await this.updateBaziInfo(nickname, {
+      const result = await this.updateBaziInfo(nickname, {
         ...baziInfo,
         lastCalculated: new Date().toISOString()
       });
-      
+
+      return result;
+
     } catch (error) {
-      console.error('计算并同步八字信息失败:', error);
+      console.error('计算并同步八字信息失败:', {
+        error: error.message,
+        nickname,
+        birthInfo
+      });
       return false;
     }
   }

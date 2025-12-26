@@ -199,8 +199,8 @@ const HoroscopeTab = () => {
         // 获取用户星座
         const userZodiac = getUserZodiac();
 
-        // 如果用户有配置星座，优先使用；否则使用白羊座
-        const initialHoroscope = userZodiac || '白羊座';
+        // 如果用户有配置星座，优先使用；否则使用金牛座
+        const initialHoroscope = userZodiac || '金牛座';
 
         if (isMounted) {
           setUserHoroscope(initialHoroscope);
@@ -213,7 +213,7 @@ const HoroscopeTab = () => {
         console.error('初始化星座运程组件失败:', error);
         // 降级处理
         if (isMounted) {
-          setUserHoroscope('白羊座');
+          setUserHoroscope('金牛座');
           setIsTemporaryHoroscope(true);
           isTemporaryRef.current = true;
           setInitialized(true);

@@ -190,6 +190,12 @@ export const UserConfigProvider = ({ children }) => {
    */
   const calculateAndSyncBazi = useCallback(async (nickname, birthInfo) => {
     try {
+      // 验证参数
+      if (!nickname || typeof nickname !== 'string') {
+        console.error('calculateAndSyncBazi: 昵称参数无效', nickname);
+        return false;
+      }
+
       const success = await enhancedUserConfigManager.calculateAndSyncBaziInfo(nickname, birthInfo);
       return success;
     } catch (err) {

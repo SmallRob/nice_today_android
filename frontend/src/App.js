@@ -14,6 +14,7 @@ const MayaPage = React.lazy(() => import('./pages/MayaPage_optimized'));
 const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
 const LifeTrendPage = React.lazy(() => import('./pages/LifeTrendPage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
+const TarotPage = React.lazy(() => import('./pages/TarotPage'));
 const TabNavigation = React.lazy(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -42,6 +43,7 @@ const AppLayout = () => {
             <Route path="/maya" element={<MayaPage />} />
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/trend" element={<LifeTrendPage />} />
+            <Route path="/tarot" element={<TarotPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </Suspense>
