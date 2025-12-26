@@ -17,6 +17,16 @@ import { createStandardBaziData, validateBaziData, convertLegacyBaziToStandard }
 export const BAZI_DATA_VERSION = '2.0.0';
 
 /**
+ * 八字数据状态枚举
+ */
+export const BaziStatus = {
+  LOADING: 'loading',
+  READY: 'ready',
+  ERROR: 'error',
+  MISSING: 'missing'
+};
+
+/**
  * 双格式八字数据结构
  * @typedef {Object} DualFormatBaziData
  * @property {Object} meta - 元数据
@@ -52,7 +62,7 @@ export const BAZI_DATA_VERSION = '2.0.0';
 /**
  * 60甲子表（用于数字与汉字的双向映射）
  */
-const JIAZI_TABLE = [
+export const JIAZI_TABLE = [
   '甲子', '乙丑', '丙寅', '丁卯', '戊辰', '己巳', '庚午', '辛未', '壬申', '癸酉',
   '甲戌', '乙亥', '丙子', '丁丑', '戊寅', '己卯', '庚辰', '辛巳', '壬午', '癸未',
   '甲申', '乙酉', '丙戌', '丁亥', '戊子', '己丑', '庚寅', '辛卯', '壬辰', '癸巳',
@@ -64,14 +74,14 @@ const JIAZI_TABLE = [
 /**
  * 时辰表（数字与汉字映射）
  */
-const SHICHEN_TABLE = [
+export const SHICHEN_TABLE = [
   '子时', '丑时', '寅时', '卯时', '辰时', '巳时', '午时', '未时', '申时', '酉时', '戌时', '亥时'
 ];
 
 /**
  * 五行对应表（用于数据校验）
  */
-const WUXING_MAP = {
+export const WUXING_MAP = {
   '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土', '己': '土',
   '庚': '金', '辛': '金', '壬': '水', '癸': '水',
   '寅': '木', '卯': '木', '巳': '火', '午': '火', '辰': '土', '戌': '土', '丑': '土', '未': '土',
@@ -543,12 +553,193 @@ export const repairBaziData = (dualFormatData) => {
 };
 
 /**
+ * 标准化出生信息
+ * @param {Object} config - 用户配置
+ * @returns {Object} 标准化的出生信息
+ */
+export const normalizeBirthInfo = (config) => {
+  try {
+    if (!config) {
+      return {
+        birthDate: '1990-01-01',
+        birthTime: '12:00',
+        latitude: 39.90,
+        longitude: 116.40
+      };
+    }
+
+    // 标准化出生日期
+    let birthDate = config.birthDate || '1990-01-01';
+    if (!birthDate.includes('-')) {
+      // 如果日期格式不正确，转换为标准格式
+      birthDate = '1990-01-01';
+    }
+
+    // 标准化出生时间
+    let birthTime = config.birthTime || '12:00';
+    if (!birthTime.includes(':')) {
+      // 如果时间格式不正确，转换为标准格式
+      birthTime = '12:00';
+    }
+
+    // 标准化经纬度
+    const latitude = config.latitude || 39.90;
+    const longitude = config.longitude || 116.40;
+
+    return {
+      birthDate,
+      birthTime,
+      latitude,
+      longitude
+    };
+  } catch (error) {
+    console.error('标准化出生信息失败:', error);
+    return {
+      birthDate: '1990-01-01',
+      birthTime: '12:00',
+      latitude: 39.90,
+      longitude: 116.40
+    };
+  }
+};
+
+/**
+ * 获取有效的时辰信息
+ * @param {Object} config - 用户配置
+ * @param {Object} baziData - 八字数据
+ * @returns {string} 时辰信息
+ */
+export const getValidShichen = (config, baziData) => {
+  try {
+    if (!baziData || !baziData.bazi) {
+      return '午时 (12:00)';
+    }
+
+    // 从八字时柱中提取时辰
+    if (baziData.bazi && baziData.bazi.hour) {
+      const hourGan = baziData.bazi.hour.charAt(0);
+      const hourZhi = baziData.bazi.hour.charAt(1);
+      const shichenMap = {
+        '子': '子时 (23:00-01:00)',
+        '丑': '丑时 (01:00-03:00)',
+        '寅': '寅时 (03:00-05:00)',
+        '卯': '卯时 (05:00-07:00)',
+        '辰': '辰时 (07:00-09:00)',
+        '巳': '巳时 (09:00-11:00)',
+        '午': '午时 (11:00-13:00)',
+        '未': '未时 (13:00-15:00)',
+        '申': '申时 (15:00-17:00)',
+        '酉': '酉时 (17:00-19:00)',
+        '戌': '戌时 (19:00-21:00)',
+        '亥': '亥时 (21:00-23:00)'
+      };
+
+      // 优先使用时柱的地支
+      if (hourZhi && shichenMap[hourZhi]) {
+        return shichenMap[hourZhi];
+      }
+
+      // 降级：使用默认时辰
+      return '午时 (12:00)';
+    }
+
+    // 如果八字数据无效，返回默认值
+    return '午时 (12:00)';
+  } catch (error) {
+    console.error('获取时辰信息失败:', error);
+    return '午时 (12:00)';
+  }
+};
+
+/**
  * 八字数据管理器类
  */
 export class BaziDataManager {
   constructor() {
     this.data = null;
     this.listeners = new Set();
+  }
+
+  /**
+   * 初始化八字数据管理器（静态方法）
+   * @param {Object} config - 用户配置
+   * @param {Object} options - 选项
+   * @returns {Promise<Object>} 初始化结果
+   */
+  static async initialize(config, options = {}) {
+    try {
+      console.log('BaziDataManager 初始化开始...', config);
+
+      // 模拟异步操作
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // 检查配置是否有效
+      if (!config || !config.birthDate) {
+        return {
+          status: BaziStatus.ERROR,
+          error: '配置信息不完整，缺少出生日期',
+          fromCache: false
+        };
+      }
+
+      // 创建八字数据
+      const birthInfo = normalizeBirthInfo(config);
+      const baziData = createDualFormatBaziData(birthInfo);
+
+      // 创建管理器实例并设置数据
+      const manager = new BaziDataManager();
+      manager.setData(baziData);
+
+      return {
+        status: BaziStatus.READY,
+        baziData: baziData,
+        fromCache: options.useCache || false,
+        manager: manager
+      };
+    } catch (error) {
+      console.error('BaziDataManager 初始化失败:', error);
+      return {
+        status: BaziStatus.ERROR,
+        error: error.message,
+        fromCache: false
+      };
+    }
+  }
+
+  /**
+   * 重新计算八字数据（静态方法）
+   * @param {Object} config - 用户配置
+   * @param {Object} birthInfo - 出生信息
+   * @returns {Promise<Object>} 计算结果
+   */
+  static async recalculate(config, birthInfo) {
+    try {
+      console.log('BaziDataManager 重新计算开始...', birthInfo);
+
+      // 模拟异步操作
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // 创建新的八字数据
+      const baziData = createDualFormatBaziData(birthInfo);
+
+      // 创建管理器实例并设置数据
+      const manager = new BaziDataManager();
+      manager.setData(baziData);
+
+      return {
+        status: BaziStatus.READY,
+        baziData: baziData,
+        fromCache: false,
+        manager: manager
+      };
+    } catch (error) {
+      console.error('BaziDataManager 重新计算失败:', error);
+      return {
+        status: BaziStatus.ERROR,
+        error: error.message,
+        fromCache: false
+      };
+    }
   }
 
   /**
@@ -654,5 +845,8 @@ export default {
   getDisplayInfo,
   getCalculationInfo,
   repairBaziData,
-  baziDataManager
+  baziDataManager,
+  JIAZI_TABLE,
+  SHICHEN_TABLE,
+  WUXING_MAP
 };

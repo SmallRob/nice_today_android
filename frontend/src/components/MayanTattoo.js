@@ -40,7 +40,7 @@ class MayaCalendarCalculator {
         kin,
         tone: this.TONES[toneIndex],
         seal: this.SEALS[sealIndex],
-        fullName: `${this.TONES[toneIndex]}的${this.SEALS[seal]}`,
+        fullName: `${this.TONES[toneIndex]}的${this.SEALS[sealIndex]}`,
         toneIndex,
         sealIndex
       };
