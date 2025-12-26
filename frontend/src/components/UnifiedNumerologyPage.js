@@ -103,7 +103,7 @@ const UnifiedNumerologyPage = () => {
               <EnhancedNumerology />
             </div>
           )}
-        </React.Suspense>
+        </Suspense>
       </main>
     </div>
   );
