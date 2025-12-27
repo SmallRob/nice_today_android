@@ -84,46 +84,40 @@ function App() {
         }
         
         try {
-          // 使用安全的初始化函数
-          const isAndroidWebView = safeInitAndroidWebViewCompat();
-          console.log('Android WebView 兼容性初始化完成:', isAndroidWebView);
+          // 使用安全的初始化函数，确保在适当环境下运行
+          const androidWebViewResult = safeInitAndroidWebViewCompat();
+          console.log('Android WebView 兼容性初始化完成:', androidWebViewResult);
         } catch (error) {
           console.warn('Android WebView 兼容性初始化失败:', error);
         }
       }
 
-      try {
-        // 记录应用启动
-        errorLogger.log('Application initialization started', {
-          component: 'App',
-          action: 'initialize',
-          userAgent: navigator.userAgent
-        });
-      } catch (error) {
-        console.warn('应用启动日志记录失败:', error);
-      }
+      // 记录应用启动（使用普通日志，不是错误）
+      console.log('Application initialization started');
 
-      // 使用try-catch块导入和初始化每个模块
-      let capacitorInit;
+      // 按顺序初始化，避免并发初始化导致的变量访问问题
+      // 首先初始化Capacitor相关功能
       try {
-        capacitorInit = await import('./utils/capacitorInit-simulated');
-        await capacitorInit.initializeApp({
-          debug: process.env.NODE_ENV === 'development',
-          performance: {
-            enabled: true,
-            autoLog: true
-          },
-          permissions: {
-            autoRequest: false,
-            required: [],
-            optional: []
-          },
-          compatibility: {
-            autoCheck: true,
-            fixProblems: false,
-            logProblems: true
-          }
-        });
+        const capacitorInitModule = await import('./utils/capacitorInit-simulated');
+        if (capacitorInitModule && typeof capacitorInitModule.initializeApp === 'function') {
+          await capacitorInitModule.initializeApp({
+            debug: process.env.NODE_ENV === 'development',
+            performance: {
+              enabled: true,
+              autoLog: true
+            },
+            permissions: {
+              autoRequest: false,
+              required: [],
+              optional: []
+            },
+            compatibility: {
+              autoCheck: true,
+              fixProblems: false,
+              logProblems: true
+            }
+          });
+        }
       } catch (error) {
         // 记录 Capacitor 初始化错误
         errorLogger.log(error, {
@@ -135,10 +129,10 @@ function App() {
         // 继续执行，不阻止应用启动
       }
 
-      // 初始化用户配置管理器，确保在应用启动时加载配置
+      // 配置迁移：检查并从旧版迁移数据
       try {
-        const { enhancedUserConfigManager } = await import('./utils/EnhancedUserConfigManager');
-        const { configMigrationTool } = await import('./utils/ConfigMigrationTool');
+        const configMigrationModule = await import('./utils/ConfigMigrationTool');
+        const { configMigrationTool } = configMigrationModule;
 
         // 检查是否需要从旧版迁移数据
         const migrationCheck = await configMigrationTool.checkMigrationNeeded();
@@ -146,20 +140,19 @@ function App() {
           console.log('检测到旧版配置数据，开始迁移...', migrationCheck);
           await configMigrationTool.performMigration();
         }
-
-        // 初始化新版管理器
-        await enhancedUserConfigManager.initialize();
-        console.log('增强版用户配置管理器初始化成功');
       } catch (error) {
-        // 记录用户配置管理器初始化错误
+        // 记录配置迁移错误
         errorLogger.log(error, {
           component: 'App',
-          action: 'enhancedUserConfigInit',
-          errorType: 'EnhancedUserConfigInitError'
+          action: 'configMigration',
+          errorType: 'ConfigMigrationError'
         });
-        console.warn('增强版用户配置管理器初始化失败:', error);
+        console.warn('配置迁移失败:', error);
         // 继续执行，不阻止应用启动
       }
+
+      // 注意：用户配置管理器的初始化现在由 UserConfigProvider 统一管理
+      // 不在这里直接调用 enhancedUserConfigManager.initialize()，避免重复初始化
 
       // 记录初始化成功
       console.log('应用初始化成功');

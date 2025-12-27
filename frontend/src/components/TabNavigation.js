@@ -81,15 +81,13 @@ const TabNavigation = () => {
       path: '/maya',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="10" r="5" strokeWidth={2} />
-          <path strokeWidth={2} d="M12 2v3m0 13v4M2 10h3m14 0h3M4.93 4.93l2.12 2.12m9.9 9.9l2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9l2.12-2.12" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16l4-4 4 4M8 16a2 2 0 00-2 2v2a2 2 0 002 2h8a2 2 0 002-2v-2a2 2 0 00-2-2" />
+          <circle cx="12" cy="12" r="3" strokeWidth={2} />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v3m0 13v4M2 10h3m14 0h3M4.93 4.93l2.12 2.12m9.9 9.9l2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9l2.12-2.12" />
         </svg>
       ),
       activeIcon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="8" r="4" />
-          <path d="M12 2v2m0 12v2M2 8h2m16 0h2M5 5l1.41 1.41M17.59 15.59L19 17M5 15.59l1.41-1.41M17.59 8.41L19 7M8 15l4-4 4 4M8 15a1 1 0 00-1 1v3a1 1 0 001 1h6a1 1 0 001-1v-3a1 1 0 00-1-1z" />
+          <circle cx="12" cy="12" r="4" />
         </svg>
       )
     },
@@ -129,18 +127,12 @@ const TabNavigation = () => {
       path: '/settings',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
       ),
       activeIcon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
       )
     }

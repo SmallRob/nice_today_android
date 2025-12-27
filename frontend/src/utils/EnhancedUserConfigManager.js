@@ -185,20 +185,27 @@ class EnhancedUserConfigManager {
 
   /**
    * 初始化配置管理器
+   * 幂等操作：多次调用不会重复执行
    */
   async initialize() {
     try {
+      // 幂等性检查：如果已经初始化，直接返回成功
+      if (this.initialized) {
+        console.log('增强版用户配置管理器已初始化，跳过重复初始化');
+        return true;
+      }
+
       console.log('开始初始化增强版用户配置管理器...');
-      
+
       // 初始化数据持久化管理器
       await dataPersistenceManager.initialize();
-      
+
       // 初始化八字缓存管理器
       await baziCacheManager.initialize();
-      
+
       // 从多级存储加载配置
       const loadResult = await this.loadConfigsFromStorage();
-      
+
       if (loadResult.success) {
         this.configs = loadResult.configs;
         this.activeConfigIndex = loadResult.activeIndex;
@@ -216,21 +223,49 @@ class EnhancedUserConfigManager {
         this.activeConfigIndex = 0;
         await this.saveConfigsToStorage();
       }
-      
-      // 验证数据完整性
-      const integrityCheck = await this.validateAllConfigs();
-      
-      if (!integrityCheck.allValid) {
-        console.warn('发现数据完整性问题，进行修复...');
-        await this.repairDataIntegrity(integrityCheck);
+
+      // 验证数据完整性并自动纠错
+      try {
+        const integrityCheck = await this.validateAllConfigs();
+
+        if (!integrityCheck.allValid) {
+          console.warn('发现数据完整性问题，进行自动修复...');
+          await this.repairDataIntegrity(integrityCheck);
+        }
+
+        // 二次验证：确保修复后数据仍然有效
+        const postRepairCheck = await this.validateAllConfigs();
+        if (!postRepairCheck.allValid) {
+          throw new Error('数据完整性修复后仍存在异常，将使用默认配置');
+        }
+
+      } catch (validationError) {
+        console.error('数据验证失败，使用默认配置替换:', validationError);
+
+        // 严重数据异常：清空异常数据，使用默认配置
+        this.configs = [createConfigFromDefault()];
+        this.activeConfigIndex = 0;
+        this.metadata = {
+          version: '2.0.0',
+          lastModified: new Date().toISOString(),
+          dataChecksum: null,
+          backupCount: 0,
+          autoRecovery: true,  // 标记为自动恢复
+          originalError: validationError.message
+        };
+
+        // 保存到存储（替换异常数据）
+        await this.saveConfigsToStorage();
+
+        console.log('已使用默认配置替换异常数据');
       }
-      
+
       this.initialized = true;
       this.notifyListeners();
-      
+
       console.log('增强版用户配置管理器初始化完成');
       return true;
-      
+
     } catch (error) {
       console.error('初始化增强版用户配置管理器失败:', error);
 
@@ -238,6 +273,13 @@ class EnhancedUserConfigManager {
       this.configs = [createConfigFromDefault()];
       this.activeConfigIndex = 0;
       this.initialized = true;
+
+      // 确保保存默认配置到存储
+      try {
+        await this.saveConfigsToStorage();
+      } catch (saveError) {
+        console.error('保存默认配置失败:', saveError);
+      }
 
       return false;
     }

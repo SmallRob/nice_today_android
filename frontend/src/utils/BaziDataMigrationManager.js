@@ -3,7 +3,7 @@
  * 负责处理数据版本升级、格式转换和异常修复
  */
 
-import { createDualFormatBaziData, convertLegacyToDualFormat } from './BaziDataManager';
+import { createDualFormatBaziData, convertLegacyToDualFormat, JIAZI_TABLE, SHICHEN_TABLE } from './baziDataManager';
 import { baziValidator } from './BaziValidationLayer';
 
 class BaziDataMigrationManager {
@@ -287,22 +287,65 @@ class BaziDataMigrationManager {
   repairMissingFields(data, error) {
     const repaired = { ...data };
     
+    // 确保元数据结构完整
+    if (!repaired.meta) {
+      repaired.meta = {
+        version: '2.0.0',
+        calculatedAt: new Date().toISOString(),
+        dataSource: 'repaired',
+        nickname: null
+      };
+    }
+    
     // 确保双格式数据结构完整
     if (!repaired.numeric) {
       repaired.numeric = {
-        year: { gan: 0, zhi: 0 },
-        month: { gan: 0, zhi: 0 },
-        day: { gan: 0, zhi: 0 },
-        hour: { gan: 0, zhi: 0 }
+        year: 0,
+        month: 0,
+        day: 0,
+        hour: 0,
+        shichen: 0
       };
+    } else {
+      // 确保数字格式的每个字段都存在
+      repaired.numeric.year = repaired.numeric.year !== undefined ? repaired.numeric.year : 0;
+      repaired.numeric.month = repaired.numeric.month !== undefined ? repaired.numeric.month : 0;
+      repaired.numeric.day = repaired.numeric.day !== undefined ? repaired.numeric.day : 0;
+      repaired.numeric.hour = repaired.numeric.hour !== undefined ? repaired.numeric.hour : 0;
+      repaired.numeric.shichen = repaired.numeric.shichen !== undefined ? repaired.numeric.shichen : 0;
     }
     
     if (!repaired.chinese) {
       repaired.chinese = {
-        year: '',
-        month: '',
-        day: '',
-        hour: ''
+        yearCn: '甲子',
+        monthCn: '乙丑',
+        dayCn: '丙寅',
+        hourCn: '丁卯',
+        shichenCn: '子时'
+      };
+    } else {
+      // 确保汉字格式的每个字段都存在
+      repaired.chinese.yearCn = repaired.chinese.yearCn || '甲子';
+      repaired.chinese.monthCn = repaired.chinese.monthCn || '乙丑';
+      repaired.chinese.dayCn = repaired.chinese.dayCn || '丙寅';
+      repaired.chinese.hourCn = repaired.chinese.hourCn || '丁卯';
+      repaired.chinese.shichenCn = repaired.chinese.shichenCn || '子时';
+    }
+    
+    // 确保验证信息结构完整
+    if (!repaired.validation) {
+      repaired.validation = {
+        isValid: false,
+        errors: ['数据结构不完整，已修复'],
+        warnings: [],
+        checksum: 'repaired'
+      };
+    }
+    
+    // 确保兼容性结构完整
+    if (!repaired.compatibility) {
+      repaired.compatibility = {
+        legacy: {}
       };
     }
 
@@ -316,9 +359,75 @@ class BaziDataMigrationManager {
    * @returns {Object} 修复后的数据
    */
   repairFormatErrors(data, error) {
-    // 这里可以实现具体的格式修复逻辑
-    // 例如：确保干支值在有效范围内
-    return data;
+    const repaired = { ...data };
+    
+    // 修复数字格式的范围错误
+    if (repaired.numeric) {
+      // 确保年柱数字在有效范围内
+      if (typeof repaired.numeric.year === 'number' && (repaired.numeric.year < 0 || repaired.numeric.year >= 60)) {
+        console.warn(`修复年柱数字格式错误: ${repaired.numeric.year}, 修正为 0`);
+        repaired.numeric.year = 0;
+      }
+      
+      // 确保月柱数字在有效范围内
+      if (typeof repaired.numeric.month === 'number' && (repaired.numeric.month < 0 || repaired.numeric.month >= 60)) {
+        console.warn(`修复月柱数字格式错误: ${repaired.numeric.month}, 修正为 0`);
+        repaired.numeric.month = 0;
+      }
+      
+      // 确保日柱数字在有效范围内
+      if (typeof repaired.numeric.day === 'number' && (repaired.numeric.day < 0 || repaired.numeric.day >= 60)) {
+        console.warn(`修复日柱数字格式错误: ${repaired.numeric.day}, 修正为 0`);
+        repaired.numeric.day = 0;
+      }
+      
+      // 确保时柱数字在有效范围内
+      if (typeof repaired.numeric.hour === 'number' && (repaired.numeric.hour < 0 || repaired.numeric.hour >= 60)) {
+        console.warn(`修复时柱数字格式错误: ${repaired.numeric.hour}, 修正为 0`);
+        repaired.numeric.hour = 0;
+      }
+      
+      // 确保时辰数字在有效范围内
+      if (typeof repaired.numeric.shichen === 'number' && (repaired.numeric.shichen < 0 || repaired.numeric.shichen >= 12)) {
+        console.warn(`修复时辰数字格式错误: ${repaired.numeric.shichen}, 修正为 0`);
+        repaired.numeric.shichen = 0;
+      }
+    }
+    
+    // 修复汉字格式的格式错误
+    if (repaired.chinese) {
+      // 检查并修复年柱汉字格式
+      if (repaired.chinese.yearCn && typeof repaired.chinese.yearCn === 'string' && !this.isValidGanzhi(repaired.chinese.yearCn)) {
+        console.warn(`修复年柱汉字格式错误: ${repaired.chinese.yearCn}, 修正为 '甲子'`);
+        repaired.chinese.yearCn = '甲子';
+      }
+      
+      // 检查并修复月柱汉字格式
+      if (repaired.chinese.monthCn && typeof repaired.chinese.monthCn === 'string' && !this.isValidGanzhi(repaired.chinese.monthCn)) {
+        console.warn(`修复月柱汉字格式错误: ${repaired.chinese.monthCn}, 修正为 '乙丑'`);
+        repaired.chinese.monthCn = '乙丑';
+      }
+      
+      // 检查并修复日柱汉字格式
+      if (repaired.chinese.dayCn && typeof repaired.chinese.dayCn === 'string' && !this.isValidGanzhi(repaired.chinese.dayCn)) {
+        console.warn(`修复日柱汉字格式错误: ${repaired.chinese.dayCn}, 修正为 '丙寅'`);
+        repaired.chinese.dayCn = '丙寅';
+      }
+      
+      // 检查并修复时柱汉字格式
+      if (repaired.chinese.hourCn && typeof repaired.chinese.hourCn === 'string' && !this.isValidGanzhi(repaired.chinese.hourCn)) {
+        console.warn(`修复时柱汉字格式错误: ${repaired.chinese.hourCn}, 修正为 '丁卯'`);
+        repaired.chinese.hourCn = '丁卯';
+      }
+      
+      // 检查并修复时辰汉字格式
+      if (repaired.chinese.shichenCn && typeof repaired.chinese.shichenCn === 'string' && !this.isValidShichen(repaired.chinese.shichenCn)) {
+        console.warn(`修复时辰汉字格式错误: ${repaired.chinese.shichenCn}, 修正为 '子时'`);
+        repaired.chinese.shichenCn = '子时';
+      }
+    }
+    
+    return repaired;
   }
 
   /**
@@ -328,9 +437,178 @@ class BaziDataMigrationManager {
    * @returns {Object} 修复后的数据
    */
   repairInconsistencies(data, error) {
-    // 这里可以实现数据一致性修复逻辑
-    // 例如：确保数字格式和汉字格式对应
-    return data;
+    const repaired = { ...data };
+    
+    // 修复数字格式和汉字格式不一致的问题
+    if (repaired.numeric && repaired.chinese) {
+      // 修复年柱数字与汉字不一致
+      if (typeof repaired.numeric.year === 'number' && repaired.chinese.yearCn) {
+        const expectedGanzhi = this.getGanzhiFromNumber(repaired.numeric.year);
+        if (expectedGanzhi !== repaired.chinese.yearCn) {
+          console.warn(`修复年柱数据不一致: 数字${repaired.numeric.year}对应${expectedGanzhi}，但汉字为${repaired.chinese.yearCn}`);
+          // 优先使用数字格式（计算格式），修复汉字格式
+          repaired.chinese.yearCn = expectedGanzhi;
+        }
+      } else if (typeof repaired.numeric.year !== 'number' && repaired.chinese.yearCn) {
+        // 如果数字格式缺失但汉字格式存在，从汉字格式推导数字格式
+        const numberFromGanzhi = this.getNumberFromGanzhi(repaired.chinese.yearCn);
+        if (numberFromGanzhi !== -1) {
+          repaired.numeric.year = numberFromGanzhi;
+        }
+      }
+      
+      // 修复月柱数字与汉字不一致
+      if (typeof repaired.numeric.month === 'number' && repaired.chinese.monthCn) {
+        const expectedGanzhi = this.getGanzhiFromNumber(repaired.numeric.month);
+        if (expectedGanzhi !== repaired.chinese.monthCn) {
+          console.warn(`修复月柱数据不一致: 数字${repaired.numeric.month}对应${expectedGanzhi}，但汉字为${repaired.chinese.monthCn}`);
+          repaired.chinese.monthCn = expectedGanzhi;
+        }
+      } else if (typeof repaired.numeric.month !== 'number' && repaired.chinese.monthCn) {
+        const numberFromGanzhi = this.getNumberFromGanzhi(repaired.chinese.monthCn);
+        if (numberFromGanzhi !== -1) {
+          repaired.numeric.month = numberFromGanzhi;
+        }
+      }
+      
+      // 修复日柱数字与汉字不一致
+      if (typeof repaired.numeric.day === 'number' && repaired.chinese.dayCn) {
+        const expectedGanzhi = this.getGanzhiFromNumber(repaired.numeric.day);
+        if (expectedGanzhi !== repaired.chinese.dayCn) {
+          console.warn(`修复日柱数据不一致: 数字${repaired.numeric.day}对应${expectedGanzhi}，但汉字为${repaired.chinese.dayCn}`);
+          repaired.chinese.dayCn = expectedGanzhi;
+        }
+      } else if (typeof repaired.numeric.day !== 'number' && repaired.chinese.dayCn) {
+        const numberFromGanzhi = this.getNumberFromGanzhi(repaired.chinese.dayCn);
+        if (numberFromGanzhi !== -1) {
+          repaired.numeric.day = numberFromGanzhi;
+        }
+      }
+      
+      // 修复时柱数字与汉字不一致
+      if (typeof repaired.numeric.hour === 'number' && repaired.chinese.hourCn) {
+        const expectedGanzhi = this.getGanzhiFromNumber(repaired.numeric.hour);
+        if (expectedGanzhi !== repaired.chinese.hourCn) {
+          console.warn(`修复时柱数据不一致: 数字${repaired.numeric.hour}对应${expectedGanzhi}，但汉字为${repaired.chinese.hourCn}`);
+          repaired.chinese.hourCn = expectedGanzhi;
+        }
+      } else if (typeof repaired.numeric.hour !== 'number' && repaired.chinese.hourCn) {
+        const numberFromGanzhi = this.getNumberFromGanzhi(repaired.chinese.hourCn);
+        if (numberFromGanzhi !== -1) {
+          repaired.numeric.hour = numberFromGanzhi;
+        }
+      }
+      
+      // 修复时辰数字与汉字不一致
+      if (typeof repaired.numeric.shichen === 'number' && repaired.chinese.shichenCn) {
+        const expectedShichen = this.getShichenFromNumber(repaired.numeric.shichen);
+        if (expectedShichen !== repaired.chinese.shichenCn) {
+          console.warn(`修复时辰数据不一致: 数字${repaired.numeric.shichen}对应${expectedShichen}，但汉字为${repaired.chinese.shichenCn}`);
+          repaired.chinese.shichenCn = expectedShichen;
+        }
+      } else if (typeof repaired.numeric.shichen !== 'number' && repaired.chinese.shichenCn) {
+        const numberFromShichen = this.getNumberFromShichen(repaired.chinese.shichenCn);
+        if (numberFromShichen !== -1) {
+          repaired.numeric.shichen = numberFromShichen;
+        }
+      }
+    }
+    
+    return repaired;
+  }
+  
+  /**
+   * 从数字获取干支
+   * @param {number} number - 数字（0-59）
+   * @returns {string} 干支字符串
+   */
+  getGanzhiFromNumber(number) {
+    if (number < 0 || number >= 60) {
+      return '甲子'; // 默认值
+    }
+    
+    return JIAZI_TABLE[number] || '甲子';
+  }
+  
+  /**
+   * 从干支获取数字
+   * @param {string} ganzhi - 干支字符串
+   * @returns {number} 数字（0-59）
+   */
+  getNumberFromGanzhi(ganzhi) {
+    if (!ganzhi || typeof ganzhi !== 'string') {
+      return -1;
+    }
+    
+    return JIAZI_TABLE.indexOf(ganzhi);
+  }
+  
+  /**
+   * 从数字获取时辰
+   * @param {number} number - 数字（0-11）
+   * @returns {string} 时辰字符串
+   */
+  getShichenFromNumber(number) {
+    if (number < 0 || number >= 12) {
+      return '子时'; // 默认值
+    }
+    
+    return SHICHEN_TABLE[number] || '子时';
+  }
+  
+  /**
+   * 从时辰获取数字
+   * @param {string} shichen - 时辰字符串
+   * @returns {number} 数字（0-11）
+   */
+  getNumberFromShichen(shichen) {
+    if (!shichen || typeof shichen !== 'string') {
+      return -1;
+    }
+    
+    return SHICHEN_TABLE.indexOf(shichen);
+  }
+  
+  /**
+   * 检查干支格式是否有效
+   * @param {string} ganzhi - 干支字符串
+   * @returns {boolean} 是否有效
+   */
+  isValidGanzhi(ganzhi) {
+    if (!ganzhi || typeof ganzhi !== 'string' || ganzhi.length !== 2) {
+      return false;
+    }
+
+    const gan = ganzhi.charAt(0);
+    const zhi = ganzhi.charAt(1);
+
+    // 检查天干是否有效
+    const validGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+    if (!validGan.includes(gan)) {
+      return false;
+    }
+
+    // 检查地支是否有效
+    const validZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+    if (!validZhi.includes(zhi)) {
+      return false;
+    }
+
+    return true;
+  }
+  
+  /**
+   * 检查时辰格式是否有效
+   * @param {string} shichen - 时辰字符串
+   * @returns {boolean} 是否有效
+   */
+  isValidShichen(shichen) {
+    if (!shichen || typeof shichen !== 'string') {
+      return false;
+    }
+    
+    const validShichen = ['子时', '丑时', '寅时', '卯时', '辰时', '巳时', '午时', '未时', '申时', '酉时', '戌时', '亥时'];
+    return validShichen.includes(shichen);
   }
 
   /**

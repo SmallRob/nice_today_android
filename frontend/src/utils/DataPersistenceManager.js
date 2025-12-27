@@ -721,6 +721,91 @@ class DataPersistenceManager {
     this.memoryCache.stopCleanup();
     this.memoryCache.clear();
   }
+
+  /**
+   * 加载数据（别名方法，兼容性）
+   * @param {string} key - 存储键
+   * @returns {Promise<Object>} 返回对象 { success: boolean, data: any, error?: string }
+   */
+  async loadData(key) {
+    try {
+      const data = await this.get(key);
+      return {
+        success: true,
+        data
+      };
+    } catch (error) {
+      console.error(`加载数据失败: ${key}`, error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 保存数据（别名方法，兼容性）
+   * @param {string} key - 存储键
+   * @param {any} data - 要保存的数据
+   * @returns {Promise<Object>} 返回对象 { success: boolean, error?: string }
+   */
+  async saveData(key, data) {
+    try {
+      await this.set(key, data);
+      return {
+        success: true
+      };
+    } catch (error) {
+      console.error(`保存数据失败: ${key}`, error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 加载备份数据
+   * @param {string} key - 存储键
+   * @returns {Promise<Object>} 返回对象 { success: boolean, data: any, error?: string }
+   */
+  async loadBackup(key) {
+    try {
+      const backupData = this.backupManager.restoreBackup(key);
+      if (backupData !== null) {
+        return {
+          success: true,
+          data: backupData
+        };
+      } else {
+        return {
+          success: false,
+          error: '没有可用的备份数据'
+        };
+      }
+    } catch (error) {
+      console.error(`加载备份数据失败: ${key}`, error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 创建备份数据
+   * @param {string} key - 存储键
+   * @param {any} data - 要备份的数据
+   * @returns {Promise<boolean>} 是否创建成功
+   */
+  async createBackup(key, data) {
+    try {
+      return this.backupManager.createBackup(key, data);
+    } catch (error) {
+      console.error(`创建备份数据失败: ${key}`, error);
+      return false;
+    }
+  }
 }
 
 // 创建单例实例

@@ -7,6 +7,7 @@
  * 2. 显示输出使用汉字格式（yearCn/monthCn/dayCn/hourCn）
  * 3. 数据保存时即完成两种格式的转换和存储
  * 4. 提供严格的数据校验和异常处理机制
+ * 5. 提供数据迁移和兼容性处理功能
  */
 
 import { createStandardBaziData, validateBaziData, convertLegacyBaziToStandard } from './baziSchema';
