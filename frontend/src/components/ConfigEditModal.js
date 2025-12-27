@@ -679,17 +679,26 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
       // 添加事件监听
       dialog.querySelector('button').onclick = () => {
-        document.body.removeChild(dialog);
+        // 确保元素存在后再移除
+        if (dialog.parentNode) {
+          document.body.removeChild(dialog);
+        }
         resolve(false);
       };
       
       dialog.querySelector('#cancel-save').onclick = () => {
-        document.body.removeChild(dialog);
+        // 确保元素存在后再移除
+        if (dialog.parentNode) {
+          document.body.removeChild(dialog);
+        }
         resolve(false);
       };
       
       dialog.querySelector('#confirm-save').onclick = () => {
-        document.body.removeChild(dialog);
+        // 确保元素存在后再移除
+        if (dialog.parentNode) {
+          document.body.removeChild(dialog);
+        }
         resolve(true);
       };
 

@@ -53,14 +53,15 @@ const startApp = () => {
         try {
           // 初始化时间缓存
           timeCacheManager.update();
-          
+
           // 标记应用已准备就绪
           setAppReady(true);
-          
+
           // 添加备用超时机制（防止欢迎界面卡住）
           const fallbackTimer = setTimeout(() => {
+            console.log('欢迎界面备用超时触发，自动跳过');
             setShowWelcome(false);
-          }, 8000); // 8秒备用超时
+          }, 5000); // 缩短到5秒，更快响应
 
           return () => clearTimeout(fallbackTimer);
         } catch (error) {

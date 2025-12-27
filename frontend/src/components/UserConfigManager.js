@@ -2094,7 +2094,12 @@ const UserConfigManagerComponent = () => {
       a.download = `nice-today-configs-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      
+      // 确保元素存在后再移除
+      if (a.parentNode) {
+        document.body.removeChild(a);
+      }
+      
 
       URL.revokeObjectURL(url);
       showMessage('导出配置成功', 'success');

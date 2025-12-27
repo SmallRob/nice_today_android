@@ -341,7 +341,37 @@ class BaziCacheManager {
     try {
       // 转换 Map 为数组以便序列化
       const cacheArray = Array.from(this.cache.entries());
-      localStorage.setItem(BAZI_CACHE_KEY, JSON.stringify(cacheArray));
+
+      // 安全序列化：移除可能导致循环引用的引用
+      const safeCacheArray = cacheArray.map(([key, cachedData]) => {
+        return [key, {
+          nickname: cachedData.nickname,
+          birthInfo: cachedData.birthInfo,
+          // 不保存完整的 bazi 和 dualFormatBazi，只保存必要字段
+          bazi: cachedData.bazi ? {
+            text: cachedData.bazi.text,
+            eightChar: null,  // 移除循环引用的 full 属性
+            // 其他必要的字段...
+            ...cachedData.bazi
+          } : null,
+          dualFormatBazi: cachedData.dualFormatBazi ? {
+            numeric: cachedData.dualFormatBazi.numeric,
+            chinese: cachedData.dualFormatBazi.chinese,
+            validation: cachedData.dualFormatBazi.validation
+            // 移除 compatibility.legacy，避免循环引用
+          } : null,
+          configIndex: cachedData.configIndex,
+          cachedAt: cachedData.cachedAt,
+          expiresAt: cachedData.expiresAt,
+          lunarBirthDate: cachedData.lunarBirthDate,
+          trueSolarTime: cachedData.trueSolarTime,
+          shichen: cachedData.shichen,
+          version: cachedData.version,
+          validation: cachedData.validation
+        }];
+      });
+
+      localStorage.setItem(BAZI_CACHE_KEY, JSON.stringify(safeCacheArray));
       localStorage.setItem(BAZI_CACHE_INDEX_KEY, JSON.stringify(this.index));
     } catch (error) {
       console.error('保存八字缓存到存储失败:', error);

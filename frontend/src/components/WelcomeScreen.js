@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/animations.css';
 
 const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
   const [loadingText, setLoadingText] = useState('正在启动...');
   const [progress, setProgress] = useState(0);
   const [canSkip, setCanSkip] = useState(false);
-  
+  const [completed, setCompleted] = useState(false);
+  const readyTimerRef = useRef(null);
+  const stepsTimeoutRef = useRef(null);
+
   useEffect(() => {
+    if (completed) return; // 已完成，跳过
+
     const versionName = version === 'lite' ? '轻量版' : '炫彩版';
     const loadingSteps = [
       { text: `正在启动${versionName}...`, duration: 600 },
@@ -15,60 +20,81 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
       { text: '优化性能设置...', duration: 500 },
       { text: '完成初始化...', duration: 400 }
     ];
-    
+
     let currentStep = 0;
     let accumulatedProgress = 0;
-    
-    const stepsInterval = setInterval(() => {
+
+    const executeNextStep = () => {
+      if (completed) return;
+
       if (currentStep < loadingSteps.length) {
         setLoadingText(loadingSteps[currentStep].text);
         const stepProgress = (100 / loadingSteps.length);
-        setProgress(Math.min(accumulatedProgress + stepProgress, 95)); // 最多到95%，等待appReady
-        
-        setTimeout(() => {
+        const targetProgress = Math.min(accumulatedProgress + stepProgress, 95);
+
+        setProgress(targetProgress); // 直接设置目标进度，避免累加错误
+
+        stepsTimeoutRef.current = setTimeout(() => {
           currentStep++;
-          accumulatedProgress += stepProgress;
-          
+          accumulatedProgress = targetProgress;
+
           if (currentStep >= loadingSteps.length) {
-            clearInterval(stepsInterval);
             setCanSkip(true);
-            
-            // 如果应用已经准备就绪，快速完成；否则等待
-            if (appReady) {
-              setTimeout(() => {
-                setProgress(100);
-                setTimeout(() => {
-                  if (typeof onComplete === 'function') {
-                    onComplete();
-                  }
-                }, 200);
-              }, 100);
-            }
+            checkReadyState();
+          } else {
+            executeNextStep();
           }
         }, loadingSteps[currentStep].duration);
       }
-    }, 100);
-    
-    return () => clearInterval(stepsInterval);
-  }, [onComplete, appReady]);
+    };
 
-  // 监听appReady状态变化
-  useEffect(() => {
-    if (appReady && canSkip && progress >= 95) {
-      setTimeout(() => {
+    const checkReadyState = () => {
+      if (completed) return;
+
+      if (appReady) {
         setProgress(100);
-        setTimeout(() => {
+        readyTimerRef.current = setTimeout(() => {
+          setCompleted(true);
           if (typeof onComplete === 'function') {
             onComplete();
           }
-        }, 200);
+        }, 500);
+      }
+    };
+
+    // 开始执行步骤
+    executeNextStep();
+
+    // 清理函数
+    return () => {
+      if (stepsTimeoutRef.current) {
+        clearTimeout(stepsTimeoutRef.current);
+        stepsTimeoutRef.current = null;
+      }
+      if (readyTimerRef.current) {
+        clearTimeout(readyTimerRef.current);
+        readyTimerRef.current = null;
+      }
+    };
+  }, [version]); // 只在 version 变化时重新执行
+
+  // 监听 appReady 状态变化
+  useEffect(() => {
+    if (appReady && canSkip && !completed) {
+      setProgress(100);
+      readyTimerRef.current = setTimeout(() => {
+        setCompleted(true);
+        if (typeof onComplete === 'function') {
+          onComplete();
+        }
       }, 300);
     }
-  }, [appReady, canSkip, progress, onComplete]);
+  }, [appReady, canSkip]); // 移除 progress 依赖
 
   // 跳过功能
   const handleSkip = () => {
-    if (canSkip || appReady) {
+    if (canSkip || appReady || completed) {
+      setCompleted(true);
       setProgress(100);
       if (typeof onComplete === 'function') {
         onComplete();

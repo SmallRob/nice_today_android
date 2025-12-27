@@ -338,7 +338,11 @@
         a.download = `error-report-${Date.now()}.json`;
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        
+        // 确保元素存在后再移除
+        if (a.parentNode) {
+          document.body.removeChild(a);
+        }
         URL.revokeObjectURL(url);
         showResult('reportResults', '✓ 错误报告导出成功', 'success');
       }

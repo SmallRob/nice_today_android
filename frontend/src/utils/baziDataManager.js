@@ -103,20 +103,40 @@ export const createDualFormatBaziData = (params) => {
     // 1. 使用标准Schema创建基础数据
     const standardData = createStandardBaziData(params);
     
-    // 2. 提取八字四柱汉字
-    const yearCn = standardData.bazi?.year?.ganZhi || '未知';
-    const monthCn = standardData.bazi?.month?.ganZhi || '未知';
-    const dayCn = standardData.bazi?.day?.ganZhi || '未知';
-    const hourCn = standardData.bazi?.hour?.ganZhi || '未知';
-    const shichenCn = standardData.birth?.time?.shichen || '未知';
-
+    // 2. 提取八字四柱汉字（添加空值检查）
+    const yearCn = standardData.bazi?.year?.ganZhi || '';
+    const monthCn = standardData.bazi?.month?.ganZhi || '';
+    const dayCn = standardData.bazi?.day?.ganZhi || '';
+    const hourCn = standardData.bazi?.hour?.ganZhi || '';
+    const shichenCn = standardData.birth?.time?.shichen || '';
+    
+    // 如果字段缺失或无效，返回错误数据
+    if (!yearCn || !monthCn || !dayCn || !hourCn) {
+      console.warn('八字数据不完整，无法创建双格式数据');
+      return createErrorBaziData({
+        error: '八字数据不完整',
+        birthDate: params.birthDate,
+        birthTime: params.birthTime
+      });
+    }
+    
     // 3. 转换为数字格式
     const yearNumeric = JIAZI_TABLE.indexOf(yearCn);
     const monthNumeric = JIAZI_TABLE.indexOf(monthCn);
     const dayNumeric = JIAZI_TABLE.indexOf(dayCn);
     const hourNumeric = JIAZI_TABLE.indexOf(hourCn);
     const shichenNumeric = SHICHEN_TABLE.findIndex(s => s === shichenCn);
-
+    
+    // 验证数字索引有效
+    if (yearNumeric < 0 || monthNumeric < 0 || dayNumeric < 0 || hourNumeric < 0) {
+      console.warn('八字汉字无法转换为数字索引');
+      return createErrorBaziData({
+        error: '八字汉字无法转换',
+        birthDate: params.birthDate,
+        birthTime: params.birthTime
+      });
+    }
+    
     // 4. 数据校验
     const validation = validateDualFormatData({
       yearCn, monthCn, dayCn, hourCn, shichenCn,
@@ -150,9 +170,8 @@ export const createDualFormatBaziData = (params) => {
       
       validation,
       
-      compatibility: {
-        legacy: standardData
-      }
+      // 移除可能导致循环引用的 compatibility.legacy 字段
+      // 旧版数据可以按需从其他地方获取
     };
 
     return dualFormatData;
@@ -176,9 +195,20 @@ export const createDualFormatBaziData = (params) => {
 const validateDualFormatData = (data) => {
   const errors = [];
   const warnings = [];
-  
+
   const { yearCn, monthCn, dayCn, hourCn, shichenCn } = data;
   const { yearNumeric, monthNumeric, dayNumeric, hourNumeric, shichenNumeric } = data;
+
+  // 如果数据为空，跳过验证
+  if (!yearCn || !monthCn || !dayCn || !hourCn) {
+    return {
+      isValid: false,
+      errors: ['八字汉字数据不完整'],
+      warnings,
+      fixes: [],
+      checksum: 'invalid'
+    };
+  }
 
   // 1. 检查数字与汉字的对应关系
   if (JIAZI_TABLE[yearNumeric] !== yearCn) {
@@ -193,7 +223,7 @@ const validateDualFormatData = (data) => {
   if (JIAZI_TABLE[hourNumeric] !== hourCn) {
     errors.push(`时柱数字与汉字不匹配: ${hourNumeric} -> ${hourCn}`);
   }
-  if (SHICHEN_TABLE[shichenNumeric] !== shichenCn) {
+  if (shichenCn && SHICHEN_TABLE[shichenNumeric] !== shichenCn) {
     warnings.push(`时辰数字与汉字不匹配: ${shichenNumeric} -> ${shichenCn}`);
   }
 

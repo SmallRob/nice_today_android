@@ -98,7 +98,7 @@ export class BaziValidator {
     if (numericValue === undefined || numericValue === null) {
       errors.push(`${pillarName}柱数字值缺失`);
     }
-    if (!chineseValue) {
+    if (!chineseValue || chineseValue.trim() === '') {
       errors.push(`${pillarName}柱汉字值缺失`);
     }
 
@@ -121,7 +121,7 @@ export class BaziValidator {
     if (JIAZI_TABLE[numericValue] !== chineseValue) {
       const expected = JIAZI_TABLE[numericValue];
       const actual = chineseValue;
-      
+
       if (this.strictMode) {
         errors.push(`${pillarName}柱数字与汉字不匹配: ${numericValue} -> ${expected} (实际: ${actual})`);
       } else {

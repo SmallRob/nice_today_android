@@ -25,7 +25,11 @@ const PerformanceTestTool = () => {
       element.textContent = '测试元素';
       element.style.display = 'none'; // 隐藏元素避免重绘
       document.body.appendChild(element);
-      document.body.removeChild(element);
+      
+      // 确保元素存在后再移除
+      if (element.parentNode) {
+        document.body.removeChild(element);
+      }
     }
     
     // 模拟内存使用 - 减少数据量
@@ -51,7 +55,12 @@ const PerformanceTestTool = () => {
           const dummyElement = document.createElement('div');
           dummyElement.style.opacity = '0';
           document.body.appendChild(dummyElement);
-          document.body.removeChild(dummyElement);
+          
+          // 确保元素存在后再移除
+          if (dummyElement.parentNode) {
+            document.body.removeChild(dummyElement);
+          }
+          
           resolve();
         });
       });
