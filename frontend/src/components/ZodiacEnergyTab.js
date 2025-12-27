@@ -64,12 +64,17 @@ const ZodiacEnergyTab = memo(() => {
       setDataLoaded(false);
     } else if (currentConfig.birthDate && !isDefaultBirthDate && userZodiac === '鼠') {
       // 如果没有生肖但有出生日期，计算生肖（排除默认日期）
-      const birthYear = new Date(currentConfig.birthDate.replace(/-/g, '/')).getFullYear();
-      if (birthYear && birthYear > 1900 && birthYear < 2100) {
-        const calculatedZodiac = ZODIAC_LIST[(birthYear - 4) % 12];
-        if (calculatedZodiac && calculatedZodiac !== '鼠') {
-          setUserZodiac(calculatedZodiac);
-          setDataLoaded(false);
+      // 增强日期验证
+      const birthDateObj = new Date(currentConfig.birthDate.replace(/-/g, '/'));
+      // 检查日期是否有效
+      if (!isNaN(birthDateObj.getTime())) {
+        const birthYear = birthDateObj.getFullYear();
+        if (birthYear && birthYear > 1900 && birthYear < 2100) {
+          const calculatedZodiac = ZODIAC_LIST[(birthYear - 4) % 12];
+          if (calculatedZodiac && calculatedZodiac !== '鼠') {
+            setUserZodiac(calculatedZodiac);
+            setDataLoaded(false);
+          }
         }
       }
     }
@@ -342,7 +347,7 @@ const ZodiacEnergyTab = memo(() => {
 
       return () => clearTimeout(timer);
     }
-  }, [userZodiac, selectedDate, loadEnergyGuidance, initialized, dataLoaded, userInfo.zodiacAnimal, tempZodiac]);
+  }, [userZodiac, selectedDate, loadEnergyGuidance, initialized, dataLoaded]);
 
   // 处理生肖选择 - 支持临时查看模式
   const handleZodiacChange = async (zodiac) => {
@@ -689,6 +694,51 @@ const ZodiacEnergyTab = memo(() => {
     );
   };
 
+  // 生成确定性的过去7天数据，避免因Math.random导致的频繁渲染
+  // 使用useMemo缓存计算结果，只在userZodiac或selectedDate变化时重新计算
+  const weeklyData = useMemo(() => {
+    if (!userZodiac) return { dates: [], energyScores: [], wealthScores: [], careerScores: [] };
+
+    const dates = [];
+    const energyScores = [];
+    const wealthScores = [];
+    const careerScores = [];
+
+    // 使用生肖和日期作为种子
+    const seedBase = userZodiac.charCodeAt(0);
+    // 使用单一Date对象并修改其值，减少对象创建
+    const baseDate = new Date(selectedDate);
+
+    for (let i = 6; i >= 0; i--) {
+      // 复制日期而不是每次创建新对象
+      const date = new Date(baseDate);
+      date.setDate(date.getDate() - i);
+      dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
+
+      // 基础能量分数（基于生肖和日期偏移量计算，确保结果固定）
+      const daySeed = date.getDate() + date.getMonth() * 31;
+      const baseScore = 50 + (seedBase % 20);
+      const dayFactor = (date.getDay() + 1) * 3;
+      // 使用确定性算法代替随机数
+      const deterministicVariation = ((seedBase * daySeed) % 20) - 10;
+      const energyScore = Math.max(20, Math.min(95, baseScore + dayFactor + deterministicVariation));
+
+      // 财运分数（基于能量分数但有一定偏差，也是确定性的）
+      const wealthVariation = ((seedBase * daySeed * 2) % 25) - 12;
+      const wealthScore = Math.max(15, Math.min(90, energyScore + wealthVariation));
+
+      // 事业分数（基于能量分数但有一定偏差，也是确定性的）
+      const careerVariation = ((seedBase * daySeed * 3) % 30) - 15;
+      const careerScore = Math.max(10, Math.min(85, energyScore + careerVariation));
+
+      energyScores.push(energyScore);
+      wealthScores.push(wealthScore);
+      careerScores.push(careerScore);
+    }
+
+    return { dates, energyScores, wealthScores, careerScores };
+  }, [userZodiac, selectedDate]);
+
   // 渲染人际关系卡片
   const renderRelationshipCard = () => {
     if (!energyGuidance?.人际关系) return null;
@@ -744,6 +794,177 @@ const ZodiacEnergyTab = memo(() => {
       </div>
     );
   };
+
+  // 渲染能量趋势图 - 增强版（包含财运和事业趋势）
+  // 优化的能量趋势图组件
+  const renderEnergyTrendChart = useCallback(() => {
+    if (!userZodiac) return null;
+
+    const { dates, energyScores, wealthScores, careerScores } = weeklyData;
+
+    // 图表配置 - 仅依赖theme和数据
+    const chartData = {
+      labels: dates,
+      datasets: [
+        {
+          label: '能量指数',
+          data: energyScores,
+          borderColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
+          backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 3,
+          pointBackgroundColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true,
+          tension: 0.4,
+        },
+        {
+          label: '财运趋势',
+          data: wealthScores,
+          borderColor: theme === 'dark' ? '#f59e0b' : '#f59e0b',
+          backgroundColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+          borderWidth: 2,
+          pointBackgroundColor: theme === 'dark' ? '#f59e0b' : '#f59e0b',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderDash: [5, 5],
+          tension: 0.3,
+        },
+        {
+          label: '事业趋势',
+          data: careerScores,
+          borderColor: theme === 'dark' ? '#10b981' : '#10b981',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointBackgroundColor: theme === 'dark' ? '#10b981' : '#10b981',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.3,
+        }
+      ]
+    };
+
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: theme === 'dark' || window.innerWidth <= 768 ? 0 : 300 // 移动端禁用动画提升性能
+      },
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            color: theme === 'dark' ? '#d1d5db' : '#374151',
+            font: {
+              size: 11,
+              weight: '500',
+            },
+            padding: 10,
+            usePointStyle: true,
+          }
+        },
+        tooltip: {
+          enabled: false, // 禁用tooltip以提升性能
+          backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+          titleColor: theme === 'dark' ? '#f3f4f6' : '#1f2937',
+          bodyColor: theme === 'dark' ? '#d1d5db' : '#374151',
+          borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
+          borderWidth: 1,
+          padding: 8,
+          cornerRadius: 6,
+          displayColors: true,
+          callbacks: {
+            label: function (context) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              label += context.parsed.y + '%';
+              return label;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false,
+          },
+          ticks: {
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+            font: {
+              size: 10,
+            }
+          }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          grid: {
+            color: theme === 'dark' ? 'rgba(75, 85, 99, 0.2)' : 'rgba(209, 213, 219, 0.2)',
+            drawBorder: false,
+          },
+          ticks: {
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+            font: {
+              size: 10,
+            },
+            callback: function (value) {
+              return value + '%';
+            }
+          }
+        }
+      }
+    };
+
+    return (
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+          </svg>
+          近7日能量趋势分析
+        </h3>
+        <div className="h-48 md:h-72 will-change-transform">
+          <Line data={chartData} options={chartOptions} />
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-1.5 md:gap-2 text-center">
+          <div className="bg-blue-50/50 dark:bg-blue-900/10 p-1.5 md:p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
+            <div className="text-blue-600 dark:text-blue-400 text-[9px] md:text-[10px] font-medium">能量指数</div>
+            <div className="text-sm md:text-base font-medium text-blue-700 dark:text-blue-300">
+              {energyScores[energyScores.length - 1]}%
+            </div>
+          </div>
+          <div className="bg-amber-50/50 dark:bg-amber-900/10 p-1.5 md:p-2 rounded-lg border border-amber-100 dark:border-amber-900/30">
+            <div className="text-amber-600 dark:text-amber-400 text-[9px] md:text-[10px] font-medium">财运趋势</div>
+            <div className="text-sm md:text-base font-medium text-amber-700 dark:text-amber-300">
+              {wealthScores[wealthScores.length - 1]}%
+            </div>
+          </div>
+          <div className="bg-green-50/50 dark:bg-green-900/10 p-1.5 md:p-2 rounded-lg border border-green-100 dark:border-green-900/30">
+            <div className="text-green-600 dark:text-green-300 text-[9px] md:text-[10px] font-medium">事业趋势</div>
+            <div className="text-sm md:text-base font-medium text-green-700 dark:text-green-300">
+              {careerScores[careerScores.length - 1]}%
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 text-[10px] text-gray-400 dark:text-gray-100 text-center italic">
+          注：数据基于个人生肖属性与当日五行气场精密计算得出
+        </div>
+      </div>
+    );
+  }, [weeklyData, theme]);
 
   // 渲染八字运势卡片（支持动态月份）
   const renderBaziFortuneCard = () => {
@@ -878,214 +1099,7 @@ const ZodiacEnergyTab = memo(() => {
     );
   };
 
-  // 渲染能量趋势图 - 增强版（包含财运和事业趋势）
-  // 优化的能量趋势图组件
-  const EnergyTrendChart = useMemo(() => {
-    if (!userZodiac) return null;
-
-    // 生成确定性的过去7天数据，避免因Math.random导致的频繁渲染
-    const generateWeeklyData = () => {
-      const dates = [];
-      const energyScores = [];
-      const wealthScores = [];
-      const careerScores = [];
-
-      // 使用生肖和日期作为种子
-      const seedBase = userZodiac.charCodeAt(0);
-
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(selectedDate);
-        date.setDate(date.getDate() - i);
-        dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
-
-        // 基础能量分数（基于生肖和日期偏移量计算，确保结果固定）
-        const daySeed = date.getDate() + date.getMonth() * 31;
-        const baseScore = 50 + (seedBase % 20);
-        const dayFactor = (date.getDay() + 1) * 3;
-        // 使用确定性算法代替随机数
-        const deterministicVariation = ((seedBase * daySeed) % 20) - 10;
-        const energyScore = Math.max(20, Math.min(95, baseScore + dayFactor + deterministicVariation));
-
-        // 财运分数（基于能量分数但有一定偏差，也是确定性的）
-        const wealthVariation = ((seedBase * daySeed * 2) % 25) - 12;
-        const wealthScore = Math.max(15, Math.min(90, energyScore + wealthVariation));
-
-        // 事业分数（基于能量分数但有一定偏差，也是确定性的）
-        const careerVariation = ((seedBase * daySeed * 3) % 30) - 15;
-        const careerScore = Math.max(10, Math.min(85, energyScore + careerVariation));
-
-        energyScores.push(energyScore);
-        wealthScores.push(wealthScore);
-        careerScores.push(careerScore);
-      }
-
-      return { dates, energyScores, wealthScores, careerScores };
-    };
-
-    const { dates, energyScores, wealthScores, careerScores } = generateWeeklyData();
-
-    // 图表配置 - 仅依赖theme和数据
-    const chartData = {
-      labels: dates,
-      datasets: [
-        {
-          label: '能量指数',
-          data: energyScores,
-          borderColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
-          backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-          borderWidth: 3,
-          pointBackgroundColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          fill: true,
-          tension: 0.4,
-        },
-        {
-          label: '财运趋势',
-          data: wealthScores,
-          borderColor: theme === 'dark' ? '#f59e0b' : '#f59e0b',
-          backgroundColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-          borderWidth: 2,
-          pointBackgroundColor: theme === 'dark' ? '#f59e0b' : '#f59e0b',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          borderDash: [5, 5],
-          tension: 0.3,
-        },
-        {
-          label: '事业趋势',
-          data: careerScores,
-          borderColor: theme === 'dark' ? '#10b981' : '#10b981',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          pointBackgroundColor: theme === 'dark' ? '#10b981' : '#10b981',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          tension: 0.3,
-        }
-      ]
-    };
-
-    const chartOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: theme === 'dark' || window.innerWidth <= 768 ? 0 : 1000 // 移动端禁用动画提升性能
-      },
-      interaction: {
-        mode: 'index',
-        intersect: false,
-      },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: {
-            color: theme === 'dark' ? '#d1d5db' : '#374151',
-            font: {
-              size: 11,
-              weight: '500',
-            },
-            padding: 10,
-            usePointStyle: true,
-          }
-        },
-        tooltip: {
-          backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
-          titleColor: theme === 'dark' ? '#f3f4f6' : '#1f2937',
-          bodyColor: theme === 'dark' ? '#d1d5db' : '#374151',
-          borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
-          borderWidth: 1,
-          padding: 8,
-          cornerRadius: 6,
-          displayColors: true,
-          callbacks: {
-            label: function (context) {
-              let label = context.dataset.label || '';
-              if (label) {
-                label += ': ';
-              }
-              label += context.parsed.y + '%';
-              return label;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: {
-            display: false,
-            drawBorder: false,
-          },
-          ticks: {
-            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
-            font: {
-              size: 10,
-            }
-          }
-        },
-        y: {
-          min: 0,
-          max: 100,
-          grid: {
-            color: theme === 'dark' ? 'rgba(75, 85, 99, 0.2)' : 'rgba(209, 213, 219, 0.2)',
-            drawBorder: false,
-          },
-          ticks: {
-            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
-            font: {
-              size: 10,
-            },
-            callback: function (value) {
-              return value + '%';
-            }
-          }
-        }
-      }
-    };
-
-    return (
-      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
-          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-          </svg>
-          近7日能量趋势分析
-        </h3>
-        <div className="h-48 md:h-72 will-change-transform">
-          <Line data={chartData} options={chartOptions} />
-        </div>
-        <div className="mt-4 grid grid-cols-3 gap-1.5 md:gap-2 text-center">
-          <div className="bg-blue-50/50 dark:bg-blue-900/10 p-1.5 md:p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
-            <div className="text-blue-600 dark:text-blue-400 text-[9px] md:text-[10px] font-medium">能量指数</div>
-            <div className="text-sm md:text-base font-medium text-blue-700 dark:text-blue-300">
-              {energyScores[energyScores.length - 1]}%
-            </div>
-          </div>
-          <div className="bg-amber-50/50 dark:bg-amber-900/10 p-1.5 md:p-2 rounded-lg border border-amber-100 dark:border-amber-900/30">
-            <div className="text-amber-600 dark:text-amber-400 text-[9px] md:text-[10px] font-medium">财运趋势</div>
-            <div className="text-sm md:text-base font-medium text-amber-700 dark:text-amber-300">
-              {wealthScores[wealthScores.length - 1]}%
-            </div>
-          </div>
-          <div className="bg-green-50/50 dark:bg-green-900/10 p-1.5 md:p-2 rounded-lg border border-green-100 dark:border-green-900/30">
-            <div className="text-green-600 dark:text-green-300 text-[9px] md:text-[10px] font-medium">事业趋势</div>
-            <div className="text-sm md:text-base font-medium text-green-700 dark:text-green-300">
-              {careerScores[careerScores.length - 1]}%
-            </div>
-          </div>
-        </div>
-        <div className="mt-3 text-[10px] text-gray-400 dark:text-gray-100 text-center italic">
-          注：数据基于个人生肖属性与当日五行气场精密计算得出
-        </div>
-      </div>
-    );
-  }, [userZodiac, selectedDate, theme]);
+  // 渲染生肖选择器
 
   // 渲染生肖选择器
   const renderZodiacSelector = () => {
@@ -1313,8 +1327,9 @@ const ZodiacEnergyTab = memo(() => {
             </div>
           </div>
         </div>
-            </div>
+      </div>
     </div>
   );
 });
+
 export default ZodiacEnergyTab;

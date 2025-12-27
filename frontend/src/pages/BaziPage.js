@@ -86,6 +86,12 @@ const BaziPage = () => {
         monthGanZhi: lunar.getMonthInGanZhi(),
         dayGanZhi: lunar.getDayInGanZhi(),
         hourGanZhi: lunar.getTimeInGanZhi(),
+        pillars: [
+          lunar.getYearInGanZhi(),  // 年柱
+          lunar.getMonthInGanZhi(), // 月柱
+          lunar.getDayInGanZhi(),   // 日柱
+          lunar.getTimeInGanZhi()   // 时柱
+        ],
         zodiac: lunar.getYearShengXiao(),
         yearXing: eightChar.getYearWuXing(),
         monthXing: eightChar.getMonthWuXing(),
@@ -99,18 +105,10 @@ const BaziPage = () => {
       const liuNian = calculateLiuNianDaYun(year, month, day, hour);
       setLiuNianData(liuNian);
 
-      // 计算月运
-      const pillars = [
-        lunarData.yearGanZhi,  // 年柱
-        lunarData.monthGanZhi, // 月柱
-        lunarData.dayGanZhi,   // 日柱
-        lunarData.hourGanZhi   // 时柱
-      ];
-      
       // 创建目标日期对象
       const targetDate = new Date(selectedYear, selectedMonth - 1, 1);
       
-      const monthlyFortune = getMonthlyBaziFortune(pillars, targetDate);
+      const monthlyFortune = getMonthlyBaziFortune(lunarData.pillars, targetDate);
       setMonthlyFortune(monthlyFortune);
       
       // 计算每日能量运势
@@ -144,6 +142,10 @@ const BaziPage = () => {
 
   // 月份选择
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  
+  // 月份名称
+  const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', 
+                     '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
   if (loading) {
     return (
@@ -231,49 +233,107 @@ const BaziPage = () => {
           </div>
         )}
 
-        {/* 月运详情 */}
-        {monthlyFortune && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-              {selectedYear}年{selectedMonth}月运势
+        {/* 八字运势卡片（支持动态月份） */}
+        {lunarData && (
+          <div className="bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-lg md:shadow-xl p-3 md:p-5 border border-amber-200/50 dark:border-amber-700/50 mb-6 overflow-hidden relative group will-change-transform">
+            {/* 背景装饰 - 移动端简化 */}
+            <div className="hidden md:block absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-100 dark:bg-amber-900/20 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+
+            <h3 className="text-lg md:text-xl font-medium text-gray-900 dark:text-gray-100 mb-5 flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white mr-3 shadow-lg shadow-amber-500/20 text-sm">
+                  ☯️
+                </span>
+                <span>
+                  {selectedMonth === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear() ? '本月' : monthNames[selectedMonth - 1]}八字运势
+                  <span className="text-sm font-normal text-gray-500 dark:text-gray-100 ml-2">
+                    ({selectedYear}年)
+                  </span>
+                </span>
+              </div>
             </h3>
+
+            {/* 月份信息提示 */}
+            {!(selectedMonth === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear()) && (
+              <div className="mb-4 p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
+                <div className="flex items-center text-blue-700 dark:text-blue-300 text-xs">
+                  <span className="mr-2">💡</span>
+                  <span>
+                    正在查看 <span className="font-semibold">{selectedYear}年{monthNames[selectedMonth - 1]}</span> 的运势分析
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* 八字展示 */}
+            <div className="grid grid-cols-4 gap-2 mb-6">
+              {['年柱', '月柱', '日柱', '时柱'].map((title, i) => (
+                <div key={i} className="flex flex-col items-center">
+                  <span className="text-[10px] text-gray-500 dark:text-gray-100 mb-1">{title}</span>
+                  <div className={`w-full aspect-[4/5] flex flex-col items-center justify-center rounded-xl border-2 transition-all ${i === 2 ? 'bg-amber-500 border-amber-400 text-white shadow-lg scale-105' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-100'
+                    }`}>
+                    <span className="text-xl md:text-2xl font-bold tracking-widest flex flex-col items-center leading-tight">
+                      <span className="font-bold drop-shadow-sm">{lunarData.pillars[i].charAt(0)}</span>
+                      <span className="font-bold drop-shadow-sm">{lunarData.pillars[i].charAt(1)}</span>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 运势分析 */}
             <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="w-3 h-3 bg-purple-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
-                <div>
-                  <h4 className="font-semibold text-gray-800 dark:text-white">事业运势</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {monthlyFortune.career || '暂无数据'}
-                  </p>
+              <div className="p-4 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-100 dark:border-amber-800/50 shadow-inner">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center">
+                    <span className="text-sm font-normal text-amber-900 dark:text-amber-200 bg-amber-200/50 dark:bg-amber-800/50 px-2 py-0.5 rounded">
+                      {monthlyFortune?.relation || '暂无数据'}
+                    </span>
+                    <span className="ml-2 text-xs text-amber-700 dark:text-amber-400 font-medium">流月核心</span>
+                  </div>
+                  <div className="flex items-center bg-white/80 dark:bg-gray-800/80 px-2 py-1 rounded-lg border border-amber-100 dark:border-amber-700 shadow-sm">
+                    <span className="text-[10px] text-gray-500 dark:text-gray-100 mr-2 uppercase tracking-tighter">Score</span>
+                    <span className="text-lg font-medium text-amber-600 dark:text-amber-400">{monthlyFortune?.score || '0'}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-800 dark:text-gray-100 leading-relaxed">
+                  {monthlyFortune?.summary || '暂无运势分析数据'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
+                <div className="p-2 md:p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-1 opacity-10">
+                    <span className="text-xl md:text-2xl">👤</span>
+                  </div>
+                  <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-100 mb-1 font-normal">命主元神</div>
+                  <div className="flex items-center">
+                    <span className="text-base md:text-lg font-medium text-gray-800 dark:text-gray-100 mr-1.5 md:mr-2">{monthlyFortune?.dayMaster || '未知'}</span>
+                    <span className="text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                      {monthlyFortune?.masterElement}命人
+                    </span>
+                  </div>
+                </div>
+                <div className="p-2 md:p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-1 opacity-10">
+                    <span className="text-xl md:text-2xl">📅</span>
+                  </div>
+                  <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-100 mb-1 font-normal">月份干支</div>
+                  <div className="text-[9px] md:text-[10px] font-black text-gray-800 dark:text-gray-100 mt-1 md:mt-1.5 flex items-center">
+                    <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-1.5 md:px-2 py-0.5 rounded">
+                      {monthlyFortune?.monthGanzhi || '未知'}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start">
-                <div className="w-3 h-3 bg-pink-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
-                <div>
-                  <h4 className="font-semibold text-gray-800 dark:text-white">财运运势</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {monthlyFortune.wealth || '暂无数据'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="w-3 h-3 bg-indigo-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
-                <div>
-                  <h4 className="font-semibold text-gray-800 dark:text-white">健康运势</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {monthlyFortune.health || '暂无数据'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="w-3 h-3 bg-violet-500 rounded-full mt-1.5 mr-3 flex-shrink-0"></div>
-                <div>
-                  <h4 className="font-semibold text-gray-800 dark:text-white">感情运势</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {monthlyFortune.love || '暂无数据'}
-                  </p>
-                </div>
-              </div>
+            </div>
+
+            {/* 提示 */}
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center text-[10px] text-gray-400">
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              注：基于日干与{selectedYear}年{monthNames[selectedMonth - 1]}干支的生克关系计算
             </div>
           </div>
         )}
