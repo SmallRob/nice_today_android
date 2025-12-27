@@ -5,11 +5,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import BiorhythmChart from '../components/biorhythm/BiorhythmChart';
 import BiorhythmBanner from '../components/biorhythm/BiorhythmBanner';
-import { storageManager } from '../utils/storageManager';
-import { calculateBiorhythms } from '../utils/biorhythmCalculator';
+import { calculateBiorhythmData, getBiorhythmRange } from '../services/localDataService';
 
 const BiorhythmPage = () => {
   const { theme } = useTheme();
@@ -23,7 +21,7 @@ const BiorhythmPage = () => {
   const [error, setError] = useState(null);
 
   // 计算生物节律
-  const calculateBiorhythm = useCallback(() => {
+  const calculateBiorhythm = useCallback(async () => {
     if (!currentConfig?.birthDate) {
       setError('请先设置您的出生日期');
       setLoading(false);
@@ -32,10 +30,14 @@ const BiorhythmPage = () => {
 
     try {
       setLoading(true);
-      const birthDate = new Date(currentConfig.birthDate);
-      const data = calculateBiorhythms(birthDate, selectedDate);
-      setBiorhythmData(data);
-      setError(null);
+      // 获取趋势数据（前后各10天）
+      const rangeResult = await getBiorhythmRange(currentConfig.birthDate, 10, 20);
+      if (rangeResult.success && rangeResult.rhythmData) {
+        setBiorhythmData(rangeResult.rhythmData);
+        setError(null);
+      } else {
+        setError('计算生物节律失败：' + (rangeResult.error || '未知错误'));
+      }
     } catch (err) {
       setError('计算生物节律失败：' + err.message);
     } finally {
@@ -108,7 +110,8 @@ const BiorhythmPage = () => {
         {/* 生物节律图表 */}
         {biorhythmData && (
           <BiorhythmChart
-            biorhythmData={biorhythmData}
+            data={biorhythmData}
+            isMobile={window.innerWidth <= 768}
             selectedDate={selectedDate}
             birthDate={currentConfig?.birthDate ? new Date(currentConfig.birthDate) : null}
           />

@@ -6,7 +6,8 @@ import {
   BaziCard,
   BiorhythmCard,
   PersonalityTraitCard,
-  EnergyBoostCard
+  EnergyBoostCard,
+  PeriodTrackerCard
 } from '../components/dashboard/FeatureCards';
 import '../styles/dashboard.css';
 
@@ -65,6 +66,7 @@ const Dashboard = () => {
         <BaziCard />
         <PersonalityTraitCard />
         <EnergyBoostCard />
+        <PeriodTrackerCard />
       </div>
 
       {/* 快速操作 */}

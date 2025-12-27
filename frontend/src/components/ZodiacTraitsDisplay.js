@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HOROSCOPE_DATA_ENHANCED } from '../utils/horoscopeAlgorithm';
 
 /**
@@ -6,7 +7,16 @@ import { HOROSCOPE_DATA_ENHANCED } from '../utils/horoscopeAlgorithm';
  * 显示星座的个性特征、优点、缺点等详细信息
  */
 const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
+  const navigate = useNavigate();
+
   if (!currentHoroscope) return null;
+
+  // 跳转到详细页面
+  const handleViewDetails = () => {
+    navigate('/zodiac-traits/' + encodeURIComponent(currentHoroscope), {
+      state: { zodiac: currentHoroscope }
+    });
+  };
 
   // 获取当前星座数据
   const zodiac = HOROSCOPE_DATA_ENHANCED.find(h => h.name === currentHoroscope);
@@ -98,11 +108,22 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-800 mt-6">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-        <span className="mr-2 text-2xl">{zodiac.icon}</span>
-        {zodiac.name} 综合特质
-      </h3>
+    <div
+      onClick={handleViewDetails}
+      className="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-800 mt-6 cursor-pointer hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all duration-200"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center">
+          <span className="mr-2 text-2xl">{zodiac.icon}</span>
+          {zodiac.name} 综合特质
+        </h3>
+        <span className="text-blue-600 dark:text-blue-400 text-sm font-semibold flex items-center">
+          查看详情
+          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      </div>
 
       {/* 基本属性 */}
       <div className="grid grid-cols-2 gap-4 mb-4">

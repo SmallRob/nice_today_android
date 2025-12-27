@@ -350,6 +350,36 @@ const MayaCalendarLitePage = ({ userInfo }) => {
       </div>
       <div className="lite-maya-page">
 
+        {/* 体验新版入口 */}
+        <div className="lite-card" style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          marginBottom: '16px'
+        }}>
+          <div className="lite-flex lite-justify-between lite-items-center">
+            <div>
+              <h3 className="lite-h3" style={{ margin: 0, marginBottom: '4px' }}>✨ 炫彩版功能</h3>
+              <p className="lite-text-sm lite-mb-0" style={{ opacity: 0.9 }}>
+                全新设计，更多功能，更丰富的体验
+              </p>
+            </div>
+            <button
+              className="lite-button lite-button-sm"
+              style={{
+                backgroundColor: 'white',
+                color: '#667eea',
+                border: 'none'
+              }}
+              onClick={() => {
+                localStorage.setItem('appVersion', 'full');
+                window.location.href = '/';
+              }}
+            >
+              体验新版
+            </button>
+          </div>
+        </div>
+
         {/* 月历 */}
         <div className="lite-card">
           <div className="calendar">

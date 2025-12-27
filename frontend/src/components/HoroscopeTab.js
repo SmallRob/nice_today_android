@@ -3,10 +3,11 @@ import { storageManager } from '../utils/storageManager';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { Card } from './PageLayout';
 
-const HoroscopeTab = () => {
-  // 使用新的配置上下文
-  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
-  
+const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, viewMode = 'daily' }) => {
+  // 使用新的配置上下文，优先使用传入的参数
+  const { currentConfig: contextConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+  const currentConfig = propCurrentConfig || contextConfig;
+
   // 状态管理
   const [userHoroscope, setUserHoroscope] = useState('');
   const [isTemporaryHoroscope, setIsTemporaryHoroscope] = useState(false);
@@ -31,145 +32,241 @@ const HoroscopeTab = () => {
   // 星座数据
   const getHoroscopeData = () => {
     return [
-      { 
-        name: '白羊座', 
+      {
+        name: '白羊座',
         dateRange: '3月21日 - 4月19日',
         element: '火象',
         icon: '♈',
         color: '#fc4a1a',
         traits: '勇敢、冲动、领导力',
+        traitsDetail: {
+          personality: '充满活力和冒险精神，勇于面对挑战，天生的领导者',
+          love: '热情直白，喜欢主动追求，对感情忠诚投入',
+          career: '具有开创精神，适合创业和管理岗位，需要学会团队协作',
+          health: '精力旺盛但容易冲动，注意控制情绪，避免过度劳累',
+          strengths: ['勇敢果断', '积极主动', '领导力强', '富有激情'],
+          weaknesses: ['缺乏耐心', '容易冲动', '脾气急躁', '不够细心']
+        },
         luckyColor: ['#FF6B6B', '#FF8E53'],
         luckyNumber: [1, 9],
         compatible: ['狮子座', '射手座', '双子座'],
         incompatible: ['巨蟹座', '天蝎座', '摩羯座']
       },
-      { 
-        name: '金牛座', 
+      {
+        name: '金牛座',
         dateRange: '4月20日 - 5月20日',
         element: '土象',
         icon: '♉',
         color: '#f7b733',
         traits: '稳重、务实、有耐心',
+        traitsDetail: {
+          personality: '踏实稳重，追求安全感，重视物质和精神双重满足',
+          love: '重视稳定关系，感情深沉专一，需要时间培养感情',
+          career: '适合金融、艺术等需要耐心和审美的领域，注重实际回报',
+          health: '体质较强但需要注意饮食，容易贪吃，适度运动很重要',
+          strengths: ['踏实可靠', '有耐心', '审美能力强', '理财能力好'],
+          weaknesses: ['固执己见', '过于保守', '贪图享乐', '反应较慢']
+        },
         luckyColor: ['#FFD700', '#FFA500'],
         luckyNumber: [2, 6],
         compatible: ['处女座', '摩羯座', '巨蟹座'],
         incompatible: ['天蝎座', '水瓶座', '狮子座']
       },
-      { 
-        name: '双子座', 
+      {
+        name: '双子座',
         dateRange: '5月21日 - 6月21日',
         element: '风象',
         icon: '♊',
         color: '#667db6',
         traits: '机智、好奇、善变',
+        traitsDetail: {
+          personality: '思维敏捷，好奇心强，善于沟通和适应环境',
+          love: '需要新鲜感，喜欢精神交流，但可能不够专一',
+          career: '适合媒体、销售等需要沟通和创意的工作，多才多艺',
+          health: '神经质，容易焦虑，需要保持心理平衡和充足睡眠',
+          strengths: ['思维敏捷', '沟通能力强', '适应力强', '多才多艺'],
+          weaknesses: ['缺乏恒心', '善变', '缺乏深度', '容易分心']
+        },
         luckyColor: ['#4ECDC4', '#44A08D'],
         luckyNumber: [3, 5],
         compatible: ['天秤座', '水瓶座', '白羊座'],
         incompatible: ['处女座', '双鱼座', '射手座']
       },
-      { 
-        name: '巨蟹座', 
+      {
+        name: '巨蟹座',
         dateRange: '6月22日 - 7月22日',
         element: '水象',
         icon: '♋',
         color: '#2193b0',
         traits: '敏感、顾家、有同情心',
+        traitsDetail: {
+          personality: '情感丰富，重视家庭，具有强烈的安全感和保护欲',
+          love: '情感深沉，渴望稳定关系，极其重视家庭和情感联系',
+          career: '适合教育、护理、餐饮等关爱他人的领域，工作认真负责',
+          health: '情绪影响健康，容易消化不良，需要保持情绪稳定',
+          strengths: ['富有同情心', '顾家', '直觉强', '记忆力好'],
+          weaknesses: ['过于敏感', '情绪化', '缺乏安全感', '过于保护']
+        },
         luckyColor: ['#64B3F4', '#4A90E2'],
         luckyNumber: [2, 7],
         compatible: ['天蝎座', '双鱼座', '金牛座'],
         incompatible: ['白羊座', '天秤座', '摩羯座']
       },
-      { 
-        name: '狮子座', 
+      {
+        name: '狮子座',
         dateRange: '7月23日 - 8月22日',
         element: '火象',
         icon: '♌',
         color: '#ff9a44',
         traits: '自信、慷慨、有魅力',
+        traitsDetail: {
+          personality: '自信阳光，具有王者风范，渴望被认可和赞美',
+          love: '热情浪漫，喜欢被宠爱的感觉，对感情慷慨大方',
+          career: '适合领导岗位和演艺领域，具有极强的表现力和号召力',
+          health: '心脏和循环系统需要注意，保持适度运动，避免过度劳累',
+          strengths: ['自信大方', '领导力强', '慷慨热情', '表现力强'],
+          weaknesses: ['自负', '爱面子', '霸道', '过于追求荣耀']
+        },
         luckyColor: ['#FFD700', '#FFA500'],
         luckyNumber: [1, 5],
         compatible: ['白羊座', '射手座', '双子座'],
         incompatible: ['天蝎座', '水瓶座', '金牛座']
       },
-      { 
-        name: '处女座', 
+      {
+        name: '处女座',
         dateRange: '8月23日 - 9月22日',
         element: '土象',
         icon: '♍',
         color: '#8e9eab',
         traits: '细致、完美主义、实用',
+        traitsDetail: {
+          personality: '注重细节，追求完美，具有强烈的服务意识和责任感',
+          love: '谨慎认真，追求完美关系，对伴侣要求较高但忠诚专一',
+          career: '适合数据分析、医疗、编辑等需要细心和专业的工作',
+          health: '容易神经紧张和消化问题，需要放松心情，注意饮食规律',
+          strengths: ['细心认真', '完美主义', '分析能力强', '乐于助人'],
+          weaknesses: ['过于挑剔', '焦虑紧张', '过于苛刻', '缺乏弹性']
+        },
         luckyColor: ['#96CEB4', '#FFEAA7'],
         luckyNumber: [3, 6],
         compatible: ['金牛座', '摩羯座', '巨蟹座'],
         incompatible: ['双子座', '射手座', '双鱼座']
       },
-      { 
-        name: '天秤座', 
+      {
+        name: '天秤座',
         dateRange: '9月23日 - 10月23日',
         element: '风象',
         icon: '♎',
         color: '#dda0dd',
         traits: '优雅、公正、追求和谐',
+        traitsDetail: {
+          personality: '追求平衡与和谐，具有良好的审美能力和外交手腕',
+          love: '浪漫优雅，重视伴侣关系，需要公平和相互尊重的感情',
+          career: '适合法律、公关、艺术等需要平衡和审美的工作',
+          health: '腰部和肾脏需要注意，保持规律作息，避免压力过大',
+          strengths: ['优雅公正', '善于社交', '审美能力强', '外交手腕好'],
+          weaknesses: ['犹豫不决', '过于依赖', '逃避冲突', '过于追求完美']
+        },
         luckyColor: ['#FF6B6B', '#FF8E53'],
         luckyNumber: [6, 9],
         compatible: ['双子座', '水瓶座', '狮子座'],
         incompatible: ['巨蟹座', '摩羯座', '白羊座']
       },
-      { 
-        name: '天蝎座', 
+      {
+        name: '天蝎座',
         dateRange: '10月24日 - 11月22日',
         element: '水象',
         icon: '♏',
         color: '#8A2BE2',
         traits: '神秘、强烈、洞察力',
+        traitsDetail: {
+          personality: '神秘深沉，具有强烈的意志力和敏锐的洞察力',
+          love: '情感炽烈，占有欲强，对感情极度忠诚但也容易嫉妒',
+          career: '适合侦探、心理学、医学等需要洞察力的专业领域',
+          health: '生殖系统和情绪需要注意，学会释放压力，避免极端情绪',
+          strengths: ['洞察力强', '意志坚定', '忠诚可靠', '神秘魅力'],
+          weaknesses: ['多疑', '报复心强', '占有欲强', '过于极端']
+        },
         luckyColor: ['#DA70D6', '#BA55D3'],
         luckyNumber: [4, 8],
         compatible: ['巨蟹座', '双鱼座', '处女座'],
         incompatible: ['狮子座', '金牛座', '双子座']
       },
-      { 
-        name: '射手座', 
+      {
+        name: '射手座',
         dateRange: '11月23日 - 12月21日',
         element: '火象',
         icon: '♐',
         color: '#32CD32',
         traits: '自由、乐观、爱冒险',
+        traitsDetail: {
+          personality: '乐观开朗，追求自由，具有探险精神和哲学思维',
+          love: '喜欢自由空间，感情直接坦诚，重视精神契合而非束缚',
+          career: '适合旅游、教育、出版等需要自由和创意的工作',
+          health: '臀部和腿部需要注意，避免过度冒险，保持运动量',
+          strengths: ['乐观开朗', '自由奔放', '有远见', '幽默风趣'],
+          weaknesses: ['粗心大意', '不负责任', '缺乏耐心', '言辞过于直率']
+        },
         luckyColor: ['#FFD700', '#FFA500'],
         luckyNumber: [3, 9],
         compatible: ['白羊座', '狮子座', '天秤座'],
         incompatible: ['处女座', '双鱼座', '巨蟹座']
       },
-      { 
-        name: '摩羯座', 
+      {
+        name: '摩羯座',
         dateRange: '12月22日 - 1月19日',
         element: '土象',
         icon: '♑',
         color: '#708090',
         traits: '实际、有责任心、目标明确',
+        traitsDetail: {
+          personality: '踏实务实，具有强烈的责任感和野心，追求事业成就',
+          love: '感情谨慎，重视稳定关系，需要时间建立信任但忠诚专一',
+          career: '适合管理和企业高管，具有极强的执行力和组织能力',
+          health: '骨骼和皮肤需要注意，避免过度劳累，保持规律生活',
+          strengths: ['责任心强', '目标明确', '执行力强', '坚韧不拔'],
+          weaknesses: ['过于严肃', '固执', '压抑情感', '功利心重']
+        },
         luckyColor: ['#808080', '#A9A9A9'],
         luckyNumber: [4, 8],
         compatible: ['金牛座', '处女座', '巨蟹座'],
         incompatible: ['白羊座', '天秤座', '狮子座']
       },
-      { 
-        name: '水瓶座', 
+      {
+        name: '水瓶座',
         dateRange: '1月20日 - 2月18日',
         element: '风象',
         icon: '♒',
         color: '#1e90ff',
         traits: '创新、独立、人道主义',
+        traitsDetail: {
+          personality: '独立创新，思维超前，具有强烈的人道主义精神',
+          love: '重视精神交流，需要自由空间，不喜欢过于束缚的关系',
+          career: '适合科技、创新、人道主义等领域，具有前瞻性思维',
+          health: '循环系统和神经需要注意，保持规律作息，避免过度思考',
+          strengths: ['创新思维', '独立自主', '人道主义', '友善友善'],
+          weaknesses: ['过于理想化', '疏离感强', '固执己见', '缺乏情感表达']
+        },
         luckyColor: ['#00BFFF', '#1E90FF'],
         luckyNumber: [4, 7],
         compatible: ['双子座', '天秤座', '射手座'],
         incompatible: ['金牛座', '天蝎座', '巨蟹座']
       },
-      { 
-        name: '双鱼座', 
+      {
+        name: '双鱼座',
         dateRange: '2月19日 - 3月20日',
         element: '水象',
         icon: '♓',
         color: '#9370DB',
         traits: '浪漫、富有想象力、直觉强',
+        traitsDetail: {
+          personality: '浪漫敏感，富有想象力和艺术天赋，直觉敏锐',
+          love: '浪漫多情，重视情感联系，容易为爱情牺牲奉献',
+          career: '适合艺术、音乐、文学等创意领域，具有丰富的想象力',
+          health: '免疫系统和脚部需要注意，避免过度沉迷幻想，保持现实感',
+          strengths: ['富有想象力', '直觉强', '艺术天赋', '富有同情心'],
+          weaknesses: ['过于理想化', '逃避现实', '缺乏自信', '过于敏感']
+        },
         luckyColor: ['#9370DB', '#8A2BE2'],
         luckyNumber: [3, 7],
         compatible: ['巨蟹座', '天蝎座', '摩羯座'],
@@ -286,99 +383,115 @@ const HoroscopeTab = () => {
       // 获取星座数据
       const horoscopeData = getHoroscopeData();
       const userData = horoscopeData.find(h => h.name === userHoroscope);
-      
+
       if (!userData) {
         throw new Error('未找到星座数据');
       }
 
-      // 简化的每日运势算法
-      // 生成随机的月亮星座 (简化版)
-      const moonHoroscopes = [...horoscopeData];
-      const todayMoonHoroscope = moonHoroscopes[Math.floor(Math.random() * moonHoroscopes.length)];
-      
-      // 计算运势分数
-      let lifeScore = 0;
-      let careerScore = 0;
-      let healthScore = 0;
-      let loveScore = 0;
-      
-      // 元素相容性规则
-      const elements = {
-        '火象': ['火象', '风象'], // 相生
-        '土象': ['土象', '水象'], // 相生
-        '风象': ['风象', '火象'], // 相生
-        '水象': ['水象', '土象']  // 相生
+      // 根据不同的 viewMode 计算运势分数
+      const calculateScores = () => {
+        let lifeScore = 0;
+        let careerScore = 0;
+        let healthScore = 0;
+        let loveScore = 0;
+
+        // 元素相容性规则
+        const elements = {
+          '火象': ['火象', '风象'],
+          '土象': ['土象', '水象'],
+          '风象': ['风象', '火象'],
+          '水象': ['水象', '土象']
+        };
+
+        // 根据星座特性强化
+        switch (userHoroscope) {
+          case '白羊座':
+            careerScore += 0.5;
+            break;
+          case '金牛座':
+            careerScore += 0.5;
+            break;
+          case '双子座':
+            lifeScore += 0.5;
+            break;
+          case '巨蟹座':
+            loveScore += 0.5;
+            break;
+          case '狮子座':
+            careerScore += 0.5;
+            break;
+          case '处女座':
+            healthScore += 0.5;
+            break;
+          case '天秤座':
+            loveScore += 0.5;
+            break;
+          case '天蝎座':
+            loveScore += 0.5;
+            break;
+          case '射手座':
+            lifeScore += 0.5;
+            break;
+          case '摩羯座':
+            careerScore += 0.5;
+            break;
+          case '水瓶座':
+            lifeScore += 0.5;
+            break;
+          case '双鱼座':
+            loveScore += 0.5;
+            break;
+          default:
+            break;
+        }
+
+        // 根据 viewMode 调整分数
+        if (viewMode === 'daily') {
+          // 每日运势 - 基础分数
+          const moonHoroscopes = [...horoscopeData];
+          const todayMoonHoroscope = moonHoroscopes[Math.floor(Math.random() * moonHoroscopes.length)];
+
+          if (userData.element === todayMoonHoroscope.element) {
+            lifeScore += 1;
+            careerScore += 1;
+            healthScore += 1;
+            loveScore += 1;
+          } else if (elements[userData.element]?.includes(todayMoonHoroscope.element)) {
+            lifeScore += 0.5;
+            careerScore += 0.5;
+            healthScore += 0.5;
+            loveScore += 0.5;
+          } else {
+            lifeScore -= 0.5;
+            careerScore -= 0.5;
+            healthScore -= 0.5;
+            loveScore -= 0.5;
+          }
+        } else if (viewMode === 'weekly') {
+          // 本周运势 - 综合几天的情况
+          lifeScore += 0.8;
+          careerScore += 0.7;
+          healthScore += 0.6;
+          loveScore += 0.9;
+        } else if (viewMode === 'monthly') {
+          // 本月运势 - 更长远的趋势
+          lifeScore += 0.6;
+          careerScore += 0.8;
+          healthScore += 0.5;
+          loveScore += 0.7;
+        }
+
+        // 限制分数范围在 -2 到 +2 之间
+        lifeScore = Math.max(-2, Math.min(2, lifeScore));
+        careerScore = Math.max(-2, Math.min(2, careerScore));
+        healthScore = Math.max(-2, Math.min(2, healthScore));
+        loveScore = Math.max(-2, Math.min(2, loveScore));
+
+        return { lifeScore, careerScore, healthScore, loveScore };
       };
-      
-      // 判断元素关系
-      if (userData.element === todayMoonHoroscope.element) {
-        // 同元素 +1
-        lifeScore += 1;
-        careerScore += 1;
-        healthScore += 1;
-        loveScore += 1;
-      } else if (elements[userData.element]?.includes(todayMoonHoroscope.element)) {
-        // 相生 +0.5
-        lifeScore += 0.5;
-        careerScore += 0.5;
-        healthScore += 0.5;
-        loveScore += 0.5;
-      } else {
-        // 相克 -0.5
-        lifeScore -= 0.5;
-        careerScore -= 0.5;
-        healthScore -= 0.5;
-        loveScore -= 0.5;
-      }
-      
-      // 根据星座特性强化
-      switch (userHoroscope) {
-        case '白羊座':
-          careerScore += 0.5; // 行动力强
-          break;
-        case '金牛座':
-          careerScore += 0.5; // 务实稳定
-          break;
-        case '双子座':
-          lifeScore += 0.5; // 沟通能力强
-          break;
-        case '巨蟹座':
-          loveScore += 0.5; // 情感丰富
-          break;
-        case '狮子座':
-          careerScore += 0.5; // 领导力强
-          break;
-        case '处女座':
-          healthScore += 0.5; // 注重健康
-          break;
-        case '天秤座':
-          loveScore += 0.5; // 追求和谐
-          break;
-        case '天蝎座':
-          loveScore += 0.5; // 情感深刻
-          break;
-        case '射手座':
-          lifeScore += 0.5; // 自由乐观
-          break;
-        case '摩羯座':
-          careerScore += 0.5; // 目标明确
-          break;
-        case '水瓶座':
-          lifeScore += 0.5; // 创新独立
-          break;
-        case '双鱼座':
-          loveScore += 0.5; // 浪漫直觉
-          break;
-        default:
-          break;
-      }
-      
-      // 限制分数范围在 -2 到 +2 之间
-      lifeScore = Math.max(-2, Math.min(2, lifeScore));
-      careerScore = Math.max(-2, Math.min(2, careerScore));
-      healthScore = Math.max(-2, Math.min(2, healthScore));
-      loveScore = Math.max(-2, Math.min(2, loveScore));
-      
+
+      const { lifeScore, careerScore, healthScore, loveScore } = calculateScores();
+
       // 生成运势描述
       const getScoreDescription = (score) => {
         if (score >= 1.5) return '极佳';
@@ -387,14 +500,18 @@ const HoroscopeTab = () => {
         if (score >= -1.5) return '较差';
         return '很差';
       };
-      
+
       const getTrend = (score) => {
         if (score >= 1) return '上升';
         if (score >= 0) return '平稳';
         if (score >= -1) return '下降';
         return '低迷';
       };
-      
+
+      // 生成月亮星座或其他信息
+      const moonHoroscopes = [...horoscopeData];
+      const todayMoonHoroscope = moonHoroscopes[Math.floor(Math.random() * moonHoroscopes.length)];
+
       const mockData = {
         horoscopeInfo: {
           name: userData.name,
@@ -431,9 +548,10 @@ const HoroscopeTab = () => {
           compatibleSigns: userData.compatible,
           incompatibleSigns: userData.incompatible,
           todayMoonSign: todayMoonHoroscope.name
-        }
+        },
+        viewMode: viewMode // 记录当前视图模式
       };
-      
+
       setHoroscopeGuidance(mockData);
     } catch (error) {
       console.error('加载星座运势失败:', error);
@@ -441,7 +559,7 @@ const HoroscopeTab = () => {
     } finally {
       setLoading(false);
     }
-  }, [userHoroscope]);
+  }, [userHoroscope, viewMode]);
 
   // 初始化组件
   useEffect(() => {
@@ -577,15 +695,16 @@ const HoroscopeTab = () => {
 
     const { name, element, dateRange, icon, traits } = horoscopeGuidance.horoscopeInfo;
     const horoscopeData = getHoroscopeData().find(h => h.name === name);
-    
+    const traitsDetail = horoscopeData?.traitsDetail;
+
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
         <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
           <span className="text-3xl mr-3">{icon}</span>
           {name} {element}
         </h3>
-        
-        <div className="grid md:grid-cols-2 gap-4">
+
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
           <div>
             <p className="text-gray-700 dark:text-gray-200 mb-3">
               <span className="font-semibold">日期范围：</span>
@@ -597,7 +716,7 @@ const HoroscopeTab = () => {
             </p>
           </div>
           <div className="flex items-center justify-center">
-            <div 
+            <div
               className="w-24 h-24 rounded-full flex items-center justify-center text-4xl"
               style={{ backgroundColor: `${horoscopeData?.color}20`, color: horoscopeData?.color }}
             >
@@ -605,6 +724,85 @@ const HoroscopeTab = () => {
             </div>
           </div>
         </div>
+
+        {/* 增强的星座特质详情 */}
+        {traitsDetail && (
+          <div className="mt-6 space-y-4">
+            {/* 性格描述 */}
+            <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-pink-200 dark:border-pink-700">
+              <h4 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                <span className="mr-2">✨</span> 性格详解
+              </h4>
+              <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
+                {traitsDetail.personality}
+              </p>
+            </div>
+
+            {/* 维度详情 */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
+                <h4 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                  <span className="mr-2">❤️</span> 感情观
+                </h4>
+                <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
+                  {traitsDetail.love}
+                </p>
+              </div>
+
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
+                <h4 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                  <span className="mr-2">💼</span> 事业观
+                </h4>
+                <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
+                  {traitsDetail.career}
+                </p>
+              </div>
+
+              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 border border-orange-200 dark:border-orange-700">
+                <h4 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                  <span className="mr-2">💚</span> 健康提示
+                </h4>
+                <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
+                  {traitsDetail.health}
+                </p>
+              </div>
+
+              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
+                <h4 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center">
+                  <span className="mr-2">💪</span> 优缺点分析
+                </h4>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs text-green-600 dark:text-green-400 font-semibold mb-1">优势：</p>
+                    <div className="flex flex-wrap gap-1">
+                      {traitsDetail.strengths.map((strength, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs rounded-full"
+                        >
+                          {strength}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-red-600 dark:text-red-400 font-semibold mb-1">劣势：</p>
+                    <div className="flex flex-wrap gap-1">
+                      {traitsDetail.weaknesses.map((weakness, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 text-xs rounded-full"
+                        >
+                          {weakness}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -612,9 +810,9 @@ const HoroscopeTab = () => {
   // 渲染每日运势卡片
   const renderDailyForecast = () => {
     if (!horoscopeGuidance?.dailyForecast) return null;
-  
+
     const { life, career, health, love } = horoscopeGuidance.dailyForecast;
-      
+
     // 根据分数设置颜色
     const getScoreColor = (score) => {
       if (score >= 1) return 'text-green-500';
@@ -622,21 +820,35 @@ const HoroscopeTab = () => {
       if (score >= -1) return 'text-yellow-500';
       return 'text-red-500';
     };
-      
+
     const getScoreBg = (score) => {
       if (score >= 1) return 'bg-green-100 dark:bg-green-900 dark:bg-opacity-30';
       if (score >= 0) return 'bg-blue-100 dark:bg-blue-900 dark:bg-opacity-30';
       if (score >= -1) return 'bg-yellow-100 dark:bg-yellow-900 dark:bg-opacity-30';
       return 'bg-red-100 dark:bg-red-900 dark:bg-opacity-30';
     };
-  
+
+    // 根据视图模式显示不同的标题
+    const getTitle = () => {
+      switch (viewMode) {
+        case 'daily':
+          return `今日运势 (${formatDateLocal(selectedDate)})`;
+        case 'weekly':
+          return '本周运势';
+        case 'monthly':
+          return '本月运势';
+        default:
+          return '运势';
+      }
+    };
+
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 mb-5 border border-gray-200 dark:border-gray-700">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-5 flex items-center">
           <span className="mr-2 text-lg">🔮</span>
-          今日运势 ({formatDateLocal(selectedDate)})
+          {getTitle()}
         </h3>
-          
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 生活运势 */}
           <div className={`${getScoreBg(life.score)} rounded-lg p-4`}>
@@ -655,7 +867,7 @@ const HoroscopeTab = () => {
               趋势：{life.trend}
             </p>
           </div>
-          
+
           {/* 事业运势 */}
           <div className={`${getScoreBg(career.score)} rounded-lg p-4`}>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
@@ -673,7 +885,7 @@ const HoroscopeTab = () => {
               趋势：{career.trend}
             </p>
           </div>
-          
+
           {/* 健康运势 */}
           <div className={`${getScoreBg(health.score)} rounded-lg p-4`}>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
@@ -691,7 +903,7 @@ const HoroscopeTab = () => {
               趋势：{health.trend}
             </p>
           </div>
-          
+
           {/* 爱情运势 */}
           <div className={`${getScoreBg(love.score)} rounded-lg p-4`}>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
@@ -721,13 +933,27 @@ const HoroscopeTab = () => {
     const { luckyColors, luckyNumbers, compatibleSigns, todayMoonSign } = horoscopeGuidance.recommendations;
     const horoscopeData = getHoroscopeData();
 
+    // 根据视图模式显示不同的标题
+    const getTitle = () => {
+      switch (viewMode) {
+        case 'daily':
+          return '今日建议';
+        case 'weekly':
+          return '本周建议';
+        case 'monthly':
+          return '本月建议';
+        default:
+          return '建议';
+      }
+    };
+
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
         <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
           <span className="mr-3">✨</span>
-          今日建议
+          {getTitle()}
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 幸运颜色 */}
           <div>
@@ -737,7 +963,7 @@ const HoroscopeTab = () => {
             <div className="flex flex-wrap gap-2">
               {luckyColors.map((color, index) => (
                 <div key={index} className="flex items-center">
-                  <div 
+                  <div
                     className="w-6 h-6 rounded-full mr-2 border border-gray-300 dark:border-gray-600"
                     style={{ backgroundColor: color }}
                   ></div>
@@ -746,7 +972,7 @@ const HoroscopeTab = () => {
               ))}
             </div>
           </div>
-          
+
           {/* 幸运数字 */}
           <div>
             <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-3 text-lg flex items-center">
@@ -754,8 +980,8 @@ const HoroscopeTab = () => {
             </h4>
             <div className="flex flex-wrap gap-2">
               {luckyNumbers.map((num, index) => (
-                <span 
-                  key={index} 
+                <span
+                  key={index}
                   className="px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-gray-700 dark:text-white"
                 >
                   {num}
@@ -763,7 +989,7 @@ const HoroscopeTab = () => {
               ))}
             </div>
           </div>
-          
+
           {/* 今日月亮星座 */}
           <div>
             <h4 className="font-semibold text-indigo-800 dark:text-indigo-200 mb-3 text-lg flex items-center">
@@ -776,7 +1002,7 @@ const HoroscopeTab = () => {
               <span className="text-gray-700 dark:text-white">{todayMoonSign}</span>
             </div>
           </div>
-          
+
           {/* 相容星座 */}
           <div>
             <h4 className="font-semibold text-green-800 dark:text-green-200 mb-3 text-lg flex items-center">
@@ -784,8 +1010,8 @@ const HoroscopeTab = () => {
             </h4>
             <div className="flex flex-wrap gap-2">
               {compatibleSigns.map((sign, index) => (
-                <span 
-                  key={index} 
+                <span
+                  key={index}
                   className="px-3 py-1 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-white flex items-center"
                 >
                   <span className="mr-1">{horoscopeData.find(h => h.name === sign)?.icon || ''}</span>
@@ -890,23 +1116,25 @@ const HoroscopeTab = () => {
             })}
           </div>
 
-          {/* 日期选择器 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              查看指定日期的运势
-            </label>
-            <input
-              type="date"
-              value={selectedDate ? formatDateLocal(selectedDate) : ''}
-              onChange={(e) => {
-                const newDate = e.target.value ? new Date(e.target.value) : new Date();
-                setSelectedDate(newDate);
-                // 日期变更时标记需要重新加载数据
-                setDataLoaded(false);
-              }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-            />
-          </div>
+          {/* 日期选择器 - 仅在每日模式下显示 */}
+          {viewMode === 'daily' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
+                查看指定日期的运势
+              </label>
+              <input
+                type="date"
+                value={selectedDate ? formatDateLocal(selectedDate) : ''}
+                onChange={(e) => {
+                  const newDate = e.target.value ? new Date(e.target.value) : new Date();
+                  setSelectedDate(newDate);
+                  // 日期变更时标记需要重新加载数据
+                  setDataLoaded(false);
+                }}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+              />
+            </div>
+          )}
 
           {/* 当前选择显示 */}
           {userHoroscope && (
@@ -915,7 +1143,7 @@ const HoroscopeTab = () => {
                 <p className="text-blue-800 dark:text-blue-200 text-sm mb-2 md:mb-0">
                   当前选择：<span className="font-semibold">{userHoroscope}</span>
                   {isTemporaryHoroscope && <span className="ml-2 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs px-2 py-1 rounded">临时</span>}
-                  {selectedDate && (
+                  {viewMode === 'daily' && selectedDate && (
                     <span className="ml-2">
                       查看日期：<span className="font-semibold">{formatDateLocal(selectedDate)}</span>
                     </span>
@@ -929,7 +1157,7 @@ const HoroscopeTab = () => {
                   )}
                 </p>
                 {isTemporaryHoroscope && (
-                  <button 
+                  <button
                     onClick={handleRestoreUserHoroscope}
                     className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition-colors"
                   >

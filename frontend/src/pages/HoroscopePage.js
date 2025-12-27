@@ -3,7 +3,7 @@
  * 复制原星座运势页面作为基础
  * 保留并优化星座核心功能
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import HoroscopeTab from '../components/HoroscopeTab';
@@ -14,8 +14,8 @@ const HoroscopePage = () => {
 
   // 状态管理
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedTab, setSelectedTab] = useState('daily');
+  const [error, setError] = useState(null);
 
   // 初始化
   useEffect(() => {

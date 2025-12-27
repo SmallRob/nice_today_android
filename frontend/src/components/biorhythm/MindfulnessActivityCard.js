@@ -20,9 +20,10 @@ const MindfulnessActivityCard = ({
           ? 'border-green-400 dark:border-green-500/70 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/20'
           : 'border-gray-100 dark:border-gray-700/50 hover:border-indigo-200 dark:hover:border-indigo-700'
         }
+        w-full max-w-full
       `}
     >
-      <div className="flex items-center">
+      <div className="flex items-center w-full max-w-full">
         {/* 完成状态复选框 */}
         <Checkbox checked={isCompleted} />
         
@@ -43,8 +44,8 @@ const MindfulnessActivityCard = ({
 const Checkbox = ({ checked }) => {
   return (
     <div className={`
-      flex-shrink-0 w-5 h-5 md:w-6 md:h-6 rounded-md border-2 
-      mr-2 md:mr-3 flex items-center justify-center 
+      flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-md border-2 
+      mr-2 flex items-center justify-center 
       transition-all duration-200
       ${checked
         ? 'bg-green-500 border-green-500'
@@ -53,7 +54,7 @@ const Checkbox = ({ checked }) => {
     `}>
       {checked && (
         <svg 
-          className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" 
+          className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -74,9 +75,9 @@ const Checkbox = ({ checked }) => {
 const ActivityIcon = ({ icon, isCompleted }) => {
   return (
     <div className={`
-      flex-shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-xl 
-      flex items-center justify-center mr-2 md:mr-3 
-      text-lg md:text-xl
+      flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-xl 
+      flex items-center justify-center mr-2 
+      text-base sm:text-lg
       ${isCompleted ? 'opacity-50' : ''}
     `}>
       {icon}
@@ -87,8 +88,8 @@ const ActivityIcon = ({ icon, isCompleted }) => {
 // 活动信息子组件
 const ActivityInfo = ({ activity, isCompleted }) => {
   return (
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center justify-between mb-0.5 md:mb-1">
+    <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex items-center justify-between mb-0.5 md:mb-1 flex-wrap">
         <h4 className={`
           text-xs md:text-sm font-semibold truncate
           ${isCompleted 
@@ -99,7 +100,7 @@ const ActivityInfo = ({ activity, isCompleted }) => {
           {activity.title}
         </h4>
         {!isCompleted && (
-          <span className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200">
+          <span className="text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 whitespace-nowrap ml-2">
             {activity.duration}
           </span>
         )}
@@ -110,11 +111,12 @@ const ActivityInfo = ({ activity, isCompleted }) => {
           ? 'text-gray-400 dark:text-gray-100' 
           : 'text-gray-600 dark:text-gray-100'
         }
+        mb-1
       `}>
         {activity.description}
       </p>
       {!isCompleted && activity.positive && (
-        <p className="text-[10px] md:text-xs text-green-600 dark:text-green-300 mt-1 md:mt-1.5 font-medium">
+        <p className="text-[10px] md:text-xs text-green-600 dark:text-green-300 font-medium truncate">
           ✨ {activity.positive}
         </p>
       )}
@@ -125,10 +127,10 @@ const ActivityInfo = ({ activity, isCompleted }) => {
 // 完成标记子组件
 const CompletionMark = () => {
   return (
-    <div className="flex-shrink-0 ml-2 md:ml-3">
-      <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-green-500 flex items-center justify-center shadow-md">
+    <div className="flex-shrink-0 ml-2">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-green-500 flex items-center justify-center shadow-md">
         <svg 
-          className="w-4 h-4 md:w-5 md:h-5 text-white" 
+          className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"

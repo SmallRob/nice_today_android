@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BiorhythmIcon } from './IconLibrary';
+import { useNavigate } from 'react-router-dom';
 import { useTabPerformance } from '../utils/tabPerformanceMonitor';
 import { isAndroidWebView, isIOSWebView } from '../utils/androidWebViewCompat';
 import { globalErrorHandler, createDetailedErrorReport } from '../utils/errorHandler';
@@ -181,6 +182,7 @@ const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
 };
 
 const BiorhythmDashboard = ({ appInfo = {} }) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false); // 改为false，立即显示UI
   const [activeTab, setActiveTab] = useState('biorhythm');
   const [serviceStatus, setServiceStatus] = useState({
@@ -567,8 +569,8 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
         </div>
 
         <div className="container mx-auto px-4 py-4 relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 sm:space-x-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
+            <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-0">
               {/* 应用图标 - 增强交互效果 */}
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden backdrop-blur-sm transition-all duration-300 hover:bg-opacity-30 hover:scale-105 cursor-pointer group">
                 <img
@@ -594,9 +596,9 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 </p>
               </div>
             </div>
-            
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3">
-              {/* 动态状态徽章 */}
+
+            {/* 动态状态徽章和版本信息放在右下角 */}
+            <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
                 <span className="relative flex h-2 w-2 sm:h-3 sm:w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -606,15 +608,26 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                   实时更新
                 </span>
               </div>
-              
-              {/* 版本信息 */}
-              <div className="hidden sm:block">
-                <span className="text-xs text-blue-100 opacity-75">
-                  v1.6
-                </span>
-              </div>
+
+              <span className="text-xs text-blue-100 opacity-75">
+                v1.6
+              </span>
             </div>
           </div>
+
+          {/* 体验新版入口 - 右上角 */}
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="absolute top-2 right-12 sm:right-2 text-xs md:text-sm text-white/80 hover:text-white hover:underline transition-all duration-200 flex items-center space-x-1 bg-black/10 hover:bg-black/20 px-2 py-1 rounded-md z-20"
+            title="体验新版炫彩版主页"
+            style={{ backdropFilter: 'blur(4px)' }}
+          >
+            <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+            <span className="hidden sm:inline">体验新版</span>
+            <span className="inline sm:hidden">新版</span>
+          </button>
         </div>
       </div>
 
@@ -657,8 +670,8 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
         </div>
       </div>
 
-      {/* 内容展示区域 - 简化布局，移除不必要的容器嵌套 */}
-      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized -webkit-overflow-scrolling-touch">
+      {/* 内容展示区域 - 简化布局，移除不必要的容器嵌套，优化滚动性能 */}
+      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized -webkit-overflow-scrolling-touch touch-pan-y">
         <div className="container mx-auto px-4 py-4 h-full">
           <div className="mb-4 h-full">
             {/* 错误显示 */}

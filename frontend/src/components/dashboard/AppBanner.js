@@ -3,8 +3,16 @@
  * 显示应用名称和图标
  */
 import niceDayImage from '../../images/nice_day.png';
+import { useNavigate } from 'react-router-dom';
 
 const AppBanner = () => {
+  const navigate = useNavigate();
+
+  const handleSwitchToOldVersion = () => {
+    // 跳转到旧版炫彩版主页
+    navigate('/old-dashboard');
+  };
+
   return (
     <div className="app-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0">
       {/* 背景渐变装饰 */}
@@ -52,6 +60,20 @@ const AppBanner = () => {
             </p>
           </div>
         </div>
+
+        {/* 回到旧版主页链接 - 右上角 */}
+        <button
+          onClick={handleSwitchToOldVersion}
+          className="absolute top-3 right-3 text-xs md:text-sm text-white/80 hover:text-white hover:underline transition-all duration-200 flex items-center space-x-1 bg-black/10 hover:bg-black/20 px-2 py-1 rounded-md z-20"
+          title="回到旧版炫彩版主页"
+          style={{ backdropFilter: 'blur(4px)' }}
+        >
+          <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span className="hidden sm:inline">回到旧版主页</span>
+          <span className="inline sm:hidden">旧版</span>
+        </button>
       </div>
     </div>
   );

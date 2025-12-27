@@ -14,12 +14,22 @@ const { Suspense } = React;
 
 // 懒加载页面组件 - 添加错误处理
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
+const BiorhythmDashboard = React.lazy(() => import('./components/BiorhythmDashboard'));
 const MayaPage = React.lazy(() => import('./pages/MayaPage'));
 const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
 const LifeTrendPage = React.lazy(() => import('./pages/LifeTrendPage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
 const TarotPage = React.lazy(() => import('./pages/TarotPage'));
 const NumerologyPage = React.lazy(() => import('./pages/NumerologyPage'));
+const BiorhythmPage = React.lazy(() => import('./pages/BiorhythmPage'));
+const HoroscopePage = React.lazy(() => import('./pages/HoroscopePage'));
+const BaziPage = React.lazy(() => import('./pages/BaziPage'));
+const MBTITestPage = React.lazy(() => import('./pages/MBTITestPage'));
+const MBTIDetailPage = React.lazy(() => import('./components/MBTIPersonalityTabHome'));
+const EnergyBoostPage = React.lazy(() => import('./pages/EnergyBoostPage'));
+const PeriodTrackerPage = React.lazy(() => import('./pages/PeriodTrackerPage'));
+const ZodiacTraitsPage = React.lazy(() => import('./pages/ZodiacTraitsPage'));
+const ChineseZodiacPage = React.lazy(() => import('./pages/ChineseZodiacPage'));
 const TabNavigation = React.lazy(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -68,12 +78,23 @@ const AppLayout = () => {
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/old-dashboard" element={<BiorhythmDashboard />} />
             <Route path="/maya" element={<MayaPage />} />
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/trend" element={<LifeTrendPage />} />
             <Route path="/tarot" element={<TarotPage />} />
             <Route path="/numerology" element={<NumerologyPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/biorhythm" element={<BiorhythmPage />} />
+            <Route path="/horoscope" element={<HoroscopePage />} />
+            <Route path="/bazi" element={<BaziPage />} />
+            <Route path="/mbti-test" element={<MBTITestPage />} />
+            <Route path="/mbti-detail" element={<MBTIDetailPage />} />
+            <Route path="/energy" element={<EnergyBoostPage />} />
+            <Route path="/period-tracker" element={<PeriodTrackerPage />} />
+            <Route path="/zodiac-traits" element={<ZodiacTraitsPage />} />
+            <Route path="/zodiac-traits/:zodiacName" element={<ZodiacTraitsPage />} />
+            <Route path="/chinese-zodiac" element={<ChineseZodiacPage />} />
           </Routes>
         </SafeSuspense>
       </div>

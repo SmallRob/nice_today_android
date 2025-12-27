@@ -6,14 +6,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import {
-  BaziDataManager,
-  BaziStatus,
-  normalizeBirthInfo
-} from '../utils/baziDataManager';
-import { calculateLiuNianDaYun, calculateMonthlyFortune } from '../utils/baziHelper';
+import { normalizeBirthInfo } from '../utils/baziDataManager';
+import { calculateLiuNianDaYun, getMonthlyBaziFortune, calculateDailyEnergy } from '../utils/baziHelper';
 import { Solar } from 'lunar-javascript';
-import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 
 const BaziPage = () => {
   const { theme } = useTheme();
@@ -23,11 +18,10 @@ const BaziPage = () => {
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState(null);
-  const [baziLoadStatus, setBaziLoadStatus] = useState(BaziStatus.LOADING);
-  const [baziData, setBaziData] = useState(null);
   const [lunarData, setLunarData] = useState(null);
   const [liuNianData, setLiuNianData] = useState(null);
   const [monthlyFortune, setMonthlyFortune] = useState(null);
+  const [dailyEnergyData, setDailyEnergyData] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
@@ -46,9 +40,42 @@ const BaziPage = () => {
       // 规范化出生信息
       const birthInfo = normalizeBirthInfo(currentConfig);
 
+      // 从字符串格式解析日期和时间
+      let year, month, day, hour;
+
+      try {
+        // 解析出生日期 (格式: YYYY-MM-DD)
+        const dateParts = birthInfo.birthDate.split('-');
+        year = parseInt(dateParts[0]);
+        month = parseInt(dateParts[1]);
+        day = parseInt(dateParts[2]);
+
+        // 解析出生时间 (格式: HH:mm)，默认使用 12:00
+        const timeParts = birthInfo.birthTime.split(':');
+        hour = timeParts.length >= 1 ? parseInt(timeParts[0]) : 12;
+      } catch (parseError) {
+        // 如果解析失败，使用默认值
+        console.warn('日期时间解析失败，使用默认值:', parseError);
+        year = 1990;
+        month = 1;
+        day = 1;
+        hour = 12;
+      }
+
+      // 验证解析结果
+      if (!year || !month || !day) {
+        throw new Error('出生日期解析失败');
+      }
+
+      if (!hour || isNaN(hour)) {
+        hour = 12; // 默认使用 12:00
+        console.log('使用默认出生时间: 12:00');
+      }
+
       // 计算八字数据
-      const solarDate = new Solar(birthInfo.year, birthInfo.month, birthInfo.day, birthInfo.hour);
+      const solarDate = Solar.fromYmdHms(year, month, day, hour, 0, 0);
       const lunar = solarDate.getLunar();
+      const eightChar = lunar.getEightChar();
 
       const lunarData = {
         year: lunar.getYear(),
@@ -58,27 +85,47 @@ const BaziPage = () => {
         yearGanZhi: lunar.getYearInGanZhi(),
         monthGanZhi: lunar.getMonthInGanZhi(),
         dayGanZhi: lunar.getDayInGanZhi(),
-        hourGanZhi: lunar.getHourInGanZhi(),
+        hourGanZhi: lunar.getTimeInGanZhi(),
         zodiac: lunar.getYearShengXiao(),
-        yearXing: lunar.getYearWuXing(),
-        monthXing: lunar.getMonthWuXing(),
-        dayXing: lunar.getDayWuXing(),
-        hourXing: lunar.getHourWuXing()
+        yearXing: eightChar.getYearWuXing(),
+        monthXing: eightChar.getMonthWuXing(),
+        dayXing: eightChar.getDayWuXing(),
+        hourXing: eightChar.getTimeWuXing()
       };
 
       setLunarData(lunarData);
 
       // 计算流年大运
-      const liuNian = calculateLiuNianDaYun(birthInfo.year, birthInfo.month, birthInfo.day, birthInfo.hour);
+      const liuNian = calculateLiuNianDaYun(year, month, day, hour);
       setLiuNianData(liuNian);
 
       // 计算月运
-      const monthlyFortune = calculateMonthlyFortune(
-        lunarData,
-        selectedYear,
-        selectedMonth
-      );
+      const pillars = [
+        lunarData.yearGanZhi,  // 年柱
+        lunarData.monthGanZhi, // 月柱
+        lunarData.dayGanZhi,   // 日柱
+        lunarData.hourGanZhi   // 时柱
+      ];
+      
+      // 创建目标日期对象
+      const targetDate = new Date(selectedYear, selectedMonth - 1, 1);
+      
+      const monthlyFortune = getMonthlyBaziFortune(pillars, targetDate);
       setMonthlyFortune(monthlyFortune);
+      
+      // 计算每日能量运势
+      // 构造符合 calculateDailyEnergy 函数要求的八字数据格式
+      const baziDataForDaily = {
+        bazi: {
+          year: lunarData.yearGanZhi,
+          month: lunarData.monthGanZhi,
+          day: lunarData.dayGanZhi,
+          hour: lunarData.hourGanZhi
+        },
+        day: lunarData.dayGanZhi
+      };
+      const dailyEnergy = calculateDailyEnergy(baziDataForDaily);
+      setDailyEnergyData(dailyEnergy);
 
       setError(null);
     } catch (err) {
@@ -225,6 +272,64 @@ const BaziPage = () => {
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     {monthlyFortune.love || '暂无数据'}
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 每日运势提醒 */}
+        {dailyEnergyData && (
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl shadow-lg p-6 mb-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center">
+              <span className="mr-2">✨</span>
+              今日运势提醒
+            </h3>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-lg font-semibold">今日能量指数</span>
+                <span className="text-xl font-bold">{dailyEnergyData.overallScore}分</span>
+              </div>
+              <div className="w-full bg-white/20 rounded-full h-3">
+                <div 
+                  className="bg-white h-3 rounded-full" 
+                  style={{ width: `${dailyEnergyData.overallScore}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            <p className="mb-4 text-blue-100">{dailyEnergyData.description}</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* 建议 */}
+              <div>
+                <h4 className="font-semibold mb-2 flex items-center">
+                  <span className="mr-2">💡</span>
+                  今日建议
+                </h4>
+                <div className="space-y-2">
+                  {dailyEnergyData.suggestions && dailyEnergyData.suggestions.map((suggestion, index) => (
+                    <div key={`suggestion-${index}`} className="flex items-center bg-white/10 rounded-lg p-2">
+                      <span className="mr-2">{suggestion.icon}</span>
+                      <span>{suggestion.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* 注意事项 */}
+              <div>
+                <h4 className="font-semibold mb-2 flex items-center">
+                  <span className="mr-2">⚠️</span>
+                  注意事项
+                </h4>
+                <div className="space-y-2">
+                  {dailyEnergyData.attentions && dailyEnergyData.attentions.map((attention, index) => (
+                    <div key={`attention-${index}`} className="flex items-center bg-white/10 rounded-lg p-2">
+                      <span className="mr-2">{attention.icon}</span>
+                      <span>{attention.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

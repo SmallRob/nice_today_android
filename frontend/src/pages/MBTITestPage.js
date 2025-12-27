@@ -3,7 +3,7 @@
  * 新建MBTI性格测试页面
  * 测试完成后跳转至现有MBTI人格魅力页
  */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
@@ -171,7 +171,7 @@ const MBTITestPage = () => {
 
     // 如果是最后一题，显示结果
     if (currentQuestionIndex === MBTI_QUESTIONS.length - 1) {
-      handleShowResult(newAnswers);
+      handleShowResult();
     } else {
       // 否则进入下一题
       setTimeout(() => {
@@ -181,7 +181,7 @@ const MBTITestPage = () => {
   };
 
   // 显示结果
-  const handleShowResult = (finalAnswers) => {
+  const handleShowResult = () => {
     setLoading(true);
 
     setTimeout(() => {

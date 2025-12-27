@@ -1,4 +1,6 @@
 import FeatureCard from './FeatureCard';
+import { useUserConfig } from '../../contexts/UserConfigContext';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * MBTI测试组件
@@ -10,7 +12,7 @@ const MBTICard = () => {
       description="探索您的性格类型"
       icon="brain"
       color="#6366f1"
-      route="/mbti"
+      route="/mbti-test"
       highlight={true}
     />
   );
@@ -23,10 +25,10 @@ const ChineseZodiacCard = () => {
   return (
     <FeatureCard
       title="生肖运势"
-      description="今日生肖运势解读"
+      description="了解您的生肖性格"
       icon="star"
       color="#f59e0b"
-      route="/zodiac"
+      route="/chinese-zodiac"
     />
   );
 };
@@ -72,7 +74,7 @@ const BiorhythmCard = () => {
       description="体力、情绪、智力周期"
       icon="chart-line"
       color="#10b981"
-      route="/trend"
+      route="/biorhythm"
       highlight={true}
     />
   );
@@ -82,13 +84,31 @@ const BiorhythmCard = () => {
  * 星座特质解析组件
  */
 const PersonalityTraitCard = () => {
+  const { currentConfig } = useUserConfig();
+  const navigate = useNavigate();
+
+  // 获取用户配置的星座，如果没有则跳转到默认页面
+  const userZodiac = currentConfig?.zodiac;
+
+  const handleClick = () => {
+    if (userZodiac) {
+      // 跳转到用户的星座特质页面
+      navigate(`/zodiac-traits/${encodeURIComponent(userZodiac)}`, {
+        state: { zodiac: userZodiac }
+      });
+    } else {
+      // 如果没有配置星座，跳转到星座运势页面让用户选择
+      navigate('/horoscope');
+    }
+  };
+
   return (
     <FeatureCard
       title="星座特质"
       description="了解您的星座性格"
       icon="star"
       color="#06b6d4"
-      route="/personality"
+      onClick={handleClick}
     />
   );
 };
@@ -108,6 +128,22 @@ const EnergyBoostCard = () => {
   );
 };
 
+/**
+ * 经期助手组件
+ */
+const PeriodTrackerCard = () => {
+  return (
+    <FeatureCard
+      title="经期助手"
+      description="智能周期追踪记录"
+      icon="heart"
+      color="#ec4899"
+      route="/period-tracker"
+      highlight={true}
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -115,5 +151,6 @@ export {
   BaziCard,
   BiorhythmCard,
   PersonalityTraitCard,
-  EnergyBoostCard
+  EnergyBoostCard,
+  PeriodTrackerCard
 };
