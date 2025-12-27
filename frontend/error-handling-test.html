@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>错误处理验证测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .test-section h2 {
+      margin-top: 0;
+      color: #666;
+      font-size: 18px;
+    }
+
+    .test-button {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .test-button:hover {
+      background: #1976D2;
+    }
+
+    .test-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .test-button.success {
+      background: #4CAF50;
+    }
+
+    .test-button.error {
+      background: #f44336;
+    }
+
+    .result-box {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .result-box.success {
+      background: #E8F5E9;
+      border: 1px solid #4CAF50;
+      color: #2E7D32;
+    }
+
+    .result-box.error {
+      background: #FFEBEE;
+      border: 1px solid #f44336;
+      color: #C62828;
+    }
+
+    .result-box.info {
+      background: #E3F2FD;
+      border: 1px solid #2196F3;
+      color: #1565C0;
+    }
+
+    .device-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .info-item {
+      padding: 10px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+
+    .info-label {
+      font-weight: bold;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .info-value {
+      color: #333;
+      font-size: 14px;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .status-indicator.pass {
+      background: #4CAF50;
+    }
+
+    .status-indicator.fail {
+      background: #f44336;
+    }
+
+    .status-indicator.pending {
+      background: #FF9800;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 错误处理验证测试</h1>
+
+  <div class="container">
+    <div class="test-section">
+      <h2>📱 设备信息</h2>
+      <div id="deviceInfo" class="device-info"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>🧪 错误处理测试</h2>
+      <button class="test-button" onclick="testBasicError()">测试基本错误处理</button>
+      <button class="test-button" onclick="testErrorLocation()">测试错误位置解析</button>
+      <button class="test-button" onclick="testStackTrace()">测试堆栈分析</button>
+      <button class="test-button" onclick="testPromiseError()">测试 Promise 错误</button>
+      <button class="test-button" onclick="testGlobalError()">测试全局错误捕获</button>
+      <div id="testResults"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>📊 错误报告生成</h2>
+      <button class="test-button" onclick="generateErrorReport()">生成错误报告</button>
+      <button class="test-button" onclick="exportErrorReport()">导出错误报告</button>
+      <div id="reportResults"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>🔧 移动设备特殊测试</h2>
+      <button class="test-button" onclick="testMobileWebView()">测试 WebView 检测</button>
+      <button class="test-button" onclick="testMobileErrorHandling()">测试移动设备错误处理</button>
+      <button class="test-button" onclick="testUserMessages()">测试用户消息生成</button>
+      <div id="mobileResults"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>🚀 运行完整验证</h2>
+      <button class="test-button" onclick="runAllTests()" id="runAllButton">运行所有测试</button>
+      <div id="allTestResults"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // 动态导入错误处理模块
+    let globalErrorHandler, getErrorLocation, createDetailedErrorReport, getDeviceInfo, isMobileDevice, isAndroidWebView, isIOSWebView;
+
+    try {
+      const module = await import('./utils/errorHandler.js');
+      globalErrorHandler = module.globalErrorHandler;
+      getErrorLocation = module.getErrorLocation;
+      createDetailedErrorReport = module.createDetailedErrorReport;
+      getDeviceInfo = module.getDeviceInfo;
+      isMobileDevice = module.isMobileDevice;
+      isAndroidWebView = module.isAndroidWebView;
+      isIOSWebView = module.isIOSWebView;
+      console.log('✓ 错误处理模块加载成功');
+    } catch (error) {
+      console.error('✗ 错误处理模块加载失败:', error);
+      alert('错误处理模块加载失败，请确保在正确的环境中运行此测试页面');
+    }
+
+    // 显示设备信息
+    if (getDeviceInfo) {
+      const deviceInfo = getDeviceInfo();
+      const deviceInfoHtml = `
+        <div class="info-item">
+          <div class="info-label">移动设备</div>
+          <div class="info-value">${deviceInfo.isMobile ? '是' : '否'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Android WebView</div>
+          <div class="info-value">${deviceInfo.isAndroidWebView ? '是' : '否'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">iOS WebView</div>
+          <div class="info-value">${deviceInfo.isIOSWebView ? '是' : '否'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">平台</div>
+          <div class="info-value">${deviceInfo.platform || '未知'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">语言</div>
+          <div class="info-value">${deviceInfo.language || '未知'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">屏幕宽度</div>
+          <div class="info-value">${deviceInfo.screenWidth || '未知'}px</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">屏幕高度</div>
+          <div class="info-value">${deviceInfo.screenHeight || '未知'}px</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">设备像素比</div>
+          <div class="info-value">${deviceInfo.devicePixelRatio || '未知'}</div>
+        </div>
+      `;
+      document.getElementById('deviceInfo').innerHTML = deviceInfoHtml;
+    }
+
+    // 测试函数
+    window.testBasicError = function() {
+      try {
+        throw new Error('测试基本错误处理');
+      } catch (error) {
+        const appError = globalErrorHandler.handle(error);
+        showResult('testResults', '✓ 基本错误处理测试通过', 'success');
+        showResult('testResults', JSON.stringify({
+          type: appError.type,
+          message: appError.message,
+          severity: appError.severity
+        }, null, 2), 'info');
+      }
+    };
+
+    window.testErrorLocation = function() {
+      try {
+        throw new Error('测试错误位置解析');
+      } catch (error) {
+        const location = getErrorLocation(error);
+        showResult('testResults', '✓ 错误位置解析测试通过', 'success');
+        showResult('testResults', JSON.stringify(location, null, 2), 'info');
+      }
+    };
+
+    window.testStackTrace = function() {
+      try {
+        throw new Error('测试堆栈分析');
+      } catch (error) {
+        const location = getErrorLocation(error);
+        const appError = globalErrorHandler.handle(error);
+        showResult('testResults', '✓ 堆栈分析测试通过', 'success');
+        showResult('testResults', {
+          hasStack: !!error.stack,
+          locationString: appError.getLocationString(),
+          fileName: location.fileName,
+          lineNumber: location.lineNumber
+        }, 'info');
+      }
+    };
+
+    window.testPromiseError = function() {
+      Promise.reject(new Error('测试 Promise 错误'))
+        .catch(error => {
+          const appError = globalErrorHandler.handle(error);
+          showResult('testResults', '✓ Promise 错误测试通过', 'success');
+          showResult('testResults', JSON.stringify({
+            type: appError.type,
+            message: appError.message
+          }, null, 2), 'info');
+        });
+    };
+
+    window.testGlobalError = function() {
+      const originalHandler = window.onerror;
+      window.onerror = function(message, filename, lineno, colno, error) {
+        showResult('testResults', '✓ 全局错误捕获测试通过', 'success');
+        showResult('testResults', {
+          message,
+          filename,
+          lineno,
+          colno
+        }, 'info');
+        window.onerror = originalHandler;
+        return true;
+      };
+
+      setTimeout(() => {
+        throw new Error('测试全局错误捕获');
+      }, 100);
+    };
+
+    window.generateErrorReport = function() {
+      try {
+        throw new Error('测试错误报告生成');
+      } catch (error) {
+        const appError = globalErrorHandler.handle(error);
+        const report = createDetailedErrorReport(appError);
+        showResult('reportResults', '✓ 错误报告生成测试通过', 'success');
+        showResult('reportResults', JSON.stringify(report, null, 2), 'info');
+      }
+    };
+
+    window.exportErrorReport = function() {
+      try {
+        throw new Error('测试错误报告导出');
+      } catch (error) {
+        const appError = globalErrorHandler.handle(error);
+        const report = createDetailedErrorReport(appError);
+        const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `error-report-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showResult('reportResults', '✓ 错误报告导出成功', 'success');
+      }
+    };
+
+    window.testMobileWebView = function() {
+      const isMobile = isMobileDevice();
+      const isAndroid = isAndroidWebView();
+      const isIOS = isIOSWebView();
+
+      showResult('mobileResults', '✓ WebView 检测测试通过', 'success');
+      showResult('mobileResults', JSON.stringify({
+        isMobile,
+        isAndroidWebView: isAndroid,
+        isIOSWebView: isIOS
+      }, null, 2), 'info');
+    };
+
+    window.testMobileErrorHandling = function() {
+      try {
+        throw new Error('测试移动设备错误处理');
+      } catch (error) {
+        const appError = globalErrorHandler.handle(error);
+        const deviceInfo = appError.deviceInfo;
+
+        showResult('mobileResults', '✓ 移动设备错误处理测试通过', 'success');
+        showResult('mobileResults', JSON.stringify({
+          hasDeviceInfo: !!deviceInfo,
+          isMobile: deviceInfo.isMobile,
+          errorType: appError.type,
+          severity: appError.severity
+        }, null, 2), 'info');
+      }
+    };
+
+    window.testUserMessages = function() {
+      try {
+        throw new Error('测试用户消息生成');
+      } catch (error) {
+        const appError = globalErrorHandler.handle(error);
+        const userMessage = appError.getUserMessage();
+
+        showResult('mobileResults', '✓ 用户消息生成测试通过', 'success');
+        showResult('mobileResults', JSON.stringify({
+          originalMessage: appError.message,
+          userMessage: userMessage,
+          messageType: typeof userMessage
+        }, null, 2), 'info');
+      }
+    };
+
+    window.runAllTests = function() {
+      const button = document.getElementById('runAllButton');
+      button.disabled = true;
+      button.textContent = '测试运行中...';
+
+      const resultsDiv = document.getElementById('allTestResults');
+      resultsDiv.innerHTML = '<div class="result-box info">正在运行所有测试，请稍候...</div>';
+
+      // 运行所有测试
+      const tests = [
+        testBasicError,
+        testErrorLocation,
+        testStackTrace,
+        testPromiseError,
+        testMobileWebView,
+        testMobileErrorHandling,
+        testUserMessages,
+        generateErrorReport
+      ];
+
+      let completed = 0;
+      let passed = 0;
+      let failed = 0;
+
+      const runNextTest = (index) => {
+        if (index >= tests.length) {
+          // 所有测试完成
+          button.disabled = false;
+          button.textContent = '运行所有测试';
+          showResult('allTestResults', `测试完成: ${passed} 通过, ${failed} 失败, ${completed} 总计`, passed === tests.length ? 'success' : 'error');
+          return;
+        }
+
+        try {
+          tests[index]();
+          passed++;
+          completed++;
+          setTimeout(() => runNextTest(index + 1), 200);
+        } catch (error) {
+          failed++;
+          completed++;
+          console.error(`测试 ${index + 1} 失败:`, error);
+          setTimeout(() => runNextTest(index + 1), 200);
+        }
+      };
+
+      runNextTest(0);
+    };
+
+    function showResult(containerId, message, type) {
+      const container = document.getElementById(containerId);
+      const resultBox = document.createElement('div');
+      resultBox.className = `result-box ${type}`;
+      resultBox.textContent = typeof message === 'string' ? message : JSON.stringify(message, null, 2);
+      container.appendChild(resultBox);
+    }
+
+    // 页面加载完成提示
+    console.log('🎉 错误处理验证测试页面已加载');
+  </script>
+</body>
+</html>
