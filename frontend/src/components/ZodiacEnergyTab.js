@@ -393,9 +393,9 @@ const ZodiacEnergyTab = memo(() => {
     const textColor = theme === 'dark' ? '#ffffff' : '#1f2937';
 
     return (
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
           </svg>
           能量匹配度
@@ -466,8 +466,8 @@ const ZodiacEnergyTab = memo(() => {
     };
 
     return (
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
           <span className="mr-2">{elementData?.icon}</span>
           {elementData.name}元素能量提升
         </h3>
@@ -516,9 +516,9 @@ const ZodiacEnergyTab = memo(() => {
     const { 幸运颜色, 适合饰品, 适合行业, 幸运方位, 能量提升 } = energyGuidance.生活建议;
 
     return (
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
           </svg>
           生活习惯调整建议
@@ -576,9 +576,9 @@ const ZodiacEnergyTab = memo(() => {
     const { 宜, 忌 } = energyGuidance.饮食调理;
 
     return (
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
           </svg>
           饮食调理建议
@@ -598,9 +598,9 @@ const ZodiacEnergyTab = memo(() => {
               </div>
               <div className="grid grid-cols-1 gap-2">
                 {宜.map((food, index) => (
-                  <div key={index} className="flex items-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2.5 rounded-lg border border-green-100 dark:border-green-800/50 transition-all hover:translate-x-1">
+                  <div key={index} className="flex items-center bg-white/70 dark:bg-gray-800/70 p-2 md:p-2.5 rounded-lg border border-green-100 dark:border-green-800/50 transition-all hover:translate-x-1 will-change-transform">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2.5 flex-shrink-0"></span>
-                    <span className="text-xs text-gray-700 dark:text-gray-100 font-medium">{food}</span>
+                    <span className="text-[10px] md:text-xs text-gray-700 dark:text-gray-100 font-medium">{food}</span>
                   </div>
                 ))}
               </div>
@@ -621,9 +621,9 @@ const ZodiacEnergyTab = memo(() => {
               </div>
               <div className="grid grid-cols-1 gap-2">
                 {忌.map((food, index) => (
-                  <div key={index} className="flex items-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2.5 rounded-lg border border-red-100 dark:border-red-800/50 transition-all hover:translate-x-1">
+                  <div key={index} className="flex items-center bg-white/70 dark:bg-gray-800/70 p-2 md:p-2.5 rounded-lg border border-red-100 dark:border-red-800/50 transition-all hover:translate-x-1 will-change-transform">
                     <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2.5 flex-shrink-0"></span>
-                    <span className="text-xs text-gray-700 dark:text-gray-100 font-medium">{food}</span>
+                    <span className="text-[10px] md:text-xs text-gray-700 dark:text-gray-100 font-medium">{food}</span>
                   </div>
                 ))}
               </div>
@@ -650,9 +650,9 @@ const ZodiacEnergyTab = memo(() => {
     const { 家居布置, 摆放位置, 建议 } = energyGuidance.家居风水;
 
     return (
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
           </svg>
           家居风水调整
@@ -696,9 +696,9 @@ const ZodiacEnergyTab = memo(() => {
     const { 适合交往的五行, 适合交往的生肖, 建议 } = energyGuidance.人际关系;
 
     return (
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
           </svg>
           人际关系调整
@@ -762,9 +762,9 @@ const ZodiacEnergyTab = memo(() => {
     const selectedMonthName = monthNames[selectedDate.getMonth()];
 
     return (
-      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-xl p-5 border border-amber-200/50 dark:border-amber-700/50 mb-4 overflow-hidden relative group">
-        {/* 背景装饰 */}
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-100 dark:bg-amber-900/20 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+      <div className="bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-lg md:shadow-xl p-3 md:p-5 border border-amber-200/50 dark:border-amber-700/50 mb-4 overflow-hidden relative group will-change-transform">
+        {/* 背景装饰 - 移动端简化 */}
+        <div className="hidden md:block absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-100 dark:bg-amber-900/20 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
 
         <h3 className="text-lg md:text-xl font-medium text-gray-900 dark:text-gray-100 mb-5 flex items-center justify-between">
           <div className="flex items-center">
@@ -976,7 +976,7 @@ const ZodiacEnergyTab = memo(() => {
       responsive: true,
       maintainAspectRatio: false,
       animation: {
-        duration: 1000 // 增加动画时长，让体验更丝滑
+        duration: theme === 'dark' || window.innerWidth <= 768 ? 0 : 1000 // 移动端禁用动画提升性能
       },
       interaction: {
         mode: 'index',
@@ -1050,14 +1050,14 @@ const ZodiacEnergyTab = memo(() => {
     };
 
     return (
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
           </svg>
           近7日能量趋势分析
         </h3>
-        <div className="h-72">
+        <div className="h-48 md:h-72 will-change-transform">
           <Line data={chartData} options={chartOptions} />
         </div>
         <div className="mt-4 grid grid-cols-3 gap-1.5 md:gap-2 text-center">
@@ -1089,10 +1089,10 @@ const ZodiacEnergyTab = memo(() => {
 
   // 渲染生肖选择器
   const renderZodiacSelector = () => {
-    return (
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+  return (
+    <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+          <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
           </svg>
           生肖能量选择
@@ -1101,8 +1101,8 @@ const ZodiacEnergyTab = memo(() => {
           <div>
             {/* 当前用户信息 */}
             {(userInfo.zodiacAnimal || tempZodiac) && (
-              <div className="mb-4 p-4 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50 shadow-sm backdrop-blur-sm">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="mb-3 md:mb-4 p-3 md:p-4 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50 shadow-sm will-change-transform">
+                <div className="flex flex-wrap items-center justify-between gap-2 md:gap-3">
                   <div className="flex items-center">
                     <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-3">
                       <span className="text-xl">🧬</span>
@@ -1210,74 +1210,46 @@ const ZodiacEnergyTab = memo(() => {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-amber-50/20 via-orange-50/10 to-yellow-50/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
-      <div className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch scroll-smooth">
+      <div className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch will-change-transform">
         {/* 传统风格Banner区域 - 随页面滚动 */}
         <div className="traditional-zodiac-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 flex-shrink-0">
-          {/* 传统生肖装饰符号 */}
-          <div className="absolute top-2 left-2 w-12 h-12 opacity-20">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              {/* 生肖龙图案 */}
-              <path d="M30,30 Q40,20 50,30 T70,30" fill="none" stroke="currentColor" strokeWidth="2" />
-              <path d="M30,40 Q40,50 50,40 T70,40" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="35" cy="25" r="2" fill="currentColor" />
-              <circle cx="65" cy="35" r="2" fill="currentColor" />
-              <path d="M25,35 L30,30" fill="none" stroke="currentColor" strokeWidth="1" />
-              <path d="M25,45 L30,40" fill="none" stroke="currentColor" strokeWidth="1" />
-            </svg>
-          </div>
-          <div className="absolute bottom-2 right-2 w-14 h-14 opacity-20">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              {/* 生肖凤凰图案 */}
-              <path d="M30,60 Q40,50 50,60 T70,60" fill="none" stroke="currentColor" strokeWidth="2" />
-              <path d="M30,70 Q40,80 50,70 T70,70" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M75,65 Q80,60 75,55" fill="none" stroke="currentColor" strokeWidth="1" />
-              <circle cx="35" cy="55" r="2" fill="currentColor" />
-              <circle cx="65" cy="65" r="2" fill="currentColor" />
-            </svg>
-          </div>
+          {/* 简化的装饰角 - 移动端性能优化 */}
+          <div className="absolute top-0 left-0 w-6 h-6 md:w-8 md:h-8 border-t-2 border-l-2 border-yellow-300/50 pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-6 h-6 md:w-8 md:h-8 border-t-2 border-r-2 border-yellow-300/50 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-6 h-6 md:w-8 md:h-8 border-b-2 border-l-2 border-yellow-300/50 pointer-events-none"></div>
+          <div className="absolute bottom-0 right-0 w-6 h-6 md:w-8 md:h-8 border-b-2 border-r-2 border-yellow-300/50 pointer-events-none"></div>
 
-          {/* 传统纹饰边框 */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600"></div>
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400"></div>
-          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-yellow-400 via-orange-500 to-red-600"></div>
-          <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-red-600 via-orange-500 to-yellow-400"></div>
-
-          {/* 传统装饰角 */}
-          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-yellow-300"></div>
-          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-yellow-300"></div>
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-yellow-300"></div>
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-yellow-300"></div>
-
-          <div className="container mx-auto px-4 py-3 md:py-6 relative z-10 text-center">
-            <h1 className="text-xl md:text-2xl font-medium mb-1 text-shadow-lg traditional-zodiac-title">
-              <span className="inline-block font-medium transform hover:scale-105 transition-transform duration-300">
+          <div className="container mx-auto px-4 py-2 md:py-6 relative z-10 text-center">
+            <h1 className="text-lg md:text-2xl font-medium mb-1 text-shadow-lg traditional-zodiac-title">
+              <span className="inline-block font-medium">
                 生肖八字运程
               </span>
             </h1>
-            <p className="text-white text-xs md:text-base opacity-95 traditional-zodiac-subtitle mb-2">
+            <p className="text-white text-[10px] md:text-base opacity-95 traditional-zodiac-subtitle mb-2">
               传统命理·八字分析·运势指引
             </p>
-            <div className="flex items-center justify-center space-x-1 md:space-x-2">
-              <span className="text-[10px] md:text-xs bg-red-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐭</span>
-              <span className="text-[10px] md:text-xs bg-orange-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐂</span>
-              <span className="text-[10px] md:text-xs bg-yellow-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐅</span>
-              <span className="text-[10px] md:text-xs bg-green-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐇</span>
-              <span className="text-[10px] md:text-xs bg-blue-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐉</span>
+            <div className="hidden md:flex items-center justify-center space-x-2">
+              <span className="text-xs bg-red-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐭</span>
+              <span className="text-xs bg-orange-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐂</span>
+              <span className="text-xs bg-yellow-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐅</span>
+              <span className="text-xs bg-green-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐇</span>
+              <span className="text-xs bg-blue-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🐉</span>
             </div>
           </div>
         </div>
 
         {/* 内容展示区域 - 调整背景色以匹配传统风格 */}
-        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-transparent flex-1">
-          <div className="mb-4 dashboard-content">
-            <div className="space-y-3">              {/* 生肖选择器 */}
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-6 bg-transparent flex-1">
+          <div className="mb-3 md:mb-4 dashboard-content">
+            <div className="space-y-2.5 md:space-y-3">
+              {/* 生肖选择器 */}
               {renderZodiacSelector()}
 
               {/* 加载状态 */}
               {loading && (
-                <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
+                <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
                   <div className="text-center py-6">
                     <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
                     <p className="text-gray-800 dark:text-gray-100 text-xs">正在加载能量指引...</p>
@@ -1287,7 +1259,7 @@ const ZodiacEnergyTab = memo(() => {
 
               {/* 错误显示 */}
               {error && (
-                <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
+                <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
                   <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
                     <p className="text-red-900 dark:text-red-300 text-xs">{error}</p>
                   </div>
@@ -1296,7 +1268,7 @@ const ZodiacEnergyTab = memo(() => {
 
               {/* 能量指引内容 */}
               {!loading && !error && energyGuidance && userZodiac && (
-                <div className="space-y-3">
+                <div className="space-y-2.5 md:space-y-3">
                   {/* 能量匹配度仪表板 */}
                   {renderEnergyMatchDashboard()}
 
@@ -1307,7 +1279,7 @@ const ZodiacEnergyTab = memo(() => {
                   {renderBaziFortuneCard()}
 
                   {/* 能量趋势图 */}
-                  {EnergyTrendChart}
+                  {renderEnergyTrendChart()}
 
                   {/* 分类建议卡片 */}
                   {renderLifestyleCard()}
@@ -1316,8 +1288,8 @@ const ZodiacEnergyTab = memo(() => {
                   {renderRelationshipCard()}
 
                   {/* 底部信息 */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
-                    <div className="text-center text-gray-700 dark:text-gray-100 text-xs p-3">
+                  <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="text-center text-gray-700 dark:text-gray-100 text-xs p-2.5 md:p-3">
                       <p>数据更新时间：{new Date().toLocaleString()}</p>
                       <p className="mt-1">五行讲究动态平衡，请根据自身状态灵活调整养生方法</p>
                     </div>
@@ -1327,7 +1299,7 @@ const ZodiacEnergyTab = memo(() => {
 
               {/* 未选择生肖时的提示 */}
               {!loading && !error && !userZodiac && (
-                <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50">
+                <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 will-change-transform">
                   <div className="text-center py-6">
                     <div className="text-3xl mb-2">🐉</div>
                     <h3 className="text-base font-semibold text-gray-700 dark:text-gray-100 mb-2">请选择您的生肖</h3>

@@ -11,12 +11,9 @@ const ZodiacTraitsPage = () => {
   const { theme } = useTheme();
   const { currentConfig } = useUserConfig();
 
-  // 从URL参数、状态或用户配置中获取星座名称
+  // 从全局配置中获取星座名称，默认金牛座
   const [currentHoroscope, setCurrentHoroscope] = useState(
-    zodiacName ||
-    location.state?.zodiac ||
-    currentConfig?.zodiac ||
-    '白羊座'
+    currentConfig?.zodiac || '金牛座'
   );
 
   // 获取元素颜色

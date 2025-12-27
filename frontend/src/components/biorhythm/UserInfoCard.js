@@ -5,71 +5,73 @@
 import React from 'react';
 import RhythmScoreCard from './RhythmScoreCard';
 
-const UserInfoCard = ({ userInfo, todayData, onEditInfo }) => {
+const UserInfoCard = React.memo(({ userInfo, todayData, onEditInfo }) => {
   if (!todayData) return null;
 
+  const isPositive = (value) => value >= 0;
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3 md:p-4">
       {/* 顶部用户信息栏 - 简化布局 */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b dark:border-gray-700">
-        <div>
-          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+      <div className="flex items-center justify-between mb-3 md:mb-4 pb-2.5 md:pb-3 border-b dark:border-gray-700">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
             {userInfo.nickname ? `${userInfo.nickname} 的今日节律` : '今日生物节律'}
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-100 mt-1">
+          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-100 mt-0.5 truncate">
             {userInfo.birthDate ? `出生: ${userInfo.birthDate}` : '请配置信息'}
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 md:space-x-2 flex-shrink-0 ml-2">
           <button
             onClick={onEditInfo}
-            className="text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full border border-blue-200 dark:border-blue-700 transition-colors touch-manipulation"
+            className="text-[10px] md:text-xs px-2 md:px-3 py-1 md:py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full border border-blue-200 dark:border-blue-700 transition-colors touch-manipulation whitespace-nowrap"
           >
-            修改信息
+            修改
           </button>
-          <span className="inline-block px-3 py-1 text-sm font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 dark:bg-opacity-30 rounded-full">
+          <span className="hidden sm:inline-block px-2.5 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 dark:bg-opacity-30 rounded-full whitespace-nowrap">
             本地计算
           </span>
         </div>
       </div>
 
       {/* 今日节律状态 - 简化网格 */}
-      <div className="grid grid-cols-3 gap-3">
-        <RhythmScoreCard 
-          label="体力" 
-          value={todayData.physical} 
-          color="green" 
+      <div className="grid grid-cols-3 gap-2 md:gap-3">
+        <RhythmScoreCard
+          label="体力"
+          value={todayData.physical}
+          color="green"
         />
-        <RhythmScoreCard 
-          label="情绪" 
-          value={todayData.emotional} 
-          color="blue" 
+        <RhythmScoreCard
+          label="情绪"
+          value={todayData.emotional}
+          color="blue"
         />
-        <RhythmScoreCard 
-          label="智力" 
-          value={todayData.intellectual} 
-          color="purple" 
+        <RhythmScoreCard
+          label="智力"
+          value={todayData.intellectual}
+          color="purple"
         />
       </div>
 
       {/* 状态解读 - 简化布局 */}
-      <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-        <div className="flex flex-wrap justify-center gap-y-2 gap-x-4 text-sm">
-          <StatusBadge 
-            condition={todayData.physical >= 0} 
-            positiveText="✓ 体力充沛" 
+      <div className="mt-3 md:mt-4 pt-2.5 md:pt-3 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex flex-wrap justify-center gap-1.5 md:gap-4">
+          <StatusBadge
+            condition={isPositive(todayData.physical)}
+            positiveText="✓ 体力充沛"
             negativeText="⚠ 体力偏低"
             color="green"
           />
-          <StatusBadge 
-            condition={todayData.emotional >= 0} 
-            positiveText="😊 情绪稳定" 
+          <StatusBadge
+            condition={isPositive(todayData.emotional)}
+            positiveText="😊 情绪稳定"
             negativeText="🌪️ 情绪波动"
             color="blue"
           />
-          <StatusBadge 
-            condition={todayData.intellectual >= 0} 
-            positiveText="💡 思维清晰" 
+          <StatusBadge
+            condition={isPositive(todayData.intellectual)}
+            positiveText="💡 思维清晰"
             negativeText="🧠 思考需谨慎"
             color="purple"
           />
@@ -77,10 +79,10 @@ const UserInfoCard = ({ userInfo, todayData, onEditInfo }) => {
       </div>
     </div>
   );
-};
+});
 
 // 状态徽章子组件
-const StatusBadge = ({ condition, positiveText, negativeText, color }) => {
+const StatusBadge = React.memo(({ condition, positiveText, negativeText, color }) => {
   const positiveConfig = {
     green: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-200',
     blue: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-200',
@@ -96,10 +98,10 @@ const StatusBadge = ({ condition, positiveText, negativeText, color }) => {
   const config = condition ? positiveConfig[color] : negativeConfig[color];
 
   return (
-    <span className={`px-2 py-0.5 rounded ${config}`}>
+    <span className={`px-1.5 md:px-2 py-0.5 md:py-0.5 rounded text-[10px] md:text-sm ${config}`}>
       {condition ? positiveText : negativeText}
     </span>
   );
-};
+});
 
 export default React.memo(UserInfoCard);

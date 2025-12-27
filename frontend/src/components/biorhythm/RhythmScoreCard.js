@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-const RhythmScoreCard = ({ label, value, color }) => {
+const RhythmScoreCard = React.memo(({ label, value, color }) => {
   const colorConfig = {
     green: {
       bg: 'bg-green-50 dark:bg-green-900/20',
@@ -29,13 +29,13 @@ const RhythmScoreCard = ({ label, value, color }) => {
   const config = colorConfig[color] || colorConfig.green;
 
   return (
-    <div className={`${config.bg} rounded-lg p-4 text-center border ${config.border}`}>
-      <div className={`text-xl font-bold ${config.text} mb-2`}>
+    <div className={`${config.bg} rounded-lg p-2.5 md:p-4 text-center border ${config.border} will-change-transform`}>
+      <div className={`text-lg md:text-xl font-bold ${config.text} mb-1 md:mb-2`}>
         {value}%
       </div>
-      <div className={`text-sm ${config.label} font-medium`}>{label}</div>
+      <div className={`text-xs md:text-sm ${config.label} font-medium`}>{label}</div>
     </div>
   );
-};
+});
 
 export default React.memo(RhythmScoreCard);

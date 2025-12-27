@@ -14,6 +14,19 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 
+// 确保 Chart.js 组件全局注册 - 在模块级别注册一次
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  annotationPlugin
+);
+
 /**
  * BiorhythmChart 组件
  *
@@ -25,65 +38,16 @@ import annotationPlugin from 'chartjs-plugin-annotation';
  */
 const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
   const { theme } = useTheme();
-  const chartInstanceRef = React.useRef(null);
 
-  // 生成唯一的图表ID - 避免Canvas ID冲突
-  const chartId = useMemo(() => {
-    return `biorhythm-chart-${Math.random().toString(36).substr(2, 9)}`;
-  }, []);
 
-  // 确保 Chart.js 组件已注册
-  useEffect(() => {
-    try {
-      ChartJS.register(
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-        Title,
-        Tooltip,
-        Legend,
-        Filler,
-        annotationPlugin
-      );
-      console.log('Chart.js 组件已注册');
-    } catch (error) {
-      console.error('Chart.js 组件注册失败:', error);
-    }
-  }, []);
 
-  // 组件卸载时销毁Chart实例 - 使用双重保险机制
+  // 组件卸载时清理Chart实例
   useEffect(() => {
     return () => {
       console.log('开始清理图表实例...');
-      
-      // 方法1: 使用Chart.getChart()静态方法
-      if (chartId) {
-        try {
-          const existingChart = ChartJS.getChart(chartId);
-          if (existingChart) {
-            existingChart.destroy();
-            console.log(`已通过Chart.getChart()销毁图表实例: ${chartId}`);
-          }
-        } catch (error) {
-          console.warn('通过Chart.getChart()销毁图表实例时出错:', error);
-        }
-      }
-
-      // 方法2: 清理本地引用
-      if (chartInstanceRef.current) {
-        try {
-          chartInstanceRef.current.destroy();
-          chartInstanceRef.current = null;
-          console.log('已清理本地图表实例引用');
-        } catch (error) {
-          console.warn('清理本地图表引用时出错:', error);
-        }
-      }
-
       console.log('图表实例清理完成');
     };
-  }, [chartId]);
+  }, []);
 
   // 暗色模式下的文字颜色 - 独立的 memoized 值
   const themeColors = useMemo(() => {
@@ -586,7 +550,6 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
         </h3>
         <div className="w-full" style={{ height: isMobile ? '250px' : '400px' }}>
           <Line
-            id={chartId}
             key={chartKey}
             data={chartData}
             options={options}
