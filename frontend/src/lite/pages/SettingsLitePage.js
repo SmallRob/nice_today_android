@@ -6,41 +6,39 @@ import { restartApp } from '../../utils/restartApp';
 import versionData from '../../version.json';
 
 const SettingsLitePage = ({ userInfo, setUserInfo }) => {
-  const [formData, setFormData] = useState({
-    nickname: '',
-    gender: 'secret',
-    birthDate: '',
-    birthTime: ''
+  const [formData, setFormData] = useState(() => {
+    // 直接从全局配置管理器获取当前配置，避免异步加载导致的黑屏
+    try {
+      const currentConfig = liteUserConfigManager.getCurrentConfig();
+      return {
+        nickname: currentConfig.nickname || '',
+        gender: currentConfig.gender || 'secret',
+        birthDate: currentConfig.birthDate || '',
+        birthTime: currentConfig.birthTime || '午'
+      };
+    } catch (error) {
+      console.error('获取配置失败，使用默认值:', error);
+      return {
+        nickname: '',
+        gender: 'secret',
+        birthDate: '',
+        birthTime: '午'
+      };
+    }
   });
+
   const [saveStatus, setSaveStatus] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState(null);
   const { showNotification } = useNotification();
 
-  // 初始化表单数据
+  // 同步更新表单数据（当userInfo prop更新时）
   useEffect(() => {
-    try {
-      if (userInfo && userInfo.nickname) {
-        setFormData({
-          nickname: userInfo.nickname || '',
-          gender: userInfo.gender || 'secret',
-          birthDate: userInfo.birthDate || '',
-          birthTime: userInfo.birthTime || ''
-        });
-      } else {
-        // 如果没有用户信息，使用默认值
-        setFormData({
-          nickname: '',
-          gender: 'secret',
-          birthDate: '',
-          birthTime: ''
-        });
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.error('设置页面数据加载失败:', error);
-      setLoadError(error);
-      setIsLoading(false);
+    if (userInfo) {
+      setFormData({
+        nickname: userInfo.nickname || '',
+        gender: userInfo.gender || 'secret',
+        birthDate: userInfo.birthDate || '',
+        birthTime: userInfo.birthTime || '午'
+      });
     }
   }, [userInfo]);
 
@@ -57,12 +55,7 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
     setSaveStatus('saving');
 
     try {
-      // 确保配置管理器已初始化
-      if (!liteUserConfigManager.initialized) {
-        await liteUserConfigManager.initialize();
-      }
-
-      // 更新轻量版配置
+      // 直接更新配置（确保配置管理器已初始化）
       const success = liteUserConfigManager.updateCurrentConfig({
         nickname: formData.nickname,
         gender: formData.gender,
@@ -146,66 +139,6 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
       duration: 3000
     });
   };
-
-  // 加载错误处理
-  if (loadError) {
-    return (
-      <div className="lite-page-container" style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        padding: '20px'
-      }}>
-        <div style={{
-          textAlign: 'center',
-          maxWidth: '400px'
-        }}>
-          <h3 style={{ color: '#e74c3c', marginBottom: '16px' }}>设置页面加载失败</h3>
-          <p style={{ color: '#666', marginBottom: '20px' }}>
-            加载用户配置时发生错误
-          </p>
-          <button
-            onClick={() => window.location.href = '/lite'}
-            className="lite-button"
-          >
-            返回首页
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // 加载状态
-  if (isLoading) {
-    return (
-      <div className="lite-page-container" style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh'
-      }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #3498db',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-          marginBottom: '16px'
-        }}></div>
-        <p style={{ color: '#666' }}>正在加载设置...</p>
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
 
   return (
     <div className="lite-page-container">

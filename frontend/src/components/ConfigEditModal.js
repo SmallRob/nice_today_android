@@ -3,13 +3,12 @@ import { useForm } from '@tanstack/react-form';
 import { useStore } from '@tanstack/react-store';
 import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
 import { getShichen, getShichenSimple, calculateTrueSolarTime } from '../utils/astronomy';
-import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
+import { calculateLunarDate, generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 
-// 性别选项
+// 性别选项 - 简化为男女
 const GENDER_OPTIONS = [
   { value: 'male', label: '男' },
-  { value: 'female', label: '女' },
-  { value: 'secret', label: '保密' }
+  { value: 'female', label: '女' }
 ];
 
 // 星座选项
@@ -30,6 +29,57 @@ const MBTI_OPTIONS = [
   'ESTP', 'ESFP', 'ENFP', 'ENTP',
   'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
 ];
+
+// 十二时辰选项
+const SHICHEN_OPTIONS = [
+  { value: '23:00-01:00', label: '子时', time: '23:00', description: '夜半，23:00-01:00' },
+  { value: '01:00-03:00', label: '丑时', time: '01:00', description: '鸡鸣，01:00-03:00' },
+  { value: '03:00-05:00', label: '寅时', time: '03:00', description: '平旦，03:00-05:00' },
+  { value: '05:00-07:00', label: '卯时', time: '05:00', description: '日出，05:00-07:00' },
+  { value: '07:00-09:00', label: '辰时', time: '07:00', description: '食时，07:00-09:00' },
+  { value: '09:00-11:00', label: '巳时', time: '09:00', description: '隅中，09:00-11:00' },
+  { value: '11:00-13:00', label: '午时', time: '11:00', description: '日中，11:00-13:00' },
+  { value: '13:00-15:00', label: '未时', time: '13:00', description: '日昳，13:00-15:00' },
+  { value: '15:00-17:00', label: '申时', time: '15:00', description: '哺时，15:00-17:00' },
+  { value: '17:00-19:00', label: '酉时', time: '17:00', description: '日入，17:00-19:00' },
+  { value: '19:00-21:00', label: '戌时', time: '19:00', description: '黄昏，19:00-21:00' },
+  { value: '21:00-23:00', label: '亥时', time: '21:00', description: '人定，21:00-23:00' }
+];
+
+
+
+// 根据时间获取对应时辰
+const getShichenByTime = (timeStr) => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes;
+  
+  // 时辰时间段映射（分钟）
+  const shichenRanges = [
+    { start: 23 * 60, end: 25 * 60, label: '子时' }, // 23:00-01:00
+    { start: 1 * 60, end: 3 * 60, label: '丑时' },   // 01:00-03:00
+    { start: 3 * 60, end: 5 * 60, label: '寅时' },   // 03:00-05:00
+    { start: 5 * 60, end: 7 * 60, label: '卯时' },   // 05:00-07:00
+    { start: 7 * 60, end: 9 * 60, label: '辰时' },   // 07:00-09:00
+    { start: 9 * 60, end: 11 * 60, label: '巳时' },  // 09:00-11:00
+    { start: 11 * 60, end: 13 * 60, label: '午时' }, // 11:00-13:00
+    { start: 13 * 60, end: 15 * 60, label: '未时' }, // 13:00-15:00
+    { start: 15 * 60, end: 17 * 60, label: '申时' }, // 15:00-17:00
+    { start: 17 * 60, end: 19 * 60, label: '酉时' }, // 17:00-19:00
+    { start: 19 * 60, end: 21 * 60, label: '戌时' }, // 19:00-21:00
+    { start: 21 * 60, end: 23 * 60, label: '亥时' }  // 21:00-23:00
+  ];
+  
+  // 处理跨天情况
+  const adjustedMinutes = totalMinutes >= 24 * 60 ? totalMinutes - 24 * 60 : totalMinutes;
+  
+  for (const range of shichenRanges) {
+    if (adjustedMinutes >= range.start && adjustedMinutes < range.end) {
+      return range.label;
+    }
+  }
+  
+  return '子时'; // 默认返回子时
+};
 
 // 移动端优化的选择器组件
 const MobileOptimizedSelect = ({ value, onChange, options, className, disabled }) => (
@@ -114,7 +164,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           birthDate: '',
           birthTime: '12:30',
           birthLocation: { ...DEFAULT_REGION },
-          gender: 'secret',
+          gender: 'male', // 默认为男性
           zodiac: '',
           zodiacAnimal: '',
           mbti: '',
@@ -134,7 +184,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             lng: config.birthLocation.lng ?? DEFAULT_REGION.lng,
             lat: config.birthLocation.lat ?? DEFAULT_REGION.lat
           } : { ...DEFAULT_REGION },
-          gender: config.gender || 'secret',
+          gender: config.gender || 'male',
           zodiac: config.zodiac || '',
           zodiacAnimal: config.zodiacAnimal || '',
           mbti: config.mbti || '',
@@ -147,7 +197,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         birthDate: '',
         birthTime: '12:30',
         birthLocation: { ...DEFAULT_REGION },
-        gender: 'secret',
+        gender: 'male', // 默认为男性
         zodiac: '',
         zodiacAnimal: '',
         mbti: '',
@@ -163,7 +213,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         birthDate: '',
         birthTime: '12:30',
         birthLocation: { ...DEFAULT_REGION },
-        gender: 'secret',
+        gender: 'male', // 默认为男性
         zodiac: '',
         zodiacAnimal: '',
         mbti: '',
@@ -216,52 +266,51 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     }
   }, [isOpen, form, defaultValues]);
 
-  // 实时计算时辰和真太阳时
+  // 实时计算时辰、真太阳时和农历信息
   useEffect(() => {
     const shichen = getShichen(formData.birthTime || '12:30');
     const lng = formData.birthLocation?.lng || DEFAULT_REGION.lng;
     const trueSolarTime = calculateTrueSolarTime(formData.birthDate, formData.birthTime || '12:30', lng);
-    setCalculatedInfo({ shichen, trueSolarTime });
+    
+    // 使用专业农历计算
+    let lunarInfo = null;
+    if (formData.birthDate) {
+      lunarInfo = calculateLunarDate(formData.birthDate, formData.birthTime || '12:30', lng);
+    }
+    
+    setCalculatedInfo({ 
+      shichen, 
+      trueSolarTime, 
+      lunarInfo,
+      // 根据时间获取时辰
+      timeShichen: getShichenByTime(formData.birthTime || '12:30')
+    });
   }, [formData.birthDate, formData.birthTime, formData.birthLocation]);
 
-  // 处理地区变化 - 级联选择
+  // 处理地区变化 - 用户手动填写为准
   const handleRegionChange = (type, value) => {
     const currentLoc = formData.birthLocation || { ...DEFAULT_REGION };
     let newLoc = { ...currentLoc };
 
     if (type === 'province') {
-      const provData = REGION_DATA.find(p => p.name === value);
-      if (provData && provData.children?.[0]) {
-        newLoc.province = value;
-        const firstCity = provData.children[0];
-        newLoc.city = firstCity.name;
-        const firstDistrict = firstCity.children?.[0];
-        if (firstDistrict) {
-          newLoc.district = firstDistrict?.name || '';
-          newLoc.lng = firstDistrict?.lng ?? 0;
-          newLoc.lat = firstDistrict?.lat ?? 0;
-        }
-      }
+      // 只更新省份，保持用户原有的城市和区县选择
+      newLoc.province = value;
     } else if (type === 'city') {
-      const provData = REGION_DATA.find(p => p.name === newLoc.province);
-      const cityData = provData?.children.find(c => c.name === value);
-      if (cityData && cityData.children?.[0]) {
-        newLoc.city = value;
-        const firstDistrict = cityData.children[0];
-        if (firstDistrict) {
-          newLoc.district = firstDistrict.name;
-          newLoc.lng = firstDistrict.lng ?? 0;
-          newLoc.lat = firstDistrict.lat ?? 0;
-        }
-      }
+      // 只更新城市，保持用户原有的区县选择
+      newLoc.city = value;
     } else if (type === 'district') {
+      // 更新区县并设置对应的经纬度（仅当用户选择区县时）
       const provData = REGION_DATA.find(p => p.name === newLoc.province);
       const cityData = provData?.children.find(c => c.name === newLoc.city);
       const distData = cityData?.children.find(d => d.name === value);
+      
       if (distData) {
         newLoc.district = value;
         newLoc.lng = distData.lng ?? 0;
         newLoc.lat = distData.lat ?? 0;
+      } else {
+        // 用户手动输入的区县，保持原经纬度或使用默认值
+        newLoc.district = value;
       }
     } else if (type === 'lng') {
       newLoc.lng = value;
@@ -291,50 +340,55 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     return '';
   };
 
-  // 简化验证：只验证必填字段，减少不必要的警告
+  // 简化验证：只验证出生日期，其他字段自动处理
   const validateRequiredInputs = (formData) => {
     const errors = [];
 
-    // 1. 验证昵称（必填）
-    if (!formData.nickname || !formData.nickname.trim()) {
-      errors.push('请输入昵称');
-    } else if (formData.nickname.trim().length < 2) {
-      errors.push('昵称至少需要2个字符');
-    } else if (formData.nickname.trim().length > 20) {
-      errors.push('昵称最多支持20个字符');
-    }
-
-    // 2. 验证出生日期（必填）
+    // 只验证出生日期（必填）
     if (!formData.birthDate) {
       errors.push('请选择出生日期');
-    } else {
-      // 简化日期验证：只检查基本格式
-      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-      if (!datePattern.test(formData.birthDate)) {
-        errors.push('出生日期格式错误，应为 YYYY-MM-DD');
-      }
-    }
-
-    // 3. 验证出生时间（必填）
-    if (!formData.birthTime || !formData.birthTime.trim()) {
-      errors.push('请输入出生时间');
-    } else {
-      // 简化时间验证：只检查基本格式
-      const timePattern = /^\d{1,2}:\d{2}$/;
-      if (!timePattern.test(formData.birthTime)) {
-        errors.push('出生时间格式错误，应为 HH:MM');
-      }
-    }
-
-    // 4. 验证出生地点（必填）
-    const loc = formData.birthLocation || {};
-    if (!loc || typeof loc !== 'object') {
-      errors.push('请提供完整的出生地点信息');
-    } else if (!loc.province || !loc.city || loc.lng === undefined || loc.lat === undefined) {
-      errors.push('请选择完整的出生地点（省、市、经纬度）');
     }
 
     return errors;
+  };
+
+  // 生成随机昵称
+  const generateRandomNickname = () => {
+    const existingUsers = JSON.parse(localStorage.getItem('userConfigs') || '[]');
+    const userCount = existingUsers.length + 1;
+    const nicknames = ['新用户', '朋友', '访客', '用户', '伙伴'];
+    const randomNick = nicknames[Math.floor(Math.random() * nicknames.length)];
+    return `${randomNick}${userCount}`;
+  };
+
+  // 格式化时间
+  const formatTime = (timeStr) => {
+    if (!timeStr) return '12:30';
+    
+    // 如果是原生时间控件返回的值，通常是 HH:MM 格式
+    const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})/);
+    if (timeMatch) {
+      const hours = parseInt(timeMatch[1]);
+      const minutes = parseInt(timeMatch[2]);
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+    
+    return '12:30'; // 默认值
+  };
+
+  // 确保出生地点有完整信息
+  const ensureCompleteLocation = (location) => {
+    if (!location || typeof location !== 'object') {
+      return { ...DEFAULT_REGION };
+    }
+    
+    return {
+      province: location.province || DEFAULT_REGION.province,
+      city: location.city || DEFAULT_REGION.city,
+      district: location.district || DEFAULT_REGION.district,
+      lng: location.lng !== undefined ? location.lng : DEFAULT_REGION.lng,
+      lat: location.lat !== undefined ? location.lat : DEFAULT_REGION.lat
+    };
   };
 
 
@@ -344,8 +398,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     return new Promise((resolve) => {
       // 计算关键信息
       const shichen = getShichen(configData.birthTime || '12:30');
+      const timeShichen = getShichenByTime(configData.birthTime || '12:30');
       const lng = configData.birthLocation?.lng || DEFAULT_REGION.lng;
       const trueSolarTime = calculateTrueSolarTime(configData.birthDate, configData.birthTime || '12:30', lng);
+      const lunarInfo = convertToLunar(configData.birthDate);
 
       // 创建确认弹窗
       const dialog = document.createElement('div');
@@ -368,15 +424,26 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">基本信息</h4>
               <p class="text-sm text-blue-700 dark:text-blue-400">
                 <strong>昵称：</strong>${configData.nickname || '未设置'}<br>
+                <strong>性别：</strong>${GENDER_OPTIONS.find(opt => opt.value === configData.gender)?.label || '男'}<br>
                 <strong>出生日期：</strong>${configData.birthDate || '未设置'}<br>
                 <strong>出生时间：</strong>${configData.birthTime || '未设置'}
               </p>
             </div>
             
+            ${lunarInfo ? `
+            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+              <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-2">农历信息</h4>
+              <p class="text-sm text-purple-700 dark:text-purple-400">
+                <strong>农历生日：</strong><span class="font-bold">${lunarInfo.lunarText}</span><br>
+                <strong>闰月：</strong><span class="font-bold">${lunarInfo.isLeapMonth ? '是' : '否'}</span>
+              </p>
+            </div>
+            ` : ''}
+            
             <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
               <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">时辰信息</h4>
               <p class="text-sm text-green-700 dark:text-green-400">
-                <strong>出生时辰：</strong><span class="font-bold">${shichen}</span><br>
+                <strong>出生时辰：</strong><span class="font-bold">${timeShichen}</span><br>
                 <strong>真太阳时：</strong><span class="font-bold">${trueSolarTime}</span><br>
                 <strong>经度校正：</strong>${lng}°
               </p>
@@ -425,7 +492,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
   // 保存配置
   const handleSave = async (formData) => {
-    // 简化验证：只验证必填字段
+    // 简化验证：只验证出生日期
     const validationErrors = validateRequiredInputs(formData);
 
     if (validationErrors.length > 0) {
@@ -450,104 +517,127 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       return;
     }
 
+    // 数据处理：自动填充缺失字段
+    const processedData = {
+      ...formData,
+      // 自动生成昵称（如果为空）
+      nickname: formData.nickname?.trim() || generateRandomNickname(),
+      // 格式化时间
+      birthTime: formatTime(formData.birthTime),
+      // 确保出生地点完整
+      birthLocation: ensureCompleteLocation(formData.birthLocation)
+    };
+
     // 显示关键信息确认弹窗
-    const confirmed = await showConfirmationDialog(formData);
+    const confirmed = await showConfirmationDialog(processedData);
     if (!confirmed) {
       console.log('用户取消了保存');
       return;
     }
 
-    // 获取位置信息（确保有有效的经纬度）
-    let finalLocation = formData.birthLocation || { ...DEFAULT_REGION };
-    // 确保经纬度有效（使用默认值兜底）
-    if (finalLocation.lng === undefined || finalLocation.lng === null || isNaN(finalLocation.lng)) {
-      finalLocation.lng = DEFAULT_REGION.lng;
-    }
-    if (finalLocation.lat === undefined || finalLocation.lat === null || isNaN(finalLocation.lat)) {
-      finalLocation.lat = DEFAULT_REGION.lat;
-    }
-    // 确保省市区有默认值
-    if (!finalLocation.province) finalLocation.province = DEFAULT_REGION.province;
-    if (!finalLocation.city) finalLocation.city = DEFAULT_REGION.city;
-    if (!finalLocation.district) finalLocation.district = DEFAULT_REGION.district;
+    const finalLocation = processedData.birthLocation;
 
     setIsSaving(true);
 
     try {
-      // 计算时辰信息
-      const shichenSimple = getShichenSimple(formData.birthTime || '12:30');
+      // 计算完整的时辰和农历信息（使用专业算法）
+      const lng = finalLocation.lng || DEFAULT_REGION.lng;
+      const lunarFields = generateLunarAndTrueSolarFields(processedData);
+      
+      const shichenSimple = getShichenSimple(processedData.birthTime);
+      const shichenFull = getShichen(processedData.birthTime);
+      const timeShichen = getShichenByTime(processedData.birthTime);
 
       // 创建安全、可序列化的配置对象，避免React错误#31
       let finalConfig = {
         // 基础字段
-        nickname: formData.nickname || '',
-        realName: formData.realName || '',
-        birthDate: formData.birthDate || '',
-        birthTime: formData.birthTime || '12:30',
-        gender: formData.gender || 'secret',
-        zodiac: formData.zodiac || '',
-        zodiacAnimal: formData.zodiacAnimal || '',
-        mbti: formData.mbti || '',
-        isused: formData.isused ?? false,
+        nickname: processedData.nickname,
+        realName: processedData.realName || '',
+        birthDate: processedData.birthDate,
+        birthTime: processedData.birthTime,
+        gender: processedData.gender || 'male',
+        zodiac: processedData.zodiac || '',
+        zodiacAnimal: processedData.zodiacAnimal || '',
+        mbti: processedData.mbti || '',
+        isused: processedData.isused ?? false,
         
         // 结构化数据（确保可序列化）
         birthLocation: finalLocation,
         shichen: shichenSimple,  // 保存简化格式的时辰
+        shichenFull: shichenFull, // 保存完整时辰信息
+        timeShichen: timeShichen, // 保存根据时间计算的时辰
+        trueSolarTime: trueSolarTime, // 保存真太阳时
         
-        // 复杂对象（确保为null或简单对象）
-        nameScore: formData.nameScore ? {
-          tian: formData.nameScore.tian || 0,
-          ren: formData.nameScore.ren || 0,
-          di: formData.nameScore.di || 0,
-          wai: formData.nameScore.wai || 0,
-          zong: formData.nameScore.zong || 0,
-          mainType: formData.nameScore.mainType || '',
-          totalScore: formData.nameScore.totalScore || 0
+        // 农历信息（使用专业计算结果）
+        lunarInfo: lunarFields.lunarInfo ? {
+          year: lunarFields.lunarInfo.year,
+          month: lunarFields.lunarInfo.month,
+          day: lunarFields.lunarInfo.day,
+          yearGanZhi: lunarFields.lunarInfo.yearGanZhi,
+          monthGanZhi: lunarFields.lunarInfo.monthGanZhi,
+          dayGanZhi: lunarFields.lunarInfo.dayGanZhi,
+          yearInChinese: lunarFields.lunarInfo.yearInChinese,
+          monthInChinese: lunarFields.lunarInfo.monthInChinese,
+          dayInChinese: lunarFields.lunarInfo.dayInChinese,
+          zodiacAnimal: lunarFields.lunarInfo.zodiacAnimal,
+          fullText: lunarFields.lunarInfo.fullText,
+          shortText: lunarFields.lunarInfo.shortText
         } : null,
         
-        bazi: formData.bazi ? {
-          year: formData.bazi.year || '',
-          month: formData.bazi.month || '',
-          day: formData.bazi.day || '',
-          hour: formData.bazi.hour || '',
-          lunar: formData.bazi.lunar ? {
-            year: formData.bazi.lunar.year || '',
-            month: formData.bazi.lunar.month || '',
-            day: formData.bazi.lunar.day || '',
-            text: formData.bazi.lunar.text || '',
-            monthStr: formData.bazi.lunar.monthStr || '',
-            dayStr: formData.bazi.lunar.dayStr || ''
+        // 复杂对象（确保为null或简单对象）
+        nameScore: processedData.nameScore ? {
+          tian: processedData.nameScore.tian || 0,
+          ren: processedData.nameScore.ren || 0,
+          di: processedData.nameScore.di || 0,
+          wai: processedData.nameScore.wai || 0,
+          zong: processedData.nameScore.zong || 0,
+          mainType: processedData.nameScore.mainType || '',
+          totalScore: processedData.nameScore.totalScore || 0
+        } : null,
+        
+        bazi: processedData.bazi ? {
+          year: processedData.bazi.year || '',
+          month: processedData.bazi.month || '',
+          day: processedData.bazi.day || '',
+          hour: processedData.bazi.hour || '',
+          lunar: processedData.bazi.lunar ? {
+            year: processedData.bazi.lunar.year || '',
+            month: processedData.bazi.lunar.month || '',
+            day: processedData.bazi.lunar.day || '',
+            text: processedData.bazi.lunar.text || '',
+            monthStr: processedData.bazi.lunar.monthStr || '',
+            dayStr: processedData.bazi.lunar.dayStr || ''
           } : null,
-          wuxing: formData.bazi.wuxing ? {
-            year: formData.bazi.wuxing.year || '',
-            month: formData.bazi.wuxing.month || '',
-            day: formData.bazi.wuxing.day || '',
-            hour: formData.bazi.wuxing.hour || '',
-            text: formData.bazi.wuxing.text || ''
+          wuxing: processedData.bazi.wuxing ? {
+            year: processedData.bazi.wuxing.year || '',
+            month: processedData.bazi.wuxing.month || '',
+            day: processedData.bazi.wuxing.day || '',
+            hour: processedData.bazi.wuxing.hour || '',
+            text: processedData.bazi.wuxing.text || ''
           } : null,
-          nayin: formData.bazi.nayin ? {
+          nayin: processedData.bazi.nayin ? {
             year: formData.bazi.nayin.year || '',
-            month: formData.bazi.nayin.month || '',
-            day: formData.bazi.nayin.day || '',
-            hour: formData.bazi.nayin.hour || ''
+            month: processedData.bazi.nayin.month || '',
+            day: processedData.bazi.nayin.day || '',
+            hour: processedData.bazi.nayin.hour || ''
           } : null,
-          shichen: formData.bazi.shichen ? {
-            ganzhi: formData.bazi.shichen.ganzhi || '',
-            name: formData.bazi.shichen.name || ''
+          shichen: processedData.bazi.shichen ? {
+            ganzhi: processedData.bazi.shichen.ganzhi || '',
+            name: processedData.bazi.shichen.name || ''
           } : null,
-          solar: formData.bazi.solar ? {
-            text: formData.bazi.solar.text || ''
+          solar: processedData.bazi.solar ? {
+            text: processedData.bazi.solar.text || ''
           } : null
         } : null,
         
-        lunarInfo: formData.lunarInfo ? {
-          lunarBirthDate: formData.lunarInfo.lunarBirthDate || '',
-          lunarBirthMonth: formData.lunarInfo.lunarBirthMonth || '',
-          lunarBirthDay: formData.lunarInfo.lunarBirthDay || '',
-          trueSolarTime: formData.lunarInfo.trueSolarTime || ''
+        lunarInfo: processedData.lunarInfo ? {
+          lunarBirthDate: processedData.lunarInfo.lunarBirthDate || '',
+          lunarBirthMonth: processedData.lunarInfo.lunarBirthMonth || '',
+          lunarBirthDay: processedData.lunarInfo.lunarBirthDay || '',
+          trueSolarTime: processedData.lunarInfo.trueSolarTime || ''
         } : null,
         
-        lastCalculated: formData.lastCalculated || new Date().toISOString()
+        lastCalculated: processedData.lastCalculated || new Date().toISOString()
       };
 
       // 计算农历和真太阳时信息（简化处理）
@@ -706,38 +796,25 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
             {/* 昵称 */}
             <div>
-              <form.Field
-                name="nickname"
-                validators={{
-                  onChange: ({ value }) => (!value || !value.trim() ? '请输入昵称' : undefined),
-                  onChangeAsync: async ({ value }) => {
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                    return !value || !value.trim() ? '昵称不能为空' : undefined;
-                  }
-                }}
-              >
+              <form.Field name="nickname">
                 {(field) => (
                   <>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      昵称 <span className="text-red-500">*</span>
+                      昵称 <span className="text-gray-400">(选填，留空将自动生成)</span>
                     </label>
                     <input
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
-                      className={`w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white text-base touch-manipulation touch-optimized ${
-                        field.state.meta.error
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                      }`}
-                      placeholder="用于应用内展示 (必需)"
+                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation touch-optimized"
+                      placeholder="例如：小明、朋友、用户 (留空自动生成)"
                       style={{ fontSize: '16px' }}
                       autoComplete="off"
                     />
-                    {field.state.meta.error && (
-                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{field.state.meta.error}</p>
-                    )}
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      💡 提示：可以自定义昵称，也可以留空让系统自动生成如"新用户1"、"朋友2"等
+                    </p>
                     {formData.nickname && (
                       <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
                         已输入：{formData.nickname}
@@ -788,6 +865,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                   <>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       出生日期 <span className="text-red-500">*</span>
+                      <span className="text-xs text-gray-500 ml-1">(必填)</span>
                     </label>
                     <input
                       type="date"
@@ -806,9 +884,16 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                       <p className="mt-1 text-xs text-red-600 dark:text-red-400">{field.state.meta.error}</p>
                     )}
                     {formData.birthDate && (
-                      <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-                        已选择：{formData.birthDate}
-                      </p>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-blue-600 dark:text-blue-400">
+                          阳历：{formData.birthDate}
+                        </p>
+                        {calculatedInfo.lunarInfo && (
+                          <p className="text-xs text-purple-600 dark:text-purple-400">
+                            农历：{calculatedInfo.lunarInfo.lunarText}
+                          </p>
+                        )}
+                      </div>
                     )}
                   </>
                 )}
@@ -817,13 +902,13 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
             {/* 性别 */}
             <div>
-              <form.Field name="gender" defaultValue="secret">
+              <form.Field name="gender" defaultValue="male">
                 {(field) => (
                   <>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       性别
                     </label>
-                    <div className="gender-options grid grid-cols-3 gap-2">
+                    <div className="gender-options grid grid-cols-2 gap-2">
                       {GENDER_OPTIONS.map(option => (
                         <button
                           key={option.value}
@@ -840,25 +925,53 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                         </button>
                       ))}
                     </div>
-                    {formData.gender !== 'secret' && (
-                      <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-                        已选择：{GENDER_OPTIONS.find(opt => opt.value === formData.gender)?.label || ''}
-                      </p>
-                    )}
+                    <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                      已选择：{GENDER_OPTIONS.find(opt => opt.value === formData.gender)?.label || '男'}
+                    </p>
                   </>
                 )}
               </form.Field>
             </div>
 
-            {/* 出生时间 */}
+            {/* 出生时间 - 优化为时辰选择 */}
             <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                出生具体时间 (出生时辰)
+                出生时间 <span className="text-gray-400">(可选择精确时间或直接选择时辰)</span>
               </label>
+              
+              {/* 时辰快速选择 */}
+              <div className="mb-3">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">🕐 快速选择时辰：</p>
+                <div className="grid grid-cols-4 gap-1">
+                  {SHICHEN_OPTIONS.map((shichen) => (
+                    <button
+                      key={shichen.value}
+                      type="button"
+                      onClick={() => {
+                        const formField = form.getFieldInfo('birthTime');
+                        if (formField) {
+                          form.setFieldValue('birthTime', shichen.time);
+                        }
+                      }}
+                      className={`px-2 py-1 text-xs rounded transition-colors ${
+                        calculatedInfo.timeShichen === shichen.label
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                      }`}
+                      title={shichen.description}
+                    >
+                      {shichen.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 精确时间选择 */}
               <form.Field name="birthTime" defaultValue="12:30">
                 {(field) => (
                   <>
-                    <div className="flex items-center space-x-2 mb-2">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">⏰ 或选择精确时间：</p>
+                    <div className="flex items-center space-x-2 mb-3">
                       <MobileOptimizedSelect
                         value={field.state.value?.split(':')[0] || '12'}
                         onChange={(hour) => {
@@ -869,7 +982,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                           value: i.toString().padStart(2, '0'),
                           label: `${i.toString().padStart(2, '0')}时`
                         }))}
-                        className="flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation touch-optimized"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm touch-manipulation touch-optimized"
                         style={{ fontSize: '16px' }}
                       />
                       <span className="text-gray-500 text-lg">:</span>
@@ -885,19 +998,25 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                           { value: '30', label: '30分' },
                           { value: '45', label: '45分' }
                         ]}
-                        className="flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm touch-manipulation"
                         style={{ fontSize: '16px' }}
                       />
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 flex justify-between bg-white dark:bg-gray-800 p-3 rounded border border-dashed border-gray-300 dark:border-gray-600">
-                      <span>时辰：<span className="font-bold text-blue-600 dark:text-blue-400">{calculatedInfo.shichen}</span></span>
-                      <span>真太阳时：<span className="font-bold text-purple-600 dark:text-purple-400">{calculatedInfo.trueSolarTime}</span></span>
+                    
+                    {/* 计算结果展示 */}
+                    <div className="text-sm space-y-2">
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded border border-dashed border-gray-300 dark:border-gray-600">
+                        <div className="flex justify-between items-center">
+                          <span>时辰：<span className="font-bold text-blue-600 dark:text-blue-400">{calculatedInfo.timeShichen || calculatedInfo.shichen}</span></span>
+                          <span>真太阳时：<span className="font-bold text-purple-600 dark:text-purple-400">{calculatedInfo.trueSolarTime}</span></span>
+                        </div>
+                      </div>
+                      {formData.birthTime && (
+                        <p className="text-xs text-blue-600 dark:text-blue-400">
+                          已选择：{formData.birthTime} ({calculatedInfo.timeShichen || calculatedInfo.shichen})
+                        </p>
+                      )}
                     </div>
-                    {formData.birthTime && (
-                      <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-                        已选择：{formData.birthTime}
-                      </p>
-                    )}
                   </>
                 )}
               </form.Field>
@@ -906,8 +1025,11 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             {/* 出生地点 */}
             <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                出生地点 (用于校准真太阳时)
+                出生地点 <span className="text-gray-400">(选填，用于计算真太阳时)</span>
               </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                💡 提示：可以选择具体地区，也可以留空使用默认位置（北京）
+              </p>
 
               <form.Field name="birthLocation" defaultValue={{ ...DEFAULT_REGION }}>
                 {(field) => (
@@ -916,7 +1038,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                     <div className="grid grid-cols-3 gap-2">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          省份 <span className="text-red-500">*</span>
+                          省份
                         </label>
                         <input
                           type="text"
@@ -939,7 +1061,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
                       <div>
                         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          城市 <span className="text-red-500">*</span>
+                          城市
                         </label>
                         <input
                           type="text"
@@ -962,7 +1084,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
                       <div>
                         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          县区 <span className="text-red-500">*</span>
+                          县区
                         </label>
                         <input
                           type="text"

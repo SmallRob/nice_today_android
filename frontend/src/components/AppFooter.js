@@ -2,6 +2,12 @@ import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 /**
+ * 固定底部页脚 - 用于需要固定在底部的场景
+ */
+// 动态导入版本信息
+import versionData from '../version.json';
+
+/**
  * 应用页脚组件 - 支持主题切换
  * 确保在亮色和暗黑模式下都能正确显示
  */
@@ -18,7 +24,7 @@ const AppFooter = ({
     light: {
       background: 'bg-white dark:bg-gray-900',
       border: 'border-t border-gray-200 dark:border-gray-700',
-      text: 'text-gray-600 dark:text-gray-400'
+      text: 'text-gray-600 dark:text-gray-300'
     },
     dark: {
       background: 'bg-gray-900',
@@ -62,39 +68,28 @@ const AppFooter = ({
   );
 };
 
-/**
- * 固定底部页脚 - 用于需要固定在底部的场景
- */
 export const FixedAppFooter = ({ 
-  version = 'v1.0.0',
+  version = versionData?.versionName || 'v1.0.0',
   showCopyright = true,
   showVersion = true,
   className = ''
 }) => {
-  const { theme } = useTheme();
-
-  const footerStyles = {
-    light: {
-      background: 'bg-white dark:bg-gray-900',
-      border: 'border-t border-gray-200 dark:border-gray-700',
-      text: 'text-gray-600 dark:text-gray-400'
-    },
-    dark: {
-      background: 'bg-gray-900',
-      border: 'border-t border-gray-700',
-      text: 'text-gray-400'
-    }
-  };
-
-  const currentStyles = theme === 'dark' ? footerStyles.dark : footerStyles.light;
+  // 安全获取主题，提供降级方案
+  let theme = 'light';
+  try {
+    const themeContext = useTheme();
+    theme = themeContext?.theme || 'light';
+  } catch (error) {
+    console.warn('Theme context not available, using light mode:', error);
+  }
 
   return (
     <footer 
       className={`
         fixed bottom-0 left-0 right-0
-        ${currentStyles.background} 
-        ${currentStyles.border} 
-        ${currentStyles.text}
+        bg-white dark:bg-gray-900
+        border-t border-gray-200 dark:border-gray-700 
+        text-gray-600 dark:text-gray-300
         py-3 px-6
         text-center text-sm
         transition-colors duration-300

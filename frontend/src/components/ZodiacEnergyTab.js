@@ -1150,7 +1150,7 @@ const ZodiacEnergyTab = memo(() => {
             )}
 
             {/* 提示文本 */}
-            <div className="mb-3 text-sm text-gray-600 dark:text-gray-400 text-center bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+            <div className="mb-3 text-xs text-gray-600 dark:text-gray-300 text-center bg-gray-50 dark:bg-gray-800/80 p-2 rounded-lg">
               ✨ 点击任意生肖图标查看能量指引，临时查看不会保存配置
             </div>
 

@@ -3,17 +3,27 @@ import { MemoizedLineChart } from './ZodiacHoroscope';
 import '../styles/horoscope.css';
 
 // 星座选择器组件
-export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleHoroscopeChange, handleRestoreUserHoroscope, getHoroscopeData }) => {
+export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleHoroscopeChange, handleRestoreUserHoroscope, handleEditHoroscope, getHoroscopeData, configuredZodiac }) => {
   return (
     <div className="horoscope-card">
-      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-        <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-        </svg>
-        星座选择
-      </h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white flex items-center">
+          <svg className="w-4 h-4 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          星座选择
+        </h3>
+        {handleEditHoroscope && (
+          <button
+            onClick={handleEditHoroscope}
+            className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded transition-all"
+          >
+            ✏️ 设置
+          </button>
+        )}
+      </div>
       <div className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-        选择您的星座，获取每日运势指引
+        {configuredZodiac ? `当前星座：${configuredZodiac}` : '点击设置您的星座，获取每日运势指引'}
       </div>
 
       <div className="horoscope-grid-4 mb-2">
@@ -34,17 +44,17 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
       </div>
 
       {isTemporaryHoroscope && (
-        <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="mt-4 p-2.5 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
             <div className="flex items-center">
-              <span className="text-yellow-500 mr-2 text-lg">⚠️</span>
-              <span className="text-yellow-700 dark:text-yellow-300 text-sm">
+              <span className="text-yellow-500 mr-2 text-sm">⚠️</span>
+              <span className="text-yellow-700 dark:text-yellow-300 text-xs">
                 临时查看 {userHoroscope} 的运势
               </span>
             </div>
             <button
               onClick={handleRestoreUserHoroscope}
-              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 whitespace-nowrap"
+              className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 whitespace-nowrap"
               style={{ touchAction: 'manipulation' }}
             >
               恢复我的星座
@@ -233,7 +243,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
             className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-600 shadow-sm mb-2"
             style={{ backgroundColor: (Array.isArray(recommendations.luckyColors) && recommendations.luckyColors[0]) ? recommendations.luckyColors[0] : '#FF6B6B' }}
           ></div>
-          <span className="text-xs text-gray-500">幸运色</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">幸运色</span>
           <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {String((Array.isArray(recommendations.luckyColorNames) && recommendations.luckyColorNames[0]) ? recommendations.luckyColorNames[0] : '魅力红')}
           </span>
@@ -241,7 +251,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">💎</div>
-          <span className="text-xs text-gray-500">幸运配饰</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">幸运配饰</span>
           <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
             {String(recommendations.luckyAccessory || '宝石')}
           </span>
@@ -249,7 +259,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🍱</div>
-          <span className="text-xs text-gray-500">幸运食物</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">幸运食物</span>
           <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
             {String(recommendations.luckyFood || '美食')}
           </span>
@@ -257,7 +267,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🔢</div>
-          <span className="text-xs text-gray-500">幸运数字</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">幸运数字</span>
           <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {Array.isArray(recommendations.luckyNumbers) ? recommendations.luckyNumbers.join('/') : String(recommendations.luckyNumbers || '7')}
           </span>
@@ -265,7 +275,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🕓</div>
-          <span className="text-xs text-gray-500">幸运时辰</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">幸运时辰</span>
           <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center whitespace-normal">
             {String(recommendations.luckyTime || '午后')}
           </span>
@@ -273,7 +283,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🧭</div>
-          <span className="text-xs text-gray-500">幸运方位</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">幸运方位</span>
           <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {String(recommendations.luckyDirection || '东方')}
           </span>

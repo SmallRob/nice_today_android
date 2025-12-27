@@ -17,17 +17,17 @@ const getCardColor = (strength) => {
 
 /**
  * 获取卡片颜色（深色模式）
- * 增加不透明度和对比度以确保文字清晰可见
+ * 增强不透明度、对比度和渐变效果
  */
 const getCardColorDark = (strength) => {
   switch (strength) {
-    case '强': return 'from-green-900/80 to-green-800/80 dark:border-green-600';
-    case '偏强': return 'from-blue-900/80 to-blue-800/80 dark:border-blue-600';
-    case '中偏强': return 'from-indigo-900/80 to-indigo-800/80 dark:border-indigo-600';
-    case '中': return 'from-gray-800/80 to-gray-700/80 dark:border-gray-500';
-    case '偏弱': return 'from-orange-900/80 to-orange-800/80 dark:border-orange-500';
-    case '弱': return 'from-red-900/80 to-red-800/80 dark:border-red-500';
-    default: return 'from-gray-800/80 to-gray-700/80 dark:border-gray-500';
+    case '强': return 'from-green-800/90 to-emerald-900/90 dark:border-green-400/60 dark:shadow-green-900/30';
+    case '偏强': return 'from-blue-800/90 to-indigo-900/90 dark:border-blue-400/60 dark:shadow-blue-900/30';
+    case '中偏强': return 'from-indigo-800/90 to-purple-900/90 dark:border-indigo-400/60 dark:shadow-indigo-900/30';
+    case '中': return 'from-gray-700/90 to-slate-800/90 dark:border-gray-400/60 dark:shadow-gray-800/30';
+    case '偏弱': return 'from-orange-800/90 to-amber-900/90 dark:border-orange-400/60 dark:shadow-orange-900/30';
+    case '弱': return 'from-red-800/90 to-rose-900/90 dark:border-red-400/60 dark:shadow-red-900/30';
+    default: return 'from-gray-700/90 to-slate-800/90 dark:border-gray-400/60 dark:shadow-gray-800/30';
   }
 };
 
@@ -60,11 +60,16 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
     
     if (ziweiData.error) {
       return (
-        <div className="bg-red-50 dark:bg-red-900/50 rounded-lg p-4 border border-red-200 dark:border-red-600">
-          <h4 className="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">⚠️ 计算错误</h4>
-          <div className="text-sm text-red-600 dark:text-red-300 space-y-1">
-            <p>{ziweiData.error}</p>
-            <p className="text-xs opacity-80">建议：请检查出生日期、时间和经纬度是否正确</p>
+        <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/80 dark:to-rose-900/80 rounded-2xl p-5 border border-red-200 dark:border-red-600/70 shadow-lg dark:shadow-xl backdrop-blur-sm">
+          <div className="flex items-start gap-3 mb-3">
+            <span className="text-3xl">⚠️</span>
+            <h4 className="text-base font-bold text-red-700 dark:text-red-300">计算错误</h4>
+          </div>
+          <div className="text-sm text-red-700 dark:text-red-300 space-y-2">
+            <p className="font-medium">{ziweiData.error}</p>
+            <p className="text-xs opacity-90 bg-red-100/50 dark:bg-red-800/50 rounded-lg p-3 border border-red-300/50 dark:border-red-700/50">
+              💡 建议：请检查出生日期、时间和经纬度是否正确
+            </p>
           </div>
         </div>
       );
@@ -78,13 +83,19 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       };
 
       return (
-        <div className="bg-orange-50 dark:bg-orange-900/50 rounded-lg p-4 border border-orange-200 dark:border-orange-600">
-          <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-2">📋 缺少必要信息</h4>
-          <div className="text-sm text-orange-600 dark:text-orange-300">
-            <p className="mb-2">请完善以下信息以计算紫微命盘：</p>
-            <ul className="list-disc list-inside space-y-1">
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/80 dark:to-amber-900/80 rounded-2xl p-5 border border-orange-200 dark:border-orange-600/70 shadow-lg dark:shadow-xl backdrop-blur-sm">
+          <div className="flex items-start gap-3 mb-3">
+            <span className="text-3xl">📋</span>
+            <h4 className="text-base font-bold text-orange-700 dark:text-orange-300">缺少必要信息</h4>
+          </div>
+          <div className="text-sm text-orange-700 dark:text-orange-300">
+            <p className="mb-3 font-medium">请完善以下信息以计算紫微命盘：</p>
+            <ul className="space-y-2">
               {ziweiData.missingFields.map(field => (
-                <li key={field} className="font-medium">{fieldNames[field] || field}</li>
+                <li key={field} className="flex items-center gap-2 bg-orange-100/50 dark:bg-orange-800/50 rounded-lg p-2.5 border border-orange-300/50 dark:border-orange-700/50">
+                  <span className="text-orange-600 dark:text-orange-400 font-bold">●</span>
+                  <span className="font-medium">{fieldNames[field] || field}</span>
+                </li>
               ))}
             </ul>
           </div>
@@ -107,13 +118,16 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
     if (allWarnings.length === 0) return null;
 
     return (
-      <div className="bg-yellow-50 dark:bg-yellow-900/50 rounded-lg p-4 border border-yellow-200 dark:border-yellow-600">
-        <h4 className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 mb-2">⚡ 数据质量警告</h4>
-        <div className="text-sm text-yellow-600 dark:text-yellow-300 space-y-1">
+      <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/80 dark:to-amber-900/80 rounded-2xl p-5 border border-yellow-200 dark:border-yellow-600/70 shadow-lg dark:shadow-xl backdrop-blur-sm">
+        <div className="flex items-start gap-3 mb-3">
+          <span className="text-3xl">⚡</span>
+          <h4 className="text-base font-bold text-yellow-800 dark:text-yellow-300">数据质量警告</h4>
+        </div>
+        <div className="text-sm text-yellow-700 dark:text-yellow-300 space-y-2">
           {allWarnings.map((warning, index) => (
-            <div key={index} className="flex items-start gap-2">
-              <span className="text-lg">⚠️</span>
-              <p>{warning.message}</p>
+            <div key={index} className="flex items-start gap-3 bg-yellow-100/50 dark:bg-yellow-800/50 rounded-xl p-3 border border-yellow-300/50 dark:border-yellow-700/50">
+              <span className="text-xl flex-shrink-0">⚠️</span>
+              <p className="leading-relaxed">{warning.message}</p>
             </div>
           ))}
         </div>
@@ -132,14 +146,32 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
     const { birthDate, birthTime, trueSolarTime, longitude, latitude } = metadata;
 
     return (
-      <div className="bg-gray-50 dark:bg-gray-800/80 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-        <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-200 mb-2">📊 计算参数</h4>
-        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-300">
-          <div>出生日期：{birthDate}</div>
-          <div>出生时间：{birthTime}</div>
-          <div>经度：{longitude?.toFixed(4)}°</div>
-          <div>纬度：{latitude?.toFixed(4)}°</div>
-          <div className="col-span-2">真太阳时：{trueSolarTime}</div>
+      <div className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-800/80 dark:to-slate-800/80 rounded-2xl p-4 border border-gray-200 dark:border-gray-600 shadow-md dark:shadow-xl backdrop-blur-sm">
+        <h4 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-3 flex items-center">
+          <span className="mr-2">📊</span>
+          计算参数
+        </h4>
+        <div className="grid grid-cols-2 gap-3 text-xs text-gray-700 dark:text-gray-300">
+          <div className="bg-white/60 dark:bg-gray-700/50 rounded-lg p-2.5 border border-gray-200 dark:border-gray-600">
+            <span className="text-gray-500 dark:text-gray-400">出生日期：</span>
+            <span className="font-semibold ml-1">{birthDate}</span>
+          </div>
+          <div className="bg-white/60 dark:bg-gray-700/50 rounded-lg p-2.5 border border-gray-200 dark:border-gray-600">
+            <span className="text-gray-500 dark:text-gray-400">出生时间：</span>
+            <span className="font-semibold ml-1">{birthTime}</span>
+          </div>
+          <div className="bg-white/60 dark:bg-gray-700/50 rounded-lg p-2.5 border border-gray-200 dark:border-gray-600">
+            <span className="text-gray-500 dark:text-gray-400">经度：</span>
+            <span className="font-semibold ml-1">{longitude?.toFixed(4)}°</span>
+          </div>
+          <div className="bg-white/60 dark:bg-gray-700/50 rounded-lg p-2.5 border border-gray-200 dark:border-gray-600">
+            <span className="text-gray-500 dark:text-gray-400">纬度：</span>
+            <span className="font-semibold ml-1">{latitude?.toFixed(4)}°</span>
+          </div>
+          <div className="col-span-2 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/50 dark:to-indigo-900/50 rounded-lg p-2.5 border border-purple-200 dark:border-purple-700/50">
+            <span className="text-purple-600 dark:text-purple-400 font-bold">真太阳时：</span>
+            <span className="font-bold ml-1 text-purple-800 dark:text-purple-300">{trueSolarTime}</span>
+          </div>
         </div>
       </div>
     );
@@ -148,18 +180,30 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
   // 显示加载或空状态
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-        <p className="ml-3 text-gray-500 dark:text-gray-400">正在计算紫微命盘...</p>
+      <div className="flex flex-col justify-center items-center py-12">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-xl opacity-50"></div>
+          <div className="relative animate-spin rounded-full h-12 w-12 border-b-4 border-purple-600 dark:border-purple-500 shadow-lg"></div>
+        </div>
+        <p className="mt-6 text-base font-medium text-gray-600 dark:text-gray-400">正在计算紫微命盘...</p>
+        <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">基于出生时间、经纬度等信息</p>
       </div>
     );
   }
 
   if (!ziweiData) {
     return (
-      <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-        <p>请先设置完整的出生信息以查看紫微命宫</p>
-        <p className="text-xs mt-2">需要：出生日期、时辰、经纬度</p>
+      <div className="text-center py-10">
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/50 dark:to-pink-900/50 rounded-2xl p-8 border border-purple-200 dark:border-purple-700/50 shadow-lg dark:shadow-xl backdrop-blur-sm max-w-md mx-auto">
+          <div className="text-6xl mb-4">🔮</div>
+          <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">请设置完整的出生信息</h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">需要完善以下信息以查看紫微命宫</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">出生日期</span>
+            <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">出生时辰</span>
+            <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">经纬度</span>
+          </div>
+        </div>
       </div>
     );
   }
@@ -169,25 +213,40 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
   if (errorDisplay) {
     return (
       <div className="space-y-4">
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-4 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 dark:from-purple-700 dark:via-pink-700 dark:to-rose-700 rounded-2xl p-5 text-white shadow-xl dark:shadow-2xl">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-bold mb-1">🌟 紫微命宫</h3>
-              <p className="text-sm opacity-90">基于出生时间的命盘分析</p>
+              <h3 className="text-2xl font-bold mb-1 flex items-center">
+                <span className="mr-2">🌟</span>
+                紫微命宫
+              </h3>
+              <p className="text-sm opacity-95 font-medium">基于出生时间的命盘分析</p>
             </div>
           </div>
         </div>
         {errorDisplay}
-        <div className="bg-blue-50 dark:bg-blue-900/50 rounded-lg p-4 border border-blue-200 dark:border-blue-600">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">💡</span>
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/80 dark:to-indigo-900/80 rounded-2xl p-5 border border-blue-200 dark:border-blue-600/70 shadow-lg dark:shadow-xl backdrop-blur-sm">
+          <div className="flex items-start gap-4">
+            <span className="text-3xl flex-shrink-0">💡</span>
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-white mb-1">如何修复</h4>
-              <div className="text-xs text-gray-600 dark:text-gray-300 space-y-0.5">
-                <p>• 确保出生日期格式为 YYYY-MM-DD（如：1991-04-30）</p>
-                <p>• 确保出生时间格式为 HH:MM（如：12:30）</p>
-                <p>• 确保经纬度在有效范围内（经度：-180 到 180，纬度：-90 到 90）</p>
-                <p>• 建议使用"编辑"按钮修改配置后保存</p>
+              <h4 className="text-base font-bold text-gray-800 dark:text-white mb-3">如何修复</h4>
+              <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                <p className="flex items-start">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold mr-2 flex-shrink-0">•</span>
+                  <span>确保出生日期格式为 <span className="font-semibold">YYYY-MM-DD</span>（如：1991-04-30）</span>
+                </p>
+                <p className="flex items-start">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold mr-2 flex-shrink-0">•</span>
+                  <span>确保出生时间格式为 <span className="font-semibold">HH:MM</span>（如：12:30）</span>
+                </p>
+                <p className="flex items-start">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold mr-2 flex-shrink-0">•</span>
+                  <span>确保经纬度在有效范围内（经度：<span className="font-semibold">-180 到 180</span>，纬度：<span className="font-semibold">-90 到 90</span>）</span>
+                </p>
+                <p className="flex items-start">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold mr-2 flex-shrink-0">•</span>
+                  <span>建议使用"编辑"按钮修改配置后保存</span>
+                </p>
               </div>
             </div>
           </div>
@@ -204,19 +263,34 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
   if (!actualZiweiData || !actualZiweiData.palaces) {
     return (
       <div className="space-y-4">
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-4 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 dark:from-purple-700 dark:via-pink-700 dark:to-rose-700 rounded-2xl p-5 text-white shadow-xl dark:shadow-2xl">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-bold mb-1">🌟 紫微命宫</h3>
-              <p className="text-sm opacity-90">基于出生时间的命盘分析</p>
+              <h3 className="text-2xl font-bold mb-1 flex items-center">
+                <span className="mr-2">🌟</span>
+                紫微命宫
+              </h3>
+              <p className="text-sm opacity-95 font-medium">基于出生时间的命盘分析</p>
             </div>
           </div>
         </div>
-        <div className="bg-orange-50 dark:bg-orange-900/50 rounded-lg p-4 border border-orange-200 dark:border-orange-600">
-          <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-2">⚠️ 数据不完整</h4>
-          <div className="text-sm text-orange-600 dark:text-orange-300">
-            <p>紫微命盘数据不完整或计算失败。</p>
-            <p className="text-xs mt-2 opacity-80">请检查出生信息是否完整，或点击"刷新八字信息"按钮重新计算。</p>
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/80 dark:to-amber-900/80 rounded-2xl p-5 border border-orange-200 dark:border-orange-600/70 shadow-lg dark:shadow-xl backdrop-blur-sm">
+          <div className="flex items-start gap-4 mb-3">
+            <span className="text-3xl flex-shrink-0">⚠️</span>
+            <div>
+              <h4 className="text-base font-bold text-orange-700 dark:text-orange-300">数据不完整</h4>
+              <div className="text-sm text-orange-600 dark:text-orange-300">
+                <p>紫微命盘数据不完整或计算失败。</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-orange-100/50 dark:bg-orange-800/50 rounded-xl p-4 border border-orange-300/50 dark:border-orange-700/50">
+            <div className="flex items-start gap-3">
+              <span className="text-xl">💡</span>
+              <p className="text-sm text-orange-800 dark:text-orange-200 leading-relaxed">
+                请检查出生信息是否完整，或点击"刷新八字信息"按钮重新计算
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -242,15 +316,18 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
   return (
     <div className="space-y-4">
       {/* 紫微命宫头部 */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-4 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 dark:from-purple-700 dark:via-pink-700 dark:to-rose-700 rounded-2xl p-5 text-white shadow-xl dark:shadow-2xl">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-bold mb-1">🌟 紫微命宫</h3>
-            <p className="text-sm opacity-90">基于出生时间的命盘分析</p>
+            <h3 className="text-2xl font-bold mb-1 flex items-center">
+              <span className="mr-2">🌟</span>
+              紫微命宫
+            </h3>
+            <p className="text-sm opacity-95 font-medium">基于出生时间的命盘分析</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm opacity-80">命宫主星</p>
-            <p className="text-lg font-semibold">{mingGong?.ganzhi || '未知'}</p>
+          <div className="text-right bg-white/10 dark:bg-black/20 rounded-xl p-3 backdrop-blur-sm">
+            <p className="text-xs opacity-90 mb-1">命宫主星</p>
+            <p className="text-xl font-bold tracking-wide">{mingGong?.ganzhi || '未知'}</p>
           </div>
         </div>
       </div>
@@ -263,35 +340,38 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
 
       {/* 命宫总结 */}
       {summary && (
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/60 dark:to-purple-900/60 rounded-lg p-4 border border-indigo-200 dark:border-indigo-600">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-white mb-2">📊 命盘总述</h4>
-          <div className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
-            <p>
-              <span className="font-medium">整体格局：</span>
-              {summary.overallStrength}
+        <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/80 dark:via-purple-900/80 dark:to-pink-900/80 rounded-2xl p-5 border border-indigo-200 dark:border-indigo-600/70 shadow-md dark:shadow-xl backdrop-blur-sm">
+          <h4 className="text-base font-bold text-gray-800 dark:text-white mb-3 flex items-center">
+            <span className="mr-2">📊</span>
+            命盘总述
+          </h4>
+          <div className="text-sm text-gray-700 dark:text-gray-200 space-y-2">
+            <p className="flex items-center">
+              <span className="w-20 font-semibold text-indigo-600 dark:text-indigo-400">整体格局：</span>
+              <span className="font-medium">{summary.overallStrength}</span>
             </p>
-            <p>
-              <span className="font-medium">最强宫位：</span>
-              {summary.strongestPalace?.name}（{summary.strongestPalace?.ganzhi}）
+            <p className="flex items-center">
+              <span className="w-20 font-semibold text-emerald-600 dark:text-emerald-400">最强宫位：</span>
+              <span className="font-medium">{summary.strongestPalace?.name}（{summary.strongestPalace?.ganzhi}）</span>
             </p>
-            <p>
-              <span className="font-medium">最弱宫位：</span>
-              {summary.weakestPalace?.name}（{summary.weakestPalace?.ganzhi}）
+            <p className="flex items-center">
+              <span className="w-20 font-semibold text-orange-600 dark:text-orange-400">最弱宫位：</span>
+              <span className="font-medium">{summary.weakestPalace?.name}（{summary.weakestPalace?.ganzhi}）</span>
             </p>
           </div>
         </div>
       )}
 
       {/* 重点宫位 */}
-      <div className="bg-white dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-base font-semibold text-gray-700 dark:text-white">🎯 重点宫位</h4>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
+            className={`text-sm px-3 py-1.5 rounded-lg transition-all hover:scale-105 active:scale-95 ${
               isExpanded
-                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300'
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-700/80 dark:text-gray-300'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white dark:from-purple-600 dark:to-indigo-600 shadow-md hover:shadow-lg'
+                : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 dark:from-gray-700 dark:to-gray-600 dark:text-gray-200 hover:shadow-md'
             }`}
           >
             {isExpanded ? '收起' : '展开'}
@@ -305,24 +385,28 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
               return (
                 <div
                   key={index}
-                  className={`bg-gradient-to-br ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-3 border transition-all hover:shadow-md ${isWeak ? 'dark:border-red-600/60' : ''}`}
+                  className={`relative overflow-hidden bg-gradient-to-br ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] ${isWeak ? 'dark:border-red-500/60' : ''}`}
                 >
-                  <div className="flex justify-between items-center mb-2">
-                    <h5 className={`text-sm font-semibold ${isWeak ? 'text-gray-900 dark:text-red-200' : 'text-gray-800 dark:text-gray-200'}`}>
-                      {palace.name}
-                    </h5>
-                    <div className="flex items-center gap-1">
-                      <span className={`text-xs px-2 py-0.5 rounded font-bold ${getScoreColor(palace.strength.score)} text-white`}>
-                        {palace.strength.strength}
-                      </span>
+                  {/* 装饰性光泽 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none dark:from-white/5"></div>
+                  <div className="relative z-10">
+                    <div className="flex justify-between items-center mb-2">
+                      <h5 className={`text-sm font-bold ${isWeak ? 'text-gray-900 dark:text-red-300' : 'text-gray-800 dark:text-gray-100'}`}>
+                        {palace.name}
+                      </h5>
+                      <div className="flex items-center gap-1">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${getScoreColor(palace.strength.score)} text-white shadow-sm`}>
+                          {palace.strength.strength}
+                        </span>
+                      </div>
                     </div>
+                    <div className={`text-xs mb-1 font-medium ${isWeak ? 'text-gray-700 dark:text-red-400/90' : 'text-gray-600 dark:text-gray-400'}`}>
+                      {palace.ganzhi} · {palace.strength.element}五行
+                    </div>
+                    <p className={`text-xs leading-relaxed ${isWeak ? 'text-gray-800 dark:text-red-200/90' : 'text-gray-700 dark:text-gray-300'}`}>
+                      {palace.description}
+                    </p>
                   </div>
-                  <div className={`text-xs mb-1 ${isWeak ? 'text-gray-700 dark:text-red-300/90' : 'text-gray-600 dark:text-gray-400'}`}>
-                    {palace.ganzhi} · {palace.strength.element}五行
-                  </div>
-                  <p className={`text-xs leading-relaxed ${isWeak ? 'text-gray-900 dark:text-red-100/90' : 'text-gray-700 dark:text-gray-300'}`}>
-                    {palace.description}
-                  </p>
                 </div>
               );
             })}
@@ -331,15 +415,15 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       </div>
 
       {/* 十二宫位展开/收起 */}
-      <div className="bg-white dark:bg-gray-800/90 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-base font-semibold text-gray-700 dark:text-white">🔮 十二宫位详解</h4>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
+            className={`text-sm px-3 py-1.5 rounded-lg transition-all hover:scale-105 active:scale-95 ${
               isExpanded
-                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300'
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-700/80 dark:text-gray-300'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white dark:from-purple-600 dark:to-indigo-600 shadow-md hover:shadow-lg'
+                : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 dark:from-gray-700 dark:to-gray-600 dark:text-gray-200 hover:shadow-md'
             }`}
           >
             {isExpanded ? '收起全部' : '展开全部'}
@@ -353,22 +437,24 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
               return (
                 <div
                   key={index}
-                  className={`bg-gradient-to-r ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-3 border transition-all hover:shadow-md ${isWeak ? 'dark:border-red-600/60' : ''}`}
+                  className={`relative overflow-hidden bg-gradient-to-r ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-xl p-3.5 border border-gray-200/50 dark:border-gray-600/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 hover:scale-[1.01] ${isWeak ? 'dark:border-red-500/60' : ''}`}
                 >
-                  <div className="flex items-start justify-between">
+                  {/* 装饰性光泽 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none dark:from-white/5"></div>
+                  <div className="relative z-10 flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h5 className={`text-sm font-semibold ${isWeak ? 'text-gray-900 dark:text-red-200' : 'text-gray-800 dark:text-gray-200'}`}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <h5 className={`text-sm font-bold ${isWeak ? 'text-gray-900 dark:text-red-300' : 'text-gray-800 dark:text-gray-100'}`}>
                           {palace.name}
                         </h5>
-                        <span className={`text-xs px-2 py-0.5 rounded font-bold ${getScoreColor(palace.strength.score)} text-white`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${getScoreColor(palace.strength.score)} text-white shadow-sm`}>
                           {palace.strength.score}分
                         </span>
-                        <span className={`text-xs ${isWeak ? 'text-gray-700 dark:text-red-300/90' : 'text-gray-600 dark:text-gray-400'}`}>
+                        <span className={`text-xs font-semibold ${isWeak ? 'text-gray-700 dark:text-red-400/90' : 'text-gray-600 dark:text-gray-400'}`}>
                           {palace.ganzhi}
                         </span>
                       </div>
-                      <p className={`text-xs leading-relaxed ${isWeak ? 'text-gray-900 dark:text-red-100/90' : 'text-gray-700 dark:text-gray-300'}`}>
+                      <p className={`text-xs leading-relaxed ${isWeak ? 'text-gray-800 dark:text-red-200/90' : 'text-gray-700 dark:text-gray-300'}`}>
                         {palace.description}
                       </p>
                     </div>
@@ -378,21 +464,23 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
             })}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
             {palaces.slice(0, 6).map((palace, index) => {
               const isWeak = ['弱', '偏弱'].includes(palace.strength.strength);
               return (
                 <div
                   key={index}
-                  className={`bg-gradient-to-br ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-lg p-2.5 border transition-all hover:shadow-md ${isWeak ? 'dark:border-red-600/60' : ''}`}
+                  className={`relative overflow-hidden bg-gradient-to-br ${getCardColor(palace.strength.strength)} dark:${getCardColorDark(palace.strength.strength)} rounded-xl p-3 border border-gray-200/50 dark:border-gray-600/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${isWeak ? 'dark:border-red-500/60' : ''}`}
                 >
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <h5 className={`text-xs font-semibold ${isWeak ? 'text-gray-900 dark:text-red-200' : 'text-gray-800 dark:text-gray-200'}`}>
+                  {/* 装饰性光泽 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none dark:from-white/5"></div>
+                  <div className="relative z-10 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1.5">
+                      <h5 className={`text-xs font-bold ${isWeak ? 'text-gray-900 dark:text-red-300' : 'text-gray-800 dark:text-gray-100'}`}>
                         {palace.name}
                       </h5>
                     </div>
-                    <div className={`text-xs ${isWeak ? 'text-gray-700 dark:text-red-300/90' : 'text-gray-600 dark:text-gray-400'}`}>
+                    <div className={`text-xs font-semibold ${isWeak ? 'text-gray-700 dark:text-red-400/90' : 'text-gray-600 dark:text-gray-400'}`}>
                       {palace.ganzhi}
                     </div>
                   </div>
@@ -405,26 +493,31 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
 
       {/* 命理建议 */}
       {summary && summary.advice && summary.advice.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-900/50 rounded-lg p-4 border border-amber-200 dark:border-amber-600">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-3">💡 命理建议</h4>
-          <div className="space-y-2">
+        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/80 dark:to-yellow-900/80 rounded-2xl p-5 border border-amber-200 dark:border-amber-600/70 shadow-md dark:shadow-xl backdrop-blur-sm">
+          <h4 className="text-base font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+            <span className="mr-2">💡</span>
+            命理建议
+          </h4>
+          <div className="space-y-2.5">
             {summary.advice.map((advice, index) => (
               <div
                 key={index}
-                className={`flex items-start gap-2 p-2 rounded-lg ${
+                className={`relative overflow-hidden flex items-start gap-3 p-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${
                   advice.type === 'success'
-                    ? 'bg-green-100 dark:bg-green-900/50'
+                    ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/70 dark:to-emerald-900/70 border border-green-200 dark:border-green-600/50'
                     : advice.type === 'warning'
-                      ? 'bg-red-100 dark:bg-red-900/50'
-                      : 'bg-blue-100 dark:bg-blue-900/50'
+                      ? 'bg-gradient-to-r from-red-100 to-rose-100 dark:from-red-900/70 dark:to-rose-900/70 border border-red-200 dark:border-red-600/50'
+                      : 'bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/70 dark:to-indigo-900/70 border border-blue-200 dark:border-blue-600/50'
                 }`}
               >
-                <span className="text-lg">{advice.type === 'success' ? '✅' : advice.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-0.5">
+                {/* 装饰性光泽 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent pointer-events-none dark:from-white/5"></div>
+                <span className="relative z-10 text-xl flex-shrink-0">{advice.type === 'success' ? '✅' : advice.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                <div className="relative z-10 flex-1">
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">
                     {advice.title}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
                     {advice.content}
                   </p>
                 </div>
@@ -435,16 +528,28 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       )}
 
       {/* 使用说明 */}
-      <div className="bg-blue-50 dark:bg-blue-900/50 rounded-lg p-4 border border-blue-200 dark:border-blue-600">
-        <div className="flex items-start gap-3">
-          <span className="text-2xl">📜</span>
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/80 dark:to-indigo-900/80 rounded-2xl p-5 border border-blue-200 dark:border-blue-600/70 shadow-md dark:shadow-xl backdrop-blur-sm">
+        <div className="flex items-start gap-4">
+          <span className="text-3xl flex-shrink-0">📜</span>
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-white mb-1">紫微命宫说明</h4>
-            <div className="text-xs text-gray-600 dark:text-gray-300 space-y-0.5">
-              <p>• 紫微命宫基于出生时间、经纬度等精确信息计算</p>
-              <p>• 十二宫位代表人生不同领域，强度分数（20-100）反映该领域的先天运势</p>
-              <p>• 命宫最强代表您的先天优势领域，最弱宫位需要后天弥补</p>
-              <p>• 更新出生信息后，紫微命宫将自动重新计算</p>
+            <h4 className="text-base font-bold text-gray-800 dark:text-white mb-3">紫微命宫说明</h4>
+            <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+              <p className="flex items-start">
+                <span className="text-blue-600 dark:text-blue-400 font-semibold mr-2 flex-shrink-0">•</span>
+                <span>紫微命宫基于出生时间、经纬度等精确信息计算</span>
+              </p>
+              <p className="flex items-start">
+                <span className="text-blue-600 dark:text-blue-400 font-semibold mr-2 flex-shrink-0">•</span>
+                <span>十二宫位代表人生不同领域，强度分数（20-100）反映该领域的先天运势</span>
+              </p>
+              <p className="flex items-start">
+                <span className="text-blue-600 dark:text-blue-400 font-semibold mr-2 flex-shrink-0">•</span>
+                <span>命宫最强代表您的先天优势领域，最弱宫位需要后天弥补</span>
+              </p>
+              <p className="flex items-start">
+                <span className="text-blue-600 dark:text-blue-400 font-semibold mr-2 flex-shrink-0">•</span>
+                <span>更新出生信息后，紫微命宫将自动重新计算</span>
+              </p>
             </div>
           </div>
         </div>

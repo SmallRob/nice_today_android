@@ -44,12 +44,6 @@ export const calculateLunarDate = (solarDateStr, solarTimeStr = '12:00', longitu
         let lunarMonthName = lunar.getMonthInChinese();
         let lunarDayName = lunar.getDayInChinese();
         
-        if (year === 1991 && month === 4 && day === 21) {
-            // 强制设置为三月初七
-            lunarMonthName = '三月';
-            lunarDayName = '初七';
-        }
-        
         return {
             // 农历基本信息
             year: lunar.getYear(),

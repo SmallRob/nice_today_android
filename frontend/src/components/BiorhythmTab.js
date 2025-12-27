@@ -316,33 +316,142 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     nickname: '',
     birthDate: ''
   });
+  const [showUserInfoModal, setShowUserInfoModal] = useState(false);
+  const [tempBirthDate, setTempBirthDate] = useState('');
+  const [tempNickname, setTempNickname] = useState('');
 
   // 动态提示相关状态
   const [dailyTip, setDailyTip] = useState('');
   const [lastTipRefresh, setLastTipRefresh] = useState(0);
 
-  // 确保配置管理器已初始化，并监听配置变化
+  // 初始化用户信息和加载数据 - 简化逻辑，参考MayaBirthChart_optimized.js
   useEffect(() => {
-    if (!configManagerReady) {
-      initializeConfigManager();
+    try {
+      let birthDate = null;
+      let nickname = '用户';
+
+      // 从全局配置获取用户信息
+      if (currentConfig && currentConfig.birthDate) {
+        birthDate = currentConfig.birthDate;
+        nickname = currentConfig.nickname || '用户';
+      }
+
+      // 更新用户信息状态
+      setUserInfo({
+        nickname: nickname,
+        birthDate: birthDate || ''
+      });
+      setTempBirthDate(birthDate || '');
+      setTempNickname(nickname);
+
+      // 如果有出生日期，加载生物节律数据
+      if (birthDate) {
+        const newBirthDate = new Date(birthDate);
+        if (!isNaN(newBirthDate.getTime())) {
+          setBirthDate(newBirthDate);
+          loadBiorhythmData(newBirthDate);
+        }
+      }
+    } catch (error) {
+      console.error('初始化用户信息失败:', error);
+    }
+  }, []);
+
+  // 监听配置变化 - 当配置更新时重新加载数据
+  useEffect(() => {
+    if (!currentConfig || !currentConfig.birthDate) return;
+
+    const { nickname, birthDate } = currentConfig;
+
+    // 更新用户信息
+    setUserInfo({
+      nickname: nickname || '用户',
+      birthDate: birthDate
+    });
+
+    setTempBirthDate(birthDate);
+    setTempNickname(nickname || '');
+
+    // 重新加载生物节律数据
+    const newBirthDate = new Date(birthDate);
+    if (!isNaN(newBirthDate.getTime())) {
+      setBirthDate(newBirthDate);
+      loadBiorhythmData(newBirthDate);
+    }
+  }, [currentConfig?.birthDate, currentConfig?.nickname, loadBiorhythmData]);
+
+  // 保存用户信息到全局配置
+  const saveUserInfo = useCallback(async () => {
+    if (!tempBirthDate) {
+      alert('请选择出生日期');
+      return;
     }
 
-    // 只有当配置数据有效且出生日期确实发生变化时才更新
-    if (currentConfig && currentConfig.birthDate) {
-      const userBirthDate = new Date(currentConfig.birthDate);
-      const newBirthDateTimestamp = userBirthDate.getTime();
-      const currentBirthDateTimestamp = birthDate ? birthDate.getTime() : 0;
-      
-      // 只有当出生日期真正变化时才更新（避免使用默认值覆盖）
-      if (newBirthDateTimestamp !== currentBirthDateTimestamp) {
-        setBirthDate(userBirthDate);
-        setUserInfo({
-          nickname: currentConfig.nickname || '',
-          birthDate: currentConfig.birthDate
-        });
+    try {
+      // 计算星座
+      const calculateZodiac = (birthDate) => {
+        const date = new Date(birthDate);
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+
+        const zodiacDates = [
+          { name: '水瓶座', startMonth: 1, startDay: 20, endMonth: 2, endDay: 18 },
+          { name: '双鱼座', startMonth: 2, startDay: 19, endMonth: 3, endDay: 20 },
+          { name: '白羊座', startMonth: 3, startDay: 21, endMonth: 4, endDay: 19 },
+          { name: '金牛座', startMonth: 4, startDay: 20, endMonth: 5, endDay: 20 },
+          { name: '双子座', startMonth: 5, startDay: 21, endMonth: 6, endDay: 21 },
+          { name: '巨蟹座', startMonth: 6, startDay: 22, endMonth: 7, endDay: 22 },
+          { name: '狮子座', startMonth: 7, startDay: 23, endMonth: 8, endDay: 22 },
+          { name: '处女座', startMonth: 8, startDay: 23, endMonth: 9, endDay: 22 },
+          { name: '天秤座', startMonth: 9, startDay: 23, endMonth: 10, endDay: 23 },
+          { name: '天蝎座', startMonth: 10, startDay: 24, endMonth: 11, endDay: 22 },
+          { name: '射手座', startMonth: 11, startDay: 23, endMonth: 12, endDay: 21 },
+          { name: '摩羯座', startMonth: 12, startDay: 22, endMonth: 1, endDay: 19 }
+        ];
+
+        for (const zodiac of zodiacDates) {
+          if ((month === zodiac.startMonth && day >= zodiac.startDay) ||
+              (month === zodiac.endMonth && day <= zodiac.endDay)) {
+            return zodiac.name;
+          }
+        }
+        return '摩羯座';
+      };
+
+      const zodiac = calculateZodiac(tempBirthDate);
+
+      // 导入userConfigManager来更新配置
+      const { userConfigManager } = await import('../utils/userConfigManager');
+
+      // 检查管理器是否初始化
+      if (!userConfigManager.initialized) {
+        await userConfigManager.initialize();
       }
+
+      // 更新当前配置
+      await userConfigManager.updateCurrentConfig({
+        birthDate: tempBirthDate,
+        nickname: tempNickname,
+        zodiac: zodiac
+      });
+
+      // 更新本地状态
+      const newBirthDate = new Date(tempBirthDate);
+      setBirthDate(newBirthDate);
+      setUserInfo({
+        nickname: tempNickname,
+        birthDate: tempBirthDate
+      });
+
+      setShowUserInfoModal(false);
+
+      // 重新加载生物节律数据
+      await loadBiorhythmData(newBirthDate);
+    } catch (error) {
+      console.error('保存用户信息失败:', error);
+      alert('保存失败，请重试');
     }
-  }, [configManagerReady, currentConfig?.birthDate, currentConfig?.nickname, initializeConfigManager, birthDate]);
+  }, [tempBirthDate, tempNickname, loadBiorhythmData]);
 
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
@@ -711,65 +820,14 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     setLoading(false);
   }, [birthDate]);
 
-  // 监听配置变化，当配置更新时重新加载数据
+  // 初始化正念活动和任务
   useEffect(() => {
-    if (!configManagerReady || !currentConfig) return;
-
-    const loadData = async () => {
-      // 只有当出生日期发生变化时才重新加载
-      if (currentConfig.birthDate) {
-        const userBirthDate = new Date(currentConfig.birthDate);
-        const newBirthDateTimestamp = userBirthDate.getTime();
-        const currentBirthDateTimestamp = birthDate ? birthDate.getTime() : 0;
-        
-        // 只有当出生日期真正变化时才重新加载（避免默认值触发）
-        if (newBirthDateTimestamp !== currentBirthDateTimestamp) {
-          setBirthDate(userBirthDate);
-          await loadBiorhythmData(userBirthDate);
-        }
-      }
-    };
-
-    loadData();
-  }, [configManagerReady, currentConfig?.birthDate, birthDate, loadBiorhythmData]);
-
-  // 组件挂载时自动加载数据（只执行一次）
-  useEffect(() => {
-    const loadData = async () => {
-      // 等待配置管理器初始化完成
-      if (!configManagerReady) return;
-
-      // 如果已经有birthDate，不再重复加载
-      if (birthDate) {
-        await loadBiorhythmData(birthDate);
-        return;
-      }
-
-      // 优先使用用户配置的出生日期
-      if (currentConfig && currentConfig.birthDate) {
-        // 只有当不是默认日期时才使用
-        if (currentConfig.birthDate !== DEFAULT_BIRTH_DATE) {
-          const userBirthDate = new Date(currentConfig.birthDate);
-          setBirthDate(userBirthDate);
-          await loadBiorhythmData(userBirthDate);
-          return;
-        }
-      }
-
-      // 最后才使用默认日期（仅在首次加载且无有效配置时）
-      const defaultDate = parseDateLocal(DEFAULT_BIRTH_DATE);
-      setBirthDate(defaultDate);
-      await loadBiorhythmData(defaultDate);
-    };
-
-    loadData();
-
     // 初始化正念活动
     setMindfulnessActivities(getMindfulnessActivities(0, 0, 0));
 
     // 加载今日任务完成状态
     setCompletedTasks(loadCompletedTasks());
-  }, [configManagerReady, loadCompletedTasks]); // 添加依赖
+  }, [loadCompletedTasks]);
 
   // 检测节律极值并发送通知，同时生成动态提示
   useEffect(() => {
@@ -836,8 +894,8 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             {totalScore > 15 ? '🌟 极佳' : totalScore > 0 ? '😊 良好' : totalScore < -15 ? '😫 极低' : totalScore < 0 ? '⚠️ 偏低' : '😐 平稳'}
           </span>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-          今日综合得分: <span className="font-medium">{totalScore}%</span> - {totalStatus.text}
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+          今日综合得分: <span className="font-medium text-gray-900 dark:text-white">{totalScore}%</span> - <span className="text-gray-700 dark:text-gray-200">{totalStatus.text}</span>
         </p>
 
         {/* 动态暖心提示 */}
@@ -855,10 +913,10 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                 className="text-xs text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 font-medium flex items-center ml-2 whitespace-nowrap"
                 title="换一换"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                <span className="ml-1">换一换</span>
+                <span className="ml-1 text-current">换一换</span>
               </button>
             </div>
           </div>
@@ -875,7 +933,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             <div className="mb-4 mx-auto max-w-2xl">
               <div className="flex flex-col items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-3"></div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">正在计算生物节律...</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">正在计算生物节律...</p>
               </div>
             </div>
           </div>
@@ -925,7 +983,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                   </svg>
                 </div>
                 <h3 className="text-gray-800 dark:text-gray-300 text-sm font-medium mb-1">暂无数据</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-xs">暂时无法获取生物节律数据</p>
+                <p className="text-gray-600 dark:text-gray-300 text-xs">暂时无法获取生物节律数据</p>
                 <button
                   onClick={() => loadBiorhythmData()}
                   className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
@@ -992,13 +1050,21 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
                     <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                       {userInfo.nickname ? `${userInfo.nickname} 的今日节律` : '今日生物节律'}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      {userInfo.birthDate ? `出生: ${userInfo.birthDate}` : '请到设置页面配置信息'}
+                    <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
+                      {userInfo.birthDate ? `出生: ${userInfo.birthDate}` : '请配置信息'}
                     </p>
                   </div>
-                  <span className="inline-block px-3 py-1 text-sm font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 dark:bg-opacity-30 rounded-full">
-                    本地计算
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setShowUserInfoModal(true)}
+                      className="text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full border border-blue-200 dark:border-blue-700 transition-colors"
+                    >
+                      修改信息
+                    </button>
+                    <span className="inline-block px-3 py-1 text-sm font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 dark:bg-opacity-30 rounded-full">
+                      本地计算
+                    </span>
+                  </div>
                 </div>
 
                 {/* 今日节律状态 */}
@@ -1267,6 +1333,56 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
           </div>
         </div>
       </div>
+
+      {/* 用户信息编辑模态框 */}
+      {showUserInfoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b dark:border-gray-700">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">编辑个人信息</h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  昵称
+                </label>
+                <input
+                  type="text"
+                  value={tempNickname}
+                  onChange={(e) => setTempNickname(e.target.value)}
+                  placeholder="请输入昵称"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  出生日期
+                </label>
+                <input
+                  type="date"
+                  value={tempBirthDate}
+                  onChange={(e) => setTempBirthDate(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+            <div className="p-6 border-t dark:border-gray-700 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowUserInfoModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={saveUserInfo}
+                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-colors shadow-md"
+              >
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

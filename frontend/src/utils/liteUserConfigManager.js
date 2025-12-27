@@ -7,7 +7,7 @@
 const LITE_DEFAULT_CONFIG = Object.freeze({
   nickname: '轻量版用户',
   birthDate: '1990-01-01',
-  birthTime: '12:00',
+  birthTime: '午',
   gender: 'secret',
   isused: false,
   isSystemDefault: true
@@ -60,22 +60,34 @@ class LiteUserConfigManager {
   }
 
   /**
-   * 初始化配置管理器
+   * 确保配置已初始化（同步方法，不使用await）
    */
-  async initialize() {
+  ensureInitialized() {
+    if (this.initialized) {
+      return;
+    }
+
     try {
-      // 从本地存储加载轻量版专用配置
+      // 同步方式从localStorage加载配置
       const storedConfigs = localStorage.getItem(LITE_STORAGE_KEYS.USER_CONFIGS);
       const storedIndex = localStorage.getItem(LITE_STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
 
-      console.log('轻量版：从本地存储加载配置:', {
+      console.log('轻量版：同步加载配置:', {
         hasConfigs: !!storedConfigs,
-        hasIndex: !!storedIndex,
-        configsLength: storedConfigs ? storedConfigs.length : 0
+        hasIndex: !!storedIndex
       });
 
-      // 解析配置数据（加载失败时创建深拷贝）
-      this.configs = storedConfigs ? JSON.parse(storedConfigs) : [createConfigFromDefault()];
+      // 解析配置数据
+      if (storedConfigs) {
+        try {
+          this.configs = JSON.parse(storedConfigs);
+        } catch (parseError) {
+          console.error('解析配置失败:', parseError);
+          this.configs = [createConfigFromDefault()];
+        }
+      } else {
+        this.configs = [createConfigFromDefault()];
+      }
       this.activeConfigIndex = storedIndex ? parseInt(storedIndex, 10) : 0;
 
       // 确保至少有一组配置
@@ -103,24 +115,22 @@ class LiteUserConfigManager {
         this.configs[this.activeConfigIndex].isused = true;
       }
 
-      // 保存配置到本地存储
-      this.saveToStorage();
-
       this.initialized = true;
-      console.log('轻量版用户配置管理器初始化成功');
-
-      return true;
     } catch (error) {
-      console.error('轻量版用户配置管理器初始化失败:', error);
-      
-      // 降级处理：使用默认配置
+      console.error('同步初始化失败，使用默认配置:', error);
       this.configs = [createConfigFromDefault()];
       this.activeConfigIndex = 0;
-      this.saveToStorage();
       this.initialized = true;
-      
-      return true;
     }
+  }
+
+  /**
+   * 初始化配置管理器
+   */
+  async initialize() {
+    this.ensureInitialized();
+    console.log('轻量版用户配置管理器初始化成功');
+    return true;
   }
 
   /**
@@ -137,13 +147,20 @@ class LiteUserConfigManager {
 
   /**
    * 获取当前配置
+   * 直接返回配置，不依赖初始化状态，确保总是有可用的数据
    */
   getCurrentConfig() {
-    if (!this.initialized || this.configs.length === 0) {
+    try {
+      if (!this.initialized || this.configs.length === 0) {
+        // 未初始化或无配置时，先尝试从localStorage加载
+        this.ensureInitialized();
+      }
+      
+      return deepCloneConfig(this.configs[this.activeConfigIndex]);
+    } catch (error) {
+      console.error('获取配置失败，使用默认配置:', error);
       return createConfigFromDefault();
     }
-    
-    return deepCloneConfig(this.configs[this.activeConfigIndex]);
   }
 
   /**

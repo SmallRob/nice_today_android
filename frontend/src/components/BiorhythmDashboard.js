@@ -11,7 +11,6 @@ import BiorhythmTab from './BiorhythmTab';
 import ZodiacEnergyTab from './ZodiacEnergyTab';
 import HoroscopeTab from './ZodiacHoroscope';
 import MBTIPersonalityTab from './MBTIPersonalityTabHome';
-import MayaCalendarTab from './MayaCalendarTab';
 
 // 错误边界组件
 const ErrorBoundaryFallback = ({ error, resetError }) => (
@@ -21,7 +20,7 @@ const ErrorBoundaryFallback = ({ error, resetError }) => (
       <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
         加载出错
       </h3>
-      <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+      <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
         {error?.message || '未知错误'}
       </p>
       <button
@@ -48,10 +47,12 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   // 性能监控
   const { measureTabSwitch } = useTabPerformance();
 
-  // 优化的内存管理：减少清理频率
+  // 优化的内存管理：减少清理频率，添加特性检测
   const cleanupUnusedTabs = useCallback((currentTab) => {
-    // 仅在内存压力较大时清理，减少不必要的状态更新
-    const shouldCleanup = performance.memory && performance.memory.usedJSHeapSize > 50 * 1024 * 1024; // 超过50MB
+    // 安全地检查内存使用情况，仅在支持的浏览器中执行
+    const shouldCleanup = performance.memory && 
+                          typeof performance.memory.usedJSHeapSize === 'number' && 
+                          performance.memory.usedJSHeapSize > 50 * 1024 * 1024; // 超过50MB
 
     if (shouldCleanup) {
       setTimeout(() => {
@@ -84,8 +85,14 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
     console.error(`[${context}] 组件错误:`, error);
     setError(`加载失败: ${error.message || '未知错误'}`);
 
-    // 如果错误严重，启用降级模式
-    if (error.name === 'ChunkLoadError' || error.message?.includes('加载失败')) {
+    // 扩展的错误检查，包含更多关键错误类型
+    const isCriticalError = error.name === 'ChunkLoadError' || 
+                           error.message?.includes('加载失败') ||
+                           error.message?.includes('网络错误') ||
+                           error.message?.includes('Network Error') ||
+                           error.code === 'MODULE_NOT_FOUND';
+
+    if (isCriticalError) {
       setFallbackMode(true);
     }
 
@@ -103,7 +110,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
         <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
           功能暂时不可用
         </h3>
-        <p className="text-gray-500 dark:text-gray-400 text-sm">
+        <p className="text-gray-500 dark:text-gray-300 text-sm">
           当前功能正在维护中，请稍后再试
         </p>
         <button
@@ -221,7 +228,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
     };
   }, []);
 
-  // 标签配置 - 添加生肖能量和星座运程标签
+  // 标签配置 - 添加生肖能量、星座运程标签
   const tabs = [
     {
       id: 'biorhythm',
@@ -273,7 +280,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             <div className="absolute inset-0 border-4 border-transparent border-t-purple-400 rounded-full animate-ping"></div>
           </div>
           <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2 animate-fade-in">Nice Today</h3>
-          <p className="text-gray-500 dark:text-gray-400 animate-fade-in" style={{ animationDelay: '0.2s' }}>正在为您准备个性化体验...</p>
+          <p className="text-gray-500 dark:text-gray-300 animate-fade-in" style={{ animationDelay: '0.2s' }}>正在为您准备个性化体验...</p>
           <div className="mt-4 flex justify-center space-x-1">
             {[0, 1, 2].map((i) => (
               <div
@@ -306,32 +313,51 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
         <div className="container mx-auto px-4 py-4 relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {/* 应用图标 */}
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              {/* 应用图标 - 增强交互效果 */}
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden backdrop-blur-sm transition-all duration-300 hover:bg-opacity-30 hover:scale-105 cursor-pointer group">
                 <img
                   src={niceDayImage}
                   alt="Nice Today"
-                  className="w-8 h-8 object-contain"
+                  className="w-8 h-8 sm:w-9 sm:h-9 object-contain transition-transform duration-300 group-hover:rotate-12"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'block';
                   }}
                 />
                 {/* 备用图标 */}
-                <svg className="w-6 h-6 text-white hidden" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white hidden" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-white">Nice Today</h1>
-                <p className="text-blue-100 text-xs">您的个性化健康助手</p>
+              <div className="flex flex-col sm:items-start">
+                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight transition-all duration-300 hover:scale-105">
+                  Nice Today
+                </h1>
+                <p className="text-blue-100 text-sm sm:text-base opacity-90 mt-0.5 transition-opacity duration-300">
+                  您的个性化健康助手
+                </p>
               </div>
             </div>
-            <div className="text-right">
-              <span className="inline-block px-2 py-1 text-xs font-medium text-white bg-white bg-opacity-20 rounded-full">
-                每日更新
-              </span>
+            
+            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3">
+              {/* 动态状态徽章 */}
+              <div className="flex items-center space-x-2">
+                <span className="relative flex h-2 w-2 sm:h-3 sm:w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-green-500"></span>
+                </span>
+                <span className="inline-block px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-white bg-white bg-opacity-20 rounded-full backdrop-blur-sm transition-all duration-300 hover:bg-opacity-30">
+                  实时更新
+                </span>
+              </div>
+              
+              {/* 版本信息 */}
+              <div className="hidden sm:block">
+                <span className="text-xs text-blue-100 opacity-75">
+                  v1.6
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -365,7 +391,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                   )}
                   <div className="flex flex-col items-center justify-center space-y-1">
                     <div className={`w-5 h-5 transition-colors duration-300 ${isActive ? colorMap[tab.color] : 'text-gray-400 dark:text-gray-500'}`}>
-                      <tab.icon size={20} />
+                      <tab.icon />
                     </div>
                     <span className="text-xs font-medium">{tab.label}</span>
                   </div>
@@ -411,11 +437,6 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 {activeTab === 'zodiac' && loadedTabs.has('zodiac') && (
                   <ZodiacEnergyTab
                     onError={(error) => handleError(error, 'ZodiacEnergyTab')}
-                  />
-                )}
-                {activeTab === 'maya' && loadedTabs.has('maya') && (
-                  <MayaCalendarTab
-                    onError={(error) => handleError(error, 'MayaCalendarTab')}
                   />
                 )}
                 {activeTab === 'horoscope' && loadedTabs.has('horoscope') && (

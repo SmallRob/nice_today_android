@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
+import { useUserConfig } from '../contexts/UserConfigContext';
+import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
 import '../styles/dashboard-layout.css';
@@ -35,6 +36,7 @@ const mbtiConfigManager = new MBTIConfigManager();
 const MBTIPersonalityTabHome = () => {
   // 使用主题管理
   const { theme } = useTheme();
+  const { updateConfig } = useUserConfig();
 
   // 状态管理
   const [userMBTI, setUserMBTI] = useState('');
@@ -50,6 +52,8 @@ const MBTIPersonalityTabHome = () => {
   const [initialized, setInitialized] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [tempMBTI, setTempMBTI] = useState(''); // 用于临时切换MBTI查看
+  const [globalUserConfig, setGlobalUserConfig] = useState(null);
+  const [showMBTIModal, setShowMBTIModal] = useState(false);
 
   // MBTI人格类型数据 - 使用useMemo缓存
   const mbtiTypes = useMemo(() => [
@@ -367,6 +371,59 @@ const MBTIPersonalityTabHome = () => {
     'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
   ], []);
 
+  // 初始化组件 - 优化为立即加载默认数据
+  useEffect(() => {
+    let isMounted = true;
+
+    const initialize = async () => {
+      try {
+        // 初始化用户配置管理器
+        await userConfigManager.initialize();
+        const config = userConfigManager.getCurrentConfig();
+        setGlobalUserConfig(config);
+
+        // 立即加载所有MBTI类型
+        setAllMBTIs(mbtiList);
+
+        // 如果用户有配置的MBTI，则使用；否则使用默认值
+        const initialMBTI = config?.mbti || 'INFP';
+        setUserMBTI(initialMBTI);
+        setTempMBTI('');
+        setInitialized(true);
+        setDataLoaded(false);
+
+        // 设置用户信息
+        setUserInfo({
+          nickname: config?.nickname || '',
+          birthDate: config?.birthDate || '',
+          mbti: config?.mbti || ''
+        });
+
+        // 如果用户配置了MBTI，则加载数据
+        if (config?.mbti) {
+          loadPersonalityAnalysis(config.mbti);
+          setDataLoaded(true);
+        }
+      } catch (error) {
+        console.error('初始化MBTI组件失败:', error);
+
+        // 降级处理
+        setAllMBTIs(mbtiList);
+        setUserMBTI('INFP');
+        setTempMBTI('');
+        if (isMounted) {
+          setInitialized(true);
+        }
+      }
+    };
+
+    initialize();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [mbtiList]);
+
   // 加载MBTI分析数据
   const loadPersonalityAnalysis = (mbtiType) => {
     if (!mbtiType) return;
@@ -588,12 +645,13 @@ const MBTIPersonalityTabHome = () => {
   // 处理MBTI类型选择 - 支持临时查看模式
   const handleMBTIChange = (mbti) => {
     if (userMBTI !== mbti) {
-      // 如果是用户配置的MBTI，清除临时标记
-      if (mbti === userInfo.mbti) {
-        setTempMBTI('');
-      } else {
-        // 否则设置为临时MBTI
+      // 判断是否为临时查看
+      const userConfigMBTI = globalUserConfig?.mbti || '';
+      const isTemporary = userConfigMBTI && userConfigMBTI !== mbti;
+      if (isTemporary) {
         setTempMBTI(mbti);
+      } else {
+        setTempMBTI('');
       }
 
       setUserMBTI(mbti);
@@ -601,6 +659,21 @@ const MBTIPersonalityTabHome = () => {
       setDataLoaded(false);
     }
   };
+
+  // 保存MBTI配置
+  const saveMBTIConfig = useCallback(async (mbti) => {
+    try {
+      await updateConfig({ mbti });
+      setGlobalUserConfig(prev => ({ ...prev, mbti }));
+      setUserInfo(prev => ({ ...prev, mbti }));
+      setUserMBTI(mbti);
+      setTempMBTI('');
+      setShowMBTIModal(false);
+    } catch (error) {
+      console.error('保存MBTI配置失败:', error);
+      setError('保存失败: ' + error.message);
+    }
+  }, [updateConfig]);
 
   // 渲染MBTI基本信息卡片
   const renderBasicInfoCard = () => {
@@ -621,7 +694,7 @@ const MBTIPersonalityTabHome = () => {
             >
               <span className="mb-1">{icon}</span>
             </div>
-            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] font-black uppercase tracking-widest border border-white/10">
+            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] text-gray-900 dark:text-gray-100 uppercase tracking-widest border border-white/10">
               {type}
             </div>
           </div>
@@ -630,14 +703,14 @@ const MBTIPersonalityTabHome = () => {
           <div className="flex-1 text-center md:text-left">
             <div className="mb-4">
               <div className="flex flex-col md:flex-row md:items-center md:gap-3 mb-2 justify-center md:justify-start">
-                <h1 className="text-3xl font-black tracking-tight">{nickname}</h1>
+                <h1 className="text-3xl font-black dark:text-gray-100 tracking-tight">{nickname}</h1>
                 <div className="h-6 w-[2px] bg-white/30 hidden md:block"></div>
-                <span className="text-lg font-bold opacity-90">{name}</span>
+                <span className="text-lg font-bold opacity-90 text-indigo-50 dark:text-indigo-200">{name}</span>
               </div>
-              <p className="text-sm text-indigo-100 font-bold mb-3 tracking-wide bg-black/10 inline-block px-3 py-1 rounded-lg backdrop-blur-sm">
+              <p className="text-sm text-indigo-100 dark:text-indigo-200 font-bold mb-3 tracking-wide bg-black/10 inline-block px-3 py-1 rounded-lg backdrop-blur-sm">
                 {motto}
               </p>
-              <p className="text-xs text-white/80 font-medium leading-relaxed max-w-lg mx-auto md:mx-0">
+              <p className="text-xs text-indigo-50 dark:text-indigo-200 font-medium leading-relaxed max-w-lg mx-auto md:mx-0">
                 {summary}
               </p>
             </div>
@@ -647,7 +720,7 @@ const MBTIPersonalityTabHome = () => {
               {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] font-black tracking-wider text-white shadow-inner"
+                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] text-gray-900 dark:text-gray-100 font-black dark:text-gray-100 tracking-wider text-white shadow-inner"
                 >
                   #{tag}
                 </span>
@@ -1076,6 +1149,13 @@ const MBTIPersonalityTabHome = () => {
               <span className="text-[10px] md:text-xs bg-green-400/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌳</span>
               <span className="text-[10px] md:text-xs bg-emerald-400/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌲</span>
             </div>
+            {/* 用户设置按钮 */}
+            <button
+              onClick={() => setShowMBTIModal(true)}
+              className="text-[10px] md:text-xs bg-white/20 dark:bg-gray-700/40 hover:bg-white/30 dark:hover:bg-gray-600/30 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-full border border-white/20 dark:border-gray-600 transition-all"
+            >
+              ⚙️
+            </button>
           </div>
         </div>
 
@@ -1171,6 +1251,9 @@ const MBTIPersonalityTabHome = () => {
           </div>
         </div>
       </div>
+
+      {/* MBTI设置模态框 */}
+      {renderMBTIModal()}
     </div>
   );
 };

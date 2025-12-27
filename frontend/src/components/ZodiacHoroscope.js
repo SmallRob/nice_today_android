@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
+import { userConfigManager } from '../utils/userConfigManager';
 import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
 import ZodiacTraitsDisplay from './ZodiacTraitsDisplay';
 import {
@@ -67,8 +68,8 @@ const getHoroscopeData = () => HOROSCOPE_DATA_ENHANCED;
 
 const HoroscopeTab = () => {
   // 使用新的配置上下文
-  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
-  
+  const { currentConfig, isLoading: configLoading, error: configError, updateConfig } = useUserConfig();
+
   // 状态管理
   const [userHoroscope, setUserHoroscope] = useState('');
   const [horoscopeGuidance, setHoroscopeGuidance] = useState(null);
@@ -78,6 +79,8 @@ const HoroscopeTab = () => {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [isTemporaryHoroscope, setIsTemporaryHoroscope] = useState(false);
   const isTemporaryRef = useRef(false);
+  const [showZodiacModal, setShowZodiacModal] = useState(false);
+  const [globalUserConfig, setGlobalUserConfig] = useState(null);
 
   // 初始化缓存管理器和性能优化
   useEffect(() => {
@@ -99,6 +102,40 @@ const HoroscopeTab = () => {
     };
 
     initOptimizations();
+
+    // 初始化用户配置管理器并获取全局配置
+    const initUserConfig = async () => {
+      try {
+        await userConfigManager.initialize();
+        const config = userConfigManager.getCurrentConfig();
+        setGlobalUserConfig(config);
+
+        // 获取用户星座
+        const zodiac = config?.zodiac || '';
+        if (zodiac) {
+          setUserHoroscope(zodiac);
+          setIsTemporaryHoroscope(false);
+          isTemporaryRef.current = false;
+        } else {
+          // 未配置时显示默认星座
+          setUserHoroscope('金牛座');
+          setIsTemporaryHoroscope(false);
+          isTemporaryRef.current = false;
+        }
+        setInitialized(true);
+        setDataLoaded(false);
+      } catch (error) {
+        console.error('初始化用户配置管理器失败:', error);
+        // 降级处理
+        setUserHoroscope('金牛座');
+        setIsTemporaryHoroscope(false);
+        isTemporaryRef.current = false;
+        setInitialized(true);
+        setDataLoaded(false);
+      }
+    };
+
+    initUserConfig();
   }, []);
 
   // 计算综合分数（基于增强版算法）
@@ -109,15 +146,25 @@ const HoroscopeTab = () => {
     return Math.round(total);
   }, []);
 
-  // 从用户配置获取用户星座
+  // 简化：直接从状态获取用户星座
   const getUserZodiac = useCallback(() => {
+    return globalUserConfig?.zodiac || '';
+  }, [globalUserConfig]);
+
+  // 保存星座配置
+  const saveHoroscopeConfig = useCallback(async (horoscope) => {
     try {
-      return currentConfig?.zodiac || '';
+      await updateConfig({ zodiac: horoscope });
+      setGlobalUserConfig(prev => ({ ...prev, zodiac: horoscope }));
+      setUserHoroscope(horoscope);
+      setIsTemporaryHoroscope(false);
+      isTemporaryRef.current = false;
+      setShowZodiacModal(false);
     } catch (error) {
-      console.log('获取用户星座失败:', error);
-      return '';
+      console.error('保存星座配置失败:', error);
+      setError('保存失败: ' + error.message);
     }
-  }, [currentConfig]);
+  }, [updateConfig]);
 
   // 优化的模块化运势数据计算
   const calculateHoroscopeData = useCallback((horoscope, date) => {
@@ -188,46 +235,7 @@ const HoroscopeTab = () => {
         performanceMonitor.end('加载星座运势数据');
       }
     }
-  }, [calculateHoroscopeData]);
-
-  // 初始化组件 - 优化为优先获取用户数据
-  useEffect(() => {
-    let isMounted = true;
-
-    const initialize = async () => {
-      try {
-        // 获取用户星座
-        const userZodiac = getUserZodiac();
-
-        // 如果用户有配置星座，优先使用；否则使用金牛座
-        const initialHoroscope = userZodiac || '金牛座';
-
-        if (isMounted) {
-          setUserHoroscope(initialHoroscope);
-          setIsTemporaryHoroscope(!userZodiac); // 如果不是用户配置的星座，标记为临时
-          isTemporaryRef.current = !userZodiac;
-          setInitialized(true);
-          setDataLoaded(false); // 标记需要加载运势数据
-        }
-      } catch (error) {
-        console.error('初始化星座运程组件失败:', error);
-        // 降级处理
-        if (isMounted) {
-          setUserHoroscope('金牛座');
-          setIsTemporaryHoroscope(true);
-          isTemporaryRef.current = true;
-          setInitialized(true);
-          setDataLoaded(false);
-        }
-      }
-    };
-
-    initialize();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [getUserZodiac]);
+  }, [calculateHoroscopeData, userHoroscope]);
 
   // 同步临时状态到ref
   useEffect(() => {
@@ -258,9 +266,11 @@ const HoroscopeTab = () => {
   const handleHoroscopeChange = useCallback((horoscope) => {
     if (userHoroscope !== horoscope) {
       setUserHoroscope(horoscope);
-      // 标记为临时选择（如果不是用户配置的星座）
-      setIsTemporaryHoroscope(horoscope !== getUserZodiac());
-      isTemporaryRef.current = horoscope !== getUserZodiac();
+      // 判断是否为临时查看
+      const userZodiac = getUserZodiac();
+      const isTemporary = userZodiac && userZodiac !== horoscope;
+      setIsTemporaryHoroscope(isTemporary);
+      isTemporaryRef.current = isTemporary;
 
       // 立即重置数据，确保不会显示旧数据
       setHoroscopeGuidance(null);
@@ -276,6 +286,7 @@ const HoroscopeTab = () => {
     if (userZodiac && userZodiac !== userHoroscope) {
       setUserHoroscope(userZodiac);
       setIsTemporaryHoroscope(false);
+      isTemporaryRef.current = false;
       // 标记需要重新加载数据
       setDataLoaded(false);
     }
@@ -375,23 +386,23 @@ const HoroscopeTab = () => {
           </div>
         )}
 
-        <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-2xl p-4 border border-indigo-100 dark:border-indigo-900/50">
+        <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-2xl p-4 border border-indigo-100 dark:border-indigo-700/50">
           <div className="flex items-center">
-            <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex items-center justify-center text-3xl mr-4 border border-indigo-50 dark:border-indigo-900">
+            <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex items-center justify-center text-3xl mr-4 border border-indigo-50 dark:border-indigo-700">
               {horoscopeGuidance.horoscopeInfo.icon}
             </div>
             <div>
               <h4 className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
                 {userHoroscope}
               </h4>
-              <p className="text-sm text-indigo-600 dark:text-indigo-400">
+              <p className="text-sm text-indigo-600 dark:text-indigo-300">
                 {horoscopeGuidance.horoscopeInfo.element}能量 · {horoscopeGuidance.horoscopeInfo.dateRange}
               </p>
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <span className="px-3 py-1 bg-white/60 dark:bg-white/5 rounded-full text-xs text-gray-600 dark:text-gray-400">相容: {Array.isArray(recommendations.compatibleSigns) ? recommendations.compatibleSigns.join('、') : recommendations.compatibleSigns}</span>
-            <span className="px-3 py-1 bg-white/60 dark:bg-white/5 rounded-full text-xs text-gray-600 dark:text-gray-400">月亮: {String(recommendations.todayMoonSign || '未知')}</span>
+            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600">相容: {Array.isArray(recommendations.compatibleSigns) ? recommendations.compatibleSigns.join('、') : recommendations.compatibleSigns}</span>
+            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600">月亮: {String(recommendations.todayMoonSign || '未知')}</span>
           </div>
         </div>
       </div>
@@ -401,13 +412,59 @@ const HoroscopeTab = () => {
   // 统一风格的星座选择器 - 采用嵌入式布局
   const renderHoroscopeSelector = () => {
     return (
-      <HoroscopeSelector 
+      <HoroscopeSelector
         userHoroscope={userHoroscope}
         isTemporaryHoroscope={isTemporaryHoroscope}
         handleHoroscopeChange={handleHoroscopeChange}
         handleRestoreUserHoroscope={handleRestoreUserHoroscope}
+        handleEditHoroscope={() => setShowZodiacModal(true)}
         getHoroscopeData={getHoroscopeData}
+        configuredZodiac={globalUserConfig?.zodiac || ''}
       />
+    );
+  };
+
+  // 渲染星座设置模态框
+  const renderZodiacModal = () => {
+    if (!showZodiacModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowZodiacModal(false)}>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              🌟 设置我的星座
+            </h3>
+            <button
+              onClick={() => setShowZodiacModal(false)}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="horoscope-grid-4 mb-4">
+            {getHoroscopeData() && Array.isArray(getHoroscopeData()) ? getHoroscopeData().map((horoscope) => {
+              const isActive = globalUserConfig?.zodiac === horoscope.name || userHoroscope === horoscope.name;
+              return (
+                <button
+                  key={horoscope.name}
+                  onClick={() => saveHoroscopeConfig(horoscope.name)}
+                  className={`horoscope-button ${isActive ? 'horoscope-button-active' : 'horoscope-button-inactive'}`}
+                  aria-label={`${horoscope.name}星座选择`}
+                >
+                  <span className="text-2xl mb-1">{horoscope.icon}</span>
+                  <span className="text-xs font-bold horoscope-subtitle">{horoscope.name.replace('座', '')}</span>
+                </button>
+              );
+            }) : null}
+          </div>
+
+          <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+            设置后默认显示您配置的星座运势
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -522,6 +579,9 @@ const HoroscopeTab = () => {
           </div>
         </div>
       </div>
+
+      {/* 星座设置模态框 */}
+      {renderZodiacModal()}
     </div>
   );
 };

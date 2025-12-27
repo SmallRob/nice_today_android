@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useCurrentConfig } from '../contexts/UserConfigContext';
-import { formatDateString } from '../services/apiServiceRefactored';
+import { useUserConfig } from '../contexts/UserConfigContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   sealInfoMap,
   toneInfoMap,
@@ -189,32 +189,57 @@ const descriptionPool = {
   黄太阳: "启蒙生命，光明意识"
 };
 
-// 图腾颜色映射（用于Tailwind）
-const sealColorClasses = {
-  "红龙": "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800",
-  "白风": "bg-slate-50 dark:bg-slate-950/20 border-slate-200 dark:border-slate-800",
-  "蓝夜": "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800",
-  "黄种子": "bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800",
-  "红蛇": "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800",
-  "白世界连接者": "bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800",
-  "蓝手": "bg-cyan-50 dark:bg-cyan-950/20 border-cyan-200 dark:border-cyan-800",
-  "黄星星": "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800",
-  "红月亮": "bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800",
-  "白狗": "bg-zinc-50 dark:bg-zinc-950/20 border-zinc-200 dark:border-zinc-800",
-  "蓝猴": "bg-sky-50 dark:bg-sky-950/20 border-sky-200 dark:border-sky-800",
-  "黄人": "bg-lime-50 dark:bg-lime-950/20 border-lime-200 dark:border-lime-800",
-  "红天空行者": "bg-indigo-50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-800",
-  "白巫师": "bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800",
-  "蓝鹰": "bg-violet-50 dark:bg-violet-950/20 border-violet-200 dark:border-violet-800",
-  "黄战士": "bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800",
-  "红地球": "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800",
-  "白镜子": "bg-slate-50 dark:bg-slate-950/20 border-slate-200 dark:border-slate-800",
-  "蓝风暴": "bg-teal-50 dark:bg-teal-950/20 border-teal-200 dark:border-teal-800",
-  "黄太阳": "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800"
+// 图腾渐变色块映射（用于Tailwind）
+const sealGradientClasses = {
+  "红龙": "from-red-500 to-orange-500 dark:from-red-600 dark:to-orange-600",
+  "白风": "from-slate-400 to-slate-300 dark:from-slate-500 dark:to-slate-400",
+  "蓝夜": "from-blue-500 to-indigo-500 dark:from-blue-600 dark:to-indigo-600",
+  "黄种子": "from-yellow-400 to-amber-500 dark:from-yellow-500 dark:to-amber-600",
+  "红蛇": "from-orange-500 to-red-600 dark:from-orange-600 dark:to-red-700",
+  "白世界连接者": "from-gray-400 to-gray-300 dark:from-gray-500 dark:to-gray-400",
+  "蓝手": "from-cyan-500 to-blue-500 dark:from-cyan-600 dark:to-blue-600",
+  "黄星星": "from-amber-400 to-yellow-500 dark:from-amber-500 dark:to-yellow-600",
+  "红月亮": "from-rose-500 to-pink-500 dark:from-rose-600 dark:to-pink-600",
+  "白狗": "from-zinc-400 to-zinc-300 dark:from-zinc-500 dark:to-zinc-400",
+  "蓝猴": "from-sky-500 to-cyan-500 dark:from-sky-600 dark:to-cyan-600",
+  "黄人": "from-lime-500 to-green-500 dark:from-lime-600 dark:to-green-600",
+  "红天空行者": "from-indigo-500 to-purple-500 dark:from-indigo-600 dark:to-purple-600",
+  "白巫师": "from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600",
+  "蓝鹰": "from-violet-500 to-purple-500 dark:from-violet-600 dark:to-purple-600",
+  "黄战士": "from-yellow-500 to-orange-500 dark:from-yellow-600 dark:to-orange-600",
+  "红地球": "from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600",
+  "白镜子": "from-slate-500 to-zinc-500 dark:from-slate-600 dark:to-zinc-600",
+  "蓝风暴": "from-teal-500 to-cyan-500 dark:from-teal-600 dark:to-cyan-600",
+  "黄太阳": "from-orange-500 to-yellow-500 dark:from-orange-600 dark:to-yellow-600"
+};
+
+// 图腾简单图标映射
+const sealIcons = {
+  "红龙": "🐉",
+  "白风": "💨",
+  "蓝夜": "🌙",
+  "黄种子": "🌱",
+  "红蛇": "🐍",
+  "白世界连接者": "🌍",
+  "蓝手": "✋",
+  "黄星星": "⭐",
+  "红月亮": "🌙",
+  "白狗": "🐕",
+  "蓝猴": "🐒",
+  "黄人": "👤",
+  "红天空行者": "🚀",
+  "白巫师": "🔮",
+  "蓝鹰": "🦅",
+  "黄战士": "⚔️",
+  "红地球": "🌍",
+  "白镜子": "🪞",
+  "蓝风暴": "🌪️",
+  "黄太阳": "☀️"
 };
 
 const MayanTattoo = () => {
-  const currentConfig = useCurrentConfig();
+  const { currentConfig } = useUserConfig();
+  const { theme } = useTheme();
   const [tattooData, setTattooData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -325,20 +350,12 @@ const MayanTattoo = () => {
     }
   }, [generateDescription]);
 
-  // 初始化数据 - 简化出生日期获取逻辑，参考UnifiedNumerologyPage实现
+  // 初始化数据 - 从全局配置直接获取出生日期
   useEffect(() => {
     try {
-      setLoading(false);
-      let birthDateToUse = '1991-04-21'; // 默认出生日期
-
-      // 从用户配置获取出生日期
-      if (currentConfig && currentConfig.birthDate) {
-        birthDateToUse = currentConfig.birthDate;
-      } else if (currentConfig && currentConfig.birthInfo && currentConfig.birthInfo.birthDate) {
-        birthDateToUse = currentConfig.birthInfo.birthDate;
-      } else if (currentConfig && currentConfig.userInfo && currentConfig.userInfo.birthDate) {
-        birthDateToUse = currentConfig.userInfo.birthDate;
-      }
+      setLoading(true);
+      // 直接从 currentConfig.birthDate 获取出生日期
+      let birthDateToUse = currentConfig?.birthDate || DEFAULT_BIRTH_DATE;
 
       const data = calculateTattooData(birthDateToUse);
       setTattooData(data);
@@ -365,14 +382,22 @@ const MayanTattoo = () => {
     } finally {
       setLoading(false);
     }
-  }, [calculateTattooData]);
+  }, [calculateTattooData, currentConfig?.birthDate]);
 
-  // 获取图腾颜色类名
-  const getSealColorClass = (sealName) => {
+  // 获取图腾渐变色类名
+  const getSealGradientClass = (sealName) => {
     if (!sealName || typeof sealName !== 'string') {
-      return "bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800";
+      return "from-gray-400 to-gray-500 dark:from-gray-500 dark:to-gray-600";
     }
-    return sealColorClasses[sealName] || "bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800";
+    return sealGradientClasses[sealName] || "from-gray-400 to-gray-500 dark:from-gray-500 dark:to-gray-600";
+  };
+
+  // 获取图腾图标
+  const getSealIcon = (sealName) => {
+    if (!sealName || typeof sealName !== 'string') {
+      return "🌟";
+    }
+    return sealIcons[sealName] || "🌟";
   };
 
   // 生成能量解读文本
@@ -418,79 +443,111 @@ const MayanTattoo = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 pb-20">
       {/* 页面标题区域 */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-b-lg shadow-lg mb-4">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold mb-1">玛雅图腾解读</h1>
-          <p className="text-purple-100 text-sm opacity-90">
-            探索你的玛雅印记能量网络
+      <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white rounded-b-2xl shadow-lg mb-6">
+        <div className="container mx-auto px-4 py-6">
+          <h1 className="text-2xl font-bold mb-2 flex items-center justify-center">
+            <span className="mr-2">🌟</span>
+            玛雅图腾解读
+            <span className="ml-2">🌟</span>
+          </h1>
+          <p className="text-purple-100 text-sm opacity-95 text-center">
+            探索你的玛雅印记能量网络，解锁宇宙能量密码
           </p>
         </div>
       </div>
 
       {/* 主内容区域 */}
-      <div className="container mx-auto px-4 space-y-3">
+      <div className="container mx-auto px-4 space-y-4">
         {/* 主要图腾信息 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-          <div className="text-center mb-4">
-            <span className="inline-block bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-1.5 rounded-full text-sm font-bold mb-3">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="text-center mb-6">
+            {/* Kin数字徽章 */}
+            <div className="inline-flex items-center bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white px-6 py-2 rounded-full text-sm font-bold mb-4 shadow-lg shadow-orange-500/30">
+              <span className="mr-2">✨</span>
               Kin {tattooData?.kinNumber || 1}
-            </span>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-              {tattooData?.kinName || '磁性的红龙'}
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 italic mb-4">
-              {tattooData?.description || '独特能量'}
+              <span className="ml-2">✨</span>
+            </div>
+            {/* 主图腾名称和图标 */}
+            <div className="flex items-center justify-center mb-4">
+              <span className="text-6xl mr-4">{getSealIcon(tattooData?.solarSeal)}</span>
+              <h2 className="text-3xl font-black text-gray-800 dark:text-white mb-2">
+                {tattooData?.kinName || '磁性的红龙'}
+              </h2>
+            </div>
+            {/* 渐变色块展示 */}
+            <div className="max-w-md mx-auto mb-4">
+              <div className={`h-16 bg-gradient-to-r ${getSealGradientClass(tattooData?.solarSeal)} rounded-xl shadow-lg flex items-center justify-center`}>
+                <span className="text-white text-xl font-bold">{tattooData?.solarSeal || '红龙'}</span>
+              </div>
+            </div>
+            <p className="text-lg text-gray-600 dark:text-gray-300 italic mb-4 font-medium">
+              "{tattooData?.description || '独特能量'}"
             </p>
           </div>
 
+          {/* 银河音阶和太阳印记 */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-purple-50 dark:bg-purple-950/20 rounded-lg p-4 text-center">
-              <div className="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-1">银河音阶</div>
-              <div className="text-xl font-bold text-purple-700 dark:text-purple-300">{tattooData?.galacticTone || '磁性'}</div>
+            <div className={`bg-gradient-to-br ${getSealGradientClass(tattooData?.solarSeal)} rounded-xl p-4 text-center shadow-md`}>
+              <div className="text-xs text-white/90 font-semibold mb-1">银河音阶</div>
+              <div className="text-xl font-bold text-white">{tattooData?.galacticTone || '磁性'}</div>
             </div>
-            <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 text-center">
-              <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mb-1">太阳印记</div>
-              <div className="text-xl font-bold text-blue-700 dark:text-blue-300">{tattooData?.solarSeal || '红龙'}</div>
+            <div className="bg-gradient-to-br from-purple-500 to-indigo-500 dark:from-purple-600 dark:to-indigo-600 rounded-xl p-4 text-center shadow-md">
+              <div className="text-xs text-white/90 font-semibold mb-1">太阳印记</div>
+              <div className="text-xl font-bold text-white">{tattooData?.solarSeal || '红龙'}</div>
             </div>
           </div>
         </div>
 
         {/* 能量属性 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-          <h3 className="text-lg font-bold text-green-600 dark:text-green-400 mb-3 text-center">能量属性</h3>
-          <div className="flex flex-wrap justify-center gap-2">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mb-4 text-center flex items-center justify-center">
+            <span className="mr-2">⚡</span>
+            能量属性
+            <span className="ml-2">⚡</span>
+          </h3>
+          <div className="flex flex-wrap justify-center gap-3">
             {tattooData?.attributes && Array.isArray(tattooData.attributes) ? tattooData.attributes.map((attr, index) => (
               <span
                 key={index}
-                className="px-3 py-1.5 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-full text-sm text-gray-700 dark:text-gray-300"
+                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white rounded-full text-sm font-medium shadow-md"
               >
                 {attr || '独特'}
               </span>
             )) : (
-              <span className="px-3 py-1.5 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-full text-sm text-gray-700 dark:text-gray-300">
+              <span className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white rounded-full text-sm font-medium shadow-md">
                 暂无法显示属性数据
               </span>
             )}
           </div>
         </div>
 
-        {/* 图腾能量网络 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-          <h3 className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-4 text-center">图腾能量网络</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        {/* 图腾能量网络 - 使用渐变色块和图标 */}
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4 text-center flex items-center justify-center">
+            <span className="mr-2">🔗</span>
+            图腾能量网络
+            <span className="ml-2">🔗</span>
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {tattooData.guides && Array.isArray(tattooData.guides) ? tattooData.guides.map((guide, index) => (
               <div
                 key={index}
-                className={`rounded-lg p-3 text-center border ${getSealColorClass(guide?.name || '')} shadow-sm hover:shadow-md transition-shadow`}
+                className="group relative overflow-hidden rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
               >
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{guide?.type || '未知'}</div>
-                <div className="text-lg font-bold text-gray-800 dark:text-white mb-1">{guide?.name || '未知'}</div>
-                <div className="text-xs text-gray-600 dark:text-gray-400">{guide?.description || '暂无描述'}</div>
+                {/* 渐变背景 */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${getSealGradientClass(guide?.name || '')} opacity-90`}></div>
+                {/* 内容 */}
+                <div className="relative z-10">
+                  <div className="text-3xl mb-2">{getSealIcon(guide?.name)}</div>
+                  <div className="text-xs text-white/90 font-medium mb-1">{guide?.type || '未知'}</div>
+                  <div className="text-sm font-bold text-white mb-1">{guide?.name || '未知'}</div>
+                  <div className="text-xs text-white/80 line-clamp-2">{guide?.description || '暂无描述'}</div>
+                </div>
               </div>
             )) : (
-              <div className="col-span-5 text-center text-gray-500 dark:text-gray-400">
+              <div className="col-span-5 text-center text-gray-500 dark:text-gray-400 py-8">
                 暂无法显示图腾能量网络数据
               </div>
             )}
@@ -498,55 +555,73 @@ const MayanTattoo = () => {
         </div>
 
         {/* 能量网络关系图 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-          <h3 className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-4 text-center">能量网络关系</h3>
-          <div className="relative h-64 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg overflow-hidden">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-4 text-center flex items-center justify-center">
+            <span className="mr-2">🌐</span>
+            能量网络关系
+            <span className="ml-2">🌐</span>
+          </h3>
+          <div className="relative h-72 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:from-purple-900/30 dark:via-indigo-900/30 dark:to-blue-900/30 rounded-2xl overflow-hidden border-2 border-purple-200 dark:border-purple-700">
             {/* 中心节点 */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white dark:bg-gray-700 rounded-full flex flex-col items-center justify-center shadow-lg z-10">
-              <span className="text-xs text-gray-500 dark:text-gray-400">主图腾</span>
-              <span className="text-sm font-bold text-gray-800 dark:text-white">{tattooData.solarSeal}</span>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 rounded-full flex flex-col items-center justify-center shadow-2xl z-10 border-4 border-white dark:border-gray-600">
+              <span className="text-xs text-white font-medium">主图腾</span>
+              <span className="text-2xl">{getSealIcon(tattooData.solarSeal)}</span>
             </div>
 
             {/* 支持节点 */}
-            <div className={`absolute top-4 left-4 w-16 h-16 ${getSealColorClass(tattooData.guides[3]?.name || '').split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
-              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[3]?.name?.slice(0, 2) || '支持'}</span>
+            <div className={`absolute top-6 left-6 w-20 h-20 bg-gradient-to-br ${getSealGradientClass(tattooData.guides[3]?.name || '')} rounded-full flex flex-col items-center justify-center shadow-xl border-4 border-white dark:border-gray-600`}>
+              <span className="text-2xl">{getSealIcon(tattooData.guides[3]?.name)}</span>
+              <span className="text-xs text-white font-medium mt-1">{tattooData.guides[3]?.type}</span>
             </div>
 
             {/* 挑战节点 */}
-            <div className={`absolute top-4 right-4 w-16 h-16 ${getSealColorClass(tattooData.guides[2]?.name || '').split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
-              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[2]?.name?.slice(0, 2) || '挑战'}</span>
+            <div className={`absolute top-6 right-6 w-20 h-20 bg-gradient-to-br ${getSealGradientClass(tattooData.guides[2]?.name || '')} rounded-full flex flex-col items-center justify-center shadow-xl border-4 border-white dark:border-gray-600`}>
+              <span className="text-2xl">{getSealIcon(tattooData.guides[2]?.name)}</span>
+              <span className="text-xs text-white font-medium mt-1">{tattooData.guides[2]?.type}</span>
             </div>
 
             {/* 指引节点 */}
-            <div className={`absolute bottom-4 left-4 w-16 h-16 ${getSealColorClass(tattooData.guides[0]?.name || '').split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
-              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[0]?.name?.slice(0, 2) || '指引'}</span>
+            <div className={`absolute bottom-6 left-6 w-20 h-20 bg-gradient-to-br ${getSealGradientClass(tattooData.guides[0]?.name || '')} rounded-full flex flex-col items-center justify-center shadow-xl border-4 border-white dark:border-gray-600`}>
+              <span className="text-2xl">{getSealIcon(tattooData.guides[0]?.name)}</span>
+              <span className="text-xs text-white font-medium mt-1">{tattooData.guides[0]?.type}</span>
             </div>
 
             {/* 推动节点 */}
-            <div className={`absolute bottom-4 right-4 w-16 h-16 ${getSealColorClass(tattooData.guides[4]?.name || '').split(' ')[0]} rounded-full flex items-center justify-center shadow`}>
-              <span className="text-xs font-bold text-gray-800 dark:text-white">{tattooData.guides[4]?.name?.slice(0, 2) || '推动'}</span>
+            <div className={`absolute bottom-6 right-6 w-20 h-20 bg-gradient-to-br ${getSealGradientClass(tattooData.guides[4]?.name || '')} rounded-full flex flex-col items-center justify-center shadow-xl border-4 border-white dark:border-gray-600`}>
+              <span className="text-2xl">{getSealIcon(tattooData.guides[4]?.name)}</span>
+              <span className="text-xs text-white font-medium mt-1">{tattooData.guides[4]?.type}</span>
             </div>
 
-            {/* 连接标签 */}
-            <div className="absolute top-6 left-6 text-xs text-gray-600 dark:text-gray-400">支持</div>
-            <div className="absolute top-6 right-6 text-xs text-gray-600 dark:text-gray-400">挑战</div>
-            <div className="absolute bottom-6 left-6 text-xs text-gray-600 dark:text-gray-400">指引</div>
-            <div className="absolute bottom-6 right-6 text-xs text-gray-600 dark:text-gray-400">推动</div>
+            {/* 连接线装饰 */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              <line x1="50%" y1="20%" x2="50%" y2="40%" stroke={theme === 'dark' ? '#4B5563' : '#E5E7EB'} strokeWidth="2" strokeDasharray="4" />
+              <line x1="20%" y1="50%" x2="40%" y2="50%" stroke={theme === 'dark' ? '#4B5563' : '#E5E7EB'} strokeWidth="2" strokeDasharray="4" />
+              <line x1="80%" y1="50%" x2="60%" y2="50%" stroke={theme === 'dark' ? '#4B5563' : '#E5E7EB'} strokeWidth="2" strokeDasharray="4" />
+              <line x1="50%" y1="80%" x2="50%" y2="60%" stroke={theme === 'dark' ? '#4B5563' : '#E5E7EB'} strokeWidth="2" strokeDasharray="4" />
+            </svg>
           </div>
         </div>
 
         {/* 能量解读 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-          <h3 className="text-lg font-bold text-orange-600 dark:text-orange-400 mb-4 text-center">能量解读</h3>
-          <div className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-xl font-bold text-orange-600 dark:text-orange-400 mb-4 text-center flex items-center justify-center">
+            <span className="mr-2">💫</span>
+            能量解读
+            <span className="ml-2">💫</span>
+          </h3>
+          <div className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm space-y-2">
             {generateInterpretation}
           </div>
         </div>
 
         {/* 底部信息 */}
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            玛雅历法解读 | 基于13月亮历法 | {tattooData?.currentDate || `${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日`}
+        <div className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4 text-center">
+          <p className="text-xs text-gray-600 dark:text-gray-300">
+            <span className="inline-block mr-2">🌙</span>
+            玛雅历法解读 | 基于13月亮历法
+            <span className="inline-block mx-2">•</span>
+            {tattooData?.currentDate || `${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日`}
+            <span className="inline-block ml-2">🌙</span>
           </p>
         </div>
       </div>

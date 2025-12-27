@@ -3,8 +3,8 @@ import { useCurrentConfig } from '../contexts/UserConfigContext';
 import '../styles/unified-numerology.css';
 
 // 导入原有功能组件
-const PersonalNumerology = React.lazy(() => import('./NumerologyPage'));
-const EnhancedNumerology = React.lazy(() => import('./EnhancedNumerologyPage'));
+const PersonalNumerology = React.lazy(() => import('../components/NumerologyPage'));
+const EnhancedNumerology = React.lazy(() => import('../components/EnhancedNumerologyPage'));
 
 const UnifiedNumerologyPage = () => {
   const currentConfig = useCurrentConfig();

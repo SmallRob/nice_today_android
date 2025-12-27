@@ -240,7 +240,7 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
   if (!data) {
     return (
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-8 text-gray-500 dark:text-gray-300">
           <svg className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
@@ -313,7 +313,7 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
       return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-100 dark:border-gray-700 mt-8">
           <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">每月节律高低点</h3>
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-300">
             <svg className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -383,7 +383,7 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
           <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">24小时人体器官节律</h3>
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-4"></div>
-            <p className="text-gray-500 dark:text-gray-400">正在加载器官节律数据...</p>
+            <p className="text-gray-500 dark:text-gray-300">正在加载器官节律数据...</p>
           </div>
         </div>
       );
@@ -555,7 +555,7 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
             <div className="absolute top-0 left-1/2 w-0.5 h-full bg-gray-400 dark:bg-gray-500"></div>
           </div>
           
-          <div className="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+          <div className="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-300">
             <span className="font-medium">-100</span>
             <span className="font-medium">0</span>
             <span className="font-medium">+100</span>

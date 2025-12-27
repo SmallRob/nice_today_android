@@ -1,7 +1,6 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
-import { NotificationProvider } from './context/NotificationContext';
 import { UserConfigProvider } from './contexts/UserConfigContext';
 import { useThemeColor } from './hooks/useThemeColor';
 import EnhancedErrorBoundary from './components/EnhancedErrorBoundary';
@@ -16,9 +15,7 @@ const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
 const LifeTrendPage = React.lazy(() => import('./pages/LifeTrendPage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
 const TarotPage = React.lazy(() => import('./pages/TarotPage'));
-const NumerologyPage = React.lazy(() => import('./components/NumerologyPage'));
-const EnhancedNumerologyPage = React.lazy(() => import('./components/EnhancedNumerologyPage'));
-const UnifiedNumerologyPage = React.lazy(() => import('./components/UnifiedNumerologyPage'));
+const NumerologyPage = React.lazy(() => import('./pages/NumerologyPage'));
 const TabNavigation = React.lazy(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -48,8 +45,7 @@ const AppLayout = () => {
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/trend" element={<LifeTrendPage />} />
             <Route path="/tarot" element={<TarotPage />} />
-            <Route path="/numerology" element={<UnifiedNumerologyPage />} />
-            <Route path="/enhanced-numerology" element={<EnhancedNumerologyPage />} />
+            <Route path="/numerology" element={<NumerologyPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </Suspense>
@@ -113,21 +109,29 @@ function App() {
         // 继续执行，不阻止应用启动
       }
 
-      // 初始化炫彩版用户配置管理器，确保在应用启动时加载配置
+      // 初始化用户配置管理器，确保在应用启动时加载配置
       try {
-        const { fullUserConfigManager } = await import('./utils/fullUserConfigManager');
+        const { enhancedUserConfigManager } = await import('./utils/EnhancedUserConfigManager');
+        const { configMigrationTool } = await import('./utils/ConfigMigrationTool');
 
-        // 初始化炫彩版管理器
-        await fullUserConfigManager.initialize();
-        console.log('炫彩版用户配置管理器初始化成功');
+        // 检查是否需要从旧版迁移数据
+        const migrationCheck = await configMigrationTool.checkMigrationNeeded();
+        if (migrationCheck.needed) {
+          console.log('检测到旧版配置数据，开始迁移...', migrationCheck);
+          await configMigrationTool.performMigration();
+        }
+
+        // 初始化新版管理器
+        await enhancedUserConfigManager.initialize();
+        console.log('增强版用户配置管理器初始化成功');
       } catch (error) {
         // 记录用户配置管理器初始化错误
         errorLogger.log(error, {
           component: 'App',
-          action: 'fullUserConfigInit',
-          errorType: 'FullUserConfigInitError'
+          action: 'enhancedUserConfigInit',
+          errorType: 'EnhancedUserConfigInitError'
         });
-        console.warn('炫彩版用户配置管理器初始化失败:', error);
+        console.warn('增强版用户配置管理器初始化失败:', error);
         // 继续执行，不阻止应用启动
       }
 
@@ -185,14 +189,12 @@ function App() {
     <>
       <Router>
         <EnhancedErrorBoundary componentName="App">
-          <NotificationProvider>
-            <ThemeProvider>
-              <UserConfigProvider>
-                <AppLayout />
-                <ErrorDisplayPanel />
-              </UserConfigProvider>
-            </ThemeProvider>
-          </NotificationProvider>
+          <ThemeProvider>
+            <UserConfigProvider>
+              <AppLayout />
+              <ErrorDisplayPanel />
+            </UserConfigProvider>
+          </ThemeProvider>
         </EnhancedErrorBoundary>
       </Router>
     </>

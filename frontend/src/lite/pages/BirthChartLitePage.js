@@ -4,97 +4,71 @@ import BaziCalculator from '../../utils/baziCalculator';
 import './styles/birthChartLiteStyles.css';
 
 const BirthChartLitePage = ({ userInfo }) => {
-  const [baziData, setBaziData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [baziData, setBaziData] = useState(() => {
+    // 初始化时直接计算，避免异步加载
+    return calculateBaziData(userInfo);
+  });
   const [showDecadeFortune, setShowDecadeFortune] = useState(false);
 
-  // 初始化计算八字
-  useEffect(() => {
-    const calculate = async () => {
+  // 同步计算八字数据
+  function calculateBaziData(userInfo) {
+    try {
+      const birthDate = userInfo?.birthDate || '1990-01-01';
+      const birthTime = userInfo?.birthTime || '午';
+      const gender = userInfo?.gender || 'secret';
+
+      // 使用时辰映射到小时
+      const timeMap = {
+        '子': 0, '丑': 2, '寅': 4, '卯': 6,
+        '辰': 8, '巳': 10, '午': 12, '未': 14,
+        '申': 16, '酉': 18, '戌': 20, '亥': 22
+      };
+
+      const hour = timeMap[birthTime] ?? 12;
+
+      const dateParts = birthDate.split('-');
+      const [year, month, day] = dateParts.length === 3
+        ? dateParts.map(Number)
+        : [1990, 1, 1];
+
+      // 使用baziCalculator计算八字
+      const bazi = BaziCalculator.calculateBazi(
+        !isNaN(year) ? year : 1990,
+        !isNaN(month) ? month : 1,
+        !isNaN(day) ? day : 1,
+        hour, 30, 110
+      );
+
+      // 获取更详细的八字信息
+      let detailedBazi = null;
       try {
-        // 验证必要参数
-        if (!userInfo || !userInfo.birthDate) {
-          console.warn('用户信息或出生日期缺失');
-          setIsLoading(false);
-          return;
-        }
-
-        const birthDate = userInfo.birthDate; // YYYY-MM-DD
-        const birthTime = userInfo.birthTime || '';
-
-        // 验证出生日期格式
-        if (!birthDate || typeof birthDate !== 'string' || !birthDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-          console.error('出生日期格式无效:', birthDate);
-          setIsLoading(false);
-          return;
-        }
-
-        // 使用时辰映射到小时
-        const timeMap = {
-          '子': 0, '丑': 2, '寅': 4, '卯': 6,
-          '辰': 8, '巳': 10, '午': 12, '未': 14,
-          '申': 16, '酉': 18, '戌': 20, '亥': 22
-        };
-
-        let hour = 12;
-        if (birthTime && timeMap[birthTime] !== undefined) {
-          hour = timeMap[birthTime];
-        }
-
-        const dateParts = birthDate.split('-');
-        if (dateParts.length !== 3) {
-          console.error('出生日期格式错误:', birthDate);
-          setIsLoading(false);
-          return;
-        }
-
-        const [year, month, day] = dateParts.map(Number);
-
-        // 验证日期数值
-        if (isNaN(year) || isNaN(month) || isNaN(day)) {
-          console.error('日期数值无效:', { year, month, day });
-          setIsLoading(false);
-          return;
-        }
-
-        // 使用baziCalculator计算八字
-        const bazi = BaziCalculator.calculateBazi(year, month, day, hour, 30, 110);
-
-        // 获取更详细的八字信息（使用安全的计算方式）
-        let detailedBazi = null;
-        try {
-          detailedBazi = calculateDetailedBazi(birthDate, '12:30', 110);
-        } catch (detailError) {
-          console.warn('获取详细八字信息失败，使用基础数据:', detailError);
-        }
-
-        setBaziData({
-          bazi,
-          detailed: detailedBazi,
-          birthInfo: {
-            birthDate,
-            birthTime,
-            gender: userInfo.gender
-          }
-        });
-      } catch (error) {
-        console.error('八字计算失败:', error);
-        // 设置默认数据，避免白屏
-        setBaziData({
-          bazi: null,
-          detailed: null,
-          birthInfo: {
-            birthDate: userInfo?.birthDate || '',
-            birthTime: userInfo?.birthTime || '',
-            gender: userInfo?.gender || 'secret'
-          }
-        });
-      } finally {
-        setIsLoading(false);
+        detailedBazi = calculateDetailedBazi(birthDate, '12:30', 110);
+      } catch (detailError) {
+        console.warn('获取详细八字信息失败:', detailError);
       }
-    };
 
-    calculate();
+      return {
+        bazi,
+        detailed: detailedBazi,
+        birthInfo: { birthDate, birthTime, gender }
+      };
+    } catch (error) {
+      console.error('八字计算失败，使用默认值:', error);
+      return {
+        bazi: BaziCalculator.calculateBazi(1990, 1, 1, 12, 30, 110),
+        detailed: null,
+        birthInfo: {
+          birthDate: '1990-01-01',
+          birthTime: '午',
+          gender: 'secret'
+        }
+      };
+    }
+  }
+
+  // 当userInfo变化时重新计算
+  useEffect(() => {
+    setBaziData(calculateBaziData(userInfo));
   }, [userInfo]);
 
   // 计算五行能量分布（简化版）
@@ -182,54 +156,15 @@ const BirthChartLitePage = ({ userInfo }) => {
     return decades;
   };
 
-  // 加载状态
-  if (isLoading) {
-    return (
-      <div className="lite-loading-container">
-        <div className="lite-loading-spinner"></div>
-        <p>正在计算八字...</p>
-      </div>
-    );
-  }
-
-  // 未设置出生信息
-  if (!userInfo || !userInfo.birthDate) {
-    return (
-      <div className="lite-page-container">
-        <div className="lite-page-header">
-          <h2 className="lite-page-title">八字分析</h2>
-        </div>
-        <div className="lite-card">
-          <p style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
-            请先在设置中完善出生日期和时辰信息
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const { bazi, birthInfo } = baziData || {};
   const wuxingData = bazi ? calculateWuxing(bazi) : [];
   const dayGan = bazi?.details?.day?.gan || '辛';
 
-  // 计算当前年份，防止出错
-  let currentYear = new Date().getFullYear();
-  let yearlyFortune = [];
-  let decadeFortune = [];
-
-  try {
-    if (!isNaN(currentYear) && currentYear > 1900 && currentYear < 2100) {
-      yearlyFortune = generateYearlyFortune(currentYear, dayGan);
-
-      // 计算出生年份
-      const birthYear = birthInfo?.birthDate ? new Date(birthInfo.birthDate).getFullYear() : 1990;
-      if (!isNaN(birthYear) && birthYear > 1900 && birthYear < 2100) {
-        decadeFortune = generateDecadeFortune(birthYear);
-      }
-    }
-  } catch (error) {
-    console.error('生成运势数据失败:', error);
-  }
+  // 计算当前年份和运势数据
+  const currentYear = new Date().getFullYear();
+  const birthYear = birthInfo?.birthDate ? new Date(birthInfo.birthDate).getFullYear() : 1990;
+  const yearlyFortune = generateYearlyFortune(currentYear, dayGan);
+  const decadeFortune = generateDecadeFortune(birthYear);
 
   return (
     <div className="lite-birthchart-container">

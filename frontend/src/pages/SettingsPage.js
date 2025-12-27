@@ -76,10 +76,12 @@ function SettingsPage() {
   const [apiBaseUrl, setApiBaseUrl] = useState('https://nice-mcp.leansoftx.com/api');
   const [useLocalCalculation, setUseLocalCalculation] = useState(false);
   const [cacheTimeout, setCacheTimeout] = useState(180000); // 默认3分钟
+  const [dataSyncEnabled, setDataSyncEnabled] = useState(true); // 数据同步状态
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
   const { showNotification } = useNotification();
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   // 通知设置状态
   const [notificationSettings, setNotificationSettings] = useState({
@@ -182,6 +184,12 @@ function SettingsPage() {
           setCacheTimeout(parseInt(savedCacheTimeout));
         }
 
+        // 加载数据同步设置
+        const savedDataSync = localStorage.getItem('dataSyncEnabled');
+        if (savedDataSync !== null) {
+          setDataSyncEnabled(savedDataSync === 'true');
+        }
+
         // 加载通知设置
         const notificationSettings = notificationService.getSettings();
         setNotificationSettings(notificationSettings);
@@ -227,6 +235,13 @@ function SettingsPage() {
     localStorage.setItem('cacheTimeout', newValue.toString());
   };
 
+  // 保存数据同步设置
+  const handleDataSyncChange = (e) => {
+    const newValue = e.target.checked;
+    setDataSyncEnabled(newValue);
+    localStorage.setItem('dataSyncEnabled', newValue.toString());
+  };
+
   // 处理通知设置变更
   const handleNotificationChange = (field, value) => {
     const newSettings = {
@@ -240,39 +255,49 @@ function SettingsPage() {
     notificationService.updateSettings(newSettings);
   };
 
-  // 请求通知权限
-  const handleRequestPermission = async () => {
-    const granted = await notificationService.requestPermission();
-    setNotificationSettings(prev => ({
-      ...prev,
-      permissionGranted: granted
-    }));
+  // 请求通知权限 - 修复内存泄漏问题
+  const handleRequestPermission = useCallback(async () => {
+    try {
+      const granted = await notificationService.requestPermission();
+      setNotificationSettings(prev => ({
+        ...prev,
+        permissionGranted: granted
+      }));
 
-    if (granted) {
-      setError('通知权限已授权！');
-      setTimeout(() => setError(null), 3000);
-    } else {
-      setError('通知权限被拒绝，请在浏览器设置中手动开启。');
+      if (granted) {
+        setSuccess('通知权限已授权！');
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        setError('通知权限被拒绝，请在浏览器设置中手动开启。');
+        setTimeout(() => setError(null), 3000);
+      }
+    } catch (error) {
+      setError('请求通知权限失败: ' + error.message);
       setTimeout(() => setError(null), 3000);
     }
-  };
+  }, []);
 
-  // 测试通知
-  const handleTestNotification = () => {
+  // 测试通知 - 修复内存泄漏和错误处理
+  const handleTestNotification = useCallback(() => {
     if (!notificationSettings.permissionGranted) {
       setError('请先授权通知权限');
       setTimeout(() => setError(null), 3000);
       return;
     }
 
-    notificationService.sendNotification(
-      '测试通知',
-      '这是一个测试通知，确认通知功能正常工作。'
-    );
+    try {
+      notificationService.sendNotification(
+        '测试通知',
+        '这是一个测试通知，确认通知功能正常工作。'
+      );
 
-    setError('测试通知已发送');
-    setTimeout(() => setError(null), 3000);
-  };
+      setSuccess('测试通知已发送');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      setError('发送测试通知失败: ' + error.message);
+      setTimeout(() => setError(null), 3000);
+    }
+  }, [notificationSettings.permissionGranted]);
 
   // 切换应用版本
   const handleVersionSwitch = (version) => {
@@ -352,24 +377,29 @@ function SettingsPage() {
     });
   };
 
-  // 处理更新检查设置变更
-  const handleUpdateCheckChange = async (field, value) => {
-    const newSettings = {
-      ...updateCheckSettings,
-      [field]: value
-    };
+  // 处理更新检查设置变更 - 修复错误处理
+  const handleUpdateCheckChange = useCallback(async (field, value) => {
+    try {
+      const newSettings = {
+        ...updateCheckSettings,
+        [field]: value
+      };
 
-    setUpdateCheckSettings(newSettings);
+      setUpdateCheckSettings(newSettings);
 
-    // 更新服务配置
-    await updateCheckService.updateConfig({
-      enabled: newSettings.enabled,
-      checkFrequency: newSettings.checkFrequency
-    });
+      // 更新服务配置
+      await updateCheckService.updateConfig({
+        enabled: newSettings.enabled,
+        checkFrequency: newSettings.checkFrequency
+      });
 
-    setError('更新检查设置已保存');
-    setTimeout(() => setError(null), 2000);
-  };
+      setSuccess('更新检查设置已保存');
+      setTimeout(() => setSuccess(null), 2000);
+    } catch (error) {
+      setError('保存更新检查设置失败: ' + error.message);
+      setTimeout(() => setError(null), 2000);
+    }
+  }, [updateCheckSettings]);
 
   // 手动检查更新
   const handleManualCheckUpdate = async () => {
@@ -427,18 +457,26 @@ function SettingsPage() {
     }
   };
 
-  // 清除检查记录
-  const handleClearCheckRecords = () => {
-    const newRecords = updateCheckService.getCheckRecords().slice(-10); // 保留最近10条
-    setUpdateCheckSettings(prev => ({
-      ...prev,
-      checkRecords: newRecords
-    }));
+  // 清除检查记录 - 实现真正的存储清除
+  const handleClearCheckRecords = useCallback(() => {
+    try {
+      // 实际清除存储中的记录
+      updateCheckService.clearCheckRecords();
+      
+      // 保留最近10条记录在状态中
+      const newRecords = updateCheckService.getCheckRecords().slice(-10);
+      setUpdateCheckSettings(prev => ({
+        ...prev,
+        checkRecords: newRecords
+      }));
 
-    // 这里需要实际清除存储中的记录，但为了简单起见，我们只更新状态
-    setError('检查记录已清除（保留最近10条）');
-    setTimeout(() => setError(null), 2000);
-  };
+      setSuccess('检查记录已清除（保留最近10条）');
+      setTimeout(() => setSuccess(null), 2000);
+    } catch (error) {
+      setError('清除检查记录失败: ' + error.message);
+      setTimeout(() => setError(null), 2000);
+    }
+  }, []);
 
   if (!isLoaded) {
     return (
@@ -469,7 +507,7 @@ function SettingsPage() {
       {/* 顶部标题区域 */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">更多个人功能</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">设置</h1>
         </div>
       </div>
 
@@ -488,13 +526,19 @@ function SettingsPage() {
         )}
 
         {/* 成功提示 */}
-        {error && !error.includes('失败') && (
+        {success && (
           <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-400 p-4">
             <div className="flex items-center">
               <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              <p className="text-green-700 dark:text-green-300">{error}</p>
+              <p className="text-green-700 dark:text-green-300">{success}</p>
+              <button
+                onClick={() => setSuccess(null)}
+                className="ml-auto text-green-500 hover:text-green-700"
+              >
+                ✕
+              </button>
             </div>
           </div>
         )}
@@ -509,13 +553,7 @@ function SettingsPage() {
                 }`}
               onClick={() => { handleTabChange('tarot'); }}
             >
-              <svg className="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
-              </svg>
-              万象花园
+              🔮 塔罗花园
             </button>
             <button
               className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'userConfigs'
@@ -554,83 +592,59 @@ function SettingsPage() {
               {activeTab === 'tarot' && (
                 <div>
                   <Card>
-                    <div className="text-center p-6 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-600 rounded-lg text-white">
-                      <div className="mb-3">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6m0 0h6M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 12l3 3m0 0l-3 3m0 0l-3-3m0 0l3-3" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10a2 2 0 1 0 0 4h8a2 2 0 1 0 0-4" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
-                        </svg>
-                      </div>
-                      <h2 className="text-2xl font-bold mb-2">万象花园</h2>
-                      <p className="text-green-100">探索趣味功能，发现无限可能</p>
+                    <div className="text-center p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 rounded-lg text-white relative">
+                      <div className="text-5xl mb-3">🔮</div>
+                      <h2 className="text-2xl font-bold mb-2">神秘塔罗</h2>
+                      <p className="text-purple-100">聆听命运的指引</p>
+                      <button
+                        onClick={() => window.location.href = '/tarot'}
+                        className="absolute bottom-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1 rounded-md text-sm transition-all"
+                      >
+                        进入 →
+                      </button>
                     </div>
                   </Card>
-                  
-                  {/* 神秘塔罗入口卡片 */}
                   <Card>
-                    <button
-                      onClick={() => window.location.href = '/tarot'}
-                      className="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg group"
-                    >
-                      <div className="flex items-center space-x-4 p-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 6c0-2 2-4 4-4s4 2 4 4-2 2-4 4-4z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 8v8l4 4 4-4V8H8z" />
-                            </svg>
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">神秘塔罗</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">聆听命运的指引</p>
-                        </div>
-                        <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </button>
+                    <div className="text-center p-6 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-600 rounded-lg text-white relative">
+                      <div className="text-5xl mb-3">🔢</div>
+                      <h2 className="text-2xl font-bold mb-2">数字之灵</h2>
+                      <p className="text-blue-100">探索生命密码的奥秘</p>
+                      <button
+                        onClick={() => window.location.href = '/numerology'}
+                        className="absolute bottom-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1 rounded-md text-sm transition-all"
+                      >
+                        进入 →
+                      </button>
+                    </div>
                   </Card>
-                  
-                  {/* 生命灵数入口卡片 - 统一入口 */}
-                  <Card>
-                    <button
-                      onClick={() => window.location.href = '/numerology'}
-                      className="w-full text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg group"
-                    >
-                      <div className="flex items-center space-x-4 p-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12c0 4 3.582 7 7 7s7-3 7-7" />
-                              <circle cx="12" cy="12" r="9" strokeWidth={1.5} />
-                            </svg>
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">生命灵数</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">探索数字的神秘力量</p>
-                        </div>
-                        <svg className="w-5 h-5 text-gray-400 group-hover:text-teal-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </button>
-                  </Card>
-                  
                   <Card>
                     <div className="text-center py-8">
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        更多好玩实用的功能正在开发中...
+                      <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        神秘塔罗功能正在建设中...
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-                        敬请期待
-                      </p>
+                      <div className="space-y-4">
+                        <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 p-4 rounded-lg">
+                          <div className="text-3xl mb-2">🎴</div>
+                          <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">塔罗牌占卜</h3>
+                          <p className="text-sm text-purple-700 dark:text-purple-300">多种牌阵选择，深度解读命运指引</p>
+                        </div>
+                        <div className="bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 p-4 rounded-lg">
+                          <div className="text-3xl mb-2">🔮</div>
+                          <h3 className="font-medium text-indigo-900 dark:text-indigo-100 mb-2">每日指引</h3>
+                          <p className="text-sm text-indigo-700 dark:text-indigo-300">每日塔罗运势，陪伴您的生活旅程</p>
+                        </div>
+                        <div className="bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-4 rounded-lg">
+                          <div className="text-3xl mb-2">📚</div>
+                          <h3 className="font-medium text-pink-900 dark:text-pink-100 mb-2">塔罗知识</h3>
+                          <p className="text-sm text-pink-700 dark:text-pink-300">学习塔罗牌义，掌握占卜技巧</p>
+                        </div>
+                      </div>
+                      <div className="mt-6">
+                        <div className="inline-flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                          <span>功能开发中，敬请期待...</span>
+                        </div>
+                      </div>
                     </div>
                   </Card>
                 </div>
@@ -805,7 +819,12 @@ function SettingsPage() {
                           <p className="text-sm text-gray-500 dark:text-gray-400">自动备份您的数据</p>
                         </div>
                         <label className="inline-flex items-center cursor-pointer">
-                          <input type="checkbox" className="sr-only peer" defaultChecked={true} />
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={dataSyncEnabled}
+                            onChange={handleDataSyncChange}
+                          />
                           <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                       </div>
