@@ -1,87 +1,188 @@
-/* NumerologyPage.css */
+/* NumerologyPage.css - 优化版 - CSS变量 + 响应式设计 */
 
-.numerology-container {
-  font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f8f9fa;
-  color: #333;
-  min-height: 100vh;
+/* ===== CSS变量定义 ===== */
+:root {
+  /* 主题颜色 - 浅色模式 */
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f1f1;
+  --bg-card: #f9f9f9;
+  --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  
+  /* 文字颜色 */
+  --text-primary: #2c3e50;
+  --text-secondary: #555;
+  --text-tertiary: #666;
+  --text-inverse: #ffffff;
+  --text-disabled: #6c757d;
+  
+  /* 边框颜色 */
+  --border-primary: #e0e0e0;
+  --border-secondary: #ccc;
+  --border-light: #ddd;
+  
+  /* 主题色 */
+  --primary-color: #3498db;
+  --primary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  --secondary-color: #9c27b0;
+  --secondary-gradient: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+  --accent-color: #ffeb3b;
+  --accent-border: #ffc107;
+  --success-color: #4caf50;
+  --danger-color: #e74c3c;
+  
+  /* 能量统计渐变 */
+  --energy-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  /* 阴影 */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 30px rgba(102, 126, 234, 0.25);
+  
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  /* 间距 */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* 触摸目标最小尺寸 */
+  --touch-min: 44px;
 }
 
+/* 暗黑模式变量覆盖 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2a2a2a;
+    --bg-tertiary: #333;
+    --bg-card: #333;
+    --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    
+    --text-primary: #f0f0f0;
+    --text-secondary: #e0e0e0;
+    --text-tertiary: #ccc;
+    --text-disabled: #888;
+    
+    --border-primary: #444;
+    --border-secondary: #555;
+    --border-light: #555;
+    
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.35);
+    --shadow-xl: 0 12px 30px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* ===== 基础容器 ===== */
+.numerology-container {
+  font-family: 'Microsoft YaHei', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== 头部区域 ===== */
 .header {
   text-align: center;
-  padding: 20px 0;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 30px;
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--border-primary);
+  margin-bottom: var(--spacing-lg);
 }
 
 .title {
-  font-size: 2.2rem;
-  color: #2c3e50;
-  margin-bottom: 15px;
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
+/* ===== 日期选择器 ===== */
 .date-selector {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: var(--spacing-sm);
   flex-wrap: wrap;
 }
 
 .date-selector label {
-  font-size: 1rem;
-  color: #555;
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
 }
 
 .date-selector input {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
+  padding: 6px var(--spacing-sm);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  min-height: var(--touch-min);
+  touch-action: manipulation;
+}
+
+.date-selector input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
 }
 
 .selected-date {
-  font-size: 0.95rem;
-  color: #666;
-  background-color: #f0f0f0;
-  padding: 6px 12px;
-  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
 }
 
-/* 主数字区域 */
+/* ===== 主数字区域 ===== */
 .main-number-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .number-circle {
-  width: 120px;
-  height: 120px;
+  width: clamp(80px, 15vw, 100px);
+  height: clamp(80px, 15vw, 100px);
   border-radius: 50%;
-  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  background: var(--primary-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 25px;
-  box-shadow: 0 10px 20px rgba(106, 17, 203, 0.2);
+  margin-bottom: var(--spacing-md);
+  box-shadow: 0 8px 16px rgba(106, 17, 203, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.number-circle:hover {
+  transform: scale(1.05);
 }
 
 .big-number {
-  font-size: 4rem;
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
   font-weight: 700;
-  color: white;
+  color: var(--text-inverse);
 }
 
 .keywords {
   display: flex;
   justify-content: center;
-  gap: 30px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -89,293 +190,51 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 80px;
+  min-width: clamp(50px, 10vw, 60px);
 }
 
 .keyword-icon {
-  width: 30px;
-  height: 30px;
-  background-color: #3498db;
-  color: white;
+  width: clamp(20px, 4vw, 25px);
+  height: clamp(20px, 4vw, 25px);
+  background-color: var(--primary-color);
+  color: var(--text-inverse);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 6px;
 }
 
 .keyword-text {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
-/* 描述区域 */
-.description-section {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  border-left: 4px solid #3498db;
-}
-
-.description-text {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #444;
-  text-align: center;
-}
-
-/* 金字塔区域 */
-.pyramid-section {
-  background-color: white;
-  padding: 25px;
-  border-radius: 10px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+/* ===== 能量统计区域 ===== */
+.energy-stats-section {
+  background: var(--energy-gradient);
+  color: var(--text-inverse);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-xl);
 }
 
 .section-title {
-  font-size: 1.5rem;
-  color: #2c3e50;
-  margin-bottom: 20px;
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  color: var(--text-inverse);
+  margin-bottom: var(--spacing-sm);
   text-align: center;
   font-weight: 600;
-}
-
-.pyramid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.pyramid-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-  position: relative;
-}
-
-.pyramid-number {
-  width: 50px;
-  height: 50px;
-  background-color: #f1f1f1;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin: 0 15px;
-  border: 2px solid #ddd;
-  transition: all 0.3s ease;
-}
-
-.pyramid-number.active {
-  background-color: #ffeb3b;
-  border-color: #ffc107;
-  box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
-  transform: scale(1.1);
-}
-
-.arrow-down {
-  position: absolute;
-  bottom: -25px;
-  font-size: 1.5rem;
-  color: #aaa;
-}
-
-.pyramid-explanation {
-  text-align: center;
-  color: #666;
-  font-size: 0.9rem;
-  margin-top: 10px;
-}
-
-/* 免责声明 */
-.disclaimer-section {
-  background-color: #fff8e1;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  border-left: 4px solid #ffc107;
-}
-
-.disclaimer-text {
-  font-size: 0.9rem;
-  color: #8d6e00;
-  line-height: 1.5;
-  text-align: center;
-}
-
-/* 灵数归类 */
-.classification-section {
-  background-color: white;
-  padding: 25px;
-  border-radius: 10px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.classification-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 25px;
-}
-
-.classification-row {
-  display: flex;
-  justify-content: space-around;
-}
-
-.classification-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  max-width: 150px;
-}
-
-.classification-value {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.classification-label {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #2c3e50;
-}
-
-.classification-explanation {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-top: 25px;
-}
-
-.explanation-item {
-  background-color: #f9f9f9;
-  padding: 15px;
-  border-radius: 8px;
-  border-left: 3px solid #4caf50;
-}
-
-.explanation-item h4 {
-  font-size: 1rem;
-  margin-bottom: 8px;
-  color: #2c3e50;
-}
-
-.explanation-item p {
-  font-size: 0.85rem;
-  color: #666;
-  line-height: 1.4;
-}
-
-/* 详细解读 */
-.interpretation-section {
-  background-color: white;
-  padding: 25px;
-  border-radius: 10px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.interpretation-content {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-.interpretation-card {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  border-top: 4px solid #3498db;
-}
-
-.interpretation-card h4 {
-  font-size: 1.1rem;
-  color: #2c3e50;
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-
-.interpretation-card p {
-  font-size: 0.95rem;
-  color: #555;
-  line-height: 1.5;
-}
-
-/* 页脚 */
-.footer {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-  font-size: 0.9rem;
-  border-top: 1px solid #e0e0e0;
-  margin-top: 30px;
-}
-
-.footer p {
-  margin-bottom: 5px;
-}
-
-/* 加载动画 */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  text-align: center;
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid #3498db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* 能量统计区域 */
-.energy-stats-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 25px;
-  border-radius: 15px;
-  margin-bottom: 30px;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
 }
 
 .energy-stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
 }
 
 .energy-stat {
@@ -383,156 +242,388 @@
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 1.8rem);
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   opacity: 0.9;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .stat-bar {
   width: 100%;
-  height: 8px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .stat-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ffd700, #ffed4e);
-  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent-color), #ffed4e);
+  border-radius: 3px;
   transition: width 0.8s ease-in-out;
+}
+
+/* ===== 描述区域 ===== */
+.description-section {
+  background: var(--bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--primary-color);
+}
+
+.description-text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 /* 优势挑战区域 */
 .strengths-challenges {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
 }
 
 .strength-item, .challenge-item {
-  padding: 15px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  line-height: 1.4;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  line-height: 1.3;
 }
 
 .strength-item {
   background: rgba(52, 152, 219, 0.1);
-  border-left: 4px solid #3498db;
+  border-left: 4px solid var(--primary-color);
 }
 
 .challenge-item {
   background: rgba(231, 76, 60, 0.1);
-  border-left: 4px solid #e74c3c;
+  border-left: 4px solid var(--danger-color);
 }
 
 .strength-label, .challenge-label {
   font-weight: 600;
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
-/* 响应式设计 */
+/* ===== 金字塔区域 ===== */
+.pyramid-section {
+  background: var(--bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.pyramid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pyramid-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.pyramid-number {
+  width: clamp(28px, 6vw, 40px);
+  height: clamp(28px, 6vw, 40px);
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
+  font-weight: 600;
+  margin: 0 8px;
+  border: 2px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.pyramid-number.active {
+  background: var(--accent-color);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+  transform: scale(1.1);
+}
+
+.arrow-down {
+  position: absolute;
+  bottom: -20px;
+  font-size: 1.2rem;
+  color: var(--text-tertiary);
+}
+
+.pyramid-explanation {
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+/* ===== 灵数归类 ===== */
+.classification-section {
+  background: var(--bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.classification-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.classification-row {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.classification-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: clamp(60px, 20vw, 120px);
+}
+
+.classification-value {
+  width: clamp(40px, 10vw, 50px);
+  height: clamp(40px, 10vw, 50px);
+  background: var(--secondary-gradient);
+  color: var(--text-inverse);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.classification-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.classification-explanation {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: var(--spacing-md);
+}
+
+.explanation-item {
+  background: var(--bg-card);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--success-color);
+}
+
+.explanation-item h4 {
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.explanation-item p {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  line-height: 1.3;
+}
+
+/* ===== 详细解读 ===== */
+.interpretation-section {
+  background: var(--bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.interpretation-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-sm);
+}
+
+.interpretation-card {
+  background: var(--bg-card);
+  padding: 15px;
+  border-radius: var(--radius-sm);
+  border-top: 4px solid var(--primary-color);
+}
+
+.interpretation-card h4 {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.interpretation-card p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ===== 免责声明 ===== */
+.disclaimer-section {
+  background: #fff8e1;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-lg);
+  border-left: 4px solid var(--accent-border);
+}
+
+@media (prefers-color-scheme: dark) {
+  .disclaimer-section {
+    background: #333;
+  }
+}
+
+.disclaimer-text {
+  font-size: 0.8rem;
+  color: #8d6e00;
+  line-height: 1.4;
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .disclaimer-text {
+    color: var(--accent-color);
+  }
+}
+
+/* ===== 页脚 ===== */
+.footer {
+  text-align: center;
+  padding: var(--spacing-md);
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border-primary);
+  margin-top: var(--spacing-lg);
+}
+
+.footer p {
+  margin-bottom: 4px;
+}
+
+/* ===== 加载动画 ===== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bg-tertiary);
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== 平板设备优化 (768px及以下) ===== */
 @media (max-width: 768px) {
-  .title {
-    font-size: 1.8rem;
+  .numerology-container {
+    padding: var(--spacing-sm);
+  }
+  
+  .header {
+    padding: var(--spacing-sm) 0;
+    margin-bottom: var(--spacing-md);
   }
   
   .date-selector {
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-  }
-  
-  .keywords {
-    gap: 15px;
-  }
-  
-  .keyword-item {
-    min-width: 70px;
-  }
-  
-  .pyramid-number {
-    width: 40px;
-    height: 40px;
-    margin: 0 10px;
-    font-size: 1.1rem;
-  }
-  
-  .classification-row {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  
-  .classification-item {
-    max-width: 100%;
-    width: 100%;
+    gap: 8px;
   }
   
   .classification-explanation {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .interpretation-content {
     grid-template-columns: 1fr;
   }
   
-  /* 移动端能量统计 */
+  .stat-bar {
+    height: 5px;
+  }
+  
   .energy-stats-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-  
-  .stat-value {
-    font-size: 1.8rem;
+    gap: 12px;
   }
   
   .strengths-challenges {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-  
-  .energy-stats-section {
-    padding: 20px;
-    border-radius: 12px;
+    gap: 12px;
   }
 }
 
+/* ===== 小屏手机优化 (480px及以下) ===== */
 @media (max-width: 480px) {
   .numerology-container {
-    padding: 15px;
+    padding: 10px;
   }
   
-  .title {
-    font-size: 1.6rem;
+  .header {
+    padding: 8px 0;
+    margin-bottom: 12px;
   }
   
-  .number-circle {
-    width: 100px;
-    height: 100px;
+  .pyramid-section,
+  .classification-section,
+  .interpretation-section {
+    padding: 12px;
+    margin-bottom: 12px;
   }
   
-  .big-number {
-    font-size: 3rem;
+  .disclaimer-section {
+    padding: 10px;
   }
   
-  .classification-explanation {
-    grid-template-columns: 1fr;
+  .energy-stats-section {
+    padding: 12px;
   }
   
-  .pyramid-number {
-    width: 35px;
-    height: 35px;
-    margin: 0 8px;
-    font-size: 1rem;
+  .classification-row {
+    justify-content: center;
+  }
+  
+  .description-section {
+    padding: 12px;
+  }
+  
+  .keywords {
+    gap: 8px;
   }
 }

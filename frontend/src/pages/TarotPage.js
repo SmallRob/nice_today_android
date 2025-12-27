@@ -528,11 +528,11 @@ function TarotPage() {
         @keyframes cardReveal {
           0% {
             opacity: 0;
-            transform: rotateY(90deg) scale(0.8);
+            transform: rotateY(90deg) scale(0.85);
           }
           50% {
-            opacity: 0.5;
-            transform: rotateY(45deg) scale(0.9);
+            opacity: 0.6;
+            transform: rotateY(45deg) scale(0.95);
           }
           100% {
             opacity: 1;
@@ -541,7 +541,23 @@ function TarotPage() {
         }
         
         .animate-card-reveal {
-          animation: cardReveal 0.8s ease-out forwards;
+          animation: cardReveal 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        /* 卡片内容渐入动画 */
+        @keyframes fadeInUp {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in-up {
+          animation: fadeInUp 0.5s ease-out forwards;
         }
       `}</style>
       <PageLayout title="神秘塔罗">
@@ -680,10 +696,10 @@ function TarotPage() {
                                 {/* 单张牌展示 */}
                                 {drawnCards.mode === DRAW_MODES.SINGLE && drawnCards.cards[0] && (
                                   <>
-                                    <div className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-2xl p-6 shadow-2xl border border-purple-100 dark:border-purple-800">
-                                      <div className="text-center">
+                                    <div className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-2xl p-4 sm:p-6 shadow-2xl border border-purple-100 dark:border-purple-800">
+                                      <div className="flex items-center justify-center">
                                         {!cardsRevealed ? (
-                                          <div className="flex justify-center">
+                                          <div className="flex items-center justify-center">
                                             <div className="w-48 h-72 sm:w-64 sm:h-96 relative perspective-1000">
                                               <div className="relative w-full h-full transition-transform duration-700">
                                                 <img
@@ -696,21 +712,28 @@ function TarotPage() {
                                             </div>
                                           </div>
                                         ) : (
-                                          <div className="flex justify-center">
+                                          <div className="flex items-center justify-center">
                                             <div className="w-48 h-72 sm:w-64 sm:h-96 relative perspective-1000">
-                                              <div className="relative w-full h-full transition-transform duration-700 animate-card-reveal">
-                                                <div className="text-7xl mb-4 animate-pulse">🃏</div>
-                                                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2 tracking-wide">
+                                              <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 py-6 transition-transform duration-700 animate-card-reveal">
+                                                {/* 卡牌图标 */}
+                                                <div className="text-6xl sm:text-7xl mb-3 sm:mb-4 animate-pulse animate-fade-in-up" style={{ animationDelay: '0.1s' }}>🃏</div>
+                                                
+                                                {/* 牌面名称 */}
+                                                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1.5 sm:mb-2 tracking-wide animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                                                   {drawnCards.cards[0].name}
                                                 </h3>
-                                                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 font-medium">
+                                                
+                                                {/* 英文名称 */}
+                                                <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4 font-medium animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                                                   {drawnCards.cards[0].nameEn}
                                                 </p>
-                                                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                                                
+                                                {/* 关键词标签 */}
+                                                <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                                                   {drawnCards.cards[0].keywords.map((keyword, index) => (
                                                     <span
                                                       key={index}
-                                                      className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
+                                                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-[10px] sm:text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
                                                     >
                                                       {keyword}
                                                     </span>
@@ -783,10 +806,10 @@ function TarotPage() {
                               <>
                                 <div className="grid grid-cols-3 gap-3">
                                   {drawnCards.cards.map((card, index) => (
-                                    <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-4 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
-                                      <div className="text-center">
+                                    <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-3 sm:p-4 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
+                                      <div className="flex items-center justify-center">
                                         {!cardsRevealed ? (
-                                          <div className="flex justify-center">
+                                          <div className="flex items-center justify-center">
                                             <div className="w-32 h-48 sm:w-40 sm:h-60 relative perspective-1000">
                                               <div className="relative w-full h-full transition-transform duration-700" style={{ animationDelay: `${index * 150}ms` }}>
                                                 <img
@@ -799,17 +822,24 @@ function TarotPage() {
                                             </div>
                                           </div>
                                         ) : (
-                                          <div className="flex justify-center">
+                                          <div className="flex items-center justify-center">
                                             <div className="w-32 h-48 sm:w-40 sm:h-60 relative perspective-1000">
-                                              <div className="relative w-full h-full transition-transform duration-700 animate-card-reveal" style={{ animationDelay: `${index * 200}ms` }}>
-                                                <div className="text-4xl mb-2 animate-pulse">🃏</div>
-                                                <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-2 py-1 mb-2 shadow-sm">
-                                                  <h4 className="font-bold text-xs text-purple-700 dark:text-purple-300 tracking-wide">{CARD_POSITIONS[index]}</h4>
+                                              <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-2 sm:px-3 py-3 sm:py-4 transition-transform duration-700 animate-card-reveal" style={{ animationDelay: `${index * 200}ms` }}>
+                                                {/* 位置标签 */}
+                                                <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 mb-2 sm:mb-3 shadow-sm order-1 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 100}ms` }}>
+                                                  <h4 className="font-bold text-[10px] sm:text-xs text-purple-700 dark:text-purple-300 tracking-wide">{CARD_POSITIONS[index]}</h4>
                                                 </div>
-                                                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1 leading-tight">
+                                                
+                                                {/* 卡牌图标 */}
+                                                <div className="text-3xl sm:text-4xl mb-2 sm:mb-3 animate-pulse animate-fade-in-up order-2" style={{ animationDelay: `${index * 200 + 150}ms` }}>🃏</div>
+                                                
+                                                {/* 牌面名称 */}
+                                                <h3 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-100 mb-0.5 sm:mb-1 leading-tight order-3 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 200}ms` }}>
                                                   {card.name}
                                                 </h3>
-                                                <p className="text-gray-600 dark:text-gray-300 text-xs font-medium mb-2">
+                                                
+                                                {/* 英文名称 */}
+                                                <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-300 font-medium mb-2 sm:mb-2 order-4 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 250}ms` }}>
                                                   {card.nameEn}
                                                 </p>
                                               </div>

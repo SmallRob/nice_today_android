@@ -60,19 +60,49 @@ export const UserConfigProvider = ({ children }) => {
   useEffect(() => {
     if (!configManagerReady) return;
 
-    const handleConfigChange = ({
-      configs: updatedConfigs,
-      currentConfig: updatedCurrentConfig,
-      forceReload
-    }) => {
-      console.log('UserConfigContext 配置变更:', {
-        configsLength: updatedConfigs.length,
-        currentConfigNickname: updatedCurrentConfig?.nickname,
-        forceReload
-      });
-      // 立即更新所有状态，确保UI能实时刷新
-      setCurrentConfig(updatedCurrentConfig);
-      setConfigs(updatedConfigs);
+    const handleConfigChange = (data) => {
+      try {
+        // 参数解构和验证
+        const {
+          configs: updatedConfigs,
+          currentConfig: updatedCurrentConfig,
+          activeConfigIndex: updatedActiveIndex,
+          forceReload
+        } = data || {};
+
+        // 安全验证：确保数据有效
+        if (!updatedConfigs || !Array.isArray(updatedConfigs)) {
+          console.warn('UserConfigContext: 无效的配置数据', data);
+          return;
+        }
+
+        console.log('UserConfigContext 配置变更:', {
+          configsLength: updatedConfigs.length,
+          currentConfigNickname: updatedCurrentConfig?.nickname,
+          activeIndex: updatedActiveIndex,
+          forceReload
+        });
+
+        // 安全更新状态，使用函数形式避免竞态条件
+        setCurrentConfig(prev => {
+          // 只有当新数据有效时才更新
+          if (updatedCurrentConfig && typeof updatedCurrentConfig === 'object') {
+            return updatedCurrentConfig;
+          }
+          return prev;
+        });
+
+        setConfigs(prev => {
+          // 只有当新数据有效时才更新
+          if (Array.isArray(updatedConfigs) && updatedConfigs.length > 0) {
+            return updatedConfigs;
+          }
+          return prev;
+        });
+      } catch (error) {
+        console.error('UserConfigContext 监听器执行错误:', error);
+        // 不抛出错误，避免破坏整个应用
+      }
     };
 
     const removeListener = enhancedUserConfigManager.addListener(handleConfigChange);

@@ -942,25 +942,58 @@ class EnhancedUserConfigManager {
    * 设置活跃配置
    */
   async setActiveConfig(index) {
-    if (!this.initialized || index < 0 || index >= this.configs.length) {
-      throw new Error('无效的配置索引');
+    console.log('[setActiveConfig] 开始设置活跃配置, index:', index, 'configs.length:', this.configs?.length);
+
+    // 参数验证
+    if (typeof index !== 'number' || index < 0) {
+      const errorMsg = `无效的配置索引: ${index}`;
+      console.error('[setActiveConfig]', errorMsg);
+      throw new Error(errorMsg);
     }
-    
+
+    if (!this.initialized) {
+      const errorMsg = '配置管理器未初始化';
+      console.error('[setActiveConfig]', errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    if (!this.configs || !Array.isArray(this.configs)) {
+      const errorMsg = '配置数据不存在或格式错误';
+      console.error('[setActiveConfig]', errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    if (index >= this.configs.length) {
+      const errorMsg = `配置索引 ${index} 超出范围，当前共有 ${this.configs.length} 个配置`;
+      console.error('[setActiveConfig]', errorMsg);
+      throw new Error(errorMsg);
+    }
+
     try {
+      // 保存旧的索引
+      const oldIndex = this.activeConfigIndex;
+
+      // 更新活跃索引
       this.activeConfigIndex = index;
-      
+
+      console.log('[setActiveConfig] 活跃索引已更新:', {
+        oldIndex,
+        newIndex: index,
+        configNickname: this.configs[index]?.nickname
+      });
+
       // 保存到存储
       await this.saveConfigsToStorage();
-      
+
       // 通知监听器
       this.notifyListeners();
-      
-      console.log('设置活跃配置成功');
+
+      console.log('[setActiveConfig] 设置活跃配置成功');
       return true;
-      
+
     } catch (error) {
-      console.error('设置活跃配置失败:', error);
-      return false;
+      console.error('[setActiveConfig] 设置活跃配置失败:', error);
+      throw error;
     }
   }
 
@@ -971,47 +1004,129 @@ class EnhancedUserConfigManager {
    * @returns {Promise<boolean>} 是否排序成功
    */
   async reorderConfig(fromIndex, toIndex) {
+    console.log('[reorderConfig] 开始排序配置', {
+      fromIndex,
+      toIndex,
+      configsLength: this.configs?.length,
+      initialized: this.initialized,
+      currentActiveIndex: this.activeConfigIndex
+    });
+
     if (!this.initialized) {
+      console.error('[reorderConfig] 配置管理器未初始化');
       throw new Error('配置管理器未初始化');
+    }
+
+    if (!this.configs || !Array.isArray(this.configs)) {
+      console.error('[reorderConfig] 配置数据无效', { configs: this.configs });
+      throw new Error('配置数据无效');
     }
 
     if (fromIndex < 0 || fromIndex >= this.configs.length ||
         toIndex < 0 || toIndex >= this.configs.length) {
-      throw new Error('无效的配置索引');
+      console.error('[reorderConfig] 无效的配置索引', {
+        fromIndex,
+        toIndex,
+        configsLength: this.configs.length
+      });
+      throw new Error(`无效的配置索引: fromIndex=${fromIndex}, toIndex=${toIndex}, configs.length=${this.configs.length}`);
     }
 
     if (fromIndex === toIndex) {
+      console.log('[reorderConfig] 索引相同，无需排序');
       return true; // 无需排序
     }
 
+    // 保存旧的活跃索引和配置快照（用于恢复）
+    const oldActiveIndex = this.activeConfigIndex;
+    const oldConfigsSnapshot = [...this.configs];
+    let movedConfig = null;
+
     try {
-      // 保存旧的活跃索引
-      const oldActiveIndex = this.activeConfigIndex;
+      console.log('[reorderConfig] 移动配置前:', {
+        oldActiveIndex,
+        fromConfig: this.configs[fromIndex]?.nickname,
+        toConfig: this.configs[toIndex]?.nickname
+      });
 
       // 移动配置项
-      const [movedConfig] = this.configs.splice(fromIndex, 1);
+      movedConfig = this.configs.splice(fromIndex, 1)[0];
       this.configs.splice(toIndex, 0, movedConfig);
 
+      console.log('[reorderConfig] 配置已移动:', {
+        movedNickname: movedConfig?.nickname,
+        newIndex: toIndex
+      });
+
       // 调整活跃配置索引
+      let newActiveIndex = oldActiveIndex;
+
       if (oldActiveIndex === fromIndex) {
-        this.activeConfigIndex = toIndex;
+        // 活跃配置被移动，新索引为 toIndex
+        newActiveIndex = toIndex;
       } else if (fromIndex < oldActiveIndex && toIndex >= oldActiveIndex) {
-        this.activeConfigIndex = oldActiveIndex - 1;
+        // 从活跃配置前移动到活跃配置后或同一位置，活跃索引减1
+        newActiveIndex = oldActiveIndex - 1;
       } else if (fromIndex > oldActiveIndex && toIndex <= oldActiveIndex) {
-        this.activeConfigIndex = oldActiveIndex + 1;
+        // 从活跃配置后移动到活跃配置前，活跃索引加1
+        newActiveIndex = oldActiveIndex + 1;
       }
 
-      // 保存到存储
-      await this.saveConfigsToStorage();
+      this.activeConfigIndex = newActiveIndex;
+
+      console.log('[reorderConfig] 活跃索引已调整:', {
+        oldActiveIndex,
+        newActiveIndex,
+        fromIndex,
+        toIndex
+      });
+
+      // 验证索引有效性
+      if (this.activeConfigIndex < 0 || this.activeConfigIndex >= this.configs.length) {
+        console.error('[reorderConfig] 活跃索引无效', {
+          activeIndex: this.activeConfigIndex,
+          configsLength: this.configs.length
+        });
+        throw new Error(`活跃索引无效: ${this.activeConfigIndex}`);
+      }
+
+      // 保存到存储（使用事务机制确保数据一致性）
+      console.log('[reorderConfig] 开始保存到存储...');
+      const saveSuccess = await this.saveConfigsToStorage();
+
+      if (!saveSuccess) {
+        console.error('[reorderConfig] 保存到存储失败');
+        throw new Error('保存到存储失败');
+      }
+
+      console.log('[reorderConfig] 保存成功，开始通知监听器...');
 
       // 通知监听器
       this.notifyListeners();
 
-      console.log(`配置排序成功: 从索引 ${fromIndex} 移动到 ${toIndex}，活跃索引从 ${oldActiveIndex} 调整为 ${this.activeConfigIndex}`);
+      console.log('[reorderConfig] 配置排序成功', {
+        fromIndex,
+        toIndex,
+        oldActiveIndex,
+        newActiveIndex: this.activeConfigIndex,
+        movedNickname: movedConfig?.nickname
+      });
       return true;
 
     } catch (error) {
-      console.error('配置排序失败:', error);
+      console.error('[reorderConfig] 配置排序失败:', {
+        error: error.message,
+        stack: error.stack,
+        fromIndex,
+        toIndex
+      });
+
+      // 恢复数据
+      console.log('[reorderConfig] 尝试恢复数据...');
+      this.configs = oldConfigsSnapshot;
+      this.activeConfigIndex = oldActiveIndex;
+      // 不需要通知监听器，因为这次操作已经失败了
+
       throw error;
     }
   }
@@ -1102,20 +1217,58 @@ class EnhancedUserConfigManager {
    * @param {Boolean} forceReload - 是否强制重新加载
    */
   notifyListeners(forceReload = false) {
-    const currentConfig = this.getCurrentConfig();
+    console.log('[notifyListeners] 开始通知监听器', {
+      listenersCount: this.listeners.length,
+      forceReload,
+      activeIndex: this.activeConfigIndex,
+      configsLength: this.configs?.length
+    });
 
-    this.listeners.forEach(listener => {
+    // 安全验证
+    if (!this.configs || !Array.isArray(this.configs)) {
+      console.error('[notifyListeners] 配置数据无效');
+      return;
+    }
+
+    const currentConfig = this.getCurrentConfig();
+    const notificationData = {
+      configs: [...this.configs],
+      activeConfigIndex: this.activeConfigIndex,
+      currentConfig,
+      metadata: this.metadata ? { ...this.metadata } : {},
+      forceReload
+    };
+
+    console.log('[notifyListeners] 准备发送数据:', {
+      configsCount: notificationData.configs.length,
+      activeConfigNickname: notificationData.currentConfig?.nickname,
+      activeIndex: notificationData.activeConfigIndex
+    });
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    this.listeners.forEach((listener, index) => {
       try {
-        listener({
-          configs: [...this.configs],
-          activeConfigIndex: this.activeConfigIndex,
-          currentConfig,
-          metadata: { ...this.metadata },
-          forceReload
-        });
+        if (typeof listener === 'function') {
+          listener(notificationData);
+          successCount++;
+          console.log(`[notifyListeners] 监听器 ${index} 执行成功`);
+        } else {
+          console.warn(`[notifyListeners] 监听器 ${index} 不是函数`);
+          errorCount++;
+        }
       } catch (error) {
-        console.error('监听器执行出错:', error);
+        errorCount++;
+        console.error(`[notifyListeners] 监听器 ${index} 执行出错:`, error);
+        // 不停止执行其他监听器
       }
+    });
+
+    console.log('[notifyListeners] 通知完成', {
+      totalListeners: this.listeners.length,
+      successCount,
+      errorCount
     });
   }
 

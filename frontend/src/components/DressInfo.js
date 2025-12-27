@@ -288,16 +288,29 @@ const DressInfo = ({ apiBaseUrl, serviceStatus, isDesktop }) => {
 
         {/* 不宜色 */}
         {unluckyColors.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm opacity-80">
-            <h3 className="text-base font-bold mb-3 flex items-center text-red-500 dark:text-red-400">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+            <h3 className="text-base font-bold mb-4 flex items-center text-red-500 dark:text-red-400">
               <IconLibrary.Icon name="close" size={18} className="mr-2" />
               今日避开颜色
             </h3>
-            <div className="flex flex-wrap gap-3">
+            <div className="space-y-3">
               {unluckyColors.map((colorItem, i) => (
-                <div key={i} className="flex items-center space-x-2 p-2 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-100 dark:border-red-800/30">
-                  <div className={`w-4 h-4 rounded-full ${getColorHex(colorItem.颜色系统)}`}></div>
-                  <span className="text-xs text-red-800 dark:text-red-200">{colorItem.颜色系统}</span>
+                <div key={i} className="flex items-start space-x-3 p-3 bg-red-50 dark:bg-red-900/10 rounded-xl group transition-all">
+                  <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-600 ${getColorHex(colorItem.颜色系统)}`}>
+                    <IconLibrary.Icon name="close" size={16} className={colorItem.颜色系统.includes('白') ? 'text-gray-400' : 'text-white'} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-bold text-gray-800 dark:text-white">{colorItem.颜色系统}</span>
+                      <span className="text-[10px] bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 px-2 py-0.5 rounded-full">慎用</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {colorItem.具体颜色?.map((c, ci) => (
+                        <span key={ci} className="text-[11px] px-2 py-0.5 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-200 shadow-sm">{c}</span>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-red-600 dark:text-red-300 leading-tight opacity-80">{colorItem.描述 || '建议今日避免穿着此色系，可选择其他推荐颜色'}</p>
+                  </div>
                 </div>
               ))}
             </div>

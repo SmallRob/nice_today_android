@@ -679,7 +679,7 @@ code {
 
 .maya-fixed-header {
   position: fixed;
-  top: 15px;
+  top: 0;
   left: 0;
   right: 0;
   z-index: 40;
@@ -708,7 +708,7 @@ code {
 
 .maya-fixed-tabs {
   position: fixed;
-  top: calc(5rem + 15px);
+  top: 3.75rem;
   left: 0;
   right: 0;
   z-index: 50;
@@ -739,12 +739,12 @@ code {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  margin-top: calc(7rem + 15px);
+  margin-top: 6.75rem;
   /* 为固定头部留出空间 */
-  padding-top: 0.5rem;
+  padding-top: 1rem;
   padding-bottom: 2rem;
   /* 确保滚动内容从顶部开始 */
-  scroll-padding-top: 0.5rem;
+  scroll-padding-top: 1rem;
 }
 
 /* 仅在桌面端使用硬件加速 */
@@ -771,9 +771,8 @@ code {
   }
 
   .maya-fixed-header {
-    top: calc(env(safe-area-inset-top) + 15px);
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    top: 0;
+    padding-top: env(safe-area-inset-top);
     /* 移动端优化固定定位 */
     position: fixed;
     left: 0;
@@ -788,7 +787,7 @@ code {
   }
 
   .maya-fixed-tabs {
-    top: calc(5rem + env(safe-area-inset-top) + 15px);
+    top: calc(3.75rem + env(safe-area-inset-top));
     /* 移动端优化固定定位 */
     position: fixed;
     left: 0;
@@ -798,8 +797,8 @@ code {
   }
 
   .maya-scroll-content {
-    margin-top: calc(7rem + env(safe-area-inset-top) + 15px);
-    padding-top: 0.5rem;
+    margin-top: calc(6.75rem + env(safe-area-inset-top));
+    padding-top: 1rem;
     padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);
     /* 移动端滚动性能优化 */
     -webkit-overflow-scrolling: touch;

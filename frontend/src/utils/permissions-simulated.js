@@ -413,6 +413,13 @@ export class PermissionManager {
     return status;
   }
 
+  // 批量检查权限
+  async checkPermissionGroup(permissionGroup) {
+    const { results, allGranted } = await checkPermissionGroup(permissionGroup);
+    
+    return { results, allGranted };
+  }
+  
   // 批量检查和请求权限
   async checkAndRequestPermissionGroup(permissionGroup) {
     const { results, allGranted } = await checkPermissionGroup(permissionGroup);

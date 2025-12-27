@@ -1415,37 +1415,54 @@ const UserConfigManagerComponent = () => {
   // 使用 ref 来跟踪前一个 configs.length，避免无限循环
   const prevConfigsLengthRef = React.useRef(0);
 
-  const handleConfigChange = useCallback(({
-    configs: updatedConfigs,
-    activeConfigIndex: updatedActiveIndex,
-    currentConfig,
-    forceReload
-  }) => {
-    console.log('配置变更监听器触发:', {
-      configsLength: updatedConfigs.length,
-      activeIndex: updatedActiveIndex,
-      currentConfigNickname: currentConfig?.nickname,
-      forceReload
-    });
+  const handleConfigChange = useCallback((data) => {
+    try {
+      // 参数解构和验证
+      const {
+        configs: updatedConfigs,
+        activeConfigIndex: updatedActiveIndex,
+        currentConfig,
+        forceReload
+      } = data || {};
 
-    // 由于configs现在来自全局上下文，这里只更新本地状态
-    setActiveConfigIndex(updatedActiveIndex);
+      console.log('配置变更监听器触发:', {
+        configsLength: updatedConfigs?.length,
+        activeIndex: updatedActiveIndex,
+        currentConfigNickname: currentConfig?.nickname,
+        forceReload,
+        raw_data: data
+      });
 
-    // 确保展开索引在有效范围内
-    if (updatedActiveIndex >= 0 && updatedActiveIndex < updatedConfigs.length) {
-      setExpandedIndex(updatedActiveIndex);
-    } else if (updatedConfigs.length > 0) {
-      setExpandedIndex(0);
+      // 安全验证：确保数据有效
+      if (!updatedConfigs || !Array.isArray(updatedConfigs)) {
+        console.warn('handleConfigChange: 无效的配置数据', data);
+        return;
+      }
+
+      // 更新本地状态，使用安全值，避免 undefined 导致的问题
+      if (typeof updatedActiveIndex === 'number' && updatedActiveIndex >= 0) {
+        setActiveConfigIndex(updatedActiveIndex);
+
+        // 确保展开索引在有效范围内
+        if (updatedActiveIndex < updatedConfigs.length) {
+          setExpandedIndex(updatedActiveIndex);
+        } else if (updatedConfigs.length > 0) {
+          setExpandedIndex(0);
+        }
+      }
+
+      // 如果配置数据变化，强制刷新八字和紫微数据
+      // 使用 ref 来避免依赖 configs
+      const lengthChanged = updatedConfigs.length !== prevConfigsLengthRef.current;
+      if (forceReload || lengthChanged) {
+        setBaziKey(prev => prev + 1);
+      }
+      // 更新 ref
+      prevConfigsLengthRef.current = updatedConfigs.length;
+    } catch (error) {
+      console.error('handleConfigChange 执行错误:', error);
+      // 不抛出错误，避免破坏UI
     }
-
-    // 如果配置数据变化，强制刷新八字和紫微数据
-    // 使用 ref 来避免依赖 configs
-    const lengthChanged = updatedConfigs.length !== prevConfigsLengthRef.current;
-    if (forceReload || lengthChanged) {
-      setBaziKey(prev => prev + 1);
-    }
-    // 更新 ref
-    prevConfigsLengthRef.current = updatedConfigs.length;
   }, []); // 移除 configs 依赖，避免无限循环
 
   // 显示提示信息
@@ -1963,37 +1980,48 @@ const UserConfigManagerComponent = () => {
     setIsTempScoringOpen(true);
   }, []);
 
-  // 优化处理设置活跃配置 - 异步切换避免卡顿
+  // 优化处理设置活跃配置 - 增强错误处理和边界检查
   const handleSetActiveConfig = useCallback(async (index) => {
-    if (isSwitching) return;
+    // 参数验证
+    if (typeof index !== 'number' || index < 0) {
+      console.error('handleSetActiveConfig: 无效的索引参数', index);
+      setError('无效的配置索引');
+      return;
+    }
+
+    // 防止重复点击
+    if (isSwitching) {
+      console.warn('handleSetActiveConfig: 正在切换中，忽略请求');
+      return;
+    }
 
     try {
       setIsSwitching(true);
       setError(null);
 
-      // 使用异步操作队列管理设置活跃配置操作
-      const setActiveOperation = async (operationData) => {
-        const { index } = operationData;
-        
-        // 异步设置活跃配置
-        await new Promise(resolve => setTimeout(resolve, 50));
-        await enhancedUserConfigManager.setActiveConfig(index);
-        
-        return true;
-      };
-      
-      // 将设置活跃配置操作添加到队列
-      await asyncOperationQueue.enqueue(
-        setActiveOperation,
-        'set-active-config',
-        { index },
-        // 乐观更新数据（可选）
-        null
-      );
-      
+      // 验证索引是否在有效范围内
+      const allConfigs = enhancedUserConfigManager.getAllConfigs();
+      if (!allConfigs || !Array.isArray(allConfigs) || index >= allConfigs.length) {
+        throw new Error(`配置索引 ${index} 超出范围，当前共有 ${allConfigs?.length || 0} 个配置`);
+      }
+
+      // 立即更新本地状态，提供即时反馈
+      setActiveConfigIndex(index);
+      setExpandedIndex(index);
+
+      // 异步更新配置管理器（延迟50ms以优化性能）
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // 调用管理器方法
+      const success = await enhancedUserConfigManager.setActiveConfig(index);
+
+      if (!success) {
+        throw new Error('配置管理器返回失败');
+      }
+
       // setActiveConfig 内部已经调用了 notifyListeners
-      // 监听器会自动更新本地状态，不需要手动更新
-      console.log('设置活跃配置成功，监听器将自动更新状态');
+      // 监听器会再次确认状态同步
+      console.log('设置活跃配置成功，索引:', index);
 
       // 延迟更新切换状态，确保UI流畅
       setTimeout(() => {
@@ -2001,36 +2029,57 @@ const UserConfigManagerComponent = () => {
       }, 300);
     } catch (error) {
       console.error('切换配置失败:', error);
-      
+
       // 使用错误处理管理器记录错误
       errorHandlingManager.logError('set-active-config', error, {
-        configIndex: index
+        configIndex: index,
+        timestamp: new Date().toISOString()
       });
-      
+
       // 尝试恢复
-      const recoveryResult = await errorHandlingManager.attemptRecovery(
-        'set-active-config',
-        async () => {
-          // 尝试恢复到之前的状态
-          const previousActiveIndex = enhancedUserConfigManager.getActiveConfigIndex();
-          if (previousActiveIndex !== index) {
-            await enhancedUserConfigManager.setActiveConfig(previousActiveIndex);
+      let recoverySuccess = false;
+      try {
+        recoverySuccess = await errorHandlingManager.attemptRecovery(
+          'set-active-config',
+          async () => {
+            // 尝试恢复到之前的状态
+            const previousActiveIndex = enhancedUserConfigManager.getActiveConfigIndex();
+            console.log('尝试恢复到之前的活跃索引:', previousActiveIndex);
+            if (previousActiveIndex !== index && typeof previousActiveIndex === 'number') {
+              await enhancedUserConfigManager.setActiveConfig(previousActiveIndex);
+            }
+            return true;
+          },
+          {
+            configIndex: index,
+            previousActiveIndex: enhancedUserConfigManager.getActiveConfigIndex(),
+            errorMessage: error.message
           }
-          return true;
-        },
-        { configIndex: index, previousActiveIndex: enhancedUserConfigManager.getActiveConfigIndex() }
-      );
-      
-      if (recoveryResult) {
+        );
+      } catch (recoveryError) {
+        console.error('恢复操作也失败了:', recoveryError);
+        recoverySuccess = false;
+      }
+
+      if (recoverySuccess) {
         setError('切换配置失败，已恢复到之前状态');
       } else {
-        setError('切换配置失败: ' + error.message);
+        setError('切换配置失败: ' + (error.message || '未知错误'));
       }
+
+      // 最终恢复状态
       setIsSwitching(false);
 
-      // 恢复之前的状态
-      const activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
-      setActiveConfigIndex(activeIndex);
+      // 确保本地状态与管理器同步
+      try {
+        const activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
+        if (typeof activeIndex === 'number' && activeIndex >= 0) {
+          setActiveConfigIndex(activeIndex);
+          setExpandedIndex(activeIndex);
+        }
+      } catch (syncError) {
+        console.error('同步活跃索引失败:', syncError);
+      }
     }
   }, [isSwitching]);
 
@@ -2188,7 +2237,18 @@ const UserConfigManagerComponent = () => {
     e.preventDefault();
     const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
 
-    if (isNaN(fromIndex) || fromIndex === toIndex) {
+    // 验证索引有效性
+    if (isNaN(fromIndex) || fromIndex === toIndex || fromIndex < 0 || toIndex < 0) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      setIsDragging(false);
+      return;
+    }
+
+    // 验证索引是否在有效范围内
+    if (!configs || !Array.isArray(configs) || fromIndex >= configs.length || toIndex >= configs.length) {
+      console.error('拖动排序索引超出范围:', { fromIndex, toIndex, configsLength: configs?.length });
+      showMessage('配置索引无效，无法完成排序', 'error');
       setDraggedIndex(null);
       setDragOverIndex(null);
       setIsDragging(false);
@@ -2196,63 +2256,41 @@ const UserConfigManagerComponent = () => {
     }
 
     try {
-      // 使用异步操作队列管理排序操作
-      const reorderOperation = async (operationData) => {
-        const { fromIndex, toIndex } = operationData;
-        
-        // 执行排序
-        const success = await enhancedUserConfigManager.reorderConfig(fromIndex, toIndex);
-        
-        if (!success) {
-          throw new Error('配置排序失败');
-        }
-        
-        return success;
-      };
-      
-      // 将排序操作添加到队列
-      const success = await asyncOperationQueue.enqueue(
-        reorderOperation,
-        'reorder-config',
-        { fromIndex, toIndex },
-        // 乐观更新数据（可选）
-        null
-      );
+      console.log('开始拖动排序:', { fromIndex, toIndex, configsCount: configs.length });
+
+      // 执行排序操作
+      const success = await enhancedUserConfigManager.reorderConfig(fromIndex, toIndex);
 
       if (success) {
         showMessage('配置排序成功', 'success');
+      } else {
+        throw new Error('配置排序失败');
       }
     } catch (error) {
       console.error('排序配置失败:', error);
-      
-      // 使用错误处理管理器记录错误
+
+      // 根据错误类型显示不同的提示
+      const errorMessage = error.message || '未知错误';
+      if (errorMessage.includes('无效的配置索引') || errorMessage.includes('超出范围')) {
+        showMessage(`排序失败：${errorMessage}，请刷新页面后重试`, 'error');
+      } else if (errorMessage.includes('存储') || errorMessage.includes('保存')) {
+        showMessage('排序失败：存储错误，请检查存储空间', 'error');
+      } else {
+        showMessage(`排序失败：${errorMessage}`, 'error');
+      }
+
+      // 记录错误但不触发错误边界
       errorHandlingManager.logError('reorder-config', error, {
         fromIndex,
-        toIndex
+        toIndex,
+        configsCount: configs?.length
       });
-      
-      // 尝试恢复
-      const recoveryResult = await errorHandlingManager.attemptRecovery(
-        'reorder-config',
-        async () => {
-          // 尝试恢复到之前的排序状态
-          // 这里可以实现撤销操作，暂时返回true表示恢复成功
-          return true;
-        },
-        { fromIndex, toIndex }
-      );
-      
-      if (recoveryResult) {
-        showMessage('✅ 配置排序已通过恢复机制处理', 'success');
-      } else {
-        showMessage(`排序失败: ${error.message}`, 'error');
-      }
     } finally {
       setDraggedIndex(null);
       setDragOverIndex(null);
       setIsDragging(false);
     }
-  }, [showMessage]);
+  }, [showMessage, configs]);
 
   if (contextLoading) {
     return (
@@ -2624,9 +2662,9 @@ const UserConfigManagerComponent = () => {
           )
         }
       >
-        {isBaziExpanded && configs[activeConfigIndex]?.birthDate ? (
+        {isBaziExpanded && configs && activeConfigIndex >= 0 && configs[activeConfigIndex]?.birthDate ? (
           (() => {
-            const currentConfig = configs[activeConfigIndex];
+            const currentConfig = configs && activeConfigIndex >= 0 ? configs[activeConfigIndex] : null;
             return currentConfig ? (
               <BaziFortuneDisplay
                 key={`${baziKey}-${currentConfig.nickname}-${currentConfig.birthDate}`}
@@ -2896,7 +2934,7 @@ const UserConfigManagerComponent = () => {
 
       {/* 配置列表 */}
       <div className="space-y-3">
-        {configs.map((config, index) => {
+        {configs && Array.isArray(configs) && configs.length > 0 ? configs.map((config, index) => {
           // 深拷贝 config 对象，避免直接修改原始数据
           const safeConfig = {
             ...config,
@@ -2920,7 +2958,11 @@ const UserConfigManagerComponent = () => {
               dragOverIndex={dragOverIndex}
             />
           );
-        })}
+        }) : (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <p>暂无配置，请添加新配置</p>
+          </div>
+        )}
       </div>
 
 

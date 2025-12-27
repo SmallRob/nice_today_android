@@ -267,9 +267,11 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       if (isAndroidWebView() || isIOSWebView()) {
         console.warn('检测到移动 WebView 环境，应用增强的错误处理');
         if (isCriticalError) {
+          // 仅在严重错误时才启用降级模式
           setFallbackMode(true);
         }
       } else if (isCriticalError) {
+        // 仅在严重错误时才启用降级模式
         setFallbackMode(true);
       }
 
@@ -314,14 +316,23 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   // 检测服务状态
   const checkServiceStatus = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // 所有环境下的默认状态（本地化运行）
-    setServiceStatus({
-      biorhythm: true
-    });
-
-    setLoading(false);
+      // 所有环境下的默认状态（本地化运行）
+      setServiceStatus({
+        biorhythm: true
+      });
+    } catch (error) {
+      console.error('检查服务状态失败:', error);
+      // 即使出错也要确保加载状态被设置为false
+      setServiceStatus({
+        biorhythm: true
+      });
+    } finally {
+      // 确保无论成功还是失败，都要结束加载状态
+      setLoading(false);
+    }
   };
 
   // 优化的预加载策略
@@ -399,21 +410,33 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   useEffect(() => {
     let isMounted = true;
+    
+    // 设置一个超时，确保即使初始化出现问题也能退出加载状态
+    const timeoutId = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('初始化超时，强制结束加载状态');
+        setLoading(false);
+      }
+    }, 10000); // 10秒超时
 
     const checkStatus = async () => {
-      if (!isMounted) return;
-
-      // 使用requestAnimationFrame确保流畅渲染
-      requestAnimationFrame(async () => {
+      try {
         if (!isMounted) return;
         await checkServiceStatus();
-      });
+      } catch (error) {
+        console.error('检查服务状态时发生错误:', error);
+        // 即使出错也要确保加载状态被设置为false
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
     checkStatus();
 
     return () => {
       isMounted = false;
+      clearTimeout(timeoutId);
     };
   }, []);
 
