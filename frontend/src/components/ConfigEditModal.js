@@ -4,6 +4,7 @@ import { useStore } from '@tanstack/react-store';
 import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
 import { getShichen, getShichenSimple, calculateTrueSolarTime } from '../utils/astronomy';
 import { calculateLunarDate, generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
+import { userConfigManager } from '../utils/userConfigManager';
 
 // 性别选项 - 简化为男女
 const GENDER_OPTIONS = [
@@ -146,15 +147,32 @@ const MobileOptimizedButton = ({ children, onClick, variant = 'primary', disable
 const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMessage, isFromTemplate = false, templateSource = null }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [initError, setInitError] = useState(null);
+  const [saveError, setSaveError] = useState(null);
+  const [validationErrors, setValidationErrors] = useState([]);
   const prevIsOpenRef = useRef(false);
 
   // 真太阳时和时辰信息
   const [calculatedInfo, setCalculatedInfo] = useState({
     shichen: '',
-    trueSolarTime: ''
+    trueSolarTime: '',
+    lunarBirthDate: '',
+    birthTimeKey: ''  // 按用户昵称ID封装出生时间的对象信息
   });
 
-  // 初始化默认值（增加错误处理）
+  // 生成出生时间唯一标识（按用户昵称ID封装）
+  const generateBirthTimeKey = (nickname, birthDate, birthTime) => {
+    const baseKey = `${nickname}_${birthDate}_${birthTime}`.replace(/[^a-zA-Z0-9_]/g, '');
+    // 使用简单的哈希生成唯一ID
+    let hash = 0;
+    for (let i = 0; i < baseKey.length; i++) {
+      const char = baseKey.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return `BT${Math.abs(hash).toString(16).padStart(8, '0').toUpperCase()}`;
+  };
+
+  // 初始化默认值（增加错误处理和冗余）
   const defaultValues = useMemo(() => {
     try {
       if (isNew) {
@@ -170,27 +188,28 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           mbti: '',
           isused: false
         };
-      } else if (config) {
+      } else if (config && typeof config === 'object') {
         // 确保深拷贝 birthLocation 对象，避免引用问题
         return {
-          nickname: config.nickname || '',
-          realName: config.realName || '',
-          birthDate: config.birthDate || '',
-          birthTime: config.birthTime || '12:30',
-          birthLocation: config.birthLocation ? {
-            province: config.birthLocation.province || '',
-            city: config.birthLocation.city || '',
-            district: config.birthLocation.district || '',
-            lng: config.birthLocation.lng ?? DEFAULT_REGION.lng,
-            lat: config.birthLocation.lat ?? DEFAULT_REGION.lat
+          nickname: (config.nickname || '').toString(),
+          realName: (config.realName || '').toString(),
+          birthDate: (config.birthDate || '').toString(),
+          birthTime: (config.birthTime || '12:30').toString(),
+          birthLocation: config.birthLocation && typeof config.birthLocation === 'object' ? {
+            province: (config.birthLocation.province || '').toString(),
+            city: (config.birthLocation.city || '').toString(),
+            district: (config.birthLocation.district || '').toString(),
+            lng: typeof config.birthLocation.lng === 'number' ? config.birthLocation.lng : DEFAULT_REGION.lng,
+            lat: typeof config.birthLocation.lat === 'number' ? config.birthLocation.lat : DEFAULT_REGION.lat
           } : { ...DEFAULT_REGION },
-          gender: config.gender || 'male',
-          zodiac: config.zodiac || '',
-          zodiacAnimal: config.zodiacAnimal || '',
-          mbti: config.mbti || '',
-          isused: config.isused ?? false
+          gender: config.gender && ['male', 'female'].includes(config.gender) ? config.gender : 'male',
+          zodiac: (config.zodiac || '').toString(),
+          zodiacAnimal: (config.zodiacAnimal || '').toString(),
+          mbti: (config.mbti || '').toString(),
+          isused: Boolean(config.isused)
         };
       }
+      // config 为 null/undefined/非对象时的兜底
       return {
         nickname: '',
         realName: '',
@@ -266,26 +285,76 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     }
   }, [isOpen, form, defaultValues]);
 
-  // 实时计算时辰、真太阳时和农历信息
+  // 实时计算时辰、真太阳时和农历信息（增加容错处理）
   useEffect(() => {
-    const shichen = getShichen(formData.birthTime || '12:30');
-    const lng = formData.birthLocation?.lng || DEFAULT_REGION.lng;
-    const trueSolarTime = calculateTrueSolarTime(formData.birthDate, formData.birthTime || '12:30', lng);
-    
-    // 使用专业农历计算
-    let lunarInfo = null;
-    if (formData.birthDate) {
-      lunarInfo = calculateLunarDate(formData.birthDate, formData.birthTime || '12:30', lng);
+    try {
+      const birthDateStr = (formData.birthDate || '').toString();
+      const birthTimeStr = (formData.birthTime || '12:30').toString();
+      const nicknameStr = (formData.nickname || '').toString();
+
+      // 防止无效日期格式
+      if (birthDateStr && !isValidDate(birthDateStr)) {
+        console.warn('无效的出生日期格式:', birthDateStr);
+        return;
+      }
+
+      const shichen = getShichen(birthTimeStr);
+      const lng = formData.birthLocation?.lng ?? DEFAULT_REGION.lng;
+      const lat = formData.birthLocation?.lat ?? DEFAULT_REGION.lat;
+
+      // 确保 lng 是有效的数字
+      const safeLng = typeof lng === 'number' && !isNaN(lng) ? lng : DEFAULT_REGION.lng;
+      const trueSolarTime = calculateTrueSolarTime(birthDateStr, birthTimeStr, safeLng);
+
+      // 使用专业农历计算（增加容错）
+      let lunarInfo = null;
+      let lunarBirthDate = '';
+      if (birthDateStr) {
+        try {
+          lunarInfo = calculateLunarDate(birthDateStr, birthTimeStr, safeLng);
+          if (lunarInfo && typeof lunarInfo === 'object') {
+            lunarBirthDate = lunarInfo.fullText || 
+              (lunarInfo.yearInChinese && lunarInfo.monthInChinese && lunarInfo.dayInChinese
+                ? `${lunarInfo.yearInChinese}年${lunarInfo.monthInChinese}${lunarInfo.dayInChinese}`
+                : birthDateStr);
+          }
+        } catch (error) {
+          console.warn('农历计算失败，使用默认值:', error);
+          lunarBirthDate = birthDateStr;
+        }
+      }
+
+      // 生成出生时间唯一标识
+      const birthTimeKey = generateBirthTimeKey(nicknameStr, birthDateStr, birthTimeStr);
+
+      setCalculatedInfo({
+        shichen,
+        trueSolarTime: trueSolarTime || birthTimeStr,
+        lunarInfo,
+        lunarBirthDate,
+        birthTimeKey,
+        timeShichen: getShichenByTime(birthTimeStr)
+      });
+    } catch (error) {
+      console.error('计算时辰信息失败:', error);
+      // 设置默认值，避免显示错误
+      setCalculatedInfo({
+        shichen: '午时',
+        trueSolarTime: formData.birthTime || '12:30',
+        lunarInfo: null,
+        lunarBirthDate: formData.birthDate || '',
+        birthTimeKey: generateBirthTimeKey(formData.nickname || '', formData.birthDate || '', formData.birthTime || ''),
+        timeShichen: '午时'
+      });
     }
-    
-    setCalculatedInfo({ 
-      shichen, 
-      trueSolarTime, 
-      lunarInfo,
-      // 根据时间获取时辰
-      timeShichen: getShichenByTime(formData.birthTime || '12:30')
-    });
-  }, [formData.birthDate, formData.birthTime, formData.birthLocation]);
+  }, [formData.birthDate, formData.birthTime, formData.birthLocation, formData.nickname]);
+
+  // 辅助函数：验证日期格式
+  const isValidDate = (dateStr) => {
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
+    return !isNaN(date.getTime());
+  };
 
   // 处理地区变化 - 用户手动填写为准
   const handleRegionChange = (type, value) => {
@@ -340,16 +409,144 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     return '';
   };
 
-  // 简化验证：只验证出生日期，其他字段自动处理
+  // 简化验证：只做基本格式检查，提供自动纠错机制
   const validateRequiredInputs = (formData) => {
     const errors = [];
+    const warnings = [];
 
-    // 只验证出生日期（必填）
-    if (!formData.birthDate) {
-      errors.push('请选择出生日期');
+    // 只验证最核心的必填项
+    if (!formData.birthDate || typeof formData.birthDate !== 'string') {
+      errors.push('请选择有效的出生日期');
     }
 
-    return errors;
+    if (!formData.birthTime || typeof formData.birthTime !== 'string') {
+      warnings.push('出生时间将使用默认值 12:30');
+    }
+
+    if (!formData.birthLocation || typeof formData.birthLocation !== 'object') {
+      warnings.push('出生地点将使用默认值（北京市）');
+    }
+
+    return { errors, warnings };
+  };
+
+  // 自动纠错函数：修复常见的格式问题
+  const autoFixFormData = (formData) => {
+    const fixed = { ...formData };
+
+    try {
+      // 1. 修复出生日期
+      if (fixed.birthDate) {
+        // 尝试多种日期格式
+        const datePatterns = [
+          /^(\d{4})-(\d{2})-(\d{2})$/,    // YYYY-MM-DD
+          /^(\d{4})\/(\d{2})\/(\d{2})$/,   // YYYY/MM/DD
+          /^(\d{4})(\d{2})(\d{2})$/,      // YYYYMMDD
+        ];
+
+        for (const pattern of datePatterns) {
+          const match = fixed.birthDate.match(pattern);
+          if (match) {
+            const [, year, month, day] = match;
+            const date = new Date(year, parseInt(month) - 1, parseInt(day));
+            if (!isNaN(date.getTime()) && date.getFullYear() === parseInt(year)) {
+              fixed.birthDate = `${year}-${month}-${day}`;
+              break;
+            }
+          }
+        }
+      } else {
+        fixed.birthDate = '1991-01-01'; // 默认日期
+      }
+
+      // 2. 修复出生时间
+      if (!fixed.birthTime || typeof fixed.birthTime !== 'string') {
+        fixed.birthTime = '12:30';
+      } else {
+        const timeMatch = fixed.birthTime.match(/(\d{1,2})[:：](\d{2})/);
+        if (timeMatch) {
+          let hours = parseInt(timeMatch[1]);
+          let minutes = parseInt(timeMatch[2]);
+          
+          // 自动修正超出范围的时间
+          if (hours < 0) hours = 0;
+          if (hours > 23) hours = 23;
+          if (minutes < 0) minutes = 0;
+          if (minutes > 59) minutes = 59;
+          
+          fixed.birthTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        } else {
+          fixed.birthTime = '12:30';
+        }
+      }
+
+      // 3. 修复经纬度
+      if (!fixed.birthLocation || typeof fixed.birthLocation !== 'object') {
+        fixed.birthLocation = { ...DEFAULT_REGION };
+      } else {
+        const loc = fixed.birthLocation;
+        
+        // 修复经度
+        if (typeof loc.lng !== 'number' || isNaN(loc.lng)) {
+          loc.lng = DEFAULT_REGION.lng;
+        } else if (loc.lng < -180) {
+          loc.lng = -180;
+        } else if (loc.lng > 180) {
+          loc.lng = 180;
+        }
+        
+        // 修复纬度
+        if (typeof loc.lat !== 'number' || isNaN(loc.lat)) {
+          loc.lat = DEFAULT_REGION.lat;
+        } else if (loc.lat < -90) {
+          loc.lat = -90;
+        } else if (loc.lat > 90) {
+          loc.lat = 90;
+        }
+        
+        // 确保省市区字段存在
+        loc.province = loc.province || DEFAULT_REGION.province;
+        loc.city = loc.city || DEFAULT_REGION.city;
+        loc.district = loc.district || DEFAULT_REGION.district;
+      }
+
+      // 4. 修复性别
+      if (!['male', 'female', 'secret'].includes(fixed.gender)) {
+        fixed.gender = 'secret';
+      }
+
+      // 5. 修复昵称
+      if (!fixed.nickname || typeof fixed.nickname !== 'string') {
+        fixed.nickname = generateRandomNickname();
+      } else {
+        // 移除特殊字符
+        fixed.nickname = fixed.nickname.trim().replace(/[<>\"'&]/g, '');
+        if (fixed.nickname.length === 0) {
+          fixed.nickname = generateRandomNickname();
+        } else if (fixed.nickname.length > 50) {
+          fixed.nickname = fixed.nickname.substring(0, 50);
+        }
+      }
+
+      console.log('数据自动纠错完成:', {
+        birthDate: fixed.birthDate,
+        birthTime: fixed.birthTime,
+        birthLocation: fixed.birthLocation,
+        nickname: fixed.nickname
+      });
+
+      return fixed;
+    } catch (error) {
+      console.error('自动纠错失败:', error);
+      // 返回最小可用的数据
+      return {
+        ...DEFAULT_REGION,
+        nickname: generateRandomNickname(),
+        birthDate: '1991-01-01',
+        birthTime: '12:30',
+        gender: 'secret'
+      };
+    }
   };
 
   // 生成随机昵称
@@ -397,11 +594,14 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
   const showConfirmationDialog = (configData) => {
     return new Promise((resolve) => {
       // 计算关键信息
-      const shichen = getShichen(configData.birthTime || '12:30');
       const timeShichen = getShichenByTime(configData.birthTime || '12:30');
       const lng = configData.birthLocation?.lng || DEFAULT_REGION.lng;
       const trueSolarTime = calculateTrueSolarTime(configData.birthDate, configData.birthTime || '12:30', lng);
-      const lunarInfo = convertToLunar(configData.birthDate);
+      const lunarInfo = calculateLunarDate(configData.birthDate);
+
+      // 计算农历显示文本
+      const lunarDisplayText = lunarInfo ? (lunarInfo.fullText || `${lunarInfo.yearInChinese}年${lunarInfo.monthInChinese}${lunarInfo.dayInChinese}`) : '';
+      const yearGanZhi = lunarInfo?.yearGanZhi || '';
 
       // 创建确认弹窗
       const dialog = document.createElement('div');
@@ -426,26 +626,34 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                 <strong>昵称：</strong>${configData.nickname || '未设置'}<br>
                 <strong>性别：</strong>${GENDER_OPTIONS.find(opt => opt.value === configData.gender)?.label || '男'}<br>
                 <strong>出生日期：</strong>${configData.birthDate || '未设置'}<br>
-                <strong>出生时间：</strong>${configData.birthTime || '未设置'}
+                <strong>出生时间：</strong>${configData.birthTime || '未设置'}<br>
+                <strong>出生时辰：</strong>${timeShichen}
               </p>
             </div>
-            
+
             ${lunarInfo ? `
             <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
               <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-2">农历信息</h4>
               <p class="text-sm text-purple-700 dark:text-purple-400">
-                <strong>农历生日：</strong><span class="font-bold">${lunarInfo.lunarText}</span><br>
-                <strong>闰月：</strong><span class="font-bold">${lunarInfo.isLeapMonth ? '是' : '否'}</span>
+                <strong>农历生日：</strong><span class="font-bold">${lunarDisplayText}</span><br>
+                <strong>干支年：</strong><span class="font-bold">${yearGanZhi}</span>
               </p>
             </div>
             ` : ''}
-            
+
             <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
               <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">时辰信息</h4>
               <p class="text-sm text-green-700 dark:text-green-400">
                 <strong>出生时辰：</strong><span class="font-bold">${timeShichen}</span><br>
                 <strong>真太阳时：</strong><span class="font-bold">${trueSolarTime}</span><br>
                 <strong>经度校正：</strong>${lng}°
+              </p>
+            </div>
+
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-2">出生时间标识</h4>
+              <p class="text-sm text-yellow-700 dark:text-yellow-400">
+                <strong>唯一标识：</strong><span class="font-bold">${generateBirthTimeKey(configData.nickname, configData.birthDate, configData.birthTime)}</span>
               </p>
             </div>
             
@@ -490,48 +698,70 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     });
   };
 
-  // 保存配置
+  // 保存配置（简化版：自动纠错 + 宽容验证）
   const handleSave = async (formData) => {
-    // 简化验证：只验证出生日期
-    const validationErrors = validateRequiredInputs(formData);
+    // 清除之前的错误状态
+    setSaveError(null);
+    setValidationErrors([]);
 
-    if (validationErrors.length > 0) {
-      // 显示浮动错误提示框
-      const errorBox = document.getElementById('validation-errors');
-      const errorList = document.getElementById('validation-error-list');
+    try {
+      // 1. 自动纠错：修复常见的格式问题
+      const autoFixedData = autoFixFormData(formData);
+      
+      // 2. 简化验证：只检查核心必填项，提供警告而不是错误
+      const { errors, warnings } = validateRequiredInputs(autoFixedData);
 
-      if (errorBox && errorList) {
-        // 清空并填充错误列表
-        errorList.innerHTML = '';
-        validationErrors.forEach(err => {
-          const li = document.createElement('li');
-          li.textContent = err;
-          errorList.appendChild(li);
-        });
-
-        // 显示错误框
-        errorBox.classList.remove('hidden');
-
-        console.error('输入验证失败:', validationErrors);
+      // 3. 显示警告信息（如果有的话）
+      if (warnings.length > 0) {
+        console.warn('保存配置时检测到问题，已自动修复:', warnings);
+        showMessage(`⚠️ ${warnings.join('；')}`, 'warning');
       }
-      return;
-    }
 
-    // 数据处理：自动填充缺失字段
-    const processedData = {
-      ...formData,
-      // 自动生成昵称（如果为空）
-      nickname: formData.nickname?.trim() || generateRandomNickname(),
-      // 格式化时间
-      birthTime: formatTime(formData.birthTime),
-      // 确保出生地点完整
-      birthLocation: ensureCompleteLocation(formData.birthLocation)
+      // 4. 只有核心错误才阻止保存（如缺少出生日期）
+      if (errors.length > 0) {
+        console.error('核心数据缺失，无法保存:', errors);
+        setSaveError(`无法保存：${errors[0]}`);
+        showMessage(`❌ ${errors[0]}`, 'error');
+        return;
+      }
+
+      // 5. 数据处理：使用自动纠错后的数据
+      const processedData = {
+        ...autoFixedData,
+        // 标记配置来源（保持原有标记）
+        isFromTemplate: isFromTemplate || false,
+        templateSource: isFromTemplate ? (templateSource || '默认模板') : null
     };
 
-    // 显示关键信息确认弹窗
-    const confirmed = await showConfirmationDialog(processedData);
+    try {
+      // 显示关键信息确认弹窗
+      const confirmed = await showConfirmationDialog(processedData);
+      if (!confirmed) {
+        console.log('用户取消了保存');
+        return;
+      }
+    } catch (error) {
+      console.error('显示确认对话框失败:', error);
+      // 确认对话框失败，记录错误但继续保存
+      showMessage('⚠️ 确认对话框加载失败，将直接保存', 'warning');
+    }
+
+    const finalLocation = processedData.birthLocation;
+
+    setIsSaving(true);
+
+    // 尝试显示确认对话框（失败不影响保存）
+    let confirmed = true;
+    try {
+      confirmed = await showConfirmationDialog(processedData);
+    } catch (error) {
+      console.warn('确认对话框加载失败，跳过确认步骤:', error);
+      // 对话框失败不影响保存流程
+    }
+
     if (!confirmed) {
       console.log('用户取消了保存');
+      setIsSaving(false);
       return;
     }
 
@@ -541,118 +771,151 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
     try {
       // 计算完整的时辰和农历信息（使用专业算法）
-      const lng = finalLocation.lng || DEFAULT_REGION.lng;
-      const lunarFields = generateLunarAndTrueSolarFields(processedData);
-      
-      const shichenSimple = getShichenSimple(processedData.birthTime);
-      const shichenFull = getShichen(processedData.birthTime);
-      const timeShichen = getShichenByTime(processedData.birthTime);
+      const lng = finalLocation?.lng ?? DEFAULT_REGION.lng;
+      const lat = finalLocation?.lat ?? DEFAULT_REGION.lat;
+
+      // 确保 lng/lat 是有效数字（增加边界检查）
+      const safeLng = typeof lng === 'number' && !isNaN(lng) && lng >= -180 && lng <= 180 
+        ? lng 
+        : DEFAULT_REGION.lng;
+      const safeLat = typeof lat === 'number' && !isNaN(lat) && lat >= -90 && lat <= 90 
+        ? lat 
+        : DEFAULT_REGION.lat;
+
+      let lunarFields;
+      try {
+        lunarFields = generateLunarAndTrueSolarFields(processedData);
+      } catch (error) {
+        console.warn('农历计算失败，使用默认值:', error);
+        lunarFields = {
+          lunarInfo: null,
+          lunarBirthDate: processedData.birthDate || '',
+          trueSolarTime: processedData.birthTime || '12:30'
+        };
+      }
+
+      const shichenSimple = getShichenSimple(processedData.birthTime || '12:30');
+      const shichenFull = getShichen(processedData.birthTime || '12:30');
+      const timeShichen = getShichenByTime(processedData.birthTime || '12:30');
+      const trueSolarTime = lunarFields?.trueSolarTime || processedData.birthTime || '12:30';
+
+      // 生成出生时间唯一标识（按用户昵称ID封装）
+      const birthTimeKey = generateBirthTimeKey(
+        processedData.nickname || '',
+        processedData.birthDate || '',
+        processedData.birthTime || ''
+      );
 
       // 创建安全、可序列化的配置对象，避免React错误#31
       let finalConfig = {
         // 基础字段
-        nickname: processedData.nickname,
-        realName: processedData.realName || '',
-        birthDate: processedData.birthDate,
-        birthTime: processedData.birthTime,
-        gender: processedData.gender || 'male',
-        zodiac: processedData.zodiac || '',
-        zodiacAnimal: processedData.zodiacAnimal || '',
-        mbti: processedData.mbti || '',
-        isused: processedData.isused ?? false,
-        
+        nickname: (processedData.nickname || '').toString().trim(),
+        realName: (processedData.realName || '').toString().trim(),
+        birthDate: (processedData.birthDate || '').toString(),
+        birthTime: (processedData.birthTime || '').toString(),
+        gender: processedData.gender && ['male', 'female', 'secret'].includes(processedData.gender) 
+          ? processedData.gender 
+          : 'secret',
+        zodiac: (processedData.zodiac || '').toString(),
+        zodiacAnimal: (processedData.zodiacAnimal || '').toString(),
+        mbti: (processedData.mbti || '').toString(),
+        isused: Boolean(processedData.isused),
+
         // 结构化数据（确保可序列化）
-        birthLocation: finalLocation,
-        shichen: shichenSimple,  // 保存简化格式的时辰
-        shichenFull: shichenFull, // 保存完整时辰信息
-        timeShichen: timeShichen, // 保存根据时间计算的时辰
-        trueSolarTime: trueSolarTime, // 保存真太阳时
-        
-        // 农历信息（使用专业计算结果）
-        lunarInfo: lunarFields.lunarInfo ? {
-          year: lunarFields.lunarInfo.year,
-          month: lunarFields.lunarInfo.month,
-          day: lunarFields.lunarInfo.day,
-          yearGanZhi: lunarFields.lunarInfo.yearGanZhi,
-          monthGanZhi: lunarFields.lunarInfo.monthGanZhi,
-          dayGanZhi: lunarFields.lunarInfo.dayGanZhi,
-          yearInChinese: lunarFields.lunarInfo.yearInChinese,
-          monthInChinese: lunarFields.lunarInfo.monthInChinese,
-          dayInChinese: lunarFields.lunarInfo.dayInChinese,
-          zodiacAnimal: lunarFields.lunarInfo.zodiacAnimal,
-          fullText: lunarFields.lunarInfo.fullText,
-          shortText: lunarFields.lunarInfo.shortText
+        birthLocation: {
+          province: (finalLocation.province || '').toString().trim(),
+          city: (finalLocation.city || '').toString().trim(),
+          district: (finalLocation.district || '').toString().trim(),
+          lng: safeLng,
+          lat: safeLat
+        },
+        shichen: shichenSimple,
+        shichenFull: shichenFull,
+        timeShichen: timeShichen,
+        trueSolarTime: trueSolarTime,
+        birthTimeKey: birthTimeKey,
+
+        // 农历信息（使用专业计算结果，增加容错）
+        lunarInfo: lunarFields?.lunarInfo && typeof lunarFields.lunarInfo === 'object' ? {
+          year: lunarFields.lunarInfo.year || 0,
+          month: lunarFields.lunarInfo.month || 0,
+          day: lunarFields.lunarInfo.day || 0,
+          yearGanZhi: (lunarFields.lunarInfo.yearGanZhi || '').toString(),
+          monthGanZhi: (lunarFields.lunarInfo.monthGanZhi || '').toString(),
+          dayGanZhi: (lunarFields.lunarInfo.dayGanZhi || '').toString(),
+          yearInChinese: (lunarFields.lunarInfo.yearInChinese || '').toString(),
+          monthInChinese: (lunarFields.lunarInfo.monthInChinese || '').toString(),
+          dayInChinese: (lunarFields.lunarInfo.dayInChinese || '').toString(),
+          zodiacAnimal: (lunarFields.lunarInfo.zodiacAnimal || '').toString(),
+          fullText: (lunarFields.lunarInfo.fullText || '').toString(),
+          shortText: (lunarFields.lunarInfo.shortText || '').toString()
         } : null,
         
         // 复杂对象（确保为null或简单对象）
-        nameScore: processedData.nameScore ? {
-          tian: processedData.nameScore.tian || 0,
-          ren: processedData.nameScore.ren || 0,
-          di: processedData.nameScore.di || 0,
-          wai: processedData.nameScore.wai || 0,
-          zong: processedData.nameScore.zong || 0,
-          mainType: processedData.nameScore.mainType || '',
-          totalScore: processedData.nameScore.totalScore || 0
+        nameScore: processedData.nameScore && typeof processedData.nameScore === 'object' ? {
+          tian: typeof processedData.nameScore.tian === 'number' ? processedData.nameScore.tian : 0,
+          ren: typeof processedData.nameScore.ren === 'number' ? processedData.nameScore.ren : 0,
+          di: typeof processedData.nameScore.di === 'number' ? processedData.nameScore.di : 0,
+          wai: typeof processedData.nameScore.wai === 'number' ? processedData.nameScore.wai : 0,
+          zong: typeof processedData.nameScore.zong === 'number' ? processedData.nameScore.zong : 0,
+          mainType: typeof processedData.nameScore.mainType === 'string' ? processedData.nameScore.mainType : '',
+          totalScore: typeof processedData.nameScore.totalScore === 'number' ? processedData.nameScore.totalScore : 0
         } : null,
         
-        bazi: processedData.bazi ? {
-          year: processedData.bazi.year || '',
-          month: processedData.bazi.month || '',
-          day: processedData.bazi.day || '',
-          hour: processedData.bazi.hour || '',
-          lunar: processedData.bazi.lunar ? {
-            year: processedData.bazi.lunar.year || '',
-            month: processedData.bazi.lunar.month || '',
-            day: processedData.bazi.lunar.day || '',
-            text: processedData.bazi.lunar.text || '',
-            monthStr: processedData.bazi.lunar.monthStr || '',
-            dayStr: processedData.bazi.lunar.dayStr || ''
+        bazi: processedData.bazi && typeof processedData.bazi === 'object' ? {
+          year: (processedData.bazi.year || '').toString(),
+          month: (processedData.bazi.month || '').toString(),
+          day: (processedData.bazi.day || '').toString(),
+          hour: (processedData.bazi.hour || '').toString(),
+          lunar: processedData.bazi.lunar && typeof processedData.bazi.lunar === 'object' ? {
+            year: (processedData.bazi.lunar.year || '').toString(),
+            month: (processedData.bazi.lunar.month || '').toString(),
+            day: (processedData.bazi.lunar.day || '').toString(),
+            text: (processedData.bazi.lunar.text || '').toString(),
+            monthStr: (processedData.bazi.lunar.monthStr || '').toString(),
+            dayStr: (processedData.bazi.lunar.dayStr || '').toString()
           } : null,
-          wuxing: processedData.bazi.wuxing ? {
-            year: processedData.bazi.wuxing.year || '',
-            month: processedData.bazi.wuxing.month || '',
-            day: processedData.bazi.wuxing.day || '',
-            hour: processedData.bazi.wuxing.hour || '',
-            text: processedData.bazi.wuxing.text || ''
+          wuxing: processedData.bazi.wuxing && typeof processedData.bazi.wuxing === 'object' ? {
+            year: (processedData.bazi.wuxing.year || '').toString(),
+            month: (processedData.bazi.wuxing.month || '').toString(),
+            day: (processedData.bazi.wuxing.day || '').toString(),
+            hour: (processedData.bazi.wuxing.hour || '').toString(),
+            text: (processedData.bazi.wuxing.text || '').toString()
           } : null,
-          nayin: processedData.bazi.nayin ? {
-            year: formData.bazi.nayin.year || '',
-            month: processedData.bazi.nayin.month || '',
-            day: processedData.bazi.nayin.day || '',
-            hour: processedData.bazi.nayin.hour || ''
+          nayin: processedData.bazi.nayin && typeof processedData.bazi.nayin === 'object' ? {
+            year: (processedData.bazi.nayin.year || '').toString(),
+            month: (processedData.bazi.nayin.month || '').toString(),
+            day: (processedData.bazi.nayin.day || '').toString(),
+            hour: (processedData.bazi.nayin.hour || '').toString()
           } : null,
-          shichen: processedData.bazi.shichen ? {
-            ganzhi: processedData.bazi.shichen.ganzhi || '',
-            name: processedData.bazi.shichen.name || ''
+          shichen: processedData.bazi.shichen && typeof processedData.bazi.shichen === 'object' ? {
+            ganzhi: (processedData.bazi.shichen.ganzhi || '').toString(),
+            name: (processedData.bazi.shichen.name || '').toString()
           } : null,
-          solar: processedData.bazi.solar ? {
-            text: processedData.bazi.solar.text || ''
+          solar: processedData.bazi.solar && typeof processedData.bazi.solar === 'object' ? {
+            text: (processedData.bazi.solar.text || '').toString()
           } : null
         } : null,
-        
-        lunarInfo: processedData.lunarInfo ? {
-          lunarBirthDate: processedData.lunarInfo.lunarBirthDate || '',
-          lunarBirthMonth: processedData.lunarInfo.lunarBirthMonth || '',
-          lunarBirthDay: processedData.lunarInfo.lunarBirthDay || '',
-          trueSolarTime: processedData.lunarInfo.trueSolarTime || ''
-        } : null,
-        
-        lastCalculated: processedData.lastCalculated || new Date().toISOString()
+
+        lastCalculated: processedData.lastCalculated || new Date().toISOString(),
+        // 保持模板来源标记
+        isFromTemplate: processedData.isFromTemplate || false,
+        templateSource: processedData.templateSource || null
       };
 
-      // 计算农历和真太阳时信息（简化处理）
+      // 计算农历和真太阳时信息（简化处理，增加容错）
       try {
-        const lunarFields = generateLunarAndTrueSolarFields(finalConfig);
-        if (lunarFields.lunarBirthDate) {
-          finalConfig.lunarBirthDate = lunarFields.lunarBirthDate;
+        const lunarFields2 = generateLunarAndTrueSolarFields(finalConfig);
+        if (lunarFields2?.lunarBirthDate) {
+          finalConfig.lunarBirthDate = lunarFields2.lunarBirthDate;
         }
-        if (lunarFields.trueSolarTime) {
-          finalConfig.trueSolarTime = lunarFields.trueSolarTime;
+        if (lunarFields2?.trueSolarTime) {
+          finalConfig.trueSolarTime = lunarFields2.trueSolarTime;
         }
         finalConfig.lastCalculated = new Date().toISOString();
       } catch (error) {
         console.warn('农历计算失败，不影响保存:', error);
-        // 农历计算失败不影响保存
+        // 农历计算失败不影响保存，只记录警告
       }
 
       // 显示保存中消息
@@ -666,17 +929,58 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           console.log('配置保存成功');
           showMessage('✅ 配置保存成功', 'success');
           
-          // 保存成功后延迟关闭弹窗
-          setTimeout(() => {
-            onClose();
-          }, 500);
+          // 保存成功后自动计算八字和紫薇星宫（完全异步，不阻塞）
+          setTimeout(async () => {
+            try {
+              const savedConfig = index !== null && index !== undefined 
+                ? userConfigManager.configs[index] 
+                : userConfigManager.getCurrentConfig();
+              
+              if (!savedConfig) {
+                console.warn('无法获取保存的配置，跳过命格计算');
+                onClose();
+                return;
+              }
+              
+              // 异步计算八字和紫薇星宫（完全异步，失败不影响任何流程）
+              try {
+                const fortuneData = await userConfigManager.calculateFortuneByIndex(
+                  index !== null && index !== undefined ? index : userConfigManager.getActiveConfigIndex()
+                );
+                
+                if (fortuneData?.hasData) {
+                  console.log('八字和紫薇星宫计算完成');
+                  showMessage('✅ 八字和紫薇星宫计算完成', 'success');
+                } else if (fortuneData?.hasErrors) {
+                  console.warn('八字和紫薇星宫计算存在错误:', fortuneData.errors);
+                  // 不显示警告，避免干扰用户
+                }
+              } catch (calcError) {
+                console.error('计算八字和紫薇星宫失败:', calcError);
+                // 计算失败完全静默处理，不影响任何流程
+              }
+              
+              // 延迟关闭弹窗
+              setTimeout(() => {
+                onClose();
+              }, 1000);
+            } catch (asyncError) {
+              console.error('异步计算过程失败:', asyncError);
+              // 即使计算失败也正常关闭弹窗
+              setTimeout(() => {
+                onClose();
+              }, 500);
+            }
+          }, 100);
         } else {
           throw new Error('保存配置返回失败结果');
         }
 
       } catch (error) {
         console.error('保存配置失败:', error);
-        showMessage(`保存失败: ${error.message}`, 'error');
+        const errorMsg = `保存失败: ${error.message}`;
+        setSaveError(errorMsg);
+        showMessage(errorMsg, 'error');
         throw error;
       } finally {
         setIsSaving(false);
@@ -684,9 +988,11 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
     } catch (error) {
       console.error('保存配置失败:', error);
-      showMessage(`保存失败: ${error.message}`, 'error');
+      const errorMsg = `保存失败: ${error.message}`;
+      setSaveError(errorMsg);
+      showMessage(errorMsg, 'error');
       setIsSaving(false);
-      throw error;
+      // 不再抛出错误，避免阻塞其他异步进程
     }
   };
 
@@ -716,6 +1022,33 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+        {/* 保存错误提示（新增） */}
+        {saveError && (
+          <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <div className="flex-1">
+                <h4 className="text-sm font-bold text-red-700 dark:text-red-300 mb-1">保存失败</h4>
+                <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+                {validationErrors.length > 0 && (
+                  <ul className="mt-2 text-sm text-red-600 dark:text-red-400 list-disc list-inside">
+                    {validationErrors.map((error, idx) => (
+                      <li key={idx}>{error}</li>
+                    ))}
+                  </ul>
+                )}
+                <button
+                  onClick={() => setSaveError(null)}
+                  className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 underline"
+                >
+                  关闭提示
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shrink-0 bg-white dark:bg-gray-800 z-10">
           <div className="flex flex-col">
@@ -888,9 +1221,9 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                         <p className="text-xs text-blue-600 dark:text-blue-400">
                           阳历：{formData.birthDate}
                         </p>
-                        {calculatedInfo.lunarInfo && (
+                        {calculatedInfo.lunarBirthDate && (
                           <p className="text-xs text-purple-600 dark:text-purple-400">
-                            农历：{calculatedInfo.lunarInfo.lunarText}
+                            农历：{calculatedInfo.lunarBirthDate}
                           </p>
                         )}
                       </div>

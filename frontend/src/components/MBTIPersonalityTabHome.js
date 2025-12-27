@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
@@ -380,38 +380,46 @@ const MBTIPersonalityTabHome = () => {
         // 初始化用户配置管理器
         await userConfigManager.initialize();
         const config = userConfigManager.getCurrentConfig();
-        setGlobalUserConfig(config);
+
+        // 确保 config 是有效对象
+        const safeConfig = config && typeof config === 'object' ? config : {};
+        setGlobalUserConfig(safeConfig);
 
         // 立即加载所有MBTI类型
         setAllMBTIs(mbtiList);
 
-        // 如果用户有配置的MBTI，则使用；否则使用默认值
-        const initialMBTI = config?.mbti || 'INFP';
+        // 如果用户有配置的MBTI，则使用；否则使用默认值（增加容错）
+        const initialMBTI = (safeConfig.mbti && typeof safeConfig.mbti === 'string' && safeConfig.mbti.trim()) || 'INFP';
         setUserMBTI(initialMBTI);
         setTempMBTI('');
         setInitialized(true);
         setDataLoaded(false);
 
-        // 设置用户信息
+        // 设置用户信息（增加容错）
         setUserInfo({
-          nickname: config?.nickname || '',
-          birthDate: config?.birthDate || '',
-          mbti: config?.mbti || ''
+          nickname: (safeConfig.nickname || '').toString(),
+          birthDate: (safeConfig.birthDate || '').toString(),
+          mbti: (safeConfig.mbti || '').toString()
         });
 
         // 如果用户配置了MBTI，则加载数据
-        if (config?.mbti) {
-          loadPersonalityAnalysis(config.mbti);
+        if (safeConfig.mbti && typeof safeConfig.mbti === 'string' && safeConfig.mbti.trim()) {
+          loadPersonalityAnalysis(safeConfig.mbti);
           setDataLoaded(true);
         }
       } catch (error) {
         console.error('初始化MBTI组件失败:', error);
 
         // 降级处理
-        setAllMBTIs(mbtiList);
-        setUserMBTI('INFP');
-        setTempMBTI('');
         if (isMounted) {
+          setAllMBTIs(mbtiList);
+          setUserMBTI('INFP');
+          setTempMBTI('');
+          setUserInfo({
+            nickname: '',
+            birthDate: '',
+            mbti: ''
+          });
           setInitialized(true);
         }
       }
@@ -565,7 +573,7 @@ const MBTIPersonalityTabHome = () => {
   };
 
   // 使用新的配置上下文
-  const { currentConfig, isLoading: configLoading, error: configError } = useCurrentConfig();
+  const { currentConfig, loading: configLoading, error: configError } = useUserConfig();
 
   // 初始化组件 - 优化为立即加载默认数据
   useEffect(() => {
@@ -581,20 +589,24 @@ const MBTIPersonalityTabHome = () => {
         // 异步获取用户配置，但不阻塞界面
         setTimeout(() => {
           try {
-            // 从用户配置上下文获取用户信息
-            if (currentConfig && isMounted) {
+            // 从用户配置上下文获取用户信息（增加容错）
+            if (isMounted && currentConfig && typeof currentConfig === 'object') {
+              const safeConfig = currentConfig;
+
               // 避免默认值覆盖用户配置
-              const isDefaultBirthDate = currentConfig.birthDate === '1991-04-30';
-              
+              const isDefaultBirthDate = safeConfig.birthDate === '1991-04-30';
+              const currentBirthDate = userInfo.birthDate || '';
+
               setUserInfo({
-                nickname: currentConfig.nickname || '',
-                birthDate: (!isDefaultBirthDate || !userInfo.birthDate) ? currentConfig.birthDate || '' : userInfo.birthDate,
-                mbti: currentConfig.mbti || ''
+                nickname: (safeConfig.nickname || '').toString(),
+                birthDate: (!isDefaultBirthDate || !currentBirthDate) ? (safeConfig.birthDate || '').toString() : currentBirthDate,
+                mbti: (safeConfig.mbti || '').toString()
               });
 
               // 如果用户有配置的MBTI且不是默认值，则更新显示
-              if (currentConfig.mbti && currentConfig.mbti !== 'INFP') {
-                setUserMBTI(currentConfig.mbti);
+              const userMBTI = safeConfig.mbti;
+              if (userMBTI && typeof userMBTI === 'string' && userMBTI.trim() && userMBTI !== 'INFP') {
+                setUserMBTI(userMBTI);
                 // 标记需要重新加载数据
                 setDataLoaded(false);
               }
@@ -611,10 +623,15 @@ const MBTIPersonalityTabHome = () => {
         console.error('初始化MBTI组件失败:', error);
 
         // 降级处理
-        setAllMBTIs(mbtiList);
-        setUserMBTI('INFP');
-        setTempMBTI('');
         if (isMounted) {
+          setAllMBTIs(mbtiList);
+          setUserMBTI('INFP');
+          setTempMBTI('');
+          setUserInfo({
+            nickname: '',
+            birthDate: '',
+            mbti: ''
+          });
           setInitialized(true);
         }
       }
@@ -1253,7 +1270,6 @@ const MBTIPersonalityTabHome = () => {
       </div>
 
       {/* MBTI设置模态框 */}
-      {renderMBTIModal()}
     </div>
   );
 };

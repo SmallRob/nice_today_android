@@ -10,7 +10,7 @@ import './index.css';
 
 // 懒加载页面组件
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
-const MayaPage = React.lazy(() => import('./pages/MayaPage_optimized'));
+const MayaPage = React.lazy(() => import('./pages/MayaPage'));
 const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
 const LifeTrendPage = React.lazy(() => import('./pages/LifeTrendPage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));

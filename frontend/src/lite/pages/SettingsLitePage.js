@@ -10,11 +10,34 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
     // 直接从全局配置管理器获取当前配置，避免异步加载导致的黑屏
     try {
       const currentConfig = liteUserConfigManager.getCurrentConfig();
+      // 确保 config 是有效对象
+      const safeConfig = currentConfig && typeof currentConfig === 'object' ? currentConfig : {};
+
+      // 转换时辰格式：如果配置中有 birthTimeShichen，使用它；否则根据 birthTime 推断
+      let birthTimeShichen = safeConfig.birthTimeShichen;
+      if (!birthTimeShichen && safeConfig.birthTime) {
+        const timeToShichenMap = {
+          '23:00': '子', '00:00': '子', '00:30': '子',
+          '01:00': '丑', '01:30': '丑', '02:00': '丑', '02:30': '丑',
+          '03:00': '寅', '03:30': '寅', '04:00': '寅', '04:30': '寅',
+          '05:00': '卯', '05:30': '卯', '06:00': '卯', '06:30': '卯',
+          '07:00': '辰', '07:30': '辰', '08:00': '辰', '08:30': '辰',
+          '09:00': '巳', '09:30': '巳', '10:00': '巳', '10:30': '巳',
+          '11:00': '午', '11:30': '午', '12:00': '午', '12:30': '午', '13:00': '午',
+          '13:00': '未', '13:30': '未', '14:00': '未', '14:30': '未',
+          '15:00': '申', '15:30': '申', '16:00': '申', '16:30': '申',
+          '17:00': '酉', '17:30': '酉', '18:00': '酉', '18:30': '酉',
+          '19:00': '戌', '19:30': '戌', '20:00': '戌', '20:30': '戌',
+          '21:00': '亥', '21:30': '亥', '22:00': '亥', '22:30': '亥'
+        };
+        birthTimeShichen = timeToShichenMap[safeConfig.birthTime] || '午';
+      }
+
       return {
-        nickname: currentConfig.nickname || '',
-        gender: currentConfig.gender || 'secret',
-        birthDate: currentConfig.birthDate || '',
-        birthTime: currentConfig.birthTime || '午'
+        nickname: (safeConfig.nickname || '').toString(),
+        gender: (safeConfig.gender || 'secret').toString(),
+        birthDate: (safeConfig.birthDate || '').toString(),
+        birthTime: birthTimeShichen || '午'
       };
     } catch (error) {
       console.error('获取配置失败，使用默认值:', error);
@@ -32,12 +55,38 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
 
   // 同步更新表单数据（当userInfo prop更新时）
   useEffect(() => {
-    if (userInfo) {
+    if (userInfo && typeof userInfo === 'object') {
+      // 确保 userInfo 是有效对象
+      const safeUserInfo = userInfo;
+
+      // 转换时辰格式
+      let birthTimeShichen = safeUserInfo.birthTime;
+      if (typeof birthTimeShichen === 'string' && birthTimeShichen.includes(':')) {
+        // 如果是时间格式，转换为时辰
+        const timeToShichenMap = {
+          '23:00': '子', '00:00': '子', '00:30': '子',
+          '01:00': '丑', '01:30': '丑', '02:00': '丑', '02:30': '丑',
+          '03:00': '寅', '03:30': '寅', '04:00': '寅', '04:30': '寅',
+          '05:00': '卯', '05:30': '卯', '06:00': '卯', '06:30': '卯',
+          '07:00': '辰', '07:30': '辰', '08:00': '辰', '08:30': '辰',
+          '09:00': '巳', '09:30': '巳', '10:00': '巳', '10:30': '巳',
+          '11:00': '午', '11:30': '午', '12:00': '午', '12:30': '午', '13:00': '午',
+          '13:00': '未', '13:30': '未', '14:00': '未', '14:30': '未',
+          '15:00': '申', '15:30': '申', '16:00': '申', '16:30': '申',
+          '17:00': '酉', '17:30': '酉', '18:00': '酉', '18:30': '酉',
+          '19:00': '戌', '19:30': '戌', '20:00': '戌', '20:30': '戌',
+          '21:00': '亥', '21:30': '亥', '22:00': '亥', '22:30': '亥'
+        };
+        birthTimeShichen = timeToShichenMap[birthTimeShichen] || '午';
+      } else if (!birthTimeShichen) {
+        birthTimeShichen = '午';
+      }
+
       setFormData({
-        nickname: userInfo.nickname || '',
-        gender: userInfo.gender || 'secret',
-        birthDate: userInfo.birthDate || '',
-        birthTime: userInfo.birthTime || '午'
+        nickname: (safeUserInfo.nickname || '').toString(),
+        gender: (safeUserInfo.gender || 'secret').toString(),
+        birthDate: (safeUserInfo.birthDate || '').toString(),
+        birthTime: birthTimeShichen
       });
     }
   }, [userInfo]);
@@ -55,12 +104,32 @@ const SettingsLitePage = ({ userInfo, setUserInfo }) => {
     setSaveStatus('saving');
 
     try {
+      // 转换时辰为标准时间格式
+      const shichenToTimeMap = {
+        '子': '00:00',
+        '丑': '01:00',
+        '寅': '03:00',
+        '卯': '05:00',
+        '辰': '07:00',
+        '巳': '09:00',
+        '午': '12:30',
+        '未': '13:00',
+        '申': '15:00',
+        '酉': '17:00',
+        '戌': '19:00',
+        '亥': '21:00'
+      };
+
+      const birthTime = formData.birthTime || '午';
+      const birthTimeStandard = shichenToTimeMap[birthTime] || '12:30';
+
       // 直接更新配置（确保配置管理器已初始化）
       const success = liteUserConfigManager.updateCurrentConfig({
         nickname: formData.nickname,
         gender: formData.gender,
         birthDate: formData.birthDate,
-        birthTime: formData.birthTime
+        birthTime: birthTimeStandard,
+        birthTimeShichen: birthTime  // 保存时辰信息
       });
 
       if (success) {

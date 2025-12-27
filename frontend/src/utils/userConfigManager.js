@@ -2,6 +2,7 @@
  * 用户配置管理器
  * 负责管理用户的个人信息配置，包括昵称、出生日期、星座和属相
  * 支持多组配置，默认加载第一组配置数据
+ * 包含八字命格和紫薇星宫的自动计算功能
  */
 
 // 默认配置模板（安全的、可序列化的数据结构，避免React错误#31）
@@ -35,6 +36,7 @@ const DEFAULT_CONFIG = Object.freeze({
 /**
  * 深拷贝配置对象，确保用户配置与默认配置完全隔离
  * 使用安全的序列化方法，避免React错误#31
+ * 增强版：增加循环引用检测和边界情况处理
  * @param {Object} sourceConfig - 源配置对象
  * @returns {Object} 深拷贝的新配置对象
  */
@@ -43,86 +45,133 @@ function deepCloneConfig(sourceConfig) {
     return sourceConfig;
   }
 
-  // 创建安全的配置对象副本，避免序列化错误
+  // 使用 WeakSet 检测循环引用
+  const seen = new WeakSet();
+
+  function safeClone(obj) {
+    if (!obj || typeof obj !== 'object') {
+      return obj;
+    }
+
+    // 检测循环引用
+    if (seen.has(obj)) {
+      console.warn('检测到循环引用，已跳过该对象');
+      return undefined;
+    }
+
+    seen.add(obj);
+
+    if (Array.isArray(obj)) {
+      const clonedArray = [];
+      for (let i = 0; i < obj.length; i++) {
+        clonedArray[i] = safeClone(obj[i]);
+      }
+      seen.delete(obj);
+      return clonedArray;
+    }
+
+    const clonedObj = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        clonedObj[key] = safeClone(obj[key]);
+      }
+    }
+    seen.delete(obj);
+    return clonedObj;
+  }
+
+  // 先进行通用深拷贝
+  let cloned = safeClone(sourceConfig);
+
+  // 创建安全的配置对象副本，避免序列化错误，并处理所有边界情况
   const safeConfig = {
-    // 基础字段
-    nickname: sourceConfig.nickname || '',
-    realName: sourceConfig.realName || '',
-    birthDate: sourceConfig.birthDate || '',
-    birthTime: sourceConfig.birthTime || '12:30',
-    shichen: sourceConfig.shichen || '',
-    zodiac: sourceConfig.zodiac || '',
-    zodiacAnimal: sourceConfig.zodiacAnimal || '',
-    gender: sourceConfig.gender || 'secret',
-    mbti: sourceConfig.mbti || '',
-    isused: sourceConfig.isused ?? false,
-    
-    // 结构化数据（确保可序列化）
-    birthLocation: sourceConfig.birthLocation ? {
-      province: sourceConfig.birthLocation.province || '',
-      city: sourceConfig.birthLocation.city || '',
-      district: sourceConfig.birthLocation.district || '',
-      lng: sourceConfig.birthLocation.lng ?? 116.48,
-      lat: sourceConfig.birthLocation.lat ?? 39.95
-    } : null,
-    
+    // 基础字段（确保字符串类型）
+    nickname: typeof cloned.nickname === 'string' ? cloned.nickname.trim() : '',
+    realName: typeof cloned.realName === 'string' ? cloned.realName.trim() : '',
+    birthDate: typeof cloned.birthDate === 'string' ? cloned.birthDate.trim() : '',
+    birthTime: typeof cloned.birthTime === 'string' ? cloned.birthTime.trim() : '12:30',
+    shichen: typeof cloned.shichen === 'string' ? cloned.shichen.trim() : '',
+    zodiac: typeof cloned.zodiac === 'string' ? cloned.zodiac.trim() : '',
+    zodiacAnimal: typeof cloned.zodiacAnimal === 'string' ? cloned.zodiacAnimal.trim() : '',
+    gender: ['male', 'female', 'secret'].includes(cloned.gender) ? cloned.gender : 'secret',
+    mbti: typeof cloned.mbti === 'string' ? cloned.mbti.trim() : '',
+    isused: Boolean(cloned.isused),
+
+    // 结构化数据（确保可序列化和类型安全）
+    birthLocation: cloned.birthLocation && typeof cloned.birthLocation === 'object' ? {
+      province: typeof cloned.birthLocation.province === 'string' ? cloned.birthLocation.province.trim() : '',
+      city: typeof cloned.birthLocation.city === 'string' ? cloned.birthLocation.city.trim() : '',
+      district: typeof cloned.birthLocation.district === 'string' ? cloned.birthLocation.district.trim() : '',
+      lng: typeof cloned.birthLocation.lng === 'number' && !isNaN(cloned.birthLocation.lng) ? cloned.birthLocation.lng : 116.48,
+      lat: typeof cloned.birthLocation.lat === 'number' && !isNaN(cloned.birthLocation.lat) ? cloned.birthLocation.lat : 39.95
+    } : {
+      province: '',
+      city: '',
+      district: '',
+      lng: 116.48,
+      lat: 39.95
+    },
+
     // 复杂对象（确保为null或简单对象）
-    nameScore: sourceConfig.nameScore ? {
-      tian: sourceConfig.nameScore.tian || 0,
-      ren: sourceConfig.nameScore.ren || 0,
-      di: sourceConfig.nameScore.di || 0,
-      wai: sourceConfig.nameScore.wai || 0,
-      zong: sourceConfig.nameScore.zong || 0,
-      mainType: sourceConfig.nameScore.mainType || '',
-      totalScore: sourceConfig.nameScore.totalScore || 0
+    nameScore: cloned.nameScore && typeof cloned.nameScore === 'object' ? {
+      tian: typeof cloned.nameScore.tian === 'number' ? cloned.nameScore.tian : 0,
+      ren: typeof cloned.nameScore.ren === 'number' ? cloned.nameScore.ren : 0,
+      di: typeof cloned.nameScore.di === 'number' ? cloned.nameScore.di : 0,
+      wai: typeof cloned.nameScore.wai === 'number' ? cloned.nameScore.wai : 0,
+      zong: typeof cloned.nameScore.zong === 'number' ? cloned.nameScore.zong : 0,
+      mainType: typeof cloned.nameScore.mainType === 'string' ? cloned.nameScore.mainType : '',
+      totalScore: typeof cloned.nameScore.totalScore === 'number' ? cloned.nameScore.totalScore : 0
     } : null,
-    
-    bazi: sourceConfig.bazi ? {
-      year: sourceConfig.bazi.year || '',
-      month: sourceConfig.bazi.month || '',
-      day: sourceConfig.bazi.day || '',
-      hour: sourceConfig.bazi.hour || '',
-      lunar: sourceConfig.bazi.lunar ? {
-        year: sourceConfig.bazi.lunar.year || '',
-        month: sourceConfig.bazi.lunar.month || '',
-        day: sourceConfig.bazi.lunar.day || '',
-        text: sourceConfig.bazi.lunar.text || '',
-        monthStr: sourceConfig.bazi.lunar.monthStr || '',
-        dayStr: sourceConfig.bazi.lunar.dayStr || ''
+
+    bazi: cloned.bazi && typeof cloned.bazi === 'object' ? {
+      year: typeof cloned.bazi.year === 'string' ? cloned.bazi.year : '',
+      month: typeof cloned.bazi.month === 'string' ? cloned.bazi.month : '',
+      day: typeof cloned.bazi.day === 'string' ? cloned.bazi.day : '',
+      hour: typeof cloned.bazi.hour === 'string' ? cloned.bazi.hour : '',
+      lunar: cloned.bazi.lunar && typeof cloned.bazi.lunar === 'object' ? {
+        year: typeof cloned.bazi.lunar.year === 'string' ? cloned.bazi.lunar.year : '',
+        month: typeof cloned.bazi.lunar.month === 'string' ? cloned.bazi.lunar.month : '',
+        day: typeof cloned.bazi.lunar.day === 'string' ? cloned.bazi.lunar.day : '',
+        text: typeof cloned.bazi.lunar.text === 'string' ? cloned.bazi.lunar.text : '',
+        monthStr: typeof cloned.bazi.lunar.monthStr === 'string' ? cloned.bazi.lunar.monthStr : '',
+        dayStr: typeof cloned.bazi.lunar.dayStr === 'string' ? cloned.bazi.lunar.dayStr : ''
       } : null,
-      wuxing: sourceConfig.bazi.wuxing ? {
-        year: sourceConfig.bazi.wuxing.year || '',
-        month: sourceConfig.bazi.wuxing.month || '',
-        day: sourceConfig.bazi.wuxing.day || '',
-        hour: sourceConfig.bazi.wuxing.hour || '',
-        text: sourceConfig.bazi.wuxing.text || ''
+      wuxing: cloned.bazi.wuxing && typeof cloned.bazi.wuxing === 'object' ? {
+        year: typeof cloned.bazi.wuxing.year === 'string' ? cloned.bazi.wuxing.year : '',
+        month: typeof cloned.bazi.wuxing.month === 'string' ? cloned.bazi.wuxing.month : '',
+        day: typeof cloned.bazi.wuxing.day === 'string' ? cloned.bazi.wuxing.day : '',
+        hour: typeof cloned.bazi.wuxing.hour === 'string' ? cloned.bazi.wuxing.hour : '',
+        text: typeof cloned.bazi.wuxing.text === 'string' ? cloned.bazi.wuxing.text : ''
       } : null,
-      nayin: sourceConfig.bazi.nayin ? {
-        year: sourceConfig.bazi.nayin.year || '',
-        month: sourceConfig.bazi.nayin.month || '',
-        day: sourceConfig.bazi.nayin.day || '',
-        hour: sourceConfig.bazi.nayin.hour || ''
+      nayin: cloned.bazi.nayin && typeof cloned.bazi.nayin === 'object' ? {
+        year: typeof cloned.bazi.nayin.year === 'string' ? cloned.bazi.nayin.year : '',
+        month: typeof cloned.bazi.nayin.month === 'string' ? cloned.bazi.nayin.month : '',
+        day: typeof cloned.bazi.nayin.day === 'string' ? cloned.bazi.nayin.day : '',
+        hour: typeof cloned.bazi.nayin.hour === 'string' ? cloned.bazi.nayin.hour : ''
       } : null,
-      shichen: sourceConfig.bazi.shichen ? {
-        ganzhi: sourceConfig.bazi.shichen.ganzhi || '',
-        name: sourceConfig.bazi.shichen.name || ''
+      shichen: cloned.bazi.shichen && typeof cloned.bazi.shichen === 'object' ? {
+        ganzhi: typeof cloned.bazi.shichen.ganzhi === 'string' ? cloned.bazi.shichen.ganzhi : '',
+        name: typeof cloned.bazi.shichen.name === 'string' ? cloned.bazi.shichen.name : ''
       } : null,
-      solar: sourceConfig.bazi.solar ? {
-        text: sourceConfig.bazi.solar.text || ''
+      solar: cloned.bazi.solar && typeof cloned.bazi.solar === 'object' ? {
+        text: typeof cloned.bazi.solar.text === 'string' ? cloned.bazi.solar.text : ''
       } : null
     } : null,
-    
-    lunarInfo: sourceConfig.lunarInfo ? {
-      lunarBirthDate: sourceConfig.lunarInfo.lunarBirthDate || '',
-      lunarBirthMonth: sourceConfig.lunarInfo.lunarBirthMonth || '',
-      lunarBirthDay: sourceConfig.lunarInfo.lunarBirthDay || '',
-      trueSolarTime: sourceConfig.lunarInfo.trueSolarTime || ''
+
+    lunarInfo: cloned.lunarInfo && typeof cloned.lunarInfo === 'object' ? {
+      lunarBirthDate: typeof cloned.lunarInfo.lunarBirthDate === 'string' ? cloned.lunarInfo.lunarBirthDate : '',
+      lunarBirthMonth: typeof cloned.lunarInfo.lunarBirthMonth === 'string' ? cloned.lunarInfo.lunarBirthMonth : '',
+      lunarBirthDay: typeof cloned.lunarInfo.lunarBirthDay === 'string' ? cloned.lunarInfo.lunarBirthDay : '',
+      trueSolarTime: typeof cloned.lunarInfo.trueSolarTime === 'string' ? cloned.lunarInfo.trueSolarTime : ''
     } : null,
-    
-    lunarBirthDate: sourceConfig.lunarBirthDate || null,
-    trueSolarTime: sourceConfig.trueSolarTime || null,
-    lastCalculated: sourceConfig.lastCalculated || null,
-    isSystemDefault: sourceConfig.isSystemDefault ?? false
+
+    lunarBirthDate: typeof cloned.lunarBirthDate === 'string' ? cloned.lunarBirthDate : null,
+    trueSolarTime: typeof cloned.trueSolarTime === 'string' ? cloned.trueSolarTime : null,
+    lastCalculated: typeof cloned.lastCalculated === 'string' ? cloned.lastCalculated : null,
+    isSystemDefault: Boolean(cloned.isSystemDefault),
+    // 新增：模板来源追踪字段
+    templateSource: typeof cloned.templateSource === 'string' ? cloned.templateSource : null,
+    isFromTemplate: Boolean(cloned.isFromTemplate)
   };
 
   return safeConfig;
@@ -168,6 +217,167 @@ const EMPTY_CONFIG_DEFAULTS = {
 const STORAGE_KEYS = {
   USER_CONFIGS: 'nice_today_user_configs',
   ACTIVE_CONFIG_INDEX: 'nice_today_active_config_index'
+};
+
+/**
+ * 计算八字命格（增强版，带容错）
+ * @param {Object} config 用户配置
+ * @returns {Object|null} 八字信息或null（计算失败时）
+ */
+const calculateBaziForConfig = (config) => {
+  try {
+    if (!config || !config.birthDate) {
+      console.warn('计算八字：缺少出生日期');
+      return null;
+    }
+
+    // 动态导入计算模块（避免循环依赖）
+    return Promise.resolve().then(async () => {
+      const { calculateDetailedBazi } = await import('./baziHelper');
+      
+      const birthDate = config.birthDate;
+      const birthTime = config.birthTime || '12:30';
+      const longitude = config.birthLocation?.lng || 116.48;
+      
+      // 调用八字计算
+      const baziResult = calculateDetailedBazi(birthDate, birthTime, longitude);
+      
+      if (!baziResult) {
+        console.warn('八字计算返回null');
+        return null;
+      }
+      
+      // 确保返回的数据结构完整
+      return {
+        year: baziResult.bazi?.year || '',
+        month: baziResult.bazi?.month || '',
+        day: baziResult.bazi?.day || '',
+        hour: baziResult.bazi?.hour || '',
+        lunar: baziResult.bazi?.lunar || null,
+        wuxing: baziResult.bazi?.wuxing || null,
+        nayin: baziResult.bazi?.nayin || null,
+        shichen: baziResult.bazi?.shichen || null,
+        solar: baziResult.bazi?.solar || null,
+        calculatedAt: new Date().toISOString()
+      };
+    });
+  } catch (error) {
+    console.error('计算八字命格失败:', error);
+    // 返回null而不是抛出异常，确保UI不会崩溃
+    return null;
+  }
+};
+
+/**
+ * 计算紫薇星宫（增强版，带容错）
+ * @param {Object} config 用户配置
+ * @returns {Promise<Object|null>} 紫薇星宫数据或null（计算失败时）
+ */
+const calculateZiWeiForConfig = async (config) => {
+  try {
+    if (!config || !config.birthDate) {
+      console.warn('计算紫薇星宫：缺少出生日期');
+      return null;
+    }
+
+    // 动态导入计算模块（避免循环依赖）
+    const { getZiWeiDisplayData } = await import('./ziweiHelper');
+    
+    // 调用紫薇星宫计算
+    const ziweiResult = await getZiWeiDisplayData(config);
+    
+    if (!ziweiResult || ziweiResult.error) {
+      console.warn('紫薇星宫计算失败:', ziweiResult?.error);
+      return null;
+    }
+    
+    // 确保返回的数据结构完整
+    return {
+      ziweiData: ziweiResult.ziweiData || null,
+      baziInfo: ziweiResult.baziInfo || null,
+      calculatedAt: ziweiResult.calculatedAt || new Date().toISOString(),
+      hasErrors: !!ziweiResult.error || !!(ziweiResult.validationErrors?.length === 0),
+      errors: ziweiResult.error || null,
+      warnings: ziweiResult.validationWarnings || ziweiResult.calculationWarnings || []
+    };
+  } catch (error) {
+    console.error('计算紫薇星宫失败:', error);
+    // 返回null而不是抛出异常，确保UI不会崩溃
+    return null;
+  }
+};
+
+/**
+ * 计算并更新配置中的八字和紫薇星宫信息
+ * @param {Object} config 用户配置
+ * @returns {Promise<Object>} 更新后的配置和计算结果
+ */
+const calculateAndUpdateFortuneData = async (config) => {
+  try {
+    // 并行计算八字和紫薇星宫
+    const [baziResult, ziweiResult] = await Promise.allSettled([
+      calculateBaziForConfig(config),
+      calculateZiWeiForConfig(config)
+    ]);
+    
+    // 处理八字计算结果
+    let bazi = null;
+    let baziError = null;
+    if (baziResult.status === 'fulfilled' && baziResult.value) {
+      bazi = baziResult.value;
+    } else if (baziResult.status === 'rejected') {
+      baziError = baziResult.reason?.message || '八字计算失败';
+      console.error('八字计算Promise被拒绝:', baziResult.reason);
+    }
+    
+    // 处理紫薇星宫计算结果
+    let ziweiData = null;
+    let ziweiError = null;
+    let ziweiWarnings = [];
+    if (ziweiResult.status === 'fulfilled' && ziweiResult.value) {
+      ziweiData = ziweiResult.value.ziweiData;
+      ziweiWarnings = ziweiResult.value.warnings || [];
+      if (ziweiResult.value.hasErrors) {
+        ziweiError = ziweiResult.value.errors || '紫薇星宫计算存在错误';
+      }
+    } else if (ziweiResult.status === 'rejected') {
+      ziweiError = ziweiResult.reason?.message || '紫薇星宫计算失败';
+      console.error('紫薇星宫计算Promise被拒绝:', ziweiResult.reason);
+    }
+    
+    // 构建计算结果摘要
+    const calculationSummary = {
+      bazi: bazi,
+      ziweiData: ziweiData,
+      lastCalculated: new Date().toISOString(),
+      hasData: !!(bazi || ziweiData),
+      hasErrors: !!(baziError || ziweiError),
+      errors: {
+        bazi: baziError,
+        ziwei: ziweiError
+      },
+      warnings: ziweiWarnings
+    };
+    
+    console.log('命格计算完成:', calculationSummary);
+    
+    return calculationSummary;
+  } catch (error) {
+    console.error('计算命格数据失败:', error);
+    // 返回安全的默认结果
+    return {
+      bazi: null,
+      ziweiData: null,
+      lastCalculated: new Date().toISOString(),
+      hasData: false,
+      hasErrors: true,
+      errors: {
+        bazi: error.message,
+        ziwei: '计算过程出现异常'
+      },
+      warnings: []
+    };
+  }
 };
 
 class UserConfigManager {
@@ -434,188 +644,216 @@ class UserConfigManager {
   }
 
   /**
-   * 更新指定索引的配置
+   * 更新指定索引的配置（含校验和容错）
    * @param {Number} index 配置索引
    * @param {Object} updates 更新的字段
-   * @returns {Boolean} 是否更新成功
-   * @throws {Error} 参数无效或保存失败时抛出异常
+   * @returns {Object} {success: boolean, error: string|null}
    */
   updateConfig(index, updates) {
+    // 增加边界检查，不抛出异常
     if (!this.initialized) {
-      throw new Error('配置管理器未初始化');
+      console.error('配置管理器未初始化');
+      return { success: false, error: '配置管理器未初始化' };
     }
     if (index < 0 || index >= this.configs.length) {
-      throw new Error(`无效的配置索引: ${index}`);
+      console.error(`无效的配置索引: ${index}`);
+      return { success: false, error: `无效的配置索引: ${index}` };
     }
     if (!updates || typeof updates !== 'object') {
-      throw new Error('更新数据无效');
+      console.error('更新数据无效');
+      return { success: false, error: '更新数据无效' };
     }
 
-    // 检测是否修改了基础配置（出生日期、时间、位置）
-    const basicFields = ['birthDate', 'birthTime', 'birthLocation'];
-    const hasBasicConfigChange = Object.keys(updates).some(key => basicFields.includes(key));
+    try {
+      // 检测是否修改了基础配置（出生日期、时间、位置）
+      const basicFields = ['birthDate', 'birthTime', 'birthLocation'];
+      const hasBasicConfigChange = Object.keys(updates).some(key => basicFields.includes(key));
 
-    // 保留原配置的 isused 状态（除非明确指定）
-    const keepIsused = this.configs[index].isused && updates.isused === undefined;
-    const configUpdates = keepIsused ? updates : { ...updates };
+      // 保留原配置的 isused 状态（除非明确指定）
+      const keepIsused = this.configs[index].isused && updates.isused === undefined;
+      const configUpdates = keepIsused ? updates : { ...updates };
 
-    // 更新配置
-    this.configs[index] = { ...this.configs[index], ...configUpdates };
+      // 更新配置
+      this.configs[index] = { ...this.configs[index], ...configUpdates };
 
-    // 确保只有一个配置的 isused 为 true
-    if (this.configs[index].isused === true) {
+      // 确保只有一个配置的 isused 为 true
+      if (this.configs[index].isused === true) {
+        this.configs.forEach((config, idx) => {
+          config.isused = idx === index;
+        });
+      }
+
+      // 保存到本地存储（增加容错）
+      const saveSuccess = this.saveToStorage();
+      if (!saveSuccess) {
+        console.error('更新配置保存失败');
+        // 尝试回滚
+        return { success: false, error: '更新配置保存失败' };
+      }
+
+      // 验证更新后的配置（可选，失败不阻止返回）
+      try {
+        const verifyConfigs = this.getAllConfigs();
+        const updatedConfig = verifyConfigs[index];
+
+        if (updatedConfig?.isused !== this.configs[index]?.isused) {
+          const errorMsg = `更新配置验证失败：isused 状态不一致`;
+          console.warn(errorMsg);
+          // 尝试修复 isused 状态
+          this.configs.forEach((c, idx) => {
+            c.isused = idx === this.activeConfigIndex;
+          });
+          this.saveToStorage();
+        }
+      } catch (verifyError) {
+        console.warn('验证更新配置失败，但不影响保存结果:', verifyError);
+      }
+
+      // 通知监听器（只有修改了基础配置才强制重新加载）
+      this.notifyListeners(hasBasicConfigChange, hasBasicConfigChange);
+
+      console.log(`更新配置 ${index} 成功，isused: ${this.configs[index].isused}, 基础配置变更: ${hasBasicConfigChange}`, this.configs[index]);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('更新配置失败:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * 删除指定索引的配置（含容错）
+   * @param {Number} index 配置索引
+   * @returns {Object} {success: boolean, error: string|null}
+   */
+  removeConfig(index) {
+    // 增加边界检查，不抛出异常
+    if (!this.initialized) {
+      console.error('配置管理器未初始化');
+      return { success: false, error: '配置管理器未初始化' };
+    }
+    if (index < 0 || index >= this.configs.length) {
+      console.error(`无效的配置索引: ${index}`);
+      return { success: false, error: `无效的配置索引: ${index}` };
+    }
+    if (this.configs.length <= 1) {
+      console.error('至少需要保留一个配置');
+      return { success: false, error: '至少需要保留一个配置' };
+    }
+
+    try {
+      // 检查是否删除了当前活跃配置
+      const wasActiveConfig = index === this.activeConfigIndex;
+
+      // 删除配置
+      this.configs.splice(index, 1);
+
+      // 调整活跃索引
+      if (index === this.activeConfigIndex) {
+        this.activeConfigIndex = Math.max(0, this.activeConfigIndex - 1);
+      } else if (index < this.activeConfigIndex) {
+        this.activeConfigIndex--;
+      }
+
+      // 确保有一个配置被设置为 isused = true
+      if (this.configs.length > 0 && this.activeConfigIndex >= 0) {
+        // 更新所有配置的 isused 状态
+        this.configs.forEach((config, i) => {
+          config.isused = i === this.activeConfigIndex;
+        });
+      }
+
+      // 保存到本地存储（增加容错）
+      const saveSuccess = this.saveToStorage();
+      if (!saveSuccess) {
+        console.error('删除配置保存失败');
+        return { success: false, error: '删除配置保存失败' };
+      }
+
+      // 验证删除后的配置（可选，失败不阻止返回）
+      try {
+        const verifyConfigs = this.getAllConfigs();
+        const activeConfig = verifyConfigs[this.activeConfigIndex];
+
+        if (activeConfig?.isused !== true) {
+          console.warn('删除配置验证失败：活跃配置的 isused 状态不正确');
+          // 尝试修复 isused 状态
+          this.configs.forEach((c, idx) => {
+            c.isused = idx === this.activeConfigIndex;
+          });
+          this.saveToStorage();
+        }
+      } catch (verifyError) {
+        console.warn('验证删除配置失败，但不影响删除结果:', verifyError);
+      }
+
+      // 通知监听器（删除了活跃配置才强制重新加载）
+      this.notifyListeners(wasActiveConfig, wasActiveConfig);
+
+      console.log(`删除配置 ${index} 成功，当前活跃索引 ${this.activeConfigIndex}, 是否为活跃配置: ${wasActiveConfig}`);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('删除配置失败:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * 设置活跃配置（含容错）
+   * @param {Number} index 配置索引
+   * @returns {Object} {success: boolean, error: string|null}
+   */
+  setActiveConfig(index) {
+    // 增加边界检查，不抛出异常
+    if (!this.initialized) {
+      console.error('配置管理器未初始化');
+      return { success: false, error: '配置管理器未初始化' };
+    }
+    if (index < 0 || index >= this.configs.length) {
+      console.error(`无效的配置索引: ${index}`);
+      return { success: false, error: `无效的配置索引: ${index}` };
+    }
+
+    try {
+      // 更新所有配置的 isused 状态
       this.configs.forEach((config, idx) => {
         config.isused = idx === index;
       });
-    }
 
-    // 保存到本地存储
-    const saveSuccess = this.saveToStorage();
-    if (!saveSuccess) {
-      throw new Error('更新配置保存失败');
-    }
+      this.activeConfigIndex = index;
 
-    // 验证更新后的配置
-    const verifyConfigs = this.getAllConfigs();
-    const updatedConfig = verifyConfigs[index];
-
-    if (updatedConfig?.isused !== this.configs[index]?.isused) {
-      const errorMsg = `更新配置验证失败：isused 状态不一致，expected: ${this.configs[index]?.isused}, actual: ${updatedConfig?.isused}`;
-      console.error(errorMsg);
-      // 尝试修复 isused 状态
-      this.configs.forEach((c, idx) => {
-        c.isused = idx === this.activeConfigIndex;
-      });
-      const repairSuccess = this.saveToStorage();
-      if (!repairSuccess) {
-        throw new Error(`${errorMsg}，修复也失败`);
+      // 保存到本地存储（增加容错）
+      const saveSuccess = this.saveToStorage();
+      if (!saveSuccess) {
+        console.error('设置活跃配置保存失败');
+        return { success: false, error: '设置活跃配置保存失败' };
       }
-    }
 
-    // 通知监听器（只有修改了基础配置才强制重新加载）
-    this.notifyListeners(hasBasicConfigChange, hasBasicConfigChange);
+      // 验证配置的 isused 状态（可选，失败不阻止返回）
+      try {
+        const verifyConfigs = this.getAllConfigs();
+        const activeConfig = verifyConfigs[this.activeConfigIndex];
 
-    console.log(`更新配置 ${index} 成功，isused: ${this.configs[index].isused}, 基础配置变更: ${hasBasicConfigChange}`, this.configs[index]);
-    return true;
-  }
-
-  /**
-   * 删除指定索引的配置
-   * @param {Number} index 配置索引
-   * @returns {Boolean} 是否删除成功
-   * @throws {Error} 索引无效或保存失败时抛出异常
-   */
-  removeConfig(index) {
-    if (!this.initialized) {
-      throw new Error('配置管理器未初始化');
-    }
-    if (index < 0 || index >= this.configs.length) {
-      throw new Error(`无效的配置索引: ${index}`);
-    }
-    if (this.configs.length <= 1) {
-      throw new Error('至少需要保留一个配置');
-    }
-
-    // 检查是否删除了当前活跃配置
-    const wasActiveConfig = index === this.activeConfigIndex;
-
-    // 删除配置
-    this.configs.splice(index, 1);
-
-    // 调整活跃索引
-    if (index === this.activeConfigIndex) {
-      this.activeConfigIndex = Math.max(0, this.activeConfigIndex - 1);
-    } else if (index < this.activeConfigIndex) {
-      this.activeConfigIndex--;
-    }
-
-    // 确保有一个配置被设置为 isused = true
-    if (this.configs.length > 0 && this.activeConfigIndex >= 0) {
-      // 更新所有配置的 isused 状态
-      this.configs.forEach((config, i) => {
-        config.isused = i === this.activeConfigIndex;
-      });
-    }
-
-    // 保存到本地存储
-    const saveSuccess = this.saveToStorage();
-    if (!saveSuccess) {
-      throw new Error('删除配置保存失败');
-    }
-
-    // 验证删除后的配置
-    const verifyConfigs = this.getAllConfigs();
-    const activeConfig = verifyConfigs[this.activeConfigIndex];
-
-    if (activeConfig?.isused !== true) {
-      const errorMsg = `删除配置验证失败：活跃配置的 isused 状态不正确，index: ${this.activeConfigIndex}, isused: ${activeConfig?.isused}`;
-      console.error(errorMsg);
-      // 尝试修复 isused 状态
-      this.configs.forEach((c, idx) => {
-        c.isused = idx === this.activeConfigIndex;
-      });
-      const repairSuccess = this.saveToStorage();
-      if (!repairSuccess) {
-        throw new Error(`${errorMsg}，修复也失败`);
+        if (activeConfig?.isused !== true) {
+          console.warn('设置活跃配置验证失败：isused 状态不正确');
+          // 尝试修复 isused 状态
+          this.configs.forEach((c, idx) => {
+            c.isused = idx === index;
+          });
+          this.saveToStorage();
+        }
+      } catch (verifyError) {
+        console.warn('验证设置活跃配置失败，但不影响设置结果:', verifyError);
       }
+
+      // 通知监听器（不强制重新加载，只更新索引）
+      this.notifyListeners(false, false); // 仅切换配置，不触发数据重新加载
+
+      console.log(`设置活跃配置为 ${index} 成功，isused 状态已更新`);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('设置活跃配置失败:', error);
+      return { success: false, error: error.message };
     }
-
-    // 通知监听器（删除了活跃配置才强制重新加载）
-    this.notifyListeners(wasActiveConfig, wasActiveConfig);
-
-    console.log(`删除配置 ${index} 成功，当前活跃索引 ${this.activeConfigIndex}, 是否为活跃配置: ${wasActiveConfig}`);
-    return true;
-  }
-
-  /**
-   * 设置活跃配置
-   * @param {Number} index 配置索引
-   * @returns {Boolean} 是否设置成功
-   * @throws {Error} 索引无效或保存失败时抛出异常
-   */
-  setActiveConfig(index) {
-    if (!this.initialized) {
-      throw new Error('配置管理器未初始化');
-    }
-    if (index < 0 || index >= this.configs.length) {
-      throw new Error(`无效的配置索引: ${index}`);
-    }
-
-    // 更新所有配置的 isused 状态
-    this.configs.forEach((config, idx) => {
-      config.isused = idx === index;
-    });
-
-    this.activeConfigIndex = index;
-
-    // 保存到本地存储
-    const saveSuccess = this.saveToStorage();
-    if (!saveSuccess) {
-      throw new Error('设置活跃配置保存失败');
-    }
-
-    // 验证配置的 isused 状态
-    const verifyConfigs = this.getAllConfigs();
-    const activeConfig = verifyConfigs[this.activeConfigIndex];
-
-    if (activeConfig?.isused !== true) {
-      const errorMsg = `设置活跃配置验证失败：isused 状态不正确，index: ${this.activeConfigIndex}, isused: ${activeConfig?.isused}`;
-      console.error(errorMsg);
-      // 尝试修复 isused 状态
-      this.configs.forEach((c, idx) => {
-        c.isused = idx === index;
-      });
-      const repairSuccess = this.saveToStorage();
-      if (!repairSuccess) {
-        throw new Error(`${errorMsg}，修复也失败`);
-      }
-    }
-
-    // 通知监听器（不强制重新加载，只更新索引）
-    this.notifyListeners(false, false); // 仅切换配置，不触发数据重新加载
-
-    console.log(`设置活跃配置为 ${index} 成功，isused 状态已更新`);
-    return true;
   }
 
   /**
@@ -920,6 +1158,651 @@ class UserConfigManager {
     } catch (error) {
       console.error('导入配置失败:', error);
       return false;
+    }
+  }
+
+  /**
+   * 计算当前配置的八字命格（增强版，带容错）
+   * @returns {Promise<Object>} 八字计算结果
+   */
+  async calculateCurrentBazi() {
+    try {
+      const config = this.getCurrentConfig();
+      return await calculateBaziForConfig(config);
+    } catch (error) {
+      console.error('计算当前八字失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 计算指定配置的八字命格
+   * @param {Number} index 配置索引
+   * @returns {Promise<Object|null>} 八字计算结果或null
+   */
+  async calculateBaziByIndex(index) {
+    try {
+      if (index < 0 || index >= this.configs.length) {
+        console.warn(`无效的配置索引: ${index}`);
+        return null;
+      }
+      const config = this.configs[index];
+      return await calculateBaziForConfig(config);
+    } catch (error) {
+      console.error(`计算配置${index}的八字失败:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * 计算当前配置的紫薇星宫（增强版，带容错）
+   * @returns {Promise<Object>} 紫薇星宫计算结果
+   */
+  async calculateCurrentZiWei() {
+    try {
+      const config = this.getCurrentConfig();
+      return await calculateZiWeiForConfig(config);
+    } catch (error) {
+      console.error('计算当前紫薇星宫失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 计算指定配置的紫薇星宫
+   * @param {Number} index 配置索引
+   * @returns {Promise<Object|null>} 紫薇星宫计算结果或null
+   */
+  async calculateZiWeiByIndex(index) {
+    try {
+      if (index < 0 || index >= this.configs.length) {
+        console.warn(`无效的配置索引: ${index}`);
+        return null;
+      }
+      const config = this.configs[index];
+      return await calculateZiWeiForConfig(config);
+    } catch (error) {
+      console.error(`计算配置${index}的紫薇星宫失败:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * 计算当前配置的所有命格数据（八字+紫薇星宫）
+   * @returns {Promise<Object>} 完整的计算结果
+   */
+  async calculateCurrentFortune() {
+    try {
+      const config = this.getCurrentConfig();
+      return await calculateAndUpdateFortuneData(config);
+    } catch (error) {
+      console.error('计算当前命格数据失败:', error);
+      return {
+        bazi: null,
+        ziweiData: null,
+        lastCalculated: new Date().toISOString(),
+        hasData: false,
+        hasErrors: true,
+        errors: { bazi: error.message, ziwei: '计算过程出现异常' },
+        warnings: []
+      };
+    }
+  }
+
+  /**
+   * 计算指定配置的所有命格数据
+   * @param {Number} index 配置索引
+   * @returns {Promise<Object>} 完整的计算结果
+   */
+  async calculateFortuneByIndex(index) {
+    try {
+      if (index < 0 || index >= this.configs.length) {
+        console.warn(`无效的配置索引: ${index}`);
+        return {
+          bazi: null,
+          ziweiData: null,
+          lastCalculated: new Date().toISOString(),
+          hasData: false,
+          hasErrors: true,
+          errors: { bazi: '无效的配置索引', ziwei: '无效的配置索引' },
+          warnings: []
+        };
+      }
+      const config = this.configs[index];
+      return await calculateAndUpdateFortuneData(config);
+    } catch (error) {
+      console.error(`计算配置${index}的命格数据失败:`, error);
+      return {
+        bazi: null,
+        ziweiData: null,
+        lastCalculated: new Date().toISOString(),
+        hasData: false,
+        hasErrors: true,
+        errors: { bazi: error.message, ziwei: error.message },
+        warnings: []
+      };
+    }
+  }
+
+  /**
+   * 更新配置并自动重新计算八字和紫薇星宫
+   * @param {Number} index 配置索引
+   * @param {Object} updates 更新的字段
+   * @param {Boolean} recalculate 是否重新计算命格数据
+   * @returns {Promise<Object>} 更新结果和计算数据
+   */
+  async updateConfigWithFortune(index, updates, recalculate = true) {
+    try {
+      // 先更新基础配置
+      const updateResult = this.updateConfig(index, updates);
+      
+      if (!updateResult) {
+        throw new Error('更新配置失败');
+      }
+      
+      // 如果需要重新计算命格数据
+      if (recalculate) {
+        const fortuneData = await this.calculateFortuneByIndex(index);
+        
+        // 将计算结果更新到配置中
+        const fortuneUpdates = {};
+        if (fortuneData.bazi) {
+          fortuneUpdates.bazi = fortuneData.bazi;
+        }
+        if (fortuneData.ziweiData) {
+          fortuneUpdates.ziweiData = fortuneData.ziweiData;
+        }
+        
+        // 更新计算时间戳
+        fortuneUpdates.lastCalculated = fortuneData.lastCalculated;
+        
+        // 如果有计算结果，更新到配置
+        if (Object.keys(fortuneUpdates).length > 0) {
+          this.updateConfig(index, fortuneUpdates);
+        }
+        
+        return {
+          success: true,
+          config: this.configs[index],
+          fortuneData
+        };
+      }
+      
+      return {
+        success: true,
+        config: this.configs[index],
+        fortuneData: null
+      };
+    } catch (error) {
+      console.error('更新配置并重新计算失败:', error);
+      return {
+        success: false,
+        config: null,
+        fortuneData: null,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 获取当前配置的命格数据（含冗余和容错）
+   * @returns {Object} 命格数据（可能包含错误信息）
+   */
+  getFortuneData() {
+    try {
+      const config = this.getCurrentConfig();
+      
+      // 检查配置中是否已有命格数据
+      const hasBazi = config && config.bazi && Object.keys(config.bazi).length > 0;
+      const hasZiWei = config && config.ziweiData;
+      
+      // 检查数据是否过期（超过7天）
+      const lastCalculated = config.lastCalculated;
+      const isExpired = lastCalculated 
+        ? (new Date().getTime() - new Date(lastCalculated).getTime()) > 7 * 24 * 60 * 60 * 1000
+        : true;
+      
+      return {
+        hasBazi,
+        hasZiWei,
+        hasCompleteData: hasBazi && hasZiWei,
+        isExpired,
+        lastCalculated: lastCalculated || null,
+        bazi: hasBazi ? config.bazi : null,
+        ziweiData: hasZiWei ? config.ziweiData : null,
+        needsRecalculation: isExpired || !hasBazi || !hasZiWei
+      };
+    } catch (error) {
+      console.error('获取命格数据失败:', error);
+      return {
+        hasBazi: false,
+        hasZiWei: false,
+        hasCompleteData: false,
+        isExpired: true,
+        lastCalculated: null,
+        bazi: null,
+        ziweiData: null,
+        needsRecalculation: true,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 生成唯一的新用户昵称（格式：新用户123，数字自动递增）
+   * @returns {string} 唯一的昵称
+   */
+  generateUniqueNickname() {
+    try {
+      const basePrefix = '新用户';
+      let maxNumber = 0;
+
+      // 查找现有配置中最大的数字
+      this.configs.forEach(config => {
+        if (config && config.nickname && typeof config.nickname === 'string' && config.nickname.startsWith(basePrefix)) {
+          const numberStr = config.nickname.substring(basePrefix.length);
+          const number = parseInt(numberStr, 10);
+          if (!isNaN(number) && number > maxNumber) {
+            maxNumber = number;
+          }
+        }
+      });
+
+      // 生成新的昵称
+      const newNumber = maxNumber + 1;
+      return `${basePrefix}${newNumber}`;
+    } catch (error) {
+      console.error('生成唯一昵称失败:', error);
+      // 降级方案：使用时间戳
+      return `新用户${Date.now()}`;
+    }
+  }
+
+  /**
+   * 从默认配置模板复制创建新配置（增强版，带容错和错误提示）
+   * @param {Object} overrides - 需要覆盖的字段
+   * @returns {Promise<Object>} {success: boolean, config: Object|null, error: string|null}
+   */
+  async duplicateConfigFromTemplate(overrides = {}) {
+    try {
+      // 1. 深拷贝默认配置模板，确保不修改原始模板
+      const templateConfig = deepCloneConfig(DEFAULT_CONFIG);
+
+      // 2. 生成唯一的昵称（如果未指定）
+      const finalNickname = overrides.nickname || this.generateUniqueNickname();
+
+      // 3. 验证昵称唯一性
+      const nicknameExists = this.configs.some(c => c && c.nickname === finalNickname);
+      if (nicknameExists) {
+        return {
+          success: false,
+          config: null,
+          error: `昵称 '${finalNickname}' 已存在，无法创建重复配置`
+        };
+      }
+
+      // 4. 创建安全、可序列化的配置对象
+      const finalConfig = {
+        // 基础字段
+        nickname: finalNickname,
+        realName: overrides.realName || templateConfig.realName || '',
+        birthDate: overrides.birthDate || templateConfig.birthDate || '',
+        birthTime: overrides.birthTime || templateConfig.birthTime || '12:30',
+        shichen: overrides.shichen || templateConfig.shichen || '',
+        zodiac: overrides.zodiac || templateConfig.zodiac || '',
+        zodiacAnimal: overrides.zodiacAnimal || templateConfig.zodiacAnimal || '',
+        gender: overrides.gender && ['male', 'female', 'secret'].includes(overrides.gender) 
+          ? overrides.gender 
+          : templateConfig.gender || 'secret',
+        mbti: overrides.mbti || templateConfig.mbti || '',
+        isused: false,
+
+        // 结构化数据
+        birthLocation: overrides.birthLocation ? {
+          province: typeof overrides.birthLocation.province === 'string' ? overrides.birthLocation.province.trim() : '',
+          city: typeof overrides.birthLocation.city === 'string' ? overrides.birthLocation.city.trim() : '',
+          district: typeof overrides.birthLocation.district === 'string' ? overrides.birthLocation.district.trim() : '',
+          lng: typeof overrides.birthLocation.lng === 'number' && !isNaN(overrides.birthLocation.lng) 
+            ? overrides.birthLocation.lng 
+            : 116.48,
+          lat: typeof overrides.birthLocation.lat === 'number' && !isNaN(overrides.birthLocation.lat) 
+            ? overrides.birthLocation.lat 
+            : 39.95
+        } : templateConfig.birthLocation ? {
+          province: templateConfig.birthLocation.province || '',
+          city: templateConfig.birthLocation.city || '',
+          district: templateConfig.birthLocation.district || '',
+          lng: templateConfig.birthLocation.lng || 116.48,
+          lat: templateConfig.birthLocation.lat || 39.95
+        } : null,
+
+        // 复杂对象
+        nameScore: overrides.nameScore ? {
+          tian: typeof overrides.nameScore.tian === 'number' ? overrides.nameScore.tian : 0,
+          ren: typeof overrides.nameScore.ren === 'number' ? overrides.nameScore.ren : 0,
+          di: typeof overrides.nameScore.di === 'number' ? overrides.nameScore.di : 0,
+          wai: typeof overrides.nameScore.wai === 'number' ? overrides.nameScore.wai : 0,
+          zong: typeof overrides.nameScore.zong === 'number' ? overrides.nameScore.zong : 0,
+          mainType: typeof overrides.nameScore.mainType === 'string' ? overrides.nameScore.mainType : '',
+          totalScore: typeof overrides.nameScore.totalScore === 'number' ? overrides.nameScore.totalScore : 0
+        } : null,
+
+        // 八字信息不复制，需要重新计算
+        bazi: null,
+        lunarBirthDate: null,
+        trueSolarTime: null,
+        lunarInfo: null,
+        lastCalculated: null,
+        isSystemDefault: false,
+        // 标记来源
+        templateSource: templateConfig.nickname || '默认模板',
+        isFromTemplate: true
+      };
+
+      console.log('模板配置复制成功:', {
+        templateNickname: templateConfig.nickname,
+        newNickname: finalConfig.nickname,
+        birthDate: finalConfig.birthDate,
+        overrides: Object.keys(overrides)
+      });
+
+      return {
+        success: true,
+        config: finalConfig,
+        error: null
+      };
+
+    } catch (error) {
+      console.error('从模板复制配置失败:', error);
+      return {
+        success: false,
+        config: null,
+        error: `从模板复制配置失败: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * 从默认配置模板直接添加新配置（增强版，带容错和错误提示）
+   * @param {Object} overrides - 需要覆盖的字段
+   * @returns {Promise<Object>} {success: boolean, config: Object|null, error: string|null}
+   */
+  async addConfigFromTemplate(overrides = {}) {
+    try {
+      // 1. 生成新配置
+      const result = await this.duplicateConfigFromTemplate(overrides);
+
+      if (!result.success || !result.config) {
+        return {
+          success: false,
+          config: null,
+          error: result.error || '生成模板配置失败'
+        };
+      }
+
+      const newConfig = result.config;
+
+      // 2. 添加到配置列表
+      this.configs.push(newConfig);
+
+      // 3. 设置新配置为活跃配置
+      this.activeConfigIndex = this.configs.length - 1;
+
+      // 4. 保存到存储
+      const saveSuccess = this.saveToStorage();
+      if (!saveSuccess) {
+        throw new Error('保存配置到存储失败');
+      }
+
+      // 5. 验证保存结果
+      const verifyConfigs = this.getAllConfigs();
+      const verifyConfig = verifyConfigs[this.activeConfigIndex];
+      
+      if (!verifyConfig || verifyConfig.nickname !== newConfig.nickname) {
+        throw new Error('保存后验证失败：配置数据不一致');
+      }
+
+      // 6. 通知监听器（强制刷新）
+      this.notifyListeners(true, true);
+
+      console.log('从模板添加配置成功:', newConfig.nickname);
+
+      return {
+        success: true,
+        config: verifyConfig,
+        error: null
+      };
+
+    } catch (error) {
+      console.error('从模板添加配置失败:', error);
+      
+      // 回滚：如果添加失败，从列表中移除
+      if (this.configs.length > 0 && this.configs[this.configs.length - 1].isFromTemplate) {
+        this.configs.pop();
+        this.activeConfigIndex = Math.max(0, this.configs.length - 1);
+      }
+
+      return {
+        success: false,
+        config: null,
+        error: `从模板添加配置失败: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * 更新从模板复制的配置（增强版，带容错和错误提示）
+   * @param {Number} index 配置索引
+   * @param {Object} updates 更新的字段
+   * @returns {Promise<Object>} {success: boolean, config: Object|null, error: string|null}
+   */
+  async updateConfigFromTemplate(index, updates) {
+    try {
+      // 1. 验证参数
+      if (!this.initialized) {
+        throw new Error('配置管理器未初始化');
+      }
+
+      if (index < 0 || index >= this.configs.length) {
+        throw new Error(`无效的配置索引: ${index}`);
+      }
+
+      if (!updates || typeof updates !== 'object') {
+        throw new Error('更新数据无效');
+      }
+
+      const config = this.configs[index];
+      
+      // 2. 检查是否是模板复制的配置
+      if (!config.isFromTemplate) {
+        return {
+          success: false,
+          config: null,
+          error: '该配置不是从模板复制的，请使用 updateConfig 方法'
+        };
+      }
+
+      // 3. 备份原始配置（用于回滚）
+      const originalConfig = deepCloneConfig(config);
+
+      // 4. 更新配置
+      this.configs[index] = {
+        ...this.configs[index],
+        ...updates,
+        lastCalculated: new Date().toISOString(), // 更新时间戳
+        // 保持模板来源标记
+        templateSource: config.templateSource,
+        isFromTemplate: true
+      };
+
+      // 5. 保存到存储
+      const saveSuccess = this.saveToStorage();
+      if (!saveSuccess) {
+        // 保存失败，回滚
+        this.configs[index] = originalConfig;
+        throw new Error('保存配置到存储失败');
+      }
+
+      // 6. 验证保存结果
+      const verifyConfigs = this.getAllConfigs();
+      const verifyConfig = verifyConfigs[index];
+
+      if (!verifyConfig) {
+        // 验证失败，回滚
+        this.configs[index] = originalConfig;
+        throw new Error('保存后验证失败：配置丢失');
+      }
+
+      // 7. 通知监听器
+      const hasBasicConfigChange = ['birthDate', 'birthTime', 'birthLocation'].some(key => key in updates);
+      this.notifyListeners(hasBasicConfigChange, hasBasicConfigChange);
+
+      console.log('更新模板配置成功:', {
+        index,
+        nickname: verifyConfig.nickname,
+        updatedFields: Object.keys(updates)
+      });
+
+      return {
+        success: true,
+        config: verifyConfig,
+        error: null
+      };
+
+    } catch (error) {
+      console.error('更新模板配置失败:', error);
+      return {
+        success: false,
+        config: null,
+        error: `更新模板配置失败: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * 批量从模板复制配置（带并发保护和错误提示）
+   * @param {number} count 要复制的数量
+   * @param {Object} overrides 需要覆盖的字段
+   * @returns {Promise<Object>} {success: boolean, configs: Array, errors: Array}
+   */
+  async batchDuplicateFromTemplate(count, overrides = {}) {
+    const newConfigs = [];
+    const errors = [];
+
+    try {
+      // 验证参数
+      if (!this.initialized) {
+        throw new Error('配置管理器未初始化');
+      }
+
+      if (typeof count !== 'number' || count <= 0) {
+        throw new Error('复制数量必须大于0');
+      }
+
+      if (count > 100) {
+        throw new Error('一次最多复制100个配置');
+      }
+
+      // 批量生成配置
+      for (let i = 0; i < count; i++) {
+        try {
+          // 为每个配置生成唯一的昵称
+          const configOverrides = {
+            ...overrides,
+            nickname: this.generateUniqueNickname()
+          };
+
+          const result = await this.duplicateConfigFromTemplate(configOverrides);
+
+          if (result.success && result.config) {
+            newConfigs.push(result.config);
+          } else {
+            errors.push(`第 ${i + 1} 个配置生成失败: ${result.error}`);
+          }
+        } catch (error) {
+          errors.push(`第 ${i + 1} 个配置生成失败: ${error.message}`);
+        }
+      }
+
+      if (newConfigs.length === 0) {
+        return {
+          success: false,
+          configs: [],
+          errors: errors.length > 0 ? errors : ['所有配置生成失败']
+        };
+      }
+
+      // 备份当前配置列表（用于回滚）
+      const originalConfigs = this.configs.slice();
+      const originalActiveIndex = this.activeConfigIndex;
+
+      try {
+        // 批量添加到配置列表
+        this.configs.push(...newConfigs);
+
+        // 设置最后一个新配置为活跃配置
+        this.activeConfigIndex = this.configs.length - 1;
+
+        // 保存到存储
+        const saveSuccess = this.saveToStorage();
+        if (!saveSuccess) {
+          throw new Error('保存配置到存储失败');
+        }
+
+        // 验证保存结果
+        const verifyConfigs = this.getAllConfigs();
+        if (verifyConfigs.length !== this.configs.length) {
+          throw new Error('保存后验证失败：配置数量不一致');
+        }
+
+        // 通知监听器
+        this.notifyListeners(true, true);
+
+        console.log(`批量从模板复制配置成功: ${newConfigs.length} 个配置`);
+
+        return {
+          success: true,
+          configs: newConfigs,
+          errors: errors.length > 0 ? errors : null
+        };
+
+      } catch (error) {
+        // 保存失败，回滚
+        this.configs = originalConfigs;
+        this.activeConfigIndex = originalActiveIndex;
+        throw error;
+      }
+
+    } catch (error) {
+      console.error('批量从模板复制配置失败:', error);
+      return {
+        success: false,
+        configs: newConfigs,
+        errors: [...errors, `批量复制失败: ${error.message}`]
+      };
+    }
+  }
+
+  /**
+   * 获取默认配置模板（只读，深拷贝）
+   * @returns {Object} 默认配置的深拷贝
+   */
+  getDefaultTemplate() {
+    try {
+      return deepCloneConfig(DEFAULT_CONFIG);
+    } catch (error) {
+      console.error('获取默认配置模板失败:', error);
+      // 降级方案：返回简化的默认配置
+      return {
+        nickname: '默认模板',
+        birthDate: '1991-04-30',
+        birthTime: '12:30',
+        gender: 'male',
+        zodiac: '金牛座',
+        zodiacAnimal: '羊',
+        mbti: 'INFP',
+        isSystemDefault: true
+      };
     }
   }
 }

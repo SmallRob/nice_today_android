@@ -7,7 +7,8 @@
 const LITE_DEFAULT_CONFIG = Object.freeze({
   nickname: '轻量版用户',
   birthDate: '1990-01-01',
-  birthTime: '午',
+  birthTime: '12:30',  // 统一使用时间格式，便于后续处理
+  birthTimeShichen: '午',  // 保存时辰信息
   gender: 'secret',
   isused: false,
   isSystemDefault: true
@@ -21,21 +22,43 @@ const LITE_STORAGE_KEYS = {
 
 /**
  * 深拷贝配置对象，确保用户配置与默认配置完全隔离
- * 简化版 - 只处理lite版本需要的字段
+ * 简化版 - 只处理lite版本需要的字段，增加容错处理
  */
 function deepCloneConfig(sourceConfig) {
   if (!sourceConfig || typeof sourceConfig !== 'object') {
-    return sourceConfig;
+    return { ...LITE_DEFAULT_CONFIG };
+  }
+
+  // 确保出生时辰格式统一：支持 "午" 或 "12:30" 格式
+  let birthTime = sourceConfig.birthTime || '12:30';
+  // 如果是时辰格式（单字），转换为对应的时间
+  if (typeof birthTime === 'string' && birthTime.length === 1) {
+    const shichenTimeMap = {
+      '子': '23:00',
+      '丑': '01:00',
+      '寅': '03:00',
+      '卯': '05:00',
+      '辰': '07:00',
+      '巳': '09:00',
+      '午': '12:30',  // 午时取中间时间
+      '未': '13:00',
+      '申': '15:00',
+      '酉': '17:00',
+      '戌': '19:00',
+      '亥': '21:00'
+    };
+    birthTime = shichenTimeMap[birthTime] || '12:30';
   }
 
   // 创建安全的配置对象副本 - 简化版
   const safeConfig = {
-    nickname: sourceConfig.nickname || '',
-    birthDate: sourceConfig.birthDate || '',
-    birthTime: sourceConfig.birthTime || '12:00',
-    gender: sourceConfig.gender || 'secret',
-    isused: sourceConfig.isused ?? false,
-    isSystemDefault: sourceConfig.isSystemDefault ?? false
+    nickname: (sourceConfig.nickname || '').toString(),
+    birthDate: (sourceConfig.birthDate || '').toString(),
+    birthTime: birthTime,
+    birthTimeShichen: (sourceConfig.birthTimeShichen || '午').toString(),  // 保存时辰信息
+    gender: (sourceConfig.gender || 'secret').toString(),
+    isused: Boolean(sourceConfig.isused),
+    isSystemDefault: Boolean(sourceConfig.isSystemDefault)
   };
 
   return safeConfig;
