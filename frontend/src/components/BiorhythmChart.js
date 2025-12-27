@@ -46,11 +46,21 @@ const BiorhythmChart = ({ data, isMobile }) => {
     } catch (error) {
       console.error('Chart.js 组件注册失败:', error);
     }
+  }, []);
 
-    // 组件卸载时清理Chart实例
+  // 组件卸载时清理Chart实例 - 使用更可靠的清理机制
+  useEffect(() => {
     return () => {
       if (chartRef.current) {
         try {
+          // 先停止动画和事件监听
+          if (chartRef.current.canvas) {
+            chartRef.current.canvas.style.visibility = 'hidden';
+            // 移除所有事件监听器
+            chartRef.current.canvas.removeEventListener('click', () => {});
+            chartRef.current.canvas.removeEventListener('mousemove', () => {});
+          }
+          // 销毁图表实例
           chartRef.current.destroy();
           chartRef.current = null;
         } catch (error) {
@@ -257,7 +267,7 @@ const BiorhythmChart = ({ data, isMobile }) => {
 
   // 如果没有数据，显示空状态
   if (!chartData) {
-    return <div className="text-center py-4 text-gray-900 dark:text-white">没有可用的图表数据</div>;
+    return <div className="text-center py-4 text-gray-900 dark:text-gray-100">没有可用的图表数据</div>;
   }
 
   return (

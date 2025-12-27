@@ -100,11 +100,21 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
     } catch (error) {
       console.error('Chart.js 组件注册失败:', error);
     }
+  }, []);
 
-    // 组件卸载时清理Chart实例
+  // 组件卸载时清理Chart实例 - 使用更可靠的清理机制
+  React.useEffect(() => {
     return () => {
       if (chartRef.current) {
         try {
+          // 先停止动画和事件监听
+          if (chartRef.current.canvas) {
+            chartRef.current.canvas.style.visibility = 'hidden';
+            // 移除所有事件监听器
+            chartRef.current.canvas.removeEventListener('click', () => {});
+            chartRef.current.canvas.removeEventListener('mousemove', () => {});
+          }
+          // 销毁图表实例
           chartRef.current.destroy();
           chartRef.current = null;
         } catch (error) {

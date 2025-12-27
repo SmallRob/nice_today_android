@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { userConfigManager } from '../utils/userConfigManager';
 import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
@@ -324,19 +324,19 @@ const HoroscopeTab = () => {
         {renderTrendChart()}
 
         <div className="horoscope-card">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
             <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
             今日运势解读
           </h3>
-          <p className="text-sm text-gray-700 dark:text-white leading-relaxed">
+          <p className="text-sm text-gray-700 dark:text-gray-100 leading-relaxed">
             {overallDescription}
           </p>
         </div>
 
         <div className="horoscope-card">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
             <svg className="w-4 h-4 text-pink-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
             </svg>
@@ -357,13 +357,13 @@ const HoroscopeTab = () => {
             <h4 className="text-green-700 dark:text-green-400 font-bold mb-2 flex items-center text-sm">
               <span className="mr-1">✅</span> 宜
             </h4>
-            <p className="text-gray-700 dark:text-white text-sm leading-relaxed">{String(recommendations.positiveAdvice || '保持积极心态')}</p>
+            <p className="text-gray-700 dark:text-gray-100 text-sm leading-relaxed">{String(recommendations.positiveAdvice || '保持积极心态')}</p>
           </div>
           <div className="horoscope-card border-l-4 border-l-red-500">
             <h4 className="text-red-700 dark:text-red-400 font-bold mb-2 flex items-center text-sm">
               <span className="mr-1">❌</span> 忌
             </h4>
-            <p className="text-gray-700 dark:text-white text-sm leading-relaxed">{String(recommendations.avoidAdvice || '避免消极思维')}</p>
+            <p className="text-gray-700 dark:text-gray-100 text-sm leading-relaxed">{String(recommendations.avoidAdvice || '避免消极思维')}</p>
           </div>
         </div>
 
@@ -371,7 +371,7 @@ const HoroscopeTab = () => {
 
         {recommendations.soulQuestion && (
           <div className="horoscope-card">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
               <svg className="w-4 h-4 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
               </svg>
@@ -404,8 +404,8 @@ const HoroscopeTab = () => {
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-white border border-gray-200 dark:border-gray-600">相容: {Array.isArray(recommendations.compatibleSigns) ? recommendations.compatibleSigns.join('、') : recommendations.compatibleSigns}</span>
-            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-white border border-gray-200 dark:border-gray-600">月亮: {String(recommendations.todayMoonSign || '未知')}</span>
+            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-gray-100 border border-gray-200 dark:border-gray-600">相容: {Array.isArray(recommendations.compatibleSigns) ? recommendations.compatibleSigns.join('、') : recommendations.compatibleSigns}</span>
+            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-gray-100 border border-gray-200 dark:border-gray-600">月亮: {String(recommendations.todayMoonSign || '未知')}</span>
           </div>
         </div>
       </div>
@@ -435,12 +435,12 @@ const HoroscopeTab = () => {
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowZodiacModal(false)}>
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               🌟 设置我的星座
             </h3>
             <button
               onClick={() => setShowZodiacModal(false)}
-              className="text-gray-500 hover:text-gray-700 dark:text-white dark:hover:text-gray-200"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-100 dark:hover:text-gray-200"
             >
               ✕
             </button>
@@ -463,7 +463,7 @@ const HoroscopeTab = () => {
             }) : null}
           </div>
 
-          <div className="text-center text-xs text-gray-500 dark:text-white">
+          <div className="text-center text-xs text-gray-500 dark:text-gray-100">
             设置后默认显示您配置的星座运势
           </div>
         </div>
@@ -574,7 +574,7 @@ const HoroscopeTab = () => {
 
             {/* 底部信息 */}
             {!loading && !error && horoscopeGuidance && (
-              <div className="horoscope-card text-center text-gray-500 dark:text-white text-xs p-3">
+              <div className="horoscope-card text-center text-gray-500 dark:text-gray-100 text-xs p-3">
                 <p>数据更新时间：{new Date().toLocaleString()}</p>
                 <p className="mt-1">星座运势仅供参考，请理性看待</p>
               </div>

@@ -394,7 +394,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
           </svg>
@@ -429,12 +429,12 @@ const ZodiacEnergyTab = memo(() => {
           <div className="text-center md:text-left">
             <div className="flex items-center mb-2">
               <span className="text-xl mr-2">{elementData?.icon}</span>
-              <h3 className="text-lg font-bold text-gray-800 dark:text-white">能量匹配度</h3>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">能量匹配度</h3>
             </div>
             <p className={`text-lg font-bold ${colorClass} mb-2`}>
               {关系} - {匹配度}%
             </p>
-            <p className="text-gray-600 dark:text-white text-xs mb-3">{描述}</p>
+            <p className="text-gray-600 dark:text-gray-100 text-xs mb-3">{描述}</p>
             <div className="flex flex-wrap gap-1">
               <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                 用户五行: <span className="font-semibold">{用户五行}</span>
@@ -467,7 +467,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
           <span className="mr-2">{elementData?.icon}</span>
           {elementData.name}元素能量提升
         </h3>
@@ -478,14 +478,14 @@ const ZodiacEnergyTab = memo(() => {
               <h4 className="text-xs md:text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1.5 md:mb-2 flex items-center">
                 <span className="mr-1.5 md:mr-2">⚡</span> {elementData.quickBoost.method}
               </h4>
-              <p className="text-[10px] md:text-xs text-gray-700 dark:text-white">{elementData.quickBoost.description}</p>
+              <p className="text-[10px] md:text-xs text-gray-700 dark:text-gray-100">{elementData.quickBoost.description}</p>
             </div>
 
             <div className={`bg-gradient-to-r ${getGradientClass({ from: 'purple-50', to: 'pink-50' })} rounded p-2.5 md:p-3`}>
               <h4 className="text-xs md:text-sm font-semibold text-purple-800 dark:text-purple-300 mb-1.5 md:mb-2 flex items-center">
                 <span className="mr-1.5 md:mr-2">🌟</span> {elementData.quickBoost.secondMethod}
               </h4>
-              <p className="text-[10px] md:text-xs text-gray-700 dark:text-white">{elementData.quickBoost.secondDescription}</p>
+              <p className="text-[10px] md:text-xs text-gray-700 dark:text-gray-100">{elementData.quickBoost.secondDescription}</p>
             </div>
           </div>
 
@@ -494,7 +494,7 @@ const ZodiacEnergyTab = memo(() => {
             <h4 className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center">
               <span className="mr-2">🏃</span> {elementData.name}行运动
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white">{elementData.exercise}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100">{elementData.exercise}</p>
           </div>
 
           {/* 呼吸调息法 */}
@@ -502,7 +502,7 @@ const ZodiacEnergyTab = memo(() => {
             <h4 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center">
               <span className="mr-2">🫁</span> {elementData.timeSlot} 呼吸调息
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white">{elementData.breathingMethod}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100">{elementData.breathingMethod}</p>
           </div>
         </div>
       </div>
@@ -517,7 +517,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
           </svg>
@@ -530,7 +530,7 @@ const ZodiacEnergyTab = memo(() => {
             </h4>
             <div className="flex flex-wrap gap-1">
               {幸运颜色.map((color, index) => (
-                <span key={index} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-xs text-gray-700 dark:text-white border border-blue-200 dark:border-blue-700">
+                <span key={index} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-xs text-gray-700 dark:text-gray-100 border border-blue-200 dark:border-blue-700">
                   {color}
                 </span>
               ))}
@@ -541,28 +541,28 @@ const ZodiacEnergyTab = memo(() => {
             <h4 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2 flex items-center">
               <span className="mr-1">💎</span> 适合饰品
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white">{适合饰品.join('、')}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100">{适合饰品.join('、')}</p>
           </div>
 
           <div>
             <h4 className="text-sm font-semibold text-green-700 dark:text-green-300 mb-2 flex items-center">
               <span className="mr-1">💼</span> 适合行业
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white">{适合行业.join('、')}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100">{适合行业.join('、')}</p>
           </div>
 
           <div>
             <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-300 mb-2 flex items-center">
               <span className="mr-1">🧭</span> 幸运方位
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white">{幸运方位.join('、')}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100">{幸运方位.join('、')}</p>
           </div>
 
           <div>
             <h4 className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-2 flex items-center">
               <span className="mr-1">⚡</span> 能量提升方法
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 p-2 rounded">{能量提升}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100 bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 p-2 rounded">{能量提升}</p>
           </div>
         </div>
       </div>
@@ -577,7 +577,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
           </svg>
@@ -600,7 +600,7 @@ const ZodiacEnergyTab = memo(() => {
                 {宜.map((food, index) => (
                   <div key={index} className="flex items-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2.5 rounded-lg border border-green-100 dark:border-green-800/50 transition-all hover:translate-x-1">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2.5 flex-shrink-0"></span>
-                    <span className="text-xs text-gray-700 dark:text-white font-medium">{food}</span>
+                    <span className="text-xs text-gray-700 dark:text-gray-100 font-medium">{food}</span>
                   </div>
                 ))}
               </div>
@@ -623,7 +623,7 @@ const ZodiacEnergyTab = memo(() => {
                 {忌.map((food, index) => (
                   <div key={index} className="flex items-center bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-2.5 rounded-lg border border-red-100 dark:border-red-800/50 transition-all hover:translate-x-1">
                     <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2.5 flex-shrink-0"></span>
-                    <span className="text-xs text-gray-700 dark:text-white font-medium">{food}</span>
+                    <span className="text-xs text-gray-700 dark:text-gray-100 font-medium">{food}</span>
                   </div>
                 ))}
               </div>
@@ -651,7 +651,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
           </svg>
@@ -664,7 +664,7 @@ const ZodiacEnergyTab = memo(() => {
             </h4>
             <div className="flex flex-wrap gap-1">
               {家居布置.map((item, index) => (
-                <span key={index} className="px-2 py-1 bg-purple-100 dark:bg-purple-900 rounded-full text-xs text-gray-700 dark:text-white border border-purple-200 dark:border-purple-700">
+                <span key={index} className="px-2 py-1 bg-purple-100 dark:bg-purple-900 rounded-full text-xs text-gray-700 dark:text-gray-100 border border-purple-200 dark:border-purple-700">
                   {item}
                 </span>
               ))}
@@ -675,14 +675,14 @@ const ZodiacEnergyTab = memo(() => {
             <h4 className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-2 flex items-center">
               <span className="mr-1">📍</span> 摆放位置
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white">{摆放位置.join('、')}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100">{摆放位置.join('、')}</p>
           </div>
 
           <div>
             <h4 className="text-sm font-semibold text-pink-700 dark:text-pink-300 mb-2 flex items-center">
               <span className="mr-1">💡</span> 风水建议
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-2 rounded">{建议}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100 bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-2 rounded">{建议}</p>
           </div>
         </div>
       </div>
@@ -697,7 +697,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
           </svg>
@@ -712,7 +712,7 @@ const ZodiacEnergyTab = memo(() => {
               {适合交往的五行.map((element, index) => {
                 const elementData = wuxingElements.find(el => el.name === element);
                 return (
-                  <span key={index} className="px-2 py-1 bg-amber-100 dark:bg-amber-900 rounded-full text-xs text-gray-700 dark:text-white border border-amber-200 dark:border-amber-700 flex items-center">
+                  <span key={index} className="px-2 py-1 bg-amber-100 dark:bg-amber-900 rounded-full text-xs text-gray-700 dark:text-gray-100 border border-amber-200 dark:border-amber-700 flex items-center">
                     <span className="mr-1">{elementData?.icon}</span>
                     {element}
                   </span>
@@ -727,7 +727,7 @@ const ZodiacEnergyTab = memo(() => {
             </h4>
             <div className="flex flex-wrap gap-1">
               {适合交往的生肖.map((zodiac, index) => (
-                <span key={index} className="px-2 py-1 bg-orange-100 dark:bg-orange-900 rounded-full text-xs text-gray-700 dark:text-white border border-orange-200 dark:border-orange-700">
+                <span key={index} className="px-2 py-1 bg-orange-100 dark:bg-orange-900 rounded-full text-xs text-gray-700 dark:text-gray-100 border border-orange-200 dark:border-orange-700">
                   {zodiac}
                 </span>
               ))}
@@ -738,7 +738,7 @@ const ZodiacEnergyTab = memo(() => {
             <h4 className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 mb-2 flex items-center">
               <span className="mr-1">💡</span> 交往建议
             </h4>
-            <p className="text-xs text-gray-700 dark:text-white bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-2 rounded">{建议}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-100 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-2 rounded">{建议}</p>
           </div>
         </div>
       </div>
@@ -766,14 +766,14 @@ const ZodiacEnergyTab = memo(() => {
         {/* 背景装饰 */}
         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-100 dark:bg-amber-900/20 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
 
-        <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-5 flex items-center justify-between">
+        <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 mb-5 flex items-center justify-between">
           <div className="flex items-center">
             <span className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white mr-3 shadow-lg shadow-amber-500/20 text-sm">
               ☯️
             </span>
             <span>
               {isCurrentMonth ? '本月' : selectedMonthName}八字运势
-              <span className="text-sm font-normal text-gray-500 dark:text-white ml-2">
+              <span className="text-sm font-normal text-gray-500 dark:text-gray-100 ml-2">
                 ({selectedDate.getFullYear()}年)
               </span>
             </span>
@@ -808,8 +808,8 @@ const ZodiacEnergyTab = memo(() => {
         <div className="grid grid-cols-4 gap-2 mb-6">
           {['年柱', '月柱', '日柱', '时柱'].map((title, i) => (
             <div key={i} className="flex flex-col items-center">
-              <span className="text-[10px] text-gray-500 dark:text-white mb-1">{title}</span>
-              <div className={`w-full aspect-[4/5] flex flex-col items-center justify-center rounded-xl border-2 transition-all ${i === 2 ? 'bg-amber-500 border-amber-400 text-white shadow-lg scale-105' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white'
+              <span className="text-[10px] text-gray-500 dark:text-gray-100 mb-1">{title}</span>
+              <div className={`w-full aspect-[4/5] flex flex-col items-center justify-center rounded-xl border-2 transition-all ${i === 2 ? 'bg-amber-500 border-amber-400 text-white shadow-lg scale-105' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-100'
                 }`}>
                 <span className="text-xl md:text-2xl font-black tracking-widest flex flex-col items-center leading-tight">
                   <span className="drop-shadow-sm">{baziInfo.pillars[i].charAt(0)}</span>
@@ -831,11 +831,11 @@ const ZodiacEnergyTab = memo(() => {
                 <span className="ml-2 text-xs text-amber-700 dark:text-amber-400 font-medium">流月核心</span>
               </div>
               <div className="flex items-center bg-white/80 dark:bg-gray-800/80 px-2 py-1 rounded-lg border border-amber-100 dark:border-amber-700 shadow-sm">
-                <span className="text-[10px] text-gray-500 dark:text-white mr-2 uppercase tracking-tighter">Score</span>
+                <span className="text-[10px] text-gray-500 dark:text-gray-100 mr-2 uppercase tracking-tighter">Score</span>
                 <span className="text-lg font-black text-amber-600 dark:text-amber-400">{monthlyFortune.score}</span>
               </div>
             </div>
-            <p className="text-sm text-gray-700 dark:text-white leading-relaxed font-medium">
+            <p className="text-sm text-gray-700 dark:text-gray-100 leading-relaxed font-medium">
               {monthlyFortune.summary}
             </p>
           </div>
@@ -845,9 +845,9 @@ const ZodiacEnergyTab = memo(() => {
               <div className="absolute top-0 right-0 p-1 opacity-10">
                 <span className="text-xl md:text-2xl">👤</span>
               </div>
-              <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-white mb-1 font-bold">命主元神</div>
+              <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-100 mb-1 font-bold">命主元神</div>
               <div className="flex items-center">
-                <span className="text-base md:text-lg font-black text-gray-800 dark:text-white mr-1.5 md:mr-2">{monthlyFortune.dayMaster}</span>
+                <span className="text-base md:text-lg font-black text-gray-800 dark:text-gray-100 mr-1.5 md:mr-2">{monthlyFortune.dayMaster}</span>
                 <span className="text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                   {monthlyFortune.masterElement}命人
                 </span>
@@ -857,8 +857,8 @@ const ZodiacEnergyTab = memo(() => {
               <div className="absolute top-0 right-0 p-1 opacity-10">
                 <span className="text-xl md:text-2xl">📅</span>
               </div>
-              <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-white mb-1 font-bold">月份干支</div>
-              <div className="text-[9px] md:text-[10px] font-black text-gray-800 dark:text-white mt-1 md:mt-1.5 flex items-center">
+              <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-100 mb-1 font-bold">月份干支</div>
+              <div className="text-[9px] md:text-[10px] font-black text-gray-800 dark:text-gray-100 mt-1 md:mt-1.5 flex items-center">
                 <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-1.5 md:px-2 py-0.5 rounded">
                   {monthlyFortune.monthGanzhi || '未知'}
                 </span>
@@ -1051,7 +1051,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
           </svg>
@@ -1080,7 +1080,7 @@ const ZodiacEnergyTab = memo(() => {
             </div>
           </div>
         </div>
-        <div className="mt-3 text-[10px] text-gray-400 dark:text-white text-center italic">
+        <div className="mt-3 text-[10px] text-gray-400 dark:text-gray-100 text-center italic">
           注：数据基于个人生肖属性与当日五行气场精密计算得出
         </div>
       </div>
@@ -1091,7 +1091,7 @@ const ZodiacEnergyTab = memo(() => {
   const renderZodiacSelector = () => {
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4 flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
           </svg>
@@ -1112,7 +1112,7 @@ const ZodiacEnergyTab = memo(() => {
                         {userInfo.zodiacAnimal ? (
                           <>我的生肖：<span className="text-lg font-black text-blue-600 dark:text-blue-400">{userInfo.zodiacAnimal}</span></>
                         ) : (
-                          <span className="text-gray-500 dark:text-white">尚未配置个人生肖</span>
+                          <span className="text-gray-500 dark:text-gray-100">尚未配置个人生肖</span>
                         )}
                       </p>
                       {tempZodiac && tempZodiac !== userInfo.zodiacAnimal && (
@@ -1135,7 +1135,7 @@ const ZodiacEnergyTab = memo(() => {
             )}
 
             {/* 提示文本 */}
-            <div className="mb-3 text-xs text-gray-600 dark:text-white text-center bg-gray-50 dark:bg-gray-800/80 p-2 rounded-lg">
+            <div className="mb-3 text-xs text-gray-600 dark:text-gray-100 text-center bg-gray-50 dark:bg-gray-800/80 p-2 rounded-lg">
               ✨ 点击任意生肖图标查看能量指引，临时查看不会保存配置
             </div>
 
@@ -1168,12 +1168,12 @@ const ZodiacEnergyTab = memo(() => {
             {/* 日期选择器 */}
             <div className="mt-4">
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-3">
                   <span className="flex items-center">
                     <span className="mr-2">📅</span>
                     选择日期
                   </span>
-                  <span className="text-xs text-gray-500 dark:text-white font-normal block mt-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-100 font-normal block mt-1">
                     选择日期查看生肖运势和当月八字运势分析
                   </span>
                 </label>
@@ -1181,7 +1181,7 @@ const ZodiacEnergyTab = memo(() => {
                   type="date"
                   value={selectedDate.toISOString().split('T')[0]}
                   onChange={(e) => handleDateChange(new Date(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <button
                   onClick={() => handleDateChange(new Date())}
@@ -1280,7 +1280,7 @@ const ZodiacEnergyTab = memo(() => {
                 <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4">
                   <div className="text-center py-6">
                     <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                    <p className="text-gray-600 dark:text-white text-xs">正在加载能量指引...</p>
+                    <p className="text-gray-600 dark:text-gray-100 text-xs">正在加载能量指引...</p>
                   </div>
                 </div>
               )}
@@ -1317,7 +1317,7 @@ const ZodiacEnergyTab = memo(() => {
 
                   {/* 底部信息 */}
                   <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
-                    <div className="text-center text-gray-500 dark:text-white text-xs p-3">
+                    <div className="text-center text-gray-500 dark:text-gray-100 text-xs p-3">
                       <p>数据更新时间：{new Date().toLocaleString()}</p>
                       <p className="mt-1">五行讲究动态平衡，请根据自身状态灵活调整养生方法</p>
                     </div>
@@ -1330,8 +1330,8 @@ const ZodiacEnergyTab = memo(() => {
                 <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-sm p-3 md:p-4 border border-gray-200/50 dark:border-gray-700/50">
                   <div className="text-center py-6">
                     <div className="text-3xl mb-2">🐉</div>
-                    <h3 className="text-base font-semibold text-gray-700 dark:text-white mb-2">请选择您的生肖</h3>
-                    <p className="text-gray-500 dark:text-white text-xs max-w-xs mx-auto">
+                    <h3 className="text-base font-semibold text-gray-700 dark:text-gray-100 mb-2">请选择您的生肖</h3>
+                    <p className="text-gray-500 dark:text-gray-100 text-xs max-w-xs mx-auto">
                       选择生肖后，将为您提供个性化的每日能量指引
                     </p>
                   </div>

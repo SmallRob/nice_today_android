@@ -20,7 +20,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       '风象': 'text-blue-600 dark:text-blue-400',
       '水象': 'text-purple-600 dark:text-purple-400'
     };
-    return colors[element] || 'text-gray-600 dark:text-white';
+    return colors[element] || 'text-gray-600 dark:text-gray-100';
   };
 
   // 获取元素背景色
@@ -99,7 +99,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-800 mt-6">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
         <span className="mr-2 text-2xl">{zodiac.icon}</span>
         {zodiac.name} 综合特质
       </h3>
@@ -107,14 +107,14 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       {/* 基本属性 */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className={`p-3 rounded-lg ${getElementBgColor(zodiac.element)}`}>
-          <div className="text-xs text-gray-600 dark:text-white mb-1">元素属性</div>
+          <div className="text-xs text-gray-600 dark:text-gray-100 mb-1">元素属性</div>
           <div className={`font-semibold ${getElementColor(zodiac.element)}`}>
             {zodiac.element}
           </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-          <div className="text-xs text-gray-600 dark:text-white mb-1">日期范围</div>
-          <div className="font-semibold text-gray-900 dark:text-white">
+          <div className="text-xs text-gray-600 dark:text-gray-100 mb-1">日期范围</div>
+          <div className="font-semibold text-gray-900 dark:text-gray-100">
             {zodiac.dateRange}
           </div>
         </div>
@@ -122,7 +122,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
 
       {/* 详细描述 */}
       <div className="mb-4">
-        <div className="text-sm text-gray-700 dark:text-white leading-relaxed">
+        <div className="text-sm text-gray-700 dark:text-gray-100 leading-relaxed">
           {getZodiacDescription(zodiac.name)}
         </div>
       </div>
@@ -136,12 +136,12 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
           </h4>
           <div className="space-y-1">
             {zodiac.personalityTraits?.map((trait, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-white flex items-center">
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-100 flex items-center">
                 <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
                 {trait}
               </div>
             )) || zodiac.traits?.split('、').map((trait, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-white flex items-center">
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-100 flex items-center">
                 <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
                 {trait}
               </div>
@@ -156,7 +156,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
           </h4>
           <div className="space-y-1">
             {zodiac.strengths?.map((strength, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-white flex items-center">
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-100 flex items-center">
                 <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
                 {strength}
               </div>
@@ -171,7 +171,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
           </h4>
           <div className="space-y-1">
             {zodiac.weaknesses?.map((weakness, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-white flex items-center">
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-100 flex items-center">
                 <span className="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
                 {weakness}
               </div>
@@ -187,20 +187,20 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
         </h4>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
-            <div className="text-xs text-gray-600 dark:text-white">幸运色</div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-xs text-gray-600 dark:text-gray-100">幸运色</div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {zodiac.luckyColor?.map(c => getColorName(c)).join('、') || '红色'}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-600 dark:text-white">幸运数字</div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-xs text-gray-600 dark:text-gray-100">幸运数字</div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {zodiac.luckyNumber?.join('、') || '7'}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-600 dark:text-white">速配星座</div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="text-xs text-gray-600 dark:text-gray-100">速配星座</div>
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {zodiac.compatible?.slice(0, 2).join('、') || '待补充'}
             </div>
           </div>
@@ -209,12 +209,12 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
 
       {/* 名人例子 */}
       <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-        <h4 className="text-sm font-semibold text-gray-700 dark:text-white mb-2 flex items-center">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2 flex items-center">
           <span className="mr-1">⭐</span> 知名{currentHoroscope}
         </h4>
         <div className="flex flex-wrap gap-2">
           {getFamousExamples(zodiac.name).map((name, index) => (
-            <span key={index} className="px-2 py-1 bg-white dark:bg-gray-700 text-xs text-gray-700 dark:text-white rounded">
+            <span key={index} className="px-2 py-1 bg-white dark:bg-gray-700 text-xs text-gray-700 dark:text-gray-100 rounded">
               {name}
             </span>
           ))}

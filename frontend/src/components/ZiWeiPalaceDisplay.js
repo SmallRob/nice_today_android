@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 /**
  * 获取卡片颜色（基于强度）
@@ -196,7 +196,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       <div className="text-center py-10">
         <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/50 dark:to-pink-900/50 rounded-2xl p-8 border border-purple-200 dark:border-purple-700/50 shadow-lg dark:shadow-xl backdrop-blur-sm max-w-md mx-auto">
           <div className="text-6xl mb-4">🔮</div>
-          <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">请设置完整的出生信息</h3>
+          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">请设置完整的出生信息</h3>
           <p className="text-gray-600 dark:text-gray-300 mb-4">需要完善以下信息以查看紫微命宫</p>
           <div className="flex flex-wrap justify-center gap-2">
             <span className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">出生日期</span>
@@ -229,7 +229,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
           <div className="flex items-start gap-4">
             <span className="text-3xl flex-shrink-0">💡</span>
             <div className="flex-1">
-              <h4 className="text-base font-bold text-gray-800 dark:text-white mb-3">如何修复</h4>
+              <h4 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-3">如何修复</h4>
               <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
                 <p className="flex items-start">
                   <span className="text-blue-600 dark:text-blue-400 font-bold mr-2 flex-shrink-0">•</span>
@@ -341,7 +341,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       {/* 命宫总结 */}
       {summary && (
         <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/80 dark:via-purple-900/80 dark:to-pink-900/80 rounded-2xl p-5 border border-indigo-200 dark:border-indigo-600/70 shadow-md dark:shadow-xl backdrop-blur-sm">
-          <h4 className="text-base font-bold text-gray-800 dark:text-white mb-3 flex items-center">
+          <h4 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
             <span className="mr-2">📊</span>
             命盘总述
           </h4>
@@ -365,7 +365,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       {/* 重点宫位 */}
       <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-base font-semibold text-gray-700 dark:text-white">🎯 重点宫位</h4>
+          <h4 className="text-base font-semibold text-gray-700 dark:text-gray-100">🎯 重点宫位</h4>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={`text-sm px-3 py-1.5 rounded-lg transition-all hover:scale-105 active:scale-95 ${
@@ -417,7 +417,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       {/* 十二宫位展开/收起 */}
       <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-base font-semibold text-gray-700 dark:text-white">🔮 十二宫位详解</h4>
+          <h4 className="text-base font-semibold text-gray-700 dark:text-gray-100">🔮 十二宫位详解</h4>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className={`text-sm px-3 py-1.5 rounded-lg transition-all hover:scale-105 active:scale-95 ${
@@ -494,7 +494,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
       {/* 命理建议 */}
       {summary && summary.advice && summary.advice.length > 0 && (
         <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/80 dark:to-yellow-900/80 rounded-2xl p-5 border border-amber-200 dark:border-amber-600/70 shadow-md dark:shadow-xl backdrop-blur-sm">
-          <h4 className="text-base font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+          <h4 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
             <span className="mr-2">💡</span>
             命理建议
           </h4>
@@ -532,7 +532,7 @@ const ZiWeiPalaceDisplay = ({ ziweiData, birthDate, birthTime, longitude }) => {
         <div className="flex items-start gap-4">
           <span className="text-3xl flex-shrink-0">📜</span>
           <div className="flex-1">
-            <h4 className="text-base font-bold text-gray-800 dark:text-white mb-3">紫微命宫说明</h4>
+            <h4 className="text-base font-bold text-gray-800 dark:text-gray-100 mb-3">紫微命宫说明</h4>
             <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
               <p className="flex items-start">
                 <span className="text-blue-600 dark:text-blue-400 font-semibold mr-2 flex-shrink-0">•</span>
