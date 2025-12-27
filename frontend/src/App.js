@@ -76,20 +76,32 @@ function App() {
 
       // 延迟初始化，确保DOM已加载
       if (typeof window !== 'undefined') {
-        // 初始化全局错误捕获
-        initializeGlobalErrorHandlers();
+        try {
+          // 初始化全局错误捕获
+          initializeGlobalErrorHandlers();
+        } catch (error) {
+          console.warn('全局错误捕获初始化失败:', error);
+        }
         
-        // 使用安全的初始化函数
-        const isAndroidWebView = safeInitAndroidWebViewCompat();
-        console.log('Android WebView 兼容性初始化完成:', isAndroidWebView);
+        try {
+          // 使用安全的初始化函数
+          const isAndroidWebView = safeInitAndroidWebViewCompat();
+          console.log('Android WebView 兼容性初始化完成:', isAndroidWebView);
+        } catch (error) {
+          console.warn('Android WebView 兼容性初始化失败:', error);
+        }
       }
 
-      // 记录应用启动
-      errorLogger.log('Application initialization started', {
-        component: 'App',
-        action: 'initialize',
-        userAgent: navigator.userAgent
-      });
+      try {
+        // 记录应用启动
+        errorLogger.log('Application initialization started', {
+          component: 'App',
+          action: 'initialize',
+          userAgent: navigator.userAgent
+        });
+      } catch (error) {
+        console.warn('应用启动日志记录失败:', error);
+      }
 
       // 使用try-catch块导入和初始化每个模块
       let capacitorInit;

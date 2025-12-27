@@ -2,9 +2,20 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useCurrentConfig } from '../contexts/UserConfigContext';
 import '../styles/unified-numerology.css';
 
-// 导入原有功能组件
-const PersonalNumerology = React.lazy(() => import('../components/NumerologyPage'));
-const EnhancedNumerology = React.lazy(() => import('../components/EnhancedNumerologyPage'));
+// 安全延迟导入功能组件，避免循环依赖
+const PersonalNumerology = React.lazy(() => 
+  import('../components/NumerologySimple').catch(error => {
+    console.warn('NumerologySimple组件加载失败:', error);
+    return { default: () => <div>组件加载失败</div> };
+  })
+);
+
+const EnhancedNumerology = React.lazy(() => 
+  import('../components/EnhancedNumerologyPage').catch(error => {
+    console.warn('EnhancedNumerologyPage组件加载失败:', error);
+    return { default: () => <div>组件加载失败</div> };
+  })
+);
 
 const UnifiedNumerologyPage = () => {
   const currentConfig = useCurrentConfig();

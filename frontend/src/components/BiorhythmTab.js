@@ -4,7 +4,6 @@ import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
 import { initDataMigration } from '../utils/dataMigration';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
-import notificationService from '../utils/notificationService';
 import '../styles/dashboard-layout.css';
 
 // 每日正念活动数据 - 优化为正能量导向
@@ -829,11 +828,11 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     setCompletedTasks(loadCompletedTasks());
   }, [loadCompletedTasks]);
 
-  // 检测节律极值并发送通知，同时生成动态提示
+  // 检测节律极值并生成动态提示（通知功能已禁用）
   useEffect(() => {
     if (todayData) {
-      // 检查节律极值
-      notificationService.checkBiorhythmCritical(todayData);
+      // 通知功能已禁用，仅记录日志
+      console.log('节律极值检测（通知功能已禁用）');
 
       // 生成动态提示
       const now = Date.now();

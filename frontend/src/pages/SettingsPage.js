@@ -1,11 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import DarkModeToggle from '../components/DarkModeToggle';
-import PerformanceTestTool from '../components/PerformanceTestTool';
-import UserConfigManager from '../components/UserConfigManager';
+import React, { useState, useEffect, useCallback, useRef, Suspense, lazy } from 'react';
 import { getAppVersion } from '../utils/capacitor';
 import { Capacitor } from '@capacitor/core';
 import PageLayout, { Card, Button } from '../components/PageLayout';
-import notificationService from '../utils/notificationService';
 import updateCheckService from '../utils/updateCheckService';
 import { useNotification } from '../context/NotificationContext';
 import versionDetector from '../utils/versionDetector';
@@ -14,6 +10,11 @@ import { errorTrackingSettings } from '../utils/errorTrackingSettings';
 import { errorLogger } from '../utils/errorLogger';
 import versionData from '../version.json';
 import '../index.css';
+
+// 懒加载大型组件，避免启动时阻塞
+const DarkModeToggle = lazy(() => import('../components/DarkModeToggle'));
+const PerformanceTestTool = lazy(() => import('../components/PerformanceTestTool'));
+const UserConfigManager = lazy(() => import('../components/UserConfigManager'));
 
 // 配置错误边界组件
 const ConfigErrorBoundary = ({ children, fallback }) => {
@@ -58,6 +59,14 @@ const ConfigErrorBoundary = ({ children, fallback }) => {
   return children;
 };
 
+// 组件加载占位符
+const ComponentLoadingFallback = ({ componentName = '组件' }) => (
+  <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
+    <span className="text-sm text-gray-600 dark:text-gray-400">加载{componentName}中...</span>
+  </div>
+);
+
 function SettingsPage() {
   // 从URL查询参数获取当前标签
   const urlParams = new URLSearchParams(window.location.search);
@@ -83,7 +92,7 @@ function SettingsPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  // 通知设置状态
+  // 通知设置状态（已禁用）
   const [notificationSettings, setNotificationSettings] = useState({
     enabled: false,
     morningTime: '07:00',
@@ -146,72 +155,122 @@ function SettingsPage() {
   }, [showNotification]);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const loadAppInfo = async () => {
       try {
+        if (!isMounted) return;
+        
         setError(null);
 
-        // 异步加载应用信息，避免卡顿
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // 分阶段加载数据，避免同时处理多个异步操作
+        
+        // 阶段1：加载基础信息（不依赖外部服务）
+        try {
+          // 获取平台信息（同步操作）
+          const platform = Capacitor.getPlatform();
+          setPlatformInfo({
+            platform,
+            isNative: Capacitor.isNativePlatform(),
+            isAndroid: platform === 'android',
+            isIOS: platform === 'ios'
+          });
 
-        // 获取应用版本信息
-        const versionInfo = await getAppVersion();
-        setAppVersion(versionInfo);
+          // 从本地存储加载API设置
+          const savedApiUrl = localStorage.getItem('apiBaseUrl');
+          if (savedApiUrl) {
+            setApiBaseUrl(savedApiUrl);
+          }
 
-        // 获取平台信息
-        const platform = Capacitor.getPlatform();
-        setPlatformInfo({
-          platform,
-          isNative: Capacitor.isNativePlatform(),
-          isAndroid: platform === 'android',
-          isIOS: platform === 'ios'
-        });
+          const savedUseLocal = localStorage.getItem('useLocalCalculation');
+          if (savedUseLocal) {
+            setUseLocalCalculation(savedUseLocal === 'true');
+          }
 
-        // 从本地存储加载API设置
-        await new Promise(resolve => setTimeout(resolve, 50));
-        const savedApiUrl = localStorage.getItem('apiBaseUrl');
-        if (savedApiUrl) {
-          setApiBaseUrl(savedApiUrl);
+          // 从本地存储加载缓存超时设置
+          const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+          if (savedCacheTimeout) {
+            setCacheTimeout(parseInt(savedCacheTimeout));
+          }
+
+          // 加载数据同步设置
+          const savedDataSync = localStorage.getItem('dataSyncEnabled');
+          if (savedDataSync !== null) {
+            setDataSyncEnabled(savedDataSync === 'true');
+          }
+        } catch (localError) {
+          console.warn('加载本地设置失败:', localError);
+          // 本地存储失败不影响应用继续运行
         }
 
-        const savedUseLocal = localStorage.getItem('useLocalCalculation');
-        if (savedUseLocal) {
-          setUseLocalCalculation(savedUseLocal === 'true');
+        // 阶段2：异步加载应用版本信息
+        try {
+          const versionInfo = await getAppVersion();
+          if (isMounted) {
+            setAppVersion(versionInfo);
+          }
+        } catch (versionError) {
+          console.warn('获取应用版本失败:', versionError);
+          if (isMounted) {
+            setAppVersion({ version: 'unknown', build: 'unknown' });
+          }
         }
 
-        // 从本地存储加载缓存超时设置
-        const savedCacheTimeout = localStorage.getItem('cacheTimeout');
-        if (savedCacheTimeout) {
-          setCacheTimeout(parseInt(savedCacheTimeout));
+        // 阶段3：通知设置（已禁用）
+        if (isMounted) {
+          setNotificationSettings({
+            enabled: false,
+            morningTime: '07:00',
+            eveningTime: '21:00',
+            permissionGranted: false
+          });
         }
 
-        // 加载数据同步设置
-        const savedDataSync = localStorage.getItem('dataSyncEnabled');
-        if (savedDataSync !== null) {
-          setDataSyncEnabled(savedDataSync === 'true');
+        // 阶段4：加载更新检查设置
+        try {
+          const updateConfig = updateCheckService.getConfig();
+          const checkRecords = updateCheckService.getCheckRecords();
+          if (isMounted) {
+            setUpdateCheckSettings({
+              enabled: updateConfig.enabled,
+              checkFrequency: updateConfig.checkFrequency,
+              lastCheckTime: updateConfig.lastCheckTime,
+              checkRecords: checkRecords
+            });
+          }
+        } catch (updateError) {
+          console.warn('加载更新检查设置失败:', updateError);
+          if (isMounted) {
+            setUpdateCheckSettings({
+              enabled: true,
+              checkFrequency: 'startup',
+              lastCheckTime: null,
+              checkRecords: []
+            });
+          }
         }
 
-        // 加载通知设置
-        const notificationSettings = notificationService.getSettings();
-        setNotificationSettings(notificationSettings);
-
-        // 加载更新检查设置
-        const updateConfig = updateCheckService.getConfig();
-        const checkRecords = updateCheckService.getCheckRecords();
-        setUpdateCheckSettings({
-          enabled: updateConfig.enabled,
-          checkFrequency: updateConfig.checkFrequency,
-          lastCheckTime: updateConfig.lastCheckTime,
-          checkRecords: checkRecords
-        });
       } catch (error) {
         console.error('Error loading app info:', error);
-        setError('加载应用信息失败: ' + error.message);
+        if (isMounted) {
+          setError('加载应用信息失败: ' + error.message);
+        }
       } finally {
-        setIsLoaded(true);
+        if (isMounted) {
+          setIsLoaded(true);
+        }
       }
     };
 
-    loadAppInfo();
+    // 延迟加载，避免阻塞应用启动
+    const timer = setTimeout(() => {
+      loadAppInfo();
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, []);
 
   // 保存API基础URL设置
@@ -242,62 +301,23 @@ function SettingsPage() {
     localStorage.setItem('dataSyncEnabled', newValue.toString());
   };
 
-  // 处理通知设置变更
+  // 通知功能已禁用
   const handleNotificationChange = (field, value) => {
-    const newSettings = {
-      ...notificationSettings,
-      [field]: value
-    };
-
-    setNotificationSettings(newSettings);
-
-    // 更新通知服务设置
-    notificationService.updateSettings(newSettings);
+    // 通知功能已禁用，不做任何操作
+    console.log('通知功能已禁用，无法修改设置');
   };
 
-  // 请求通知权限 - 修复内存泄漏问题
-  const handleRequestPermission = useCallback(async () => {
-    try {
-      const granted = await notificationService.requestPermission();
-      setNotificationSettings(prev => ({
-        ...prev,
-        permissionGranted: granted
-      }));
-
-      if (granted) {
-        setSuccess('通知权限已授权！');
-        setTimeout(() => setSuccess(null), 3000);
-      } else {
-        setError('通知权限被拒绝，请在浏览器设置中手动开启。');
-        setTimeout(() => setError(null), 3000);
-      }
-    } catch (error) {
-      setError('请求通知权限失败: ' + error.message);
-      setTimeout(() => setError(null), 3000);
-    }
+  // 通知权限请求已禁用
+  const handleRequestPermission = useCallback(() => {
+    setError('通知功能已禁用，无法请求权限');
+    setTimeout(() => setError(null), 3000);
   }, []);
 
-  // 测试通知 - 修复内存泄漏和错误处理
+  // 测试通知已禁用
   const handleTestNotification = useCallback(() => {
-    if (!notificationSettings.permissionGranted) {
-      setError('请先授权通知权限');
-      setTimeout(() => setError(null), 3000);
-      return;
-    }
-
-    try {
-      notificationService.sendNotification(
-        '测试通知',
-        '这是一个测试通知，确认通知功能正常工作。'
-      );
-
-      setSuccess('测试通知已发送');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      setError('发送测试通知失败: ' + error.message);
-      setTimeout(() => setError(null), 3000);
-    }
-  }, [notificationSettings.permissionGranted]);
+    setError('通知功能已禁用，无法发送测试通知');
+    setTimeout(() => setError(null), 3000);
+  }, []);
 
   // 切换应用版本
   const handleVersionSwitch = (version) => {
@@ -660,7 +680,9 @@ function SettingsPage() {
                           <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
                         </div>
-                        <DarkModeToggle />
+                        <Suspense fallback={<ComponentLoadingFallback componentName="深色模式切换器" />}>
+                          <DarkModeToggle />
+                        </Suspense>
                       </div>
 
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
@@ -942,7 +964,9 @@ function SettingsPage() {
 
                       {/* 性能测试工具 */}
                       <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <PerformanceTestTool />
+                        <Suspense fallback={<ComponentLoadingFallback componentName="性能测试工具" />}>
+                          <PerformanceTestTool />
+                        </Suspense>
                       </div>
                     </div>
                   </Card>
@@ -1034,7 +1058,9 @@ function SettingsPage() {
                       </div>
                     </div>
                   }>
-                    <UserConfigManager />
+                    <Suspense fallback={<ComponentLoadingFallback componentName="用户配置管理器" />}>
+                      <UserConfigManager />
+                    </Suspense>
                   </ConfigErrorBoundary>
                 </div>
               )}

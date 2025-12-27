@@ -10,11 +10,30 @@ class AndroidNotificationService {
     this.morningTime = '07:00';
     this.eveningTime = '21:00';
     this.isNativeApp = false;
-    this.init();
+    this.isInitialized = false;
+    this.initializationPromise = null;
+    
+    // 延迟初始化，避免阻塞应用启动
+    this.deferredInit();
+  }
+  
+  // 延迟初始化，避免模块加载阻塞
+  deferredInit() {
+    // 使用微任务延迟初始化，确保模块加载完成
+    setTimeout(() => {
+      this.init().catch(error => {
+        console.warn('通知服务初始化失败，已降级处理:', error);
+        // 即使初始化失败，也要标记为已初始化，避免重复尝试
+        this.isInitialized = true;
+      });
+    }, 0);
   }
 
   // 初始化通知服务
   async init() {
+    // 避免重复初始化
+    if (this.isInitialized) return;
+    
     try {
       // 检查是否为Capacitor原生应用
       this.isNativeApp = this.checkIsNativeApp();
@@ -37,6 +56,7 @@ class AndroidNotificationService {
       this.loadSettings();
       
       console.log('通知服务初始化完成，模式:', this.isNativeApp ? 'Android原生' : 'Web浏览器');
+      this.isInitialized = true;
     } catch (error) {
       console.error('通知服务初始化失败:', error);
       // 确保即使初始化失败也不会影响应用其他功能
@@ -45,6 +65,7 @@ class AndroidNotificationService {
         this.isNativeApp = false;
         this.permissionGranted = false;
         this.notificationEnabled = false;
+        this.isInitialized = true; // 标记为已初始化，避免重复尝试
       } catch (fallbackError) {
         console.error('通知服务降级措施失败:', fallbackError);
       }

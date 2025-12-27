@@ -28,18 +28,7 @@ const TabNavigation = () => {
         // 根据当前路径触发相应页面的缓存更新逻辑
         const updatePageCache = async () => {
           if (!isMounted) return;
-          // 这里可以根据不同路径触发不同页面的缓存更新逻辑
-          // 例如：
-          // if (location.pathname === '/') {
-          //   // 触发首页缓存更新
-          // }
-          // if (location.pathname === '/maya') {
-          //   // 触发玛雅页面缓存更新
-          // }
-          // if (location.pathname === '/dress') {
-          //   // 触发穿衣指南页面缓存更新
-          // }
-        };
+        };  
         
         await updatePageCache();
       } catch (error) {

@@ -197,20 +197,21 @@ export const triggerHaptics = async (type = 'impact') => {
 
 // 获取应用版本信息
 export const getAppVersion = async () => {
-  if (!isNative) return { version: 'web', build: 'web' };
-
-  await initPlugins();
-  if (!App) return { version: 'web', build: 'web' };
-
   try {
+    if (!isNative) return { version: 'web', build: 'web' };
+
+    const pluginsInitialized = await initPlugins();
+    if (!pluginsInitialized || !App) return { version: 'web', build: 'web' };
+
     const info = await App.getInfo();
     return {
-      version: info.version,
-      build: info.build
+      version: info.version || 'unknown',
+      build: info.build || 'unknown'
     };
   } catch (error) {
     console.debug('Error getting app version:', error.message);
-    return { version: 'unknown', build: 'unknown' };
+    // 提供安全的默认值，避免应用启动失败
+    return { version: 'web', build: 'web' };
   }
 };
 
