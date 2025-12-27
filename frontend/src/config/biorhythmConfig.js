@@ -69,8 +69,30 @@ export const predictionTipConfig = {
   }
 };
 
-// 24小时人体器官节律数据现在存储在 public/data/organRhythmData.csv 文件中
-// 通过 dataService.js 中的 fetchOrganRhythmData 函数加载
+/**
+ * 24小时人体器官节律数据
+ * 
+ * 数据格式更新说明：
+ * 1. 数据文件从 CSV 格式迁移到 JSON 格式（2025-12-27）
+ * 2. JSON 格式提供更快的解析速度和更好的类型安全
+ * 3. 包含版本信息和更新时间，便于数据管理
+ * 4. 数据位置：public/data/organRhythmData.json
+ * 5. 保留 CSV 格式作为备选（向后兼容）
+ * 
+ * 加载方式：
+ * - 优先加载 JSON 格式（更快）
+ * - 如果 JSON 加载失败，降级到 CSV 格式
+ * - 实现内存缓存机制，避免重复加载
+ * - 提供5分钟缓存，减少网络请求
+ * 
+ * 通过 dataService.js 中的 fetchOrganRhythmData 函数加载
+ */
+export const ORGAN_RHYTHM_DATA_CONFIG = {
+  jsonPath: '/data/organRhythmData.json',
+  csvPath: '/data/organRhythmData.csv',
+  cacheDuration: 5 * 60 * 1000, // 5分钟
+  version: '1.0.0'
+};
 
 // 生物节律科学依据信息
 export const biorhythmScienceInfo = {

@@ -202,11 +202,20 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
     }
   }, [data, title]);
 
-  // 加载器官节律数据
+  // 加载器官节律数据 - 添加安全和初始化检查
   useEffect(() => {
     const loadOrganData = async () => {
       try {
         setOrganLoading(true);
+        
+        // 添加初始化检查，确保数据服务可用
+        if (typeof fetchOrganRhythmData !== 'function') {
+          console.warn('fetchOrganRhythmData 不可用，使用默认数据');
+          setOrganData([]);
+          setOrganLoading(false);
+          return;
+        }
+        
         // #region agent log
         fetch('http://127.0.0.1:7242/ingest/b3387138-a87a-4b03-a45b-f70781421b47',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'frontend/src/components/BiorhythmInfo.js:200',message:'Loading organ rhythm data',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'csv-fix2',hypothesisId:'H'})}).catch(()=>{});
         // #endregion
@@ -228,12 +237,18 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
         fetch('http://127.0.0.1:7242/ingest/b3387138-a87a-4b03-a45b-f70781421b47',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'frontend/src/components/BiorhythmInfo.js:212',message:'Organ rhythm data error',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'csv-fix2',hypothesisId:'H'})}).catch(()=>{});
         // #endregion
         setOrganError('无法加载器官节律数据');
+        setOrganData([]); // 确保即使出错也有空数组
       } finally {
         setOrganLoading(false);
       }
     };
     
-    loadOrganData();
+    // 延迟加载，避免初始化时序问题
+    const timeoutId = setTimeout(() => {
+      loadOrganData();
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   if (!data) {

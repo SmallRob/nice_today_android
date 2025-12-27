@@ -5,11 +5,23 @@ import { isAndroidWebView } from '../utils/androidWebViewCompat';
 import '../styles/animations.css';
 import niceDayImage from '../images/nice_day.png';
 
-// 直接导入组件，避免懒加载导致的初始化问题
-import BiorhythmTab from './BiorhythmTab';
-import ZodiacEnergyTab from './ZodiacEnergyTab';
-import HoroscopeTab from './ZodiacHoroscope';
-import MBTIPersonalityTab from './MBTIPersonalityTabHome';
+// 使用懒加载组件，避免直接导入导致的初始化时序问题
+const BiorhythmTab = React.lazy(() => import('./BiorhythmTab').catch(err => {
+  console.error('BiorhythmTab 加载失败:', err);
+  return Promise.resolve(() => <div>BiorhythmTab 加载失败</div>);
+}));
+const ZodiacEnergyTab = React.lazy(() => import('./ZodiacEnergyTab').catch(err => {
+  console.error('ZodiacEnergyTab 加载失败:', err);
+  return Promise.resolve(() => <div>ZodiacEnergyTab 加载失败</div>);
+}));
+const HoroscopeTab = React.lazy(() => import('./HoroscopeTab').catch(err => {
+  console.error('HoroscopeTab 加载失败:', err);
+  return Promise.resolve(() => <div>HoroscopeTab 加载失败</div>);
+}));
+const MBTIPersonalityTab = React.lazy(() => import('./MBTIPersonalityTabHome').catch(err => {
+  console.error('MBTIPersonalityTab 加载失败:', err);
+  return Promise.resolve(() => <div>MBTIPersonalityTab 加载失败</div>);
+}));
 
 // 错误边界组件
 const ErrorBoundaryFallback = ({ error, resetError }) => (
@@ -454,11 +466,18 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               </div>
             )}
 
-            {/* 标签内容 - 直接显示，不再包裹在额外的容器中 */}
+            {/* 标签内容 - 添加 Suspense 边界保护懒加载组件 */}
             {fallbackMode ? (
               <FallbackComponent />
             ) : (
-              <>
+              <React.Suspense fallback={
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">正在加载标签页...</p>
+                  </div>
+                </div>
+              }>
                 {activeTab === 'biorhythm' && loadedTabs.has('biorhythm') && (
                   <BiorhythmTab
                     serviceStatus={serviceStatus.biorhythm}
@@ -481,7 +500,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                     onError={(error) => handleError(error, 'MBTIPersonalityTab')}
                   />
                 )}
-              </>
+              </React.Suspense>
             )}
           </div>
         </div>

@@ -1,8 +1,17 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import { useTheme } from '../context/ThemeContext';
 import { ensureChartRegistered } from '../utils/chartConfig';
 
+/**
+ * BiorhythmChart 组件
+ * 
+ * 性能优化说明：
+ * 1. 优化 useMemo 依赖项，避免不必要的重新计算
+ * 2. 修复闭包问题，防止在 tooltip 回调中访问未初始化的变量
+ * 3. 将复杂计算拆分为独立的 memoized 值
+ * 4. 使用 useCallback 稳定回调函数引用
+ */
 const BiorhythmChart = ({ data, isMobile }) => {
   const { theme } = useTheme();
 
@@ -11,11 +20,16 @@ const BiorhythmChart = ({ data, isMobile }) => {
     ensureChartRegistered();
   }, []);
 
-  // 深色模式下的文字颜色
-  const textColor = theme === 'dark' ? '#f3f4f6' : '#1f2937';
-  const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+  // 深色模式下的文字颜色 - 独立的 memoized 值
+  const themeColors = useMemo(() => ({
+    textColor: theme === 'dark' ? '#f3f4f6' : '#1f2937',
+    gridColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+    todayLineColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)',
+    todayLabelBg: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)',
+    todayLabelColor: theme === 'dark' ? '#000' : '#fff'
+  }), [theme]);
 
-  // 优化的数据格式化函数 - 使用useMemo避免不必要的重新计算
+  // 数据格式化函数 - 优化依赖项，只在 data 变化时重新计算
   const formattedData = useMemo(() => {
     if (!data) return null;
 
@@ -37,21 +51,22 @@ const BiorhythmChart = ({ data, isMobile }) => {
     return null;
   }, [data]);
 
-  // 优化的日期处理 - 使用useMemo避免不必要的重新计算
-  const { todayIndex, chartData } = useMemo(() => {
-    // 如果没有数据，返回默认值
-    if (!formattedData) {
-      return { todayIndex: -1, chartData: null };
-    }
+  // 计算今天索引 - 独立的 memoized 值
+  const todayIndex = useMemo(() => {
+    if (!formattedData || !formattedData.dates) return -1;
 
     // 找到今天的索引 - 使用本地时间
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-    const todayIndex = formattedData.dates.findIndex(date => date === todayStr);
+    return formattedData.dates.findIndex(date => date === todayStr);
+  }, [formattedData]);
 
-    // 准备图表数据
-    const chartData = {
+  // 准备图表数据 - 独立的 memoized 值
+  const chartData = useMemo(() => {
+    if (!formattedData) return null;
+
+    return {
       labels: formattedData.dates.map(date => {
         // 将日期格式化为 MM-DD
         const dateObj = new Date(date);
@@ -84,11 +99,54 @@ const BiorhythmChart = ({ data, isMobile }) => {
         },
       ],
     };
-
-    return { todayIndex, chartData };
   }, [formattedData]);
 
-  // 优化的图表配置 - 使用useMemo避免不必要的重新计算
+  // 优化后的 tooltip 回调 - 使用 useCallback 避免闭包问题
+  const tooltipTitleCallback = useCallback((items) => {
+    if (!items.length) return '';
+    const index = items[0].dataIndex;
+    // 安全访问 formattedData，避免闭包捕获未初始化的值
+    if (formattedData && formattedData.dates && formattedData.dates[index]) {
+      return `日期: ${formattedData.dates[index]}`;
+    }
+    return '';
+  }, [formattedData]);
+
+  const tooltipLabelCallback = useCallback((context) => {
+    const label = context.dataset.label || '';
+    const value = context.parsed.y;
+    return `${label}: ${value}`;
+  }, []);
+
+  // 图表注解配置 - 独立的 memoized 值
+  const annotations = useMemo(() => {
+    if (todayIndex < 0) return {};
+
+    return {
+      todayLine: {
+        type: 'line',
+        xMin: todayIndex,
+        xMax: todayIndex,
+        borderColor: themeColors.todayLineColor,
+        borderWidth: 2,
+        borderDash: [6, 6], // 设置为虚线
+        label: {
+          display: true,
+          content: '今天',
+          position: 'start',
+          backgroundColor: themeColors.todayLabelBg,
+          color: themeColors.todayLabelColor,
+          font: {
+            weight: 'bold',
+            size: isMobile ? 10 : 12
+          },
+          padding: isMobile ? 4 : 6
+        }
+      }
+    };
+  }, [todayIndex, themeColors, isMobile]);
+
+  // 图表配置 - 优化依赖项，移除不稳定的依赖
   const options = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
@@ -99,51 +157,18 @@ const BiorhythmChart = ({ data, isMobile }) => {
           font: {
             size: isMobile ? 12 : 14,
           },
-          color: textColor, // 根据主题设置文字颜色
+          color: themeColors.textColor,
         },
       },
       tooltip: {
         callbacks: {
-          title: (items) => {
-            if (!items.length) return '';
-            const index = items[0].dataIndex;
-            // 确保data和dates存在
-            if (formattedData && formattedData.dates && formattedData.dates[index]) {
-              return `日期: ${formattedData.dates[index]}`;
-            }
-            return '';
-          },
-          label: (context) => {
-            const label = context.dataset.label || '';
-            const value = context.parsed.y;
-            return `${label}: ${value}`;
-          },
+          title: tooltipTitleCallback,
+          label: tooltipLabelCallback,
         },
       },
       // 添加注解配置
       annotation: {
-        annotations: todayIndex >= 0 ? {
-          todayLine: {
-            type: 'line',
-            xMin: todayIndex,
-            xMax: todayIndex,
-            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)',
-            borderWidth: 2,
-            borderDash: [6, 6], // 设置为虚线
-            label: {
-              display: true,
-              content: '今天',
-              position: 'start',
-              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)',
-              color: theme === 'dark' ? '#000' : '#fff',
-              font: {
-                weight: 'bold',
-                size: isMobile ? 10 : 12
-              },
-              padding: isMobile ? 4 : 6
-            }
-          }
-        } : {}
+        annotations
       }
     },
     scales: {
@@ -155,10 +180,10 @@ const BiorhythmChart = ({ data, isMobile }) => {
           font: {
             size: isMobile ? 10 : 12
           },
-          color: textColor, // 根据主题设置坐标轴刻度颜色
+          color: themeColors.textColor,
         },
         grid: {
-          color: gridColor, // 根据主题设置网格线颜色
+          color: themeColors.gridColor,
         },
       },
       x: {
@@ -166,14 +191,14 @@ const BiorhythmChart = ({ data, isMobile }) => {
           font: {
             size: isMobile ? 10 : 12
           },
-          color: textColor, // 根据主题设置坐标轴刻度颜色
+          color: themeColors.textColor,
         },
         grid: {
-          color: gridColor, // 根据主题设置网格线颜色
+          color: themeColors.gridColor,
         },
       },
     },
-  }), [isMobile, textColor, gridColor, todayIndex, formattedData, theme]);
+  }), [isMobile, themeColors, annotations, tooltipTitleCallback, tooltipLabelCallback]);
 
   // 如果没有数据，显示空状态
   if (!chartData) {
