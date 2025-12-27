@@ -387,4 +387,7 @@ class ChunkLoadErrorBoundary extends React.Component {
   }
 }
 
+export { ChunkLoadErrorBoundary };
+
+// Keep default export for backward compatibility
 export default ChunkLoadErrorBoundary;

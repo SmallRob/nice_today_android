@@ -966,6 +966,38 @@ const generateOverallDescription = (score, horoscopeName) => {
 };
 
 /**
+ * 根据出生日期获取星座
+ * @param {Date} birthDate - 出生日期
+ * @returns {string} - 星座名称
+ */
+export const getZodiacSign = (birthDate) => {
+  if (!birthDate) return '未知';
+  
+  // 确保输入是Date对象
+  const date = birthDate instanceof Date ? birthDate : new Date(birthDate);
+  
+  if (isNaN(date.getTime())) return '未知';
+  
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  
+  if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return '白羊座';
+  if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return '金牛座';
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 21)) return '双子座';
+  if ((month === 6 && day >= 22) || (month === 7 && day <= 22)) return '巨蟹座';
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return '狮子座';
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return '处女座';
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 23)) return '天秤座';
+  if ((month === 10 && day >= 24) || (month === 11 && day <= 22)) return '天蝎座';
+  if ((month === 11 && day >= 23) || (month === 12 && day <= 21)) return '射手座';
+  if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return '摩羯座';
+  if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return '水瓶座';
+  if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return '双鱼座';
+  
+  return '未知';
+};
+
+/**
  * 验证每日运势数据的唯一性
  */
 export const validateHoroscopeUniqueness = (horoscopeData1, horoscopeData2) => {
