@@ -5,11 +5,15 @@ import { UserConfigProvider } from './contexts/UserConfigContext';
 import { useThemeColor } from './hooks/useThemeColor';
 import EnhancedErrorBoundary from './components/EnhancedErrorBoundary';
 import ErrorDisplayPanel from './components/ErrorDisplayPanel';
-import { errorLogger } from './utils/errorLogger';
+import { errorLogger, initializeGlobalErrorHandlers } from './utils/errorLogger';
+import { safeInitAndroidWebViewCompat } from './utils/androidWebViewCompat';
 import './index.css';
 
-// 懒加载页面组件
-const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
+// 懒加载页面组件 - 添加错误处理
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage').catch(err => {
+  console.error('DashboardPage 加载失败:', err);
+  return import('./pages/ErrorPage');
+}));
 const MayaPage = React.lazy(() => import('./pages/MayaPage'));
 const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
 const LifeTrendPage = React.lazy(() => import('./pages/LifeTrendPage'));
@@ -67,15 +71,25 @@ function App() {
   // 简化的初始化函数
   const initializeApp = async () => {
     try {
+      // 延迟初始化，确保DOM已加载
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // 延迟初始化，确保DOM已加载
+      if (typeof window !== 'undefined') {
+        // 初始化全局错误捕获
+        initializeGlobalErrorHandlers();
+        
+        // 使用安全的初始化函数
+        const isAndroidWebView = safeInitAndroidWebViewCompat();
+        console.log('Android WebView 兼容性初始化完成:', isAndroidWebView);
+      }
+
       // 记录应用启动
       errorLogger.log('Application initialization started', {
         component: 'App',
         action: 'initialize',
         userAgent: navigator.userAgent
       });
-
-      // 延迟初始化，确保DOM已加载
-      await new Promise(resolve => setTimeout(resolve, 100));
 
       // 使用try-catch块导入和初始化每个模块
       let capacitorInit;

@@ -245,8 +245,16 @@ class ErrorLogger {
 // 创建单例实例
 export const errorLogger = new ErrorLogger();
 
-// 全局错误捕获
-if (typeof window !== 'undefined') {
+// 延迟初始化全局错误捕获，避免模块加载时的循环依赖
+let isGlobalErrorHandlersInitialized = false;
+
+export const initializeGlobalErrorHandlers = () => {
+  if (isGlobalErrorHandlersInitialized || typeof window === 'undefined') {
+    return;
+  }
+  
+  isGlobalErrorHandlersInitialized = true;
+  
   // 捕获未处理的 Promise 拒绝
   window.addEventListener('unhandledrejection', (event) => {
     errorLogger.log(event.reason, {
@@ -282,6 +290,6 @@ if (typeof window !== 'undefined') {
       });
     }
   }, true);
-}
+};
 
 export default ErrorLogger;

@@ -36,8 +36,13 @@ class PerformanceMonitor {
 
   // 获取内存使用情况
   getMemoryUsage() {
-    if (performance.memory) {
-      return performance.memory.usedJSHeapSize / 1024 / 1024; // MB
+    try {
+      // Android WebView 不支持 performance.memory，使用 try-catch 保护
+      if (performance && performance.memory && typeof performance.memory.usedJSHeapSize === 'number') {
+        return performance.memory.usedJSHeapSize / 1024 / 1024; // MB
+      }
+    } catch (error) {
+      console.warn('获取内存使用失败:', error);
     }
     return 0;
   }

@@ -1,34 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import annotationPlugin from 'chartjs-plugin-annotation';
 import { useTheme } from '../context/ThemeContext';
-
-// 注册 Chart.js 组件
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  annotationPlugin  // 注册注解插件
-);
-
-
+import { ensureChartRegistered } from '../utils/chartConfig';
 
 const BiorhythmChart = ({ data, isMobile }) => {
   const { theme } = useTheme();
+
+  // 确保 Chart.js 组件已注册
+  useEffect(() => {
+    ensureChartRegistered();
+  }, []);
 
   // 深色模式下的文字颜色
   const textColor = theme === 'dark' ? '#f3f4f6' : '#1f2937';

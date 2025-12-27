@@ -348,6 +348,11 @@ export const getPlatformInfo = () => {
   };
 };
 
+// 将 getPlatformInfo 挂载到 window 对象，方便全局调用
+if (typeof window !== 'undefined') {
+  window.getPlatformInfo = getPlatformInfo;
+}
+
 // 获取兼容性报告
 export const getCompatibilityReport = () => {
   return appState.compatibilityReport;

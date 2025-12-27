@@ -26,7 +26,7 @@ function DashboardPage() {
       requestAnimationFrame(() => {
         // 检查组件是否仍然挂载
         if (!isMountedRef.current) return;
-        
+
         // 立即设置为ready状态，减少等待时间
         setAppInfo({
           isNative: false,
@@ -39,23 +39,42 @@ function DashboardPage() {
         // 异步执行平台检测，不阻塞主渲染
         requestAnimationFrame(() => {
           try {
-            // 尝试使用全局函数
+            // 尝试使用全局函数，增加多重容错
+            const platformInfo = {
+              isNative: false,
+              platform: 'web',
+              isMobile: false,
+              isDesktop: false
+            };
+
+            // 检查 window.getPlatformInfo 是否存在
             if (window.getPlatformInfo && typeof window.getPlatformInfo === 'function') {
-              const platformInfo = window.getPlatformInfo();
-              
-              // 再次检查组件是否仍然挂载
-              if (!isMountedRef.current) return;
-              
-              // 更新状态
-              setAppInfo(prev => ({
-                ...prev,
-                isNative: platformInfo.isNative || false,
-                platform: platformInfo.platform || 'web',
-                isMobile: (platformInfo.isAndroid || platformInfo.isIOS) || false
-              }));
+              const info = window.getPlatformInfo();
+              if (info) {
+                platformInfo.isNative = info.isNative || false;
+                platformInfo.platform = info.platform || 'web';
+                platformInfo.isMobile = (info.isAndroid || info.isIOS) || false;
+                platformInfo.isDesktop = info.isWeb && !platformInfo.isMobile;
+              }
+            } else {
+              // 降级处理：使用 userAgent 进行简单检测
+              const ua = navigator.userAgent || '';
+              platformInfo.isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+              platformInfo.isDesktop = !platformInfo.isMobile;
+              console.warn('window.getPlatformInfo 不可用，使用降级检测');
             }
+
+            // 再次检查组件是否仍然挂载
+            if (!isMountedRef.current) return;
+
+            // 更新状态
+            setAppInfo(prev => ({
+              ...prev,
+              ...platformInfo
+            }));
           } catch (error) {
             console.warn('平台检测失败，使用默认值:', error);
+            // 出错时保持默认值，不抛出异常
           }
         });
       });

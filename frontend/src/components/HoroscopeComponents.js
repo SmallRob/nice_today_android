@@ -1,6 +1,17 @@
 import React from 'react';
-import { MemoizedLineChart } from './ZodiacHoroscope';
 import '../styles/horoscope.css';
+
+// 延迟导入以避免循环依赖
+let MemoizedLineChart = null;
+
+// 动态导入函数
+export const getMemoizedLineChart = async () => {
+  if (!MemoizedLineChart) {
+    const module = await import('./ZodiacHoroscope');
+    MemoizedLineChart = module.MemoizedLineChart;
+  }
+  return MemoizedLineChart;
+};
 
 // 星座选择器组件
 export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleHoroscopeChange, handleRestoreUserHoroscope, handleEditHoroscope, getHoroscopeData, configuredZodiac }) => {
@@ -68,6 +79,15 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
 
 // 趋势图表组件
 export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
+  const [chartComponent, setChartComponent] = React.useState(null);
+
+  React.useEffect(() => {
+    // 延迟加载图表组件
+    getMemoizedLineChart().then(ChartComponent => {
+      setChartComponent(() => ChartComponent);
+    });
+  }, []);
+
   if (!userHoroscope) return null;
 
   const generateTrendData = () => {
@@ -187,7 +207,16 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
         近期能量趋势
       </h3>
       <div style={{ height: '200px' }}>
-        <MemoizedLineChart data={chartData} options={options} />
+        {chartComponent ? (
+          <chartComponent data={chartData} options={options} />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500 mx-auto mb-2"></div>
+              <p className="text-xs text-gray-500">加载图表中...</p>
+            </div>
+          </div>
+        )}
       </div>
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">展示过去7天的运势波动情况</p>
     </div>

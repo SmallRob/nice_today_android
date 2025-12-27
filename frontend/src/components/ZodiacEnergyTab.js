@@ -8,27 +8,7 @@ import '../styles/responsive-zodiac.css';
 import '../styles/dashboard-layout.css';
 import { calculateBazi, getMonthlyBaziFortune } from '../utils/baziHelper';
 import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-// 注册 Chart.js 组件
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import { ensureChartRegistered } from '../utils/chartConfig';
 
 // 生肖列表 - 移到组件外部避免重复创建和"在定义前使用"的警告
 const ZODIAC_LIST = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
@@ -36,6 +16,11 @@ const ZODIAC_LIST = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '�
 const ZodiacEnergyTab = memo(() => {
   // 使用主题管理
   const { theme } = useTheme();
+
+  // 确保 Chart.js 组件已注册
+  useEffect(() => {
+    ensureChartRegistered();
+  }, []);
 
   // 使用用户配置
   const { currentConfig } = useUserConfig();

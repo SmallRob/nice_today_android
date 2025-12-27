@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { BiorhythmIcon, IconLibrary } from './IconLibrary';
-import PageLayout from './PageLayout';
-import DarkModeToggle from './DarkModeToggle';
+import { useState, useEffect, useCallback } from 'react';
+import { BiorhythmIcon } from './IconLibrary';
 import { useTabPerformance } from '../utils/tabPerformanceMonitor';
+import { isAndroidWebView } from '../utils/androidWebViewCompat';
 import '../styles/animations.css';
 import niceDayImage from '../images/nice_day.png';
 
-// 直接导入组件，不使用懒加载
+// 直接导入组件，避免懒加载导致的初始化问题
 import BiorhythmTab from './BiorhythmTab';
 import ZodiacEnergyTab from './ZodiacEnergyTab';
 import HoroscopeTab from './ZodiacHoroscope';
@@ -33,6 +32,25 @@ const ErrorBoundaryFallback = ({ error, resetError }) => (
   </div>
 );
 
+// 简单的错误捕获包装器
+const withErrorBoundary = (Component, componentName) => {
+  return function SafeComponent(props) {
+    try {
+      return <Component {...props} />;
+    } catch (error) {
+      console.error(`[${componentName}] 组件渲染错误:`, error);
+      return (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center">
+            <p className="text-red-600 dark:text-red-400">组件加载失败</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{componentName}</p>
+          </div>
+        </div>
+      );
+    }
+  };
+};
+
 const BiorhythmDashboard = ({ appInfo = {} }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('biorhythm');
@@ -49,36 +67,50 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   // 优化的内存管理：减少清理频率，添加特性检测
   const cleanupUnusedTabs = useCallback((currentTab) => {
-    // 安全地检查内存使用情况，仅在支持的浏览器中执行
-    const shouldCleanup = performance.memory && 
-                          typeof performance.memory.usedJSHeapSize === 'number' && 
-                          performance.memory.usedJSHeapSize > 50 * 1024 * 1024; // 超过50MB
+    try {
+      // 在移动设备上总是执行清理
+      const isMobile = appInfo.isMobile || isAndroidWebView();
 
-    if (shouldCleanup) {
-      setTimeout(() => {
-        setLoadedTabs(prev => {
-          const newSet = new Set(prev);
-          // 保留当前标签和相邻标签
-          const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
-          const currentIndex = tabOrder.indexOf(currentTab);
-          const tabsToKeep = [
-            currentTab,
-            tabOrder[currentIndex - 1],
-            tabOrder[currentIndex + 1]
-          ].filter(Boolean);
+      // 在移动设备上，总是执行清理以保持流畅
+      if (isMobile) {
+        setTimeout(() => {
+          setLoadedTabs(prev => {
+            const newSet = new Set(prev);
+            // 保留当前标签和相邻标签
+            const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
+            const currentIndex = tabOrder.indexOf(currentTab);
+            const tabsToKeep = [
+              currentTab,
+              tabOrder[currentIndex - 1],
+              tabOrder[currentIndex + 1]
+            ].filter(Boolean);
 
-          // 仅清理长时间未使用的标签
-          Array.from(newSet).forEach(tab => {
-            if (!tabsToKeep.includes(tab)) {
-              newSet.delete(tab);
+            // 在移动设备上，只保留当前标签，清理其他标签
+            if (isAndroidWebView()) {
+              // Android WebView: 只保留当前标签
+              Array.from(newSet).forEach(tab => {
+                if (tab !== currentTab) {
+                  newSet.delete(tab);
+                }
+              });
+            } else {
+              // 其他平台: 保留当前标签和相邻标签
+              Array.from(newSet).forEach(tab => {
+                if (!tabsToKeep.includes(tab)) {
+                  newSet.delete(tab);
+                }
+              });
             }
-          });
 
-          return newSet;
-        });
-      }, 10000); // 10秒后清理，减少频繁更新
+            return newSet;
+          });
+        }, 10000); // 10秒后清理，减少频繁更新
+      }
+    } catch (error) {
+      console.warn('内存清理检测失败:', error);
+      // 失败时不影响正常功能，继续执行
     }
-  }, []);
+  }, [appInfo.isMobile]);
 
   // 错误处理函数
   const handleError = useCallback((error, context) => {

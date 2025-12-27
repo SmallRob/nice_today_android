@@ -17,6 +17,7 @@ import '../styles/animations.css';
 import '../styles/horoscope.css';
 import '../styles/dashboard-layout.css';
 import { Line } from 'react-chartjs-2';
+import { ensureChartRegistered } from '../utils/chartConfig';
 import {
   HoroscopeSelector,
   TrendChart,
@@ -27,35 +28,11 @@ import {
   EmptyState
 } from './HoroscopeComponents';
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-} from 'chart.js';
-
 // Memoized Line Chart Component for better performance on mobile devices
 export const MemoizedLineChart = memo(({ data, options }) => (
   <Line data={data} options={options} />
 ));
 MemoizedLineChart.displayName = 'MemoizedLineChart';
-
-// 注册 Chart.js 组件
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
 
 // 解构赋值确保函数正确导入
 const {
@@ -69,6 +46,11 @@ const getHoroscopeData = () => HOROSCOPE_DATA_ENHANCED;
 const HoroscopeTab = () => {
   // 使用新的配置上下文
   const { currentConfig, isLoading: configLoading, error: configError, updateConfig } = useUserConfig();
+
+  // 确保 Chart.js 组件已注册
+  useEffect(() => {
+    ensureChartRegistered();
+  }, []);
 
   // 状态管理
   const [userHoroscope, setUserHoroscope] = useState('');
