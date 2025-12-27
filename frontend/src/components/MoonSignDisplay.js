@@ -119,14 +119,14 @@ const MoonSignDisplay = memo(({ date = new Date() }) => {
             <div className="font-bold text-lg text-gray-900 dark:text-white">
               {moonSign}
             </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400">
+            <div className="text-xs text-gray-600 dark:text-white">
               {getMoonSignElement(moonSign)}星座
             </div>
           </div>
         </div>
         
         <div className="text-right">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="text-xs text-gray-500 dark:text-white mb-1">
             月亮周期位置
           </div>
           <div className="text-sm font-semibold text-purple-700 dark:text-purple-300">
@@ -136,7 +136,7 @@ const MoonSignDisplay = memo(({ date = new Date() }) => {
       </div>
       
       <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3">
-        <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+        <div className="text-sm text-gray-800 dark:text-white leading-relaxed">
           {influence}
         </div>
       </div>
@@ -144,14 +144,14 @@ const MoonSignDisplay = memo(({ date = new Date() }) => {
       {/* 月亮星座小贴士 */}
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
         <div className="bg-white/30 dark:bg-black/10 rounded p-2 text-center">
-          <div className="text-gray-600 dark:text-gray-400">适合活动</div>
-          <div className="font-medium text-gray-800 dark:text-gray-200">
+          <div className="text-gray-600 dark:text-white">适合活动</div>
+          <div className="font-medium text-gray-800 dark:text-white">
             {getSuitableActivity(moonSign)}
           </div>
         </div>
         <div className="bg-white/30 dark:bg-black/10 rounded p-2 text-center">
-          <div className="text-gray-600 dark:text-gray-400">能量强度</div>
-          <div className="font-medium text-gray-800 dark:text-gray-200">
+          <div className="text-gray-600 dark:text-white">能量强度</div>
+          <div className="font-medium text-gray-800 dark:text-white">
             {getEnergyLevel(moonSign)}
           </div>
         </div>

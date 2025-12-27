@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
-import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
+import { useUserConfig } from '../contexts/UserConfigContext';
 import { userConfigManager } from '../utils/userConfigManager';
 import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
 import ZodiacTraitsDisplay from './ZodiacTraitsDisplay';
@@ -7,7 +7,6 @@ import {
   initializeHoroscopeCache
 } from '../utils/horoscopeCache';
 import {
-  debounce,
   initializePerformanceOptimization
 } from '../utils/performanceOptimization';
 import performanceMonitor from '../utils/performanceMonitor';
@@ -17,7 +16,18 @@ import '../styles/animations.css';
 import '../styles/horoscope.css';
 import '../styles/dashboard-layout.css';
 import { Line } from 'react-chartjs-2';
-import { ensureChartRegistered } from '../utils/chartConfig';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import {
   HoroscopeSelector,
   TrendChart,
@@ -28,11 +38,7 @@ import {
   EmptyState
 } from './HoroscopeComponents';
 
-// Memoized Line Chart Component for better performance on mobile devices
-export const MemoizedLineChart = memo(({ data, options }) => (
-  <Line data={data} options={options} />
-));
-MemoizedLineChart.displayName = 'MemoizedLineChart';
+
 
 // 解构赋值确保函数正确导入
 const {
@@ -45,11 +51,26 @@ const getHoroscopeData = () => HOROSCOPE_DATA_ENHANCED;
 
 const HoroscopeTab = () => {
   // 使用新的配置上下文
-  const { currentConfig, isLoading: configLoading, error: configError, updateConfig } = useUserConfig();
+  const { updateConfig } = useUserConfig();
 
-  // 确保 Chart.js 组件已注册
+  // 确保 Chart.js 组件已注册 - 按页面实例化
   useEffect(() => {
-    ensureChartRegistered();
+    try {
+      // 注册当前页面实例所需的 Chart.js 组件
+      ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        PointElement,
+        LineElement,
+        Title,
+        Tooltip,
+        Legend,
+        Filler,
+        annotationPlugin
+      );
+    } catch (error) {
+      console.error('Chart.js 组件注册失败:', error);
+    }
   }, []);
 
   // 状态管理
@@ -309,7 +330,7 @@ const HoroscopeTab = () => {
             </svg>
             今日运势解读
           </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+          <p className="text-sm text-gray-700 dark:text-white leading-relaxed">
             {overallDescription}
           </p>
         </div>
@@ -336,13 +357,13 @@ const HoroscopeTab = () => {
             <h4 className="text-green-700 dark:text-green-400 font-bold mb-2 flex items-center text-sm">
               <span className="mr-1">✅</span> 宜
             </h4>
-            <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{String(recommendations.positiveAdvice || '保持积极心态')}</p>
+            <p className="text-gray-700 dark:text-white text-sm leading-relaxed">{String(recommendations.positiveAdvice || '保持积极心态')}</p>
           </div>
           <div className="horoscope-card border-l-4 border-l-red-500">
             <h4 className="text-red-700 dark:text-red-400 font-bold mb-2 flex items-center text-sm">
               <span className="mr-1">❌</span> 忌
             </h4>
-            <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{String(recommendations.avoidAdvice || '避免消极思维')}</p>
+            <p className="text-gray-700 dark:text-white text-sm leading-relaxed">{String(recommendations.avoidAdvice || '避免消极思维')}</p>
           </div>
         </div>
 
@@ -383,8 +404,8 @@ const HoroscopeTab = () => {
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600">相容: {Array.isArray(recommendations.compatibleSigns) ? recommendations.compatibleSigns.join('、') : recommendations.compatibleSigns}</span>
-            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600">月亮: {String(recommendations.todayMoonSign || '未知')}</span>
+            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-white border border-gray-200 dark:border-gray-600">相容: {Array.isArray(recommendations.compatibleSigns) ? recommendations.compatibleSigns.join('、') : recommendations.compatibleSigns}</span>
+            <span className="px-3 py-1 bg-white/60 dark:bg-gray-700/50 rounded-full text-xs text-gray-600 dark:text-white border border-gray-200 dark:border-gray-600">月亮: {String(recommendations.todayMoonSign || '未知')}</span>
           </div>
         </div>
       </div>
@@ -419,7 +440,7 @@ const HoroscopeTab = () => {
             </h3>
             <button
               onClick={() => setShowZodiacModal(false)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-gray-500 hover:text-gray-700 dark:text-white dark:hover:text-gray-200"
             >
               ✕
             </button>
@@ -442,7 +463,7 @@ const HoroscopeTab = () => {
             }) : null}
           </div>
 
-          <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+          <div className="text-center text-xs text-gray-500 dark:text-white">
             设置后默认显示您配置的星座运势
           </div>
         </div>
@@ -553,7 +574,7 @@ const HoroscopeTab = () => {
 
             {/* 底部信息 */}
             {!loading && !error && horoscopeGuidance && (
-              <div className="horoscope-card text-center text-gray-500 dark:text-gray-400 text-xs p-3">
+              <div className="horoscope-card text-center text-gray-500 dark:text-white text-xs p-3">
                 <p>数据更新时间：{new Date().toLocaleString()}</p>
                 <p className="mt-1">星座运势仅供参考，请理性看待</p>
               </div>

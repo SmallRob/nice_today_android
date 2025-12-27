@@ -18,12 +18,12 @@ const VersionInfo = ({
   return (
     <div className={`flex space-x-4 ${className}`}>
       {showVersion && (
-        <span className="text-gray-500 dark:text-gray-500 text-sm">
+        <span className="text-gray-500 dark:text-white text-sm">
           版本: {version}
         </span>
       )}
       {showLocalIndicator && (
-        <span className="text-gray-500 dark:text-gray-500 text-sm">
+        <span className="text-gray-500 dark:text-white text-sm">
           本地化计算
         </span>
       )}

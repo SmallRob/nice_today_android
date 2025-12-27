@@ -2,31 +2,79 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BiorhythmIcon } from './IconLibrary';
 import { useTabPerformance } from '../utils/tabPerformanceMonitor';
 import { isAndroidWebView, isIOSWebView } from '../utils/androidWebViewCompat';
-import { globalErrorHandler, getErrorLocation, createDetailedErrorReport } from '../utils/errorHandler';
+import { globalErrorHandler, createDetailedErrorReport } from '../utils/errorHandler';
 import '../styles/animations.css';
 import niceDayImage from '../images/nice_day.png';
 
 // 使用懒加载组件，避免直接导入导致的初始化时序问题
-const BiorhythmTab = React.lazy(() => import('./BiorhythmTab').catch(err => {
-  console.error('BiorhythmTab 加载失败:', err);
-  globalErrorHandler.handle(err, { component: 'BiorhythmTab', action: 'lazyImport' });
-  return Promise.resolve(() => <div className="text-center p-8 text-gray-500 dark:text-gray-400">生物节律模块加载失败，请稍后重试</div>);
-}));
-const ZodiacEnergyTab = React.lazy(() => import('./ZodiacEnergyTab').catch(err => {
-  console.error('ZodiacEnergyTab 加载失败:', err);
-  globalErrorHandler.handle(err, { component: 'ZodiacEnergyTab', action: 'lazyImport' });
-  return Promise.resolve(() => <div className="text-center p-8 text-gray-500 dark:text-gray-400">生肖能量模块加载失败，请稍后重试</div>);
-}));
-const HoroscopeTab = React.lazy(() => import('./HoroscopeTab').catch(err => {
-  console.error('HoroscopeTab 加载失败:', err);
-  globalErrorHandler.handle(err, { component: 'HoroscopeTab', action: 'lazyImport' });
-  return Promise.resolve(() => <div className="text-center p-8 text-gray-500 dark:text-gray-400">星座运程模块加载失败，请稍后重试</div>);
-}));
-const MBTIPersonalityTab = React.lazy(() => import('./MBTIPersonalityTabHome').catch(err => {
-  console.error('MBTIPersonalityTab 加载失败:', err);
-  globalErrorHandler.handle(err, { component: 'MBTIPersonalityTab', action: 'lazyImport' });
-  return Promise.resolve(() => <div className="text-center p-8 text-gray-500 dark:text-gray-400">人格魅力模块加载失败，请稍后重试</div>);
-}));
+// 修复：为Android WebView提供更健壮的懒加载错误处理
+const createLazyComponent = (importFn, componentName, fallbackMessage) => {
+  return React.lazy(() => {
+    return importFn()
+      .catch(err => {
+        console.error(`${componentName} 加载失败:`, err);
+        globalErrorHandler.handle(err, { component: componentName, action: 'lazyImport' });
+
+        // 确保返回一个有效的React组件
+        return {
+          default: ({ onError }) => {
+            // 触发错误回调（如果提供）
+            if (typeof onError === 'function') {
+              try {
+                onError(err);
+              } catch (callbackError) {
+                console.warn('错误回调执行失败:', callbackError);
+              }
+            }
+
+            return (
+              <div className="flex-1 flex items-center justify-center p-4">
+                <div className="text-center">
+                  <div className="text-4xl mb-3">⚠️</div>
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    {componentName}加载失败
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
+                    {fallbackMessage || '模块加载失败，请刷新页面重试'}
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                  >
+                    刷新页面
+                  </button>
+                </div>
+              </div>
+            );
+          }
+        };
+      });
+  });
+};
+
+const BiorhythmTab = createLazyComponent(
+  () => import('./BiorhythmTab'),
+  'BiorhythmTab',
+  '生物节律模块加载失败，请稍后重试'
+);
+
+const ZodiacEnergyTab = createLazyComponent(
+  () => import('./ZodiacEnergyTab'),
+  'ZodiacEnergyTab',
+  '生肖能量模块加载失败，请稍后重试'
+);
+
+const HoroscopeTab = createLazyComponent(
+  () => import('./ZodiacHoroscope'),
+  'HoroscopeTab',
+  '星座运程模块加载失败，请稍后重试'
+);
+
+const MBTIPersonalityTab = createLazyComponent(
+  () => import('./MBTIPersonalityTabHome'),
+  'MBTIPersonalityTab',
+  '人格魅力模块加载失败，请稍后重试'
+);
 
 // 增强版错误边界组件
 const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
@@ -38,7 +86,7 @@ const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
       <div className="text-center max-w-md w-full">
         {/* 错误图标 */}
         <div className="text-6xl mb-4">❌</div>
-        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
           加载出错
         </h3>
         <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
@@ -60,8 +108,8 @@ const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
         {/* 精确错误位置信息 */}
         {errorDetails?.locationString && (
           <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 mb-4 text-left">
-            <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">错误位置:</p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 break-all">
+            <p className="text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">错误位置:</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300 break-all">
               {errorDetails.locationString}
             </p>
           </div>
@@ -71,38 +119,38 @@ const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
         {showDetails && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4 text-left">
             <details className="space-y-3">
-              <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
+              <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-200">
                 完整错误信息
               </summary>
               <div className="space-y-2">
                 {errorDetails?.errorId && (
                   <div>
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">错误ID:</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">{errorDetails.errorId}</p>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-200">错误ID:</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails.errorId}</p>
                   </div>
                 )}
                 {errorDetails?.location?.fileName && (
                   <div>
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">文件:</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 break-all">{errorDetails.location.fileName}</p>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-200">文件:</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 break-all">{errorDetails.location.fileName}</p>
                   </div>
                 )}
                 {errorDetails?.location?.lineNumber && (
                   <div>
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">行号:</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">{errorDetails.location.lineNumber}</p>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-200">行号:</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails.location.lineNumber}</p>
                   </div>
                 )}
                 {errorDetails?.location?.columnNumber && (
                   <div>
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">列号:</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">{errorDetails.location.columnNumber}</p>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-200">列号:</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails.location.columnNumber}</p>
                   </div>
                 )}
                 {errorDetails?.stackTrace && (
                   <div>
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">堆栈追踪:</p>
-                    <pre className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 p-2 rounded overflow-x-auto whitespace-pre-wrap">
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-200">堆栈追踪:</p>
+                    <pre className="text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-2 rounded overflow-x-auto whitespace-pre-wrap">
                       {errorDetails.stackTrace}
                     </pre>
                   </div>
@@ -122,7 +170,7 @@ const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
           </button>
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
           >
             {showDetails ? '隐藏详情' : '显示详情'}
           </button>
@@ -132,43 +180,8 @@ const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
   );
 };
 
-// 增强的错误捕获包装器
-const withErrorBoundary = (Component, componentName) => {
-  return function SafeComponent(props) {
-    try {
-      return <Component {...props} />;
-    } catch (error) {
-      // 使用全局错误处理器标准化错误
-      const appError = globalErrorHandler.handle(error, {
-        component: componentName,
-        action: 'render',
-        timestamp: new Date().toISOString()
-      });
-
-      // 创建详细的错误报告
-      const errorDetails = createDetailedErrorReport(appError);
-
-      console.error(`[${componentName}] 组件渲染错误:`, appError);
-      console.error('错误详情:', errorDetails);
-
-      // 返回增强的错误显示组件
-      return (
-        <ErrorBoundaryFallback
-          error={error}
-          errorDetails={errorDetails}
-          resetError={() => {
-            // 清除错误状态并重试
-            console.log(`[组件 ${componentName}] 重试加载...`);
-            window.location.reload();
-          }}
-        />
-      );
-    }
-  };
-};
-
 const BiorhythmDashboard = ({ appInfo = {} }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // 改为false，立即显示UI
   const [activeTab, setActiveTab] = useState('biorhythm');
   const [serviceStatus, setServiceStatus] = useState({
     biorhythm: true
@@ -182,6 +195,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   const { measureTabSwitch } = useTabPerformance();
 
   // 优化的内存管理：减少清理频率，添加特性检测
+  // 修复：确保在Android WebView中更积极地清理内存，并增加错误处理
   const cleanupUnusedTabs = useCallback((currentTab) => {
     try {
       // 在移动设备上总是执行清理
@@ -189,48 +203,59 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
       // 在移动设备上，总是执行清理以保持流畅
       if (isMobile) {
-        setTimeout(() => {
-          setLoadedTabs(prev => {
-            const newSet = new Set(prev);
-            // 保留当前标签和相邻标签
-            const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
-            const currentIndex = tabOrder.indexOf(currentTab);
-            const tabsToKeep = [
-              currentTab,
-              tabOrder[currentIndex - 1],
-              tabOrder[currentIndex + 1]
-            ].filter(Boolean);
+        // 使用requestAnimationFrame确保UI更新后再清理
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            setLoadedTabs(prev => {
+              const newSet = new Set(prev);
+              // 保留当前标签和相邻标签
+              const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
+              const currentIndex = tabOrder.indexOf(currentTab);
+              const tabsToKeep = [
+                currentTab,
+                tabOrder[currentIndex - 1],
+                tabOrder[currentIndex + 1]
+              ].filter(Boolean);
 
-            // 在移动设备上，只保留当前标签，清理其他标签
-            if (isAndroidWebView()) {
-              // Android WebView: 只保留当前标签
-              Array.from(newSet).forEach(tab => {
-                if (tab !== currentTab) {
-                  newSet.delete(tab);
-                }
-              });
-            } else {
-              // 其他平台: 保留当前标签和相邻标签
-              Array.from(newSet).forEach(tab => {
-                if (!tabsToKeep.includes(tab)) {
-                  newSet.delete(tab);
-                }
-              });
-            }
+              // 在移动设备上，只保留当前标签，清理其他标签
+              if (isAndroidWebView()) {
+                // Android WebView: 只保留当前标签（更激进的清理）
+                Array.from(newSet).forEach(tab => {
+                  if (tab !== currentTab) {
+                    newSet.delete(tab);
+                  }
+                });
+              } else {
+                // 其他平台: 保留当前标签和相邻标签
+                Array.from(newSet).forEach(tab => {
+                  if (!tabsToKeep.includes(tab)) {
+                    newSet.delete(tab);
+                  }
+                });
+              }
 
-            return newSet;
-          });
-        }, 10000); // 10秒后清理，减少频繁更新
+              return newSet;
+            });
+          }, isAndroidWebView() ? 5000 : 10000); // Android WebView清理更频繁
+        });
       }
     } catch (error) {
       console.warn('内存清理检测失败:', error);
       // 失败时不影响正常功能，继续执行
+      // 确保即使清理失败也不影响应用运行
     }
   }, [appInfo.isMobile]);
 
   // 错误处理函数
+  // 修复：增强对未定义变量错误的检测，包括压缩后的变量名
   const handleError = useCallback((error, context) => {
     try {
+      // 防止处理无效错误对象
+      if (!error) {
+        console.warn(`${context}: 收到空错误对象`);
+        return;
+      }
+
       // 使用全局错误处理器标准化错误
       const appError = globalErrorHandler.handle(error, {
         component: context,
@@ -251,6 +276,17 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       setError(errorMessage);
 
       // 扩展的错误检查，包含更多关键错误类型
+      // 修复：添加对未定义变量错误（包括压缩后的变量名如'se'）的检测
+      const isReferenceError = error instanceof ReferenceError ||
+                             error.name === 'ReferenceError' ||
+                             appError.type === 'COMPONENT_ERROR';
+
+      const isUndefinedVariableError = isReferenceError &&
+                                     (error.message?.includes('is not defined') ||
+                                      error.message?.includes('is not defined') ||
+                                      error.message?.includes('undefined') ||
+                                      error.message?.includes('not defined'));
+
       const isCriticalError = appError.type === 'CHUNK_LOAD_ERROR' ||
                              appError.type === 'MOBILE_WEBVIEW_ERROR' ||
                              appError.type === 'SOURCE_MAP_ERROR' ||
@@ -260,18 +296,20 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                              error.message?.includes('网络错误') ||
                              error.message?.includes('Network Error') ||
                              error.message?.includes('Failed to fetch') ||
+                             error.message?.includes('not defined') ||
                              error.code === 'MODULE_NOT_FOUND' ||
                              error.code === 'NETWORK_ERROR';
 
       // 移动设备特殊处理
       if (isAndroidWebView() || isIOSWebView()) {
         console.warn('检测到移动 WebView 环境，应用增强的错误处理');
-        if (isCriticalError) {
-          // 仅在严重错误时才启用降级模式
+        if (isCriticalError || isUndefinedVariableError) {
+          // 仅在严重错误或未定义变量错误时才启用降级模式
+          console.error('启用降级模式，错误类型:', appError.type);
           setFallbackMode(true);
         }
-      } else if (isCriticalError) {
-        // 仅在严重错误时才启用降级模式
+      } else if (isCriticalError || isUndefinedVariableError) {
+        // 仅在严重错误或未定义变量错误时才启用降级模式
         setFallbackMode(true);
       }
 
@@ -283,7 +321,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       // 错误处理过程中出现错误，记录并尝试恢复
       console.error('错误处理函数内部出现错误:', handlingError);
       setError('组件加载失败，错误处理出现异常');
-      
+
       // 使用全局错误处理器处理内部错误
       globalErrorHandler.handle(handlingError, {
         component: 'errorHandler',
@@ -298,7 +336,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
     <div className="flex-1 flex items-center justify-center p-4">
       <div className="text-center">
         <div className="text-4xl mb-3">⚠️</div>
-        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
           功能暂时不可用
         </h3>
         <p className="text-gray-500 dark:text-gray-300 text-sm">
@@ -314,11 +352,10 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
     </div>
   ), []);
 
-  // 检测服务状态
+  // 检测服务状态 - 优化：后台执行，不阻塞UI
   const checkServiceStatus = async () => {
     try {
-      setLoading(true);
-
+      // 不设置loading为true，直接在后台检查服务状态
       // 所有环境下的默认状态（本地化运行）
       setServiceStatus({
         biorhythm: true
@@ -336,11 +373,18 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   };
 
   // 优化的预加载策略
+  // 修复：在Android WebView中减少预加载以节省内存
   const preloadAdjacentTabs = useCallback((currentTab) => {
     const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
     const currentIndex = tabOrder.indexOf(currentTab);
 
     if (currentIndex === -1) return;
+
+    // Android WebView只预加载当前标签，减少内存压力
+    if (isAndroidWebView()) {
+      console.log('Android WebView模式：仅加载当前标签，减少预加载');
+      return;
+    }
 
     // 优先预加载紧邻标签，延迟预加载较远标签
     const immediateTabs = [
@@ -357,20 +401,22 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       });
     }
 
-    // 延迟预加载更远的标签
-    const distantTabs = [
-      tabOrder[currentIndex - 2],
-      tabOrder[currentIndex + 2]
-    ].filter(Boolean);
+    // 延迟预加载更远的标签（仅在非移动环境）
+    if (!isAndroidWebView()) {
+      const distantTabs = [
+        tabOrder[currentIndex - 2],
+        tabOrder[currentIndex + 2]
+      ].filter(Boolean);
 
-    if (distantTabs.length > 0) {
-      setTimeout(() => {
-        setLoadedTabs(prev => {
-          const newSet = new Set(prev);
-          distantTabs.forEach(tab => newSet.add(tab));
-          return newSet;
-        });
-      }, 500);
+      if (distantTabs.length > 0) {
+        setTimeout(() => {
+          setLoadedTabs(prev => {
+            const newSet = new Set(prev);
+            distantTabs.forEach(tab => newSet.add(tab));
+            return newSet;
+          });
+        }, 500);
+      }
     }
   }, []);
 
@@ -410,19 +456,17 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   useEffect(() => {
     let isMounted = true;
-    
-    // 设置一个超时，确保即使初始化出现问题也能退出加载状态
-    const timeoutId = setTimeout(() => {
-      if (isMounted && loading) {
-        console.warn('初始化超时，强制结束加载状态');
-        setLoading(false);
-      }
-    }, 10000); // 10秒超时
 
+    // 后台检查服务状态，不阻塞UI
     const checkStatus = async () => {
       try {
         if (!isMounted) return;
-        await checkServiceStatus();
+        // 使用setTimeout将检查推迟到下一个事件循环，确保UI先渲染
+        setTimeout(async () => {
+          if (isMounted) {
+            await checkServiceStatus();
+          }
+        }, 100);
       } catch (error) {
         console.error('检查服务状态时发生错误:', error);
         // 即使出错也要确保加载状态被设置为false
@@ -436,7 +480,6 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
     };
   }, []);
 
@@ -491,7 +534,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
           <div className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-6 relative">
             <div className="absolute inset-0 border-4 border-transparent border-t-purple-400 rounded-full animate-ping"></div>
           </div>
-          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2 animate-fade-in">Nice Today</h3>
+          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2 animate-fade-in">Nice Today</h3>
           <p className="text-gray-500 dark:text-gray-300 animate-fade-in" style={{ animationDelay: '0.2s' }}>正在为您准备个性化体验...</p>
           <div className="mt-4 flex justify-center space-x-1">
             {[0, 1, 2].map((i) => (
@@ -595,17 +638,17 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                   className={`flex-1 py-3 px-2 text-center font-medium transition-all duration-300 relative ${
                     isActive
                       ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700`
-                      : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+                      : 'text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   {isActive && (
                     <div className={`absolute bottom-0 left-0 w-full h-0.5 ${colorMap[tab.color]}`}></div>
                   )}
                   <div className="flex flex-col items-center justify-center space-y-1">
-                    <div className={`w-5 h-5 transition-colors duration-300 ${isActive ? colorMap[tab.color] : 'text-gray-400 dark:text-gray-500'}`}>
+                    <div className={`w-5 h-5 transition-colors duration-300 ${isActive ? colorMap[tab.color] : 'text-gray-400 dark:text-gray-400'}`}>
                       <tab.icon />
                     </div>
-                    <span className="text-xs font-medium">{tab.label}</span>
+                    <span className="text-xs font-medium dark:text-gray-300">{tab.label}</span>
                   </div>
                 </button>
               );
@@ -634,20 +677,20 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               </div>
             )}
 
-            {/* 标签内容 - 添加 Suspense 边界保护懒加载组件 */}
+            {/* 标签内容 - 修复：移除嵌套Suspense，简化结构以提升Android WebView兼容性 */}
             {fallbackMode ? (
               <FallbackComponent />
             ) : (
-              <React.Suspense fallback={
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">正在加载标签页...</p>
-                  </div>
-                </div>
-              }>
+              <>
                 {activeTab === 'biorhythm' && loadedTabs.has('biorhythm') && (
-                  <React.Suspense fallback={<div className="text-center py-8 text-gray-500 dark:text-gray-400">正在加载生物节律模块...</div>}>
+                  <React.Suspense fallback={
+                    <div className="flex items-center justify-center h-64">
+                      <div className="text-center">
+                        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载生物节律模块...</p>
+                      </div>
+                    </div>
+                  }>
                     <BiorhythmTab
                       serviceStatus={serviceStatus.biorhythm}
                       isDesktop={appInfo.isDesktop}
@@ -656,27 +699,48 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                   </React.Suspense>
                 )}
                 {activeTab === 'zodiac' && loadedTabs.has('zodiac') && (
-                  <React.Suspense fallback={<div className="text-center py-8 text-gray-500 dark:text-gray-400">正在加载生肖能量模块...</div>}>
+                  <React.Suspense fallback={
+                    <div className="flex items-center justify-center h-64">
+                      <div className="text-center">
+                        <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-2"></div>
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载生肖能量模块...</p>
+                      </div>
+                    </div>
+                  }>
                     <ZodiacEnergyTab
                       onError={(error) => handleError(error, 'ZodiacEnergyTab')}
                     />
                   </React.Suspense>
                 )}
                 {activeTab === 'horoscope' && loadedTabs.has('horoscope') && (
-                  <React.Suspense fallback={<div className="text-center py-8 text-gray-500 dark:text-gray-400">正在加载星座运程模块...</div>}>
+                  <React.Suspense fallback={
+                    <div className="flex items-center justify-center h-64">
+                      <div className="text-center">
+                        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2"></div>
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载星座运程模块...</p>
+                      </div>
+                    </div>
+                  }>
                     <HoroscopeTab
                       onError={(error) => handleError(error, 'HoroscopeTab')}
                     />
                   </React.Suspense>
                 )}
                 {activeTab === 'mbti' && loadedTabs.has('mbti') && (
-                  <React.Suspense fallback={<div className="text-center py-8 text-gray-500 dark:text-gray-400">正在加载人格魅力模块...</div>}>
+                  <React.Suspense fallback={
+                    <div className="flex items-center justify-center h-64">
+                      <div className="text-center">
+                        <div className="w-8 h-8 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-2"></div>
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载人格魅力模块...</p>
+                      </div>
+                    </div>
+                  }>
                     <MBTIPersonalityTab
                       onError={(error) => handleError(error, 'MBTIPersonalityTab')}
                     />
                   </React.Suspense>
                 )}
-              </React.Suspense>
+              </>
             )}
           </div>
         </div>

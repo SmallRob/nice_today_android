@@ -109,7 +109,14 @@ const getPerformanceAPI = async () => {
     }
     
     // 尝试导入性能插件
-    const { Performance } = await import('@capacitor/performance');
+    let Performance;
+    try {
+      const performanceModule = await import('@capacitor/performance');
+      Performance = performanceModule.Performance;
+    } catch (error) {
+      console.warn('Performance plugin not available, using simulation:', error);
+      return SimulatedPerformanceAPI;
+    }
     
     // 检查性能API是否可用
     if (!Performance || typeof Performance.startTrace !== 'function') {

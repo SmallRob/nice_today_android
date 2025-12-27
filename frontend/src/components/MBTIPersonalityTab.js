@@ -569,12 +569,12 @@ const MBTIPersonalityTab = () => {
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
                   {type} - {name}
                 </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-300">{description}</p>
+                <p className="text-lg text-gray-600 dark:text-white">{description}</p>
               </div>
               
               {/* 核心特质标签 */}
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-white mb-2">
                   核心特质
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -615,7 +615,7 @@ const MBTIPersonalityTab = () => {
               {strengths.map((strength, index) => (
                 <li key={index} className="flex items-start">
                   <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700 dark:text-gray-300">{strength}</span>
+                  <span className="text-gray-700 dark:text-white">{strength}</span>
                 </li>
               ))}
             </ul>
@@ -630,7 +630,7 @@ const MBTIPersonalityTab = () => {
               {growthAreas.map((tip, index) => (
                 <li key={index} className="flex items-start">
                   <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700 dark:text-gray-300">{tip}</span>
+                  <span className="text-gray-700 dark:text-white">{tip}</span>
                 </li>
               ))}
             </ul>
@@ -645,7 +645,7 @@ const MBTIPersonalityTab = () => {
               {weaknesses.map((weakness, index) => (
                 <li key={index} className="flex items-start">
                   <span className="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700 dark:text-gray-300">{weakness}</span>
+                  <span className="text-gray-700 dark:text-white">{weakness}</span>
                 </li>
               ))}
             </ul>
@@ -669,7 +669,7 @@ const MBTIPersonalityTab = () => {
             <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-3 flex items-center">
               <span className="mr-2">💞</span> 关系风格
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <p className="text-gray-700 dark:text-white bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 p-4 rounded-lg">
               {style}
             </p>
           </div>
@@ -679,7 +679,7 @@ const MBTIPersonalityTab = () => {
             <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-300 mb-3 flex items-center">
               <span className="mr-2">💬</span> 沟通方式
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <p className="text-gray-700 dark:text-white bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 p-4 rounded-lg">
               {communication}
             </p>
           </div>
@@ -696,7 +696,7 @@ const MBTIPersonalityTab = () => {
                   return (
                     <span 
                       key={index}
-                      className="px-4 py-2 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-gray-200 border border-green-200 dark:border-green-700 flex items-center"
+                      className="px-4 py-2 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-white border border-green-200 dark:border-green-700 flex items-center"
                     >
                       <span className="mr-1">{typeData?.icon}</span>
                       {type}
@@ -716,7 +716,7 @@ const MBTIPersonalityTab = () => {
                   return (
                     <span 
                       key={index}
-                      className="px-4 py-2 bg-red-100 dark:bg-red-900 rounded-full text-sm text-gray-700 dark:text-gray-200 border border-red-200 dark:border-red-700 flex items-center"
+                      className="px-4 py-2 bg-red-100 dark:bg-red-900 rounded-full text-sm text-gray-700 dark:text-white border border-red-200 dark:border-red-700 flex items-center"
                     >
                       <span className="mr-1">{typeData?.icon}</span>
                       {type}
@@ -732,7 +732,7 @@ const MBTIPersonalityTab = () => {
             <h3 className="text-lg font-semibold text-pink-700 dark:text-pink-300 mb-3 flex items-center">
               <span className="mr-2">💡</span> 关系建议
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <p className="text-gray-700 dark:text-white bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-4 rounded-lg">
               {advice}
             </p>
           </div>
@@ -759,7 +759,7 @@ const MBTIPersonalityTab = () => {
               {suggestions.map((career, index) => (
                 <span 
                   key={index}
-                  className="px-4 py-2 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-gray-700 dark:text-gray-200 border border-blue-200 dark:border-blue-700"
+                  className="px-4 py-2 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-gray-700 dark:text-white border border-blue-200 dark:border-blue-700"
                 >
                   {career}
                 </span>
@@ -777,7 +777,7 @@ const MBTIPersonalityTab = () => {
                 {idealEnvironments.map((env, index) => (
                   <li key={index} className="flex items-start">
                     <span className="w-2 h-2 bg-teal-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    <span className="text-gray-700 dark:text-gray-300">{env}</span>
+                    <span className="text-gray-700 dark:text-white">{env}</span>
                   </li>
                 ))}
               </ul>
@@ -787,7 +787,7 @@ const MBTIPersonalityTab = () => {
               <h3 className="text-lg font-semibold text-cyan-700 dark:text-cyan-300 mb-3 flex items-center">
                 <span className="mr-2">⚡</span> 工作风格
               </h3>
-              <p className="text-gray-700 dark:text-gray-300 bg-cyan-50 dark:bg-cyan-900 dark:bg-opacity-20 p-4 rounded-lg">
+              <p className="text-gray-700 dark:text-white bg-cyan-50 dark:bg-cyan-900 dark:bg-opacity-20 p-4 rounded-lg">
                 {workStyle}
               </p>
             </div>
@@ -802,7 +802,7 @@ const MBTIPersonalityTab = () => {
               {avoidCareers.map((career, index) => (
                 <span 
                   key={index}
-                  className="px-4 py-2 bg-amber-100 dark:bg-amber-900 rounded-full text-sm text-gray-700 dark:text-gray-200 border border-amber-200 dark:border-amber-700"
+                  className="px-4 py-2 bg-amber-100 dark:bg-amber-900 rounded-full text-sm text-gray-700 dark:text-white border border-amber-200 dark:border-amber-700"
                 >
                   {career}
                 </span>
@@ -815,7 +815,7 @@ const MBTIPersonalityTab = () => {
             <h3 className="text-lg font-semibold text-violet-700 dark:text-violet-300 mb-3 flex items-center">
               <span className="mr-2">🎯</span> 职业发展建议
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 bg-violet-50 dark:bg-violet-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <p className="text-gray-700 dark:text-white bg-violet-50 dark:bg-violet-900 dark:bg-opacity-20 p-4 rounded-lg">
               {advice}
             </p>
           </div>
@@ -838,7 +838,7 @@ const MBTIPersonalityTab = () => {
             <h3 className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 mb-3 flex items-center">
               <span className="mr-2">🚀</span> 成长潜力
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 bg-emerald-50 dark:bg-emerald-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <p className="text-gray-700 dark:text-white bg-emerald-50 dark:bg-emerald-900 dark:bg-opacity-20 p-4 rounded-lg">
               {potential}
             </p>
           </div>
@@ -852,7 +852,7 @@ const MBTIPersonalityTab = () => {
               {tips.map((tip, index) => (
                 <div key={index} className="flex items-start bg-lime-50 dark:bg-lime-900 dark:bg-opacity-20 p-3 rounded-lg">
                   <span className="text-lime-600 dark:text-lime-400 mr-2">✓</span>
-                  <span className="text-gray-700 dark:text-gray-300">{tip}</span>
+                  <span className="text-gray-700 dark:text-white">{tip}</span>
                 </div>
               ))}
             </div>
@@ -863,7 +863,7 @@ const MBTIPersonalityTab = () => {
             <h3 className="text-lg font-semibold text-rose-700 dark:text-rose-300 mb-3 flex items-center">
               <span className="mr-2">🧘</span> 自我觉察
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 bg-rose-50 dark:bg-rose-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <p className="text-gray-700 dark:text-white bg-rose-50 dark:bg-rose-900 dark:bg-opacity-20 p-4 rounded-lg">
               {mindfulness}
             </p>
           </div>
@@ -891,7 +891,7 @@ const MBTIPersonalityTab = () => {
               {examples.map((person, index) => (
                 <div key={index} className="bg-amber-50 dark:bg-amber-900 dark:bg-opacity-20 p-4 rounded-lg border border-amber-100 dark:border-amber-800">
                   <div className="font-medium text-amber-800 dark:text-amber-300 mb-1">{person}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">代表性{typeData?.name}</div>
+                  <div className="text-sm text-gray-600 dark:text-white">代表性{typeData?.name}</div>
                 </div>
               ))}
             </div>
@@ -902,7 +902,7 @@ const MBTIPersonalityTab = () => {
             <h3 className="text-lg font-semibold text-yellow-700 dark:text-yellow-300 mb-3 flex items-center">
               <span className="mr-2">💫</span> 启发
             </h3>
-            <p className="text-gray-700 dark:text-gray-300 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-4 rounded-lg">
+            <p className="text-gray-700 dark:text-white bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-4 rounded-lg">
               {inspiration}
             </p>
           </div>
@@ -917,7 +917,7 @@ const MBTIPersonalityTab = () => {
       <Card title="MBTI类型选择" className="mb-6">
         <div className="space-y-6">
           <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-gray-600 dark:text-white mb-4">
               您可以从用户配置中读取MBTI类型，也可以临时选择其他类型进行查询。临时选择不会保存到配置中。
             </p>
             
@@ -935,7 +935,7 @@ const MBTIPersonalityTab = () => {
             
             {/* MBTI类型网格 */}
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">
                 选择要分析的MBTI类型：
               </h3>
               <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
@@ -996,7 +996,7 @@ const MBTIPersonalityTab = () => {
           
           {/* 类型比较选择器 */}
           <div>
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">
               选择要比较的MBTI类型（可选）：
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -1061,15 +1061,15 @@ const MBTIPersonalityTab = () => {
             <div className="text-center p-4 rounded-xl" style={{ backgroundColor: `${currentTypeData.color}20`, border: `1px solid ${currentTypeData.color}` }}>
               <div className="text-3xl mb-2">{currentTypeData.icon}</div>
               <h3 className="text-xl font-bold mb-1" style={{ color: currentTypeData.color }}>{currentTypeData.type}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{currentTypeData.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{currentTypeData.description}</p>
+              <p className="text-sm text-gray-600 dark:text-white">{currentTypeData.name}</p>
+              <p className="text-xs text-gray-500 dark:text-white mt-2">{currentTypeData.description}</p>
             </div>
             
             <div className="text-center p-4 rounded-xl" style={{ backgroundColor: `${compareTypeData.color}20`, border: `1px solid ${compareTypeData.color}` }}>
               <div className="text-3xl mb-2">{compareTypeData.icon}</div>
               <h3 className="text-xl font-bold mb-1" style={{ color: compareTypeData.color }}>{compareTypeData.type}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{compareTypeData.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{compareTypeData.description}</p>
+              <p className="text-sm text-gray-600 dark:text-white">{compareTypeData.name}</p>
+              <p className="text-xs text-gray-500 dark:text-white mt-2">{compareTypeData.description}</p>
             </div>
           </div>
           
@@ -1083,7 +1083,7 @@ const MBTIPersonalityTab = () => {
                 {commonStrengths.map((strength, index) => (
                   <span 
                     key={index}
-                    className="px-3 py-1.5 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-gray-200"
+                    className="px-3 py-1.5 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-white"
                   >
                     {strength}
                   </span>
@@ -1102,7 +1102,7 @@ const MBTIPersonalityTab = () => {
                 {uniqueStrengths.map((strength, index) => (
                   <li key={index} className="flex items-start">
                     <span className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0" style={{ backgroundColor: currentTypeData.color }}></span>
-                    <span className="text-gray-700 dark:text-gray-300">{strength}</span>
+                    <span className="text-gray-700 dark:text-white">{strength}</span>
                   </li>
                 ))}
               </ul>
@@ -1116,7 +1116,7 @@ const MBTIPersonalityTab = () => {
                 {compareUniqueStrengths.map((strength, index) => (
                   <li key={index} className="flex items-start">
                     <span className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0" style={{ backgroundColor: compareTypeData.color }}></span>
-                    <span className="text-gray-700 dark:text-gray-300">{strength}</span>
+                    <span className="text-gray-700 dark:text-white">{strength}</span>
                   </li>
                 ))}
               </ul>
@@ -1125,7 +1125,7 @@ const MBTIPersonalityTab = () => {
           
           {/* 比较建议 */}
           <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-lg">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
+            <p className="text-sm text-gray-700 dark:text-white">
               <span className="font-semibold" style={{ color: currentTypeData.color }}>{currentTypeData.type}</span> 和 
               <span className="font-semibold" style={{ color: compareTypeData.color }}> {compareTypeData.type}</span> 
               在沟通和合作时可以相互学习。{currentTypeData.type}可以向{compareTypeData.type}学习{compareUniqueStrengths[0] || '不同的优势'}，而{compareTypeData.type}则可以借鉴{currentTypeData.type}的{uniqueStrengths[0] || '独特优势'}。
@@ -1144,7 +1144,7 @@ const MBTIPersonalityTab = () => {
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
             🧠 MBTI 16型人格解析
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-sm text-gray-600 dark:text-white max-w-2xl mx-auto">
             深入了解16种人格类型的特质、优势、职业发展和人际关系建议。
             人格类型不是限制，而是了解自我和他人、促进个人成长的工具。
           </p>
@@ -1159,7 +1159,7 @@ const MBTIPersonalityTab = () => {
         <Card>
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">正在加载人格分析数据...</p>
+            <p className="text-gray-600 dark:text-white text-sm">正在加载人格分析数据...</p>
           </div>
         </Card>
       )}
@@ -1208,7 +1208,7 @@ const MBTIPersonalityTab = () => {
           
           {/* 底部信息 */}
           <Card>
-            <div className="text-center text-gray-500 dark:text-gray-400 text-xs">
+            <div className="text-center text-gray-500 dark:text-white text-xs">
               <p className="mb-2">MBTI®是Myers-Briggs Type Indicator的注册商标，本页面内容仅供学习和参考使用。</p>
               <p>人格类型理论帮助我们理解个体差异，但每个人都是独特且不断发展变化的。</p>
               <p className="mt-2">数据更新时间：{new Date().toLocaleString()}</p>
@@ -1222,8 +1222,8 @@ const MBTIPersonalityTab = () => {
         <Card>
           <div className="text-center py-12">
             <div className="text-5xl mb-4">🧩</div>
-            <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3">请选择MBTI类型</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto mb-6">
+            <h3 className="text-xl font-semibold text-gray-700 dark:text-white mb-3">请选择MBTI类型</h3>
+            <p className="text-gray-500 dark:text-white text-sm max-w-md mx-auto mb-6">
               从上方选择一种MBTI类型，开始探索人格特质、优势和发展建议
             </p>
             <div className="inline-flex flex-wrap gap-2 justify-center">

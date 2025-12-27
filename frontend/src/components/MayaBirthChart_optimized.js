@@ -25,8 +25,8 @@ const LoadingSpinner = memo(() => (
       <div className="absolute inset-0 rounded-full border-4 border-purple-100 dark:border-purple-900/30"></div>
       <div className="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin"></div>
     </div>
-    <p className="text-sm font-medium text-gray-600 dark:text-gray-300 tracking-wide">正在同步宇宙频率...</p>
-    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">计算您的玛雅印记中</p>
+    <p className="text-sm font-medium text-gray-600 dark:text-white tracking-wide">正在同步宇宙频率...</p>
+    <p className="text-xs text-gray-400 dark:text-white mt-1">计算您的玛雅印记中</p>
   </div>
 ));
 
@@ -362,14 +362,14 @@ const MayaBirthChart = () => {
             <h1 className="text-base font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
               {userInfo.nickname ? `${userInfo.nickname}的玛雅印记` : '玛雅出生图'}
             </h1>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-medium mt-0.5">
+            <p className="text-[10px] text-gray-400 dark:text-white uppercase tracking-widest font-medium mt-0.5">
               MAYA BIRTH CHART
             </p>
           </div>
         </div>
         {userInfo.birthDate && (
           <div className="px-2.5 py-1 bg-gray-50 dark:bg-gray-700/50 rounded-full border border-gray-100 dark:border-gray-600">
-            <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 tracking-wide">
+            <span className="text-[11px] font-medium text-gray-500 dark:text-white tracking-wide">
               {userInfo.birthDate}
             </span>
           </div>
@@ -393,7 +393,7 @@ const MayaBirthChart = () => {
           <ResultsSection birthInfo={birthInfo} showResults={showResults} />
         ) : (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 dark:text-white">
               {!userInfo.birthDate ? '请先设置出生日期' : '正在加载星盘数据...'}
             </p>
           </div>

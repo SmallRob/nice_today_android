@@ -94,7 +94,7 @@ const OptimizedInfoCard = memo(({ title, children, className = "", isActive = fa
           }`}></div>
         <h4 className={`font-bold tracking-wide text-sm ${isActive
           ? 'text-purple-800 dark:text-purple-300'
-          : 'text-gray-800 dark:text-gray-200'
+          : 'text-gray-800 dark:text-white'
           }`}>{title}</h4>
       </div>
     )}
@@ -164,19 +164,19 @@ const SealInfoSection = memo(({ birthInfo }) => {
           <div className="flex items-center text-orange-700 dark:text-orange-300 font-bold text-xs mb-1.5">
             <span className="mr-1.5 opacity-80">✨</span> 特质
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.特质 || '连接宇宙能量的通道'}</p>
+          <p className="text-gray-600 dark:text-white text-xs leading-relaxed">{birthInfo?.maya_seal_info?.特质 || '连接宇宙能量的通道'}</p>
         </div>
         <div className="bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-xl border border-blue-100/50 dark:border-blue-800/30">
           <div className="flex items-center text-blue-700 dark:text-blue-300 font-bold text-xs mb-1.5">
             <span className="mr-1.5 opacity-80">🌀</span> 能量
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.能量 || '激活内在潜能的力量'}</p>
+          <p className="text-gray-600 dark:text-white text-xs leading-relaxed">{birthInfo?.maya_seal_info?.能量 || '激活内在潜能的力量'}</p>
         </div>
         <div className="bg-purple-50/50 dark:bg-purple-950/20 p-3 rounded-xl border border-purple-100/50 dark:border-purple-800/30">
           <div className="flex items-center text-purple-700 dark:text-purple-300 font-bold text-xs mb-1.5">
             <span className="mr-1.5 opacity-80">📖</span> 启示
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">{birthInfo?.maya_seal_info?.启示 || '开启灵性成长的大门'}</p>
+          <p className="text-gray-600 dark:text-white text-xs leading-relaxed">{birthInfo?.maya_seal_info?.启示 || '开启灵性成长的大门'}</p>
         </div>
       </div>
     </OptimizedInfoCard>
@@ -193,24 +193,24 @@ const ToneInfoSection = memo(({ birthInfo }) => {
             {birthInfo.maya_tone_info?.数字 || '1'}
           </div>
           <div>
-            <div className="text-xs text-gray-800 dark:text-gray-200 font-bold mb-1">数字能量</div>
-            <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">
+            <div className="text-xs text-gray-800 dark:text-white font-bold mb-1">数字能量</div>
+            <p className="text-gray-600 dark:text-white text-xs leading-relaxed">
               第{birthInfo.maya_tone_info?.数字 || '1'}号音调代表着独特的宇宙振动频率，指引您的行动基调。
             </p>
           </div>
         </div>
         <div className="pl-11 border-l border-gray-100 dark:border-gray-700 ml-4 space-y-3">
           <div>
-            <div className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold mb-1 flex items-center">
+            <div className="text-[11px] text-gray-500 dark:text-white font-semibold mb-1 flex items-center">
               <span className="w-1 h-1 bg-indigo-400 rounded-full mr-2"></span> 行动
             </div>
-            <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">{birthInfo.maya_tone_info?.行动 || '和谐共振，创造平衡'}</p>
+            <p className="text-gray-600 dark:text-white text-xs leading-relaxed">{birthInfo.maya_tone_info?.行动 || '和谐共振，创造平衡'}</p>
           </div>
           <div>
-            <div className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold mb-1 flex items-center">
+            <div className="text-[11px] text-gray-500 dark:text-white font-semibold mb-1 flex items-center">
               <span className="w-1 h-1 bg-indigo-400 rounded-full mr-2"></span> 启示
             </div>
-            <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">{birthInfo.maya_tone_info?.启示 || '聆听内在智慧的声音'}</p>
+            <p className="text-gray-600 dark:text-white text-xs leading-relaxed">{birthInfo.maya_tone_info?.启示 || '聆听内在智慧的声音'}</p>
           </div>
         </div>
       </div>
@@ -228,7 +228,7 @@ const LifePurposeSection = memo(({ birthInfo }) => {
       <div className="space-y-3">
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-3 rounded-xl border border-blue-100/50 dark:border-blue-900/30">
           <p className="text-sm font-bold text-blue-900 dark:text-blue-200 mb-1">{birthInfo.life_purpose?.summary || '探索你的生命使命...'}</p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed italic border-l-2 border-blue-200 dark:border-blue-800 pl-2 mt-2">
+          <p className="text-xs text-gray-600 dark:text-white leading-relaxed italic border-l-2 border-blue-200 dark:border-blue-800 pl-2 mt-2">
             {birthInfo.life_purpose?.details || '发现你独特的人生道路 and 目标'}
           </p>
         </div>
@@ -236,7 +236,7 @@ const LifePurposeSection = memo(({ birthInfo }) => {
           <div className="text-[11px] text-blue-600 dark:text-blue-400 font-bold mb-1.5 flex items-center">
             <span className="mr-1.5">🚀</span> 行动指南
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{birthInfo.life_purpose?.action_guide || '跟随内心指引，实践你的天赋'}</p>
+          <p className="text-xs text-gray-600 dark:text-white leading-relaxed">{birthInfo.life_purpose?.action_guide || '跟随内心指引，实践你的天赋'}</p>
         </div>
       </div>
     </OptimizedInfoCard>
@@ -254,7 +254,7 @@ const PersonalTraitsSection = memo(({ birthInfo }) => {
     <li key={`${isStrength ? 'strength' : 'challenge'}-${index}`} className="flex items-start group">
       <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 mr-2 transition-transform group-hover:scale-125 ${isStrength ? 'bg-emerald-400' : 'bg-rose-400'
         }`}></div>
-      <span className="text-[11px] text-gray-600 dark:text-gray-400 leading-tight">{trait || (isStrength ? '积极主动' : '需要平衡')}</span>
+      <span className="text-[11px] text-gray-600 dark:text-white leading-tight">{trait || (isStrength ? '积极主动' : '需要平衡')}</span>
     </li>
   ), []);
 
@@ -294,7 +294,7 @@ const EnergyFieldSection = memo(({ birthInfo }) => {
           <div className="flex-1">
             <div className="text-[11px] text-indigo-700 dark:text-indigo-300 font-bold">主能量场</div>
             <div className="text-xs text-gray-800 dark:text-white font-medium mt-0.5 tracking-wide">{birthInfo.birth_energy_field?.primary?.type || '个人能量场'}</div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 leading-normal">{birthInfo.birth_energy_field?.primary?.info?.描述 || '反映个人状态的能场'}</p>
+            <p className="text-[10px] text-gray-500 dark:text-white mt-1 leading-normal">{birthInfo.birth_energy_field?.primary?.info?.描述 || '反映个人状态的能场'}</p>
           </div>
         </div>
 
@@ -305,7 +305,7 @@ const EnergyFieldSection = memo(({ birthInfo }) => {
           <div className="flex-1">
             <div className="text-[11px] text-purple-700 dark:text-purple-300 font-bold">次要能量场</div>
             <div className="text-xs text-gray-800 dark:text-white font-medium mt-0.5 tracking-wide">{birthInfo.birth_energy_field?.secondary?.type || '创造能量场'}</div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 leading-normal">{birthInfo.birth_energy_field?.secondary?.info?.描述 || '与创造力相关的能场'}</p>
+            <p className="text-[10px] text-gray-500 dark:text-white mt-1 leading-normal">{birthInfo.birth_energy_field?.secondary?.info?.描述 || '与创造力相关的能场'}</p>
           </div>
         </div>
 

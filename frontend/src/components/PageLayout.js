@@ -31,7 +31,7 @@ const PageLayout = ({
       <div className={`flex-1 overflow-auto ${bgClass} pb-safe-bottom safe-area-theme-adaptive`}>
         <div className="flex flex-col items-center justify-center h-64">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">正在加载...</p>
+          <p className="text-gray-600 dark:text-white">正在加载...</p>
         </div>
       </div>
     );
@@ -66,7 +66,7 @@ const PageLayout = ({
                   onClick={onBackPress}
                   className="mr-3 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-6 h-6 text-gray-700 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
@@ -79,7 +79,7 @@ const PageLayout = ({
                   </h1>
                 )}
                 {subtitle && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="text-sm text-gray-600 dark:text-white mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                     {subtitle}
                   </p>
                 )}
@@ -129,7 +129,7 @@ export const Card = ({
                 </h3>
               )}
               {subtitle && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                <p className="text-sm text-gray-600 dark:text-white mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                   {subtitle}
                 </p>
               )}
@@ -167,7 +167,7 @@ export const Button = ({
     success: 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500 dark:bg-green-500 dark:hover:bg-green-600',
     warning: 'bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-500 dark:bg-yellow-500 dark:hover:bg-yellow-600',
     danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 dark:bg-red-500 dark:hover:bg-red-600',
-    outline: 'border border-gray-300 hover:bg-gray-50 text-gray-700 focus:ring-blue-500 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700'
+    outline: 'border border-gray-300 hover:bg-gray-50 text-gray-700 focus:ring-blue-500 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700'
   };
   
   // 尺寸样式

@@ -178,7 +178,7 @@ const UserInfoSection = memo(({ userInfo, loading, onSwitchProfile }) => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-3 mb-3">
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-white">
           {userInfo.birthDate ? `出生日期: ${userInfo.birthDate}` : '请到设置页面配置个人信息'}
         </p>
       </div>
@@ -204,7 +204,7 @@ const HistorySection = memo(({ historyDates, handleHistoryClick }) => (
           <button
             key={`${date}-${index}`}
             onClick={() => handleHistoryClick(date)}
-            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs rounded-md transition-all duration-200 active:scale-95 active:shadow-inner relative overflow-hidden group touch-manipulation"
+            className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white text-xs rounded-md transition-all duration-200 active:scale-95 active:shadow-inner relative overflow-hidden group touch-manipulation"
           >
             {/* 高亮反馈效果 */}
             <div className="absolute inset-0 bg-white opacity-0 group-active:opacity-20 transition-opacity duration-150"></div>
@@ -900,7 +900,7 @@ const MayaBirthChart = () => {
           <Suspense fallback={
             <div className="p-6 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">正在加载玛雅印记信息...</p>
+              <p className="text-gray-600 dark:text-white text-sm">正在加载玛雅印记信息...</p>
             </div>
           }>
             <ResultsSection

@@ -83,7 +83,7 @@ const MonthSelector = ({
           <div className="flex items-center space-x-2">
             <button
               onClick={() => navigateYear(-1)}
-              className={`${sizeClasses[size]} bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors`}
+              className={`${sizeClasses[size]} bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg transition-colors`}
               aria-label="上一年"
             >
               ◀
@@ -99,7 +99,7 @@ const MonthSelector = ({
             </select>
             <button
               onClick={() => navigateYear(1)}
-              className={`${sizeClasses[size]} bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors`}
+              className={`${sizeClasses[size]} bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg transition-colors`}
               aria-label="下一年"
             >
               ▶
@@ -133,7 +133,7 @@ const MonthSelector = ({
                   rounded-lg border transition-all duration-200 font-medium
                   ${isCurrentMonth 
                     ? 'bg-blue-500 text-white border-blue-600 shadow-md transform scale-105' 
-                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
                   }
                   ${isCurrentYearMonth && !isCurrentMonth 
                     ? 'ring-2 ring-blue-200 dark:ring-blue-800' 
@@ -161,7 +161,7 @@ const MonthSelector = ({
       <div className="md:hidden p-4 border-t border-gray-100 dark:border-gray-700">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">快速选择</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-white">快速选择</span>
             <button
               onClick={goToCurrentMonth}
               className="text-xs bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 px-2 py-1 rounded transition-colors"
@@ -193,7 +193,7 @@ const MonthSelector = ({
           </div>
           
           <div className="text-center">
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-gray-500 dark:text-white">
               或使用上方网格选择月份
             </span>
           </div>
@@ -203,7 +203,7 @@ const MonthSelector = ({
       {/* 当前选择显示 */}
       <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-b-lg border-t border-gray-100 dark:border-gray-700">
         <div className="text-center">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+          <span className="text-sm text-gray-600 dark:text-white">
             当前选择: 
           </span>
           <span className="text-blue-600 dark:text-blue-400 font-semibold">

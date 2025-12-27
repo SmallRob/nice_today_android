@@ -711,7 +711,7 @@ const MBTIPersonalityTabHome = () => {
             >
               <span className="mb-1">{icon}</span>
             </div>
-            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] text-gray-900 dark:text-gray-100 uppercase tracking-widest border border-white/10">
+            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] text-gray-900 dark:text-white uppercase tracking-widest border border-white/10">
               {type}
             </div>
           </div>
@@ -720,7 +720,7 @@ const MBTIPersonalityTabHome = () => {
           <div className="flex-1 text-center md:text-left">
             <div className="mb-4">
               <div className="flex flex-col md:flex-row md:items-center md:gap-3 mb-2 justify-center md:justify-start">
-                <h1 className="text-3xl font-black dark:text-gray-100 tracking-tight">{nickname}</h1>
+                <h1 className="text-3xl font-black dark:text-white tracking-tight">{nickname}</h1>
                 <div className="h-6 w-[2px] bg-white/30 hidden md:block"></div>
                 <span className="text-lg font-bold opacity-90 text-indigo-50 dark:text-indigo-200">{name}</span>
               </div>
@@ -737,7 +737,7 @@ const MBTIPersonalityTabHome = () => {
               {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] text-gray-900 dark:text-gray-100 font-black dark:text-gray-100 tracking-wider text-white shadow-inner"
+                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] text-gray-900 dark:text-white font-black dark:text-white tracking-wider text-white shadow-inner"
                 >
                   #{tag}
                 </span>
@@ -821,7 +821,7 @@ const MBTIPersonalityTabHome = () => {
         </div>
 
         <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-          <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed italic text-center">
+          <p className="text-[11px] text-gray-500 dark:text-white font-medium leading-relaxed italic text-center">
             基于人格维度的动态平衡，呈现出独一无二的性格能量分布
           </p>
         </div>
@@ -854,7 +854,7 @@ const MBTIPersonalityTabHome = () => {
               {strengths.slice(0, 4).map((strength, index) => (
                 <li key={index} className="flex items-start">
                   <div className="mt-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2.5 flex-shrink-0"></div>
-                  <span className="text-[12px] text-gray-700 dark:text-gray-200 font-medium leading-tight">{strength}</span>
+                  <span className="text-[12px] text-gray-700 dark:text-white font-medium leading-tight">{strength}</span>
                 </li>
               ))}
             </ul>
@@ -870,7 +870,7 @@ const MBTIPersonalityTabHome = () => {
               {weaknesses.slice(0, 4).map((weakness, index) => (
                 <li key={index} className="flex items-start">
                   <div className="mt-1.5 w-1.5 h-1.5 bg-rose-400 rounded-full mr-2.5 flex-shrink-0"></div>
-                  <span className="text-[12px] text-gray-700 dark:text-gray-200 font-medium leading-tight">{weakness}</span>
+                  <span className="text-[12px] text-gray-700 dark:text-white font-medium leading-tight">{weakness}</span>
                 </li>
               ))}
             </ul>
@@ -898,7 +898,7 @@ const MBTIPersonalityTabHome = () => {
         <div className="space-y-4">
           {/* 兼容类型 */}
           <div>
-            <h3 className="text-[13px] font-bold text-gray-700 dark:text-gray-300 mb-2.5 flex items-center">
+            <h3 className="text-[13px] font-bold text-gray-700 dark:text-white mb-2.5 flex items-center">
               <span className="w-6 h-6 bg-pink-50 dark:bg-pink-900/40 rounded-full flex items-center justify-center mr-2 text-xs">💖</span>
               灵魂共鸣类型
             </h3>
@@ -911,7 +911,7 @@ const MBTIPersonalityTabHome = () => {
                     className="group px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-sm flex items-center transition-all hover:border-pink-200 dark:hover:border-pink-900/50 hover:shadow-md"
                   >
                     <span className="text-sm mr-2 group-hover:scale-125 transition-transform">{compatTypeData?.icon}</span>
-                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{type}</span>
+                    <span className="text-xs font-bold text-gray-700 dark:text-white">{type}</span>
                   </div>
                 );
               })}
@@ -922,7 +922,7 @@ const MBTIPersonalityTabHome = () => {
           <div className="relative p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-xl border border-pink-100/50 dark:border-pink-900/30">
             <div className="absolute top-3 right-4 opacity-10 text-3xl">💬</div>
             <h3 className="text-[11px] font-black text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1.5">沟通建议</h3>
-            <p className="text-[12px] text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+            <p className="text-[12px] text-gray-600 dark:text-white font-medium leading-relaxed">
               {advice}
             </p>
           </div>
@@ -946,7 +946,7 @@ const MBTIPersonalityTabHome = () => {
           天赋使命与职业
         </h3>
         <div className="p-1">
-          <h3 className="text-[13px] font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+          <h3 className="text-[13px] font-bold text-gray-700 dark:text-white mb-3 flex items-center">
             <span className="w-6 h-6 bg-blue-50 dark:bg-blue-900/40 rounded-full flex items-center justify-center mr-2 text-xs">💼</span>
             高匹配度职业
           </h3>
@@ -985,7 +985,7 @@ const MBTIPersonalityTabHome = () => {
             <h3 className="text-[11px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest mb-2 flex items-center">
               <span className="mr-2">✨</span> Potential Analysis
             </h3>
-            <p className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-relaxed tracking-wide">
+            <p className="text-[12px] text-gray-700 dark:text-white font-medium leading-relaxed tracking-wide">
               {potential}
             </p>
           </div>
@@ -997,7 +997,7 @@ const MBTIPersonalityTabHome = () => {
                 <div className="w-8 h-8 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 flex items-center justify-center mr-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0">
                   <span className="text-sm font-bold">{index + 1}</span>
                 </div>
-                <span className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-tight">{tip}</span>
+                <span className="text-[12px] text-gray-700 dark:text-white font-medium leading-tight">{tip}</span>
               </div>
             ))}
           </div>
@@ -1037,7 +1037,7 @@ const MBTIPersonalityTabHome = () => {
             )}
 
             {/* 提示文本 */}
-            <p className="mb-3 text-[11px] text-gray-400 dark:text-gray-500 font-medium px-1 flex items-center">
+            <p className="mb-3 text-[11px] text-gray-400 dark:text-white font-medium px-1 flex items-center">
               <span className="mr-1.5 opacity-50">✦</span> 点击下方任意类型探索深度分析
             </p>
 
@@ -1066,7 +1066,7 @@ const MBTIPersonalityTabHome = () => {
                       <span className={`text-lg mb-0.5 transition-transform group-hover:scale-125 ${isSelected ? 'scale-110' : ''}`}>
                         {typeData?.icon}
                       </span>
-                      <span className={`text-[11px] font-black tracking-tighter ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-300'
+                      <span className={`text-[11px] font-black tracking-tighter ${isSelected ? 'text-white' : 'text-gray-700 dark:text-white'
                         }`}>
                         {mbti}
                       </span>
@@ -1169,7 +1169,7 @@ const MBTIPersonalityTabHome = () => {
             {/* 用户设置按钮 */}
             <button
               onClick={() => setShowMBTIModal(true)}
-              className="text-[10px] md:text-xs bg-white/20 dark:bg-gray-700/40 hover:bg-white/30 dark:hover:bg-gray-600/30 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-full border border-white/20 dark:border-gray-600 transition-all"
+              className="text-[10px] md:text-xs bg-white/20 dark:bg-gray-700/40 hover:bg-white/30 dark:hover:bg-gray-600/30 text-gray-700 dark:text-white px-3 py-1.5 rounded-full border border-white/20 dark:border-gray-600 transition-all"
             >
               ⚙️
             </button>
@@ -1188,7 +1188,7 @@ const MBTIPersonalityTabHome = () => {
                 <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
                   <div className="text-center py-6">
                     <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto mb-2"></div>
-                    <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载人格分析数据...</p>
+                    <p className="text-gray-600 dark:text-white text-xs">正在加载人格分析数据...</p>
                   </div>
                 </div>
               )}
@@ -1239,8 +1239,8 @@ const MBTIPersonalityTabHome = () => {
                 <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
                   <div className="text-center py-6">
                     <div className="text-3xl mb-2">🧩</div>
-                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择MBTI类型</h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs max-w-xs mx-auto mb-3">
+                    <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-2">请选择MBTI类型</h3>
+                    <p className="text-gray-500 dark:text-white text-xs max-w-xs mx-auto mb-3">
                       选择一种MBTI类型，探索人格特质与发展建议
                     </p>
                     <div className="inline-flex flex-wrap gap-1 justify-center">

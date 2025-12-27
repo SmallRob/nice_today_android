@@ -587,11 +587,11 @@ const HoroscopeTab = () => {
         
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <p className="text-gray-600 dark:text-gray-300 mb-3">
+            <p className="text-gray-600 dark:text-white mb-3">
               <span className="font-semibold">日期范围：</span>
               <span className="ml-1">{dateRange}</span>
             </p>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-white">
               <span className="font-semibold">性格特点：</span>
               <span className="ml-1">{traits}</span>
             </p>
@@ -651,7 +651,7 @@ const HoroscopeTab = () => {
                 {life.description}
               </span>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-xs text-gray-600 dark:text-white mt-2">
               趋势：{life.trend}
             </p>
           </div>
@@ -669,7 +669,7 @@ const HoroscopeTab = () => {
                 {career.description}
               </span>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-xs text-gray-600 dark:text-white mt-2">
               趋势：{career.trend}
             </p>
           </div>
@@ -687,7 +687,7 @@ const HoroscopeTab = () => {
                 {health.description}
               </span>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-xs text-gray-600 dark:text-white mt-2">
               趋势：{health.trend}
             </p>
           </div>
@@ -705,7 +705,7 @@ const HoroscopeTab = () => {
                 {love.description}
               </span>
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-xs text-gray-600 dark:text-white mt-2">
               趋势：{love.trend}
             </p>
           </div>
@@ -741,7 +741,7 @@ const HoroscopeTab = () => {
                     className="w-6 h-6 rounded-full mr-2 border border-gray-300 dark:border-gray-600"
                     style={{ backgroundColor: color }}
                   ></div>
-                  <span className="text-gray-700 dark:text-gray-300">{color}</span>
+                  <span className="text-gray-700 dark:text-white">{color}</span>
                 </div>
               ))}
             </div>
@@ -756,7 +756,7 @@ const HoroscopeTab = () => {
               {luckyNumbers.map((num, index) => (
                 <span 
                   key={index} 
-                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-gray-700 dark:text-gray-200"
+                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-gray-700 dark:text-white"
                 >
                   {num}
                 </span>
@@ -773,7 +773,7 @@ const HoroscopeTab = () => {
               <span className="text-2xl mr-2">
                 {horoscopeData.find(h => h.name === todayMoonSign)?.icon || '🌙'}
               </span>
-              <span className="text-gray-700 dark:text-gray-300">{todayMoonSign}</span>
+              <span className="text-gray-700 dark:text-white">{todayMoonSign}</span>
             </div>
           </div>
           
@@ -786,7 +786,7 @@ const HoroscopeTab = () => {
               {compatibleSigns.map((sign, index) => (
                 <span 
                   key={index} 
-                  className="px-3 py-1 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-gray-200 flex items-center"
+                  className="px-3 py-1 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-white flex items-center"
                 >
                   <span className="mr-1">{horoscopeData.find(h => h.name === sign)?.icon || ''}</span>
                   {sign}
@@ -806,7 +806,7 @@ const HoroscopeTab = () => {
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+              <p className="text-sm text-gray-600 dark:text-white mb-1">
                 用户昵称
               </p>
               <p className="font-medium text-gray-900 dark:text-white">
@@ -814,7 +814,7 @@ const HoroscopeTab = () => {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+              <p className="text-sm text-gray-600 dark:text-white mb-1">
                 出生日期
               </p>
               <p className="font-medium text-gray-900 dark:text-white">
@@ -822,7 +822,7 @@ const HoroscopeTab = () => {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+              <p className="text-sm text-gray-600 dark:text-white mb-1">
                 当前星座
               </p>
               <p className="font-medium text-blue-600 dark:text-blue-400">
@@ -832,7 +832,7 @@ const HoroscopeTab = () => {
           </div>
           {userInfo.nickname && (
             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-500 dark:text-white">
                 💡 如需修改信息，请在设置页面进行用户配置管理
               </p>
             </div>
@@ -850,7 +850,7 @@ const HoroscopeTab = () => {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
             🔮 星座运程
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-gray-600 dark:text-white">
             根据您的星座和当日天象，为您提供运势指导
           </p>
         </div>
@@ -862,7 +862,7 @@ const HoroscopeTab = () => {
       {/* 简化的星座选择器 */}
       <Card title="临时切换星座" className="mb-4">
         <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-white">
             您可以临时切换查看不同星座的运程，这不会修改您的用户配置
           </p>
           
@@ -880,7 +880,7 @@ const HoroscopeTab = () => {
                   className={`p-2 rounded-lg text-center transition-all duration-200 text-sm font-medium flex flex-col items-center ${
                     userHoroscope === horoscope
                       ? 'bg-blue-500 text-white shadow'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white'
                   }`}
                 >
                   <span className="text-lg mb-1">{horoscopeData?.icon || '⭐'}</span>
@@ -892,7 +892,7 @@ const HoroscopeTab = () => {
 
           {/* 日期选择器 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
               查看指定日期的运势
             </label>
             <input
@@ -947,7 +947,7 @@ const HoroscopeTab = () => {
         <Card>
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">正在加载星座运势...</p>
+            <p className="text-gray-600 dark:text-white text-sm">正在加载星座运势...</p>
           </div>
         </Card>
       )}
@@ -981,7 +981,7 @@ const HoroscopeTab = () => {
 
           {/* 底部信息 */}
           <Card>
-            <div className="text-center text-gray-500 dark:text-gray-400 text-xs">
+            <div className="text-center text-gray-500 dark:text-white text-xs">
               <p>数据更新时间：{new Date().toLocaleString()}</p>
               <p className="mt-1">星座运势仅供参考，请理性看待，结合实际情况做出决策</p>
             </div>
@@ -994,8 +994,8 @@ const HoroscopeTab = () => {
         <Card>
           <div className="text-center py-8">
             <div className="text-4xl mb-4">🔮</div>
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择您的星座</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-2">请选择您的星座</h3>
+            <p className="text-gray-500 dark:text-white text-sm max-w-md mx-auto">
               选择星座后，将为您提供个性化的每日运势指导
             </p>
           </div>

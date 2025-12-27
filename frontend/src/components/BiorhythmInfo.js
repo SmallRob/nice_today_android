@@ -254,8 +254,8 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
   if (!data) {
     return (
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <div className="text-center py-8 text-gray-500 dark:text-gray-300">
-          <svg className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center py-8 text-gray-500 dark:text-white">
+          <svg className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           没有可用的节律数据
@@ -327,8 +327,8 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
       return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-100 dark:border-gray-700 mt-8">
           <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">每月节律高低点</h3>
-          <div className="text-center py-8 text-gray-500 dark:text-gray-300">
-            <svg className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center py-8 text-gray-500 dark:text-white">
+            <svg className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             请先输入出生日期以查看准确的节律高低点数据
@@ -372,14 +372,14 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
                 <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-900 dark:text-white">{item.month}</td>
                 <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-medium text-yellow-600 dark:text-yellow-400">{item.highDate}</td>
                 <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-medium text-green-600 dark:text-green-400">{item.highValue}</td>
-                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-300">{item.physicalHigh}</td>
-                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-300">{item.emotionalHigh}</td>
-                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-300">{item.intellectualHigh}</td>
+                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white">{item.physicalHigh}</td>
+                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white">{item.emotionalHigh}</td>
+                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white">{item.intellectualHigh}</td>
                 <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-medium text-yellow-600 dark:text-yellow-400">{item.lowDate}</td>
                 <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-medium text-red-600 dark:text-red-400">{item.lowValue}</td>
-                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-300">{item.physicalLow}</td>
-                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-300">{item.emotionalLow}</td>
-                <td className="py-3 px-4 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-300">{item.intellectualLow}</td>
+                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white">{item.physicalLow}</td>
+                <td className="py-3 px-4 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white">{item.emotionalLow}</td>
+                <td className="py-3 px-4 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-white">{item.intellectualLow}</td>
               </tr>
             ))}
           </tbody>
@@ -397,7 +397,7 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
           <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">24小时人体器官节律</h3>
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-4"></div>
-            <p className="text-gray-500 dark:text-gray-300">正在加载器官节律数据...</p>
+            <p className="text-gray-500 dark:text-white">正在加载器官节律数据...</p>
           </div>
         </div>
       );
@@ -427,7 +427,7 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
           {/* 使用备选数据渲染表格 */}
           {organData.length > 0 && (
             <div className="mt-4">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">备选数据</h4>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-3">备选数据</h4>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden table-fixed">
                   <thead>
@@ -447,13 +447,13 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
                             : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150'}>
                         <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-900 dark:text-white text-center whitespace-nowrap">{item.timeRange}</td>
                         <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-bold text-blue-600 dark:text-blue-400 text-center whitespace-nowrap">{item.organ}</td>
-                        <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-300 truncate" title={item.description}>
+                        <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-white truncate" title={item.description}>
                           <div className="max-h-12 overflow-hidden">{item.description}</div>
                         </td>
-                        <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-300 truncate" title={item.activities}>
+                        <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-white truncate" title={item.activities}>
                           <div className="max-h-12 overflow-hidden">{item.activities}</div>
                         </td>
-                        <td className="py-2 px-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-300 truncate" title={item.tips}>
+                        <td className="py-2 px-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-white truncate" title={item.tips}>
                           <div className="max-h-12 overflow-hidden">{item.tips}</div>
                         </td>
                       </tr>
@@ -489,13 +489,13 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
                       : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150'}>
                   <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-900 dark:text-white text-center whitespace-nowrap">{item.timeRange}</td>
                   <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm font-bold text-blue-600 dark:text-blue-400 text-center whitespace-nowrap">{item.organ}</td>
-                  <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-300 truncate" title={item.description}>
+                  <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-white truncate" title={item.description}>
                     <div className="max-h-12 overflow-hidden">{item.description}</div>
                   </td>
-                  <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-300 truncate" title={item.activities}>
+                  <td className="py-2 px-2 border-b border-r border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-white truncate" title={item.activities}>
                     <div className="max-h-12 overflow-hidden">{item.activities}</div>
                   </td>
-                  <td className="py-2 px-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-300 truncate" title={item.tips}>
+                  <td className="py-2 px-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-white truncate" title={item.tips}>
                     <div className="max-h-12 overflow-hidden">{item.tips}</div>
                   </td>
                 </tr>
@@ -506,16 +506,16 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
         
         {/* 添加移动端优化视图 */}
         <div className="md:hidden mt-6">
-          <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">器官节律详情</h4>
+          <h4 className="text-lg font-semibold text-gray-700 dark:text-white mb-3">器官节律详情</h4>
           {organData.map((item, index) => (
             <div key={index} className="mb-4 p-3 bg-white dark:bg-gray-700 rounded-lg shadow border border-gray-200 dark:border-gray-600">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-bold bg-green-100 dark:bg-green-900 dark:bg-opacity-30 text-green-800 dark:text-green-300 px-2 py-1 rounded">{item.timeRange}</span>
                 <span className="text-sm font-bold bg-blue-100 dark:bg-blue-900 dark:bg-opacity-30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded">{item.organ}</span>
               </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2"><span className="font-medium">说明：</span>{item.description}</p>
-              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2"><span className="font-medium">建议活动：</span>{item.activities}</p>
-              <p className="text-sm text-gray-700 dark:text-gray-300"><span className="font-medium">健康提示：</span>{item.tips}</p>
+              <p className="text-sm text-gray-700 dark:text-white mb-2"><span className="font-medium">说明：</span>{item.description}</p>
+              <p className="text-sm text-gray-700 dark:text-white mb-2"><span className="font-medium">建议活动：</span>{item.activities}</p>
+              <p className="text-sm text-gray-700 dark:text-white"><span className="font-medium">健康提示：</span>{item.tips}</p>
             </div>
           ))}
         </div>
@@ -569,7 +569,7 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
             <div className="absolute top-0 left-1/2 w-0.5 h-full bg-gray-400 dark:bg-gray-500"></div>
           </div>
           
-          <div className="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-300">
+          <div className="mt-2 flex justify-between text-xs text-gray-500 dark:text-white">
             <span className="font-medium">-100</span>
             <span className="font-medium">0</span>
             <span className="font-medium">+100</span>
@@ -578,7 +578,7 @@ const BiorhythmInfo = ({ data, title, birthDate }) => {
           <div className="mt-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm">
             <div className="flex items-center">
               <div className={`w-2 h-2 rounded-full mr-2 ${rhythm.value > 0 ? 'bg-green-500' : rhythm.value < 0 ? 'bg-red-500' : 'bg-gray-500'}`}></div>
-              <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+              <p className="text-xs text-gray-700 dark:text-white font-medium">
                 {getPredictionTip(rhythm.key, rhythm.value, title)}
               </p>
             </div>

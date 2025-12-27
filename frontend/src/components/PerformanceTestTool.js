@@ -218,7 +218,7 @@ const PerformanceTestTool = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
           <div>
             <p className="font-medium text-gray-900 dark:text-white">性能测试</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 dark:text-white">
               评估设备本地化运算效能
             </p>
           </div>
@@ -239,7 +239,7 @@ const PerformanceTestTool = () => {
         {/* 进度条 */}
         {isRunning && (
           <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex justify-between text-sm text-gray-600 dark:text-white">
               <span>{currentTest}</span>
               <span>{Math.round(progress)}%</span>
             </div>
@@ -265,7 +265,7 @@ const PerformanceTestTool = () => {
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                     性能评分
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600 dark:text-white">
                     {testResults.passedTests}/{testResults.totalTests} 项测试通过
                   </p>
                 </div>
@@ -279,12 +279,12 @@ const PerformanceTestTool = () => {
               
               {expandedSections.summary && (
                 <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-2">
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <div className="text-xs text-gray-600 dark:text-white">
                     测试时间: {testResults.timestamp}
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-4">
                     <div className="text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">总体评级: </span>
+                      <span className="text-gray-500 dark:text-white">总体评级: </span>
                       <span className={`font-medium ${getScoreColor(testResults.overallScore)}`}>
                         {testResults.overallScore >= 90 ? '优秀' : 
                          testResults.overallScore >= 70 ? '良好' : 
@@ -292,7 +292,7 @@ const PerformanceTestTool = () => {
                       </span>
                     </div>
                     <div className="text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">通过率: </span>
+                      <span className="text-gray-500 dark:text-white">通过率: </span>
                       <span className={`font-medium ${getScoreColor((testResults.passedTests / testResults.totalTests) * 100)}`}>
                         {Math.round((testResults.passedTests / testResults.totalTests) * 100)}%
                       </span>
@@ -310,7 +310,7 @@ const PerformanceTestTool = () => {
               >
                 <div className="flex items-center space-x-2">
                   <h5 className="font-medium text-gray-900 dark:text-white">详细测试结果</h5>
-                  <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded-full">
+                  <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-white text-xs rounded-full">
                     {testResults.details.length} 项
                   </span>
                 </div>
@@ -390,7 +390,7 @@ const PerformanceTestTool = () => {
             {/* 重新测试按钮 */}
             <button
               onClick={runPerformanceTest}
-              className="w-full py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+              className="w-full py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg transition-colors"
             >
               重新测试
             </button>

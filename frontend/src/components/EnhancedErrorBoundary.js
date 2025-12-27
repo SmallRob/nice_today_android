@@ -122,7 +122,7 @@ class EnhancedErrorBoundary extends React.Component {
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                   应用遇到错误
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-gray-600 dark:text-white text-sm">
                   很抱歉，应用运行时遇到了意外错误。请尝试以下操作：
                 </p>
               </div>
@@ -162,7 +162,7 @@ class EnhancedErrorBoundary extends React.Component {
                   {error?.stack && (
                     <div>
                       <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-2">堆栈追踪</h4>
-                      <pre className="text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-3 rounded overflow-x-auto whitespace-pre-wrap">
+                      <pre className="text-xs text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-900 p-3 rounded overflow-x-auto whitespace-pre-wrap">
                         {error.stack}
                       </pre>
                     </div>
@@ -172,7 +172,7 @@ class EnhancedErrorBoundary extends React.Component {
                   {errorInfo?.componentStack && (
                     <div>
                       <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-2">组件堆栈</h4>
-                      <pre className="text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-3 rounded overflow-x-auto whitespace-pre-wrap">
+                      <pre className="text-xs text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-900 p-3 rounded overflow-x-auto whitespace-pre-wrap">
                         {errorInfo.componentStack}
                       </pre>
                     </div>
@@ -182,7 +182,7 @@ class EnhancedErrorBoundary extends React.Component {
                   {errorLog && (
                     <div>
                       <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-2">错误上下文</h4>
-                      <pre className="text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 p-3 rounded overflow-x-auto whitespace-pre-wrap">
+                      <pre className="text-xs text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-900 p-3 rounded overflow-x-auto whitespace-pre-wrap">
                         {JSON.stringify(errorLog.context, null, 2)}
                       </pre>
                     </div>
@@ -200,11 +200,11 @@ class EnhancedErrorBoundary extends React.Component {
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">总错误数:</span>
+                    <span className="text-gray-600 dark:text-white">总错误数:</span>
                     <span className="font-medium text-blue-900 dark:text-blue-300">{errorLogger.getStats().total}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">24小时内:</span>
+                    <span className="text-gray-600 dark:text-white">24小时内:</span>
                     <span className="font-medium text-blue-900 dark:text-blue-300">{errorLogger.getStats().recent24h}</span>
                   </div>
                 </div>
@@ -225,7 +225,7 @@ class EnhancedErrorBoundary extends React.Component {
 
               <button
                 onClick={this.handleShowDetails}
-                className="flex-1 min-w-[120px] px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2"
+                className="flex-1 min-w-[120px] px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -247,7 +247,7 @@ class EnhancedErrorBoundary extends React.Component {
             {/* 清除日志按钮 */}
             <button
               onClick={this.handleClearLogs}
-              className="w-full px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+              className="w-full px-4 py-2 text-sm text-gray-500 dark:text-white hover:text-red-600 dark:hover:text-red-400 transition-colors"
             >
               清除所有错误日志
             </button>

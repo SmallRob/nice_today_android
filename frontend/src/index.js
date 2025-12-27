@@ -80,7 +80,7 @@ const startApp = () => {
       <div className="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-50">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">正在加载...</p>
+          <p className="text-gray-600 dark:text-white text-sm">正在加载...</p>
         </div>
       </div>
     );
@@ -90,10 +90,10 @@ const startApp = () => {
       <div className="fixed inset-0 bg-red-50 dark:bg-red-900/20 flex items-center justify-center z-50">
         <div className="text-center p-6 max-w-sm mx-auto">
           <div className="text-4xl mb-4">⚠️</div>
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
             初始化失败
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+          <p className="text-gray-600 dark:text-white text-sm mb-4">
             应用启动时遇到问题，正在尝试恢复...
           </p>
           <button

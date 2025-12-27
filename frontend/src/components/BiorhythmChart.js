@@ -1,23 +1,63 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import { useTheme } from '../context/ThemeContext';
-import { ensureChartRegistered } from '../utils/chartConfig';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
 
 /**
  * BiorhythmChart 组件
- * 
+ *
  * 性能优化说明：
  * 1. 优化 useMemo 依赖项，避免不必要的重新计算
  * 2. 修复闭包问题，防止在 tooltip 回调中访问未初始化的变量
  * 3. 将复杂计算拆分为独立的 memoized 值
  * 4. 使用 useCallback 稳定回调函数引用
+ * 5. 添加动态key强制重新创建chart，防止canvas冲突
  */
 const BiorhythmChart = ({ data, isMobile }) => {
   const { theme } = useTheme();
+  const chartRef = React.useRef(null);
 
-  // 确保 Chart.js 组件已注册
+  // 确保 Chart.js 组件已注册 - 按页面实例化
   useEffect(() => {
-    ensureChartRegistered();
+    try {
+      // 注册当前页面实例所需的 Chart.js 组件
+      ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        PointElement,
+        LineElement,
+        Title,
+        Tooltip,
+        Legend,
+        Filler,
+        annotationPlugin
+      );
+    } catch (error) {
+      console.error('Chart.js 组件注册失败:', error);
+    }
+
+    // 组件卸载时清理Chart实例
+    return () => {
+      if (chartRef.current) {
+        try {
+          chartRef.current.destroy();
+          chartRef.current = null;
+        } catch (error) {
+          console.warn('清理Chart实例时出错:', error);
+        }
+      }
+    };
   }, []);
 
   // 深色模式下的文字颜色 - 独立的 memoized 值
@@ -200,6 +240,21 @@ const BiorhythmChart = ({ data, isMobile }) => {
     },
   }), [isMobile, themeColors, annotations, tooltipTitleCallback, tooltipLabelCallback]);
 
+  // 使用稳定的key，为每个组件实例生成唯一key
+  // key基于数据和主题变化，确保正确的生命周期管理
+  // 使用动态key来强制重新创建chart，防止canvas重复使用错误
+  // key基于数据和主题变化，确保正确的生命周期管理
+  const chartKey = useMemo(() => {
+    return `biorhythm-chart-${theme}-${isMobile}-${data?.length || 0}`;
+  }, [theme, isMobile, data?.length]);
+
+  // 图表渲染回调 - 保存chart实例引用
+  const onChartRender = useCallback((chart) => {
+    if (chart) {
+      chartRef.current = chart;
+    }
+  }, []);
+
   // 如果没有数据，显示空状态
   if (!chartData) {
     return <div className="text-center py-4 text-gray-900 dark:text-white">没有可用的图表数据</div>;
@@ -207,7 +262,14 @@ const BiorhythmChart = ({ data, isMobile }) => {
 
   return (
     <div className="w-full" style={{ height: isMobile ? '250px' : '400px' }}>
-      <Line data={chartData} options={options} />
+      <Line
+        key={chartKey}
+        data={chartData}
+        options={options}
+        type="line"
+        redraw={false}
+        ref={onChartRender}
+      />
     </div>
   );
 };

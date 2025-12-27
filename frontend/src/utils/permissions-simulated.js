@@ -227,7 +227,14 @@ const getPermissionsAPI = async () => {
     }
     
     // 尝试导入权限插件
-    const { Permissions } = await import('@capacitor/permissions');
+    let Permissions;
+    try {
+      const permissionsModule = await import('@capacitor/permissions');
+      Permissions = permissionsModule.Permissions;
+    } catch (error) {
+      console.warn('Permissions plugin not available, using simulation:', error);
+      return SimulatedPermissionsAPI;
+    }
     
     // 检查权限API是否可用
     if (!Permissions || typeof Permissions.query !== 'function') {

@@ -51,13 +51,14 @@ class ThemeConfigManager {
       const fullConfig = {
         ...config,
         lastUpdated: Date.now(),
-        version: '1.0'
+        version: '2.0'
       };
       localStorage.setItem(this.THEME_CONFIG_KEY, JSON.stringify(fullConfig));
-      
+
       // 设置缓存刷新标记
       this.setCacheRefreshFlag();
-      
+
+      console.log('主题配置已保存:', fullConfig);
       return true;
     } catch (error) {
       console.error('保存主题配置失败:', error);
@@ -219,26 +220,34 @@ export const ThemeProvider = ({ children }) => {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    
+
     // 更新localStorage以保持向后兼容性
     localStorage.setItem('theme', effectiveTheme);
+
+    console.log('主题已应用:', effectiveTheme);
   }, [effectiveTheme]);
 
   const toggleTheme = () => {
     // 简单切换，保留为向后兼容
     setThemeMode(prevMode => {
       const newMode = prevMode === 'light' ? 'dark' : 'light';
-      const newEffectiveTheme = newMode; // 直接使用新模式作为有效主题
-      
-      setEffectiveTheme(newEffectiveTheme);
-      
-      // 立即保存到配置文件
-      configManager.saveThemeConfig({ 
-        themeMode: newMode, 
-        effectiveTheme: newEffectiveTheme 
+
+      // 保存到配置文件（在状态更新之前保存，确保数据一致性）
+      configManager.saveThemeConfig({
+        themeMode: newMode,
+        effectiveTheme: newMode
       });
-      
+
       return newMode;
+    });
+
+    // 在下一个事件循环中更新有效主题，避免状态更新冲突
+    requestAnimationFrame(() => {
+      setThemeMode(currentMode => {
+        const newEffectiveTheme = currentMode;
+        setEffectiveTheme(newEffectiveTheme);
+        return currentMode;
+      });
     });
   };
 

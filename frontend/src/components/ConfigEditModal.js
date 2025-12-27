@@ -101,7 +101,7 @@ const MobileOptimizedSelect = ({ value, onChange, options, className, disabled }
 // 带验证的经纬度输入组件
 const CoordinateInput = ({ label, value, onChange, error, placeholder, min, max, step }) => (
   <div className="flex-1">
-    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label className="block text-xs font-medium text-gray-700 dark:text-white mb-1">
       {label}
     </label>
     <input
@@ -128,7 +128,7 @@ const MobileOptimizedButton = ({ children, onClick, variant = 'primary', disable
   const baseClasses = 'px-4 py-2 rounded-md text-base font-medium touch-manipulation transition-colors';
   const variantClasses = {
     primary: 'bg-blue-500 text-white hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed',
-    secondary: 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
+    secondary: 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600',
     danger: 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed'
   };
 
@@ -612,7 +612,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">
               🔍 请确认关键信息
             </h3>
-            <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            <button class="text-gray-500 hover:text-gray-700 dark:text-white dark:hover:text-gray-200">
               <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -667,7 +667,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           </div>
           
           <div class="flex justify-end gap-3">
-            <button id="cancel-save" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
+            <button id="cancel-save" class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
               取消
             </button>
             <button id="confirm-save" class="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
@@ -965,7 +965,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md">
           <h3 className="text-lg font-bold text-red-600 mb-2">表单初始化失败</h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">{initError}</p>
+          <p className="text-sm text-gray-700 dark:text-white mb-4">{initError}</p>
           <button
             onClick={() => {
               setInitError(null);
@@ -1025,7 +1025,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               </p>
             )}
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 touch-manipulation">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-white dark:hover:text-gray-200 p-1 touch-manipulation">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -1093,7 +1093,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <form.Field name="nickname">
                 {(field) => (
                   <>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                       昵称 <span className="text-gray-400">(选填，留空将自动生成)</span>
                     </label>
                     <input
@@ -1106,7 +1106,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                       style={{ fontSize: '16px' }}
                       autoComplete="off"
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-xs text-gray-500 dark:text-white">
                       💡 提示：可以自定义昵称，也可以留空让系统自动生成如"新用户1"、"朋友2"等
                     </p>
                     {formData.nickname && (
@@ -1124,7 +1124,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <form.Field name="realName">
                 {(field) => (
                   <>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                       真实姓名 (选填)
                     </label>
                     <input
@@ -1137,7 +1137,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                       style={{ fontSize: '16px' }}
                       autoComplete="off"
                     />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-xs text-gray-500 dark:text-white">
                       注：保存后将自动为中文姓名进行五格评分，无需手动操作。
                     </p>
                     {formData.realName && (
@@ -1157,7 +1157,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               >
                 {(field) => (
                   <>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                       出生日期 <span className="text-red-500">*</span>
                       <span className="text-xs text-gray-500 ml-1">(必填)</span>
                     </label>
@@ -1199,7 +1199,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <form.Field name="gender" defaultValue="male">
                 {(field) => (
                   <>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                       性别
                     </label>
                     <div className="gender-options grid grid-cols-2 gap-2">
@@ -1210,7 +1210,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                           className={`p-3 rounded-md text-center text-base font-medium touch-manipulation transition-all duration-200 ${
                             field.state.value === option.value
                               ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-md scale-105'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
                           }`}
                           onClick={() => field.handleChange(option.value)}
                           style={{ fontSize: '16px' }}
@@ -1229,13 +1229,13 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
             {/* 出生时间 - 优化为时辰选择 */}
             <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                 出生时间 <span className="text-gray-400">(可选择精确时间或直接选择时辰)</span>
               </label>
               
               {/* 时辰快速选择 */}
               <div className="mb-3">
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">🕐 快速选择时辰：</p>
+                <p className="text-xs text-gray-600 dark:text-white mb-2">🕐 快速选择时辰：</p>
                 <div className="grid grid-cols-4 gap-1">
                   {SHICHEN_OPTIONS.map((shichen) => (
                     <button
@@ -1250,7 +1250,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                       className={`px-2 py-1 text-xs rounded transition-colors ${
                         calculatedInfo.timeShichen === shichen.label
                           ? 'bg-blue-500 text-white'
-                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
                       }`}
                       title={shichen.description}
                     >
@@ -1264,7 +1264,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <form.Field name="birthTime" defaultValue="12:30">
                 {(field) => (
                   <>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">⏰ 或选择精确时间：</p>
+                    <p className="text-xs text-gray-600 dark:text-white mb-2">⏰ 或选择精确时间：</p>
                     <div className="flex items-center space-x-2 mb-3">
                       <MobileOptimizedSelect
                         value={field.state.value?.split(':')[0] || '12'}
@@ -1318,10 +1318,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
             {/* 出生地点 */}
             <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-gray-200 dark:border-gray-700">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                 出生地点 <span className="text-gray-400">(选填，用于计算真太阳时)</span>
               </label>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              <p className="text-xs text-gray-500 dark:text-white mb-3">
                 💡 提示：可以选择具体地区，也可以留空使用默认位置（北京）
               </p>
 
@@ -1331,7 +1331,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                     {/* 省市区三级联动选择 - 统一样式和尺寸 */}
                     <div className="grid grid-cols-3 gap-2">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-white mb-1">
                           省份
                         </label>
                         <input
@@ -1354,7 +1354,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-white mb-1">
                           城市
                         </label>
                         <input
@@ -1377,7 +1377,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-white mb-1">
                           县区
                         </label>
                         <input
@@ -1485,10 +1485,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <form.Field name="zodiac">
                 {(field) => (
                   <>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                       星座
                     </label>
-                    <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="mb-2 text-xs text-gray-500 dark:text-white">
                       点击选择您的星座
                     </div>
                     <div className="selector-grid">
@@ -1522,10 +1522,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <form.Field name="zodiacAnimal">
                 {(field) => (
                   <>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                       生肖
                     </label>
-                    <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="mb-2 text-xs text-gray-500 dark:text-white">
                       点击选择您的生肖
                     </div>
                     <div className="selector-grid">
@@ -1558,10 +1558,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <form.Field name="mbti">
                 {(field) => (
                   <>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                       MBTI类型
                     </label>
-                    <div className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="mb-2 text-xs text-gray-500 dark:text-white">
                       点击选择您的MBTI类型
                     </div>
                     <div className="selector-grid">

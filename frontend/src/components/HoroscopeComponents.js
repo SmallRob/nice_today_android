@@ -1,17 +1,18 @@
 import React from 'react';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import '../styles/horoscope.css';
-
-// 延迟导入以避免循环依赖
-let MemoizedLineChart = null;
-
-// 动态导入函数
-export const getMemoizedLineChart = async () => {
-  if (!MemoizedLineChart) {
-    const module = await import('./ZodiacHoroscope');
-    MemoizedLineChart = module.MemoizedLineChart;
-  }
-  return MemoizedLineChart;
-};
 
 // 星座选择器组件
 export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleHoroscopeChange, handleRestoreUserHoroscope, handleEditHoroscope, getHoroscopeData, configuredZodiac }) => {
@@ -27,13 +28,13 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
         {handleEditHoroscope && (
           <button
             onClick={handleEditHoroscope}
-            className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded transition-all"
+            className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white px-2 py-1 rounded transition-all"
           >
             ✏️ 设置
           </button>
         )}
       </div>
-      <div className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+      <div className="text-sm text-gray-600 dark:text-white mb-3">
         {configuredZodiac ? `当前星座：${configuredZodiac}` : '点击设置您的星座，获取每日运势指引'}
       </div>
 
@@ -77,20 +78,46 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
   );
 };
 
-// 趋势图表组件
+// 趋势图表组件 - 优化版本，参考人体节律图表的实现
 export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
-  const [chartComponent, setChartComponent] = React.useState(null);
+  const chartRef = React.useRef(null);
 
+  // 确保 Chart.js 组件已注册 - 按页面实例化
   React.useEffect(() => {
-    // 延迟加载图表组件
-    getMemoizedLineChart().then(ChartComponent => {
-      setChartComponent(() => ChartComponent);
-    });
+    try {
+      // 注册当前页面实例所需的 Chart.js 组件
+      ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        PointElement,
+        LineElement,
+        Title,
+        Tooltip,
+        Legend,
+        Filler,
+        annotationPlugin
+      );
+    } catch (error) {
+      console.error('Chart.js 组件注册失败:', error);
+    }
+
+    // 组件卸载时清理Chart实例
+    return () => {
+      if (chartRef.current) {
+        try {
+          chartRef.current.destroy();
+          chartRef.current = null;
+        } catch (error) {
+          console.warn('清理Chart实例时出错:', error);
+        }
+      }
+    };
   }, []);
 
-  if (!userHoroscope) return null;
+  // 生成趋势数据 - 使用 useMemo 优化性能
+  const trendData = React.useMemo(() => {
+    if (!userHoroscope) return null;
 
-  const generateTrendData = () => {
     const labels = [];
     const loveData = [];
     const wealthData = [];
@@ -121,44 +148,48 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
       }
     }
     return { labels, loveData, wealthData, careerData };
-  };
+  }, [userHoroscope, generateDailyHoroscope]);
 
-  const { labels, loveData, wealthData, careerData } = generateTrendData();
+  // 图表数据配置 - 使用 useMemo 优化
+  const chartData = React.useMemo(() => {
+    if (!trendData) return null;
 
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        label: '爱情',
-        data: loveData,
-        borderColor: '#EC4899',
-        backgroundColor: 'rgba(236, 72, 153, 0.1)',
-        tension: 0.4,
-        fill: true,
-        pointRadius: 3,
-      },
-      {
-        label: '财富',
-        data: wealthData,
-        borderColor: '#F59E0B',
-        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-        tension: 0.4,
-        fill: true,
-        pointRadius: 3,
-      },
-      {
-        label: '事业',
-        data: careerData,
-        borderColor: '#3B82F6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-        fill: true,
-        pointRadius: 3,
-      }
-    ]
-  };
+    return {
+      labels: trendData.labels,
+      datasets: [
+        {
+          label: '爱情',
+          data: trendData.loveData,
+          borderColor: '#EC4899',
+          backgroundColor: 'rgba(236, 72, 153, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 3,
+        },
+        {
+          label: '财富',
+          data: trendData.wealthData,
+          borderColor: '#F59E0B',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 3,
+        },
+        {
+          label: '事业',
+          data: trendData.careerData,
+          borderColor: '#3B82F6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 3,
+        }
+      ]
+    };
+  }, [trendData]);
 
-  const options = {
+  // 图表选项配置 - 使用 useMemo 优化
+  const chartOptions = React.useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -196,7 +227,21 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
         }
       }
     }
-  };
+  }), []);
+
+  // 图表渲染回调 - 保存chart实例引用
+  const onChartRender = React.useCallback((chart) => {
+    if (chart) {
+      chartRef.current = chart;
+    }
+  }, []);
+
+  // 使用基于数据的key来避免不必要的重新创建，同时防止canvas重复使用错误
+  const chartKey = React.useMemo(() => {
+    return `horoscope-trend-chart-${userHoroscope || 'default'}-${trendData?.labels?.length || 0}`;
+  }, [userHoroscope, trendData?.labels?.length]);
+
+  if (!userHoroscope) return null;
 
   return (
     <div className="horoscope-card">
@@ -207,8 +252,14 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
         近期能量趋势
       </h3>
       <div style={{ height: '200px' }}>
-        {chartComponent ? (
-          <chartComponent data={chartData} options={options} />
+        {chartData ? (
+          <Line 
+            key={chartKey}
+            data={chartData} 
+            options={chartOptions} 
+            redraw={false}
+            ref={onChartRender}
+          />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -218,7 +269,7 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
           </div>
         )}
       </div>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">展示过去7天的运势波动情况</p>
+      <p className="text-xs text-gray-500 dark:text-white mt-2 text-center">展示过去7天的运势波动情况</p>
     </div>
   );
 };
@@ -272,48 +323,48 @@ export const LuckyItemsGrid = ({ recommendations }) => {
             className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-600 shadow-sm mb-2"
             style={{ backgroundColor: (Array.isArray(recommendations.luckyColors) && recommendations.luckyColors[0]) ? recommendations.luckyColors[0] : '#FF6B6B' }}
           ></div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">幸运色</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
+          <span className="text-xs text-gray-500 dark:text-white">幸运色</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1">
             {String((Array.isArray(recommendations.luckyColorNames) && recommendations.luckyColorNames[0]) ? recommendations.luckyColorNames[0] : '魅力红')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">💎</div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">幸运配饰</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
+          <span className="text-xs text-gray-500 dark:text-white">幸运配饰</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1 text-center truncate w-full">
             {String(recommendations.luckyAccessory || '宝石')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🍱</div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">幸运食物</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
+          <span className="text-xs text-gray-500 dark:text-white">幸运食物</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1 text-center truncate w-full">
             {String(recommendations.luckyFood || '美食')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🔢</div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">幸运数字</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
+          <span className="text-xs text-gray-500 dark:text-white">幸运数字</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1">
             {Array.isArray(recommendations.luckyNumbers) ? recommendations.luckyNumbers.join('/') : String(recommendations.luckyNumbers || '7')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🕓</div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">幸运时辰</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center whitespace-normal">
+          <span className="text-xs text-gray-500 dark:text-white">幸运时辰</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1 text-center whitespace-normal">
             {String(recommendations.luckyTime || '午后')}
           </span>
         </div>
 
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🧭</div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">幸运方位</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
+          <span className="text-xs text-gray-500 dark:text-white">幸运方位</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1">
             {String(recommendations.luckyDirection || '东方')}
           </span>
         </div>
@@ -384,8 +435,8 @@ export const EmptyState = () => {
     <div className="horoscope-card">
       <div className="text-center py-6">
         <div className="text-3xl mb-2">🔮</div>
-        <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择您的星座</h3>
-        <p className="text-gray-500 dark:text-gray-400 text-xs">
+        <h3 className="text-base font-semibold text-gray-700 dark:text-white mb-2">请选择您的星座</h3>
+        <p className="text-gray-500 dark:text-white text-xs">
           选择您的星座，获取每日运势指引
         </p>
       </div>

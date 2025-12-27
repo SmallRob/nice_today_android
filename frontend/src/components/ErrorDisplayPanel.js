@@ -129,7 +129,7 @@ const ErrorDisplayPanel = () => {
           {/* 内容区域 */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {recentErrors.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-8 text-gray-500 dark:text-white">
                 <span className="text-4xl mb-3 block">✅</span>
                 <p>暂无错误日志</p>
               </div>
@@ -157,7 +157,7 @@ const ErrorDisplayPanel = () => {
                           <p className="font-medium text-sm text-gray-900 dark:text-white line-clamp-1">
                             {log.message}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-gray-500 dark:text-white">
                             {log.type} • {log.context.component}
                           </p>
                         </div>
@@ -186,7 +186,7 @@ const ErrorDisplayPanel = () => {
               </button>
               <button
                 onClick={() => clearLogs()}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2"
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -247,15 +247,15 @@ const ErrorDisplayPanel = () => {
                 <h4 className="font-medium text-gray-900 dark:text-white mb-3">错误上下文</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex">
-                    <span className="text-gray-500 dark:text-gray-400 w-24 flex-shrink-0">组件:</span>
+                    <span className="text-gray-500 dark:text-white w-24 flex-shrink-0">组件:</span>
                     <span className="text-gray-900 dark:text-white font-mono">{selectedLog.context.component}</span>
                   </div>
                   <div className="flex">
-                    <span className="text-gray-500 dark:text-gray-400 w-24 flex-shrink-0">动作:</span>
+                    <span className="text-gray-500 dark:text-white w-24 flex-shrink-0">动作:</span>
                     <span className="text-gray-900 dark:text-white font-mono">{selectedLog.context.action}</span>
                   </div>
                   <div className="flex">
-                    <span className="text-gray-500 dark:text-gray-400 w-24 flex-shrink-0">路由:</span>
+                    <span className="text-gray-500 dark:text-white w-24 flex-shrink-0">路由:</span>
                     <span className="text-gray-900 dark:text-white font-mono">{selectedLog.context.route}</span>
                   </div>
                 </div>
@@ -267,7 +267,7 @@ const ErrorDisplayPanel = () => {
                   <h4 className="bg-gray-100 dark:bg-gray-800 px-4 py-2 font-medium text-gray-900 dark:text-white text-sm">
                     堆栈追踪
                   </h4>
-                  <pre className="p-4 text-xs text-gray-700 dark:text-gray-300 overflow-x-auto whitespace-pre-wrap">
+                  <pre className="p-4 text-xs text-gray-700 dark:text-white overflow-x-auto whitespace-pre-wrap">
                     {selectedLog.stack}
                   </pre>
                 </div>

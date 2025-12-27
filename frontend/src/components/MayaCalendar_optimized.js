@@ -121,7 +121,7 @@ class MayaCalendarUtils {
       return {
         tip: "今日能量状态正常，保持平和心态面对一切。",
         bgColor: 'bg-gray-50 dark:bg-gray-900 dark:bg-opacity-20',
-        textColor: 'text-gray-700 dark:text-gray-400',
+        textColor: 'text-gray-700 dark:text-white',
         level: '中',
         suggestion: '适合日常工作、学习、生活'
       };
@@ -134,7 +134,7 @@ const LoadingSpinner = memo(() => (
   <div className="flex flex-col items-center justify-center py-6 animate-fadeIn">
     <div className="animate-pulse flex flex-col items-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mb-2"></div>
-      <p className="text-gray-600 dark:text-gray-400 text-sm leading-5 text-center">正在计算玛雅历法...</p>
+      <p className="text-gray-600 dark:text-white text-sm leading-5 text-center">正在计算玛雅历法...</p>
     </div>
   </div>
 ));
@@ -164,12 +164,12 @@ const ErrorDisplay = memo(({ error, onRetry }) => (
 const EmptyState = memo(({ onRetry }) => (
   <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center animate-fadeIn">
     <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
-      <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+      <svg className="w-4 h-4 text-gray-400 dark:text-white" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
       </svg>
     </div>
-    <h3 className="text-gray-800 dark:text-gray-300 text-sm font-medium mb-2 leading-5">暂无数据</h3>
-    <p className="text-gray-600 dark:text-gray-400 text-xs mb-3 leading-5">暂时无法获取玛雅历法数据</p>
+    <h3 className="text-gray-800 dark:text-white text-sm font-medium mb-2 leading-5">暂无数据</h3>
+    <p className="text-gray-600 dark:text-white text-xs mb-3 leading-5">暂时无法获取玛雅历法数据</p>
     {onRetry && (
       <button 
         onClick={onRetry} 
@@ -396,7 +396,7 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
             className={`px-3 py-1 text-xs rounded-md transition-all font-medium ${
               selectedOffset === offset
                 ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
           >
             {offset === -1 ? '昨天' : offset === 0 ? '今天' : '明天'}
@@ -452,7 +452,7 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
       <p className={`text-xs ${mayaData?.textColor} mb-2 leading-relaxed`}>
         <strong>能量等级：{mayaData?.level}</strong> - {mayaData?.tip}
       </p>
-      <div className="text-xs text-gray-600 dark:text-gray-400">
+      <div className="text-xs text-gray-600 dark:text-white">
         <strong>建议活动：</strong>{mayaData?.suggestion}
       </div>
     </div>
@@ -575,8 +575,8 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
         
         {/* 添加简短的实践建议 */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mt-2 border border-gray-200 dark:border-gray-700">
-          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-1">今日实践建议</div>
-          <div className="text-xs text-gray-500 dark:text-gray-500">
+          <div className="text-xs text-gray-600 dark:text-white font-medium mb-1">今日实践建议</div>
+          <div className="text-xs text-gray-500 dark:text-white">
             {inspiration.type === 'healing' 
               ? "花5分钟冥想，感受内心的平静" 
               : inspiration.type === 'energy' 
@@ -676,19 +676,19 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
           {knowledge.icon}
           {knowledge.title}
         </h4>
-        <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+        <p className="text-xs text-gray-700 dark:text-white leading-relaxed mb-3">
           {knowledge.content}
         </p>
         
         {/* 添加互动元素 - 基于当前KIN的实践提示 */}
         <div className="bg-white dark:bg-gray-800 rounded-md p-3 mt-3">
-          <h5 className="text-xs font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center">
+          <h5 className="text-xs font-semibold text-gray-800 dark:text-white mb-2 flex items-center">
             <svg className="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
             今日实践
           </h5>
-          <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+          <p className="text-xs text-gray-600 dark:text-white leading-relaxed">
             根据{mayaData?.fullName}的能量，今天特别适合{" "}
             {mayaData?.suggestion}。{" "}
             记住，玛雅历法提醒我们与自然周期同步，在每个当下保持觉知。
@@ -697,7 +697,7 @@ const MayaCalendar = memo(({ serviceStatus, isDesktop }) => {
         
         {/* 添加探索链接 */}
         <div className="mt-3 flex justify-between items-center">
-          <div className="text-xs text-gray-500 dark:text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-white">
             KIN {mayaData?.kin} / 260天周期第{mayaData?.kin}天
           </div>
           <button className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center">

@@ -93,7 +93,7 @@ const GlobalNotificationUI = ({ type, title, message, actions, onClose }) => {
                         <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
                             {title}
                         </h3>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <p className="mt-1 text-sm text-gray-500 dark:text-white">
                             {message}
                         </p>
                         {actions && actions.length > 0 && (
@@ -107,7 +107,7 @@ const GlobalNotificationUI = ({ type, title, message, actions, onClose }) => {
                                         }}
                                         className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${action.primary
                                                 ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30'
-                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
                                             }`}
                                     >
                                         {action.label}

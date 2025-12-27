@@ -5,10 +5,10 @@ const ErrorPage = ({ error }) => {
     <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900 p-4">
       <div className="text-center max-w-md">
         <div className="text-6xl mb-4">😕</div>
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
           加载失败
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-gray-600 dark:text-white mb-6">
           页面加载时出现错误，请刷新页面重试
         </p>
         {error && (

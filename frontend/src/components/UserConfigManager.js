@@ -149,7 +149,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
   if (!baziInfo) {
     return (
-      <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+      <div className="text-center py-4 text-gray-500 dark:text-white">
         请先设置出生日期
       </div>
     );
@@ -262,34 +262,34 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-              <th className="px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">柱</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">辛丑年</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{(baziInfo && baziInfo.lunar && baziInfo.lunar.monthStr) || '未知'}</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{(baziInfo && baziInfo.lunar && baziInfo.lunar.dayStr) || '未知'}</th>
-              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-gray-300">{(baziInfo && baziInfo.shichen && baziInfo.shichen.ganzhi) || '未知'}</th>
+              <th className="px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-white">柱</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-white">辛丑年</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-white">{(baziInfo && baziInfo.lunar && baziInfo.lunar.monthStr) || '未知'}</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-white">{(baziInfo && baziInfo.lunar && baziInfo.lunar.dayStr) || '未知'}</th>
+              <th className="px-3 py-2 text-center text-sm font-medium text-gray-700 dark:text-white">{(baziInfo && baziInfo.shichen && baziInfo.shichen.ganzhi) || '未知'}</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b border-gray-100 dark:border-gray-700">
-              <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">八字</td>
+              <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-white">八字</td>
               <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.year) || '未知'}</td>
               <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.month) || '未知'}</td>
               <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.day) || '未知'}</td>
               <td className="px-3 py-2 text-center font-mono text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.hour) || '未知'}</td>
             </tr>
             <tr className="border-b border-gray-100 dark:border-gray-700">
-              <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">五行</td>
+              <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-white">五行</td>
               <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.year) || '未知'}</td>
               <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.month) || '未知'}</td>
               <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.day) || '未知'}</td>
               <td className="px-3 py-2 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.hour) || '未知'}</td>
             </tr>
             <tr>
-              <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">纳音</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.year) || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.month) || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.day) || '未知'}</td>
-              <td className="px-3 py-2 text-center text-gray-600 dark:text-gray-400 text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.hour) || '未知'}</td>
+              <td className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-white">纳音</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-white text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.year) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-white text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.month) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-white text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.day) || '未知'}</td>
+              <td className="px-3 py-2 text-center text-gray-600 dark:text-white text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.hour) || '未知'}</td>
             </tr>
           </tbody>
         </table>
@@ -297,7 +297,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
       {/* 五行统计 */}
       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">五行统计</h4>
+        <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-3">五行统计</h4>
         <div className="grid grid-cols-5 gap-2">
           {wuxingElements.map((element) => {
             const elementColors = {
@@ -307,7 +307,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
             return (
               <div key={element} className="text-center">
                 <div className={`h-2 rounded-full ${elementColors[element]} mb-1`}></div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">{element}</p>
+                <p className="text-xs text-gray-600 dark:text-white">{element}</p>
                 <p className="text-sm font-bold text-gray-900 dark:text-white">{elementCounts[element]}</p>
               </div>
             );
@@ -317,13 +317,13 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
       {/* 八字总述解析 */}
       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">八字总述解析</h4>
-        <div className="text-sm text-gray-800 dark:text-gray-200 space-y-2">
+        <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">八字总述解析</h4>
+        <div className="text-sm text-gray-800 dark:text-white space-y-2">
           <p>
             <span className="font-medium">总述：</span>
             {fortuneType}，八字喜用神「{luckyElement}」，起名最好用五行属性为「{luckyElement}」的字。
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+          <p className="text-xs text-gray-600 dark:text-white">
             日主天干为{dayMaster}({masterElement})。五行统计：
             木{elementCounts['木']}，火{elementCounts['火']}，土{elementCounts['土']}，
             金{elementCounts['金']}，水{elementCounts['水']}。
@@ -333,8 +333,8 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
       {/* 命局五行喜忌 */}
       <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">命局五行喜忌</h4>
-        <div className="text-sm text-gray-800 dark:text-gray-200 space-y-2">
+        <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-3">命局五行喜忌</h4>
+        <div className="text-sm text-gray-800 dark:text-white space-y-2">
           {(() => {
               const preferences = calculateWuxingPreferences(baziInfo);
               if (!preferences) return null;
@@ -345,7 +345,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                 {preferences.preferred.filter(p => p.priority === '最喜').map((item, index) => (
                   <div key={`preferred-top-${index}`} className="border-l-4 border-green-500 pl-3">
                     <p className="font-medium">最喜五行{item.element}：</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                    <p className="text-xs text-gray-600 dark:text-white ml-2">
                       十神：{item.shishen}；方位：{item.fangwei}；数字{item.shuzi}；色彩：{item.secai}
                     </p>
                   </div>
@@ -355,7 +355,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                 {preferences.preferred.filter(p => p.priority === '次喜').map((item, index) => (
                   <div key={`preferred-secondary-${index}`} className="border-l-4 border-blue-500 pl-3">
                     <p className="font-medium">次喜五行{item.element}：</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                    <p className="text-xs text-gray-600 dark:text-white ml-2">
                       十神：{item.shishen}；方位：{item.fangwei}；数字{item.shuzi}；色彩：{item.secai}
                     </p>
                   </div>
@@ -365,7 +365,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                 {preferences.avoided.filter(p => p.priority === '最忌').map((item, index) => (
                   <div key={`avoided-top-${index}`} className="border-l-4 border-red-500 pl-3">
                     <p className="font-medium">最忌五行{item.element}：</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                    <p className="text-xs text-gray-600 dark:text-white ml-2">
                       十神：{item.shishen}；方位：{item.fangwei}；数字：{item.shuzi}；色彩：{item.secai}
                     </p>
                   </div>
@@ -375,7 +375,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                 {preferences.avoided.filter(p => p.priority === '次忌').map((item, index) => (
                   <div key={`avoided-secondary-${index}`} className="border-l-4 border-orange-500 pl-3">
                     <p className="font-medium">次忌五行{item.element}：</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                    <p className="text-xs text-gray-600 dark:text-white ml-2">
                       十神：{item.shishen}；方位：{item.fangwei}；数字：{item.shuzi}；色彩：{item.secai}
                     </p>
                   </div>
@@ -385,7 +385,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                 {preferences.neutral.map((item, index) => (
                   <div key={`neutral-${index}`} className="border-l-4 border-gray-500 pl-3">
                     <p className="font-medium">平常五行{item.element}：</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 ml-2">
+                    <p className="text-xs text-gray-600 dark:text-white ml-2">
                       十神：{item.shishen}；方位：{item.fangwei}；数字{item.shuzi}；色彩{item.secai}
                     </p>
                   </div>
@@ -398,8 +398,8 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
       {/* 十年大运 */}
       <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">大运</h4>
-        <div className="text-sm text-gray-800 dark:text-gray-200">
+        <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-3">大运</h4>
+        <div className="text-sm text-gray-800 dark:text-white">
           {(() => {
               // 从出生日期中提取年份
               const birthYear = birthDate ? parseInt(birthDate.split('-')[0]) : new Date().getFullYear();
@@ -411,7 +411,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                 {dayun.map((d, index) => (
                   <div key={index} className="flex justify-between py-1 border-b border-yellow-100 dark:border-yellow-800/50">
                     <span className="font-medium">{d.ganzhi} {d.startYear}-{d.endYear}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">({d.ageRange})</span>
+                    <span className="text-xs text-gray-500 dark:text-white">({d.ageRange})</span>
                   </div>
                 ))}
               </div>
@@ -1215,7 +1215,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
             {safeConfig.realName && (
               <div className="flex items-center ml-2 space-x-2">
                 <span className="text-gray-500 text-xs">|</span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{safeConfig.realName}</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">{safeConfig.realName}</span>
                 {safeConfig?.nameScore && (
                   <span className={`px-2 py-0.5 text-xs rounded font-bold ${safeConfig.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                     safeConfig.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
@@ -1255,19 +1255,19 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
             <div>
-              <span className="text-gray-500 dark:text-gray-400">昵称：</span>
+              <span className="text-gray-500 dark:text-white">昵称：</span>
               <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.nickname || '-'}</span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">星座：</span>
+              <span className="text-gray-500 dark:text-white">星座：</span>
               <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.zodiac || '-'}</span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">生肖：</span>
+              <span className="text-gray-500 dark:text-white">生肖：</span>
               <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.zodiacAnimal || '-'}</span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">MBTI：</span>
+              <span className="text-gray-500 dark:text-white">MBTI：</span>
               <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.mbti || '-'}</span>
             </div>
           </div>
@@ -1277,7 +1277,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
             <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-gray-500 dark:text-gray-400 text-sm">姓名评分：</span>
+                  <span className="text-gray-500 dark:text-white text-sm">姓名评分：</span>
                   {safeConfig.nameScore && (
                     <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${safeConfig.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                       safeConfig.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
@@ -1300,7 +1300,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
           ) : (
             <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center">
-                <span className="text-gray-500 dark:text-gray-400 text-sm">姓名评分：</span>
+                <span className="text-gray-500 dark:text-white text-sm">姓名评分：</span>
                 <button
                   className="ml-2 px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
                   onClick={() => onEdit && onEdit(index)}
@@ -2297,7 +2297,7 @@ const UserConfigManagerComponent = () => {
       <div className="flex justify-center items-center py-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">正在加载配置...</p>
+          <p className="text-gray-600 dark:text-white">正在加载配置...</p>
         </div>
       </div>
     );
@@ -2486,7 +2486,7 @@ const UserConfigManagerComponent = () => {
             title={isUserInfoExpanded ? "收起" : "展开"}
           >
             <svg 
-              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isUserInfoExpanded ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-gray-500 dark:text-white transition-transform duration-200 ${isUserInfoExpanded ? 'rotate-180' : ''}`}
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -2500,7 +2500,7 @@ const UserConfigManagerComponent = () => {
           {configs[activeConfigIndex] ? (
             <UserInfoCard config={configs[activeConfigIndex]} />
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-4">当前没有可用配置</p>
+            <p className="text-gray-500 dark:text-white text-center py-4">当前没有可用配置</p>
           )}
         </div>
       </Card>
@@ -2516,7 +2516,7 @@ const UserConfigManagerComponent = () => {
             title={isZiweiExpanded ? "收起" : "展开"}
           >
             <svg 
-              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isZiweiExpanded ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-gray-500 dark:text-white transition-transform duration-200 ${isZiweiExpanded ? 'rotate-180' : ''}`}
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -2559,7 +2559,7 @@ const UserConfigManagerComponent = () => {
             title={isBaziExpanded ? "收起" : "展开"}
           >
             <svg 
-              className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isBaziExpanded ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-gray-500 dark:text-white transition-transform duration-200 ${isBaziExpanded ? 'rotate-180' : ''}`}
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -2584,7 +2584,7 @@ const UserConfigManagerComponent = () => {
                 }}
                 title="刷新八字信息"
               >
-                <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-gray-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </button>
@@ -2654,7 +2654,7 @@ const UserConfigManagerComponent = () => {
                 }}
                 title="同步八字到全局配置"
               >
-                <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-gray-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                 </svg>
               </button>
@@ -2680,11 +2680,11 @@ const UserConfigManagerComponent = () => {
           })()
         ) : (
           !isBaziExpanded ? (
-            <div className="p-4 text-gray-500 dark:text-gray-400 text-sm text-center">
+            <div className="p-4 text-gray-500 dark:text-white text-sm text-center">
               点击箭头展开八字命格信息
             </div>
           ) : (
-            <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-6 text-gray-500 dark:text-white">
               <p>请先设置出生日期以查看八字命格信息</p>
             </div>
           )
@@ -2695,7 +2695,7 @@ const UserConfigManagerComponent = () => {
       <Card title="用户配置" className="mb-6">
         <div className="space-y-4">
           <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="text-sm text-gray-700 dark:text-white leading-relaxed">
               <span className="font-semibold text-blue-700 dark:text-blue-400">🎯 配置管理</span>
               在这里管理您的个人信息配置，包括昵称、出生日期、星座和生肖。
               您可以创建多个配置，并随时切换使用哪个配置。
@@ -2959,7 +2959,7 @@ const UserConfigManagerComponent = () => {
             />
           );
         }) : (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-8 text-gray-500 dark:text-white">
             <p>暂无配置，请添加新配置</p>
           </div>
         )}
