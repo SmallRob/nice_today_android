@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BiorhythmIcon } from './IconLibrary';
 import { useTabPerformance } from '../utils/tabPerformanceMonitor';
-import { isAndroidWebView } from '../utils/androidWebViewCompat';
+import { isAndroidWebView, isIOSWebView } from '../utils/androidWebViewCompat';
 import { globalErrorHandler, getErrorLocation, createDetailedErrorReport } from '../utils/errorHandler';
 import '../styles/animations.css';
 import niceDayImage from '../images/nice_day.png';
@@ -9,19 +9,23 @@ import niceDayImage from '../images/nice_day.png';
 // 使用懒加载组件，避免直接导入导致的初始化时序问题
 const BiorhythmTab = React.lazy(() => import('./BiorhythmTab').catch(err => {
   console.error('BiorhythmTab 加载失败:', err);
-  return Promise.resolve(() => <div>BiorhythmTab 加载失败</div>);
+  globalErrorHandler.handle(err, { component: 'BiorhythmTab', action: 'lazyImport' });
+  return Promise.resolve(() => <div className="text-center p-8 text-gray-500 dark:text-gray-400">生物节律模块加载失败，请稍后重试</div>);
 }));
 const ZodiacEnergyTab = React.lazy(() => import('./ZodiacEnergyTab').catch(err => {
   console.error('ZodiacEnergyTab 加载失败:', err);
-  return Promise.resolve(() => <div>ZodiacEnergyTab 加载失败</div>);
+  globalErrorHandler.handle(err, { component: 'ZodiacEnergyTab', action: 'lazyImport' });
+  return Promise.resolve(() => <div className="text-center p-8 text-gray-500 dark:text-gray-400">生肖能量模块加载失败，请稍后重试</div>);
 }));
 const HoroscopeTab = React.lazy(() => import('./HoroscopeTab').catch(err => {
   console.error('HoroscopeTab 加载失败:', err);
-  return Promise.resolve(() => <div>HoroscopeTab 加载失败</div>);
+  globalErrorHandler.handle(err, { component: 'HoroscopeTab', action: 'lazyImport' });
+  return Promise.resolve(() => <div className="text-center p-8 text-gray-500 dark:text-gray-400">星座运程模块加载失败，请稍后重试</div>);
 }));
 const MBTIPersonalityTab = React.lazy(() => import('./MBTIPersonalityTabHome').catch(err => {
   console.error('MBTIPersonalityTab 加载失败:', err);
-  return Promise.resolve(() => <div>MBTIPersonalityTab 加载失败</div>);
+  globalErrorHandler.handle(err, { component: 'MBTIPersonalityTab', action: 'lazyImport' });
+  return Promise.resolve(() => <div className="text-center p-8 text-gray-500 dark:text-gray-400">人格魅力模块加载失败，请稍后重试</div>);
 }));
 
 // 增强版错误边界组件
@@ -226,49 +230,65 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   // 错误处理函数
   const handleError = useCallback((error, context) => {
-    // 使用全局错误处理器标准化错误
-    const appError = globalErrorHandler.handle(error, {
-      component: context,
-      action: 'onError',
-      timestamp: new Date().toISOString()
-    });
+    try {
+      // 使用全局错误处理器标准化错误
+      const appError = globalErrorHandler.handle(error, {
+        component: context,
+        action: 'onError',
+        timestamp: new Date().toISOString()
+      });
 
-    // 创建详细的错误报告
-    const errorDetails = createDetailedErrorReport(appError);
+      // 创建详细的错误报告
+      const errorDetails = createDetailedErrorReport(appError);
 
-    console.error(`[${context}] 组件错误:`, appError);
-    console.error('错误位置:', errorDetails.locationString);
-    console.error('设备信息:', errorDetails.device);
-    console.error('完整错误报告:', errorDetails);
+      console.error(`[${context}] 组件错误:`, appError);
+      console.error('错误位置:', errorDetails.locationString);
+      console.error('设备信息:', errorDetails.device);
+      console.error('完整错误报告:', errorDetails);
 
-    // 设置错误消息（包含位置信息）
-    const errorMessage = `加载失败: ${appError.message}\n位置: ${errorDetails.locationString}`;
-    setError(errorMessage);
+      // 设置错误消息（包含位置信息）
+      const errorMessage = `加载失败: ${appError.message}\n位置: ${errorDetails.locationString}`;
+      setError(errorMessage);
 
-    // 扩展的错误检查，包含更多关键错误类型
-    const isCriticalError = appError.type === 'CHUNK_LOAD_ERROR' ||
-                           appError.type === 'MOBILE_WEBVIEW_ERROR' ||
-                           appError.type === 'SOURCE_MAP_ERROR' ||
-                           error.name === 'ChunkLoadError' ||
-                           error.message?.includes('加载失败') ||
-                           error.message?.includes('网络错误') ||
-                           error.message?.includes('Network Error') ||
-                           error.code === 'MODULE_NOT_FOUND';
+      // 扩展的错误检查，包含更多关键错误类型
+      const isCriticalError = appError.type === 'CHUNK_LOAD_ERROR' ||
+                             appError.type === 'MOBILE_WEBVIEW_ERROR' ||
+                             appError.type === 'SOURCE_MAP_ERROR' ||
+                             appError.type === 'COMPONENT_ERROR' ||
+                             error.name === 'ChunkLoadError' ||
+                             error.message?.includes('加载失败') ||
+                             error.message?.includes('网络错误') ||
+                             error.message?.includes('Network Error') ||
+                             error.message?.includes('Failed to fetch') ||
+                             error.code === 'MODULE_NOT_FOUND' ||
+                             error.code === 'NETWORK_ERROR';
 
-    // 移动设备特殊处理
-    if (isAndroidWebView() || isIOSWebView()) {
-      console.warn('检测到移动 WebView 环境，应用增强的错误处理');
-      if (isCriticalError) {
+      // 移动设备特殊处理
+      if (isAndroidWebView() || isIOSWebView()) {
+        console.warn('检测到移动 WebView 环境，应用增强的错误处理');
+        if (isCriticalError) {
+          setFallbackMode(true);
+        }
+      } else if (isCriticalError) {
         setFallbackMode(true);
       }
-    } else if (isCriticalError) {
-      setFallbackMode(true);
-    }
 
-    // 自动恢复机制（延长至10秒，给用户更多时间查看错误信息）
-    setTimeout(() => {
-      setError(null);
-    }, 10000);
+      // 自动恢复机制（延长至10秒，给用户更多时间查看错误信息）
+      setTimeout(() => {
+        setError(null);
+      }, 10000);
+    } catch (handlingError) {
+      // 错误处理过程中出现错误，记录并尝试恢复
+      console.error('错误处理函数内部出现错误:', handlingError);
+      setError('组件加载失败，错误处理出现异常');
+      
+      // 使用全局错误处理器处理内部错误
+      globalErrorHandler.handle(handlingError, {
+        component: 'errorHandler',
+        action: 'internalError',
+        timestamp: new Date().toISOString()
+      });
+    }
   }, []);
 
   // 降级模式组件
@@ -604,26 +624,34 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 </div>
               }>
                 {activeTab === 'biorhythm' && loadedTabs.has('biorhythm') && (
-                  <BiorhythmTab
-                    serviceStatus={serviceStatus.biorhythm}
-                    isDesktop={appInfo.isDesktop}
-                    onError={(error) => handleError(error, 'BiorhythmTab')}
-                  />
+                  <React.Suspense fallback={<div className="text-center py-8 text-gray-500 dark:text-gray-400">正在加载生物节律模块...</div>}>
+                    <BiorhythmTab
+                      serviceStatus={serviceStatus.biorhythm}
+                      isDesktop={appInfo.isDesktop}
+                      onError={(error) => handleError(error, 'BiorhythmTab')}
+                    />
+                  </React.Suspense>
                 )}
                 {activeTab === 'zodiac' && loadedTabs.has('zodiac') && (
-                  <ZodiacEnergyTab
-                    onError={(error) => handleError(error, 'ZodiacEnergyTab')}
-                  />
+                  <React.Suspense fallback={<div className="text-center py-8 text-gray-500 dark:text-gray-400">正在加载生肖能量模块...</div>}>
+                    <ZodiacEnergyTab
+                      onError={(error) => handleError(error, 'ZodiacEnergyTab')}
+                    />
+                  </React.Suspense>
                 )}
                 {activeTab === 'horoscope' && loadedTabs.has('horoscope') && (
-                  <HoroscopeTab
-                    onError={(error) => handleError(error, 'HoroscopeTab')}
-                  />
+                  <React.Suspense fallback={<div className="text-center py-8 text-gray-500 dark:text-gray-400">正在加载星座运程模块...</div>}>
+                    <HoroscopeTab
+                      onError={(error) => handleError(error, 'HoroscopeTab')}
+                    />
+                  </React.Suspense>
                 )}
                 {activeTab === 'mbti' && loadedTabs.has('mbti') && (
-                  <MBTIPersonalityTab
-                    onError={(error) => handleError(error, 'MBTIPersonalityTab')}
-                  />
+                  <React.Suspense fallback={<div className="text-center py-8 text-gray-500 dark:text-gray-400">正在加载人格魅力模块...</div>}>
+                    <MBTIPersonalityTab
+                      onError={(error) => handleError(error, 'MBTIPersonalityTab')}
+                    />
+                  </React.Suspense>
                 )}
               </React.Suspense>
             )}

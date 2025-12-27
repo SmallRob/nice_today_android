@@ -14,6 +14,20 @@ export const isAndroidWebView = () => {
   }
 };
 
+// 检测是否在 iOS WebView 中运行
+export const isIOSWebView = () => {
+  try {
+    const ua = navigator.userAgent || '';
+    // 检测 iOS 设备且不是 Safari 浏览器
+    return /iPhone|iPad|iPod/.test(ua) &&
+           /Safari/.test(ua) &&
+           !/Safari.*Version/.test(ua) &&
+           /Mobile/.test(ua);
+  } catch (error) {
+    return false;
+  }
+};
+
 // 检测是否在 Capacitor 环境中
 export const isCapacitorAndroid = () => {
   try {
@@ -196,6 +210,7 @@ export const initAndroidWebViewCompat = () => {
 
 export default {
   isAndroidWebView,
+  isIOSWebView,
   isCapacitorAndroid,
   safeGetMemoryUsage,
   isPerformanceAvailable,
