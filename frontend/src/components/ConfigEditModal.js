@@ -731,46 +731,26 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         // 标记配置来源（保持原有标记）
         isFromTemplate: isFromTemplate || false,
         templateSource: isFromTemplate ? (templateSource || '默认模板') : null
-    };
+      };
 
-    try {
-      // 显示关键信息确认弹窗
-      const confirmed = await showConfirmationDialog(processedData);
+      // 6. 显示确认对话框（失败不影响保存）
+      let confirmed = true;
+      try {
+        confirmed = await showConfirmationDialog(processedData);
+      } catch (error) {
+        console.warn('确认对话框加载失败，跳过确认步骤:', error);
+        // 对话框失败不影响保存流程
+      }
+
       if (!confirmed) {
         console.log('用户取消了保存');
         return;
       }
-    } catch (error) {
-      console.error('显示确认对话框失败:', error);
-      // 确认对话框失败，记录错误但继续保存
-      showMessage('⚠️ 确认对话框加载失败，将直接保存', 'warning');
-    }
 
-    const finalLocation = processedData.birthLocation;
+      const finalLocation = processedData.birthLocation;
+      setIsSaving(true);
 
-    setIsSaving(true);
-
-    // 尝试显示确认对话框（失败不影响保存）
-    let confirmed = true;
-    try {
-      confirmed = await showConfirmationDialog(processedData);
-    } catch (error) {
-      console.warn('确认对话框加载失败，跳过确认步骤:', error);
-      // 对话框失败不影响保存流程
-    }
-
-    if (!confirmed) {
-      console.log('用户取消了保存');
-      setIsSaving(false);
-      return;
-    }
-
-    const finalLocation = processedData.birthLocation;
-
-    setIsSaving(true);
-
-    try {
-      // 计算完整的时辰和农历信息（使用专业算法）
+      // 7. 计算完整的时辰和农历信息（使用专业算法）
       const lng = finalLocation?.lng ?? DEFAULT_REGION.lng;
       const lat = finalLocation?.lat ?? DEFAULT_REGION.lat;
 
@@ -807,7 +787,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       );
 
       // 创建安全、可序列化的配置对象，避免React错误#31
-      let finalConfig = {
+      const finalConfig = {
         // 基础字段
         nickname: (processedData.nickname || '').toString().trim(),
         realName: (processedData.realName || '').toString().trim(),
@@ -897,93 +877,65 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           } : null
         } : null,
 
-        lastCalculated: processedData.lastCalculated || new Date().toISOString(),
+        lunarBirthDate: lunarFields?.lunarBirthDate || processedData.birthDate || '',
+        lastCalculated: new Date().toISOString(),
         // 保持模板来源标记
         isFromTemplate: processedData.isFromTemplate || false,
         templateSource: processedData.templateSource || null
       };
 
-      // 计算农历和真太阳时信息（简化处理，增加容错）
-      try {
-        const lunarFields2 = generateLunarAndTrueSolarFields(finalConfig);
-        if (lunarFields2?.lunarBirthDate) {
-          finalConfig.lunarBirthDate = lunarFields2.lunarBirthDate;
-        }
-        if (lunarFields2?.trueSolarTime) {
-          finalConfig.trueSolarTime = lunarFields2.trueSolarTime;
-        }
-        finalConfig.lastCalculated = new Date().toISOString();
-      } catch (error) {
-        console.warn('农历计算失败，不影响保存:', error);
-        // 农历计算失败不影响保存，只记录警告
-      }
-
       // 显示保存中消息
       showMessage('正在保存配置...', 'info');
 
-      try {
-        // 异步保存数据
-        const result = await onSave(index, finalConfig);
+      // 异步保存数据
+      const result = await onSave(index, finalConfig);
 
-        if (result) {
-          console.log('配置保存成功');
-          showMessage('✅ 配置保存成功', 'success');
-          
-          // 保存成功后自动计算八字和紫薇星宫（完全异步，不阻塞）
-          setTimeout(async () => {
-            try {
-              const savedConfig = index !== null && index !== undefined 
-                ? userConfigManager.configs[index] 
-                : userConfigManager.getCurrentConfig();
-              
-              if (!savedConfig) {
-                console.warn('无法获取保存的配置，跳过命格计算');
-                onClose();
-                return;
-              }
-              
-              // 异步计算八字和紫薇星宫（完全异步，失败不影响任何流程）
-              try {
-                const fortuneData = await userConfigManager.calculateFortuneByIndex(
-                  index !== null && index !== undefined ? index : userConfigManager.getActiveConfigIndex()
-                );
-                
-                if (fortuneData?.hasData) {
-                  console.log('八字和紫薇星宫计算完成');
-                  showMessage('✅ 八字和紫薇星宫计算完成', 'success');
-                } else if (fortuneData?.hasErrors) {
-                  console.warn('八字和紫薇星宫计算存在错误:', fortuneData.errors);
-                  // 不显示警告，避免干扰用户
-                }
-              } catch (calcError) {
-                console.error('计算八字和紫薇星宫失败:', calcError);
-                // 计算失败完全静默处理，不影响任何流程
-              }
-              
-              // 延迟关闭弹窗
-              setTimeout(() => {
-                onClose();
-              }, 1000);
-            } catch (asyncError) {
-              console.error('异步计算过程失败:', asyncError);
-              // 即使计算失败也正常关闭弹窗
-              setTimeout(() => {
-                onClose();
-              }, 500);
+      if (result) {
+        console.log('配置保存成功');
+        showMessage('✅ 配置保存成功', 'success');
+        
+        // 保存成功后自动计算八字和紫薇星宫（完全异步，不阻塞）
+        setTimeout(async () => {
+          try {
+            const savedConfig = index !== null && index !== undefined 
+              ? userConfigManager.configs[index] 
+              : userConfigManager.getCurrentConfig();
+            
+            if (!savedConfig) {
+              console.warn('无法获取保存的配置，跳过命格计算');
+              onClose();
+              return;
             }
-          }, 100);
-        } else {
-          throw new Error('保存配置返回失败结果');
-        }
-
-      } catch (error) {
-        console.error('保存配置失败:', error);
-        const errorMsg = `保存失败: ${error.message}`;
-        setSaveError(errorMsg);
-        showMessage(errorMsg, 'error');
-        throw error;
-      } finally {
-        setIsSaving(false);
+            
+            // 异步计算八字和紫薇星宫（完全异步，失败不影响任何流程）
+            try {
+              const fortuneData = await userConfigManager.calculateFortuneByIndex(
+                index !== null && index !== undefined ? index : userConfigManager.getActiveConfigIndex()
+              );
+              
+              if (fortuneData?.hasData) {
+                console.log('八字和紫薇星宫计算完成');
+                showMessage('✅ 八字和紫薇星宫计算完成', 'success');
+              }
+            } catch (calcError) {
+              console.error('计算八字和紫薇星宫失败:', calcError);
+              // 计算失败完全静默处理，不影响任何流程
+            }
+            
+            // 延迟关闭弹窗
+            setTimeout(() => {
+              onClose();
+            }, 1000);
+          } catch (asyncError) {
+            console.error('异步计算过程失败:', asyncError);
+            // 即使计算失败也正常关闭弹窗
+            setTimeout(() => {
+              onClose();
+            }, 500);
+          }
+        }, 100);
+      } else {
+        throw new Error('保存配置返回失败结果');
       }
 
     } catch (error) {
@@ -991,8 +943,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       const errorMsg = `保存失败: ${error.message}`;
       setSaveError(errorMsg);
       showMessage(errorMsg, 'error');
+    } finally {
       setIsSaving(false);
-      // 不再抛出错误，避免阻塞其他异步进程
     }
   };
 
