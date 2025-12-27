@@ -91,6 +91,12 @@ const getFamousExamples = (zodiacName) => {
     return HOROSCOPE_DATA_ENHANCED.find(h => h.name === currentHoroscope);
   }, [currentHoroscope]);
   
+  // 当前星座数据依赖currentHoroscope，所以需要在currentHoroscope变化时更新
+  useEffect(() => {
+    // 当currentHoroscope变化时，zodiacData会自动更新
+    // 因为zodiacData是通过useMemo依赖currentHoroscope计算的
+  }, [currentHoroscope]);
+  
   const elementColors = useMemo(() => {
     if (!zodiacData?.element) {
       console.warn('星座元素数据不可用');
@@ -104,6 +110,8 @@ const getFamousExamples = (zodiacName) => {
     // 检查URL参数、状态和配置中的星座
     const stateZodiac = location.state?.userZodiac;
     const configZodiac = currentConfig?.zodiac;
+    
+    // 优先级：URL参数 > 传递状态 > 用户配置 > 默认值
     const targetZodiac = zodiacName || stateZodiac || configZodiac || '金牛座';
     
     if (targetZodiac && targetZodiac !== currentHoroscope) {

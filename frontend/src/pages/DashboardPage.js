@@ -11,6 +11,8 @@ import {
   EnergyBoostCard,
   PeriodTrackerCard
 } from '../components/dashboard/FeatureCards';
+import { useUserConfig } from '../contexts/UserConfigContext';
+import { useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css';
 
 /**
@@ -18,6 +20,9 @@ import '../styles/dashboard.css';
  * 采用响应式网格布局，提供清晰的功能入口
  */
 const Dashboard = () => {
+  const { currentConfig } = useUserConfig();
+  const navigate = useNavigate();
+  
   // 获取当前日期和星期
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -32,6 +37,19 @@ const Dashboard = () => {
     const now = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
     return now.toLocaleDateString('zh-CN', options);
+  };
+  
+  // 跳转到用户星座特质页面
+  const goToUserZodiacTraits = () => {
+    const userZodiac = currentConfig?.zodiac;
+    if (userZodiac) {
+      navigate(`/zodiac-traits/${encodeURIComponent(userZodiac)}`, {
+        state: { from: 'dashboard', userZodiac: userZodiac }
+      });
+    } else {
+      // 如果用户没有配置星座，跳转到星座选择页面
+      navigate('/horoscope');
+    }
   };
 
   return (
@@ -54,6 +72,14 @@ const Dashboard = () => {
         <p className="welcome-text">
           全方位的性格分析、运势解读和能量管理，助您每一天都充满活力
         </p>
+        {currentConfig?.zodiac && (
+          <button 
+            onClick={goToUserZodiacTraits}
+            className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm"
+          >
+            查看您的专属星座特质：{currentConfig.zodiac}
+          </button>
+        )}
       </div>
 
       {/* 个性化功能展示 */}
