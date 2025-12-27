@@ -7,30 +7,91 @@ import EnhancedErrorBoundary from './components/EnhancedErrorBoundary';
 import ErrorDisplayPanel from './components/ErrorDisplayPanel';
 import { errorLogger, initializeGlobalErrorHandlers } from './utils/errorLogger';
 import { safeInitAndroidWebViewCompat } from './utils/androidWebViewCompat';
+import { useChunkErrorRecovery, ChunkLoadErrorBoundary } from './utils/chunkLoadErrorHandler';
+import { useVersionManager, VersionUpdateNotification } from './utils/versionManager';
+import { UserParamsProvider } from './context/UserParamsContext';
 import './index.css';
 
 // 为移动设备兼容性安全导入Suspense
 const { Suspense } = React;
 
+// 创建带有错误处理的懒加载函数
+const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
+  return React.lazy(() => 
+    importFunc().catch(error => {
+      console.error('组件加载失败:', error);
+      
+      // 如果是ChunkLoadError，记录错误并尝试恢复
+      if (error.name === 'ChunkLoadError') {
+        console.error('检测到ChunkLoadError，尝试恢复...');
+        
+        // 记录错误信息
+        if (typeof window !== 'undefined' && window.localStorage) {
+          try {
+            const errorInfo = {
+              type: 'ChunkLoadError',
+              message: error.message,
+              stack: error.stack,
+              timestamp: new Date().toISOString(),
+              url: window.location.href
+            };
+            
+            const errors = JSON.parse(window.localStorage.getItem('chunkLoadErrors') || '[]');
+            errors.push(errorInfo);
+            window.localStorage.setItem('chunkLoadErrors', JSON.stringify(errors));
+          } catch (e) {
+            console.warn('无法记录ChunkLoadError:', e);
+          }
+        }
+      }
+      
+      // 返回回退组件或错误页面
+      if (fallbackComponent) {
+        return fallbackComponent;
+      }
+      
+      // 默认返回错误页面组件
+      return {
+        default: () => (
+          <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900 p-4">
+            <div className="text-red-500 text-xl mb-4">页面加载失败</div>
+            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-w-md">
+              <p className="text-gray-700 dark:text-white text-sm mb-4">
+                抱歉，页面资源加载失败。这通常是由于网络问题或应用更新导致的。
+              </p>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+                onClick={() => window.location.reload()}
+              >
+                刷新页面
+              </button>
+            </div>
+          </div>
+        )
+      };
+    })
+  );
+};
+
 // 懒加载页面组件 - 添加错误处理
-const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
-const BiorhythmDashboard = React.lazy(() => import('./components/BiorhythmDashboard'));
-const MayaPage = React.lazy(() => import('./pages/MayaPage'));
-const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
-const LifeTrendPage = React.lazy(() => import('./pages/LifeTrendPage'));
-const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
-const TarotPage = React.lazy(() => import('./pages/TarotPage'));
-const NumerologyPage = React.lazy(() => import('./pages/NumerologyPage'));
-const BiorhythmPage = React.lazy(() => import('./pages/BiorhythmPage'));
-const HoroscopePage = React.lazy(() => import('./pages/HoroscopePage'));
-const BaziPage = React.lazy(() => import('./pages/BaziPage'));
-const MBTITestPage = React.lazy(() => import('./pages/MBTITestPage'));
-const MBTIDetailPage = React.lazy(() => import('./components/MBTIPersonalityTabHome'));
-const EnergyBoostPage = React.lazy(() => import('./pages/EnergyBoostPage'));
-const PeriodTrackerPage = React.lazy(() => import('./pages/PeriodTrackerPage'));
-const ZodiacTraitsPage = React.lazy(() => import('./pages/ZodiacTraitsPage'));
-const ChineseZodiacPage = React.lazy(() => import('./pages/ChineseZodiacPage'));
-const TabNavigation = React.lazy(() => import('./components/TabNavigation'));
+const DashboardPage = lazyLoadWithErrorHandling(() => import('./pages/DashboardPage'));
+const BiorhythmDashboard = lazyLoadWithErrorHandling(() => import('./components/BiorhythmDashboard'));
+const MayaPage = lazyLoadWithErrorHandling(() => import('./pages/MayaPage'));
+const DressGuidePage = lazyLoadWithErrorHandling(() => import('./pages/DressGuidePage'));
+const LifeTrendPage = lazyLoadWithErrorHandling(() => import('./pages/LifeTrendPage'));
+const SettingsPage = lazyLoadWithErrorHandling(() => import('./pages/SettingsPage'));
+const TarotPage = lazyLoadWithErrorHandling(() => import('./pages/TarotPage'));
+const NumerologyPage = lazyLoadWithErrorHandling(() => import('./pages/NumerologyPage'));
+const BiorhythmPage = lazyLoadWithErrorHandling(() => import('./pages/BiorhythmPage'));
+const HoroscopePage = lazyLoadWithErrorHandling(() => import('./pages/HoroscopePage'));
+const BaziPage = lazyLoadWithErrorHandling(() => import('./pages/BaziPage'));
+const MBTITestPage = lazyLoadWithErrorHandling(() => import('./pages/MBTITestPage'));
+const MBTIDetailPage = lazyLoadWithErrorHandling(() => import('./components/MBTIPersonalityTabHome'));
+const EnergyBoostPage = lazyLoadWithErrorHandling(() => import('./pages/EnergyBoostPage'));
+const PeriodTrackerPage = lazyLoadWithErrorHandling(() => import('./pages/PeriodTrackerPage'));
+const ZodiacTraitsPage = lazyLoadWithErrorHandling(() => import('./pages/ZodiacTraitsPage'));
+const ChineseZodiacPage = lazyLoadWithErrorHandling(() => import('./pages/ChineseZodiacPage'));
+const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
 const LoadingScreen = () => (
@@ -111,6 +172,20 @@ function App() {
     initialized: false,
     error: null
   });
+  
+  // 初始化Chunk错误恢复工具
+  const { handleChunkError, checkChunkHealth } = useChunkErrorRecovery();
+  
+  // 初始化版本管理工具
+  const {
+    current: currentVersion,
+    stored: storedVersion,
+    needsUpdate,
+    clearAndReload
+  } = useVersionManager();
+  
+  // 版本更新通知状态
+  const [showUpdateNotification, setShowUpdateNotification] = React.useState(false);
 
   // 检测是否在移动设备环境中
   const isMobileEnvironment = () => {
@@ -135,7 +210,7 @@ function App() {
     };
   };
 
-  // 在应用启动时记录设备信息
+  // 在应用启动时记录设备信息和检查chunk健康状态
   useEffect(() => {
     const deviceInfo = isMobileEnvironment();
     console.log('设备信息:', deviceInfo);
@@ -148,7 +223,48 @@ function App() {
         isAndroidWebView: deviceInfo.isAndroidWebView
       });
     }
-  }, []);
+    
+    // 检查关键chunk健康状态
+    try {
+      const isHealthy = checkChunkHealth();
+      if (!isHealthy) {
+        console.warn('检测到潜在的chunk加载问题');
+      }
+    } catch (e) {
+      console.warn('Chunk健康检查失败:', e);
+    }
+    
+    // 监听全局错误，特别是ChunkLoadError
+    const handleGlobalError = (event) => {
+      if (event.error && event.error.name === 'ChunkLoadError') {
+        console.log('全局ChunkLoadError捕获:', event.error.message);
+        handleChunkError(event.error);
+      }
+    };
+    
+    const handleUnhandledRejection = (event) => {
+      if (event.reason && event.reason.name === 'ChunkLoadError') {
+        console.log('全局Promise拒绝ChunkLoadError捕获:', event.reason.message);
+        handleChunkError(event.reason);
+      }
+    };
+    
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, [handleChunkError, checkChunkHealth]);
+  
+  // 监听版本更新
+  React.useEffect(() => {
+    if (needsUpdate) {
+      console.log(`检测到版本更新: ${storedVersion || '未知'} → ${currentVersion}`);
+      setShowUpdateNotification(true);
+    }
+  }, [needsUpdate, currentVersion, storedVersion]);
 
   // 安全的初始化函数 - 优化：立即返回，后台执行初始化
   const initializeApp = async () => {
@@ -309,14 +425,35 @@ function App() {
   return (
     <>
       <Router>
-        <EnhancedErrorBoundary componentName="App">
-          <ThemeProvider>
-            <UserConfigProvider>
-              <AppLayout />
-              <ErrorDisplayPanel />
-            </UserConfigProvider>
-          </ThemeProvider>
-        </EnhancedErrorBoundary>
+        {/* 版本更新通知 */}
+        {showUpdateNotification && (
+          <VersionUpdateNotification
+            updateInfo={{
+              previousVersion: storedVersion,
+              currentVersion: currentVersion
+            }}
+            onApplyUpdate={() => {
+              clearAndReload(true);
+              setShowUpdateNotification(false);
+            }}
+            onDismiss={() => {
+              setShowUpdateNotification(false);
+            }}
+          />
+        )}
+        
+        <ChunkLoadErrorBoundary maxRetries={3}>
+          <EnhancedErrorBoundary componentName="App">
+            <ThemeProvider>
+              <UserConfigProvider>
+                <UserParamsProvider>
+                  <AppLayout />
+                  <ErrorDisplayPanel />
+                </UserParamsProvider>
+              </UserConfigProvider>
+            </ThemeProvider>
+          </EnhancedErrorBoundary>
+        </ChunkLoadErrorBoundary>
       </Router>
     </>
   );

@@ -127,25 +127,25 @@ const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
                 {errorDetails?.errorId && (
                   <div>
                     <p className="text-xs font-medium text-gray-700 dark:text-gray-200">错误ID:</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails.errorId}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails?.errorId}</p>
                   </div>
                 )}
                 {errorDetails?.location?.fileName && (
                   <div>
                     <p className="text-xs font-medium text-gray-700 dark:text-gray-200">文件:</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 break-all">{errorDetails.location.fileName}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 break-all">{errorDetails.location?.fileName}</p>
                   </div>
                 )}
                 {errorDetails?.location?.lineNumber && (
                   <div>
                     <p className="text-xs font-medium text-gray-700 dark:text-gray-200">行号:</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails.location.lineNumber}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails.location?.lineNumber}</p>
                   </div>
                 )}
                 {errorDetails?.location?.columnNumber && (
                   <div>
                     <p className="text-xs font-medium text-gray-700 dark:text-gray-200">列号:</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails.location.columnNumber}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-mono">{errorDetails.location?.columnNumber}</p>
                   </div>
                 )}
                 {errorDetails?.stackTrace && (

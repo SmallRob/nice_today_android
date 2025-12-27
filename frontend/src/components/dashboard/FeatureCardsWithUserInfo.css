@@ -1,0 +1,107 @@
+/* 个性化功能卡片样式 */
+.user-personalized-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.feature-card {
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card.personalized {
+  /* 背景色将根据星座动态设置 */
+}
+
+.feature-card.age-based {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.feature-header {
+  margin-bottom: 16px;
+}
+
+.feature-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.user-summary {
+  font-size: 14px;
+  opacity: 0.9;
+  padding: 4px 8px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.feature-description {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  flex-grow: 1;
+}
+
+.feature-action-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.feature-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.user-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.user-tag {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.15);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .user-personalized-features {
+    grid-template-columns: 1fr;
+  }
+  
+  .feature-card {
+    padding: 16px;
+  }
+  
+  .feature-title {
+    font-size: 18px;
+  }
+  
+  .feature-description {
+    font-size: 14px;
+  }
+}

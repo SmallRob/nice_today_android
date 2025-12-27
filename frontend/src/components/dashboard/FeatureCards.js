@@ -92,9 +92,9 @@ const PersonalityTraitCard = () => {
 
   const handleClick = () => {
     if (userZodiac) {
-      // 跳转到用户的星座特质页面
+      // 优化：直接跳转到用户的星座特质页面，传递URL参数
       navigate(`/zodiac-traits/${encodeURIComponent(userZodiac)}`, {
-        state: { zodiac: userZodiac }
+        state: { from: 'dashboard', userZodiac: userZodiac }
       });
     } else {
       // 如果没有配置星座，跳转到星座运势页面让用户选择

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChunkLoadError 测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .error-message {
+      color: #d32f2f;
+      background-color: #ffebee;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .success-message {
+      color: #388e3c;
+      background-color: #e8f5e9;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <h1>ChunkLoadError 错误处理测试</h1>
+  
+  <div class="test-section">
+    <h2>测试说明</h2>
+    <p>此页面用于测试应用中的ChunkLoadError错误处理机制。通过模拟代码块加载失败的场景，验证我们的错误恢复功能是否正常工作。</p>
+  </div>
+  
+  <div class="test-section">
+    <h2>测试场景</h2>
+    
+    <h3>1. 模拟ChunkLoadError</h3>
+    <p>点击下面的按钮模拟代码块加载失败，观察错误处理机制的反应：</p>
+    <button id="simulateChunkError">模拟ChunkLoadError</button>
+    
+    <h3>2. 测试版本管理</h3>
+    <p>测试版本检测和缓存清理功能：</p>
+    <button id="checkVersion">检查版本</button>
+    <button id="clearCache">清理缓存</button>
+    
+    <h3>3. 测试错误恢复</h3>
+    <p>测试自动错误恢复和重试机制：</p>
+    <button id="testRecovery">测试错误恢复</button>
+  </div>
+  
+  <div id="results" class="test-section">
+    <h2>测试结果</h2>
+    <div id="output"></div>
+  </div>
+  
+  <script>
+    // 模拟ChunkLoadError
+    document.getElementById('simulateChunkError').addEventListener('click', function() {
+      const error = new Error('Loading chunk 6425 failed. (error: https://localhost/zodiac-traits/static/js/6425.5e437d5d.chunk.js)');
+      error.name = 'ChunkLoadError';
+      
+      // 触发全局错误事件
+      setTimeout(() => {
+        window.dispatchEvent(new ErrorEvent('error', {
+          error: error,
+          message: error.message,
+          filename: 'chunk-test.js',
+          lineno: 1,
+          colno: 1
+        }));
+      }, 100);
+      
+      showMessage('已触发ChunkLoadError模拟，请查看应用错误处理机制的反应。', 'success');
+    });
+    
+    // 测试版本检查
+    document.getElementById('checkVersion').addEventListener('click', async function() {
+      try {
+        const response = await fetch('/version.json', { 
+          method: 'GET',
+          cache: 'no-cache'
+        });
+        
+        if (response.ok) {
+          const versionData = await response.json();
+          showMessage(`当前版本: ${versionData.version}，构建时间: ${versionData.buildTime}`, 'success');
+        } else {
+          showMessage('无法获取版本信息', 'error');
+        }
+      } catch (error) {
+        showMessage(`版本检查失败: ${error.message}`, 'error');
+      }
+    });
+    
+    // 测试缓存清理
+    document.getElementById('clearCache').addEventListener('click', function() {
+      try {
+        // 清理localStorage
+        localStorage.clear();
+        
+        // 清理sessionStorage
+        sessionStorage.clear();
+        
+        showMessage('已清理应用缓存，请刷新页面查看效果。', 'success');
+      } catch (error) {
+        showMessage(`缓存清理失败: ${error.message}`, 'error');
+      }
+    });
+    
+    // 测试错误恢复
+    document.getElementById('testRecovery').addEventListener('click', function() {
+      // 模拟多次ChunkLoadError
+      let errorCount = 0;
+      const maxErrors = 3;
+      
+      const triggerError = () => {
+        errorCount++;
+        
+        const error = new Error(`Loading chunk ${Math.floor(Math.random() * 10000)} failed.`);
+        error.name = 'ChunkLoadError';
+        
+        setTimeout(() => {
+          window.dispatchEvent(new ErrorEvent('error', {
+            error: error,
+            message: error.message
+          }));
+          
+          if (errorCount < maxErrors) {
+            showMessage(`触发错误 (${errorCount}/${maxErrors})，观察重试机制...`, 'success');
+            setTimeout(triggerError, 2000);
+          } else {
+            showMessage(`已触发 ${maxErrors} 次错误，观察最终处理结果。`, 'success');
+          }
+        }, 100);
+      };
+      
+      triggerError();
+    });
+    
+    // 显示消息
+    function showMessage(message, type) {
+      const output = document.getElementById('output');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+      messageDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      output.appendChild(messageDiv);
+      
+      // 滚动到最新消息
+      messageDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // 监听全局错误事件
+    window.addEventListener('error', function(event) {
+      if (event.error && event.error.name === 'ChunkLoadError') {
+        showMessage(`检测到ChunkLoadError: ${event.error.message}`, 'error');
+      }
+    });
+    
+    // 初始化消息
+    showMessage('测试环境已准备就绪，可以开始测试。', 'success');
+  </script>
+</body>
+</html>

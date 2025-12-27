@@ -1,4 +1,6 @@
 import AppBanner from '../components/dashboard/AppBanner';
+import UserCard from '../components/dashboard/UserInfoCard';
+import FeatureCardsWithUserInfo from '../components/dashboard/FeatureCardsWithUserInfo';
 import {
   MBTICard,
   ChineseZodiacCard,
@@ -43,6 +45,9 @@ const Dashboard = () => {
         <p className="dashboard-subtitle">{getCurrentDate()}</p>
       </header>
 
+      {/* 用户信息卡片 */}
+      <UserCard />
+
       {/* 欢迎卡片 */}
       <div className="welcome-card">
         <h2 className="welcome-title">探索您的专属运势</h2>
@@ -50,6 +55,9 @@ const Dashboard = () => {
           全方位的性格分析、运势解读和能量管理，助您每一天都充满活力
         </p>
       </div>
+
+      {/* 个性化功能展示 */}
+      <FeatureCardsWithUserInfo />
 
       {/* 热门功能 - 主功能 */}
       <h2 className="section-title">热门功能</h2>
