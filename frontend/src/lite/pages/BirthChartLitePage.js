@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { calculateDetailedBazi } from '../../utils/baziHelper';
 import BaziCalculator from '../../utils/baziCalculator';
-import './styles/birthChartLiteStyles.css';
+import '../styles/birthChartLiteStyles.css';
 
 const BirthChartLitePage = ({ userInfo }) => {
   const [baziData, setBaziData] = useState(() => {
