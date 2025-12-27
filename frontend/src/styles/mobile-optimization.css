@@ -1,0 +1,143 @@
+/**
+ * 移动端性能优化样式
+ * 专注于触控体验和流畅交互
+ */
+
+/* 移动端触摸优化 */
+* {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* 隐藏滚动条但保留功能 */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 优化移动端滚动性能 */
+.scroll-performance-optimized {
+  -webkit-overflow-scrolling: touch;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* 触控按钮最小尺寸 - 符合移动端触控标准 */
+.touch-manipulation {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 优化字体渲染 */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 移动端文本大小调整优化 */
+body {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* 减少重绘和重排 */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 移动端卡片悬停效果优化 */
+@media (hover: none) {
+  .hover\:shadow-md:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 移动端特定优化 */
+@media (max-width: 768px) {
+  /* 减少移动端的padding和margin */
+  .mobile-optimized {
+    padding: 0.75rem;
+  }
+  
+  /* 优化移动端卡片间距 */
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* 移动端按钮全宽 */
+  .mobile-full-width {
+    width: 100%;
+  }
+  
+  /* 移动端文本大小 */
+  .mobile-text-sm {
+    font-size: 0.875rem;
+  }
+  
+  /* 移动端减少阴影 */
+  .mobile-shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* 减少DOM重绘 */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 优化移动端触摸反馈 */
+.touch-feedback {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s;
+}
+
+.touch-feedback:active {
+  transform: scale(0.98);
+}
+
+/* 移动端输入框优化 */
+input[type="date"],
+input[type="text"],
+input[type="number"] {
+  font-size: 16px; /* 防止iOS自动缩放 */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* 移动端模态框优化 */
+.mobile-modal {
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 减少移动端动画 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

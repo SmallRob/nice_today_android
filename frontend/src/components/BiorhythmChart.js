@@ -27,6 +27,12 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 const BiorhythmChart = ({ data, isMobile }) => {
   const { theme } = useTheme();
   const chartRef = React.useRef(null);
+  const chartInstanceRef = React.useRef(null);
+
+  // 生成唯一的图表ID，用于跟踪每个实例
+  const chartId = useMemo(() => {
+    return `biorhythm-chart-${Math.random().toString(36).substr(2, 9)}`;
+  }, []);
 
   // 确保 Chart.js 组件已注册 - 按页面实例化
   useEffect(() => {
@@ -48,27 +54,34 @@ const BiorhythmChart = ({ data, isMobile }) => {
     }
   }, []);
 
-  // 组件卸载时清理Chart实例 - 使用更可靠的清理机制
+  // 组件卸载时清理Chart实例 - 使用Chart.getChart()方法
   useEffect(() => {
     return () => {
-      if (chartRef.current) {
+      // 方法2: 使用Chart.getChart()静态方法
+      if (chartId) {
         try {
-          // 先停止动画和事件监听
-          if (chartRef.current.canvas) {
-            chartRef.current.canvas.style.visibility = 'hidden';
-            // 移除所有事件监听器
-            chartRef.current.canvas.removeEventListener('click', () => {});
-            chartRef.current.canvas.removeEventListener('mousemove', () => {});
+          const existingChart = ChartJS.getChart(chartId);
+          if (existingChart) {
+            // 销毁现有图表实例
+            existingChart.destroy();
+            console.log(`已销毁图表实例: ${chartId}`);
           }
-          // 销毁图表实例
-          chartRef.current.destroy();
-          chartRef.current = null;
         } catch (error) {
-          console.warn('清理Chart实例时出错:', error);
+          console.warn('销毁图表实例时出错:', error);
+        }
+      }
+
+      // 清理本地引用
+      if (chartInstanceRef.current) {
+        try {
+          chartInstanceRef.current.destroy();
+          chartInstanceRef.current = null;
+        } catch (error) {
+          console.warn('清理本地图表引用时出错:', error);
         }
       }
     };
-  }, []);
+  }, [chartId]);
 
   // 深色模式下的文字颜色 - 独立的 memoized 值
   const themeColors = useMemo(() => ({

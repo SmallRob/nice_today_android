@@ -3,8 +3,16 @@ import BiorhythmChart from './BiorhythmChart';
 import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
 import { initDataMigration } from '../utils/dataMigration';
-import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
+import { useCurrentConfig } from '../contexts/UserConfigContext';
+
+// 导入优化后的子组件
+import BiorhythmBanner from './biorhythm/BiorhythmBanner';
+import UserInfoCard from './biorhythm/UserInfoCard';
+import DailySummaryCard from './biorhythm/DailySummaryCard';
+import MindfulnessActivities from './biorhythm/MindfulnessActivities';
+
 import '../styles/dashboard-layout.css';
+import '../styles/mobile-optimization.css';
 
 // 每日正念活动数据 - 优化为正能量导向
 const MINDFULNESS_ACTIVITIES = [
@@ -545,35 +553,18 @@ const BiorhythmTab = ({ isDesktop }) => {
   // 每日任务存储键
   const DAILY_TASKS_KEY = 'biorhythm_daily_tasks';
 
-  // 获取今天的日期字符串
-  const getTodayDate = useCallback(() => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }, []);
-
-  // 从localStorage加载今日任务完成状态
-  const loadCompletedTasks = useCallback(() => {
-    try {
-      const data = localStorage.getItem(DAILY_TASKS_KEY);
-      if (data) {
-        const tasksData = JSON.parse(data);
-        const today = getTodayDate();
-        return tasksData[today] || [];
-      }
-      return [];
-    } catch (error) {
-      console.error('加载任务完成状态失败:', error);
-      return [];
-    }
-  }, [getTodayDate]);
-
   // 保存任务完成状态到localStorage
   const saveCompletedTasks = useCallback((completedIds) => {
     try {
-      const today = getTodayDate();
+      const getTodayString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const today = getTodayString();
       const data = localStorage.getItem(DAILY_TASKS_KEY);
       const tasksData = data ? JSON.parse(data) : {};
 
@@ -596,7 +587,7 @@ const BiorhythmTab = ({ isDesktop }) => {
     } catch (error) {
       console.error('保存任务完成状态失败:', error);
     }
-  }, [DAILY_TASKS_KEY, getTodayDate]);
+  }, [DAILY_TASKS_KEY]);
 
   // 标记任务完成/取消完成
   const toggleTaskCompletion = useCallback((taskId) => {
@@ -627,9 +618,6 @@ const BiorhythmTab = ({ isDesktop }) => {
 
     return guidance;
   }, []);
-
-  // 从配置文件获取默认出生日期
-  const DEFAULT_BIRTH_DATE = elementConfig.defaultBirthDate || "1991-01-01";
 
   // 智能推荐正念活动 - 根据节律动态推荐
   const getMindfulnessActivities = useCallback((physical, emotional, intellectual) => {
@@ -680,7 +668,14 @@ const BiorhythmTab = ({ isDesktop }) => {
         const data = localStorage.getItem(DAILY_TASKS_KEY);
         if (data) {
           const tasksData = JSON.parse(data);
-          const today = getTodayDate();
+          const getTodayString = () => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          };
+          const today = getTodayString();
           setCompletedTasks(tasksData[today] || []);
         }
       } catch (error) {
@@ -689,7 +684,7 @@ const BiorhythmTab = ({ isDesktop }) => {
     };
     
     loadTasks();
-  }, [getTodayDate]);
+  }, []);
 
   // 生成动态暖心提示
   const generateDailyTip = useCallback(() => {
@@ -777,15 +772,6 @@ const BiorhythmTab = ({ isDesktop }) => {
     }
   }, [todayData, mindfulnessActivities.length, getMindfulnessActivities, generateEnergyGuidance, generateDailyTip]);
 
-  // 简化的状态确定函数 - 柔化暗黑主题颜色
-  const getSimpleStatus = (score) => {
-    if (score > 15) return { text: '极佳', color: 'text-green-600 dark:text-green-300', bg: 'bg-green-100 dark:bg-green-900/20' };
-    if (score > 0) return { text: '良好', color: 'text-emerald-600 dark:text-emerald-300', bg: 'bg-emerald-100 dark:bg-emerald-900/20' };
-    if (score < -15) return { text: '极低', color: 'text-rose-600 dark:text-rose-300', bg: 'bg-rose-100 dark:bg-rose-900/20' };
-    if (score < 0) return { text: '偏低', color: 'text-amber-600 dark:text-amber-300', bg: 'bg-amber-100 dark:bg-amber-900/20' };
-    return { text: '平稳', color: 'text-sky-600 dark:text-sky-300', bg: 'bg-sky-100 dark:bg-sky-900/20' };
-  };
-
   // 获取当前时间段
   const getTimeOfDay = () => {
     const hour = new Date().getHours();
@@ -827,29 +813,9 @@ const BiorhythmTab = ({ isDesktop }) => {
   };
 
   // 刷新提示
-  const refreshTip = () => {
+  const refreshTip = useCallback(() => {
     setDailyTip(generateDailyTip());
-    setLastTipRefresh(Date.now());
-  };
-
-  // 获取趋向符号
-  const getTrendSymbol = (currentValue, futureValue) => {
-    const diff = futureValue - currentValue;
-    if (diff > 2) return '↑↑';
-    if (diff > 0.5) return '↑';
-    if (diff < -2) return '↓↓';
-    if (diff < -0.5) return '↓';
-    return '→';
-  };
-
-  // 获取趋势颜色 - 柔化暗黑主题颜色
-  const getTrendColorClass = (symbol) => {
-    if (symbol === '↑↑') return 'text-green-600 dark:text-green-300 font-bold';
-    if (symbol === '↑') return 'text-green-500 dark:text-green-400';
-    if (symbol === '↓↓') return 'text-rose-600 dark:text-rose-300 font-bold';
-    if (symbol === '↓') return 'text-rose-500 dark:text-rose-400';
-    return 'text-gray-400 dark:text-gray-100';
-  };
+  }, [generateDailyTip]);
 
   // 计算未来7天趋势
   const futureTrends = useMemo(() => {
@@ -863,6 +829,25 @@ const BiorhythmTab = ({ isDesktop }) => {
       const futureItem = rhythmData[todayIndex + i];
       if (!futureItem) break;
 
+      // 计算趋势符号
+      const getTrendSymbol = (currentValue, futureValue) => {
+        const diff = futureValue - currentValue;
+        if (diff > 2) return '↑↑';
+        if (diff > 0.5) return '↑';
+        if (diff < -2) return '↓↓';
+        if (diff < -0.5) return '↓';
+        return '→';
+      };
+
+      // 计算趋势颜色类
+      const getTrendColorClass = (symbol) => {
+        if (symbol === '↑↑') return 'text-green-600 dark:text-green-300 font-bold';
+        if (symbol === '↑') return 'text-green-500 dark:text-green-400';
+        if (symbol === '↓↓') return 'text-rose-600 dark:text-rose-300 font-bold';
+        if (symbol === '↓') return 'text-rose-500 dark:text-rose-400';
+        return 'text-gray-400 dark:text-gray-100';
+      };
+
       trends.push({
         day: i === 1 ? '明天' : `${i}天后`,
         date: futureItem.date,
@@ -874,70 +859,22 @@ const BiorhythmTab = ({ isDesktop }) => {
     return trends;
   }, [rhythmData, todayData]);
 
-  // 生成今日节律总结 - 简化版本，添加动态提示
-  const renderTodaySummary = () => {
-    // 确保todayData存在且包含必要的数据
-    if (!todayData || todayData.physical === undefined || todayData.emotional === undefined || todayData.intellectual === undefined) {
-      return null;
-    }
-
-    // 获取今天的节律值
-    const todayPhysical = todayData.physical;
-    const todayEmotional = todayData.emotional;
-    const todayIntellectual = todayData.intellectual;
-
-    // 计算综合累积值
-    const totalScore = todayPhysical + todayEmotional + todayIntellectual;
-
-    // 使用简化的状态确定函数
-    const totalStatus = getSimpleStatus(totalScore);
-
-    return (
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800/30 dark:to-gray-900/30 border border-blue-200 dark:border-gray-700/50 rounded-lg p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded-full ${totalScore > 15 ? 'bg-green-500' : totalScore > 0 ? 'bg-emerald-500' : totalScore < -15 ? 'bg-rose-500' : totalScore < 0 ? 'bg-amber-500' : 'bg-sky-500'}`}></div>
-            <span className="text-base font-medium text-gray-900 dark:text-gray-100">综合状态</span>
-          </div>
-          <span className={`text-sm font-medium px-3 py-1 rounded-full ${totalScore > 15 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300' :
-            totalScore > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300' :
-              totalScore < -15 ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/20 dark:text-rose-300' :
-                totalScore < 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300' :
-                  'bg-sky-100 text-sky-800 dark:bg-sky-900/20 dark:text-sky-300'
-            }`}>
-            {totalScore > 15 ? '🌟 极佳' : totalScore > 0 ? '😊 良好' : totalScore < -15 ? '😫 极低' : totalScore < 0 ? '⚠️ 偏低' : '😐 平稳'}
-          </span>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-100 mb-3">
-          今日综合得分: <span className="font-medium text-gray-900 dark:text-gray-100">{totalScore}%</span> - <span className="text-gray-700 dark:text-gray-100">{totalStatus.text}</span>
-        </p>
-
-        {/* 动态暖心提示 */}
-        {dailyTip && (
-          <div className="bg-white/60 dark:bg-gray-700/30 rounded-lg p-3 border border-blue-100 dark:border-gray-600/50">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-2">
-                <span className="text-lg">💬</span>
-                <p className="text-sm text-gray-700 dark:text-gray-100 leading-relaxed flex-1">
-                  {dailyTip}
-                </p>
-              </div>
-              <button
-                onClick={refreshTip}
-                className="text-xs text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100 font-medium flex items-center ml-2 whitespace-nowrap"
-                title="换一换"
-              >
-                <svg className="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span className="ml-1 text-current">换一换</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
+  // 获取趋势颜色类 - 在渲染时使用
+  const getTrendColorClass = (symbol) => {
+    if (symbol === '↑↑') return 'text-green-600 dark:text-green-300 font-bold';
+    if (symbol === '↑') return 'text-green-500 dark:text-green-400';
+    if (symbol === '↓↓') return 'text-rose-600 dark:text-rose-300 font-bold';
+    if (symbol === '↓') return 'text-rose-500 dark:text-rose-400';
+    return 'text-gray-400 dark:text-gray-100';
   };
+
+  // 计算综合分数
+  const totalScore = useMemo(() => {
+    if (!todayData || todayData.physical === undefined || todayData.emotional === undefined || todayData.intellectual === undefined) {
+      return undefined;
+    }
+    return todayData.physical + todayData.emotional + todayData.intellectual;
+  }, [todayData]);
 
   if (loading && !rhythmData) {
     return (
@@ -1015,241 +952,33 @@ const BiorhythmTab = ({ isDesktop }) => {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
       <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized taoist-content-scroll bg-white dark:bg-black -webkit-overflow-scrolling-touch">
-        {/* Banner区域 - 生物节律主题 */}
-        <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0">
-          {/* 节律渐变背景 */}
-          <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30"></div>
-
-          {/* 道家装饰符号 */}
-          <div className="absolute top-2 left-2 w-12 h-12 opacity-15">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M50,5 A45,45 0 1,1 50,95 A45,45 0 1,1 50,5" fill="none" stroke="currentColor" strokeWidth="1" />
-              <circle cx="50" cy="30" r="8" fill="currentColor" />
-              <circle cx="50" cy="70" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
-          </div>
-          <div className="absolute bottom-2 right-2 w-14 h-14 opacity-15">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <path d="M50,10 L90,50 L50,90 L10,50 Z" fill="none" stroke="currentColor" strokeWidth="2" />
-              <circle cx="50" cy="50" r="15" fill="currentColor" opacity="0.3" />
-            </svg>
-          </div>
-
-          <div className="container mx-auto px-4 py-3 md:py-6 relative z-10 text-center">
-            <h1 className="text-xl md:text-2xl font-bold mb-1 text-shadow-lg taoist-title">
-              <span className="inline-block transform hover:scale-105 transition-transform duration-300">
-                人体节律
-              </span>
-            </h1>
-            <p className="text-white text-xs md:text-base opacity-95 font-medium taoist-subtitle mb-2">
-              天人合一·顺应自然·调和身心
-            </p>
-            <div className="flex items-center justify-center space-x-1 md:space-x-2">
-              <span className="text-[10px] md:text-xs bg-blue/40 text-white px-2 py-0.5 rounded-full border border-white/20">体力</span>
-              <span className="text-[10px] md:text-xs bg-purple/40 text-white px-2 py-0.5 rounded-full border border-white/20">情绪</span>
-              <span className="text-[10px] md:text-xs bg-indigo/40 text-white px-2 py-0.5 rounded-full border border-white/20">智力</span>
-            </div>
-          </div>
-        </div>
+        {/* 简化的Banner组件 */}
+        <BiorhythmBanner />
 
         <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
           <div className="mb-4 space-y-4 h-full dashboard-content">
-            {/* 合并的用户信息与今日状态卡片 */}
-            {todayData && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">
-                {/* 顶部用户信息栏 */}
-                <div className="flex items-center justify-between mb-4 pb-3 border-b dark:border-gray-700">
-                  <div>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {userInfo.nickname ? `${userInfo.nickname} 的今日节律` : '今日生物节律'}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-100 mt-1">
-                      {userInfo.birthDate ? `出生: ${userInfo.birthDate}` : '请配置信息'}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => setShowUserInfoModal(true)}
-                      className="text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-full border border-blue-200 dark:border-blue-700 transition-colors"
-                    >
-                      修改信息
-                    </button>
-                    <span className="inline-block px-3 py-1 text-sm font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900 dark:bg-opacity-30 rounded-full">
-                      本地计算
-                    </span>
-                  </div>
-                </div>
+            {/* 简化的用户信息卡片 */}
+            <UserInfoCard 
+              userInfo={userInfo}
+              todayData={todayData}
+              onEditInfo={() => setShowUserInfoModal(true)}
+            />
 
-                {/* 今日节律状态 */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center border border-green-100 dark:border-green-800/40">
-                    <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
-                      {todayData.physical}%
-                    </div>
-                    <div className="text-sm text-green-800 dark:text-green-200 font-medium">体力</div>
-                  </div>
+            {/* 简化的今日节律总结 */}
+            <DailySummaryCard 
+              totalScore={totalScore}
+              dailyTip={dailyTip}
+              onRefreshTip={refreshTip}
+            />
 
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center border border-blue-100 dark:border-blue-800/40">
-                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                      {todayData.emotional}%
-                    </div>
-                    <div className="text-sm text-blue-800 dark:text-blue-200 font-medium">情绪</div>
-                  </div>
-
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-800/40">
-                    <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                      {todayData.intellectual}%
-                    </div>
-                    <div className="text-sm text-purple-800 dark:text-purple-200 font-medium">智力</div>
-                  </div>
-                </div>
-
-                {/* 状态解读 */}
-                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                  <div className="flex flex-wrap justify-center gap-y-2 gap-x-4 text-sm">
-                    <span className={`px-2 py-0.5 rounded ${todayData.physical >= 0 ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-200' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-200'}`}>
-                      {todayData.physical >= 0 ? '✓ 体力充沛' : '⚠ 体力偏低'}
-                    </span>
-                    <span className={`px-2 py-0.5 rounded ${todayData.emotional >= 0 ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-200' : 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-200'}`}>
-                      {todayData.emotional >= 0 ? '😊 情绪稳定' : '🌪️ 情绪波动'}
-                    </span>
-                    <span className={`px-2 py-0.5 rounded ${todayData.intellectual >= 0 ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-200' : 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-200'}`}>
-                      {todayData.intellectual >= 0 ? '💡 思维清晰' : '🧠 思考需谨慎'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 今日节律总结 */}
-            {renderTodaySummary()}
-
-            {/* 每日正念卡片 - 重构为正能量导向 */}
-            <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-900/20 dark:via-purple-900/20 dark:to-pink-900/20 border border-indigo-100 dark:border-purple-700/50 rounded-lg shadow-sm p-3 md:p-4">
-              {/* 顶部：能量UP+ 指示器 */}
-              <div className="flex items-center justify-between mb-3 md:mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1.5 rounded-full shadow-md">
-                    <span className="text-lg mr-1.5">⚡</span>
-                    <span className="text-sm font-bold">能量UP+</span>
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-100">
-                    今日完成: <span className="font-semibold text-indigo-600 dark:text-indigo-300">{completedTasks.length}/4</span>
-                  </div>
-                </div>
-                <button
-                  onClick={refreshActivities}
-                  className="text-xs text-purple-600 dark:text-purple-300 hover:text-purple-800 dark:hover:text-purple-100 font-medium flex items-center px-3 py-1.5 bg-white/60 dark:bg-gray-800/60 rounded-full border border-purple-200 dark:border-purple-700/50 shadow-sm transition-all hover:shadow-md"
-                  title="换一批"
-                >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  换一批
-                </button>
-              </div>
-
-              {/* 能量指引 */}
-              {energyGuidance && (
-                <div className="mb-3 md:mb-4 bg-gradient-to-r from-indigo-100/80 to-purple-100/80 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg p-2.5 md:p-3 border border-indigo-200 dark:border-indigo-800/50">
-                  <div className="flex items-start">
-                    <span className="text-xl md:text-2xl mr-2 md:mr-3">🌟</span>
-                    <p className="text-xs md:text-sm text-indigo-800 dark:text-indigo-100 leading-relaxed font-medium">
-                      {energyGuidance}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* 每日正念任务列表 */}
-              <div className="space-y-2 md:space-y-3">
-                {mindfulnessActivities.map((activity, index) => {
-                  const isCompleted = completedTasks.includes(activity.id);
-                  return (
-                    <div
-                      key={activity.id}
-                      onClick={() => toggleTaskCompletion(activity.id)}
-                      className={`bg-white dark:bg-gray-800/60 rounded-lg p-2.5 md:p-3.5 cursor-pointer border-2 transition-all duration-300 hover:shadow-md ${
-                        isCompleted
-                          ? 'border-green-400 dark:border-green-500/70 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/20'
-                          : 'border-gray-100 dark:border-gray-700/50'
-                      }`}
-                    >
-                      <div className="flex items-center">
-                        {/* 完成状态复选框 */}
-                        <div className={`flex-shrink-0 w-5 h-5 md:w-6 md:h-6 rounded-md border-2 mr-2 md:mr-3 flex items-center justify-center transition-all duration-200 ${
-                          isCompleted
-                            ? 'bg-green-500 border-green-500'
-                            : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500'
-                        }`}>
-                          {isCompleted && (
-                            <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </div>
-
-                        {/* 活动图标 */}
-                        <div className={`flex-shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center mr-2 md:mr-3 text-lg md:text-xl ${
-                          isCompleted ? 'opacity-50' : ''
-                        }`}>
-                          {activity.icon}
-                        </div>
-
-                        {/* 活动信息 */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-0.5 md:mb-1">
-                            <h4 className={`text-xs md:text-sm font-semibold truncate ${
-                              isCompleted ? 'text-gray-500 dark:text-gray-100 line-through' : 'text-gray-900 dark:text-gray-100'
-                            }`}>
-                              {activity.title}
-                            </h4>
-                            <div className="flex items-center space-x-2">
-                              <span className={`text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full ${
-                                isCompleted ? 'opacity-50' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200'
-                              }`}>
-                                {activity.duration}
-                              </span>
-                            </div>
-                          </div>
-                          <p className={`text-[10px] md:text-xs leading-relaxed ${
-                            isCompleted ? 'text-gray-400 dark:text-gray-100' : 'text-gray-600 dark:text-gray-100'
-                          }`}>
-                            {activity.description}
-                          </p>
-                          {!isCompleted && activity.positive && (
-                            <p className="text-[10px] md:text-xs text-green-600 dark:text-green-300 mt-1 md:mt-1.5 font-medium">
-                              ✨ {activity.positive}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* 完成标记 */}
-                        {isCompleted && (
-                          <div className="flex-shrink-0 ml-2 md:ml-3">
-                            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-green-500 flex items-center justify-center shadow-md">
-                              <svg className="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* 底部提示 */}
-              <div className="mt-3 md:mt-4 pt-2.5 md:pt-3 border-t border-indigo-100 dark:border-indigo-800/50">
-                <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-100 text-center leading-relaxed">
-                  💡 点击任务标记完成，每日每个任务只能标记一次
-                  <br />
-                  完成任务后可立即感受到能量的提升 🌈
-                </p>
-              </div>
-            </div>
+            {/* 简化的正念活动组件 */}
+            <MindfulnessActivities 
+              activities={mindfulnessActivities}
+              completedTasks={completedTasks}
+              onToggleTask={toggleTaskCompletion}
+              onRefreshActivities={refreshActivities}
+              energyGuidance={energyGuidance}
+            />
 
             {/* 生物节律曲线图 - 优化间距 */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 p-4">

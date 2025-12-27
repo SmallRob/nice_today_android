@@ -13,10 +13,7 @@ import './index.css';
 const { Suspense } = React;
 
 // 懒加载页面组件 - 添加错误处理
-const DashboardPage = React.lazy(() => import('./pages/DashboardPage').catch(err => {
-  console.error('DashboardPage 加载失败:', err);
-  return import('./pages/ErrorPage');
-}));
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
 const MayaPage = React.lazy(() => import('./pages/MayaPage'));
 const DressGuidePage = React.lazy(() => import('./pages/DressGuidePage'));
 const LifeTrendPage = React.lazy(() => import('./pages/LifeTrendPage'));
@@ -62,14 +59,15 @@ const AppLayout = () => {
     );
   };
 
-  return (
-    <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
+    return (
+      <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
       <div className="flex-1 relative overflow-y-auto overflow-x-hidden">
         <SafeSuspense fallback={<div className="flex items-center justify-center h-full">
           <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
         </div>}>
           <Routes>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/maya" element={<MayaPage />} />
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/trend" element={<LifeTrendPage />} />
