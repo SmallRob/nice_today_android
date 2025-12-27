@@ -1,32 +1,49 @@
 // 解析CSV内容的辅助函数（保留用于兼容性）
 export const parseCSV = (csvText) => {
-  const lines = csvText.split('\n').filter(line => line.trim());
-  if (lines.length < 2) return []; // 至少需要标题行和一行数据
-  
-  const headers = lines[0].split(',').map(header => header.trim());
-  const data = [];
-  
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(value => {
-      // 移除字段值周围的引号
-      let trimmedValue = value.trim();
-      if (trimmedValue.startsWith('"') && trimmedValue.endsWith('"')) {
-        trimmedValue = trimmedValue.substring(1, trimmedValue.length - 1);
-      }
-      return trimmedValue;
-    });
-    
-    if (values.length !== headers.length) continue; // 跳过格式不正确的行
-    
-    const entry = {};
-    headers.forEach((header, index) => {
-      entry[header] = values[index] || '';
-    });
-    
-    data.push(entry);
+  // 参数验证
+  if (!csvText || typeof csvText !== 'string') {
+    console.error('parseCSV: 无效的输入参数');
+    return [];
   }
-  
-  return data;
+
+  try {
+    const lines = csvText.split('\n').filter(line => line.trim());
+    if (lines.length < 2) return []; // 至少需要标题行和一行数据
+    
+    const headers = lines[0].split(',').map(header => header.trim());
+    const data = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      // 添加行级异常处理
+      try {
+        const values = lines[i].split(',').map(value => {
+          // 移除字段值周围的引号
+          let trimmedValue = value.trim();
+          if (trimmedValue.startsWith('"') && trimmedValue.endsWith('"')) {
+            trimmedValue = trimmedValue.substring(1, trimmedValue.length - 1);
+          }
+          return trimmedValue;
+        });
+        
+        if (values.length !== headers.length) continue; // 跳过格式不正确的行
+        
+        const entry = {};
+        headers.forEach((header, index) => {
+          entry[header] = values[index] || '';
+        });
+        
+        data.push(entry);
+      } catch (lineError) {
+        console.warn(`解析CSV行 ${i} 失败:`, lineError.message);
+        // 继续处理下一行，不中断整个解析
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('CSV解析失败:', error);
+    throw new Error(`CSV解析错误: ${error.message}`);
+  }
 };
 
 // API服务导入 - 统一管理API调用

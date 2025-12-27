@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { BiorhythmIcon } from './IconLibrary';
 import { useTabPerformance } from '../utils/tabPerformanceMonitor';
 import { isAndroidWebView } from '../utils/androidWebViewCompat';
+import { globalErrorHandler, getErrorLocation, createDetailedErrorReport } from '../utils/errorHandler';
 import '../styles/animations.css';
 import niceDayImage from '../images/nice_day.png';
 
@@ -23,41 +24,140 @@ const MBTIPersonalityTab = React.lazy(() => import('./MBTIPersonalityTabHome').c
   return Promise.resolve(() => <div>MBTIPersonalityTab 加载失败</div>);
 }));
 
-// 错误边界组件
-const ErrorBoundaryFallback = ({ error, resetError }) => (
-  <div className="flex-1 flex items-center justify-center p-4">
-    <div className="text-center">
-      <div className="text-4xl mb-3">❌</div>
-      <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        加载出错
-      </h3>
-      <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
-        {error?.message || '未知错误'}
-      </p>
-      <button
-        onClick={resetError}
-        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-      >
-        重试
-      </button>
-    </div>
-  </div>
-);
+// 增强版错误边界组件
+const ErrorBoundaryFallback = ({ error, errorDetails, resetError }) => {
+  const [showDetails, setShowDetails] = useState(false);
+  const deviceInfo = errorDetails?.deviceInfo || {};
 
-// 简单的错误捕获包装器
+  return (
+    <div className="flex-1 flex items-center justify-center p-4">
+      <div className="text-center max-w-md w-full">
+        {/* 错误图标 */}
+        <div className="text-6xl mb-4">❌</div>
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          加载出错
+        </h3>
+        <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
+          {error?.message || '未知错误'}
+        </p>
+
+        {/* 设备信息提示（移动设备显示） */}
+        {(deviceInfo.isAndroidWebView || deviceInfo.isIOSWebView) && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3 mb-4 text-left">
+            <p className="text-xs text-yellow-800 dark:text-yellow-200">
+              检测到移动 WebView 环境，可能存在兼容性问题
+            </p>
+            <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+              {deviceInfo.isAndroidWebView ? 'Android WebView' : 'iOS WebView'}
+            </p>
+          </div>
+        )}
+
+        {/* 精确错误位置信息 */}
+        {errorDetails?.locationString && (
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 mb-4 text-left">
+            <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">错误位置:</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 break-all">
+              {errorDetails.locationString}
+            </p>
+          </div>
+        )}
+
+        {/* 详细错误信息（展开时显示） */}
+        {showDetails && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4 text-left">
+            <details className="space-y-3">
+              <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
+                完整错误信息
+              </summary>
+              <div className="space-y-2">
+                {errorDetails?.errorId && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">错误ID:</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">{errorDetails.errorId}</p>
+                  </div>
+                )}
+                {errorDetails?.location?.fileName && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">文件:</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 break-all">{errorDetails.location.fileName}</p>
+                  </div>
+                )}
+                {errorDetails?.location?.lineNumber && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">行号:</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">{errorDetails.location.lineNumber}</p>
+                  </div>
+                )}
+                {errorDetails?.location?.columnNumber && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">列号:</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 font-mono">{errorDetails.location.columnNumber}</p>
+                  </div>
+                )}
+                {errorDetails?.stackTrace && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">堆栈追踪:</p>
+                    <pre className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 p-2 rounded overflow-x-auto whitespace-pre-wrap">
+                      {errorDetails.stackTrace}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </details>
+          </div>
+        )}
+
+        {/* 操作按钮 */}
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={resetError}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+          >
+            重试
+          </button>
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+          >
+            {showDetails ? '隐藏详情' : '显示详情'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 增强的错误捕获包装器
 const withErrorBoundary = (Component, componentName) => {
   return function SafeComponent(props) {
     try {
       return <Component {...props} />;
     } catch (error) {
-      console.error(`[${componentName}] 组件渲染错误:`, error);
+      // 使用全局错误处理器标准化错误
+      const appError = globalErrorHandler.handle(error, {
+        component: componentName,
+        action: 'render',
+        timestamp: new Date().toISOString()
+      });
+
+      // 创建详细的错误报告
+      const errorDetails = createDetailedErrorReport(appError);
+
+      console.error(`[${componentName}] 组件渲染错误:`, appError);
+      console.error('错误详情:', errorDetails);
+
+      // 返回增强的错误显示组件
       return (
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center">
-            <p className="text-red-600 dark:text-red-400">组件加载失败</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{componentName}</p>
-          </div>
-        </div>
+        <ErrorBoundaryFallback
+          error={error}
+          errorDetails={errorDetails}
+          resetError={() => {
+            // 清除错误状态并重试
+            console.log(`[组件 ${componentName}] 重试加载...`);
+            window.location.reload();
+          }}
+        />
       );
     }
   };
@@ -126,24 +226,49 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   // 错误处理函数
   const handleError = useCallback((error, context) => {
-    console.error(`[${context}] 组件错误:`, error);
-    setError(`加载失败: ${error.message || '未知错误'}`);
+    // 使用全局错误处理器标准化错误
+    const appError = globalErrorHandler.handle(error, {
+      component: context,
+      action: 'onError',
+      timestamp: new Date().toISOString()
+    });
+
+    // 创建详细的错误报告
+    const errorDetails = createDetailedErrorReport(appError);
+
+    console.error(`[${context}] 组件错误:`, appError);
+    console.error('错误位置:', errorDetails.locationString);
+    console.error('设备信息:', errorDetails.device);
+    console.error('完整错误报告:', errorDetails);
+
+    // 设置错误消息（包含位置信息）
+    const errorMessage = `加载失败: ${appError.message}\n位置: ${errorDetails.locationString}`;
+    setError(errorMessage);
 
     // 扩展的错误检查，包含更多关键错误类型
-    const isCriticalError = error.name === 'ChunkLoadError' || 
+    const isCriticalError = appError.type === 'CHUNK_LOAD_ERROR' ||
+                           appError.type === 'MOBILE_WEBVIEW_ERROR' ||
+                           appError.type === 'SOURCE_MAP_ERROR' ||
+                           error.name === 'ChunkLoadError' ||
                            error.message?.includes('加载失败') ||
                            error.message?.includes('网络错误') ||
                            error.message?.includes('Network Error') ||
                            error.code === 'MODULE_NOT_FOUND';
 
-    if (isCriticalError) {
+    // 移动设备特殊处理
+    if (isAndroidWebView() || isIOSWebView()) {
+      console.warn('检测到移动 WebView 环境，应用增强的错误处理');
+      if (isCriticalError) {
+        setFallbackMode(true);
+      }
+    } else if (isCriticalError) {
       setFallbackMode(true);
     }
 
-    // 自动恢复机制
+    // 自动恢复机制（延长至10秒，给用户更多时间查看错误信息）
     setTimeout(() => {
       setError(null);
-    }, 5000);
+    }, 10000);
   }, []);
 
   // 降级模式组件
