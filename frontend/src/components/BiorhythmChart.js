@@ -14,6 +14,19 @@ import {
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 
+// 确保 Chart.js 组件全局注册 - 在模块级别注册一次
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  annotationPlugin
+);
+
 /**
  * BiorhythmChart 组件
  *
@@ -27,61 +40,23 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 const BiorhythmChart = ({ data, isMobile }) => {
   const { theme } = useTheme();
   const chartRef = React.useRef(null);
-  const chartInstanceRef = React.useRef(null);
 
-  // 生成唯一的图表ID，用于跟踪每个实例
-  const chartId = useMemo(() => {
-    return `biorhythm-chart-${Math.random().toString(36).substr(2, 9)}`;
-  }, []);
 
-  // 确保 Chart.js 组件已注册 - 按页面实例化
-  useEffect(() => {
-    try {
-      // 注册当前页面实例所需的 Chart.js 组件
-      ChartJS.register(
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-        Title,
-        Tooltip,
-        Legend,
-        Filler,
-        annotationPlugin
-      );
-    } catch (error) {
-      console.error('Chart.js 组件注册失败:', error);
-    }
-  }, []);
 
-  // 组件卸载时清理Chart实例 - 使用Chart.getChart()方法
+  // 组件卸载时清理Chart实例
   useEffect(() => {
     return () => {
-      // 方法2: 使用Chart.getChart()静态方法
-      if (chartId) {
-        try {
-          const existingChart = ChartJS.getChart(chartId);
-          if (existingChart) {
-            // 销毁现有图表实例
-            existingChart.destroy();
-            console.log(`已销毁图表实例: ${chartId}`);
-          }
-        } catch (error) {
-          console.warn('销毁图表实例时出错:', error);
-        }
-      }
-
       // 清理本地引用
-      if (chartInstanceRef.current) {
+      if (chartRef.current) {
         try {
-          chartInstanceRef.current.destroy();
-          chartInstanceRef.current = null;
+          chartRef.current.destroy();
+          chartRef.current = null;
         } catch (error) {
           console.warn('清理本地图表引用时出错:', error);
         }
       }
     };
-  }, [chartId]);
+  }, []);
 
   // 深色模式下的文字颜色 - 独立的 memoized 值
   const themeColors = useMemo(() => ({
@@ -263,13 +238,7 @@ const BiorhythmChart = ({ data, isMobile }) => {
     },
   }), [isMobile, themeColors, annotations, tooltipTitleCallback, tooltipLabelCallback]);
 
-  // 使用稳定的key，为每个组件实例生成唯一key
-  // key基于数据和主题变化，确保正确的生命周期管理
-  // 使用动态key来强制重新创建chart，防止canvas重复使用错误
-  // key基于数据和主题变化，确保正确的生命周期管理
-  const chartKey = useMemo(() => {
-    return `biorhythm-chart-${theme}-${isMobile}-${data?.length || 0}`;
-  }, [theme, isMobile, data?.length]);
+
 
   // 图表渲染回调 - 保存chart实例引用
   const onChartRender = useCallback((chart) => {
@@ -286,7 +255,6 @@ const BiorhythmChart = ({ data, isMobile }) => {
   return (
     <div className="w-full" style={{ height: isMobile ? '250px' : '400px' }}>
       <Line
-        key={chartKey}
         data={chartData}
         options={options}
         type="line"
