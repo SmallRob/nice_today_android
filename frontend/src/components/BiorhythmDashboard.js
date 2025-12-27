@@ -54,13 +54,13 @@ const createLazyComponent = (importFn, componentName, fallbackMessage) => {
 };
 
 const BiorhythmTab = createLazyComponent(
-  () => import('./BiorhythmTab'),
+  () => import('./BiorhythmSimple'),
   'BiorhythmTab',
   '生物节律模块加载失败，请稍后重试'
 );
 
 const ZodiacEnergyTab = createLazyComponent(
-  () => import('./ZodiacEnergyTab'),
+  () => import('./ZodiacEnergySimple'),
   'ZodiacEnergyTab',
   '生肖能量模块加载失败，请稍后重试'
 );
@@ -598,7 +598,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             </div>
 
             {/* 动态状态徽章和版本信息放在右下角 */}
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
                 <span className="relative flex h-2 w-2 sm:h-3 sm:w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -612,7 +612,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               <span className="text-xs text-blue-100 opacity-75">
                 v1.6
               </span>
-            </div>
+            </div> */}
           </div>
 
           {/* 体验新版入口 - 右上角 */}
@@ -626,7 +626,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
             <span className="hidden sm:inline">体验新版</span>
-            <span className="inline sm:hidden">新版</span>
+            <span className="inline sm:hidden">新版主页</span>
           </button>
         </div>
       </div>
