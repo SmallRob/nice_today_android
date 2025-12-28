@@ -80,25 +80,25 @@ const CalendarView = ({ prediction, cycles, onDateSelect }) => {
 
   return (
     <div className="calendar-container bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-      {/* 日历头部 - 月份导航 */}
-      <div className="calendar-header flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+      {/* 日历头部 - 月份导航 - 优化紧凑布局 */}
+      <div className="calendar-header flex items-center justify-between p-2 sm:p-4 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={goToPreviousMonth}
-          className="calendar-nav-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="calendar-nav-btn p-1.5 sm:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           title="上个月"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         
-        <div className="flex items-center space-x-4">
-          <h2 className="calendar-title text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <h2 className="calendar-title text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h2>
           <button
             onClick={goToToday}
-            className="calendar-today-btn px-3 py-1 text-sm bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full hover:bg-pink-200 dark:hover:bg-pink-800 transition-colors"
+            className="calendar-today-btn px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full hover:bg-pink-200 dark:hover:bg-pink-800 transition-colors"
           >
             今天
           </button>
@@ -106,21 +106,21 @@ const CalendarView = ({ prediction, cycles, onDateSelect }) => {
         
         <button
           onClick={goToNextMonth}
-          className="calendar-nav-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="calendar-nav-btn p-1.5 sm:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           title="下个月"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
 
-      {/* 星期头部 */}
+      {/* 星期头部 - 优化紧凑布局 */}
       <div className="calendar-weekdays grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
         {dayNames.map((day, index) => (
           <div 
             key={day}
-            className={`calendar-weekday py-2 text-center text-sm font-medium ${
+            className={`calendar-weekday py-1 sm:py-2 text-center text-xs sm:text-sm font-medium ${
               index === 0 ? 'text-red-500 dark:text-red-400' : 
               index === 6 ? 'text-blue-500 dark:text-blue-400' : 
               'text-gray-500 dark:text-gray-400'
@@ -131,7 +131,7 @@ const CalendarView = ({ prediction, cycles, onDateSelect }) => {
         ))}
       </div>
 
-      {/* 日历网格 */}
+      {/* 日历网格 - 优化紧凑布局 */}
       <div className="calendar-grid grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700">
         {monthData.map((day, index) => {
           return (
@@ -139,30 +139,30 @@ const CalendarView = ({ prediction, cycles, onDateSelect }) => {
               key={index}
               onClick={() => onDateSelect && onDateSelect(day.date)}
               className={`
-                calendar-day relative min-h-20 p-1 bg-white dark:bg-gray-800 cursor-pointer transition-colors
+                calendar-day relative min-h-[60px] sm:min-h-20 p-1 bg-white dark:bg-gray-800 cursor-pointer transition-colors
                 ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900' : ''}
                 ${day.isToday ? 'bg-pink-50 dark:bg-pink-900/20' : ''}
                 ${day.isWeekend ? 'bg-gray-50 dark:bg-gray-900' : ''}
                 hover:bg-gray-100 dark:hover:bg-gray-700
               `}
             >
-              {/* 日期数字 */}
+              {/* 日期数字 - 优化紧凑布局 */}
               <div className={`
-                calendar-day-number absolute top-1 left-1 w-6 h-6 flex items-center justify-center text-sm rounded-full
+                calendar-day-number absolute top-0.5 left-0.5 sm:top-1 sm:left-1 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm rounded-full
                 ${day.isToday ? 'bg-pink-500 text-white' : ''}
               `}>
                 {day.date.getDate()}
               </div>
 
-              {/* 预测标记 */}
+              {/* 预测标记 - 优化紧凑布局 */}
               {day.isPredictedPeriod && (
-                <div className="absolute bottom-1 right-1">
+                <div className="absolute bottom-0.5 right-0.5 sm:bottom-1 sm:right-1">
                   {day.date >= prediction.nextPeriodStart && day.date <= prediction.nextPeriodEnd ? (
-                    <div className="w-2 h-2 rounded-full bg-pink-500" title="预测经期"></div>
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-pink-500" title="预测经期"></div>
                   ) : day.date.toDateString() === prediction.ovulationDate.toDateString() ? (
-                    <div className="w-2 h-2 rounded-full bg-yellow-500" title="预测排卵期"></div>
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-500" title="预测排卵期"></div>
                   ) : (
-                    <div className="w-2 h-2 rounded-full bg-yellow-300" title="受孕期"></div>
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-300" title="受孕期"></div>
                   )}
                 </div>
               )}

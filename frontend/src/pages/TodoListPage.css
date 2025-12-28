@@ -1,8 +1,8 @@
 .todo-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-  padding-bottom: 100px;
+  padding: 12px;
+  padding-bottom: 80px;
 }
 
 .todo-page.dark {
@@ -14,11 +14,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   background: rgba(255, 255, 255, 0.95);
-  padding: 15px 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
 }
 
 .todo-page.dark .todo-header {
@@ -29,21 +29,28 @@
   background: #6366f1;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.3s;
+  touch-action: manipulation;
+  min-height: 40px;
+  min-width: 70px;
 }
 
 .back-btn:hover {
   background: #4f46e5;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+}
+
+.back-btn:active {
+  transform: translateY(0);
 }
 
 .page-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 17px;
   color: #1f2937;
   font-weight: 600;
 }
@@ -55,10 +62,10 @@
 /* 待办事项表单卡片 */
 .todo-form-card {
   background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin-bottom: 20px;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  margin-bottom: 12px;
 }
 
 .todo-page.dark .todo-form-card {
@@ -68,19 +75,20 @@
 .todo-form-card form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .todo-input {
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 15px;
+  padding: 11px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 7px;
+  font-size: 14px;
   transition: all 0.3s;
   box-sizing: border-box;
   background: white;
   color: #1f2937;
+  touch-action: manipulation;
 }
 
 .todo-page.dark .todo-input {
@@ -102,19 +110,21 @@
 
 .todo-form-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .todo-select {
   flex: 1;
-  padding: 12px 15px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 15px;
+  padding: 11px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 7px;
+  font-size: 14px;
   background: white;
   cursor: pointer;
   transition: all 0.3s;
   color: #1f2937;
+  touch-action: manipulation;
+  min-height: 44px;
 }
 
 .todo-page.dark .todo-select {
@@ -134,13 +144,15 @@
 
 .todo-date-input {
   flex: 1;
-  padding: 12px 15px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 15px;
+  padding: 11px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 7px;
+  font-size: 14px;
   transition: all 0.3s;
   background: white;
   color: #1f2937;
+  touch-action: manipulation;
+  min-height: 44px;
 }
 
 .todo-page.dark .todo-date-input {
@@ -162,18 +174,20 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 12px;
+  border-radius: 7px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
-  margin-top: 5px;
+  margin-top: 2px;
+  touch-action: manipulation;
+  min-height: 48px;
 }
 
 .todo-add-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.35);
 }
 
 .todo-add-btn:active {
@@ -185,10 +199,10 @@
   display: flex;
   justify-content: space-around;
   background: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
 }
 
 .todo-page.dark .todo-stats {
@@ -199,17 +213,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .stat-number {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #6366f1;
 }
 
 .stat-label {
-  font-size: 13px;
+  font-size: 12px;
   color: #6b7280;
 }
 
@@ -220,10 +234,10 @@
 /* 分类统计 */
 .category-stats {
   background: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
 }
 
 .todo-page.dark .category-stats {
@@ -231,9 +245,10 @@
 }
 
 .category-stats h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
+  margin: 0 0 8px 0;
+  font-size: 14px;
   color: #1f2937;
+  font-weight: 600;
 }
 
 .todo-page.dark .category-stats h3 {
@@ -243,35 +258,37 @@
 .category-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .category-tag {
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 5px 10px;
+  border-radius: 16px;
   color: white;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
 }
 
 /* 过滤器 */
 .todo-filters {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
 .filter-btn {
   flex: 1;
-  padding: 12px;
+  padding: 10px;
   background: rgba(255, 255, 255, 0.9);
-  border: 2px solid transparent;
-  border-radius: 8px;
-  font-size: 15px;
+  border: 1.5px solid transparent;
+  border-radius: 7px;
+  font-size: 13px;
   color: #6b7280;
   cursor: pointer;
   transition: all 0.3s;
   font-weight: 500;
+  touch-action: manipulation;
+  min-height: 44px;
 }
 
 .todo-page.dark .filter-btn {
@@ -281,7 +298,7 @@
 
 .filter-btn:hover {
   background: white;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .todo-page.dark .filter-btn:hover {
@@ -298,11 +315,11 @@
 .todo-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
 }
 
 .todo-page.dark .todo-list {
@@ -311,32 +328,32 @@
 
 .empty-state {
   background: rgba(255, 255, 255, 0.95);
-  padding: 40px 20px;
-  border-radius: 12px;
+  padding: 30px 16px;
+  border-radius: 10px;
   text-align: center;
   color: #6b7280;
 }
 
 .empty-state p:first-child {
-  font-size: 18px;
-  margin: 0 0 8px 0;
+  font-size: 15px;
+  margin: 0 0 6px 0;
   color: #374151;
 }
 
 .empty-hint {
-  font-size: 14px;
+  font-size: 12px;
   margin: 0 !important;
 }
 
 .todo-item {
   background: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   transition: all 0.3s;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .todo-page.dark .todo-item {
@@ -344,8 +361,8 @@
 }
 
 .todo-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .todo-item.completed {
@@ -353,7 +370,7 @@
 }
 
 .todo-item.editing {
-  border: 2px solid #6366f1;
+  border: 1.5px solid #6366f1;
 }
 
 .todo-page.dark .todo-item.editing {
@@ -362,13 +379,13 @@
 
 .todo-main {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
 }
 
 .todo-check {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border: 2px solid #d1d5db;
   border-radius: 50%;
   background: white;
@@ -378,8 +395,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
+  touch-action: manipulation;
+  min-width: 22px;
+  min-height: 22px;
 }
 
 .todo-check.checked {
@@ -392,12 +412,12 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .todo-description {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   color: #1f2937;
   line-height: 1.5;
   word-break: break-word;
@@ -415,53 +435,56 @@
 .todo-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 .todo-category {
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 3px 8px;
+  border-radius: 10px;
   color: white;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
 .todo-date {
-  font-size: 12px;
+  font-size: 11px;
   color: #6b7280;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .todo-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
 }
 
 .todo-tag {
-  padding: 3px 8px;
+  padding: 2px 7px;
   background: #f3f4f6;
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: 5px;
+  font-size: 10px;
   color: #6b7280;
 }
 
 .todo-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: flex-end;
 }
 
 .todo-actions button {
-  padding: 6px 12px;
+  padding: 6px 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.3s;
+  touch-action: manipulation;
+  min-height: 36px;
+  min-width: 36px;
 }
 
 .edit-btn {
@@ -485,14 +508,15 @@
 /* 编辑模式 */
 .todo-edit-input {
   width: 100%;
-  padding: 10px 12px;
-  border: 2px solid #e5e7eb;
+  padding: 9px 11px;
+  border: 1.5px solid #e5e7eb;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.3s;
   box-sizing: border-box;
   background: white;
   color: #1f2937;
+  touch-action: manipulation;
 }
 
 .todo-page.dark .todo-edit-input {
@@ -512,21 +536,23 @@
 
 .todo-edit-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-end;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .save-btn {
-  padding: 8px 16px;
+  padding: 7px 14px;
   background: #10b981;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   transition: all 0.3s;
+  touch-action: manipulation;
+  min-height: 40px;
 }
 
 .save-btn:hover {
@@ -535,15 +561,17 @@
 }
 
 .cancel-btn {
-  padding: 8px 16px;
+  padding: 7px 14px;
   background: #6b7280;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   transition: all 0.3s;
+  touch-action: manipulation;
+  min-height: 40px;
 }
 
 .cancel-btn:hover {
@@ -553,77 +581,11 @@
 /* 响应式设计 */
 @media (max-width: 768px) {
   .todo-page {
-    padding: 15px;
-  }
-
-  .todo-header {
-    padding: 12px 15px;
-  }
-
-  .page-title {
-    font-size: 18px;
-  }
-
-  .todo-form-card {
-    padding: 15px;
-  }
-
-  .todo-input {
-    font-size: 14px;
-  }
-
-  .todo-form-row {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .todo-select,
-  .todo-date-input {
-    width: 100%;
-  }
-
-  .todo-stats {
-    padding: 12px;
-  }
-
-  .stat-number {
-    font-size: 24px;
-  }
-
-  .stat-label {
-    font-size: 12px;
-  }
-
-  .todo-filters {
-    gap: 8px;
-  }
-
-  .filter-btn {
-    padding: 10px;
-    font-size: 14px;
-  }
-
-  .todo-item {
-    padding: 12px;
-  }
-
-  .todo-description {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .todo-page {
     padding: 10px;
   }
 
   .todo-header {
-    padding: 10px 12px;
-  }
-
-  .back-btn {
-    padding: 8px 15px;
-    font-size: 13px;
+    padding: 10px 14px;
   }
 
   .page-title {
@@ -634,38 +596,192 @@
     padding: 12px;
   }
 
-  .todo-input,
-  .todo-select,
-  .todo-date-input {
+  .todo-input {
     font-size: 13px;
     padding: 10px 12px;
   }
 
-  .todo-add-btn {
-    padding: 12px;
-    font-size: 15px;
+  .todo-form-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .todo-select,
+  .todo-date-input {
+    width: 100%;
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .todo-stats {
+    padding: 10px;
   }
 
   .stat-number {
-    font-size: 20px;
+    font-size: 22px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .todo-filters {
+    gap: 5px;
   }
 
   .filter-btn {
-    padding: 8px;
-    font-size: 13px;
+    padding: 9px;
+    font-size: 12px;
   }
 
   .todo-item {
     padding: 10px;
   }
 
+  .todo-description {
+    font-size: 13px;
+  }
+
+  .back-btn {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+
+  .todo-add-btn {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .todo-page {
+    padding: 8px;
+  }
+
+  .todo-header {
+    padding: 8px 12px;
+    margin-bottom: 10px;
+  }
+
+  .back-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 60px;
+  }
+
+  .page-title {
+    font-size: 15px;
+  }
+
+  .todo-form-card {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .todo-input,
+  .todo-select,
+  .todo-date-input {
+    font-size: 12px;
+    padding: 9px 11px;
+  }
+
+  .todo-add-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .todo-stats {
+    padding: 8px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .todo-filters {
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .filter-btn {
+    padding: 8px;
+    font-size: 12px;
+    min-height: 40px;
+  }
+
+  .todo-list {
+    padding: 10px;
+  }
+
+  .todo-item {
+    padding: 9px;
+  }
+
   .todo-check {
     width: 20px;
     height: 20px;
     font-size: 12px;
+    min-width: 20px;
+    min-height: 20px;
   }
 
   .todo-description {
     font-size: 13px;
   }
+
+  .todo-actions button {
+    padding: 5px 9px;
+    font-size: 12px;
+    min-height: 34px;
+    min-width: 34px;
+  }
+
+  .category-stats {
+    padding: 10px;
+  }
+
+  .category-stats h3 {
+    font-size: 13px;
+  }
+
+  .category-tag {
+    padding: 4px 9px;
+    font-size: 11px;
+  }
+}
+
+/* 暗黑主题优化 */
+.todo-page.dark .todo-item {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.todo-page.dark .todo-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.todo-page.dark .todo-check {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.todo-page.dark .todo-check.checked {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.todo-page.dark .todo-tag {
+  background: #374151;
+  color: #9ca3af;
+}
+
+.todo-page.dark .empty-state {
+  background: rgba(17, 24, 39, 0.95);
+  color: #9ca3af;
+}
+
+.todo-page.dark .empty-state p:first-child {
+  color: #d1d5db;
 }

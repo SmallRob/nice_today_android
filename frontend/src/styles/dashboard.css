@@ -49,8 +49,6 @@
 }
 
 /* 头部区域 */
-
-/* 头部区域 */
 .dashboard-header {
   margin-top: 24px;
   margin-bottom: 24px;
@@ -142,27 +140,75 @@
   z-index: 1;
 }
 
+/* 全部功能标题和分割线 */
+.features-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 16px 0 12px 0;
+  padding: 0 8px;
+}
+
+.features-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.dark .features-title {
+  color: #f9fafb;
+}
+
+.features-divider {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+}
+
+.dark .features-divider {
+  background: linear-gradient(90deg, transparent 0%, #374151 50%, transparent 100%);
+}
+
 /* 功能网格布局 - 3列网格 */
 .features-grid-three-col {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
-/* 响应式网格 - 平板 (2列) */
-@media (max-width: 992px) {
+/* 响应式网格 - 平板 (3列) */
+@media (min-width: 577px) and (max-width: 992px) {
   .features-grid-three-col {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
 }
 
-/* 响应式网格 - 手机 (3列等宽) */
+/* 大屏幕 (3列，显示描述) */
+@media (min-width: 993px) {
+  .features-grid-three-col {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .feature-card-description {
+    display: block;
+  }
+}
+
+/* 响应式网格 - 手机 (3列等宽，不显示描述) */
 @media (max-width: 576px) {
   .features-grid-three-col {
     grid-template-columns: repeat(3, 1fr);
     gap: 6px;
+  }
+
+  .feature-card-description {
+    display: none;
   }
 }
 
@@ -197,16 +243,18 @@
 /* 功能卡片 */
 .feature-card {
   background: white;
-  border-radius: 16px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 14px 10px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  min-height: 140px;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  text-align: center;
   /* 优化触摸区域 */
   -webkit-tap-highlight-color: transparent;
   user-select: none;
@@ -219,49 +267,38 @@
 }
 
 .feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .dark .feature-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .feature-card:active {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* 高亮卡片 */
-.feature-card-highlight {
-  border: 2px solid var(--card-color);
-}
-
-.feature-card-highlight::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--card-color) 0%, transparent 50%);
-  opacity: 0.05;
-  pointer-events: none;
-}
-
-/* 卡片图标 */
+/* 卡片图标 - 与背景色融合 */
 .feature-card-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   background: var(--card-color);
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s;
+}
+
+.feature-card:hover .feature-card-icon {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* 卡片内容 */
@@ -269,16 +306,19 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
+  align-items: center;
   width: 100%;
 }
 
 .feature-card-title {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: #1f2937;
-  margin: 0 0 4px 0;
-  line-height: 1.4;
+  margin: 0 0 2px 0;
+  line-height: 1.3;
+  text-align: center;
+  word-wrap: break-word;
 }
 
 .dark .feature-card-title {
@@ -286,33 +326,19 @@
 }
 
 .feature-card-description {
-  font-size: 12px;
+  font-size: 11px;
   color: #6b7280;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-align: center;
 }
 
 .dark .feature-card-description {
   color: #9ca3af;
-}
-
-/* 高亮徽章 */
-.feature-card-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: var(--card-color);
-  color: white;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 /* 分类标题 */
@@ -447,8 +473,8 @@
 
   /* 移动端3列布局优化 */
   .feature-card {
-    min-height: 100px;
-    padding: 10px 8px;
+    min-height: 95px;
+    padding: 12px 8px;
     text-align: center;
     align-items: center;
   }
@@ -466,11 +492,12 @@
     height: 36px;
     margin-bottom: 6px;
     border-radius: 8px;
+    font-size: 18px;
   }
 
   .feature-card-title {
     font-size: 12px;
-    margin-bottom: 2px;
+    margin-bottom: 0;
     line-height: 1.2;
     -webkit-line-clamp: 1;
     text-overflow: ellipsis;
@@ -480,13 +507,7 @@
   }
 
   .feature-card-description {
-    font-size: 10px;
-    line-height: 1.2;
-    -webkit-line-clamp: 1;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    width: 100%;
+    display: none;
   }
 
   .features-grid {
@@ -514,11 +535,11 @@
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .quick-action-btn span:nth-child(1) {
     font-size: 16px;
   }
-  
+
   .quick-action-btn span:nth-child(2) {
     font-size: 10px;
     line-height: 1.2;
@@ -536,17 +557,23 @@
   }
 
   .feature-card {
-    padding: 12px;
-    min-height: 110px;
+    padding: 10px 8px;
+    min-height: 90px;
+  }
+
+  .feature-card-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
   }
 
   .quick-actions {
-    gap: 8px;
+    gap: 4px;
   }
 
   .quick-action-btn {
-    padding: 10px 14px;
-    font-size: 12px;
+    padding: 6px 10px;
+    font-size: 11px;
   }
 }
 
@@ -554,4 +581,187 @@
 .feature-card-loading {
   opacity: 0.6;
   pointer-events: none;
+}
+
+/* 编辑模式控制按钮 */
+.features-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.edit-mode-btn {
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dark .edit-mode-btn {
+  background: #1f2937;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+.edit-mode-btn:hover {
+  background: #f9fafb;
+  border-color: #667eea;
+}
+
+.dark .edit-mode-btn:hover {
+  background: #374151;
+  border-color: #667eea;
+}
+
+.edit-mode-btn.edit-mode-active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.edit-mode-btn.edit-mode-active:hover {
+  background: #5568d3;
+}
+
+.reset-order-btn {
+  background: white;
+  border: 1px solid #fca5a5;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dark .reset-order-btn {
+  background: #1f2937;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+.reset-order-btn:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.dark .reset-order-btn:hover {
+  background: #7f1d1d;
+  border-color: #dc2626;
+}
+
+/* 功能卡片包装器 */
+.feature-wrapper {
+  position: relative;
+}
+
+/* 拖拽手柄 */
+.drag-handle {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: move;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+/* 可拖拽的卡片 */
+.feature-card-draggable {
+  cursor: move !important;
+}
+
+.feature-card-draggable:hover {
+  transform: translateY(-2px);
+}
+
+/* 拖拽中的卡片 */
+.feature-card-dragging {
+  opacity: 0.5;
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* 拖拽目标高亮 */
+.features-grid-three-col .feature-wrapper:has(.feature-card-draggable:hover) {
+  position: relative;
+}
+
+.features-grid-three-col .feature-wrapper:has(.feature-card-draggable:hover)::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px dashed #667eea;
+  border-radius: 14px;
+  pointer-events: none;
+}
+
+/* 编辑模式下的网格样式 */
+.features-grid-three-col.edit-mode {
+  gap: 12px;
+}
+
+/* 拖拽动画 */
+@keyframes dragPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.feature-card-draggable {
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.feature-card-draggable:active {
+  animation: dragPulse 0.3s ease-in-out;
+}
+
+/* 移动端优化 */
+@media (max-width: 576px) {
+  .features-controls {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .edit-mode-btn,
+  .reset-order-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .drag-handle {
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+
+  .feature-card-draggable:hover {
+    transform: translateY(-1px);
+  }
 }

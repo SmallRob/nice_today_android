@@ -12,10 +12,15 @@ const FeatureCard = ({
   color = '#6366f1',
   route,
   onClick,
-  highlight = false,
-  disabled = false
+  disabled = false,
+  draggable = false,
+  onDragStart,
+  onDragEnd,
+  index,
+  id
 }) => {
   const navigate = useNavigate();
+  const [isDragging, setIsDragging] = React.useState(false);
 
   const handleClick = () => {
     if (disabled) return;
@@ -24,6 +29,55 @@ const FeatureCard = ({
       navigate(route);
     } else if (onClick) {
       onClick();
+    }
+  };
+
+  const handleDragStart = (e) => {
+    if (!draggable) return;
+    
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+    
+    // 设置拖拽时的透明度
+    setTimeout(() => {
+      e.target.style.opacity = '0.5';
+    }, 0);
+
+    if (onDragStart) {
+      onDragStart(e, index);
+    }
+  };
+
+  const handleDragEnd = (e) => {
+    setIsDragging(false);
+    e.target.style.opacity = '1';
+    
+    if (onDragEnd) {
+      onDragEnd(e);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    if (!draggable || isDragging) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e) => {
+    if (!draggable) return;
+    e.preventDefault();
+
+    const draggedId = e.dataTransfer.getData('text/plain');
+    const targetId = id;
+
+    if (draggedId && targetId && draggedId !== targetId && onDragEnd) {
+      // 将拖拽的卡片移动到目标位置
+      onDragEnd({
+        draggedId,
+        targetId,
+        type: 'drop'
+      });
     }
   };
 
@@ -36,17 +90,26 @@ const FeatureCard = ({
       'calendar': '📅',
       'chart-line': '📊',
       'lightning-bolt': '⚡',
-      'heart': '❤️'
+      'heart': '❤️',
+      'grid': '🌟',
+      'sparkles': '✨'
     };
     return iconMap[icon] || '📱';
   };
 
   return (
     <div
-      className={`feature-card ${highlight ? 'feature-card-highlight' : ''} ${
+      className={`feature-card ${
         disabled ? 'feature-card-loading' : ''
+      } ${draggable ? 'feature-card-draggable' : ''} ${
+        isDragging ? 'feature-card-dragging' : ''
       }`}
       onClick={handleClick}
+      draggable={draggable}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       style={{
         '--card-color': color
       }}
@@ -54,15 +117,11 @@ const FeatureCard = ({
       <div className="feature-card-icon">
         {getIconContent()}
       </div>
-      
+
       <div className="feature-card-content">
         <h3 className="feature-card-title">{title}</h3>
         <p className="feature-card-description">{description}</p>
       </div>
-
-      {highlight && (
-        <div className="feature-card-badge">热门</div>
-      )}
     </div>
   );
 };

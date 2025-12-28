@@ -300,29 +300,43 @@ const ZodiacEnergyTab = memo(() => {
     }
   }, [userZodiac, selectedDate, wuxingElements]);
 
-  // 初始化组件 - 优化为立即加载默认数据
+  // 初始化组件 - 增强稳定性版本
   useEffect(() => {
     let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     const initialize = async () => {
       try {
         if (!isMounted) return;
 
+        console.log('初始化生肖能量组件，重试次数:', retryCount);
+        
         // 设置默认生肖为"羊"，确保有数据可显示
         setUserZodiac('羊');
         setTempZodiac('');
 
         if (isMounted) {
           setInitialized(true);
+          console.log('生肖能量组件初始化成功');
         }
       } catch (error) {
         console.error('初始化生肖能量组件失败:', error);
 
         // 降级处理：使用默认逻辑
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log('重试初始化，当前重试次数:', retryCount);
+          setTimeout(initialize, 500); // 500ms后重试
+          return;
+        }
+
+        // 最终降级处理
         setUserZodiac('羊');
         setTempZodiac('');
         if (isMounted) {
           setInitialized(true);
+          console.log('使用降级方案初始化成功');
         }
       }
     };
@@ -334,18 +348,32 @@ const ZodiacEnergyTab = memo(() => {
     };
   }, []);
 
-  // 当生肖或日期变化时重新加载数据 - 优化加载逻辑
+  // 当生肖或日期变化时重新加载数据 - 增强稳定性版本
   useEffect(() => {
-    if (!userZodiac || !initialized) return;
+    if (!userZodiac || !initialized) {
+      console.log('条件不满足，跳过数据加载:', { userZodiac, initialized });
+      return;
+    }
 
     // 仅在首次默认加载或用户主动切换时执行数据请求
     if (!dataLoaded) {
       const timer = setTimeout(() => {
-        loadEnergyGuidance();
-        setDataLoaded(true);
+        try {
+          console.log('开始加载能量指引数据');
+          loadEnergyGuidance();
+          setDataLoaded(true);
+          console.log('能量指引数据加载完成');
+        } catch (error) {
+          console.error('加载能量指引数据失败:', error);
+          setError('数据加载失败，请重试');
+          setDataLoaded(false); // 允许重试
+        }
       }, 200);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        console.log('清理数据加载定时器');
+      };
     }
   }, [userZodiac, selectedDate, loadEnergyGuidance, initialized, dataLoaded]);
 
@@ -399,7 +427,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
           </svg>
@@ -472,7 +500,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <span className="mr-2">{elementData?.icon}</span>
           {elementData.name}元素能量提升
         </h3>
@@ -522,7 +550,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
           </svg>
@@ -582,7 +610,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
           </svg>
@@ -656,7 +684,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
           </svg>
@@ -747,7 +775,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
           </svg>
@@ -930,7 +958,7 @@ const ZodiacEnergyTab = memo(() => {
 
     return (
       <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
           </svg>
@@ -987,7 +1015,7 @@ const ZodiacEnergyTab = memo(() => {
         {/* 背景装饰 - 移动端简化 */}
         <div className="hidden md:block absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-100 dark:bg-amber-900/20 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
 
-        <h3 className="text-lg md:text-xl font-medium text-gray-900 dark:text-gray-100 mb-5 flex items-center justify-between">
+        <h3 className="text-lg md:text-xl font-medium text-gray-900 dark:text-white mb-5 flex items-center justify-between">
           <div className="flex items-center">
             <span className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white mr-3 shadow-lg shadow-amber-500/20 text-sm">
               ☯️
@@ -1066,9 +1094,9 @@ const ZodiacEnergyTab = memo(() => {
               <div className="absolute top-0 right-0 p-1 opacity-10">
                 <span className="text-xl md:text-2xl">👤</span>
               </div>
-              <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-100 mb-1 font-normal">命主元神</div>
+              <div className="text-[9px] md:text-[10px] text-gray-400 dark:text-gray-300 mb-1 font-normal">命主元神</div>
               <div className="flex items-center">
-                <span className="text-base md:text-lg font-medium text-gray-800 dark:text-gray-100 mr-1.5 md:mr-2">{monthlyFortune.dayMaster}</span>
+                <span className="text-base md:text-lg font-medium text-gray-800 dark:text-white mr-1.5 md:mr-2">{monthlyFortune.dayMaster}</span>
                 <span className="text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                   {monthlyFortune.masterElement}命人
                 </span>
@@ -1105,7 +1133,7 @@ const ZodiacEnergyTab = memo(() => {
   const renderZodiacSelector = () => {
   return (
     <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
-        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2.5 md:mb-4 flex items-center">
+        <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
           </svg>
@@ -1149,7 +1177,7 @@ const ZodiacEnergyTab = memo(() => {
             )}
 
             {/* 提示文本 */}
-            <div className="mb-3 text-xs text-gray-600 dark:text-gray-100 text-center bg-gray-50 dark:bg-gray-800/80 p-2 rounded-lg">
+            <div className="mb-3 text-xs text-gray-600 dark:text-gray-300 text-center bg-gray-50 dark:bg-gray-800/80 p-2 rounded-lg">
               ✨ 点击任意生肖图标查看能量指引，临时查看不会保存配置
             </div>
 
@@ -1182,12 +1210,12 @@ const ZodiacEnergyTab = memo(() => {
             {/* 日期选择器 */}
             <div className="mt-4">
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-100 mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-3">
                   <span className="flex items-center">
                     <span className="mr-2">📅</span>
                     选择日期
                   </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-100 font-normal block mt-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-300 font-normal block mt-1">
                     选择日期查看生肖运势和当月八字运势分析
                   </span>
                 </label>
@@ -1258,21 +1286,31 @@ const ZodiacEnergyTab = memo(() => {
         <div className="container mx-auto px-3 md:px-4 py-3 md:py-6 bg-transparent flex-1">
           <div className="mb-3 md:mb-4 dashboard-content">
             <div className="space-y-2.5 md:space-y-3">
-              {/* 生肖选择器 */}
-              {renderZodiacSelector()}
-
-              {/* 加载状态 */}
-              {loading && (
+              {/* 初始化状态检查 - 防止手机端黑屏 */}
+              {!initialized && (
                 <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
                   <div className="text-center py-6">
                     <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                    <p className="text-gray-800 dark:text-gray-100 text-xs">正在加载能量指引...</p>
+                    <p className="text-gray-800 dark:text-white text-xs">正在初始化组件...</p>
+                  </div>
+                </div>
+              )}
+
+              {/* 生肖选择器 */}
+              {initialized && renderZodiacSelector()}
+
+              {/* 加载状态 */}
+              {initialized && loading && (
+                <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+                  <div className="text-center py-6">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                    <p className="text-gray-800 dark:text-white text-xs">正在加载能量指引...</p>
                   </div>
                 </div>
               )}
 
               {/* 错误显示 */}
-              {error && (
+              {initialized && error && (
                 <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
                   <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
                     <p className="text-red-900 dark:text-red-300 text-xs">{error}</p>
@@ -1303,7 +1341,7 @@ const ZodiacEnergyTab = memo(() => {
 
                   {/* 底部信息 */}
                   <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200 dark:border-gray-700">
-                    <div className="text-center text-gray-700 dark:text-gray-100 text-xs p-2.5 md:p-3">
+                    <div className="text-center text-gray-700 dark:text-white text-xs p-2.5 md:p-3">
                       <p>数据更新时间：{new Date().toLocaleString()}</p>
                       <p className="mt-1">五行讲究动态平衡，请根据自身状态灵活调整养生方法</p>
                     </div>
@@ -1316,8 +1354,8 @@ const ZodiacEnergyTab = memo(() => {
                 <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 will-change-transform">
                   <div className="text-center py-6">
                     <div className="text-3xl mb-2">🐉</div>
-                    <h3 className="text-base font-semibold text-gray-700 dark:text-gray-100 mb-2">请选择您的生肖</h3>
-                    <p className="text-gray-700 dark:text-gray-100 text-xs max-w-xs mx-auto">
+                    <h3 className="text-base font-semibold text-gray-700 dark:text-white mb-2">请选择您的生肖</h3>
+                    <p className="text-gray-700 dark:text-gray-300 text-xs max-w-xs mx-auto">
                       选择生肖后，将为您提供个性化的每日能量指引
                     </p>
                   </div>

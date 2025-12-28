@@ -87,8 +87,12 @@ const HoroscopeTab = () => {
   const [showZodiacModal, setShowZodiacModal] = useState(false);
   const [globalUserConfig, setGlobalUserConfig] = useState(null);
 
-  // 初始化缓存管理器和性能优化
+  // 初始化缓存管理器和性能优化 - 增强稳定性版本
   useEffect(() => {
+    let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
+
     const initOptimizations = async () => {
       try {
         // 检查函数是否存在再初始化性能优化
@@ -102,41 +106,64 @@ const HoroscopeTab = () => {
         }
       } catch (error) {
         console.error('优化初始化失败:', error);
-        setError('初始化失败: ' + error.message);
+        if (isMounted) {
+          setError('初始化失败: ' + error.message);
+        }
       }
     };
-
-    initOptimizations();
 
     // 初始化用户配置管理器并获取全局配置
     const initUserConfig = async () => {
       try {
+        console.log('初始化星座组件，重试次数:', retryCount);
+        
         await userConfigManager.initialize();
         const config = userConfigManager.getCurrentConfig();
-        setGlobalUserConfig(config);
+        
+        if (isMounted) {
+          setGlobalUserConfig(config);
 
-        // 获取用户星座
-        const zodiac = config?.zodiac || '';
-        if (zodiac) {
-          setUserHoroscope(zodiac);
-          setIsTemporaryHoroscope(false);
-          isTemporaryRef.current = false;
-        } else {
-          // 未配置时显示默认星座
-          setDefaultHoroscopeState();
+          // 获取用户星座
+          const zodiac = config?.zodiac || '';
+          if (zodiac) {
+            setUserHoroscope(zodiac);
+            setIsTemporaryHoroscope(false);
+            isTemporaryRef.current = false;
+          } else {
+            // 未配置时显示默认星座
+            setDefaultHoroscopeState();
+          }
+          setInitialized(true);
+          setDataLoaded(false);
+          console.log('星座组件初始化成功');
         }
-        setInitialized(true);
-        setDataLoaded(false);
       } catch (error) {
         console.error('初始化用户配置管理器失败:', error);
-        // 降级处理
-        setDefaultHoroscopeState();
-        setInitialized(true);
-        setDataLoaded(false);
+
+        // 重试逻辑
+        if (retryCount < maxRetries && isMounted) {
+          retryCount++;
+          console.log('重试初始化，当前重试次数:', retryCount);
+          setTimeout(initUserConfig, 500); // 500ms后重试
+          return;
+        }
+
+        // 最终降级处理
+        if (isMounted) {
+          setDefaultHoroscopeState();
+          setInitialized(true);
+          setDataLoaded(false);
+          console.log('使用降级方案初始化成功');
+        }
       }
     };
 
+    initOptimizations();
     initUserConfig();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // 设置默认星座状态的工具函数
@@ -243,21 +270,32 @@ const HoroscopeTab = () => {
     isTemporaryRef.current = isTemporaryHoroscope;
   }, [isTemporaryHoroscope]);
 
-  // 当星座变化时重新加载数据 - 使用时间缓存确保一致性
+  // 当星座变化时重新加载数据 - 增强稳定性版本
   useEffect(() => {
-    if (!userHoroscope || !initialized) return;
+    if (!userHoroscope || !initialized) {
+      console.log('条件不满足，跳过数据加载:', { userHoroscope, initialized });
+      return;
+    }
 
     // 立即加载数据，不使用防抖，确保实时响应
     if (!dataLoaded) {
-      // 直接调用，不使用防抖，确保立即计算新数据
+      try {
+        console.log('开始加载星座运势数据');
         loadHoroscopeGuidance(userHoroscope, getToday())
-        .then(() => {
-          setDataLoaded(true);
-        })
-        .catch(error => {
-          console.error('加载星座数据失败:', error);
-          setError('加载失败: ' + error.message);
-        });
+          .then(() => {
+            setDataLoaded(true);
+            console.log('星座运势数据加载完成');
+          })
+          .catch(error => {
+            console.error('加载星座数据失败:', error);
+            setError('加载失败: ' + error.message);
+            setDataLoaded(false); // 允许重试
+          });
+      } catch (error) {
+        console.error('加载星座数据过程异常:', error);
+        setError('数据加载异常，请重试');
+        setDataLoaded(false); // 允许重试
+      }
     }
   }, [userHoroscope, loadHoroscopeGuidance, initialized, dataLoaded]);
 
@@ -320,7 +358,7 @@ const HoroscopeTab = () => {
         {renderTrendChart()}
 
         <div className="horoscope-card">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
             <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
@@ -332,7 +370,7 @@ const HoroscopeTab = () => {
         </div>
 
         <div className="horoscope-card">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
             <svg className="w-4 h-4 text-pink-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
             </svg>
@@ -367,7 +405,7 @@ const HoroscopeTab = () => {
 
         {recommendations.soulQuestion && (
           <div className="horoscope-card">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
               <svg className="w-4 h-4 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
               </svg>
@@ -506,28 +544,57 @@ const HoroscopeTab = () => {
           {/* 星座选择器 */}
           {renderHoroscopeSelector()}
 
-          {/* 内容区域 - 简化布局 */}
+          {/* 内容区域 - 增强稳定性版本 */}
           <div className="space-y-4 dashboard-content">
+            {/* 初始化状态检查 - 防止手机端黑屏 */}
+            {!initialized && (
+              <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+                <div className="text-center py-6">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                  <p className="text-gray-800 dark:text-white text-xs">正在初始化星座组件...</p>
+                </div>
+              </div>
+            )}
+
             {/* 加载状态 */}
-            {loading && <SkeletonLoader />}
+            {initialized && loading && <SkeletonLoader />}
 
             {/* 错误显示 */}
-            {error && <ErrorDisplay error={error} />}
+            {initialized && error && <ErrorDisplay error={error} />}
 
-            {/* 运势内容 */}
-            {!loading && !error && horoscopeGuidance && userHoroscope ? (
+            {/* 运势内容 - 增强稳定性 */}
+            {initialized && !loading && !error && horoscopeGuidance && userHoroscope ? (
               renderHoroscopeCard()
-            ) : !loading && !error && !userHoroscope ? (
+            ) : initialized && !loading && !error && !userHoroscope ? (
               <EmptyState />
+            ) : initialized && !loading && !error && (!horoscopeGuidance || !userHoroscope) ? (
+              <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-4 border border-gray-200/50 dark:border-gray-700/50 will-change-transform">
+                <div className="text-center py-6">
+                  <div className="text-3xl mb-2">🌙</div>
+                  <h3 className="text-base font-semibold text-gray-700 dark:text-white mb-2">数据准备中</h3>
+                  <p className="text-gray-700 dark:text-gray-300 text-xs max-w-xs mx-auto">
+                    正在准备星座运势数据，请稍候...
+                  </p>
+                  <button
+                    onClick={() => {
+                      setDataLoaded(false);
+                      loadHoroscopeGuidance();
+                    }}
+                    className="mt-3 px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+                  >
+                    重新加载数据
+                  </button>
+                </div>
+              </div>
             ) : null}
 
             {/* 星座综合特质展示 */}
-            {!loading && !error && userHoroscope && (
+            {initialized && !loading && !error && userHoroscope && (
               <ZodiacTraitsDisplay currentHoroscope={userHoroscope} />
             )}
 
             {/* 底部信息 */}
-            {!loading && !error && horoscopeGuidance && (
+            {initialized && !loading && !error && horoscopeGuidance && (
               <div className="horoscope-card text-center text-gray-500 dark:text-gray-300 text-xs p-3">
                 <p>数据更新时间：{new Date().toLocaleString()}</p>
                 <p className="mt-1">星座运势仅供参考，请理性看待</p>

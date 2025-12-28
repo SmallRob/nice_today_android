@@ -82,10 +82,9 @@ const LifeEnergyTrendPage = lazyLoadWithErrorHandling(() => import('./pages/Life
 const SettingsPage = lazyLoadWithErrorHandling(() => import('./pages/SettingsPage'));
 const TarotPage = lazyLoadWithErrorHandling(() => import('./pages/TarotPage'));
 const NumerologyPage = lazyLoadWithErrorHandling(() => import('./pages/NumerologyPage'));
-const BiorhythmPage = lazyLoadWithErrorHandling(() => import('./pages/BiorhythmPage_optimized'));
+const BiorhythmPage = lazyLoadWithErrorHandling(() => import('./pages/BiorhythmPage'));
 const HoroscopePage = lazyLoadWithErrorHandling(() => import('./pages/HoroscopePage_optimized'));
-const BaziMonthlyTrendPage = lazyLoadWithErrorHandling(() => import('./pages/LifeTrendPage_optimized'));
-const BaziPage = lazyLoadWithErrorHandling(() => import('./pages/LifeTrendPage_optimized'));
+const BaziPage = lazyLoadWithErrorHandling(() => import('./pages/BaziPage'));
 const MBTITestPage = lazyLoadWithErrorHandling(() => import('./pages/MBTITestPage'));
 const MBTIDetailPage = lazyLoadWithErrorHandling(() => import('./components/MBTIPersonalityTabHome'));
 const EnergyBoostPage = lazyLoadWithErrorHandling(() => import('./pages/EnergyBoostPage'));
@@ -96,6 +95,9 @@ const AgeAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/AgeAnaly
 const ZiWeiPage = lazyLoadWithErrorHandling(() => import('./pages/ZiWeiPage'));
 const TodoListPage = lazyLoadWithErrorHandling(() => import('./pages/TodoListPage'));
 const FinancePage = lazyLoadWithErrorHandling(() => import('./pages/FinancePage'));
+const TakashimaAdvicePage = lazyLoadWithErrorHandling(() => import('./pages/TakashimaAdvice'));
+const LifestyleGuidePage = lazyLoadWithErrorHandling(() => import('./pages/LifestyleGuide'));
+const DailyCardPage = lazyLoadWithErrorHandling(() => import('./pages/DailyCardPage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -149,7 +151,6 @@ const AppLayout = () => {
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/life-energy" element={<LifeEnergyTrendPage />} />
             <Route path="/trend" element={<LifeEnergyTrendPage />} />
-            <Route path="/bazi-monthly" element={<BaziMonthlyTrendPage />} />
             <Route path="/tarot" element={<TarotPage />} />
             <Route path="/numerology" element={<NumerologyPage />} />
             <Route path="/settings" element={<SettingsPage />} />
@@ -167,6 +168,9 @@ const AppLayout = () => {
             <Route path="/ziwei" element={<ZiWeiPage />} />
             <Route path="/todo-list" element={<TodoListPage />} />
             <Route path="/finance" element={<FinancePage />} />
+            <Route path="/takashima-advice" element={<TakashimaAdvicePage />} />
+            <Route path="/lifestyle-guide" element={<LifestyleGuidePage />} />
+            <Route path="/daily-cards" element={<DailyCardPage />} />
           </Routes>
         </SafeSuspense>
       </div>

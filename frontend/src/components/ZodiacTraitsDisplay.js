@@ -30,7 +30,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       '风象': 'text-blue-600 dark:text-blue-400',
       '水象': 'text-purple-600 dark:text-purple-400'
     };
-    return colors[element] || 'text-gray-600 dark:text-gray-100';
+    return colors[element] || 'text-gray-600 dark:text-gray-300';
   };
 
   // 获取元素背景色
@@ -113,7 +113,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       className="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 border border-gray-100 dark:border-gray-800 mt-6 cursor-pointer hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 transition-all duration-200"
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
           <span className="mr-2 text-2xl">{zodiac.icon}</span>
           {zodiac.name} 综合特质
         </h3>
@@ -128,14 +128,14 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       {/* 基本属性 */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className={`p-3 rounded-lg ${getElementBgColor(zodiac.element)}`}>
-          <div className="text-xs text-gray-600 dark:text-gray-100 mb-1">元素属性</div>
+          <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">元素属性</div>
           <div className={`font-semibold ${getElementColor(zodiac.element)}`}>
             {zodiac.element}
           </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-          <div className="text-xs text-gray-600 dark:text-gray-100 mb-1">日期范围</div>
-          <div className="font-semibold text-gray-900 dark:text-gray-100">
+          <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">日期范围</div>
+          <div className="font-semibold text-gray-900 dark:text-white">
             {zodiac.dateRange}
           </div>
         </div>
@@ -143,7 +143,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
 
       {/* 详细描述 */}
       <div className="mb-4">
-        <div className="text-sm text-gray-700 dark:text-gray-100 leading-relaxed">
+        <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
           {getZodiacDescription(zodiac.name)}
         </div>
       </div>
@@ -157,12 +157,12 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
           </h4>
           <div className="space-y-1">
             {zodiac.personalityTraits?.map((trait, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-gray-100 flex items-center">
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
                 <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
                 {trait}
               </div>
             )) || zodiac.traits?.split('、').map((trait, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-gray-100 flex items-center">
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
                 <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
                 {trait}
               </div>
@@ -177,7 +177,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
           </h4>
           <div className="space-y-1">
             {zodiac.strengths?.map((strength, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-gray-100 flex items-center">
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
                 <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
                 {strength}
               </div>
@@ -192,7 +192,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
           </h4>
           <div className="space-y-1">
             {zodiac.weaknesses?.map((weakness, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-gray-100 flex items-center">
+              <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
                 <span className="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
                 {weakness}
               </div>

@@ -383,46 +383,62 @@ const MBTIPersonalityTabHome = () => {
     'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
   ], []);
 
-  // 初始化组件 - 优化为立即加载默认数据
+  // 初始化组件 - 增强稳定性版本
   useEffect(() => {
     let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     const initialize = async () => {
       try {
+        console.log('初始化MBTI组件，重试次数:', retryCount);
+        
         // 初始化用户配置管理器
         await userConfigManager.initialize();
         const config = userConfigManager.getCurrentConfig();
 
         // 确保 config 是有效对象
         const safeConfig = config && typeof config === 'object' ? config : {};
-        setGlobalUserConfig(safeConfig);
+        
+        if (isMounted) {
+          setGlobalUserConfig(safeConfig);
 
-        // 立即加载所有MBTI类型
-        setAllMBTIs(mbtiList);
+          // 立即加载所有MBTI类型
+          setAllMBTIs(mbtiList);
 
-        // 如果用户有配置的MBTI，则使用；否则使用默认值（增加容错）
-        const initialMBTI = (safeConfig.mbti && typeof safeConfig.mbti === 'string' && safeConfig.mbti.trim()) || 'INFP';
-        setUserMBTI(initialMBTI);
-        setTempMBTI('');
-        setInitialized(true);
-        setDataLoaded(false);
+          // 如果用户有配置的MBTI，则使用；否则使用默认值（增加容错）
+          const initialMBTI = (safeConfig.mbti && typeof safeConfig.mbti === 'string' && safeConfig.mbti.trim()) || 'INFP';
+          setUserMBTI(initialMBTI);
+          setTempMBTI('');
+          setInitialized(true);
+          setDataLoaded(false);
 
-        // 设置用户信息（增加容错）
-        setUserInfo({
-          nickname: (safeConfig.nickname || '').toString(),
-          birthDate: (safeConfig.birthDate || '').toString(),
-          mbti: (safeConfig.mbti || '').toString()
-        });
+          // 设置用户信息（增加容错）
+          setUserInfo({
+            nickname: (safeConfig.nickname || '').toString(),
+            birthDate: (safeConfig.birthDate || '').toString(),
+            mbti: (safeConfig.mbti || '').toString()
+          });
 
-        // 如果用户配置了MBTI，则加载数据
-        if (safeConfig.mbti && typeof safeConfig.mbti === 'string' && safeConfig.mbti.trim()) {
-          loadPersonalityAnalysis(safeConfig.mbti);
-          setDataLoaded(true);
+          // 如果用户配置了MBTI，则加载数据
+          if (safeConfig.mbti && typeof safeConfig.mbti === 'string' && safeConfig.mbti.trim()) {
+            loadPersonalityAnalysis(safeConfig.mbti);
+            setDataLoaded(true);
+          }
+          console.log('MBTI组件初始化成功');
         }
       } catch (error) {
         console.error('初始化MBTI组件失败:', error);
 
-        // 降级处理
+        // 重试逻辑
+        if (retryCount < maxRetries && isMounted) {
+          retryCount++;
+          console.log('重试初始化，当前重试次数:', retryCount);
+          setTimeout(initialize, 500); // 500ms后重试
+          return;
+        }
+
+        // 最终降级处理
         if (isMounted) {
           setAllMBTIs(mbtiList);
           setUserMBTI('INFP');
@@ -433,6 +449,7 @@ const MBTIPersonalityTabHome = () => {
             mbti: ''
           });
           setInitialized(true);
+          console.log('使用降级方案初始化成功');
         }
       }
     };
@@ -734,7 +751,7 @@ const MBTIPersonalityTabHome = () => {
             >
               <span className="mb-1">{icon}</span>
             </div>
-            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] text-gray-900 dark:text-gray-100 uppercase tracking-widest border border-white/10">
+            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] text-gray-900 dark:text-white uppercase tracking-widest border border-white/10">
               {type}
             </div>
           </div>
@@ -760,7 +777,7 @@ const MBTIPersonalityTabHome = () => {
               {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] text-gray-900 dark:text-gray-100 font-black tracking-wider text-white shadow-inner"
+                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] text-gray-900 dark:text-white font-black tracking-wider text-white shadow-inner"
                 >
                   #{tag}
                 </span>

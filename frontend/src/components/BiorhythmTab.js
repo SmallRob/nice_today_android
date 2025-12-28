@@ -3,7 +3,7 @@ import BiorhythmChart from './BiorhythmChart';
 import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
 import { initDataMigration } from '../utils/dataMigration';
-import { useCurrentConfig } from '../contexts/UserConfigContext';
+import { useUserConfig, useCurrentConfig } from '../contexts/UserConfigContext';
 
 // 导入优化后的子组件
 import BiorhythmBanner from './biorhythm/BiorhythmBanner';
@@ -312,10 +312,13 @@ const BiorhythmTab = ({ isDesktop }) => {
     initDataMigration();
   }, []);
 
-  // 使用全局配置上下文（降级处理）
-  // 移除未使用的configManagerReady变量以消除ESLint警告
-  // useCurrentConfig() 直接返回配置对象，不需要再解构
-  const currentConfig = useCurrentConfig() || {};
+  // 使用全局配置上下文（增强版本，带降级处理）
+  const userConfig = useUserConfig();
+  const { configManagerReady, currentConfig, initializeConfigManager } = userConfig || {};
+
+  // 降级处理：如果useUserConfig失败，使用useCurrentConfig
+  const fallbackConfig = useCurrentConfig();
+  const effectiveConfig = currentConfig || fallbackConfig || {};
 
   // 从全局配置获取用户信息
   const [birthDate, setBirthDate] = useState(null);
@@ -332,6 +335,9 @@ const BiorhythmTab = ({ isDesktop }) => {
   const [error, setError] = useState(null);
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
+  
+  // 当前日期状态，用于检测日期变化
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   // 每日任务状态
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -411,17 +417,47 @@ const BiorhythmTab = ({ isDesktop }) => {
     setLoading(false);
   }, [formatDateLocal, parseDateLocal]);
 
-  // 初始化用户信息和加载数据 - 简化逻辑，参考MayaBirthChart_optimized.js
+  // 增强的配置管理器初始化
+  useEffect(() => {
+    const initializeConfig = async () => {
+      try {
+        // 确保配置管理器已初始化
+        if (!configManagerReady) {
+          const initSuccess = await initializeConfigManager();
+          if (!initSuccess) {
+            console.warn('配置管理器初始化失败，使用默认配置');
+          }
+        }
+      } catch (error) {
+        console.error('配置初始化失败:', error);
+      }
+    };
+    
+    initializeConfig();
+  }, [configManagerReady, initializeConfigManager]);
+
+  // 初始化用户信息和加载数据 - 增强版本
   useEffect(() => {
     try {
       let birthDate = null;
       let nickname = '用户';
 
-      // 从全局配置获取用户信息
-      if (currentConfig && currentConfig.birthDate) {
-        birthDate = currentConfig.birthDate;
-        nickname = currentConfig.nickname || '用户';
+      // 从全局配置获取用户信息（增强验证）
+      if (effectiveConfig && effectiveConfig.birthDate) {
+        // 验证出生日期格式
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (dateRegex.test(effectiveConfig.birthDate)) {
+          birthDate = effectiveConfig.birthDate;
+        }
+        nickname = effectiveConfig.nickname || '用户';
       }
+
+      console.log('初始化用户信息:', { 
+        nickname, 
+        birthDate, 
+        configManagerReady,
+        hasBirthDate: !!birthDate 
+      });
 
       // 更新用户信息状态
       setUserInfo({
@@ -442,30 +478,71 @@ const BiorhythmTab = ({ isDesktop }) => {
     } catch (error) {
       console.error('初始化用户信息失败:', error);
     }
-  }, [currentConfig, loadBiorhythmData]);
+  }, [effectiveConfig, configManagerReady, loadBiorhythmData]);
 
-  // 监听配置变化 - 当配置更新时重新加载数据
+  // 监听配置变化 - 增强版本，支持配置管理器状态变化
   useEffect(() => {
-    if (!currentConfig || !currentConfig.birthDate) return;
+    if (!configManagerReady || !effectiveConfig) {
+      console.log('配置管理器未就绪或当前配置为空，跳过配置变化监听');
+      return;
+    }
 
-    const { nickname, birthDate } = currentConfig;
+    const { nickname, birthDate } = effectiveConfig;
 
-    // 更新用户信息
-    setUserInfo({
-      nickname: nickname || '用户',
-      birthDate: birthDate
+    console.log('配置变化检测:', { 
+      nickname, 
+      birthDate, 
+      configManagerReady 
     });
 
-    setTempBirthDate(birthDate);
+    // 验证出生日期格式
+    const isValidBirthDate = birthDate && /^\d{4}-\d{2}-\d{2}$/.test(birthDate);
+
+    // 更新用户信息状态
+    setUserInfo({
+      nickname: nickname || '用户',
+      birthDate: isValidBirthDate ? birthDate : ''
+    });
+
+    setTempBirthDate(isValidBirthDate ? birthDate : '');
     setTempNickname(nickname || '');
 
-    // 重新加载生物节律数据
-    const newBirthDate = new Date(birthDate);
-    if (!isNaN(newBirthDate.getTime())) {
-      setBirthDate(newBirthDate);
-      loadBiorhythmData(newBirthDate);
+    // 如果出生日期有效，重新加载生物节律数据
+    if (isValidBirthDate) {
+      const newBirthDate = new Date(birthDate);
+      if (!isNaN(newBirthDate.getTime())) {
+        console.log('配置变化触发重新加载节律数据');
+        setBirthDate(newBirthDate);
+        loadBiorhythmData(newBirthDate);
+      }
     }
-  }, [currentConfig, loadBiorhythmData]);
+  }, [effectiveConfig, configManagerReady, loadBiorhythmData]);
+
+  // 日期变化检测和刷新机制
+  useEffect(() => {
+    const checkDateChange = () => {
+      const now = new Date();
+      const todayString = now.toDateString();
+      const currentDateString = currentDate.toDateString();
+      
+      // 如果日期发生变化，重新加载数据
+      if (todayString !== currentDateString) {
+        console.log('检测到日期变化，重新加载节律数据');
+        setCurrentDate(now);
+        
+        // 如果有出生日期，重新加载数据
+        if (birthDate) {
+          loadBiorhythmData(birthDate);
+        }
+      }
+    };
+
+    // 每分钟检查一次日期变化
+    const interval = setInterval(checkDateChange, 60000);
+    
+    // 组件卸载时清除定时器
+    return () => clearInterval(interval);
+  }, [birthDate, currentDate, loadBiorhythmData]);
 
   // 保存用户信息到全局配置
   const saveUserInfo = useCallback(async () => {

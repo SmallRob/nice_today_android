@@ -13,7 +13,6 @@ const MBTICard = () => {
       icon="brain"
       color="#6366f1"
       route="/mbti-test"
-      highlight={true}
     />
   );
 };
@@ -44,7 +43,6 @@ const HoroscopeCard = () => {
       icon="weather-sunny"
       color="#ec4899"
       route="/horoscope"
-      highlight={true}
     />
   );
 };
@@ -59,7 +57,7 @@ const BaziCard = () => {
       description="命理运势深度解析"
       icon="calendar"
       color="#8b5cf6"
-      route="/bazi"
+      route="/bazi?mode=monthly"
     />
   );
 };
@@ -75,7 +73,6 @@ const BiorhythmCard = () => {
       icon="chart-line"
       color="#10b981"
       route="/biorhythm"
-      highlight={true}
     />
   );
 };
@@ -144,7 +141,6 @@ const PeriodTrackerCard = () => {
       icon="heart"
       color="#ec4899"
       route="/period-tracker"
-      highlight={true}
     />
   );
 };
@@ -173,7 +169,6 @@ const ZiWeiCard = () => {
       icon="star"
       color="#8b5cf6"
       onClick={handleClick}
-      highlight={true}
     />
   );
 };
@@ -189,7 +184,6 @@ const TodoCard = () => {
       icon="calendar"
       color="#3b82f6"
       route="/todo-list"
-      highlight={true}
     />
   );
 };
@@ -205,7 +199,51 @@ const FinanceCard = () => {
       icon="chart-line"
       color="#ef4444"
       route="/finance"
-      highlight={true}
+    />
+  );
+};
+
+/**
+ * 高岛易断卜卦组件
+ */
+const TakashimaDivinationCard = () => {
+  return (
+    <FeatureCard
+      title="高岛易断"
+      description="传统周易卦象占卜"
+      icon="sparkles"
+      color="#0ea5e9"
+      route="/takashima-advice"
+    />
+  );
+};
+
+/**
+ * 生命矩阵组件
+ */
+const LifeMatrixCard = () => {
+  return (
+    <FeatureCard
+      title="生命矩阵"
+      description="构建你的意义能量图谱"
+      icon="grid"
+      color="#8b5cf6"
+      route="/lifestyle-guide"
+    />
+  );
+};
+
+/**
+ * 每日集卡组件
+ */
+const DailyCardCard = () => {
+  return (
+    <FeatureCard
+      title="每日集卡"
+      description="摇一摇收集精美卡牌"
+      icon="sparkles"
+      color="#ec4899"
+      route="/daily-cards"
     />
   );
 };
@@ -221,5 +259,8 @@ export {
   PeriodTrackerCard,
   ZiWeiCard,
   TodoCard,
-  FinanceCard
+  FinanceCard,
+  TakashimaDivinationCard,
+  LifeMatrixCard,
+  DailyCardCard
 };

@@ -3,7 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { useUserSummary } from '../hooks/useUserInfo';
 import { useNavigate } from 'react-router-dom';
-import { generateDailyHoroscope } from '../utils/horoscopeAlgorithm';
+import { generateDailyHoroscope, generateWeeklyHoroscope, generateMonthlyHoroscope } from '../utils/horoscopeAlgorithm';
 import '../styles/dashboard.css';
 
 const HoroscopePage = () => {
@@ -22,7 +22,28 @@ const HoroscopePage = () => {
   // 获取今日日期
   const getToday = () => {
     const today = new Date();
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    return today;
+  };
+
+  // 格式化日期字符串
+  const formatDateString = (date) => {
+    const d = date instanceof Date ? date : new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  // 格式化日期范围字符串
+  const formatDateRange = (viewMode) => {
+    const today = getToday();
+    if (viewMode === 'daily') {
+      return formatDateString(today);
+    } else if (viewMode === 'weekly') {
+      const endOfWeek = new Date(today);
+      endOfWeek.setDate(today.getDate() + 6);
+      return `${formatDateString(today)} - ${formatDateString(endOfWeek)}`;
+    } else if (viewMode === 'monthly') {
+      return `${today.getFullYear()}年${today.getMonth() + 1}月`;
+    }
+    return formatDateString(today);
   };
 
   // 加载星座运势数据
@@ -34,10 +55,20 @@ const HoroscopePage = () => {
 
     try {
       const date = getToday();
-      const data = generateDailyHoroscope(selectedZodiac, date);
-      
+      let data;
+
+      // 根据视图模式加载不同类型的运势
+      if (viewMode === 'daily') {
+        data = generateDailyHoroscope(selectedZodiac, date);
+      } else if (viewMode === 'weekly') {
+        data = generateWeeklyHoroscope(selectedZodiac, date);
+      } else if (viewMode === 'monthly') {
+        data = generateMonthlyHoroscope(selectedZodiac, date);
+      }
+
       if (data) {
         setHoroscopeData(data);
+        console.log(`✅ ${viewMode === 'daily' ? '今日' : viewMode === 'weekly' ? '本周' : '本月'}运势已加载:`, data);
       } else {
         throw new Error('无法生成运势数据');
       }
@@ -47,7 +78,7 @@ const HoroscopePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedZodiac]);
+  }, [selectedZodiac, viewMode]);
 
   // 初始化
   useEffect(() => {
@@ -94,7 +125,9 @@ const HoroscopePage = () => {
               </svg>
               返回首页
             </button>
-            <h1 className="text-xl font-bold">今日运势</h1>
+            <h1 className="text-xl font-bold">
+              {viewMode === 'daily' ? '今日运势' : viewMode === 'weekly' ? '本周运势' : '本月运势'}
+            </h1>
             <div className="w-12"></div>
           </div>
         </div>
@@ -198,10 +231,10 @@ const HoroscopePage = () => {
                   {selectedZodiac} {viewMode === 'daily' ? '今日' : viewMode === 'weekly' ? '本周' : '本月'}运势
                 </h2>
                 <span className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-full text-sm font-medium">
-                  {getToday()}
+                  {formatDateRange(viewMode)}
                 </span>
               </div>
-              
+
               <div className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
                 {horoscopeData.overallDescription || horoscopeData.description}
               </div>
@@ -213,6 +246,63 @@ const HoroscopePage = () => {
                 {renderScore(horoscopeData.dailyForecast?.career?.score || 65, '事业')}
                 {renderScore(horoscopeData.dailyForecast?.study?.score || 80, '学业')}
               </div>
+
+              {/* 每日概览（仅周运显示） */}
+              {viewMode === 'weekly' && horoscopeData.dailyOverview && (
+                <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3">
+                    本周每日运势概览
+                  </h3>
+                  <div className="grid grid-cols-7 gap-2">
+                    {horoscopeData.dailyOverview.map((day, index) => (
+                      <div key={index} className="text-center">
+                        <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">{day.day}</div>
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {day.date.substring(5)}
+                        </div>
+                        <div
+                          className={`text-xs mt-1 rounded px-1 py-0.5 ${
+                            day.score >= 80 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                            day.score >= 60 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                            day.score >= 40 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                          }`}
+                        >
+                          {day.score}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 每周概览（仅月运显示） */}
+              {viewMode === 'monthly' && horoscopeData.weeklyOverview && (
+                <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3">
+                    本月每周运势概览
+                  </h3>
+                  <div className="grid grid-cols-4 gap-3">
+                    {horoscopeData.weeklyOverview.map((week, index) => (
+                      <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          {week.week}
+                        </div>
+                        <div
+                          className={`text-lg font-bold rounded px-2 py-1 ${
+                            week.score >= 80 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                            week.score >= 60 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                            week.score >= 40 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                          }`}
+                        >
+                          {week.score}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 运势详情 */}
@@ -220,7 +310,8 @@ const HoroscopePage = () => {
               {/* 宜忌 */}
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
                 <h3 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-3 flex items-center">
-                  <span className="mr-2">✅</span> 今日宜
+                  <span className="mr-2">✅</span>
+                  {viewMode === 'daily' ? '今日宜' : viewMode === 'weekly' ? '本周宜' : '本月宜'}
                 </h3>
                 <p className="text-green-700 dark:text-green-200">
                   {horoscopeData.recommendations?.positiveAdvice || '保持积极心态，主动出击'}
@@ -229,7 +320,8 @@ const HoroscopePage = () => {
 
               <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
                 <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-3 flex items-center">
-                  <span className="mr-2">❌</span> 今日忌
+                  <span className="mr-2">❌</span>
+                  {viewMode === 'daily' ? '今日忌' : viewMode === 'weekly' ? '本周忌' : '本月忌'}
                 </h3>
                 <p className="text-red-700 dark:text-red-200">
                   {horoscopeData.recommendations?.avoidAdvice || '避免冲动决策，三思而行'}
@@ -273,13 +365,16 @@ const HoroscopePage = () => {
               </div>
             )}
 
-            {/* 每日提醒 */}
+            {/* 感性提醒 */}
             <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
               <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-3 flex items-center">
-                <span className="mr-2">💖</span> 感性提醒
+                <span className="mr-2">💖</span>
+                {viewMode === 'daily' ? '今日提醒' : viewMode === 'weekly' ? '本周提醒' : '本月提醒'}
               </h3>
               <p className="text-blue-700 dark:text-blue-200 leading-relaxed">
-                {horoscopeData.recommendations?.dailyReminder || '今天会是美好的一天，保持微笑，积极面对每一个挑战。'}
+                {horoscopeData.recommendations?.dailyReminder || horoscopeData.recommendations?.positiveAdvice ||
+                  (viewMode === 'daily' ? '今天会是美好的一天，保持微笑，积极面对每一个挑战。' :
+                   viewMode === 'weekly' ? '本周保持积极心态，把握机遇。' : '本月稳步前进，持续积累。')}
               </p>
             </div>
           </div>

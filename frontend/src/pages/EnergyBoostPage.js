@@ -1,7 +1,7 @@
 /**
  * 每日能量提升模块页面
  * 由原每日正念内容提炼
- * 新增能量管理特性
+ * 优化：统一字体大小，优化排版，适配移动端
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
@@ -131,7 +131,7 @@ const EnergyBoostPage = () => {
     loadCompletedTasks();
     loadEnergyHistory();
 
-    // 生成活动
+    //生成活动
     const newActivities = generateRandomActivities();
     setActivities(newActivities);
     setEnergyGuidance(getRandomGuidance());
@@ -191,7 +191,7 @@ const EnergyBoostPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-white dark:bg-gray-900">
-        <div className="w-12 h-12 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-3 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -199,26 +199,26 @@ const EnergyBoostPage = () => {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-gray-900 dark:via-orange-900/30 dark:to-yellow-900/30 ${theme}`}>
       {/* 导航标题栏 */}
-      <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
+      <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-sm sticky top-0 z-40">
+        <div className="container mx-auto px-3 py-3">
           <div className="flex items-center justify-between">
             <button
               onClick={() => window.history.back()}
-              className="text-white hover:text-orange-100 flex items-center"
+              className="text-white hover:text-orange-100 flex items-center text-base"
             >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               返回
             </button>
-            <h1 className="text-xl font-bold">每日能量提升</h1>
+            <h1 className="text-lg font-bold">每日能量提升</h1>
             <button
               onClick={handleResetTasks}
               className="text-white hover:text-orange-100"
               title="重置任务"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.003 8.003 0 014.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 0 001 1H9z" />
               </svg>
             </button>
           </div>
@@ -226,25 +226,25 @@ const EnergyBoostPage = () => {
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="container mx-auto px-3 py-3 max-w-4xl">
         {/* 能量等级卡片 */}
-        <div className="bg-gradient-to-br from-orange-500 to-amber-600 text-white rounded-2xl shadow-2xl p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-gradient-to-br from-orange-500 to-amber-600 text-white rounded-xl shadow-md p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-2xl font-bold mb-2">今日能量指数</h2>
-              <div className="text-5xl font-bold">{energyLevel}</div>
+              <h2 className="text-lg font-bold mb-1">今日能量指数</h2>
+              <div className="text-2xl font-bold">{energyLevel}</div>
             </div>
-            <div className="text-8xl opacity-20">⚡</div>
+            <div className="text-4xl opacity-20">⚡</div>
           </div>
 
           {/* 能量等级指示条 */}
-          <div className="h-4 bg-white/30 rounded-full overflow-hidden">
+          <div className="h-3 bg-white/30 rounded-full overflow-hidden">
             <div
               className="h-full bg-white transition-all duration-500"
               style={{ width: `${energyLevel}%` }}
             ></div>
           </div>
-          <p className="mt-2 text-sm opacity-90">
+          <p className="mt-2 text-base opacity-90 text-white">
             完成任务可以提升能量等级
           </p>
         </div>
@@ -260,19 +260,19 @@ const EnergyBoostPage = () => {
 
         {/* 能量历史 */}
         {energyHistory.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mt-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-4">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-3">
               近期能量记录
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {energyHistory.slice(-7).reverse().map((record, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div key={index} className="flex items-center justify-between p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                   <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-orange-500 mr-3"></div>
-                    <span className="text-gray-800 dark:text-white">{record.date}</span>
+                    <div className="w-2 h-2 rounded-full bg-orange-500 mr-2"></div>
+                    <span className="text-base text-gray-800 dark:text-white">{record.date}</span>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-base text-gray-600 dark:text-gray-400">
                       {record.tasksCompleted} 个任务
                     </span>
                     <span className="font-semibold text-orange-600 dark:text-orange-400">
@@ -286,32 +286,32 @@ const EnergyBoostPage = () => {
         )}
 
         {/* 能量提升建议 */}
-        <div className="bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl p-6 mt-6 border border-orange-200 dark:border-orange-800">
-          <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+        <div className="bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl shadow-sm p-4 border border-orange-200 dark:border-orange-800">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-3">
             能量提升建议
           </h3>
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             <li className="flex items-start">
-              <span className="text-2xl mr-3">💪</span>
-              <p className="text-gray-700 dark:text-gray-300">
+              <span className="text-xl mr-2">💪</span>
+              <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                 坚持每天完成能量任务，养成良好习惯
               </p>
             </li>
             <li className="flex items-start">
-              <span className="text-2xl mr-3">🌅</span>
-              <p className="text-gray-700 dark:text-gray-300">
+              <span className="text-xl mr-2">🌅</span>
+              <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                 早上起床后进行简单的拉伸和冥想
               </p>
             </li>
             <li className="flex items-start">
-              <span className="text-2xl mr-3">🥗</span>
-              <p className="text-gray-700 dark:text-gray-300">
+              <span className="text-xl mr-2">🥗</span>
+              <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                 合理饮食，多吃富含蛋白质和维生素的食物
               </p>
             </li>
             <li className="flex items-start">
-              <span className="text-2xl mr-3">😴</span>
-              <p className="text-gray-700 dark:text-gray-300">
+              <span className="text-xl mr-2">😴</span>
+              <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                 保证充足的睡眠，让身体得到充分休息
               </p>
             </li>

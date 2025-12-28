@@ -251,36 +251,31 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
     return context.parsed.y;
   }, []);
 
-  // 今天的今天线数据
-  const todayDataset = useMemo(() => {
-    if (!formattedData || todayIndex === -1) return null;
-
-    return {
-      label: '今天',
-      data: formattedData.physical.slice(todayIndex, todayIndex + 1),
-      borderColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
-      backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-      borderWidth: 3,
-      pointRadius: 5,
-      pointHoverRadius: 7,
-      tension: 0.4,
-      fill: true
-    };
-  }, [formattedData, todayIndex, theme, themeColors]);
-
   // 今天线注释配置
   const todayAnnotation = useMemo(() => {
     if (todayIndex === -1) return {};
 
     return {
       type: 'line',
-      xMin: todayIndex - 0.5,
-      xMax: todayIndex + 0.5,
-      borderColor: 'rgba(255, 99, 132, 0.8)',
+      xMin: todayIndex,
+      xMax: todayIndex,
+      borderColor: themeColors.todayLineColor,
       borderWidth: 2,
-      borderDash: [5, 5]
+      borderDash: [6, 6],
+      label: {
+        display: true,
+        content: '今天',
+        position: 'start',
+        backgroundColor: themeColors.todayLabelBg,
+        color: themeColors.todayLabelColor,
+        font: {
+          size: isMobile ? 10 : 12
+        },
+        padding: 4,
+        borderRadius: 4
+      }
     };
-  }, [todayIndex]);
+  }, [todayIndex, themeColors, isMobile]);
 
   // 体力数据集
   const physicalDataset = useMemo(() => {
@@ -348,16 +343,11 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
     if (emotionalDataset) datasets.push(emotionalDataset);
     if (intellectualDataset) datasets.push(intellectualDataset);
 
-    // 只有在今天数据存在时才添加今天线
-    if (todayDataset && todayIndex !== -1) {
-      datasets.push(todayDataset);
-    }
-
     return {
       labels: formattedData.labels,
       datasets: datasets
     };
-  }, [formattedData, physicalDataset, emotionalDataset, intellectualDataset, todayDataset, todayIndex]);
+  }, [formattedData, physicalDataset, emotionalDataset, intellectualDataset]);
 
   // 图表配置 - 优化依赖项，移除不稳定的依赖
   const options = useMemo(() => {

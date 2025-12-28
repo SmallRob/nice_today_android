@@ -1,45 +1,71 @@
 /**
  * 生物节律Banner组件
- * 简化的Banner组件，减少嵌套层级
+ * 优化暗色主题适配，参考节律趋势图样式
  */
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 const BiorhythmBanner = () => {
+  const { theme } = useTheme();
+  
+  // 根据主题设置渐变颜色
+  const gradientColors = theme === 'dark' 
+    ? 'from-blue-900 via-purple-900 to-indigo-900'
+    : 'from-blue-600 via-purple-600 to-indigo-700';
+    
+  const overlayColors = theme === 'dark'
+    ? 'from-blue-500/10 via-purple-600/10 to-indigo-700/10'
+    : 'from-blue-500/20 via-purple-600/20 to-indigo-700/20';
+
   return (
-    <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0 will-change-transform">
-      {/* 合并背景渐变 - 简化为单层 */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-r from-blue-500/20 via-purple-600/20 to-indigo-700/20 pointer-events-none" />
+    <div className={`taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r ${gradientColors} flex-shrink-0 will-change-transform`}>
+      {/* 动态背景渐变 */}
+      <div className={`absolute inset-0 z-0 bg-gradient-to-r ${overlayColors} pointer-events-none`} />
 
-      {/* 简化的装饰元素 - 用CSS替代SVG提升性能 */}
-      <div className="absolute top-3 left-3 w-8 h-8 rounded-full border-2 border-white/10 pointer-events-none" />
-      <div className="absolute top-5 right-4 w-6 h-6 transform rotate-45 bg-white/5 pointer-events-none" />
+      {/* 节律波形装饰元素 - 参考图表样式 */}
+      <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+        <div className="absolute top-1/4 left-0 w-full h-1 bg-gradient-to-r from-green-400/20 to-blue-400/20 rounded-full" />
+        <div className="absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full" />
+        <div className="absolute top-3/4 left-0 w-full h-1 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 rounded-full" />
+      </div>
 
-      {/* Banner内容 - 简化嵌套 */}
-      <div className="container mx-auto px-4 py-2.5 md:py-6 relative z-10 text-center">
-        <h1 className="text-lg md:text-2xl font-semibold mb-1 text-shadow-lg taoist-title">
-          <span className="inline-block">
+      {/* Banner内容 */}
+      <div className="container mx-auto px-4 py-3 md:py-6 relative z-10 text-center">
+        <h1 className="text-xl md:text-3xl font-bold mb-2 text-shadow-lg taoist-title">
+          <span className="inline-block bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
             人体节律
           </span>
         </h1>
-        <p className="text-white text-[10px] md:text-sm opacity-95 font-medium taoist-subtitle mb-2">
+        <p className="text-white/90 text-sm md:text-base opacity-95 font-medium taoist-subtitle mb-3">
           天人合一·顺应自然·调和身心
         </p>
-        <div className="flex items-center justify-center space-x-1.5 md:space-x-2">
-          <Badge label="体力" />
-          <Badge label="情绪" />
-          <Badge label="智力" />
+        <div className="flex items-center justify-center space-x-2 md:space-x-3">
+          <CycleBadge label="体力" color="green" period="23天" />
+          <CycleBadge label="情绪" color="blue" period="28天" />
+          <CycleBadge label="智力" color="purple" period="33天" />
         </div>
       </div>
     </div>
   );
 };
 
-// Badge子组件
-const Badge = ({ label }) => {
+// CycleBadge子组件 - 显示周期信息
+const CycleBadge = ({ label, color, period }) => {
+  const colorClasses = {
+    green: 'from-green-400 to-green-500 border-green-300/30',
+    blue: 'from-blue-400 to-blue-500 border-blue-300/30',
+    purple: 'from-purple-400 to-purple-500 border-purple-300/30'
+  };
+
   return (
-    <span className="text-[9px] md:text-xs text-white px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap">
-      {label}
-    </span>
+    <div className="flex flex-col items-center">
+      <span className={`text-xs md:text-sm font-semibold text-white px-3 py-1 rounded-full border bg-gradient-to-r ${colorClasses[color]} whitespace-nowrap shadow-sm`}>
+        {label}
+      </span>
+      <span className="text-[10px] md:text-xs text-white/70 mt-1 font-medium">
+        {period}
+      </span>
+    </div>
   );
 };
 

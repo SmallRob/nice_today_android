@@ -16,7 +16,8 @@ const ZodiacTraitsPage = () => {
   const [currentHoroscope, setCurrentHoroscope] = useState(() => {
     // 多层级参数获取：URL参数 > 传递状态 > 用户配置 > 默认值
     const stateZodiac = location.state?.userZodiac;
-    return zodiacName || stateZodiac || currentConfig?.zodiac || '金牛座';
+    const configZodiac = currentConfig?.zodiac;
+    return zodiacName || stateZodiac || configZodiac || '金牛座';
   });
   
   // 运势数据状态
@@ -163,16 +164,16 @@ const getFamousExamples = (zodiacName) => {
     // 检查URL参数、状态和配置中的星座
     const stateZodiac = location.state?.userZodiac;
     const configZodiac = currentConfig?.zodiac;
-    
+
     // 优先级：URL参数 > 传递状态 > 用户配置 > 默认值
     const targetZodiac = zodiacName || stateZodiac || configZodiac || '金牛座';
-    
+
     // 只有当目标星座有效且与当前不同时才更新
     if (targetZodiac && targetZodiac !== currentHoroscope) {
       console.log('更新星座参数:', { from: currentHoroscope, to: targetZodiac });
       setCurrentHoroscope(targetZodiac);
     }
-  }, [zodiacName, location.state, currentConfig?.zodiac]);
+  }, [zodiacName, location.state?.userZodiac, currentConfig?.zodiac]);
   
   // 专门处理URL参数变化，确保直接访问带参数的URL时能正确加载
   useEffect(() => {

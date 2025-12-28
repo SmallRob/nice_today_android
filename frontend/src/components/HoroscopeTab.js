@@ -574,10 +574,12 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
         
         // 从用户配置上下文获取用户信息
         if (currentConfig && isMounted) {
+          console.log('HoroscopeTab: 从用户配置获取信息', currentConfig);
           setUserInfo(currentConfig);
           
           // 优先使用用户配置中的星座信息
           if (currentConfig.zodiac) {
+            console.log('HoroscopeTab: 使用用户配置中的星座', currentConfig.zodiac);
             setUserHoroscope(currentConfig.zodiac);
             setIsTemporaryHoroscope(false);
             isTemporaryRef.current = false;
@@ -586,6 +588,7 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
             await storageManager.setUserHoroscope(currentConfig.zodiac);
           } else if (currentConfig.birthDate) {
             // 如果没有星座但有出生日期，计算星座
+            console.log('HoroscopeTab: 从出生日期计算星座', currentConfig.birthDate);
             const birthDateObj = new Date(currentConfig.birthDate);
             const year = birthDateObj.getFullYear();
             const month = birthDateObj.getMonth() + 1;
@@ -594,8 +597,13 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
             if (year && month && day) {
               await calculateHoroscopeFromDate(year, month, day);
             }
+          } else {
+            console.log('HoroscopeTab: 用户配置中缺少星座和出生日期信息');
+            // 尝试从storage获取
+            await getStoredHoroscope();
           }
         } else {
+          console.log('HoroscopeTab: 用户配置不可用，降级使用存储数据');
           // 降级处理：使用原有逻辑
           await getStoredHoroscope();
           

@@ -19,11 +19,11 @@ const HoroscopePage = () => {
 
   // 初始化
   useEffect(() => {
-    // 模拟加载
+    // 模拟加载，确保用户配置已加载
     setTimeout(() => {
       setLoading(false);
     }, 500);
-  }, []);
+  }, [currentConfig]);
 
   // Tab切换
   const handleTabChange = (tab) => {

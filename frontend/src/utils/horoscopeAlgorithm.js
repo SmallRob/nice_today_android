@@ -825,6 +825,242 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
   };
 };
 
+/**
+ * 生成周运数据
+ * @param {string} horoscopeName - 星座名称
+ * @param {Date} date - 起始日期
+ * @returns {object} 周运数据
+ */
+export const generateWeeklyHoroscope = (horoscopeName, date = new Date()) => {
+  const horoscope = HOROSCOPE_DATA_ENHANCED.find(h => h.name === horoscopeName);
+  if (!horoscope) return null;
+
+  // 周运基于7天的日运平均值
+  let totalScore = 0;
+  let totalLove = 0;
+  let totalWealth = 0;
+  let totalCareer = 0;
+  let totalStudy = 0;
+  let totalSocial = 0;
+
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(date);
+    dayDate.setDate(date.getDate() + i);
+    const dailyData = generateDailyHoroscope(horoscopeName, dayDate);
+
+    if (dailyData) {
+      totalScore += dailyData.overallScore;
+      totalLove += dailyData.dailyForecast.love.score;
+      totalWealth += dailyData.dailyForecast.wealth.score;
+      totalCareer += dailyData.dailyForecast.career.score;
+      totalStudy += dailyData.dailyForecast.study.score;
+      totalSocial += dailyData.dailyForecast.social.score;
+    }
+  }
+
+  const avgScore = Math.round(totalScore / 7);
+  const baseScores = {
+    love: Math.round(totalLove / 7),
+    wealth: Math.round(totalWealth / 7),
+    career: Math.round(totalCareer / 7),
+    study: Math.round(totalStudy / 7),
+    social: Math.round(totalSocial / 7)
+  };
+
+  const dailyForecast = {
+    love: {
+      score: baseScores.love,
+      description: getScoreDescription(baseScores.love),
+      trend: getTrend(baseScores.love)
+    },
+    wealth: {
+      score: baseScores.wealth,
+      description: getScoreDescription(baseScores.wealth),
+      trend: getTrend(baseScores.wealth)
+    },
+    career: {
+      score: baseScores.career,
+      description: getScoreDescription(baseScores.career),
+      trend: getTrend(baseScores.career)
+    },
+    study: {
+      score: baseScores.study,
+      description: getScoreDescription(baseScores.study),
+      trend: getTrend(baseScores.study)
+    },
+    social: {
+      score: baseScores.social,
+      description: getScoreDescription(baseScores.social),
+      trend: getTrend(baseScores.social)
+    }
+  };
+
+  const recommendations = {
+    luckyColors: horoscope.luckyColor || ['#FFD700'],
+    luckyColorNames: horoscope.luckyColor || ['金色'],
+    luckyNumbers: Array.isArray(horoscope.luckyNumber) ? horoscope.luckyNumber : [horoscope.luckyNumber || 7],
+    compatibleSigns: Array.isArray(horoscope.compatible) ? horoscope.compatible : [horoscope.compatible || '未知星座'],
+    luckyDirection: horoscope.element === '火象' ? '南方' : horoscope.element === '水象' ? '北方' : horoscope.element === '土象' ? '东方' : '西方',
+    positiveAdvice: `本周${horoscope.element}能量较强，适合积极行动`,
+    avoidAdvice: `本周注意平衡各方面，避免过度投入单一领域`,
+    dailyReminder: '本周保持积极心态，把握机遇'
+  };
+
+  const horoscopeInfo = {
+    name: horoscope.name,
+    element: horoscope.element,
+    dateRange: horoscope.dateRange,
+    icon: horoscope.icon,
+    traits: horoscope.traits,
+    color: horoscope.color
+  };
+
+  // 生成本周7天的每日运势概览
+  const dailyOverview = [];
+  const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(date);
+    dayDate.setDate(date.getDate() + i);
+    const dailyData = generateDailyHoroscope(horoscopeName, dayDate);
+    if (dailyData) {
+      dailyOverview.push({
+        day: weekDays[i],
+        date: dayDate.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }),
+        score: dailyData.overallScore
+      });
+    }
+  }
+
+  return {
+    horoscopeInfo,
+    dailyForecast,
+    recommendations,
+    overallDescription: `本周${horoscope.name}总体运势${avgScore > 60 ? '较好' : '一般'}，${horoscope.element}特质明显`,
+    overallScore: avgScore,
+    dailyOverview,
+    timestamp: date.getTime(),
+    weeklyId: `${horoscopeName}_${date.getFullYear()}_${date.getMonth()}_${date.getDate()}`
+  };
+};
+
+/**
+ * 生成月运数据
+ * @param {string} horoscopeName - 星座名称
+ * @param {Date} date - 起始日期
+ * @returns {object} 月运数据
+ */
+export const generateMonthlyHoroscope = (horoscopeName, date = new Date()) => {
+  const horoscope = HOROSCOPE_DATA_ENHANCED.find(h => h.name === horoscopeName);
+  if (!horoscope) return null;
+
+  // 月运基于30天的日运平均值
+  let totalScore = 0;
+  let totalLove = 0;
+  let totalWealth = 0;
+  let totalCareer = 0;
+  let totalStudy = 0;
+  let totalSocial = 0;
+
+  const daysInMonth = 30;
+  for (let i = 0; i < daysInMonth; i++) {
+    const dayDate = new Date(date);
+    dayDate.setDate(date.getDate() + i);
+    const dailyData = generateDailyHoroscope(horoscopeName, dayDate);
+
+    if (dailyData) {
+      totalScore += dailyData.overallScore;
+      totalLove += dailyData.dailyForecast.love.score;
+      totalWealth += dailyData.dailyForecast.wealth.score;
+      totalCareer += dailyData.dailyForecast.career.score;
+      totalStudy += dailyData.dailyForecast.study.score;
+      totalSocial += dailyData.dailyForecast.social.score;
+    }
+  }
+
+  const avgScore = Math.round(totalScore / daysInMonth);
+  const baseScores = {
+    love: Math.round(totalLove / daysInMonth),
+    wealth: Math.round(totalWealth / daysInMonth),
+    career: Math.round(totalCareer / daysInMonth),
+    study: Math.round(totalStudy / daysInMonth),
+    social: Math.round(totalSocial / daysInMonth)
+  };
+
+  const dailyForecast = {
+    love: {
+      score: baseScores.love,
+      description: getScoreDescription(baseScores.love),
+      trend: getTrend(baseScores.love)
+    },
+    wealth: {
+      score: baseScores.wealth,
+      description: getScoreDescription(baseScores.wealth),
+      trend: getTrend(baseScores.wealth)
+    },
+    career: {
+      score: baseScores.career,
+      description: getScoreDescription(baseScores.career),
+      trend: getTrend(baseScores.career)
+    },
+    study: {
+      score: baseScores.study,
+      description: getScoreDescription(baseScores.study),
+      trend: getTrend(baseScores.study)
+    },
+    social: {
+      score: baseScores.social,
+      description: getScoreDescription(baseScores.social),
+      trend: getTrend(baseScores.social)
+    }
+  };
+
+  const recommendations = {
+    luckyColors: horoscope.luckyColor || ['#FFD700'],
+    luckyColorNames: horoscope.luckyColor || ['金色'],
+    luckyNumbers: Array.isArray(horoscope.luckyNumber) ? horoscope.luckyNumber : [horoscope.luckyNumber || 7],
+    compatibleSigns: Array.isArray(horoscope.compatible) ? horoscope.compatible : [horoscope.compatible || '未知星座'],
+    luckyDirection: horoscope.element === '火象' ? '南方' : horoscope.element === '水象' ? '北方' : horoscope.element === '土象' ? '东方' : '西方',
+    positiveAdvice: `本月${horoscope.element}能量流转，适合规划长远目标`,
+    avoidAdvice: `本月注意调整节奏，避免过度消耗`,
+    dailyReminder: '本月稳步前进，持续积累'
+  };
+
+  const horoscopeInfo = {
+    name: horoscope.name,
+    element: horoscope.element,
+    dateRange: horoscope.dateRange,
+    icon: horoscope.icon,
+    traits: horoscope.traits,
+    color: horoscope.color
+  };
+
+  // 生成本月4周的运势概览
+  const weeklyOverview = [];
+  const weekNames = ['第一周', '第二周', '第三周', '第四周'];
+  for (let i = 0; i < 4; i++) {
+    const weekDate = new Date(date);
+    weekDate.setDate(date.getDate() + (i * 7));
+    const weeklyData = generateWeeklyHoroscope(horoscopeName, weekDate);
+    if (weeklyData) {
+      weeklyOverview.push({
+        week: weekNames[i],
+        score: weeklyData.overallScore
+      });
+    }
+  }
+
+  return {
+    horoscopeInfo,
+    dailyForecast,
+    recommendations,
+    overallDescription: `本月${horoscope.name}运势${avgScore > 60 ? '较好' : '平稳'}，${horoscope.element}特质主导`,
+    overallScore: avgScore,
+    weeklyOverview,
+    timestamp: date.getTime(),
+    monthlyId: `${horoscopeName}_${date.getFullYear()}_${date.getMonth()}`
+  };
+};
+
 // 辅助函数
 const getScoreDescription = (score) => {
   if (score >= 90) return '极佳';

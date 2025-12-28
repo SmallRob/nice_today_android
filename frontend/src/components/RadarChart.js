@@ -1,4 +1,44 @@
+import React, { useState, useEffect, useRef } from 'react';
+
 const RadarChart = ({ data, year, theme }) => {
+  const radarContainerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(280);
+
+  // 监听容器宽度变化
+  useEffect(() => {
+    const container = radarContainerRef.current;
+    if (!container) return;
+
+    const updateWidth = () => {
+      const width = container.clientWidth;
+      // 确保最小宽度
+      const adjustedWidth = Math.max(width, 200);
+      setContainerWidth(adjustedWidth);
+    };
+
+    // 初始计算
+    updateWidth();
+
+    // 使用 ResizeObserver 监听容器尺寸变化
+    const resizeObserver = new ResizeObserver(() => {
+      updateWidth();
+    });
+
+    resizeObserver.observe(container);
+
+    // 窗口 resize 时也更新
+    const handleResize = () => {
+      updateWidth();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   if (!data) return null;
 
   const dimensions = [
@@ -9,11 +49,12 @@ const RadarChart = ({ data, year, theme }) => {
     { key: 'social', label: '人际' },
   ];
 
-  // 响应式尺寸：移动设备适配
-  const isMobile = window.innerWidth < 375;
-  const centerX = isMobile ? 115 : 140;
-  const centerY = isMobile ? 130 : 150;
-  const radius = isMobile ? 75 : 90;
+  // 响应式尺寸计算
+  const isMobile = containerWidth < 240;
+  const centerX = Math.round(containerWidth / 2);
+  const centerY = Math.round(containerWidth * 0.45);
+  const radius = Math.round(containerWidth * 0.3);
+  const containerHeight = Math.round(containerWidth * 0.9);
   const angleStep = (2 * Math.PI) / dimensions.length;
 
   // 生成雷达图多边形点
@@ -71,7 +112,7 @@ const RadarChart = ({ data, year, theme }) => {
   // 绘制数值标签
   const labels = points.map((point, i) => {
     const angle = i * angleStep - Math.PI / 2;
-    const labelRadius = radius + (isMobile ? 20 : 25);
+    const labelRadius = radius + Math.round(containerWidth * 0.08);
     const x = centerX + labelRadius * Math.cos(angle);
     const y = centerY + labelRadius * Math.sin(angle);
 
@@ -96,7 +137,7 @@ const RadarChart = ({ data, year, theme }) => {
   );
 
   return (
-    <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl ${isMobile ? 'p-3' : 'p-4'} shadow-sm overflow-hidden`}>
+    <div ref={radarContainerRef} className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl ${isMobile ? 'p-3' : 'p-4'} shadow-sm overflow-hidden`}>
       <div className="flex justify-between items-center mb-3">
         <div>
           <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -108,7 +149,13 @@ const RadarChart = ({ data, year, theme }) => {
         </div>
       </div>
 
-      <svg width="100%" height={isMobile ? 260 : 320} viewBox={`0 0 ${isMobile ? 230 : 280} ${isMobile ? 260 : 320}`} className="radar-svg">
+      <svg
+        width="100%"
+        height={containerHeight}
+        viewBox={`0 0 ${containerWidth} ${containerHeight}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="radar-svg"
+      >
         {/* 网格圆环 */}
         {circles}
 

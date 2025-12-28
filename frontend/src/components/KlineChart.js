@@ -1,21 +1,59 @@
+import React, { useState, useEffect, useRef } from 'react';
+
 const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimension, selectedYear }) => {
+  const chartContainerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(350);
+
+  // 监听容器宽度变化
+  useEffect(() => {
+    const container = chartContainerRef.current;
+    if (!container) return;
+
+    const updateWidth = () => {
+      const width = container.clientWidth;
+      // 确保最小宽度
+      const adjustedWidth = Math.max(width, 260);
+      setContainerWidth(adjustedWidth);
+    };
+
+    // 初始计算
+    updateWidth();
+
+    // 使用 ResizeObserver 监听容器尺寸变化
+    const resizeObserver = new ResizeObserver(() => {
+      updateWidth();
+    });
+
+    resizeObserver.observe(container);
+
+    // 窗口 resize 时也更新
+    const handleResize = () => {
+      updateWidth();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   if (!data.length) return null;
 
+  // 响应式高度：根据宽度比例计算
+  const containerHeight = Math.round(containerWidth * 0.75);
+
   // 响应式断点：更细致的设备适配
-  const isSmallMobile = window.innerWidth < 360;
-  const isMobile = window.innerWidth < 480;
-  const isTablet = window.innerWidth < 768;
+  const isSmallMobile = containerWidth < 280;
+  const isMobile = containerWidth < 320;
 
-  // 响应式尺寸计算
-  const containerWidth = isSmallMobile ? 260 : isMobile ? 300 : isTablet ? 320 : 350;
-  const containerHeight = isSmallMobile ? 240 : isMobile ? 260 : 280;
-
-  // 优化内边距：大幅压缩左侧空间，为数据腾出更多展示区域
+  // 优化内边距：根据容器宽度动态调整
   const padding = isSmallMobile
-    ? { top: 25, right: 8, bottom: 35, left: 22 }
+    ? { top: 20, right: 8, bottom: 30, left: 20 }
     : isMobile
-    ? { top: 28, right: 10, bottom: 38, left: 26 }
-    : { top: 32, right: 12, bottom: 42, left: 32 };
+    ? { top: 24, right: 10, bottom: 35, left: 24 }
+    : { top: 28, right: 12, bottom: 40, left: 30 };
   const chartWidth = containerWidth - padding.left - padding.right;
   const chartHeight = containerHeight - padding.top - padding.bottom;
 
@@ -243,7 +281,7 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
   }
 
   return (
-    <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl ${isSmallMobile ? 'p-2.5' : isMobile ? 'p-3' : 'p-4'} shadow-sm relative overflow-hidden`}>
+    <div ref={chartContainerRef} className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl ${isSmallMobile ? 'p-2.5' : isMobile ? 'p-3' : 'p-4'} shadow-sm relative overflow-hidden`}>
       <div className={`flex justify-between items-center ${isSmallMobile ? 'mb-2' : 'mb-3'}`}>
         <div>
           <h3 className={`${isSmallMobile ? 'text-xs' : isMobile ? 'text-sm' : 'text-base'} font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -271,6 +309,7 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
         width="100%"
         height={containerHeight}
         viewBox={`0 0 ${containerWidth} ${containerHeight}`}
+        preserveAspectRatio="xMidYMid meet"
         className="kline-svg"
       >
         {/* 网格背景 */}
