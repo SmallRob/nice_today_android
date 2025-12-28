@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -80,10 +80,10 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
 
 // 趋势图表组件 - 优化版本，参考人体节律图表的实现
 export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
-  const chartRef = React.useRef(null);
+  const chartRef = useRef(null);
 
   // 确保 Chart.js 组件已注册 - 按页面实例化
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       // 注册当前页面实例所需的 Chart.js 组件
       ChartJS.register(
@@ -103,7 +103,7 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
   }, []);
 
   // 组件卸载时清理Chart实例 - 使用更可靠的清理机制
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (chartRef.current) {
         try {
@@ -125,7 +125,7 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
   }, []);
 
   // 生成趋势数据 - 使用 useMemo 优化性能
-  const trendData = React.useMemo(() => {
+  const trendData = useMemo(() => {
     if (!userHoroscope) return null;
 
     const labels = [];
@@ -161,7 +161,7 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
   }, [userHoroscope, generateDailyHoroscope]);
 
   // 图表数据配置 - 使用 useMemo 优化
-  const chartData = React.useMemo(() => {
+  const chartData = useMemo(() => {
     if (!trendData) return null;
 
     return {
@@ -199,7 +199,7 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
   }, [trendData]);
 
   // 图表选项配置 - 使用 useMemo 优化
-  const chartOptions = React.useMemo(() => ({
+  const chartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -240,14 +240,14 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
   }), []);
 
   // 图表渲染回调 - 保存chart实例引用
-  const onChartRender = React.useCallback((chart) => {
+  const onChartRender = useCallback((chart) => {
     if (chart) {
       chartRef.current = chart;
     }
   }, []);
 
   // 使用基于数据的key来避免不必要的重新创建，同时防止canvas重复使用错误
-  const chartKey = React.useMemo(() => {
+  const chartKey = useMemo(() => {
     return `horoscope-trend-chart-${userHoroscope || 'default'}-${trendData?.labels?.length || 0}`;
   }, [userHoroscope, trendData?.labels?.length]);
 

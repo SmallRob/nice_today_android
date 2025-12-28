@@ -272,7 +272,7 @@ function App() {
   // 监听版本更新
   React.useEffect(() => {
     if (needsUpdate) {
-      console.log(`检测到版本更新: ${storedVersion || '未知'} → ${currentVersion}`);
+      console.log(`检测到数据版本同步: ${storedVersion || '未知'} → ${currentVersion}`);
       setShowUpdateNotification(true);
     }
   }, [needsUpdate, currentVersion, storedVersion]);

@@ -249,9 +249,9 @@ export const checkAndHandleUpdates = async (options = {}) => {
     
     const currentVersion = await getCurrentVersion();
     const { appVersion: storedVersion } = getStoredVersion();
-    
+
     if (!silent) {
-      console.log(`检测到版本更新: ${storedVersion || '未知'} → ${currentVersion}`);
+      console.log(`检测到数据版本同步: ${storedVersion || '未知'} → ${currentVersion}`);
     }
     
     // 如果需要自动清理缓存

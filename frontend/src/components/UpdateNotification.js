@@ -63,9 +63,9 @@ const UpdateNotification = ({ updateInfo, onUpdateNow, onLater, onClose }) => {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold">发现新版本</h3>
+                <h3 className="text-lg font-semibold">数据版本同步</h3>
                 <p className="text-blue-100 text-sm">
-                  当前版本：{updateInfo.currentVersion} → 新版本：{updateInfo.serverVersion}
+                  本地版本：{updateInfo.currentVersion}，云端版本：{updateInfo.serverVersion}
                 </p>
               </div>
             </div>

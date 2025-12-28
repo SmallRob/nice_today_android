@@ -33,7 +33,7 @@ const ChineseZodiacSelector = ({
   const [localSelected, setLocalSelected] = useState(selectedZodiac);
 
   // 同步外部属性到本地状态
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedZodiac !== localSelected) {
       setLocalSelected(selectedZodiac);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BiorhythmIcon } from './IconLibrary';
 import { useNavigate } from 'react-router-dom';
 import { useTabPerformance } from '../utils/tabPerformanceMonitor';
@@ -6,6 +6,39 @@ import { isAndroidWebView, isIOSWebView } from '../utils/androidWebViewCompat';
 import { globalErrorHandler, createDetailedErrorReport } from '../utils/errorHandler';
 import '../styles/animations.css';
 import niceDayImage from '../images/nice_day.png';
+
+// 错误回退组件（具名组件，满足React Hooks规则）
+const LazyLoadErrorFallback = ({ componentName, fallbackMessage, error: loadError }) => {
+  useEffect(() => {
+    if (typeof loadError === 'function') {
+      try {
+        loadError();
+      } catch (callbackError) {
+        console.warn('错误回调执行失败:', callbackError);
+      }
+    }
+  }, [loadError]);
+
+  return (
+    <div className="flex-1 flex items-center justify-center p-4">
+      <div className="text-center">
+        <div className="text-4xl mb-3">⚠️</div>
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          {componentName}加载失败
+        </h3>
+        <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
+          {fallbackMessage || '模块加载失败，请刷新页面重试'}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+        >
+          刷新页面
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // 使用懒加载组件，避免直接导入导致的初始化时序问题
 // 修复：为Android WebView提供更健壮的懒加载错误处理
@@ -18,38 +51,7 @@ const createLazyComponent = (importFn, componentName, fallbackMessage) => {
 
         // 确保返回一个有效的React组件
         return {
-          default: ({ onError }) => {
-            // 使用useEffect确保错误回调在组件挂载后执行
-            React.useEffect(() => {
-              if (typeof onError === 'function') {
-                try {
-                  onError(err);
-                } catch (callbackError) {
-                  console.warn('错误回调执行失败:', callbackError);
-                }
-              }
-            }, [onError, err]);
-
-            return (
-              <div className="flex-1 flex items-center justify-center p-4">
-                <div className="text-center">
-                  <div className="text-4xl mb-3">⚠️</div>
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    {componentName}加载失败
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
-                    {fallbackMessage || '模块加载失败，请刷新页面重试'}
-                  </p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
-                  >
-                    刷新页面
-                  </button>
-                </div>
-              </div>
-            );
-          }
+          default: (props) => <LazyLoadErrorFallback {...props} componentName={componentName} fallbackMessage={fallbackMessage} error={err} />
         };
       });
   });
