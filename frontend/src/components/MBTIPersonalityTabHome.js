@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
@@ -34,9 +35,20 @@ class MBTIConfigManager {
 const mbtiConfigManager = new MBTIConfigManager();
 
 const MBTIPersonalityTabHome = () => {
+  const location = useLocation();
   // 使用主题管理
   const { theme } = useTheme();
   const { updateConfig } = useUserConfig();
+
+  // 从 URL 查询参数中获取 MBTI 类型
+  const getMBTIFromURL = () => {
+    const params = new URLSearchParams(location.search);
+    const mbtiParam = params.get('mbti');
+    if (mbtiParam && mbtiParam.length === 4) {
+      return mbtiParam.toUpperCase();
+    }
+    return null;
+  };
 
   // 状态管理
   const [userMBTI, setUserMBTI] = useState('');
@@ -581,9 +593,20 @@ const MBTIPersonalityTabHome = () => {
 
     const initialize = async () => {
       try {
+        // 优先从 URL 参数获取 MBTI
+        const urlMBTI = getMBTIFromURL();
+
         // 立即加载所有MBTI类型和默认MBTI，不等待用户配置
         setAllMBTIs(mbtiList);
-        setUserMBTI('INFP');
+
+        // 设置初始 MBTI：URL 参数 > 用户配置 > 默认值
+        let initialMBTI = 'INFP';
+        if (urlMBTI && mbtiList.includes(urlMBTI)) {
+          initialMBTI = urlMBTI;
+          console.log('从URL参数加载MBTI:', urlMBTI);
+        }
+
+        setUserMBTI(initialMBTI);
         setTempMBTI('');
 
         // 异步获取用户配置，但不阻塞界面
@@ -603,9 +626,9 @@ const MBTIPersonalityTabHome = () => {
                 mbti: (safeConfig.mbti || '').toString()
               });
 
-              // 如果用户有配置的MBTI且不是默认值，则更新显示
+              // 如果用户有配置的MBTI且不是默认值，并且URL没有指定MBTI，则使用用户配置的MBTI
               const userMBTI = safeConfig.mbti;
-              if (userMBTI && typeof userMBTI === 'string' && userMBTI.trim() && userMBTI !== 'INFP') {
+              if (!urlMBTI && userMBTI && typeof userMBTI === 'string' && userMBTI.trim() && userMBTI !== 'INFP') {
                 setUserMBTI(userMBTI);
                 // 标记需要重新加载数据
                 setDataLoaded(false);
@@ -642,7 +665,7 @@ const MBTIPersonalityTabHome = () => {
     return () => {
       isMounted = false;
     };
-  }, [mbtiList, currentConfig]);
+  }, [mbtiList, currentConfig, location]);
 
   // 当MBTI类型变化时重新加载数据
   useEffect(() => {
@@ -711,7 +734,7 @@ const MBTIPersonalityTabHome = () => {
             >
               <span className="mb-1">{icon}</span>
             </div>
-            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] text-gray-900 dark:text-white uppercase tracking-widest border border-white/10">
+            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] text-gray-900 dark:text-gray-100 uppercase tracking-widest border border-white/10">
               {type}
             </div>
           </div>
@@ -737,7 +760,7 @@ const MBTIPersonalityTabHome = () => {
               {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] text-gray-900 dark:text-white font-black dark:text-white tracking-wider text-white shadow-inner"
+                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] text-gray-900 dark:text-gray-100 font-black tracking-wider text-white shadow-inner"
                 >
                   #{tag}
                 </span>
@@ -761,7 +784,7 @@ const MBTIPersonalityTabHome = () => {
     ];
 
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden relative">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-6 border border-gray-200 dark:text-white mb-4 overflow-hidden relative">
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
           <svg width="120" height="120" viewBox="0 0 100 100">
             <path d="M 10 50 L 90 50 M 50 10 L 50 90" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -821,7 +844,7 @@ const MBTIPersonalityTabHome = () => {
         </div>
 
         <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-          <p className="text-[11px] text-gray-500 dark:text-white font-medium leading-relaxed italic text-center">
+          <p className="text-[11px] text-gray-500 dark:text-gray-300 font-medium leading-relaxed italic text-center">
             基于人格维度的动态平衡，呈现出独一无二的性格能量分布
           </p>
         </div>
@@ -854,7 +877,7 @@ const MBTIPersonalityTabHome = () => {
               {strengths.slice(0, 4).map((strength, index) => (
                 <li key={index} className="flex items-start">
                   <div className="mt-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2.5 flex-shrink-0"></div>
-                  <span className="text-[12px] text-gray-700 dark:text-white font-medium leading-tight">{strength}</span>
+                  <span className="text-[12px] text-gray-700 dark:text-gray-200 font-medium leading-tight">{strength}</span>
                 </li>
               ))}
             </ul>
@@ -870,7 +893,7 @@ const MBTIPersonalityTabHome = () => {
               {weaknesses.slice(0, 4).map((weakness, index) => (
                 <li key={index} className="flex items-start">
                   <div className="mt-1.5 w-1.5 h-1.5 bg-rose-400 rounded-full mr-2.5 flex-shrink-0"></div>
-                  <span className="text-[12px] text-gray-700 dark:text-white font-medium leading-tight">{weakness}</span>
+                  <span className="text-[12px] text-gray-700 dark:text-gray-200 font-medium leading-tight">{weakness}</span>
                 </li>
               ))}
             </ul>
@@ -922,7 +945,7 @@ const MBTIPersonalityTabHome = () => {
           <div className="relative p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-xl border border-pink-100/50 dark:border-pink-900/30">
             <div className="absolute top-3 right-4 opacity-10 text-3xl">💬</div>
             <h3 className="text-[11px] font-black text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1.5">沟通建议</h3>
-            <p className="text-[12px] text-gray-600 dark:text-white font-medium leading-relaxed">
+            <p className="text-[12px] text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
               {advice}
             </p>
           </div>
@@ -985,7 +1008,7 @@ const MBTIPersonalityTabHome = () => {
             <h3 className="text-[11px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest mb-2 flex items-center">
               <span className="mr-2">✨</span> Potential Analysis
             </h3>
-            <p className="text-[12px] text-gray-700 dark:text-white font-medium leading-relaxed tracking-wide">
+            <p className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-relaxed tracking-wide">
               {potential}
             </p>
           </div>
@@ -997,7 +1020,7 @@ const MBTIPersonalityTabHome = () => {
                 <div className="w-8 h-8 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 flex items-center justify-center mr-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0">
                   <span className="text-sm font-bold">{index + 1}</span>
                 </div>
-                <span className="text-[12px] text-gray-700 dark:text-white font-medium leading-tight">{tip}</span>
+                <span className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-tight">{tip}</span>
               </div>
             ))}
           </div>
@@ -1037,7 +1060,7 @@ const MBTIPersonalityTabHome = () => {
             )}
 
             {/* 提示文本 */}
-            <p className="mb-3 text-[11px] text-gray-400 dark:text-white font-medium px-1 flex items-center">
+            <p className="mb-3 text-[11px] text-gray-400 dark:text-gray-300 font-medium px-1 flex items-center">
               <span className="mr-1.5 opacity-50">✦</span> 点击下方任意类型探索深度分析
             </p>
 
@@ -1066,7 +1089,7 @@ const MBTIPersonalityTabHome = () => {
                       <span className={`text-lg mb-0.5 transition-transform group-hover:scale-125 ${isSelected ? 'scale-110' : ''}`}>
                         {typeData?.icon}
                       </span>
-                      <span className={`text-[11px] font-black tracking-tighter ${isSelected ? 'text-white' : 'text-gray-700 dark:text-white'
+                      <span className={`text-[11px] font-black tracking-tighter ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-200'
                         }`}>
                         {mbti}
                       </span>
@@ -1167,12 +1190,12 @@ const MBTIPersonalityTabHome = () => {
               <span className="text-[10px] md:text-xs bg-emerald-400/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌲</span>
             </div>
             {/* 用户设置按钮 */}
-            <button
+            {/*             <button
               onClick={() => setShowMBTIModal(true)}
-              className="text-[10px] md:text-xs bg-white/20 dark:bg-gray-700/40 hover:bg-white/30 dark:hover:bg-gray-600/30 text-gray-700 dark:text-white px-3 py-1.5 rounded-full border border-white/20 dark:border-gray-600 transition-all"
+              className="text-[10px] md:text-xs bg-white/20 dark:bg-gray-700/40 hover:bg-white/30 dark:hover:bg-gray-600/30 text-gray-700 dark:text-gray-200 px-3 py-1.5 rounded-full border border-white/20 dark:border-gray-600 transition-all"
             >
               ⚙️
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -1188,7 +1211,7 @@ const MBTIPersonalityTabHome = () => {
                 <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
                   <div className="text-center py-6">
                     <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto mb-2"></div>
-                    <p className="text-gray-600 dark:text-white text-xs">正在加载人格分析数据...</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载人格分析数据...</p>
                   </div>
                 </div>
               )}
@@ -1239,8 +1262,8 @@ const MBTIPersonalityTabHome = () => {
                 <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
                   <div className="text-center py-6">
                     <div className="text-3xl mb-2">🧩</div>
-                    <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-2">请选择MBTI类型</h3>
-                    <p className="text-gray-500 dark:text-white text-xs max-w-xs mx-auto mb-3">
+                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">请选择MBTI类型</h3>
+                    <p className="text-gray-500 dark:text-gray-300 text-xs max-w-xs mx-auto mb-3">
                       选择一种MBTI类型，探索人格特质与发展建议
                     </p>
                     <div className="inline-flex flex-wrap gap-1 justify-center">

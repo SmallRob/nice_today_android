@@ -1,0 +1,838 @@
+.finance-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+/* Dark theme support */
+.finance-page.dark {
+  background: linear-gradient(135deg, #1e3a8a 0%, #991b1b 100%);
+}
+
+/* 顶部导航栏 */
+.finance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.finance-page.dark .finance-header {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.back-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.back-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.page-title {
+  margin: 0;
+  font-size: 20px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.finance-page.dark .page-title {
+  color: #f3f4f6;
+}
+
+/* 月收入设置卡片 */
+.income-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.finance-page.dark .income-card {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.income-card h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #374151;
+}
+
+.finance-page.dark .income-card h3 {
+  color: #f3f4f6;
+}
+
+.income-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.currency-symbol {
+  font-size: 24px;
+  font-weight: bold;
+  color: #374151;
+}
+
+.finance-page.dark .currency-symbol {
+  color: #f3f4f6;
+}
+
+.income-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  transition: all 0.3s;
+}
+
+.income-input:focus {
+  outline: none;
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* 月份选择器 */
+.month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.finance-page.dark .month-selector {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.month-nav-btn {
+  background: #f97316;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.month-nav-btn:hover {
+  background: #ea580c;
+  transform: translateY(-1px);
+}
+
+.current-month {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.finance-page.dark .current-month {
+  color: #f3f4f6;
+}
+
+/* 统计卡片网格 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.income {
+  border-top: 4px solid #10b981;
+}
+
+.stat-card.expenses {
+  border-top: 4px solid #ef4444;
+}
+
+.stat-card.remaining {
+  border-top: 4px solid #3b82f6;
+}
+
+.stat-card.warning {
+  border-top: 4px solid #ef4444;
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  }
+}
+
+.stat-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 5px;
+}
+
+.finance-page.dark .stat-label {
+  color: #9ca3af;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.finance-page.dark .stat-value {
+  color: #f3f4f6;
+}
+
+/* 警示横幅 */
+.warning-banner {
+  background: #fef2f2;
+  border: 2px solid #ef4444;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  animation: slide-in 0.3s ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.warning-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.warning-icon {
+  font-size: 28px;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.warning-text {
+  flex: 1;
+  font-size: 14px;
+  color: #7f1d1d;
+  line-height: 1.5;
+}
+
+/* 图表卡片 */
+.chart-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.finance-page.dark .chart-card {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.chart-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  color: #374151;
+}
+
+.finance-page.dark .chart-card h3 {
+  color: #f3f4f6;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chart-label {
+  min-width: 70px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: right;
+}
+
+.chart-bar-container {
+  flex: 1;
+  height: 28px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.finance-page.dark .chart-bar-container {
+  background: #374151;
+}
+
+.chart-bar {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 8px;
+  transition: width 0.5s ease-out;
+  white-space: nowrap;
+}
+
+.chart-value {
+  font-size: 12px;
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 快速统计 */
+.quick-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.quick-stat-item {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.finance-page.dark .quick-stat-item {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.quick-stat-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.quick-stat-value {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.quick-stat-value.fixed {
+  color: #8b5cf6;
+}
+
+.quick-stat-value.temporary {
+  color: #f97316;
+}
+
+/* 添加支出表单 */
+.add-expense-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.finance-page.dark .add-expense-card {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.add-expense-card h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #374151;
+}
+
+.finance-page.dark .add-expense-card h3 {
+  color: #f3f4f6;
+}
+
+.add-expense-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expense-type-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #6b7280;
+}
+
+.finance-page.dark .type-btn {
+  background: #1f2937;
+  border-color: #374151;
+  color: #9ca3af;
+}
+
+.type-btn:hover {
+  background: #f9fafb;
+  transform: translateY(-1px);
+}
+
+.finance-page.dark .type-btn:hover {
+  background: #374151;
+}
+
+.type-btn.active {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.form-select,
+.form-input {
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
+  background: white;
+  color: #1f2937;
+}
+
+.finance-page.dark .form-select,
+.finance-page.dark .form-input {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: #ef4444;
+}
+
+.form-select {
+  flex: 1;
+  cursor: pointer;
+}
+
+.amount-input {
+  flex: 1;
+}
+
+.date-input {
+  flex: 1;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 5px;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+/* 支出记录列表 */
+.expenses-list {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.finance-page.dark .expenses-list {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.expenses-list h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.finance-page.dark .expenses-list h3 {
+  color: #f3f4f6;
+}
+
+.record-count {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: normal;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.finance-page.dark .empty-state {
+  color: #9ca3af;
+}
+
+.empty-state p:first-child {
+  font-size: 18px;
+  margin: 0 0 8px 0;
+  color: #374151;
+}
+
+.finance-page.dark .empty-state p:first-child {
+  color: #f3f4f6;
+}
+
+.empty-hint {
+  font-size: 14px;
+  margin: 0 !important;
+}
+
+.expense-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expense-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border-left: 4px solid #e5e7eb;
+  transition: all 0.3s;
+}
+
+.finance-page.dark .expense-item {
+  background: #1f2937;
+  border-left-color: #374151;
+}
+
+.expense-item:hover {
+  background: #f3f4f6;
+  transform: translateX(2px);
+}
+
+.finance-page.dark .expense-item:hover {
+  background: #374151;
+}
+
+.expense-item:nth-child(odd) {
+  border-left-color: #3b82f6;
+}
+
+.expense-item:nth-child(even) {
+  border-left-color: #10b981;
+}
+
+.expense-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.expense-category {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.finance-page.dark .expense-category {
+  color: #f3f4f6;
+}
+
+.expense-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expense-type {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.expense-type.fixed {
+  background: #ede9fe;
+  color: #8b5cf6;
+}
+
+.expense-type.temporary {
+  background: #ffedd5;
+  color: #f97316;
+}
+
+.expense-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.finance-page.dark .expense-date {
+  color: #9ca3af;
+}
+
+.expense-description {
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.finance-page.dark .expense-description {
+  color: #9ca3af;
+}
+
+.expense-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.expense-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.expense-item .delete-btn {
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.expense-item .delete-btn:hover {
+  background: #fecaca;
+  transform: scale(1.05);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .finance-page {
+    padding: 15px;
+  }
+
+  .finance-header {
+    padding: 12px 15px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .income-card {
+    padding: 15px;
+  }
+
+  .income-input {
+    font-size: 16px;
+  }
+
+  .stats-grid {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-icon {
+    font-size: 28px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .amount-input,
+  .date-input {
+    width: 100%;
+  }
+
+  .chart-label {
+    min-width: 60px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .finance-page {
+    padding: 10px;
+  }
+
+  .finance-header {
+    padding: 10px 12px;
+  }
+
+  .back-btn {
+    padding: 8px 15px;
+    font-size: 13px;
+  }
+
+  .page-title {
+    font-size: 16px;
+  }
+
+  .income-card {
+    padding: 12px;
+  }
+
+  .currency-symbol {
+    font-size: 20px;
+  }
+
+  .income-input {
+    font-size: 15px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+  }
+
+  .stat-icon {
+    font-size: 32px;
+    margin-bottom: 0;
+  }
+
+  .stat-content {
+    flex: 1;
+    text-align: right;
+  }
+
+  .quick-stats {
+    flex-direction: column;
+  }
+
+  .chart-bar {
+    font-size: 11px;
+  }
+
+  .expense-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .expense-right {
+    align-items: flex-end;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .expense-amount {
+    font-size: 15px;
+  }
+
+  .expense-item .delete-btn {
+    padding: 6px 12px;
+  }
+}

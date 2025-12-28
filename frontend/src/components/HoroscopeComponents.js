@@ -34,7 +34,7 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
           </button>
         )}
       </div>
-      <div className="text-sm text-gray-600 dark:text-white mb-3">
+      <div className="text-sm text-gray-600 dark:text-gray-300 mb-3">
         {configuredZodiac ? `当前星座：${configuredZodiac}` : '点击设置您的星座，获取每日运势指引'}
       </div>
 
@@ -274,12 +274,12 @@ export const TrendChart = ({ userHoroscope, generateDailyHoroscope }) => {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500 mx-auto mb-2"></div>
-              <p className="text-xs text-gray-500">加载图表中...</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">加载图表中...</p>
             </div>
           </div>
         )}
       </div>
-      <p className="text-xs text-gray-500 dark:text-white mt-2 text-center">展示过去7天的运势波动情况</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">展示过去7天的运势波动情况</p>
     </div>
   );
 };
@@ -334,7 +334,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
             style={{ backgroundColor: (Array.isArray(recommendations.luckyColors) && recommendations.luckyColors[0]) ? recommendations.luckyColors[0] : '#FF6B6B' }}
           ></div>
           <span className="text-xs text-gray-500 dark:text-white">幸运色</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1">
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {String((Array.isArray(recommendations.luckyColorNames) && recommendations.luckyColorNames[0]) ? recommendations.luckyColorNames[0] : '魅力红')}
           </span>
         </div>
@@ -342,7 +342,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">💎</div>
           <span className="text-xs text-gray-500 dark:text-white">幸运配饰</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1 text-center truncate w-full">
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center truncate w-full">
             {String(recommendations.luckyAccessory || '宝石')}
           </span>
         </div>
@@ -358,7 +358,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🔢</div>
           <span className="text-xs text-gray-500 dark:text-white">幸运数字</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1">
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {Array.isArray(recommendations.luckyNumbers) ? recommendations.luckyNumbers.join('/') : String(recommendations.luckyNumbers || '7')}
           </span>
         </div>
@@ -366,7 +366,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🕓</div>
           <span className="text-xs text-gray-500 dark:text-white">幸运时辰</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1 text-center whitespace-normal">
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1 text-center whitespace-normal">
             {String(recommendations.luckyTime || '午后')}
           </span>
         </div>
@@ -374,7 +374,7 @@ export const LuckyItemsGrid = ({ recommendations }) => {
         <div className="flex flex-col items-center">
           <div className="text-2xl mb-2">🧭</div>
           <span className="text-xs text-gray-500 dark:text-white">幸运方位</span>
-          <span className="text-sm font-bold text-gray-800 dark:text-white mt-1">
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-200 mt-1">
             {String(recommendations.luckyDirection || '东方')}
           </span>
         </div>
@@ -445,8 +445,8 @@ export const EmptyState = () => {
     <div className="horoscope-card">
       <div className="text-center py-6">
         <div className="text-3xl mb-2">🔮</div>
-        <h3 className="text-base font-semibold text-gray-700 dark:text-white mb-2">请选择您的星座</h3>
-        <p className="text-gray-500 dark:text-white text-xs">
+        <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">请选择您的星座</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-xs">
           选择您的星座，获取每日运势指引
         </p>
       </div>

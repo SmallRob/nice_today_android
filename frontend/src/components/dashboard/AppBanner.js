@@ -41,8 +41,8 @@ const AppBanner = () => {
       </svg>
 
       {/* Banner内容 */}
-      <div className="container mx-auto px-4 py-6 md:py-8 relative z-10">
-        <div className="flex items-center justify-center space-x-4">
+      <div className="container mx-auto relative z-10">
+        <div className="flex items-center justify-center space-x-4 py-6 md:py-8">
           {/* 应用图标 */}
           <img
             src={niceDayImage}

@@ -7,6 +7,37 @@ import { Capacitor } from '@capacitor/core';
 // 使用动态导入避免在 Web 平台上直接导入不可用的插件
 let App, SplashScreen, StatusBar, Device, Network, Keyboard, Haptics;
 
+// 主题颜色映射
+const THEME_COLORS = {
+  light: '#6366f1',  // indigo-500
+  dark: '#1e293b'    // slate-800
+};
+
+// 获取当前主题
+const getCurrentTheme = () => {
+  if (typeof window === 'undefined') return 'light';
+  try {
+    const config = localStorage.getItem('app_theme_config');
+    if (config) {
+      const parsed = JSON.parse(config);
+      // 如果有有效主题，直接使用
+      if (parsed.effectiveTheme) {
+        return parsed.effectiveTheme;
+      }
+      // 否则根据主题模式计算
+      const themeMode = parsed.themeMode || 'system';
+      if (themeMode === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return themeMode || 'light';
+    }
+  } catch (error) {
+    console.warn('获取主题失败:', error);
+  }
+  // 默认检查系统主题
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
 const initPlugins = async () => {
   if (!App) {
     try {
@@ -71,12 +102,17 @@ export const initApp = async () => {
 
   try {
     await initPlugins();
-    
+
+    // 获取当前主题，根据主题设置状态栏颜色
+    const currentTheme = getCurrentTheme();
+    const themeColor = THEME_COLORS[currentTheme] || THEME_COLORS.light;
+    const statusBarStyle = isIOS ? 'DARK' : (currentTheme === 'dark' ? 'DARK' : 'LIGHT');
+
     // 设置状态栏
     if (StatusBar) {
       try {
-        await StatusBar.setStyle({ style: isIOS ? 'DARK' : 'LIGHT' });
-        await StatusBar.setBackgroundColor({ color: '#ffffff' });
+        await StatusBar.setStyle({ style: statusBarStyle });
+        await StatusBar.setBackgroundColor({ color: themeColor });
       } catch (error) {
         console.debug('StatusBar not available:', error.message);
       }
@@ -301,9 +337,14 @@ export const checkNetworkStatus = async () => {
 
 // 创建一个应用初始化函数
 export const initializeApp = async (options = {}) => {
+  // 获取当前主题，根据主题设置状态栏颜色
+  const currentTheme = getCurrentTheme();
+  const themeColor = THEME_COLORS[currentTheme] || THEME_COLORS.light;
+  const statusBarStyle = isIOS ? 'DARK' : (currentTheme === 'dark' ? 'DARK' : 'LIGHT');
+
   const {
-    statusBarStyle = isIOS ? 'DARK' : 'LIGHT',
-    statusBarBackgroundColor = '#ffffff',
+    statusBarStyle: customStatusBarStyle = statusBarStyle,
+    statusBarBackgroundColor = themeColor,
     enableKeyboardListeners = true,
     enableNetworkListener = false,
     networkCallback,

@@ -1,0 +1,513 @@
+/* 每日运势能量卡片 */
+.daily-fortune-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.dark .daily-fortune-card {
+  background: #1f2937;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.daily-fortune-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.dark .daily-fortune-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* 卡片头部 */
+.fortune-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dark .fortune-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.fortune-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fortune-date {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.dark .fortune-date {
+  color: #6b7280;
+}
+
+.fortune-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.dark .fortune-title {
+  color: #f9fafb;
+}
+
+.fortune-zodiac-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.zodiac-icon {
+  font-size: 20px;
+}
+
+.zodiac-name {
+  font-size: 14px;
+}
+
+/* 卡片内容区域 - 左右布局 */
+.fortune-content {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.fortune-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.fortune-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 120px;
+}
+
+/* 能量进度条列表 */
+.energy-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.energy-progress-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.energy-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.energy-progress-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.energy-progress-icon {
+  font-size: 16px;
+}
+
+.energy-progress-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.dark .energy-progress-name {
+  color: #e5e7eb;
+}
+
+.energy-progress-value {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* 进度条轨道 */
+.energy-progress-track {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dark .energy-progress-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 进度条填充 */
+.energy-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 进度条闪光效果 */
+.energy-progress-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 能量球容器 */
+.energy-ball-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 能量球主体 */
+.energy-ball {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+              linear-gradient(135deg, var(--ball-color) 0%, var(--ball-color)88 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2),
+              inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  transform: scale(var(--scale));
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.energy-ball-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.energy-score {
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  line-height: 1;
+}
+
+.energy-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin-top: 2px;
+}
+
+/* 能量球脉冲动画 */
+.energy-ball-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--ball-color);
+  opacity: 0;
+  animation: pulse var(--animation-duration) ease-out infinite;
+  z-index: 1;
+}
+
+.energy-ball-pulse-2 {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--ball-color);
+  opacity: 0;
+  animation: pulse var(--animation-duration) ease-out infinite;
+  animation-delay: calc(var(--animation-duration) / 2);
+  z-index: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* 加载状态骨架屏 */
+.daily-fortune-card.loading {
+  min-height: 200px;
+}
+
+.fortune-header-skeleton {
+  height: 40px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.dark .fortune-header-skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+}
+
+.fortune-content-skeleton {
+  display: flex;
+  gap: 24px;
+}
+
+.fortune-left-skeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-bar-skeleton {
+  height: 32px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.dark .progress-bar-skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+}
+
+.fortune-right-skeleton {
+  width: 120px;
+  height: 100px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dark .fortune-right-skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 响应式设计 - 平板 */
+@media (max-width: 768px) {
+  .daily-fortune-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .fortune-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .fortune-title {
+    font-size: 16px;
+  }
+
+  .fortune-zodiac-badge {
+    padding: 6px 12px;
+  }
+
+  .zodiac-icon {
+    font-size: 18px;
+  }
+
+  .zodiac-name {
+    font-size: 13px;
+  }
+
+  .fortune-content {
+    gap: 16px;
+  }
+
+  .fortune-right {
+    width: 100px;
+  }
+
+  .energy-ball {
+    width: 70px;
+    height: 70px;
+  }
+
+  .energy-score {
+    font-size: 20px;
+  }
+
+  .energy-label {
+    font-size: 9px;
+  }
+
+  .energy-progress-icon {
+    font-size: 14px;
+  }
+
+  .energy-progress-name {
+    font-size: 13px;
+  }
+
+  .energy-progress-value {
+    font-size: 12px;
+  }
+}
+
+/* 响应式设计 - 手机 */
+@media (max-width: 576px) {
+  .daily-fortune-card {
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+  }
+
+  .fortune-header {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+
+  .fortune-date {
+    font-size: 11px;
+  }
+
+  .fortune-title {
+    font-size: 15px;
+  }
+
+  .fortune-zodiac-badge {
+    padding: 5px 10px;
+  }
+
+  .zodiac-icon {
+    font-size: 16px;
+  }
+
+  .zodiac-name {
+    font-size: 12px;
+  }
+
+  .fortune-content {
+    gap: 12px;
+  }
+
+  .fortune-right {
+    width: 90px;
+  }
+
+  .energy-ball-container {
+    width: 90px;
+    height: 90px;
+  }
+
+  .energy-ball {
+    width: 65px;
+    height: 65px;
+  }
+
+  .energy-score {
+    font-size: 18px;
+  }
+
+  .energy-label {
+    font-size: 9px;
+  }
+
+  .energy-progress-list {
+    gap: 10px;
+  }
+
+  .energy-progress-track {
+    height: 6px;
+  }
+
+  .energy-progress-icon {
+    font-size: 14px;
+  }
+
+  .energy-progress-name {
+    font-size: 12px;
+  }
+
+  .energy-progress-value {
+    font-size: 11px;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 375px) {
+  .fortune-content {
+    flex-direction: column;
+  }
+
+  .fortune-right {
+    width: 100%;
+    order: -1;
+    margin-bottom: 12px;
+  }
+
+  .energy-ball-container {
+    margin: 0 auto;
+  }
+
+  .fortune-left {
+    width: 100%;
+  }
+}

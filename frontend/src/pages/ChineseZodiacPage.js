@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
+import { generateDailyHoroscope } from '../utils/horoscopeAlgorithm';
 
 /**
  * 十二生肖数据
@@ -188,8 +189,62 @@ const ChineseZodiacPage = () => {
     return '鼠'; // 默认生肖
   });
 
+  // 运势数据状态
+  const [horoscopeData, setHoroscopeData] = useState(null);
+  const [loadingHoroscope, setLoadingHoroscope] = useState(false);
+
   // 获取当前生肖数据
   const zodiacData = CHINESE_ZODIAC_DATA.find(z => z.name === userZodiac);
+
+  // 生成每日运势数据
+  const generateDailyHoroscopeData = useCallback(async () => {
+    if (!userZodiac) return;
+    
+    setLoadingHoroscope(true);
+    try {
+      // 生肖对应的星座映射（简化版）
+      const zodiacToHoroscope = {
+        '鼠': '双子座', '牛': '金牛座', '虎': '白羊座', '兔': '巨蟹座',
+        '龙': '狮子座', '蛇': '天蝎座', '马': '射手座', '羊': '摩羯座',
+        '猴': '水瓶座', '鸡': '处女座', '狗': '天秤座', '猪': '双鱼座'
+      };
+      
+      const horoscopeName = zodiacToHoroscope[userZodiac] || '金牛座';
+      const data = generateDailyHoroscope(horoscopeName);
+      setHoroscopeData(data);
+    } catch (error) {
+      console.error('生成生肖运势数据失败:', error);
+      // 设置默认运势数据
+      setHoroscopeData({
+        overallScore: 70,
+        overallDescription: '今日运势平稳，保持积极心态会有不错的发展。',
+        dailyForecast: {
+          love: { score: 65, description: '良好', trend: '上升' },
+          wealth: { score: 70, description: '良好', trend: '平稳' },
+          career: { score: 75, description: '良好', trend: '上升' },
+          study: { score: 70, description: '良好', trend: '上升' },
+          social: { score: 68, description: '良好', trend: '平稳' }
+        },
+        recommendations: {
+          luckyColorNames: ['蓝色', '绿色'],
+          luckyNumbers: [3, 7, 9],
+          compatibleSigns: ['白羊座', '狮子座', '射手座'],
+          positiveAdvice: '保持积极心态，主动出击',
+          avoidAdvice: '避免冲动行事',
+          dailyReminder: '今天会是充满机遇的一天'
+        }
+      });
+    } finally {
+      setLoadingHoroscope(false);
+    }
+  }, [userZodiac]);
+
+  // 当生肖变化时，重新生成运势数据
+  useEffect(() => {
+    if (userZodiac) {
+      generateDailyHoroscopeData();
+    }
+  }, [userZodiac, generateDailyHoroscopeData]);
 
   // 获取元素颜色
   const getElementColor = (element) => {
@@ -351,6 +406,75 @@ const ChineseZodiacPage = () => {
             </div>
           </div>
         </div>
+
+        {/* 今日运势卡片 */}
+        {loadingHoroscope ? (
+          <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+              <span className="ml-3">运势数据加载中...</span>
+            </div>
+          </div>
+        ) : horoscopeData ? (
+          <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center">
+              <span className="mr-2">✨</span> 生肖今日运势
+            </h3>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-lg font-semibold">综合运势指数</span>
+                <span className="text-2xl font-bold">{horoscopeData.overallScore}分</span>
+              </div>
+              <div className="w-full bg-white/20 rounded-full h-3">
+                <div 
+                  className="bg-white h-3 rounded-full" 
+                  style={{ width: `${horoscopeData.overallScore}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            <p className="mb-4 text-blue-100">{horoscopeData.overallDescription}</p>
+            
+            {/* 各领域运势 */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {Object.entries(horoscopeData.dailyForecast || {}).map(([key, data]) => (
+                <div key={key} className="text-center p-2 bg-white/10 rounded-lg">
+                  <div className="text-xs text-green-200 mb-1">
+                    {key === 'love' ? '爱情' : 
+                     key === 'wealth' ? '财运' : 
+                     key === 'career' ? '事业' : 
+                     key === 'study' ? '学业' : 
+                     key === 'social' ? '社交' : key}
+                  </div>
+                  <div className="text-lg font-bold">{data.score}</div>
+                  <div className="text-xs text-green-300">{data.description}</div>
+                </div>
+              ))}
+            </div>
+            
+            {/* 幸运信息 */}
+            <div className="mt-4 pt-4 border-t border-white/20">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-green-200">幸运色：</span>
+                  <span>{horoscopeData.recommendations?.luckyColorNames?.join('、') || '蓝色、绿色'}</span>
+                </div>
+                <div>
+                  <span className="text-green-200">幸运数字：</span>
+                  <span>{horoscopeData.recommendations?.luckyNumbers?.join('、') || '3、7、9'}</span>
+                </div>
+                <div>
+                  <span className="text-green-200">今日建议：</span>
+                  <span>{horoscopeData.recommendations?.positiveAdvice || '保持积极心态'}</span>
+                </div>
+                <div>
+                  <span className="text-green-200">注意事项：</span>
+                  <span>{horoscopeData.recommendations?.avoidAdvice || '避免冲动'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {/* 其他生肖入口 */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">

@@ -19,14 +19,16 @@ const createLazyComponent = (importFn, componentName, fallbackMessage) => {
         // 确保返回一个有效的React组件
         return {
           default: ({ onError }) => {
-            // 触发错误回调（如果提供）
-            if (typeof onError === 'function') {
-              try {
-                onError(err);
-              } catch (callbackError) {
-                console.warn('错误回调执行失败:', callbackError);
+            // 使用useEffect确保错误回调在组件挂载后执行
+            React.useEffect(() => {
+              if (typeof onError === 'function') {
+                try {
+                  onError(err);
+                } catch (callbackError) {
+                  console.warn('错误回调执行失败:', callbackError);
+                }
               }
-            }
+            }, [onError, err]);
 
             return (
               <div className="flex-1 flex items-center justify-center p-4">
@@ -190,6 +192,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   });
   const [loadedTabs, setLoadedTabs] = useState(new Set(['biorhythm'])); // 预加载当前标签
   const [tabTransition, setTabTransition] = useState(false);
+  const [isTabSwitching, setIsTabSwitching] = useState(false); // 标签切换状态
   const [error, setError] = useState(null);
   const [fallbackMode, setFallbackMode] = useState(false);
 
@@ -200,6 +203,12 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   // 修复：确保在Android WebView中更积极地清理内存，并增加错误处理
   const cleanupUnusedTabs = useCallback((currentTab) => {
     try {
+      // 如果正在标签切换过程中，跳过清理，避免清理正在加载的标签
+      if (isTabSwitching) {
+        console.log('标签切换中，跳过内存清理');
+        return;
+      }
+
       // 在移动设备上总是执行清理
       const isMobile = appInfo.isMobile || isAndroidWebView();
 
@@ -208,6 +217,12 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
         // 使用requestAnimationFrame确保UI更新后再清理
         requestAnimationFrame(() => {
           setTimeout(() => {
+            // 再次检查是否还在切换中
+            if (isTabSwitching) {
+              console.log('标签切换仍在进行中，取消内存清理');
+              return;
+            }
+
             setLoadedTabs(prev => {
               const newSet = new Set(prev);
               // 保留当前标签和相邻标签
@@ -246,7 +261,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       // 失败时不影响正常功能，继续执行
       // 确保即使清理失败也不影响应用运行
     }
-  }, [appInfo.isMobile]);
+  }, [appInfo.isMobile, isTabSwitching]);
 
   // 错误处理函数
   // 修复：增强对未定义变量错误的检测，包括压缩后的变量名
@@ -315,10 +330,8 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
         setFallbackMode(true);
       }
 
-      // 自动恢复机制（延长至10秒，给用户更多时间查看错误信息）
-      setTimeout(() => {
-        setError(null);
-      }, 10000);
+      // 移除自动恢复机制，避免内容突然消失
+      // 改为让用户手动关闭错误信息
     } catch (handlingError) {
       // 错误处理过程中出现错误，记录并尝试恢复
       console.error('错误处理函数内部出现错误:', handlingError);
@@ -426,6 +439,9 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   const handleTabChange = useCallback((tabId) => {
     if (tabId === activeTab) return;
 
+    // 设置标签切换状态，防止内存清理
+    setIsTabSwitching(true);
+
     // 性能监控
     const endMeasurement = measureTabSwitch(activeTab, tabId);
 
@@ -444,8 +460,12 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       // 预加载相邻标签
       preloadAdjacentTabs(tabId);
 
-      // 清理未使用的标签数据（延迟执行）
-      setTimeout(() => cleanupUnusedTabs(tabId), 1000);
+      // 清理未使用的标签数据（延迟执行，但要在切换完成后再清理）
+      setTimeout(() => {
+        cleanupUnusedTabs(tabId);
+        // 清除标签切换状态，允许内存清理
+        setIsTabSwitching(false);
+      }, 2000);
 
       // 结束性能测量
       if (endMeasurement) setTimeout(endMeasurement, 50);
@@ -622,11 +642,11 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             title="体验新版炫彩版主页"
             style={{ backdropFilter: 'blur(4px)' }}
           >
-            <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-            <span className="hidden sm:inline">体验新版</span>
-            <span className="inline sm:hidden">新版主页</span>
+          <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span className="hidden sm:inline">体验新版</span>
+          <span className="inline sm:hidden">新版</span>
           </button>
         </div>
       </div>

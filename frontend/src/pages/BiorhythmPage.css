@@ -1,0 +1,414 @@
+/* 人体节律页面样式 - 移动端优化 */
+.biorhythm-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0;
+  margin: 0;
+}
+
+/* 页面头部 */
+.page-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #4a5568;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2d3748;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.header-date {
+  font-size: 14px;
+  color: #718096;
+  text-align: right;
+}
+
+/* 主要内容区 */
+.page-content {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 每日提醒卡片 */
+.daily-tips-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.tips-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.tips-content h3 {
+  margin: 0 0 8px 0;
+  color: #2d3748;
+  font-size: 18px;
+}
+
+.tips-content p {
+  margin: 0;
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+/* 今日节律状态 */
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2d3748;
+  margin: 0 0 16px 0;
+}
+
+.today-rhythm {
+  margin-bottom: 24px;
+}
+
+.rhythm-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.rhythm-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.rhythm-card:hover {
+  transform: translateY(-2px);
+}
+
+.rhythm-card.excellent {
+  border-left: 4px solid #48bb78;
+}
+
+.rhythm-card.good {
+  border-left: 4px solid #38a169;
+}
+
+.rhythm-card.normal {
+  border-left: 4px solid #ecc94b;
+}
+
+.rhythm-card.poor {
+  border-left: 4px solid #ed8936;
+}
+
+.rhythm-card.low {
+  border-left: 4px solid #e53e3e;
+}
+
+.rhythm-emoji {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.rhythm-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #4a5568;
+  margin-bottom: 4px;
+}
+
+.rhythm-status {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.rhythm-label {
+  font-size: 11px;
+  color: #718096;
+}
+
+/* 生物节律图表 */
+.biorhythm-chart-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2d3748;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.trend-chart {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.chart-grid {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 10px;
+}
+
+.chart-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  max-width: 20px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 2px;
+  height: 80%;
+  margin-bottom: 8px;
+}
+
+.bar {
+  width: 4px;
+  border-radius: 2px;
+  transition: all 0.3s;
+  min-height: 2px;
+}
+
+.bar.physical.positive {
+  background: linear-gradient(to top, #48bb78, #38a169);
+}
+
+.bar.physical.negative {
+  background: linear-gradient(to top, #e53e3e, #c53030);
+}
+
+.bar.emotional.positive {
+  background: linear-gradient(to top, #4299e1, #3182ce);
+}
+
+.bar.emotional.negative {
+  background: linear-gradient(to top, #ed8936, #dd6b20);
+}
+
+.bar.intellectual.positive {
+  background: linear-gradient(to top, #9f7aea, #805ad5);
+}
+
+.bar.intellectual.negative {
+  background: linear-gradient(to top, #ed64a6, #d53f8c);
+}
+
+.chart-label {
+  font-size: 10px;
+  color: #718096;
+  text-align: center;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-color.physical {
+  background: linear-gradient(45deg, #48bb78, #38a169);
+}
+
+.legend-color.emotional {
+  background: linear-gradient(45deg, #4299e1, #3182ce);
+}
+
+.legend-color.intellectual {
+  background: linear-gradient(45deg, #9f7aea, #805ad5);
+}
+
+.legend-item span {
+  font-size: 12px;
+  color: #4a5568;
+}
+
+/* 节律说明 */
+.rhythm-explanation {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.rhythm-explanation h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2d3748;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.explanation-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.explanation-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.item-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.item-content h4 {
+  margin: 0 0 4px 0;
+  color: #2d3748;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.item-content p {
+  margin: 0;
+  color: #4a5568;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .page-title {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .header-date {
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .page-content {
+    padding: 16px;
+  }
+
+  .daily-tips-card {
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .rhythm-cards {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .rhythm-card {
+    padding: 12px;
+  }
+
+  .chart-grid {
+    padding: 0 5px;
+  }
+
+  .chart-column {
+    max-width: 16px;
+  }
+
+  .bar {
+    width: 3px;
+  }
+
+  .chart-legend {
+    gap: 12px;
+  }
+
+  .explanation-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .item-icon {
+    margin-top: 0;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+  .page-content {
+    padding: 12px;
+  }
+
+  .biorhythm-chart-container,
+  .daily-tips-card,
+  .rhythm-explanation {
+    padding: 16px;
+  }
+
+  .trend-chart {
+    height: 150px;
+  }
+
+  .chart-label {
+    font-size: 9px;
+  }
+}

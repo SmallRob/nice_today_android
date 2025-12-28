@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import { HOROSCOPE_DATA_ENHANCED } from '../utils/horoscopeAlgorithm';
+import { HOROSCOPE_DATA_ENHANCED, generateDailyHoroscope } from '../utils/horoscopeAlgorithm';
 import { memo } from 'react';
 
 const ZodiacTraitsPage = () => {
@@ -18,6 +18,10 @@ const ZodiacTraitsPage = () => {
     const stateZodiac = location.state?.userZodiac;
     return zodiacName || stateZodiac || currentConfig?.zodiac || '金牛座';
   });
+  
+  // 运势数据状态
+  const [horoscopeData, setHoroscopeData] = useState(null);
+  const [loadingHoroscope, setLoadingHoroscope] = useState(false);
 
   // 优化性能：将辅助函数移出组件内部，避免每次渲染重新创建
   
@@ -88,13 +92,27 @@ const getFamousExamples = (zodiacName) => {
       console.warn('星座数据不可用或格式不正确');
       return null;
     }
-    return HOROSCOPE_DATA_ENHANCED.find(h => h.name === currentHoroscope);
-  }, [currentHoroscope]);
-  
-  // 当前星座数据依赖currentHoroscope，所以需要在currentHoroscope变化时更新
-  useEffect(() => {
-    // 当currentHoroscope变化时，zodiacData会自动更新
-    // 因为zodiacData是通过useMemo依赖currentHoroscope计算的
+    
+    // 调试日志：查看当前参数状态
+    console.log('当前星座参数:', {
+      zodiacName,
+      stateZodiac: location.state?.userZodiac,
+      configZodiac: currentConfig?.zodiac,
+      currentHoroscope
+    });
+    
+    // 优化查找逻辑：确保星座名称完全匹配
+    const foundZodiac = HOROSCOPE_DATA_ENHANCED.find(h => {
+      // 精确匹配星座名称
+      return h.name === currentHoroscope;
+    });
+    
+    if (!foundZodiac) {
+      console.warn(`未找到星座数据: ${currentHoroscope}`);
+      console.log('可用星座列表:', HOROSCOPE_DATA_ENHANCED.map(z => z.name));
+    }
+    
+    return foundZodiac;
   }, [currentHoroscope]);
   
   const elementColors = useMemo(() => {
@@ -105,6 +123,41 @@ const getFamousExamples = (zodiacName) => {
     return getElementColor(zodiacData.element);
   }, [zodiacData]);
   
+  // 生成每日运势数据
+  const generateDailyHoroscopeData = useCallback(async () => {
+    if (!currentHoroscope) return;
+    
+    setLoadingHoroscope(true);
+    try {
+      const data = generateDailyHoroscope(currentHoroscope);
+      setHoroscopeData(data);
+    } catch (error) {
+      console.error('生成运势数据失败:', error);
+      // 即使生成失败，也设置一个默认的运势数据
+      setHoroscopeData({
+        overallScore: 75,
+        overallDescription: '今日运势平稳，保持积极心态会有不错的发展。',
+        dailyForecast: {
+          love: { score: 70, description: '良好', trend: '上升' },
+          wealth: { score: 65, description: '良好', trend: '平稳' },
+          career: { score: 75, description: '良好', trend: '上升' },
+          study: { score: 80, description: '很好', trend: '上升' },
+          social: { score: 70, description: '良好', trend: '上升' }
+        },
+        recommendations: {
+          luckyColorNames: ['蓝色', '绿色'],
+          luckyNumbers: [3, 7, 9],
+          compatibleSigns: ['白羊座', '狮子座', '射手座'],
+          positiveAdvice: '保持积极心态，主动出击',
+          avoidAdvice: '避免冲动行事',
+          dailyReminder: '今天会是充满机遇的一天'
+        }
+      });
+    } finally {
+      setLoadingHoroscope(false);
+    }
+  }, [currentHoroscope]);
+
   // 优化：确保所有来源的参数与内部状态同步
   useEffect(() => {
     // 检查URL参数、状态和配置中的星座
@@ -114,22 +167,51 @@ const getFamousExamples = (zodiacName) => {
     // 优先级：URL参数 > 传递状态 > 用户配置 > 默认值
     const targetZodiac = zodiacName || stateZodiac || configZodiac || '金牛座';
     
+    // 只有当目标星座有效且与当前不同时才更新
     if (targetZodiac && targetZodiac !== currentHoroscope) {
+      console.log('更新星座参数:', { from: currentHoroscope, to: targetZodiac });
       setCurrentHoroscope(targetZodiac);
     }
-  }, [zodiacName, location.state, currentConfig?.zodiac, currentHoroscope]);
+  }, [zodiacName, location.state, currentConfig?.zodiac]);
+  
+  // 专门处理URL参数变化，确保直接访问带参数的URL时能正确加载
+  useEffect(() => {
+    if (zodiacName && zodiacName !== currentHoroscope) {
+      console.log('URL参数变化，更新星座:', { from: currentHoroscope, to: zodiacName });
+      setCurrentHoroscope(zodiacName);
+    }
+  }, [zodiacName]);
+  
+  // 当星座变化时，重新生成运势数据
+  useEffect(() => {
+    if (currentHoroscope) {
+      generateDailyHoroscopeData();
+    }
+  }, [currentHoroscope, generateDailyHoroscopeData]);
 
   if (!zodiacData) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400">星座数据加载中...</p>
-          <button
-            onClick={() => navigate('/horoscope')}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-          >
-            返回星座运势
-          </button>
+          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400 mb-2">加载星座数据中...</p>
+          <p className="text-gray-500 dark:text-gray-500 text-sm mb-4">
+            当前星座: {currentHoroscope || '未设置'}
+          </p>
+          <div className="space-x-2">
+            <button
+              onClick={() => navigate('/horoscope')}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              返回星座运势
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+            >
+              刷新页面
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -345,6 +427,75 @@ const getFamousExamples = (zodiacName) => {
             ))}
           </div>
         </div>
+
+        {/* 今日运势卡片 */}
+        {loadingHoroscope ? (
+          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+              <span className="ml-3">运势数据加载中...</span>
+            </div>
+          </div>
+        ) : horoscopeData ? (
+          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center">
+              <span className="mr-2">✨</span> 今日运势
+            </h3>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-lg font-semibold">综合运势指数</span>
+                <span className="text-2xl font-bold">{horoscopeData.overallScore}分</span>
+              </div>
+              <div className="w-full bg-white/20 rounded-full h-3">
+                <div 
+                  className="bg-white h-3 rounded-full" 
+                  style={{ width: `${horoscopeData.overallScore}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            <p className="mb-4 text-blue-100">{horoscopeData.overallDescription}</p>
+            
+            {/* 各领域运势 */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {Object.entries(horoscopeData.dailyForecast || {}).map(([key, data]) => (
+                <div key={key} className="text-center p-2 bg-white/10 rounded-lg">
+                  <div className="text-xs text-blue-200 mb-1">
+                    {key === 'love' ? '爱情' : 
+                     key === 'wealth' ? '财运' : 
+                     key === 'career' ? '事业' : 
+                     key === 'study' ? '学业' : 
+                     key === 'social' ? '社交' : key}
+                  </div>
+                  <div className="text-lg font-bold">{data.score}</div>
+                  <div className="text-xs text-blue-300">{data.description}</div>
+                </div>
+              ))}
+            </div>
+            
+            {/* 幸运信息 */}
+            <div className="mt-4 pt-4 border-t border-white/20">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-blue-200">幸运色：</span>
+                  <span>{horoscopeData.recommendations?.luckyColorNames?.join('、') || '蓝色、绿色'}</span>
+                </div>
+                <div>
+                  <span className="text-blue-200">幸运数字：</span>
+                  <span>{horoscopeData.recommendations?.luckyNumbers?.join('、') || '3、7、9'}</span>
+                </div>
+                <div>
+                  <span className="text-blue-200">今日建议：</span>
+                  <span>{horoscopeData.recommendations?.positiveAdvice || '保持积极心态'}</span>
+                </div>
+                <div>
+                  <span className="text-blue-200">注意事项：</span>
+                  <span>{horoscopeData.recommendations?.avoidAdvice || '避免冲动'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {/* 其他星座入口 */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">

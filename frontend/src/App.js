@@ -78,19 +78,24 @@ const DashboardPage = lazyLoadWithErrorHandling(() => import('./pages/DashboardP
 const BiorhythmDashboard = lazyLoadWithErrorHandling(() => import('./components/BiorhythmDashboard'));
 const MayaPage = lazyLoadWithErrorHandling(() => import('./pages/MayaPage'));
 const DressGuidePage = lazyLoadWithErrorHandling(() => import('./pages/DressGuidePage'));
-const LifeTrendPage = lazyLoadWithErrorHandling(() => import('./pages/LifeTrendPage'));
+const LifeEnergyTrendPage = lazyLoadWithErrorHandling(() => import('./pages/LifeTrendPage'));
 const SettingsPage = lazyLoadWithErrorHandling(() => import('./pages/SettingsPage'));
 const TarotPage = lazyLoadWithErrorHandling(() => import('./pages/TarotPage'));
 const NumerologyPage = lazyLoadWithErrorHandling(() => import('./pages/NumerologyPage'));
-const BiorhythmPage = lazyLoadWithErrorHandling(() => import('./pages/BiorhythmPage'));
-const HoroscopePage = lazyLoadWithErrorHandling(() => import('./pages/HoroscopePage'));
-const BaziPage = lazyLoadWithErrorHandling(() => import('./pages/BaziPage'));
+const BiorhythmPage = lazyLoadWithErrorHandling(() => import('./pages/BiorhythmPage_optimized'));
+const HoroscopePage = lazyLoadWithErrorHandling(() => import('./pages/HoroscopePage_optimized'));
+const BaziMonthlyTrendPage = lazyLoadWithErrorHandling(() => import('./pages/LifeTrendPage_optimized'));
+const BaziPage = lazyLoadWithErrorHandling(() => import('./pages/LifeTrendPage_optimized'));
 const MBTITestPage = lazyLoadWithErrorHandling(() => import('./pages/MBTITestPage'));
 const MBTIDetailPage = lazyLoadWithErrorHandling(() => import('./components/MBTIPersonalityTabHome'));
 const EnergyBoostPage = lazyLoadWithErrorHandling(() => import('./pages/EnergyBoostPage'));
 const PeriodTrackerPage = lazyLoadWithErrorHandling(() => import('./pages/PeriodTrackerPage'));
 const ZodiacTraitsPage = lazyLoadWithErrorHandling(() => import('./pages/ZodiacTraitsPage'));
 const ChineseZodiacPage = lazyLoadWithErrorHandling(() => import('./pages/ChineseZodiacPage'));
+const AgeAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/AgeAnalysisPage'));
+const ZiWeiPage = lazyLoadWithErrorHandling(() => import('./pages/ZiWeiPage'));
+const TodoListPage = lazyLoadWithErrorHandling(() => import('./pages/TodoListPage'));
+const FinancePage = lazyLoadWithErrorHandling(() => import('./pages/FinancePage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -142,7 +147,9 @@ const AppLayout = () => {
             <Route path="/old-dashboard" element={<BiorhythmDashboard />} />
             <Route path="/maya" element={<MayaPage />} />
             <Route path="/dress" element={<DressGuidePage />} />
-            <Route path="/trend" element={<LifeTrendPage />} />
+            <Route path="/life-energy" element={<LifeEnergyTrendPage />} />
+            <Route path="/trend" element={<LifeEnergyTrendPage />} />
+            <Route path="/bazi-monthly" element={<BaziMonthlyTrendPage />} />
             <Route path="/tarot" element={<TarotPage />} />
             <Route path="/numerology" element={<NumerologyPage />} />
             <Route path="/settings" element={<SettingsPage />} />
@@ -156,6 +163,10 @@ const AppLayout = () => {
             <Route path="/zodiac-traits" element={<ZodiacTraitsPage />} />
             <Route path="/zodiac-traits/:zodiacName" element={<ZodiacTraitsPage />} />
             <Route path="/chinese-zodiac" element={<ChineseZodiacPage />} />
+            <Route path="/age-analysis" element={<AgeAnalysisPage />} />
+            <Route path="/ziwei" element={<ZiWeiPage />} />
+            <Route path="/todo-list" element={<TodoListPage />} />
+            <Route path="/finance" element={<FinancePage />} />
           </Routes>
         </SafeSuspense>
       </div>

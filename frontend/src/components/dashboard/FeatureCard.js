@@ -1,64 +1,67 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import IconLibrary from '../IconLibrary';
 
 /**
- * 功能卡片组件 - 首页功能入口
- * @param {Object} props
- * @param {string} props.title - 卡片标题
- * @param {string} props.description - 卡片描述
- * @param {string} props.icon - 图标名称
- * @param {string} props.color - 主题颜色
- * @param {string} props.route - 路由路径
- * @param {boolean} props.highlight - 是否高亮显示
- * @param {string} props.className - 自定义类名
- * @param {Function} props.onClick - 点击回调
+ * 功能卡片基础组件
+ * 提供统一的卡片样式和交互行为
  */
 const FeatureCard = ({
   title,
   description,
   icon,
-  color = '#3b82f6',
+  color = '#6366f1',
   route,
+  onClick,
   highlight = false,
-  className = '',
-  onClick
+  disabled = false
 }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (onClick) {
-      onClick();
-    } else if (route) {
+    if (disabled) return;
+    
+    if (route) {
       navigate(route);
+    } else if (onClick) {
+      onClick();
     }
+  };
+
+  // 获取图标内容
+  const getIconContent = () => {
+    const iconMap = {
+      'brain': '🧠',
+      'star': '⭐',
+      'weather-sunny': '☀️',
+      'calendar': '📅',
+      'chart-line': '📊',
+      'lightning-bolt': '⚡',
+      'heart': '❤️'
+    };
+    return iconMap[icon] || '📱';
   };
 
   return (
     <div
-      className={`feature-card ${highlight ? 'feature-card-highlight' : ''} ${className}`}
+      className={`feature-card ${highlight ? 'feature-card-highlight' : ''} ${
+        disabled ? 'feature-card-loading' : ''
+      }`}
       onClick={handleClick}
       style={{
         '--card-color': color
       }}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          handleClick();
-        }
-      }}
     >
       <div className="feature-card-icon">
-        <IconLibrary.Icon name={icon} size={32} />
+        {getIconContent()}
       </div>
+      
       <div className="feature-card-content">
         <h3 className="feature-card-title">{title}</h3>
         <p className="feature-card-description">{description}</p>
       </div>
+
       {highlight && (
-        <div className="feature-card-badge">
-          热门
-        </div>
+        <div className="feature-card-badge">热门</div>
       )}
     </div>
   );

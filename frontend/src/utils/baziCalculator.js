@@ -271,6 +271,100 @@ class BaziCalculator {
   static getBaziDescription(bazi) {
     return `年柱：${bazi.year}\n月柱：${bazi.month}\n日柱：${bazi.day}\n时柱：${bazi.hour}`;
   }
+
+  /**
+   * 计算八字运势趋势
+   * @param {Date} birthDate 出生日期
+   * @param {Date} currentDate 当前日期
+   * @param {string} timeRange 时间范围（week/month/year）
+   * @returns {Object} 趋势数据
+   */
+  static calculateBaziTrend(birthDate, currentDate, timeRange = 'week') {
+    const trend = [];
+    const today = new Date(currentDate);
+    
+    // 根据时间范围确定数据点数量
+    let dataPoints, periodLabel;
+    switch (timeRange) {
+      case 'week':
+        dataPoints = 7;
+        periodLabel = '天';
+        break;
+      case 'month':
+        dataPoints = 30;
+        periodLabel = '日';
+        break;
+      case 'year':
+        dataPoints = 12;
+        periodLabel = '月';
+        break;
+      default:
+        dataPoints = 7;
+        periodLabel = '天';
+    }
+
+    // 生成趋势数据
+    for (let i = 0; i < dataPoints; i++) {
+      const date = new Date(today);
+      
+      if (timeRange === 'week') {
+        date.setDate(today.getDate() - (dataPoints - 1) + i);
+      } else if (timeRange === 'month') {
+        date.setDate(today.getDate() - (dataPoints - 1) + i);
+      } else if (timeRange === 'year') {
+        date.setMonth(today.getMonth() - (dataPoints - 1) + i);
+      }
+
+      // 简化版运势评分（基于随机数，实际应用中应基于八字算法）
+      const baseScore = Math.sin((i / dataPoints) * Math.PI * 2) * 0.8;
+      const randomFactor = (Math.random() - 0.5) * 0.4;
+      const overallScore = baseScore + randomFactor;
+
+      trend.push({
+        period: timeRange === 'year' ? 
+          `${date.getMonth() + 1}月` : 
+          `${i + 1}${periodLabel}`,
+        date: date.toISOString().split('T')[0],
+        overallScore: parseFloat(overallScore.toFixed(2)),
+        career: parseFloat((overallScore * 0.8 + (Math.random() - 0.5) * 0.3).toFixed(2)),
+        wealth: parseFloat((overallScore * 0.9 + (Math.random() - 0.5) * 0.2).toFixed(2)),
+        health: parseFloat((overallScore * 0.7 + (Math.random() - 0.5) * 0.4).toFixed(2)),
+        relationship: parseFloat((overallScore * 0.6 + (Math.random() - 0.5) * 0.5).toFixed(2))
+      });
+    }
+
+    // 当前运势数据
+    const current = trend[trend.length - 1];
+
+    return {
+      trend,
+      current,
+      timeRange,
+      birthDate: birthDate.toISOString().split('T')[0],
+      currentDate: today.toISOString().split('T')[0]
+    };
+  }
+
+  /**
+   * 获取八字运势洞察
+   * @param {Object} currentData 当前运势数据
+   * @returns {string} 运势洞察文本
+   */
+  static getBaziInsight(currentData) {
+    const { overallScore, career, wealth, health, relationship } = currentData;
+    
+    if (overallScore > 0.7) {
+      return "当前运势极佳，各方面都处于有利时期，适合大胆尝试新事物，把握机会，积极进取。";
+    } else if (overallScore > 0.3) {
+      return "运势良好，事业和财运发展顺利，保持积极心态，稳步前进会有不错收获。";
+    } else if (overallScore > -0.3) {
+      return "运势平稳，适合稳扎稳打，注意健康管理和人际关系维护，避免冲动决策。";
+    } else if (overallScore > -0.7) {
+      return "运势稍有波动，需要更加谨慎，注意控制开支，保持良好作息，多与亲友沟通。";
+    } else {
+      return "当前运势面临挑战，建议保守行事，注意身体健康，保持耐心，等待时机好转。";
+    }
+  }
 }
 
 export default BaziCalculator;

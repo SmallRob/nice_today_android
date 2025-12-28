@@ -92,9 +92,14 @@ const PersonalityTraitCard = () => {
 
   const handleClick = () => {
     if (userZodiac) {
+      console.log('从功能卡片跳转到星座特质页面:', userZodiac);
       // 优化：直接跳转到用户的星座特质页面，传递URL参数
       navigate(`/zodiac-traits/${encodeURIComponent(userZodiac)}`, {
-        state: { from: 'dashboard', userZodiac: userZodiac }
+        state: { 
+          from: 'feature-card', 
+          userZodiac: userZodiac,
+          timestamp: Date.now()
+        }
       });
     } else {
       // 如果没有配置星座，跳转到星座运势页面让用户选择
@@ -144,6 +149,67 @@ const PeriodTrackerCard = () => {
   );
 };
 
+/**
+ * 紫微命宫组件
+ */
+const ZiWeiCard = () => {
+  const { currentConfig } = useUserConfig();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    // 检查是否有必要的配置信息
+    if (currentConfig?.birthDate) {
+      navigate('/ziwei');
+    } else {
+      // 如果没有配置出生信息，跳转到设置页面
+      navigate('/settings');
+    }
+  };
+
+  return (
+    <FeatureCard
+      title="紫微命宫"
+      description="传统命理深度分析"
+      icon="star"
+      color="#8b5cf6"
+      onClick={handleClick}
+      highlight={true}
+    />
+  );
+};
+
+/**
+ * 待办事项组件
+ */
+const TodoCard = () => {
+  return (
+    <FeatureCard
+      title="待办事项"
+      description="高效管理日常任务"
+      icon="calendar"
+      color="#3b82f6"
+      route="/todo-list"
+      highlight={true}
+    />
+  );
+};
+
+/**
+ * 财务斩杀线组件
+ */
+const FinanceCard = () => {
+  return (
+    <FeatureCard
+      title="财务斩杀线"
+      description="智能收支管理分析"
+      icon="chart-line"
+      color="#ef4444"
+      route="/finance"
+      highlight={true}
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -152,5 +218,8 @@ export {
   BiorhythmCard,
   PersonalityTraitCard,
   EnergyBoostCard,
-  PeriodTrackerCard
+  PeriodTrackerCard,
+  ZiWeiCard,
+  TodoCard,
+  FinanceCard
 };
