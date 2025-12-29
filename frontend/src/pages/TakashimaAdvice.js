@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import './styles/takashima-advice.css';
 
@@ -95,6 +95,36 @@ const TakashimaAdvice = () => {
   const [divinationHistory, setDivinationHistory] = useState([]);
   const [explanation, setExplanation] = useState("");
   const [divinationLog, setDivinationLog] = useState([]);
+
+  // 从本地存储加载历史记录
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('takashimaDivinationHistory');
+    if (savedHistory) {
+      try {
+        const parsed = JSON.parse(savedHistory);
+        setDivinationHistory(parsed);
+      } catch (error) {
+        console.error('Failed to load history:', error);
+      }
+    }
+  }, []);
+
+  // 保存历史记录到本地存储
+  const saveHistory = (newHistory) => {
+    try {
+      localStorage.setItem('takashimaDivinationHistory', JSON.stringify(newHistory));
+    } catch (error) {
+      console.error('Failed to save history:', error);
+    }
+  };
+
+  // 清空历史记录
+  const clearHistory = () => {
+    if (window.confirm('确定要清空所有占卜历史记录吗？此操作不可恢复。')) {
+      setDivinationHistory([]);
+      localStorage.removeItem('takashimaDivinationHistory');
+    }
+  };
 
   // 初始化蓍草
   const initialStalks = Array(50).fill(0).map((_, i) => i + 1);
@@ -227,15 +257,21 @@ const TakashimaAdvice = () => {
       generateExplanation(foundHexagram, finalLines, movingLines.length);
       
       // 记录到历史
+      const now = new Date();
       const newRecord = {
-        id: divinationHistory.length + 1,
+        id: now.getTime(),
         question,
         hexagram: foundHexagram,
         lines: [...finalLines],
-        time: new Date().toLocaleString('zh-CN')
+        date: now.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }),
+        time: now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: now.getTime()
       };
-      
-      setDivinationHistory([newRecord, ...divinationHistory]);
+
+      // 保存历史记录（最多10条）
+      const newHistory = [newRecord, ...divinationHistory].slice(0, 10);
+      setDivinationHistory(newHistory);
+      saveHistory(newHistory);
       
       // 完成占卜
       setTimeout(() => {
@@ -469,7 +505,9 @@ const TakashimaAdvice = () => {
     setLines(record.lines);
     setCurrentHexagram(record.hexagram);
     setOriginalHexagram(record.hexagram);
-    setExplanation(`历史记录 - ${record.time}\n\n您曾占得：${record.hexagram.name}卦 ${record.hexagram.symbol}\n\n卦辞：${record.hexagram.description}`);
+    setChangingHexagram(null);
+    setExplanation(`历史记录 - ${record.date} ${record.time}\n\n您曾占得：${record.hexagram.name}卦 ${record.hexagram.symbol}\n\n卦辞：${record.hexagram.description}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // 渲染爻象
@@ -657,18 +695,34 @@ const TakashimaAdvice = () => {
         
         {divinationHistory.length > 0 && (
           <div className="history-section">
-            <h2>占卜历史</h2>
+            <div className="history-header">
+              <h2>占卜历史</h2>
+              <button className="clear-history-button" onClick={clearHistory}>
+                清空记录
+              </button>
+            </div>
             <div className="history-container">
-              {divinationHistory.slice(0, 5).map(record => (
-                <div 
-                  key={record.id} 
+              {divinationHistory.map(record => (
+                <div
+                  key={record.id}
                   className="history-record"
                   onClick={() => viewHistoryRecord(record)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      viewHistoryRecord(record);
+                    }
+                  }}
                 >
                   <div className="record-question">{record.question}</div>
                   <div className="record-info">
-                    <span className="record-hexagram">{record.hexagram.name}卦</span>
-                    <span className="record-time">{record.time}</span>
+                    <div className="record-hexagram">{record.hexagram.name}卦 {record.hexagram.symbol}</div>
+                    <div className="record-time">
+                      <span className="record-date">{record.date}</span>
+                      <span className="record-clock">{record.time}</span>
+                    </div>
                   </div>
                 </div>
               ))}
