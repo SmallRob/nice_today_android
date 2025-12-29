@@ -347,6 +347,29 @@
   }
   
   .form-group input {
-    padding: 10px 12px;
+    padding: 14px 16px; /* 增加触摸目标大小 */
+    font-size: 1rem; /* 防止iOS缩放 */
+  }
+  
+  .bazi-selectors select {
+    padding: 12px; /* 增加触摸目标大小 */
+    font-size: 1rem; /* 防止iOS缩放 */
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .method-btn {
+    padding: 14px 20px; /* 增加触摸目标大小 */
+    min-height: 44px;
+  }
+  
+  .gender-option {
+    padding: 12px 20px; /* 增加触摸目标大小 */
+    min-height: 44px;
+  }
+  
+  .form-group label {
+    font-size: 0.9rem;
   }
 }

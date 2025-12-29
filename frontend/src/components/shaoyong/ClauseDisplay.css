@@ -270,3 +270,33 @@
     font-size: 1rem;
   }
 }
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .clause-card {
+    padding: 15px;
+    min-height: 120px;
+  }
+  
+  .clause-number, .clause-category {
+    font-size: 0.8rem;
+  }
+  
+  .clause-title {
+    font-size: 1rem;
+  }
+  
+  .clause-preview {
+    font-size: 0.9rem;
+  }
+  
+  .search-box input {
+    padding: 12px 15px;
+    min-height: 44px;
+  }
+  
+  .tab-btn {
+    padding: 10px 15px;
+    min-height: 44px;
+  }
+}

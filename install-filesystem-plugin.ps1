@@ -1,4 +1,4 @@
-# 安装Capacitor Filesystem插件脚本 (PowerShell版)
+﻿# 安装Capacitor Filesystem插件脚本 (PowerShell版)
 # 用于支持Android/iOS WebView中的文件保存和导入功能
 
 Write-Host "=========================================" -ForegroundColor Cyan

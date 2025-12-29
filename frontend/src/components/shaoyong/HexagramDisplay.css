@@ -30,6 +30,10 @@
   .hexagrams-container {
     grid-template-columns: 1fr;
   }
+  
+  .hexagram-card {
+    margin-bottom: 20px;
+  }
 }
 
 .hexagram-card {
@@ -163,6 +167,30 @@
 @media (max-width: 768px) {
   .trigrams-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .hexagram-line {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .line-number {
+    position: static;
+    display: block;
+    font-size: 0.7rem;
+    margin-top: 5px;
+  }
+  
+  .hexagram-name {
+    font-size: 1.2rem;
+  }
+  
+  .hexagram-composition {
+    font-size: 0.8rem;
+    padding: 4px 8px;
   }
 }
 

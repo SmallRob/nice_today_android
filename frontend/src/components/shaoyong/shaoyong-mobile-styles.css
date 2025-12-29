@@ -1,0 +1,119 @@
+/* Shaoyong组件库移动端适配通用样式 */
+
+/* 安全区域适配 */
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-area-inset-left {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.safe-area-inset-right {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* 触摸友好设计 */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 12px;
+}
+
+/* 滚动性能优化 */
+.scroll-container {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 防止iOS缩放 */
+input[type="text"], 
+input[type="number"], 
+input[type="datetime-local"], 
+input[type="time"],
+select,
+textarea {
+  font-size: 16px !important;
+}
+
+/* 移动端字体优化 */
+.mobile-text {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* 移动端间距优化 */
+.mobile-padding {
+  padding: 15px;
+}
+
+.mobile-margin {
+  margin: 15px;
+}
+
+/* 移动端按钮优化 */
+.mobile-btn {
+  min-height: 44px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 移动端网格优化 */
+.mobile-grid {
+  display: grid;
+  gap: 15px;
+}
+
+/* 移动端隐藏滚动条但保留功能 */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
+/* 移动端优化的媒体查询 */
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  .mobile-flex {
+    display: flex;
+  }
+  
+  .mobile-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .mobile-grid-1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-small-only {
+    display: block;
+  }
+  
+  .mobile-padding-small {
+    padding: 10px;
+  }
+  
+  .mobile-text-small {
+    font-size: 14px;
+  }
+}

@@ -34,6 +34,13 @@
   box-sizing: border-box;
 }
 
+/* 移动端适配基础样式 */
+.shaoyong-yixue {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 .shaoyong-yixue {
   font-family: 'SimSun', '宋体', 'Microsoft YaHei', serif;
   background: var(--bg-primary);
@@ -381,6 +388,7 @@
 @media (max-width: 768px) {
   .shaoyong-yixue {
     padding: 10px;
+    padding-top: env(safe-area-inset-top, 20px);
   }
   
   .header-content {
@@ -394,13 +402,17 @@
   }
   
   .tab-navigation {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 5px;
   }
   
   .tab-btn {
+    flex: 1 1 calc(50% - 5px);
     border-radius: 10px;
-    padding: 12px 20px;
+    padding: 12px 10px;
+    min-width: auto;
+    font-size: 0.9rem;
   }
   
   .content-grid {
@@ -427,6 +439,11 @@
 }
 
 @media (max-width: 480px) {
+  .shaoyong-yixue {
+    padding: 5px;
+    padding-top: env(safe-area-inset-top, 10px);
+  }
+  
   .title-section h1 {
     font-size: 1.8rem;
   }
@@ -435,9 +452,15 @@
     font-size: 1rem;
   }
   
+  .header-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
   .tab-btn {
+    flex: 1 1 100%;
     font-size: 1rem;
-    padding: 10px 15px;
+    padding: 15px 10px;
   }
   
   .card {
@@ -446,6 +469,51 @@
   
   .card h2 {
     font-size: 1.3rem;
+  }
+  
+  .method-selector {
+    flex-direction: column;
+  }
+  
+  .method-btn {
+    min-width: auto;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn-primary, .btn-secondary {
+    width: 100%;
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  /* 滚动性能优化 */
+  .main-content {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* 触摸友好按钮 */
+  .tab-btn, .btn-primary, .btn-secondary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* 字体大小优化 */
+  body {
+    font-size: 16px; /* 防止iOS缩放 */
+  }
+  
+  /* 安全区域适配 */
+  .app-header {
+    padding-top: env(safe-area-inset-top, 0px);
   }
 }
 

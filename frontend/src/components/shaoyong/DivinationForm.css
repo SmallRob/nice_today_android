@@ -129,3 +129,24 @@
     flex-direction: column;
   }
 }
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .form-group label {
+    font-size: 0.9rem;
+  }
+  
+  .form-group input {
+    padding: 14px 16px; /* 增加触摸目标大小 */
+    font-size: 1rem; /* 防止iOS缩放 */
+  }
+  
+  .method-btn {
+    padding: 14px 20px; /* 增加触摸目标大小 */
+    min-height: 44px;
+  }
+  
+  .method-explanation {
+    padding: 15px;
+  }
+}

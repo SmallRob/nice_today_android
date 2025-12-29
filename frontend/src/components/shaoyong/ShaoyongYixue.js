@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ShaoyongYixue.css';
+import './shaoyong-mobile-styles.css';
 
 // 导入梅花易数组件
 import HexagramDisplay from './HexagramDisplay';
@@ -130,7 +131,7 @@ const ShaoyongYixue = () => {
   };
 
   return (
-    <div className="shaoyong-yixue">
+    <div className="shaoyong-yixue safe-area-inset-top">
       {/* 头部导航 */}
       <header className="app-header">
         <div className="header-content">

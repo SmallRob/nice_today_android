@@ -232,3 +232,26 @@
     justify-content: center;
   }
 }
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .interpretation-panel h3 {
+    font-size: 1.2rem;
+  }
+  
+  .summary-card h4 {
+    font-size: 1.1rem;
+  }
+  
+  .line-text {
+    font-size: 1rem;
+  }
+  
+  .advice-details li {
+    font-size: 0.9rem;
+  }
+  
+  .principle-item {
+    padding: 12px;
+  }
+}
