@@ -14,8 +14,7 @@ import { calculateDetailedBazi } from '../utils/baziHelper';
 import { getDisplayBaziInfo } from '../utils/baziSchema';
 import { DEFAULT_REGION } from '../data/ChinaLocationData';
 import { getShichenSimple, normalizeShichen } from '../utils/astronomy';
-import { getZiWeiDisplayData } from '../utils/ziweiHelper';
-import ZiWeiPalaceDisplay from './ZiWeiPalaceDisplay';
+// 紫薇命宫相关功能已移除
 import birthDataIntegrityManager from '../utils/BirthDataIntegrityManager'; // 新增：出生数据完整性管理器
 import ConfigEditModal from './ConfigEditModal';
 import NameScoringModal from './NameScoringModal';
@@ -1398,11 +1397,7 @@ const UserConfigManagerComponent = () => {
   const [editingConfigIndex, setEditingConfigIndex] = useState(null); // 正在编辑的配置索引
   // 用户信息折叠状态
   const [isUserInfoExpanded, setIsUserInfoExpanded] = useState(true);
-  const [isZiweiExpanded, setIsZiweiExpanded] = useState(true);
   const [isBaziExpanded, setIsBaziExpanded] = useState(true);
-  // 紫微命宫数据
-  const [ziweiData, setZiweiData] = useState(null);
-  const [ziweiLoading, setZiweiLoading] = useState(false);
   // 拖拽相关状态
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -2157,65 +2152,7 @@ const UserConfigManagerComponent = () => {
     }
   }, [showMessage]);
 
-  // 计算紫微命宫数据（当配置或活跃配置索引变化时）
-  useEffect(() => {
-    const loadZiweiData = async () => {
-      // 检查是否有有效的配置
-      if (!configs || configs.length === 0 || activeConfigIndex < 0 || activeConfigIndex >= configs.length) {
-        setZiweiData(null);
-        return;
-      }
-
-      const currentConfig = configs[activeConfigIndex];
-      if (!currentConfig) {
-        setZiweiData(null);
-        return;
-      }
-
-      // 检查是否有必要的出生信息
-      if (!currentConfig.birthDate) {
-        // 没有出生日期，返回降级数据
-        setZiweiData({
-          error: '缺少出生日期',
-          baziInfo: null,
-          ziweiData: null,
-          calculatedAt: new Date().toISOString()
-        });
-        return;
-      }
-
-      setZiweiLoading(true);
-
-      try {
-        // 使用 getZiWeiDisplayData 计算紫微命宫
-        const result = await getZiWeiDisplayData(currentConfig);
-
-        if (result) {
-          setZiweiData(result);
-        } else {
-          // 计算失败，返回降级数据
-          setZiweiData({
-            error: '紫微命宫计算失败',
-            baziInfo: null,
-            ziweiData: null,
-            calculatedAt: new Date().toISOString()
-          });
-        }
-      } catch (error) {
-        console.error('计算紫微命宫失败:', error);
-        setZiweiData({
-          error: error.message,
-          baziInfo: null,
-          ziweiData: null,
-          calculatedAt: new Date().toISOString()
-        });
-      } finally {
-        setZiweiLoading(false);
-      }
-    };
-
-    loadZiweiData();
-  }, [configs, activeConfigIndex, baziKey]); // 当配置、活跃配置索引或八字刷新键变化时重新计算
+  // 紫微命宫数据计算已移除
 
   // 拖拽开始
   const handleDragStart = useCallback((e, index) => {
@@ -2505,48 +2442,6 @@ const UserConfigManagerComponent = () => {
         </div>
       </Card>
 
-      {/* 紫微命宫展示栏目 */}
-      <Card
-        title="紫微命宫"
-        className="mb-6"
-        headerAction={
-          <button
-            onClick={() => setIsZiweiExpanded(!isZiweiExpanded)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-            title={isZiweiExpanded ? "收起" : "展开"}
-          >
-            <svg 
-              className={`w-5 h-5 text-gray-500 dark:text-white transition-transform duration-200 ${isZiweiExpanded ? 'rotate-180' : ''}`}
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        }
-      >
-        {ziweiLoading && (
-          <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-transparent"></div>
-            计算中...
-          </div>
-        )}
-        {!isZiweiExpanded && ziweiLoading === false && ziweiData && ziweiData.error && (
-          <div className="p-4 text-red-600 dark:text-red-400 text-sm">
-            <p>{ziweiData.error}</p>
-          </div>
-        )}
-        {isZiweiExpanded && (
-          <ZiWeiPalaceDisplay
-            ziweiData={ziweiData}
-            birthDate={configs[activeConfigIndex]?.birthDate}
-            birthTime={configs[activeConfigIndex]?.birthTime}
-            longitude={configs[activeConfigIndex]?.birthLocation?.lng}
-            nickname={configs[activeConfigIndex]?.nickname}
-          />
-        )}
-      </Card>
 
       {/* 八字命格展示栏目 */}
       <Card
