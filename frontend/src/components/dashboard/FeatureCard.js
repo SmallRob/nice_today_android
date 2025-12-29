@@ -86,13 +86,21 @@ const FeatureCard = ({
     const iconMap = {
       'brain': '🧠',
       'star': '⭐',
+      'star-outline': '✴️',
       'weather-sunny': '☀️',
       'calendar': '📅',
       'chart-line': '📊',
       'lightning-bolt': '⚡',
       'heart': '❤️',
       'grid': '🌟',
-      'sparkles': '✨'
+      'sparkles': '✨',
+      'cards': '🎴',
+      'dragon': '🐉',
+      'book': '📖',
+      'check-circle': '✅',
+      'money': '💰',
+      'divination': '🔮',
+      'shuffle': '🔀'
     };
     return iconMap[icon] || '📱';
   };

@@ -148,7 +148,7 @@ const MergedUserCard = () => {
                   onClick={navigateToZodiacTraits}
                   title="点击查看星座特质"
                 >
-                  {zodiacSign}座
+                  {zodiacSign.endsWith('座') ? zodiacSign : `${zodiacSign}座`}
                 </button>
               )}
               

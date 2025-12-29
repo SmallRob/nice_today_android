@@ -25,7 +25,7 @@ const ChineseZodiacCard = () => {
     <FeatureCard
       title="生肖运势"
       description="了解您的生肖性格"
-      icon="star"
+      icon="dragon"
       color="#f59e0b"
       route="/chinese-zodiac"
     />
@@ -55,7 +55,7 @@ const BaziCard = () => {
     <FeatureCard
       title="八字月运"
       description="命理运势深度解析"
-      icon="calendar"
+      icon="book"
       color="#8b5cf6"
       route="/bazi?mode=monthly"
     />
@@ -108,7 +108,7 @@ const PersonalityTraitCard = () => {
     <FeatureCard
       title="星座特质"
       description="了解您的星座性格"
-      icon="star"
+      icon="sparkles"
       color="#06b6d4"
       onClick={handleClick}
     />
@@ -139,7 +139,7 @@ const PeriodTrackerCard = () => {
       title="经期助手"
       description="智能周期追踪记录"
       icon="heart"
-      color="#ec4899"
+      color="#db2777"
       route="/period-tracker"
     />
   );
@@ -166,8 +166,8 @@ const ZiWeiCard = () => {
     <FeatureCard
       title="紫微命宫"
       description="传统命理深度分析"
-      icon="star"
-      color="#8b5cf6"
+      icon="star-outline"
+      color="#d946ef"
       onClick={handleClick}
     />
   );
@@ -181,7 +181,7 @@ const TodoCard = () => {
     <FeatureCard
       title="待办事项"
       description="高效管理日常任务"
-      icon="calendar"
+      icon="check-circle"
       color="#3b82f6"
       route="/todo-list"
     />
@@ -196,7 +196,7 @@ const FinanceCard = () => {
     <FeatureCard
       title="财务斩杀线"
       description="智能收支管理分析"
-      icon="chart-line"
+      icon="money"
       color="#ef4444"
       route="/finance"
     />
@@ -211,7 +211,7 @@ const TakashimaDivinationCard = () => {
     <FeatureCard
       title="高岛易断"
       description="传统周易卦象占卜"
-      icon="sparkles"
+      icon="divination"
       color="#0ea5e9"
       route="/takashima-advice"
     />
@@ -227,7 +227,7 @@ const LifeMatrixCard = () => {
       title="生命矩阵"
       description="构建你的意义能量图谱"
       icon="grid"
-      color="#8b5cf6"
+      color="#14b8a6"
       route="/lifestyle-guide"
     />
   );
@@ -241,8 +241,8 @@ const DailyCardCard = () => {
     <FeatureCard
       title="每日集卡"
       description="摇一摇收集精美卡牌"
-      icon="sparkles"
-      color="#ec4899"
+      icon="shuffle"
+      color="#f472b6"
       route="/daily-cards"
     />
   );
@@ -258,7 +258,7 @@ const TarotGardenCard = () => {
       description="探索塔罗牌的智慧与奥秘"
       icon="cards"
       color="#9333ea"
-      route="/tarot"
+      route="/tarot-garden"
     />
   );
 };

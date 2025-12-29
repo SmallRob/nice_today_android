@@ -1,9 +1,32 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useUserConfig } from '../../contexts/UserConfigContext';
 import { useTheme } from '../../context/ThemeContext';
+import LunarCalendar from '../../utils/lunarCalendar';
 import './DailyFortuneCard.css';
 
 const ZODIAC_LIST = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+
+// 每日禁忌数据生成器
+const generateDailyTaboo = (lunarDay) => {
+  const day = lunarDay;
+  const beneficial = [
+    '打扫', '沐浴', '出行', '会友', '读书', '运动', '购物', '理财',
+    '工作', '学习', '娱乐', '休息', '锻炼', '烹饪', '整理', '思考'
+  ];
+  const avoid = [
+    '出行', '动土', '婚嫁', '开张', '搬家', '动土', '借贷', '投资',
+    '远行', '签约', '争斗', '争吵', '决策', '饮酒', '熬夜', '操劳'
+  ];
+
+  // 基于农历日期生成确定性结果
+  const benIndex = (day * 7) % beneficial.length;
+  const avoidIndex = (day * 13) % avoid.length;
+
+  return {
+    beneficial: beneficial[benIndex],
+    avoid: avoid[avoidIndex]
+  };
+};
 
 const DailyFortuneCard = () => {
   const { theme } = useTheme();
@@ -11,6 +34,8 @@ const DailyFortuneCard = () => {
   const [fortuneData, setFortuneData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userZodiac, setUserZodiac] = useState('羊');
+  const [lunarData, setLunarData] = useState(null);
+  const [dailyTaboo, setDailyTaboo] = useState(null);
 
   // 根据出生日期计算生肖
   useEffect(() => {
@@ -64,8 +89,24 @@ const DailyFortuneCard = () => {
 
   useEffect(() => {
     setLoading(true);
+    
+    // 生成运势数据
     const data = generateFortuneData();
     setFortuneData(data);
+    
+    // 计算农历数据
+    const today = new Date();
+    const lunarInfo = LunarCalendar.solarToLunar(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      today.getDate()
+    );
+    setLunarData(lunarInfo);
+    
+    // 生成每日禁忌
+    const taboo = generateDailyTaboo(lunarInfo.lunarDay);
+    setDailyTaboo(taboo);
+    
     setLoading(false);
   }, [generateFortuneData]);
 
@@ -332,6 +373,26 @@ const DailyFortuneCard = () => {
           <span className="fortune-date">{fortuneData.date}</span>
           <h3 className="fortune-title">今日运势能量</h3>
         </div>
+        
+        {/* 农历信息和禁忌 */}
+        {lunarData && dailyTaboo && (
+          <div className="lunar-info-section">
+            <div className="lunar-date-info">
+              <span className="lunar-label">农历</span>
+              <span className="lunar-date">{lunarData.lunarMonthStr.replace('月', '')}{lunarData.lunarDayStr}</span>
+            </div>
+            <div className="lunar-taboo-info">
+              <span className="taboo-benefit">
+                <span className="taboo-label">宜</span>
+                {dailyTaboo.beneficial}
+              </span>
+              <span className="taboo-avoid">
+                <span className="taboo-label">忌</span>
+                {dailyTaboo.avoid}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="fortune-content">

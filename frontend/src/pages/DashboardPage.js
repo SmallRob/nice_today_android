@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import MergedBannerCard from '../components/dashboard/MergedBannerCard';
 import DailyFortuneCard from '../components/dashboard/DailyFortuneCard';
 import {
@@ -7,7 +7,6 @@ import {
   HoroscopeCard,
   BaziCard,
   BiorhythmCard,
-  PersonalityTraitCard,
   EnergyBoostCard,
   PeriodTrackerCard,
   ZiWeiCard,
@@ -18,7 +17,6 @@ import {
   DailyCardCard,
   TarotGardenCard
 } from '../components/dashboard/FeatureCards';
-import { useUserConfig } from '../contexts/UserConfigContext';
 import { useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css';
 import {
@@ -33,7 +31,6 @@ import {
  * 采用响应式网格布局，提供清晰的功能入口
  */
 const Dashboard = () => {
-  const { currentConfig } = useUserConfig();
   const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
   const [features, setFeatures] = useState([]);
@@ -50,7 +47,6 @@ const Dashboard = () => {
     { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
     { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
     { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
-    { component: PersonalityTraitCard, name: 'PersonalityTraitCard', category: '个人成长类' },
     { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
     { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
     { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
@@ -75,25 +71,58 @@ const Dashboard = () => {
     setFeatures(sortedFeatures);
   }, []);
 
-  // 处理拖拽排序
-  const handleReorder = ({ draggedId, targetId, type, sourceIndex, targetIndex }) => {
+  // 处理拖拽开始
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('dragIndex', index.toString());
+    
+    // 添加拖拽时的视觉反馈
+    setTimeout(() => {
+      e.target.classList.add('dragging');
+    }, 0);
+  };
+
+  // 处理拖拽结束
+  const handleDragEnd = () => {
+    // 移除所有卡片的拖拽样式
+    document.querySelectorAll('.feature-wrapper').forEach(el => {
+      el.classList.remove('dragging');
+      el.classList.remove('drag-over');
+    });
+  };
+
+  // 处理拖拽经过
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    // 添加目标卡片的视觉反馈
+    const targetCard = e.currentTarget;
+    targetCard.classList.add('drag-over');
+  };
+
+  // 处理拖拽离开
+  const handleDragLeave = (e) => {
+    e.currentTarget.classList.remove('drag-over');
+  };
+
+  // 处理放置
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+
+    const draggedIndexStr = e.dataTransfer.getData('dragIndex');
+    if (!draggedIndexStr) return;
+
+    const draggedIndex = parseInt(draggedIndexStr, 10);
+    
+    // 如果拖拽和放置位置相同，不执行操作
+    if (draggedIndex === targetIndex) return;
+
+    // 执行排序
     const newFeatures = [...features];
-
-    if (type === 'drop') {
-      // 查找拖拽和目标功能在当前列表中的索引
-      const draggedIndex = newFeatures.findIndex(f => getFeatureId(f.name) === draggedId);
-      const targetIndex = newFeatures.findIndex(f => getFeatureId(f.name) === targetId);
-
-      if (draggedIndex === -1 || targetIndex === -1) return;
-
-      // 移动功能
-      const [draggedFeature] = newFeatures.splice(draggedIndex, 1);
-      newFeatures.splice(targetIndex, 0, draggedFeature);
-    } else if (type === 'move' && sourceIndex !== undefined && targetIndex !== undefined) {
-      // 通过索引移动
-      const [draggedFeature] = newFeatures.splice(sourceIndex, 1);
-      newFeatures.splice(targetIndex, 0, draggedFeature);
-    }
+    const [draggedFeature] = newFeatures.splice(draggedIndex, 1);
+    newFeatures.splice(targetIndex, 0, draggedFeature);
 
     setFeatures(newFeatures);
 
@@ -119,7 +148,6 @@ const Dashboard = () => {
         { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
         { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
         { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
-        { component: PersonalityTraitCard, name: 'PersonalityTraitCard', category: '个人成长类' },
         { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
         { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
         { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
@@ -196,19 +224,25 @@ const Dashboard = () => {
           const featureId = getFeatureId(feature.name);
 
           return (
-            <div key={featureId} className="feature-wrapper">
+            <div
+              key={featureId}
+              className="feature-wrapper"
+              draggable={isEditMode}
+              onDragStart={isEditMode ? (e) => handleDragStart(e, index) : undefined}
+              onDragEnd={isEditMode ? handleDragEnd : undefined}
+              onDragOver={isEditMode ? handleDragOver : undefined}
+              onDragLeave={isEditMode ? handleDragLeave : undefined}
+              onDrop={isEditMode ? (e) => handleDrop(e, index) : undefined}
+              style={{
+                cursor: isEditMode ? 'move' : 'pointer'
+              }}
+            >
               <FeatureComponent
-                draggable={isEditMode}
+                draggable={false}
                 index={index}
                 id={featureId}
-                onDragStart={isEditMode ? (e, idx) => {
-                  console.log('Drag started:', featureId, idx);
-                } : undefined}
-                onDragEnd={isEditMode ? (e) => {
-                  if (e.draggedId && e.targetId) {
-                    handleReorder(e);
-                  }
-                } : undefined}
+                onDragStart={undefined}
+                onDragEnd={undefined}
               />
               {isEditMode && (
                 <div className="drag-handle">⋮⋮</div>

@@ -17,7 +17,15 @@ const ZodiacTraitsPage = () => {
     // 多层级参数获取：URL参数 > 传递状态 > 用户配置 > 默认值
     const stateZodiac = location.state?.userZodiac;
     const configZodiac = currentConfig?.zodiac;
-    return zodiacName || stateZodiac || configZodiac || '金牛座';
+    
+    // 解码URL参数（防止移动端编码问题）
+    const decodedZodiacName = zodiacName ? decodeURIComponent(zodiacName) : '';
+    
+    // 验证星座名称是否有效
+    const validZodiac = decodedZodiacName || stateZodiac || configZodiac || '金牛座';
+    console.log('初始化星座参数:', { zodiacName: decodedZodiacName, stateZodiac, configZodiac, validZodiac });
+    
+    return validZodiac;
   });
   
   // 运势数据状态
@@ -96,25 +104,38 @@ const getFamousExamples = (zodiacName) => {
     
     // 调试日志：查看当前参数状态
     console.log('当前星座参数:', {
-      zodiacName,
+      zodiacName: zodiacName ? decodeURIComponent(zodiacName) : '',
       stateZodiac: location.state?.userZodiac,
       configZodiac: currentConfig?.zodiac,
       currentHoroscope
     });
     
-    // 优化查找逻辑：确保星座名称完全匹配
-    const foundZodiac = HOROSCOPE_DATA_ENHANCED.find(h => {
-      // 精确匹配星座名称
-      return h.name === currentHoroscope;
-    });
+    // 优化查找逻辑：确保星座名称完全匹配，增加模糊匹配
+    const decodedZodiacName = zodiacName ? decodeURIComponent(zodiacName) : '';
+    
+    // 1. 精确匹配
+    let foundZodiac = HOROSCOPE_DATA_ENHANCED.find(h => h.name === currentHoroscope);
+    
+    // 2. 如果精确匹配失败，尝试模糊匹配（处理可能的空格、特殊字符等）
+    if (!foundZodiac && decodedZodiacName) {
+      foundZodiac = HOROSCOPE_DATA_ENHANCED.find(h => 
+        h.name.replace(/\s+/g, '') === decodedZodiacName.replace(/\s+/g, '')
+      );
+    }
+    
+    // 3. 如果还是找不到，使用第一个星座作为备选
+    if (!foundZodiac && HOROSCOPE_DATA_ENHANCED.length > 0) {
+      console.warn(`未找到星座数据: ${currentHoroscope}，使用默认星座: ${HOROSCOPE_DATA_ENHANCED[0].name}`);
+      foundZodiac = HOROSCOPE_DATA_ENHANCED[0];
+    }
     
     if (!foundZodiac) {
-      console.warn(`未找到星座数据: ${currentHoroscope}`);
+      console.warn('星座数据完全不可用');
       console.log('可用星座列表:', HOROSCOPE_DATA_ENHANCED.map(z => z.name));
     }
     
     return foundZodiac;
-  }, [currentHoroscope]);
+  }, [currentHoroscope, zodiacName]);
   
   const elementColors = useMemo(() => {
     if (!zodiacData?.element) {
@@ -164,24 +185,19 @@ const getFamousExamples = (zodiacName) => {
     // 检查URL参数、状态和配置中的星座
     const stateZodiac = location.state?.userZodiac;
     const configZodiac = currentConfig?.zodiac;
+    
+    // 解码URL参数
+    const decodedZodiacName = zodiacName ? decodeURIComponent(zodiacName) : '';
 
     // 优先级：URL参数 > 传递状态 > 用户配置 > 默认值
-    const targetZodiac = zodiacName || stateZodiac || configZodiac || '金牛座';
+    const targetZodiac = decodedZodiacName || stateZodiac || configZodiac || '金牛座';
 
     // 只有当目标星座有效且与当前不同时才更新
     if (targetZodiac && targetZodiac !== currentHoroscope) {
-      console.log('更新星座参数:', { from: currentHoroscope, to: targetZodiac });
+      console.log('更新星座参数:', { from: currentHoroscope, to: targetZodiac, source: zodiacName ? 'URL' : stateZodiac ? 'State' : 'Config' });
       setCurrentHoroscope(targetZodiac);
     }
   }, [zodiacName, location.state?.userZodiac, currentConfig?.zodiac]);
-  
-  // 专门处理URL参数变化，确保直接访问带参数的URL时能正确加载
-  useEffect(() => {
-    if (zodiacName && zodiacName !== currentHoroscope) {
-      console.log('URL参数变化，更新星座:', { from: currentHoroscope, to: zodiacName });
-      setCurrentHoroscope(zodiacName);
-    }
-  }, [zodiacName]);
   
   // 当星座变化时，重新生成运势数据
   useEffect(() => {
@@ -193,13 +209,13 @@ const getFamousExamples = (zodiacName) => {
   if (!zodiacData) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        <div className="text-center px-4">
+          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4 mx-auto"></div>
           <p className="text-gray-600 dark:text-gray-400 mb-2">加载星座数据中...</p>
           <p className="text-gray-500 dark:text-gray-500 text-sm mb-4">
             当前星座: {currentHoroscope || '未设置'}
           </p>
-          <div className="space-x-2">
+          <div className="space-x-2 flex flex-col sm:flex-row justify-center gap-2">
             <button
               onClick={() => navigate('/horoscope')}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
@@ -211,6 +227,12 @@ const getFamousExamples = (zodiacName) => {
               className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
             >
               刷新页面
+            </button>
+            <button
+              onClick={() => setCurrentHoroscope('白羊座')}
+              className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition"
+            >
+              查看白羊座
             </button>
           </div>
         </div>
