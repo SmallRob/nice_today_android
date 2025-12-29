@@ -1,4 +1,35 @@
-/* 铁板神数组件样式 - 适配主题系统 */
+/* 铁板神数组件样式 - 移动端优化布局 */
+
+/* 基础容器样式 */
+.app-container {
+  max-width: 100%;
+  padding: 0 16px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    max-width: 1024px;
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-container {
+    max-width: 1280px;
+    padding: 0 32px;
+  }
+}
+
+/* 确保标签不换行 */
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+/* 触摸优化 */
+.touch-manipulation {
+  touch-action: manipulation;
+}
 
 .tiebanshenshu-calculation {
   font-family: inherit;

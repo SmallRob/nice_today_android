@@ -286,10 +286,18 @@
 .features-header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 16px;
   margin: 12px 0 8px 0; /* 减少margin，避免底部留白 */
   padding: 0 8px;
+}
+
+.features-header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 1;
 }
 
 .features-title {
@@ -909,6 +917,51 @@
   margin: 8px 0; /* 减少margin，避免底部留白 */
 }
 
+/* 编辑图标按钮 */
+.edit-icon-btn {
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 6px;
+  border-radius: 50%;
+  font-size: 16px;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark .edit-icon-btn {
+  background: #1f2937;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+.edit-icon-btn:hover {
+  background: #f9fafb;
+  border-color: #667eea;
+  transform: scale(1.1);
+}
+
+.dark .edit-icon-btn:hover {
+  background: #374151;
+  border-color: #667eea;
+}
+
+.edit-icon-btn.edit-mode-active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.edit-icon-btn.edit-mode-active:hover {
+  background: #5568d3;
+}
+
 .edit-mode-btn {
   background: white;
   border: 1px solid #e5e7eb;
@@ -1075,6 +1128,13 @@
   .reset-order-btn {
     padding: 6px 12px;
     font-size: 11px;
+  }
+
+  .edit-icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    padding: 4px;
   }
 
   .drag-handle {

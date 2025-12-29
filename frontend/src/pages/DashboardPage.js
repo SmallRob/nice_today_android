@@ -214,25 +214,29 @@ const Dashboard = () => {
 
         {/* 全部功能标题和分割线 */}
         <div className="features-header">
-          <div className="features-divider"></div>
-          <h2 className="features-title">所有功能</h2>
-          <div className="features-divider"></div>
+          <div className="features-header-center">
+            <div className="features-divider"></div>
+            <h2 className="features-title">所有功能</h2>
+            <div className="features-divider"></div>
+          </div>
+          {/* 编辑排序按钮 - 只显示图标 */}
+          <button
+            className={`edit-icon-btn ${isEditMode ? 'edit-mode-active' : ''}`}
+            onClick={toggleEditMode}
+            title={isEditMode ? '完成排序' : '编辑排序'}
+          >
+            {isEditMode ? '✓' : '✏️'}
+          </button>
         </div>
 
-        {/* 编辑模式控制按钮 */}
-        <div className="features-controls">
-          <button
-            className={`edit-mode-btn ${isEditMode ? 'edit-mode-active' : ''}`}
-            onClick={toggleEditMode}
-          >
-            {isEditMode ? '✓ 完成排序' : '✏️ 编辑排序'}
-          </button>
-          {isEditMode && (
+        {/* 编辑模式控制按钮 - 只在编辑模式显示重置按钮 */}
+        {isEditMode && (
+          <div className="features-controls">
             <button className="reset-order-btn" onClick={resetToDefault}>
               ↺ 重置默认
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* 可滚动内容区域 */}
