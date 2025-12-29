@@ -366,7 +366,7 @@ const UserDataManager = ({ showMessage }) => {
    * 清空所有数据
    */
   const clearAllData = useCallback(() => {
-    if (!confirm('确定要清空所有用户数据吗？此操作不可撤销！')) {
+    if (!window.confirm('确定要清空所有用户数据吗？此操作不可撤销！')) {
       return;
     }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import './culturalcap.css';
+import './styles/culturalcap.css';
 
 function CulturalCup() {
   const { theme } = useTheme();

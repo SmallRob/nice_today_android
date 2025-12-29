@@ -321,52 +321,19 @@ code {
 
 /* 导航栏样式优化 */
 .nav-tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 1.25rem;
-  margin-top: 0;
-}
-
-.dark .nav-tabs {
-  border-bottom-color: #374151;
+  @apply flex border-b border-gray-200 dark:border-gray-700 mb-5 mt-0;
 }
 
 .nav-tab {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-  font-size: 1rem;
-  line-height: 1.5rem;
-  font-weight: 500;
-  outline: none;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  @apply py-3 px-6 text-base font-medium focus:outline-none transition-colors duration-200;
 }
 
 .nav-tab-active {
-  border-bottom: 2px solid #3b82f6;
-  color: #2563eb;
-}
-
-.dark .nav-tab-active {
-  color: #60a5fa;
+  @apply border-b-2 border-blue-500 text-blue-600 dark:text-blue-400;
 }
 
 .nav-tab-inactive {
-  color: #6b7280;
-}
-
-.dark .nav-tab-inactive {
-  color: #9ca3af;
-}
-
-.nav-tab-inactive:hover {
-  color: #374151;
-  border-color: #d1d5db;
-}
-
-.dark .nav-tab-inactive:hover {
-  color: white;
+  @apply text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-white;
 }
 
 /* 页面标题栏样式 */
@@ -404,125 +371,38 @@ code {
 
 /* 卡片样式 */
 .card {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.dark .card {
-  background-color: #1f2937;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-200;
 }
 
 .card-header {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 1rem;
-}
-
-.dark .card-header {
-  color: white;
+  @apply text-xl font-semibold text-gray-900 dark:text-white mb-4;
 }
 
 /* 表单元素样式 */
 .form-input {
-  display: block;
-  width: 100%;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  outline: none;
-}
-
-.dark .form-input {
-  border-color: #4b5563;
-  background-color: #374151;
-  color: white;
-}
-
-.form-input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  @apply block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white;
 }
 
 .form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.25rem;
-}
-
-.dark .form-label {
-  color: #d1d5db;
+  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
 }
 
 .form-button {
-  display: inline-flex;
-  align-items: center;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  border: 1px solid transparent;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: 0.375rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  color: white;
-  background-color: #4f46e5;
-  outline: none;
-}
-
-.form-button:hover {
-  background-color: #4338ca;
-}
-
-.dark .form-button {
-  background-color: #6366f1;
-}
-
-.dark .form-button:hover {
-  background-color: #4f46e5;
-}
-
-.form-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-600;
 }
 
 /* 文本样式 */
 .text-primary {
-  color: #111827;
-}
-
-.dark .text-primary {
-  color: #f9fafb;
+  @apply text-gray-900 dark:text-gray-50;
 }
 
 .text-secondary {
-  color: #6b7280;
-}
-
-.dark .text-secondary {
-  color: #d1d5db;
+  @apply text-gray-500 dark:text-gray-300;
 }
 
 /* 边框样式 */
 .border-default {
-  border-color: #e5e7eb;
-}
-
-.dark .border-default {
-  border-color: #374151;
+  @apply border-gray-200 dark:border-gray-700;
 }
 
 /* APP特定滚动优化 */

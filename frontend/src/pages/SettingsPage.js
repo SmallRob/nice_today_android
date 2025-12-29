@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { getAppVersion } from '../utils/capacitor';
 import { Capacitor } from '@capacitor/core';
 import { Card, Button } from '../components/PageLayout';

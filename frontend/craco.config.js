@@ -44,52 +44,52 @@ module.exports = {
           }
         };
 
-      // 启用生产环境source map以帮助调试
-      webpackConfig.devtool = 'source-map';
-      
-      // 添加版本文件插件
-      const fs = require('fs');
-      const path = require('path');
-      
-      webpackConfig.plugins.push({
-        apply: (compiler) => {
-          compiler.hooks.emit.tapAsync('VersionPlugin', (compilation, callback) => {
-            // 读取package.json获取版本信息
-            const packagePath = path.resolve(__dirname, 'package.json');
-            const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-            
-            // 创建版本信息对象
-            const versionInfo = {
-              version: packageJson.version,
-              buildTime: new Date().toISOString(),
-              gitCommit: process.env.GIT_COMMIT || 'unknown',
-              features: [
-                "生物节律分析",
-                "星座运势",
-                "玛雅历法",
-                "MBTI性格测试",
-                "生命趋势分析"
-              ],
-              changelog: [
-                "修复代码块加载失败问题",
-                "增强错误处理机制",
-                "添加自动版本检测和更新"
-              ]
-            };
-            
-            // 添加到编译资源
-            compilation.assets['version.json'] = {
-              source: () => JSON.stringify(versionInfo, null, 2),
-              size: () => JSON.stringify(versionInfo, null, 2).length
-            };
-            
-            callback();
-          });
-        }
-      });
-    }
+        // 启用生产环境source map以帮助调试
+        webpackConfig.devtool = 'source-map';
 
-    return webpackConfig;
+        // 添加版本文件插件
+        const fs = require('fs');
+        const path = require('path');
+
+        webpackConfig.plugins.push({
+          apply: (compiler) => {
+            compiler.hooks.emit.tapAsync('VersionPlugin', (compilation, callback) => {
+              // 读取package.json获取版本信息
+              const packagePath = path.resolve(__dirname, 'package.json');
+              const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+
+              // 创建版本信息对象
+              const versionInfo = {
+                version: packageJson.version,
+                buildTime: new Date().toISOString(),
+                gitCommit: process.env.GIT_COMMIT || 'unknown',
+                features: [
+                  "生物节律分析",
+                  "星座运势",
+                  "玛雅历法",
+                  "MBTI性格测试",
+                  "生命趋势分析"
+                ],
+                changelog: [
+                  "修复代码块加载失败问题",
+                  "增强错误处理机制",
+                  "添加自动版本检测和更新"
+                ]
+              };
+
+              // 添加到编译资源
+              compilation.assets['version.json'] = {
+                source: () => JSON.stringify(versionInfo, null, 2),
+                size: () => JSON.stringify(versionInfo, null, 2).length
+              };
+
+              callback();
+            });
+          }
+        });
+      }
+
+      return webpackConfig;
     }
   },
   jest: {

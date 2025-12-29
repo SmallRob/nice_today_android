@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import '../index.css';
 
 // 懒加载用户配置管理器
