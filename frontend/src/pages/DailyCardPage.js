@@ -7,7 +7,6 @@ import { createShakeDetector, isShakeSupported, needsPermissionRequest, requestS
 import { performDraw, calculatePityProgress } from '../utils/cardProbability';
 import {
   loadDailyDraws,
-  saveDailyDraws,
   addCardToCollection,
   recordDraw,
   loadPityData,
@@ -72,19 +71,21 @@ const CardItem = ({ card, collected }) => {
     <div
       className={`collection-card-item ${card.rarity.toLowerCase()} ${isHexagram ? 'hexagram' : 'traditional'}`}
     >
-      {card.rarity === 'SR' && <div className="card-badge sr">SR</div>}
-      {card.rarity === 'SSR' && <div className="card-badge ssr">SSR</div>}
-      <div className="card-content">
-        <div className="collection-card-icon">{card.icon}</div>
-        <div className="collection-card-info">
-          <div className="collection-card-name">{card.name}</div>
-          {card.alias && <div className="collection-card-alias">{card.alias}</div>}
-          <div className={`collection-card-rarity ${card.rarity.toLowerCase()}`}>
-            {rarityInfo.chineseName}
+      <div>
+        {card.rarity === 'SR' && <div className="card-badge sr">SR</div>}
+        {card.rarity === 'SSR' && <div className="card-badge ssr">SSR</div>}
+        <div className="card-content">
+          <div className="collection-card-icon">{card.icon}</div>
+          <div className="collection-card-info">
+            <div className="collection-card-name">{card.name}</div>
+            {card.alias && <div className="collection-card-alias">{card.alias}</div>}
+            <div className={`collection-card-rarity ${card.rarity.toLowerCase()}`}>
+              {rarityInfo.chineseName}
+            </div>
           </div>
         </div>
+        {collected && <div className="collected-badge">✓</div>}
       </div>
-      {collected && <div className="collected-badge">✓</div>}
     </div>
   );
 };
@@ -274,9 +275,11 @@ const CardDraw = ({ remaining, onDraw, isDrawing }) => {
     <div className="card-draw-section">
       <div className={`card-back-container ${isDrawing ? 'drawing' : ''}`}>
         <div className="card-back">
-          <div className="card-pattern">🎴</div>
-          <div className="draw-hint">
-            {isDrawing ? '🎰 抽卡中...' : '📱 摇一摇或点击抽卡'}
+          <div>
+            <div className="card-pattern">🎴</div>
+            <div className="draw-hint">
+              {isDrawing ? '🎰 抽卡中...' : '📱 摇一摇或点击抽卡'}
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金色边框卡牌</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #8a6d3b;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            color: #a88c5e;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            width: 350px;
+            min-height: 450px;
+            background-color: white;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* 基础金色边框 */
+        .gold-border {
+            border: 1px solid #d4af37;
+        }
+        
+        /* 高级金色边框 - 使用伪元素创建双层效果 */
+        .fancy-border {
+            border: none;
+            position: relative;
+            padding: 2px;
+        }
+        
+        .fancy-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #d4af37, #f7ef8a, #d4af37);
+            z-index: 1;
+            border-radius: 4px;
+        }
+        
+        .fancy-border > .card-content {
+            position: relative;
+            background-color: white;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            border-radius: 3px;
+            padding: 30px 25px;
+        }
+        
+        /* 角部装饰样式 */
+        .corner-decoration {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            z-index: 3;
+        }
+        
+        .corner-tl {
+            top: 0;
+            left: 0;
+            border-top: 2px solid #d4af37;
+            border-left: 2px solid #d4af37;
+        }
+        
+        .corner-tr {
+            top: 0;
+            right: 0;
+            border-top: 2px solid #d4af37;
+            border-right: 2px solid #d4af37;
+        }
+        
+        .corner-bl {
+            bottom: 0;
+            left: 0;
+            border-bottom: 2px solid #d4af37;
+            border-left: 2px solid #d4af37;
+        }
+        
+        .corner-br {
+            bottom: 0;
+            right: 0;
+            border-bottom: 2px solid #d4af37;
+            border-right: 2px solid #d4af37;
+        }
+        
+        /* 角部花纹装饰 */
+        .corner-tl::before, .corner-tr::before, .corner-bl::before, .corner-br::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: transparent;
+        }
+        
+        .corner-tl::before {
+            top: -1px;
+            left: -1px;
+            border-top: 2px solid #d4af37;
+            border-left: 2px solid #d4af37;
+        }
+        
+        .corner-tr::before {
+            top: -1px;
+            right: -1px;
+            border-top: 2px solid #d4af37;
+            border-right: 2px solid #d4af37;
+        }
+        
+        .corner-bl::before {
+            bottom: -1px;
+            left: -1px;
+            border-bottom: 2px solid #d4af37;
+            border-left: 2px solid #d4af37;
+        }
+        
+        .corner-br::before {
+            bottom: -1px;
+            right: -1px;
+            border-bottom: 2px solid #d4af37;
+            border-right: 2px solid #d4af37;
+        }
+        
+        /* 花纹装饰 */
+        .ornament {
+            position: absolute;
+            color: #d4af37;
+            font-size: 16px;
+        }
+        
+        .ornament-tl { top: 8px; left: 8px; }
+        .ornament-tr { top: 8px; right: 8px; transform: scaleX(-1); }
+        .ornament-bl { bottom: 8px; left: 8px; transform: scaleY(-1); }
+        .ornament-br { bottom: 8px; right: 8px; transform: scale(-1); }
+        
+        /* 卡片标题 */
+        .card-title {
+            text-align: center;
+            color: #8a6d3b;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0e6d2;
+        }
+        
+        /* 文本内容 */
+        .card-text {
+            line-height: 1.8;
+            color: #555;
+        }
+        
+        .text-item {
+            padding: 5px 0;
+            font-size: 1.1rem;
+        }
+        
+        .pangdee {
+            color: #b8860b;
+            font-weight: 600;
+        }
+        
+        .pangtree {
+            color: #daa520;
+            font-weight: 600;
+        }
+        
+        /* 代码显示区域 */
+        .code-container {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 40px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .code-header {
+            background-color: #2d2d2d;
+            color: #ccc;
+            padding: 12px 20px;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-content {
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        pre {
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .css-selector {
+            color: #569cd6;
+        }
+        
+        .css-property {
+            color: #9cdcfe;
+        }
+        
+        .css-value {
+            color: #ce9178;
+        }
+        
+        .css-comment {
+            color: #6a9955;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .card-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .card {
+                width: 100%;
+                max-width: 350px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #a88c5e;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-gem"></i> 金色边框卡牌设计</h1>
+            <p class="subtitle">基于CSS的典雅卡牌设计，模拟白色背景、金色边框和精致角饰效果。包含两种不同实现方式：基础边框和高级边框效果。</p>
+        </header>
+        
+        <div class="card-container">
+            <!-- 卡牌1: 基础金色边框 -->
+            <div class="card gold-border">
+                <div class="corner-decoration corner-tl"></div>
+                <div class="corner-decoration corner-tr"></div>
+                <div class="corner-decoration corner-bl"></div>
+                <div class="corner-decoration corner-br"></div>
+                
+                <!-- 角部花纹装饰 -->
+                <div class="ornament ornament-tl">❖</div>
+                <div class="ornament ornament-tr">❖</div>
+                <div class="ornament ornament-bl">❖</div>
+                <div class="ornament ornament-br">❖</div>
+                
+                <div class="card-content">
+                    <h2 class="card-title">基础金色边框卡牌</h2>
+                    <div class="card-text">
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangtree">pangtree</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 卡牌2: 高级金色边框 -->
+            <div class="card fancy-border">
+                <div class="corner-decoration corner-tl"></div>
+                <div class="corner-decoration corner-tr"></div>
+                <div class="corner-decoration corner-bl"></div>
+                <div class="corner-decoration corner-br"></div>
+                
+                <!-- 角部花纹装饰 -->
+                <div class="ornament ornament-tl">❈</div>
+                <div class="ornament ornament-tr">❈</div>
+                <div class="ornament ornament-bl">❈</div>
+                <div class="ornament ornament-br">❈</div>
+                
+                <div class="card-content">
+                    <h2 class="card-title">高级金色边框卡牌</h2>
+                    <div class="card-text">
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangtree">pangtree</div>
+                        <div class="text-item pangdee">pangdee</div>
+                        <div class="text-item pangdee">pangdee</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>CSS 实现代码</span>
+                <span>金色卡牌边框样式</span>
+            </div>
+            <div class="code-content">
+                <pre><code><span class="css-selector">.card</span> {
+  <span class="css-property">width</span>: <span class="css-value">350px</span>;
+  <span class="css-property">min-height</span>: <span class="css-value">450px</span>;
+  <span class="css-property">background-color</span>: <span class="css-value">white</span>;
+  <span class="css-property">position</span>: <span class="css-value">relative</span>;
+  <span class="css-property">box-shadow</span>: <span class="css-value">0 10px 30px rgba(0, 0, 0, 0.08)</span>;
+}
+
+<span class="css-comment">/* 基础金色边框 */</span>
+<span class="css-selector">.gold-border</span> {
+  <span class="css-property">border</span>: <span class="css-value">1px solid #d4af37</span>;
+}
+
+<span class="css-comment">/* 高级金色边框 - 使用伪元素创建双层效果 */</span>
+<span class="css-selector">.fancy-border</span> {
+  <span class="css-property">border</span>: <span class="css-value">none</span>;
+  <span class="css-property">position</span>: <span class="css-value">relative</span>;
+  <span class="css-property">padding</span>: <span class="css-value">2px</span>;
+}
+
+<span class="css-selector">.fancy-border::before</span> {
+  <span class="css-property">content</span>: <span class="css-value">''</span>;
+  <span class="css-property">position</span>: <span class="css-value">absolute</span>;
+  <span class="css-property">top</span>: <span class="css-value">0</span>;
+  <span class="css-property">left</span>: <span class="css-value">0</span>;
+  <span class="css-property">right</span>: <span class="css-value">0</span>;
+  <span class="css-property">bottom</span>: <span class="css-value">0</span>;
+  <span class="css-property">background</span>: <span class="css-value">linear-gradient(45deg, #d4af37, #f7ef8a, #d4af37)</span>;
+  <span class="css-property">z-index</span>: <span class="css-value">1</span>;
+  <span class="css-property">border-radius</span>: <span class="css-value">4px</span>;
+}
+
+<span class="css-comment">/* 角部装饰 */</span>
+<span class="css-selector">.corner-decoration</span> {
+  <span class="css-property">position</span>: <span class="css-value">absolute</span>;
+  <span class="css-property">width</span>: <span class="css-value">40px</span>;
+  <span class="css-property">height</span>: <span class="css-value">40px</span>;
+  <span class="css-property">z-index</span>: <span class="css-value">3</span>;
+}
+
+<span class="css-selector">.corner-tl</span> {
+  <span class="css-property">top</span>: <span class="css-value">0</span>;
+  <span class="css-property">left</span>: <span class="css-value">0</span>;
+  <span class="css-property">border-top</span>: <span class="css-value">2px solid #d4af37</span>;
+  <span class="css-property">border-left</span>: <span class="css-value">2px solid #d4af37</span>;
+}
+
+<span class="css-comment">/* 角部花纹装饰 */</span>
+<span class="css-selector">.corner-tl::before</span> {
+  <span class="css-property">content</span>: <span class="css-value">''</span>;
+  <span class="css-property">position</span>: <span class="css-value">absolute</span>;
+  <span class="css-property">width</span>: <span class="css-value">20px</span>;
+  <span class="css-property">height</span>: <span class="css-value">20px</span>;
+  <span class="css-property">top</span>: <span class="css-value">-1px</span>;
+  <span class="css-property">left</span>: <span class="css-value">-1px</span>;
+  <span class="css-property">border-top</span>: <span class="css-value">2px solid #d4af37</span>;
+  <span class="css-property">border-left</span>: <span class="css-value">2px solid #d4af37</span>;
+}
+
+<span class="css-comment">/* 花纹装饰符号 */</span>
+<span class="css-selector">.ornament</span> {
+  <span class="css-property">position</span>: <span class="css-value">absolute</span>;
+  <span class="css-property">color</span>: <span class="css-value">#d4af37</span>;
+  <span class="css-property">font-size</span>: <span class="css-value">16px</span>;
+}</code></pre>
+            </div>
+        </div>
+        
+        <footer>
+            <p>金色边框卡牌设计 | 使用纯CSS实现 | 模拟典雅精致视觉效果</p>
+        </footer>
+    </div>
+</body>
+</html>
