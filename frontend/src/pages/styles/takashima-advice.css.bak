@@ -800,77 +800,10 @@
   color: #f3f4f6;
 }
 
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.clear-history-button {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
-  min-height: 36px;
-}
-
-.clear-history-button:hover {
-  background: #dc2626;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.clear-history-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
-}
-
-.takashima-divination.dark .clear-history-button {
-  background: rgba(239, 68, 68, 0.8);
-}
-
 .history-container {
-  max-height: 600px;
-  overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
-  padding-right: 5px;
-}
-
-.history-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.history-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.history-container::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.history-container::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
-.takashima-divination.dark .history-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.takashima-divination.dark .history-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
 }
 
 .history-record {
@@ -915,8 +848,9 @@
 
 .record-info {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
 .record-hexagram {
@@ -930,37 +864,11 @@
 }
 
 .record-time {
-  display: flex;
-  gap: 8px;
-  align-items: center;
   font-size: 12px;
   color: #9ca3af;
 }
 
-.takashima-divination.dark .record-time {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.record-date {
-  color: #667eea;
-  font-weight: 500;
-  background: rgba(102, 126, 234, 0.08);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.record-clock {
-  color: #9ca3af;
-}
-
-.takashima-divination.dark .record-date {
-  color: #818cf8;
-  background: rgba(129, 140, 248, 0.1);
-}
-
-.takashima-divination.dark .record-clock {
+.takshima-divination.dark .record-time {
   color: #6b7280;
 }
 
@@ -1033,7 +941,6 @@
   
   .history-container {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    max-height: 550px;
   }
 }
 
@@ -1179,59 +1086,18 @@
     padding: 16px;
     border-radius: 12px;
   }
-
-  .history-header {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .history-section h2 {
-    font-size: 16px;
-  }
-
-  .clear-history-button {
-    padding: 6px 12px;
-    font-size: 13px;
-    min-height: 32px;
-  }
-
+  
   .history-container {
     grid-template-columns: 1fr;
     gap: 10px;
-    max-height: 500px;
   }
-
+  
   .history-record {
     padding: 12px;
-    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.1);
-  }
-
-  .history-record:active {
-    transform: scale(0.98);
-    background: rgba(102, 126, 234, 0.1);
   }
   
   .record-question {
     font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .record-hexagram {
-    font-size: 14px;
-  }
-
-  .record-time {
-    flex-wrap: wrap;
-  }
-
-  .record-date {
-    font-size: 11px;
-    padding: 2px 6px;
-  }
-
-  .record-clock {
-    font-size: 11px;
   }
   
   .app-footer {
@@ -1294,35 +1160,5 @@
   .divination-button,
   .clear-button {
     width: 100%;
-  }
-}
-
-/* 触摸优化 */
-@media (pointer: coarse) {
-  .history-record {
-    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.1);
-  }
-
-  .history-record:active {
-    transform: scale(0.98);
-    background: rgba(102, 126, 234, 0.12);
-  }
-
-  .divination-button:active,
-  .clear-button:active,
-  .clear-history-button:active {
-    transform: scale(0.97);
-  }
-
-  .history-container {
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .explanation-content {
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .log-container {
-    -webkit-overflow-scrolling: touch;
   }
 }
