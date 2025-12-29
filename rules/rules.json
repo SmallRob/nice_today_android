@@ -107,6 +107,21 @@
       "name": "compatibility_considerations",
       "description": "兼容性考虑",
       "content": "支持Android 6.0+和iOS 12+，处理不同版本系统的API差异，确保在低端设备上也能流畅运行，进行充分的兼容性测试。"
+    },
+    {
+      "name": "documentation_management",
+      "description": "文档统一管理规范",
+      "content": "所有Markdown文档(.md)必须统一放置在docs/文件夹中，包括但不限于：需求文档、设计文档、开发文档、部署文档、优化报告等。禁止在项目根目录或其他非指定位置创建.md文档。文档命名使用kebab-case，清晰描述文档内容。"
+    },
+    {
+      "name": "test_script_management",
+      "description": "测试脚本统一管理规范",
+      "content": "所有测试脚本必须统一放置在根目录的test/文件夹中，按功能模块分类组织。Shell脚本使用.sh扩展名，PowerShell脚本使用.ps1扩展名，Node.js测试脚本使用.js扩展名。测试脚本命名遵循test-[功能名称].[扩展名]格式，例如test-storage-functionality.sh。"
+    },
+    {
+      "name": "css_theme_adaptation",
+      "description": "CSS主题适配规范",
+      "content": "所有CSS样式必须同时适配light和dark两种主题模式。使用Tailwind CSS的dark:前缀类名实现暗色主题样式。确保在dark:类中定义完整的颜色、背景、边框、阴影等样式属性，避免在暗色模式下出现不可见或对比度不足的元素。关键元素背景色在暗色模式下推荐使用rgba(30, 41, 59, 0.95)或更高透明度，文字颜色推荐使用#cbd5e1或更亮的色值。"
     }
   ]
 }
