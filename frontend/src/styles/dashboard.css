@@ -1,11 +1,23 @@
-/* Dashboard 主容器 */
+/* Dashboard 主容器 - 优化滚动条处理和高度自适应 */
 .dashboard-container {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
   box-sizing: border-box;
   padding: 16px;
-  padding-bottom: 100px;
+  padding-bottom: 16px; /* 统一底部padding */
+  overflow: hidden; /* 确保不出现全局滚动条 */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  /* 确保内容正确填充 */
+  min-height: 0;
+  /* 防止内容溢出 */
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 .dark .dashboard-container {
@@ -46,6 +58,136 @@
   .app-banner .container {
     padding: 12px 16px;
   }
+}
+
+/* 隐藏滚动条样式 - 增强版，兼容所有主流浏览器 */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
+/* 增强版隐藏滚动条 - 更全面的浏览器兼容 */
+.hide-scrollbar-complete {
+  /* IE and Edge */
+  -ms-overflow-style: none;
+  /* Firefox */
+  scrollbar-width: none;
+  /* Chrome, Safari, Opera */
+}
+
+.hide-scrollbar-complete::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 旧版IE支持 - 注释掉不兼容的语法 */
+/* .hide-scrollbar-complete {
+  *scrollbar-arrow-color: transparent;
+  *scrollbar-base-color: transparent;
+  *scrollbar-face-color: transparent;
+  *scrollbar-track-color: transparent;
+} */
+
+/* 滚动容器样式 - 优化版 */
+.scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  /* 性能优化 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* 防止内容溢出 */
+.dashboard-content {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* 滚动性能优化 - 根据项目规范 */
+.dashboard-scroll-container {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  will-change: scroll-position;
+  /* 确保不出现滚动条 */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.dashboard-scroll-container::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 隐藏滚动条但保持功能 - 增强版 */
+.scrollable-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 固定头部与滚动内容分离 - 优化高度自适应 */
+.dashboard-fixed-header {
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0; /* 防止头部被压缩 */
+  /* 确保头部不会占据过多空间 */
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  /* 不设置max-height，让内容自然布局 */
+  /* 确保固定区域内容不会导致滚动条 */
+  max-height: none;
+  /* 防止内容溢出 */
+  width: 100%;
+}
+
+.dashboard-scrollable-content {
+  flex: 1; /* 占据剩余空间 */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  min-height: 0; /* 关键：确保flex子元素正确收缩 */
+  /* 移除固定高度，使用flex自适应 */
+  /* height: calc(100vh - 200px); */
+  will-change: scroll-position;
+  /* 隐藏滚动条 */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  /* 确保内容填满整个区域 */
+  display: flex;
+  flex-direction: column;
+  /* 防止内容溢出 */
+  overflow-x: hidden;
+  /* 硬件加速 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.dashboard-scrollable-content::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+  width: 0;
+  height: 0;
 }
 
 /* 头部区域 */
@@ -146,7 +288,7 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin: 16px 0 12px 0;
+  margin: 12px 0 8px 0; /* 减少margin，避免底部留白 */
   padding: 0 8px;
 }
 
@@ -172,27 +314,49 @@
   background: linear-gradient(90deg, transparent 0%, #374151 50%, transparent 100%);
 }
 
-/* 功能网格布局 - 3列网格 */
+/* 功能网格布局 - 3列网格 - 优化版 */
 .features-grid-three-col {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 16px; /* 添加底部margin，确保内容不会紧贴底部 */
+  overflow-x: hidden; /* 防止横向溢出 */
+  /* 确保网格内容自适应 */
+  min-height: 0;
+  flex: 1;
+  max-height: none;
+  /* 确保行高固定，宽度自适应 */
+  align-items: stretch;
+  justify-items: stretch;
+  width: 100%;
+  grid-auto-rows: minmax(100px, auto); /* 行高固定，最小100px */
 }
 
-/* 响应式网格 - 平板 (3列) */
+/* 响应式网格 - 平板 (3列，固定行高) */
 @media (min-width: 577px) and (max-width: 992px) {
   .features-grid-three-col {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+    grid-auto-rows: minmax(110px, auto); /* 平板端固定行高110px */
+  }
+
+  .feature-card {
+    min-height: 110px;
+    height: 100%; /* 确保填满网格单元格 */
   }
 }
 
-/* 大屏幕 (3列，显示描述) */
+/* 大屏幕 (3列，显示描述，固定行高) */
 @media (min-width: 993px) {
   .features-grid-three-col {
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
+    grid-auto-rows: minmax(120px, auto); /* 桌面端固定行高120px */
+  }
+
+  .feature-card {
+    min-height: 120px;
+    height: 100%; /* 确保填满网格单元格 */
   }
 
   .feature-card-description {
@@ -200,11 +364,18 @@
   }
 }
 
-/* 响应式网格 - 手机 (3列等宽，不显示描述) */
+/* 响应式网格 - 手机 (3列等宽，固定行高) */
 @media (max-width: 576px) {
   .features-grid-three-col {
     grid-template-columns: repeat(3, 1fr);
     gap: 6px;
+    grid-auto-rows: minmax(95px, auto); /* 移动端固定行高95px */
+    margin-bottom: 12px; /* 移动端底部margin */
+  }
+
+  .feature-card {
+    min-height: 95px;
+    height: 100%; /* 确保填满网格单元格 */
   }
 
   .feature-card-description {
@@ -240,7 +411,7 @@
   }
 }
 
-/* 功能卡片 */
+/* 功能卡片 - 优化行高固定和宽度自适应 */
 .feature-card {
   background: white;
   border-radius: 12px;
@@ -253,12 +424,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100px;
+  min-height: 100px; /* 固定最小高度 */
+  height: 100%; /* 确保卡片填满网格单元格高度 */
   text-align: center;
   /* 优化触摸区域 */
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
+  /* 确保宽度自适应 */
+  width: 100%;
+  box-sizing: border-box;
+  /* 防止内容溢出 */
+  overflow: hidden;
 }
 
 .dark .feature-card {
@@ -371,6 +548,7 @@
   gap: 8px;
   margin-top: 16px;
   margin-bottom: 16px;
+  overflow-x: hidden; /* 防止横向溢出 */
 }
 
 .quick-action-btn {
@@ -439,8 +617,45 @@
 @media (max-width: 576px) {
   .dashboard-container {
     padding: 12px;
-    /* 添加底部padding避免内容被导航栏遮挡 */
-    padding-bottom: 100px;
+    /* 移除额外的底部padding，避免不必要的空白 */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* 确保移动端不出现全局滚动条 */
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+    /* 确保移动端内容正确显示 */
+    min-height: 0;
+  }
+
+  .dashboard-fixed-header {
+    flex-shrink: 0;
+    /* 移动端优化固定区域 */
+    overflow: hidden;
+    max-height: none;
+  }
+
+  .dashboard-scrollable-content {
+    /* 移动端优化滚动 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    overflow-y: auto;
+    /* 硬件加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* 确保滚动区域正确显示 */
+    flex: 1;
+    min-height: 0;
+    /* 隐藏滚动条 */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .dashboard-scrollable-content::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   .dashboard-header {
@@ -474,9 +689,12 @@
   /* 移动端3列布局优化 */
   .feature-card {
     min-height: 95px;
+    height: 100%; /* 确保填满网格单元格 */
     padding: 12px 8px;
     text-align: center;
     align-items: center;
+    width: 100%; /* 宽度自适应 */
+    box-sizing: border-box;
   }
 
   .feature-card:hover {
@@ -529,7 +747,7 @@
     padding: 8px 12px;
     font-size: 12px;
     min-width: auto;
-    min-height: 40px;
+    min-height: 44px; /* 确保触摸目标大小 */
     justify-content: center;
     text-align: center;
     flex-direction: column;
@@ -546,34 +764,134 @@
   }
 }
 
-/* 超小屏幕优化 */
+/* 375px屏幕优化 - 针对iPhone SE等小屏幕设备 */
 @media (max-width: 375px) {
   .dashboard-container {
     padding: 10px;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  .dashboard-scrollable-content {
+    /* 移动端优化滚动 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    overflow-y: auto;
+    /* 硬件加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  .quick-actions {
+    gap: 4px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .quick-action-btn {
+    padding: 6px 8px;
+    font-size: 11px;
+    min-height: 40px;
+  }
+  
+  .quick-action-btn span:nth-child(1) {
+    font-size: 14px;
+  }
+  
+  .quick-action-btn span:nth-child(2) {
+    font-size: 9px;
+  }
+}
+
+/* 414px屏幕优化 - 针对中等屏幕设备 */
+@media (max-width: 414px) and (min-width: 376px) {
+  .dashboard-container {
+    padding: 12px;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  .dashboard-scrollable-content {
+    /* 移动端优化滚动 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    overflow-y: auto;
+    /* 硬件加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  .quick-actions {
+    gap: 5px;
+  }
+  
+  .quick-action-btn {
+    padding: 7px 10px;
+    font-size: 11.5px;
+    min-height: 42px;
+  }
+}
+
+/* 超小屏幕优化 - 针对320px设备 */
+@media (max-width: 320px) {
+  .dashboard-container {
+    padding: 8px;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  .dashboard-scrollable-content {
+    /* 移动端优化滚动 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    overflow-y: auto;
+    /* 硬件加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
   .features-grid-three-col {
-    gap: 6px;
+    gap: 4px;
+    grid-auto-rows: minmax(85px, auto); /* 超小屏幕固定行高85px */
   }
 
   .feature-card {
-    padding: 10px 8px;
-    min-height: 90px;
+    padding: 8px 6px;
+    min-height: 85px;
+    height: 100%; /* 确保填满网格单元格 */
+    width: 100%; /* 宽度自适应 */
   }
 
   .feature-card-icon {
-    width: 34px;
-    height: 34px;
-    font-size: 17px;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
   }
 
   .quick-actions {
-    gap: 4px;
+    gap: 3px;
   }
 
   .quick-action-btn {
-    padding: 6px 10px;
-    font-size: 11px;
+    padding: 5px 8px;
+    font-size: 10px;
+    min-height: 38px;
+  }
+  
+  .quick-action-btn span:nth-child(1) {
+    font-size: 14px;
+  }
+  
+  .quick-action-btn span:nth-child(2) {
+    font-size: 9px;
   }
 }
 
@@ -588,7 +906,7 @@
   display: flex;
   gap: 8px;
   justify-content: center;
-  margin: 12px 0;
+  margin: 8px 0; /* 减少margin，避免底部留白 */
 }
 
 .edit-mode-btn {
@@ -658,9 +976,15 @@
   border-color: #dc2626;
 }
 
-/* 功能卡片包装器 */
+/* 功能卡片包装器 - 确保行高固定和宽度自适应 */
 .feature-wrapper {
   position: relative;
+  /* 确保包装器不会影响网格布局 */
+  height: 100%;
+  width: 100%;
+  /* 确保内部卡片正确显示 */
+  display: flex;
+  flex-direction: column;
 }
 
 /* 拖拽手柄 */
@@ -763,5 +1087,217 @@
 
   .feature-card-draggable:hover {
     transform: translateY(-1px);
+  }
+}
+
+/* 全局滚动条处理 - 确保不占用空间 */
+.dashboard-wrapper {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 确保body和html不会出现滚动条 */
+html.dashboard-active,
+body.dashboard-active {
+  overflow: hidden;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+/* Dashboard页面特定的全局样式优化 */
+body:has(.dashboard-container) {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* 隐藏所有滚动条但保持滚动功能 - 全面兼容版 */
+.no-scrollbar {
+  /* IE, Edge */
+  -ms-overflow-style: none;
+  /* Firefox */
+  scrollbar-width: none;
+  /* Chrome, Safari, Opera */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 响应式高度自适应 - 移动端优先 */
+@media (max-width: 768px) {
+  .dashboard-container {
+    height: 100vh;
+    height: -webkit-fill-available;
+    max-height: 100vh;
+    max-height: -webkit-fill-available;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .dashboard-fixed-header {
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .dashboard-scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    /* 硬件加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* 确保滚动条隐藏但功能正常 */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .dashboard-scrollable-content::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+/* 平板和桌面端优化 */
+@media (min-width: 769px) {
+  .dashboard-container {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .dashboard-fixed-header {
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .dashboard-scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    /* 硬件加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* 桌面端保留滚动条功能 */
+    -ms-overflow-style: auto;
+    scrollbar-width: auto;
+  }
+
+  /* 桌面端滚动条样式美化 */
+  .dashboard-scrollable-content::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dashboard-scrollable-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+  }
+
+  .dashboard-scrollable-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+
+  .dashboard-scrollable-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* 暗黑模式下的滚动条美化 */
+.dark .dashboard-scrollable-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .dashboard-scrollable-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark .dashboard-scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 确保Dashboard滚动区域内容正确显示到底部 */
+.dashboard-scrollable-content > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* 确保内容能够自然延伸到底部 */
+  min-height: 0;
+  /* 防止内容溢出 */
+  overflow: hidden;
+  overflow-x: hidden;
+  /* 移除底部margin，让内容直接填满 */
+  margin: 0;
+  padding: 0;
+}
+
+/* 确保内容区域的最后一个元素没有多余的空间 */
+.dashboard-scrollable-content > div > *:last-child {
+  margin-bottom: 0;
+}
+
+/* 移动端优化滚动区域内容 */
+@media (max-width: 768px) {
+  .dashboard-scrollable-content > div {
+    /* 移动端优化 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+}
+
+/* 移动端优化滚动区域内容 */
+@media (max-width: 768px) {
+  .dashboard-scrollable-content > div {
+    /* 移动端优化 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+}
+
+/* 移除重复定义，使用上方统一的样式 */
+
+/* 确保功能网格内的卡片正确显示 */
+.features-grid-three-col .feature-wrapper {
+  /* 确保卡片wrapper不会有多余的margin */
+  margin: 0;
+  padding: 0;
+}
+
+/* 确保滚动区域的内容正确延伸到底部 */
+.dashboard-scrollable-content > div {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: 0; /* 移除底部padding，避免多余空白 */
+}
+
+/* 确保在各种屏幕密度下保持一致性 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .dashboard-scrollable-content {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .dashboard-scrollable-content {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
   }
 }

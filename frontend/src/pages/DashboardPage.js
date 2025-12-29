@@ -176,98 +176,104 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      {/* 合并的Banner和用户信息卡片 */}
-      <MergedBannerCard />
+      {/* 固定头部区域 */}
+      <div className="dashboard-fixed-header">
+        {/* 合并的Banner和用户信息卡片 */}
+        <MergedBannerCard />
 
-      {/* 每日运势能量卡片 */}
-      <DailyFortuneCard />
+        {/* 每日运势能量卡片 */}
+        <DailyFortuneCard />
 
-      {/* 节日节气提醒 */}
-      <FestivalCard />
+        {/* 节日节气提醒 */}
+        <FestivalCard />
 
-      {/* 快速操作 - 置顶的功能 */}
-      <div className="quick-actions">
-        <button
-          className="quick-action-btn"
-          onClick={() => navigate('/horoscope')}
-        >
-          <span>📅</span>
-          <span>今日运势</span>
-        </button>
-        <button
-          className="quick-action-btn"
-          onClick={() => navigate('/bazi-analysis')}
-        >
-          <span>☯️</span>
-          <span>八字命格</span>
-        </button>
-        <button
-          className="quick-action-btn"
-          onClick={() => navigate('/dress')}
-        >
-          <span>👕</span>
-          <span>穿衣指南</span>
-        </button>
-
-      </div>
-
-      {/* 全部功能标题和分割线 */}
-      <div className="features-header">
-        <div className="features-divider"></div>
-        <h2 className="features-title">所有功能</h2>
-        <div className="features-divider"></div>
-      </div>
-
-      {/* 编辑模式控制按钮 */}
-      <div className="features-controls">
-        <button
-          className={`edit-mode-btn ${isEditMode ? 'edit-mode-active' : ''}`}
-          onClick={toggleEditMode}
-        >
-          {isEditMode ? '✓ 完成排序' : '✏️ 编辑排序'}
-        </button>
-        {isEditMode && (
-          <button className="reset-order-btn" onClick={resetToDefault}>
-            ↺ 重置默认
+        {/* 快速操作 - 置顶的功能 */}
+        <div className="quick-actions">
+          <button
+            className="quick-action-btn"
+            onClick={() => navigate('/horoscope')}
+          >
+            <span>📅</span>
+            <span>今日运势</span>
           </button>
-        )}
+          <button
+            className="quick-action-btn"
+            onClick={() => navigate('/bazi-analysis')}
+          >
+            <span>☯️</span>
+            <span>八字命格</span>
+          </button>
+          <button
+            className="quick-action-btn"
+            onClick={() => navigate('/dress')}
+          >
+            <span>👕</span>
+            <span>穿衣指南</span>
+          </button>
+        </div>
+
+        {/* 全部功能标题和分割线 */}
+        <div className="features-header">
+          <div className="features-divider"></div>
+          <h2 className="features-title">所有功能</h2>
+          <div className="features-divider"></div>
+        </div>
+
+        {/* 编辑模式控制按钮 */}
+        <div className="features-controls">
+          <button
+            className={`edit-mode-btn ${isEditMode ? 'edit-mode-active' : ''}`}
+            onClick={toggleEditMode}
+          >
+            {isEditMode ? '✓ 完成排序' : '✏️ 编辑排序'}
+          </button>
+          {isEditMode && (
+            <button className="reset-order-btn" onClick={resetToDefault}>
+              ↺ 重置默认
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* 全部功能 - 3列网格布局 */}
-      <div className="features-grid-three-col">
-        {features.map((feature, index) => {
-          const FeatureComponent = feature.component;
-          const featureId = getFeatureId(feature.name);
+      {/* 可滚动内容区域 */}
+      <div className="dashboard-scrollable-content">
+        <div>
+          {/* 全部功能 - 3列网格布局 */}
+          <div className="features-grid-three-col">
+            {features.map((feature, index) => {
+              const FeatureComponent = feature.component;
+              const featureId = getFeatureId(feature.name);
 
-          return (
-            <div
-              key={featureId}
-              className="feature-wrapper"
-              draggable={isEditMode}
-              onDragStart={isEditMode ? (e) => handleDragStart(e, index) : undefined}
-              onDragEnd={isEditMode ? handleDragEnd : undefined}
-              onDragOver={isEditMode ? handleDragOver : undefined}
-              onDragLeave={isEditMode ? handleDragLeave : undefined}
-              onDrop={isEditMode ? (e) => handleDrop(e, index) : undefined}
-              style={{
-                cursor: isEditMode ? 'move' : 'pointer'
-              }}
-            >
-              <FeatureComponent
-                draggable={false}
-                index={index}
-                id={featureId}
-                onDragStart={undefined}
-                onDragEnd={undefined}
-              />
-              {isEditMode && (
-                <div className="drag-handle">⋮⋮</div>
-              )}
-            </div>
-          );
-        })}
+              return (
+                <div
+                  key={featureId}
+                  className="feature-wrapper"
+                  draggable={isEditMode}
+                  onDragStart={isEditMode ? (e) => handleDragStart(e, index) : undefined}
+                  onDragEnd={isEditMode ? handleDragEnd : undefined}
+                  onDragOver={isEditMode ? handleDragOver : undefined}
+                  onDragLeave={isEditMode ? handleDragLeave : undefined}
+                  onDrop={isEditMode ? (e) => handleDrop(e, index) : undefined}
+                  style={{
+                    cursor: isEditMode ? 'move' : 'pointer'
+                  }}
+                >
+                  <FeatureComponent
+                    draggable={false}
+                    index={index}
+                    id={featureId}
+                    onDragStart={undefined}
+                    onDragEnd={undefined}
+                  />
+                  {isEditMode && (
+                    <div className="drag-handle">⋮⋮</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
-
     </div>
   );
 };

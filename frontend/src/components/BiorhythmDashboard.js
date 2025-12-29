@@ -5,6 +5,7 @@ import { useTabPerformance } from '../utils/tabPerformanceMonitor';
 import { isAndroidWebView, isIOSWebView } from '../utils/androidWebViewCompat';
 import { globalErrorHandler, createDetailedErrorReport } from '../utils/errorHandler';
 import '../styles/animations.css';
+import '../styles/mobileOptimization.css';
 import niceDayImage from '../images/nice_day.png';
 
 // 错误回退组件（具名组件，满足React Hooks规则）
@@ -577,7 +578,15 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
       {/* Banner区域 - 参考穿衣指南样式 */}
-      <div className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0">
+      <div
+        className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0"
+        style={{
+          overflowY: 'hidden',
+          overflowX: 'hidden',
+          maxHeight: '100%',
+          width: '100%'
+        }}
+      >
         {/* 背景装饰 */}
         <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30"></div>
 
@@ -637,24 +646,33 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             </div> */}
           </div>
 
-          {/* 体验新版入口 - 右上角 */}
+          {/* 体验新版入口 - 右上角 - 优化版 */}
           <button
             onClick={() => navigate('/dashboard')}
-            className="absolute top-2 right-12 sm:right-2 text-xs md:text-sm text-white/80 hover:text-white hover:underline transition-all duration-200 flex items-center space-x-1 bg-black/10 hover:bg-black/20 px-2 py-1 rounded-md z-20"
+            className="taoist-new-version-btn"
             title="体验新版炫彩版主页"
-            style={{ backdropFilter: 'blur(4px)' }}
           >
-          <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <span className="hidden sm:inline">体验新版</span>
-          <span className="inline sm:hidden">新版</span>
+            <svg
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span>新版</span>
           </button>
         </div>
       </div>
 
       {/* 标签页选择器 - 参考穿衣指南样式 */}
-      <div className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+      <div
+        className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 flex-shrink-0"
+        style={{
+          overflowY: 'hidden',
+          overflowX: 'hidden',
+          width: '100%'
+        }}
+      >
         <div className="container mx-auto px-4">
           <div className="flex">
             {tabs.map((tab) => {
@@ -693,11 +711,10 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       </div>
 
       {/* 内容展示区域 - 简化布局，移除不必要的容器嵌套，优化滚动性能 */}
-      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized -webkit-overflow-scrolling-touch touch-pan-y">
-        <div className="container mx-auto px-4 py-4 h-full">
-          <div className="mb-4 h-full">
-            {/* 错误显示 */}
-            {error && (
+      <div className="biorhythm-content-area">
+        <div className="container mx-auto px-4 py-4">
+          {/* 错误显示 */}
+          {error && (
               <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4">
                 <div className="flex items-center">
                   <span className="text-red-500 mr-2">⚠️</span>
@@ -777,7 +794,6 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 )}
               </>
             )}
-          </div>
         </div>
       </div>
     </div>

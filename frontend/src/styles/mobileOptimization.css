@@ -390,7 +390,9 @@
 
 .taoist-wuxing-banner {
   position: relative;
+  height: 120px;
   min-height: 120px;
+  max-height: 120px;
   background: linear-gradient(135deg,
       #4caf50 0%,
       /* 木 - 青色 */
@@ -405,6 +407,21 @@
     );
   background-size: 400% 400%;
   animation: wuxingFlow 8s ease-in-out infinite;
+  /* 隐藏滚动条 */
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  /* 防止溢出 */
+  width: 100%;
+  max-width: 100%;
+  /* 性能优化 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* 确保子元素正确定位 */
+  contain: layout style paint;
 }
 
 .wuxing-gradient {
@@ -535,10 +552,12 @@
   contain: layout style;
 }
 
-/* 响应式调整 */
+/* 响应式调整 - 优化版 */
 @media (max-width: 768px) {
   .taoist-wuxing-banner {
+    height: 100px;
     min-height: 100px;
+    max-height: 100px;
   }
 
   .taoist-title {
@@ -553,7 +572,9 @@
 
 @media (max-width: 480px) {
   .taoist-wuxing-banner {
+    height: 90px;
     min-height: 90px;
+    max-height: 90px;
   }
 
   .taoist-title {
@@ -562,6 +583,23 @@
 
   .taoist-subtitle {
     font-size: 0.75rem;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 375px) {
+  .taoist-wuxing-banner {
+    height: 85px;
+    min-height: 85px;
+    max-height: 85px;
+  }
+}
+
+@media (max-width: 320px) {
+  .taoist-wuxing-banner {
+    height: 80px;
+    min-height: 80px;
+    max-height: 80px;
   }
 }
 
@@ -576,6 +614,484 @@
   .taoist-wuxing-banner {
     background: linear-gradient(135deg, #4caf50, #3f51b5);
   }
+}
+
+/* 访问新版按钮优化 - 防止缩放导致位置变动和高度变形 */
+.taoist-new-version-btn {
+  /* 固定高度和位置 */
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 20;
+
+  /* 固定宽度范围 */
+  min-width: 80px;
+  max-width: none;
+
+  /* 隐藏滚动条 */
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+
+  /* 防止内容溢出 */
+  white-space: nowrap;
+
+  /* 性能优化 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  /* 防止用户选中文字 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  /* 防止iOS点击高亮 */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+
+  /* 确保触摸目标大小 */
+  min-height: 32px;
+  min-width: 80px;
+
+  /* 移除默认按钮样式 */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* 边框和背景 */
+  border: none;
+  outline: none;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  /* 布局 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border-radius: 6px;
+  gap: 6px;
+
+  /* 字体样式 */
+  font-size: 12px !important;
+  line-height: 1;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+
+  /* 过渡效果 */
+  transition: all 0.2s ease;
+}
+
+/* 悬停效果 */
+.taoist-new-version-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+/* 按下效果 */
+.taoist-new-version-btn:active {
+  transform: scale(0.97);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* 图标样式 */
+.taoist-new-version-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  max-width: 14px !important;
+  max-height: 14px !important;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* 文字样式 */
+.taoist-new-version-btn span {
+  font-size: 12px !important;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .taoist-new-version-btn {
+    top: 8px;
+    right: 8px;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    padding: 0 10px;
+    min-width: 70px;
+    font-size: 11px !important;
+  }
+
+  .taoist-new-version-btn svg {
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px !important;
+    min-height: 13px !important;
+    max-width: 13px !important;
+    max-height: 13px !important;
+  }
+
+  .taoist-new-version-btn span {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .taoist-new-version-btn {
+    top: 6px;
+    right: 6px;
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    padding: 0 8px;
+    min-width: 65px;
+    font-size: 11px !important;
+  }
+
+  .taoist-new-version-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+    min-width: 12px !important;
+    min-height: 12px !important;
+    max-width: 12px !important;
+    max-height: 12px !important;
+  }
+
+  .taoist-new-version-btn span {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .taoist-new-version-btn {
+    top: 6px;
+    right: 6px;
+    height: 26px !important;
+    min-height: 26px !important;
+    max-height: 26px !important;
+    padding: 0 8px;
+    min-width: 60px;
+    font-size: 10px !important;
+  }
+
+  .taoist-new-version-btn svg {
+    width: 11px !important;
+    height: 11px !important;
+    min-width: 11px !important;
+    min-height: 11px !important;
+    max-width: 11px !important;
+    max-height: 11px !important;
+  }
+
+  .taoist-new-version-btn span {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 320px) {
+  .taoist-new-version-btn {
+    top: 5px;
+    right: 5px;
+    height: 24px !important;
+    min-height: 24px !important;
+    max-height: 24px !important;
+    padding: 0 6px;
+    min-width: 55px;
+    font-size: 10px !important;
+  }
+
+  .taoist-new-version-btn svg {
+    width: 10px !important;
+    height: 10px !important;
+    min-width: 10px !important;
+    min-height: 10px !important;
+    max-width: 10px !important;
+    max-height: 10px !important;
+  }
+
+  .taoist-new-version-btn span {
+    font-size: 10px !important;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .taoist-new-version-btn {
+    /* 确保触摸目标足够大 */
+    min-height: 44px !important;
+    min-width: 80px !important;
+
+    /* 优化触摸反馈 */
+    transition: background-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .taoist-new-version-btn:active {
+    transform: scale(0.97);
+  }
+}
+
+/* 高密度屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .taoist-new-version-btn {
+    /* 优化字体渲染 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* 低性能设备优化 */
+@media (prefers-reduced-motion: reduce) {
+  .taoist-new-version-btn {
+    /* 减少动画 */
+    transition: none;
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* 全局滚动条隐藏优化 - 适用于所有浏览器 */
+.hide-vertical-scrollbar {
+  /* IE和Edge */
+  -ms-overflow-style: none;
+  /* Firefox */
+  scrollbar-width: none;
+  /* Chrome, Safari, Opera - 隐藏纵向滚动条但保持横向滚动 */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.hide-vertical-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 隐藏所有滚动条但保持滚动功能 */
+.hide-all-scrollbars {
+  /* IE和Edge */
+  -ms-overflow-style: none;
+  /* Firefox */
+  scrollbar-width: none;
+  /* Chrome, Safari, Opera */
+}
+
+.hide-all-scrollbars::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 生物节律仪表板容器优化 */
+.biorhythm-dashboard-container {
+  /* 隐藏纵向滚动条 */
+  overflow-y: hidden;
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Banner容器滚动条隐藏 */
+.taoist-wuxing-banner-wrapper {
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 标签页容器滚动条隐藏 */
+.taoist-tab-wrapper {
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 内容区域滚动优化 */
+.taoist-content-area {
+  /* 只允许垂直滚动 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* 隐藏纵向滚动条但保持滚动功能 */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.taoist-content-area::-webkit-scrollbar {
+  display: none;
+  width: 0;
+}
+
+/* 移动端滚动条隐藏优化 */
+@media (max-width: 768px) {
+  .biorhythm-dashboard-container,
+  .taoist-wuxing-banner-wrapper,
+  .taoist-tab-wrapper {
+    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+
+  .taoist-content-area {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* 防止页面整体出现滚动条 */
+body.biorhythm-active {
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* 生物节律仪表板内容区域高度优化 */
+.biorhythm-content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  min-height: 0; /* 关键：确保flex子元素正确收缩 */
+  /* 计算正确的高度 */
+  height: calc(100vh - 120px);
+  /* 硬件加速 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* 内容容器 - 移除固定高度 */
+.biorhythm-content-wrapper {
+  width: 100%;
+  max-width: 100%;
+  /* 不设置固定高度，让内容自然流式布局 */
+  padding-top: 16px;
+  padding-bottom: 16px;
+  /* 防止内容溢出 */
+  overflow: hidden;
+  overflow-x: hidden;
+}
+
+/* 移动端高度优化 */
+@media (max-width: 768px) {
+  .biorhythm-content-area {
+    height: calc(100vh - 110px);
+    min-height: 0;
+  }
+
+  .biorhythm-content-wrapper {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .biorhythm-content-area {
+    height: calc(100vh - 100px);
+    min-height: 0;
+  }
+
+  .biorhythm-content-wrapper {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+@media (max-width: 375px) {
+  .biorhythm-content-area {
+    height: calc(100vh - 95px);
+    min-height: 0;
+  }
+
+  .biorhythm-content-wrapper {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+@media (max-width: 320px) {
+  .biorhythm-content-area {
+    height: calc(100vh - 90px);
+    min-height: 0;
+  }
+
+  .biorhythm-content-wrapper {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+/* 性能优化：使用contain属性 */
+.taoist-wuxing-banner,
+.taoist-tab-wrapper,
+.biorhythm-dashboard-container {
+  contain: layout style paint;
+}
+
+/* 浏览器兼容性修复 */
+@supports (-ms-overflow-style: none) {
+  .taoist-content-area {
+    -ms-overflow-style: none;
+  }
+}
+
+@supports (scrollbar-width: none) {
+  .taoist-content-area {
+    scrollbar-width: none;
+  }
+}
+
+/* Safari特定优化 */
+@supports (-webkit-backdrop-filter: blur(1px)) {
+  .taoist-new-version-btn {
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .taoist-content-area {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 防止iOS橡皮筋效果 */
+.ios-prevent-bounce {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
+}
+
+/* 确保容器不会因为内容变化而跳动 */
+.stable-container {
+  overflow-anchor: none;
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 /* 五行道家养生风格标签导航 - 优化 backdrop-filter 性能 */

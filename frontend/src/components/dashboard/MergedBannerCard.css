@@ -256,6 +256,9 @@
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
+  max-width: 100%;
+  min-height: 20px;
+  height: auto;
 }
 
 .user-tag-inline {
@@ -271,6 +274,11 @@
   transition: all 0.3s ease;
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-height: 18px;
+  line-height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-tag-inline:hover {
@@ -382,6 +390,9 @@
   align-items: center;
   gap: 4px;
   z-index: 10;
+  min-width: 42px;
+  min-height: 24px;
+  box-sizing: border-box;
 }
 
 .old-version-btn:hover {
@@ -521,6 +532,8 @@
   .user-tag-inline {
     padding: 2px 5px;
     font-size: 9px;
+    min-height: 16px;
+    line-height: 12px;
   }
 
   .greeting {
@@ -537,6 +550,8 @@
 
   .old-version-btn {
     padding: 3px 6px;
+    min-width: 38px;
+    min-height: 22px;
   }
 
   .old-version-icon {
@@ -577,11 +592,28 @@
   .user-tag-inline {
     padding: 1px 4px;
     font-size: 9px;
+    min-height: 16px;
+    line-height: 12px;
   }
 
   .user-avatar-small {
     width: 22px;
     height: 22px;
     font-size: 10px;
+  }
+
+  .old-version-btn {
+    padding: 2px 5px;
+    min-width: 36px;
+    min-height: 20px;
+  }
+
+  .old-version-icon {
+    width: 9px;
+    height: 9px;
+  }
+
+  .old-version-text {
+    font-size: 8px;
   }
 }

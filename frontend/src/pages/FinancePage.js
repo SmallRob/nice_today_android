@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './FinancePage.css';
 
 /**
@@ -9,7 +8,6 @@ import './FinancePage.css';
  * 新增：收支按月/年统计图，支出曲线图，红线标记斩杀线，余额<3000警示
  */
 const FinancePage = () => {
-  const navigate = useNavigate();
   const chartRef = useRef(null);
 
   // 检测系统是否使用dark主题
@@ -573,9 +571,6 @@ const FinancePage = () => {
 
       {/* 顶部导航栏 */}
       <div className="finance-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          ← 返回
-        </button>
         <h1 className="page-title">💰 财务斩杀线</h1>
       </div>
 

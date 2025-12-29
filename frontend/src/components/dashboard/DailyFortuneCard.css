@@ -6,6 +6,7 @@
   margin-bottom: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  overflow-x: hidden; /* 防止横向溢出 */
 }
 
 .dark .daily-fortune-card {
@@ -517,8 +518,133 @@
   }
 }
 
-/* 超小屏幕适配 */
+/* 375px屏幕优化 */
 @media (max-width: 375px) {
+  .daily-fortune-card {
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+
+  .fortune-header {
+    gap: 8px;
+  }
+
+  .lunar-info-section {
+    padding: 6px 10px;
+  }
+
+  .fortune-title {
+    font-size: 12px;
+  }
+
+  .lunar-date {
+    font-size: 10px;
+  }
+
+  .taboo-benefit,
+  .taboo-avoid {
+    font-size: 9px;
+    padding: 1px 4px;
+    min-height: 18px;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .taboo-label {
+    font-size: 9px;
+  }
+
+  .fortune-right {
+    width: 100px;
+    min-width: 90px;
+  }
+
+  .water-flask-container {
+    width: 90px;
+    height: 90px;
+  }
+
+  .energy-progress-name {
+    font-size: 10px;
+  }
+
+  .energy-progress-value {
+    font-size: 9px;
+  }
+
+  .energy-progress-track {
+    height: 3.5px;
+  }
+
+  .energy-progress-icon {
+    font-size: 11px;
+  }
+}
+
+/* 414px屏幕优化 */
+@media (max-width: 414px) and (min-width: 376px) {
+  .daily-fortune-card {
+    padding: 11px;
+    margin-bottom: 9px;
+  }
+
+  .fortune-header {
+    gap: 9px;
+  }
+
+  .lunar-info-section {
+    padding: 7px 11px;
+  }
+
+  .fortune-title {
+    font-size: 12.5px;
+  }
+
+  .lunar-date {
+    font-size: 10.5px;
+  }
+
+  .taboo-benefit,
+  .taboo-avoid {
+    font-size: 9.5px;
+    padding: 1.5px 4.5px;
+    min-height: 19px;
+  }
+
+  .taboo-label {
+    font-size: 9.5px;
+  }
+
+  .fortune-right {
+    width: 105px;
+    min-width: 95px;
+  }
+
+  .water-flask-container {
+    width: 95px;
+    height: 95px;
+  }
+
+  .energy-progress-name {
+    font-size: 10.5px;
+  }
+
+  .energy-progress-value {
+    font-size: 9.5px;
+  }
+
+  .energy-progress-track {
+    height: 3.8px;
+  }
+
+  .energy-progress-icon {
+    font-size: 11.5px;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 320px) {
   .fortune-content {
     flex-direction: column;
   }
