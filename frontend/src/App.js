@@ -101,6 +101,7 @@ const FinancePage = lazyLoadWithErrorHandling(() => import('./pages/FinancePage'
 const TakashimaAdvicePage = lazyLoadWithErrorHandling(() => import('./pages/TakashimaAdvice'));
 const LifestyleGuidePage = lazyLoadWithErrorHandling(() => import('./pages/LifestyleGuide'));
 const DailyCardPage = lazyLoadWithErrorHandling(() => import('./pages/DailyCardPage'));
+const CulturalCupPage = lazyLoadWithErrorHandling(() => import('./pages/CulturalCapPage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -177,6 +178,7 @@ const AppLayout = () => {
             <Route path="/takashima-advice" element={<TakashimaAdvicePage />} />
             <Route path="/lifestyle-guide" element={<LifestyleGuidePage />} />
             <Route path="/daily-cards" element={<DailyCardPage />} />
+            <Route path="/cultural-cup" element={<CulturalCupPage />} />
           </Routes>
         </SafeSuspense>
       </div>

@@ -100,9 +100,10 @@ const FeatureCard = ({
       'check-circle': '✅',
       'money': '💰',
       'divination': '🔮',
-      'shuffle': '🔀'
+      'shuffle': '🔀',
+      'cup':'🏆'
     };
-    return iconMap[icon] || '📱';
+    return iconMap[icon] || iconMap['🔮'] || '📱';
   };
 
   return (

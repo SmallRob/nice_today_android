@@ -18,6 +18,9 @@ export const DEFAULT_FEATURE_ORDER = [
   'personality-trait',
   'energy',
   'life-matrix',
+  'daily-cards',
+  'tarot-garden',
+  'cultural-cup',
   'biorhythm',
   'period-tracker'
 ];
@@ -38,6 +41,9 @@ export const getFeatureId = (componentName) => {
     'PersonalityTraitCard': 'personality-trait',
     'EnergyBoostCard': 'energy',
     'LifeMatrixCard': 'life-matrix',
+    'DailyCardCard': 'daily-cards',
+    'TarotGardenCard': 'tarot-garden',
+    'CulturalCupCard': 'cultural-cup',
     'BiorhythmCard': 'biorhythm',
     'PeriodTrackerCard': 'period-tracker'
   };

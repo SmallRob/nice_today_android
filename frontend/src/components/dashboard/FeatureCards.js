@@ -263,6 +263,21 @@ const TarotGardenCard = () => {
   );
 };
 
+/**
+ * 摔杯请卦组件
+ */
+const CulturalCupCard = () => {
+  return (
+    <FeatureCard
+      title="摔杯请卦"
+      description="传统卜卦 · 心诚则灵"
+      icon="🏆"
+      color="#8B4513"
+      route="/cultural-cup"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -278,5 +293,6 @@ export {
   TakashimaDivinationCard,
   LifeMatrixCard,
   DailyCardCard,
-  TarotGardenCard
+  TarotGardenCard,
+  CulturalCupCard
 };

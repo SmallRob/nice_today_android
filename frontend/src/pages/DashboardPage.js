@@ -15,7 +15,8 @@ import {
   TakashimaDivinationCard,
   LifeMatrixCard,
   DailyCardCard,
-  TarotGardenCard
+  TarotGardenCard,
+  CulturalCupCard
 } from '../components/dashboard/FeatureCards';
 import { useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css';
@@ -51,6 +52,7 @@ const Dashboard = () => {
     { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
     { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
     { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
+    { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
     { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
     { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
   ];
@@ -150,10 +152,11 @@ const Dashboard = () => {
         { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
         { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
         { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
-        { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
-        { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
-        { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
-        { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
+    { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
+    { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
+    { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
+    { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
+    { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
       ];
       setFeatures(allFeatures);
 
