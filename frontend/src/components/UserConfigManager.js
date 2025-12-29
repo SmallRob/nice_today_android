@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import PageLayout, { Card, Button } from './PageLayout';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { baziCacheManager } from '../utils/BaziCacheManager';
@@ -18,6 +18,7 @@ import { getShichenSimple, normalizeShichen } from '../utils/astronomy';
 import birthDataIntegrityManager from '../utils/BirthDataIntegrityManager'; // 新增：出生数据完整性管理器
 import ConfigEditModal from './ConfigEditModal';
 import NameScoringModal from './NameScoringModal';
+import UserDataManager from './UserDataManager';
 
 // 八字命理展示组件（优化版：优先从缓存中读取八字信息）
 const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname }) => {
@@ -1403,6 +1404,9 @@ const UserConfigManagerComponent = () => {
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  // 导入/导出操作并发控制
+  const isProcessingRef = useRef(false);
+
   // 降级处理：如果 enhancedUserConfigManager 不可用，使用基本的默认配置
   const [useFallbackMode, setUseFallbackMode] = useState(false);
 
@@ -2083,72 +2087,185 @@ const UserConfigManagerComponent = () => {
     setExpandedIndex(prev => prev === index ? -1 : index);
   }, []);
 
-  // 处理导入配置
-  const handleImportConfigs = useCallback(() => {
-    try {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-
-      input.onchange = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            const jsonData = e.target.result;
-            const success = await enhancedUserConfigManager.importConfigs(jsonData);
-            if (success) {
-              // importConfigs 内部已经调用了 notifyListeners
-              // 监听器会自动更新本地状态
-              console.log('导入配置成功，监听器将自动更新状态');
-              showMessage('导入配置成功', 'success');
-            } else {
-              showMessage('导入配置失败，请检查文件格式', 'error');
-            }
-          } catch (error) {
-            showMessage('读取文件失败: ' + error.message, 'error');
-          }
-        };
-
-        reader.readAsText(file);
-      };
-
-      input.click();
-    } catch (error) {
-      showMessage('导入失败: ' + error.message, 'error');
+  // 处理导入配置（使用移动端文件系统工具，优化版）
+  const handleImportConfigs = useCallback(async () => {
+    // 防止重复触发
+    if (isProcessingRef.current) {
+      console.warn('导入操作正在进行中，请稍候');
+      return;
     }
-  }, [showMessage]);
 
-  // 处理导出配置
-  const handleExportConfigs = useCallback(() => {
     try {
-      const jsonData = enhancedUserConfigManager.exportConfigs();
-      if (!jsonData) {
-        showMessage('导出配置失败', 'error');
+      isProcessingRef.current = true;
+      
+      // 动态导入移动端文件系统工具（带错误处理）
+      let readFile, checkAndRequestStoragePermission;
+      try {
+        const mobileFileSystemModule = await import('../utils/mobileFileSystem');
+        readFile = mobileFileSystemModule.readFile;
+        checkAndRequestStoragePermission = mobileFileSystemModule.checkAndRequestStoragePermission;
+      } catch (importError) {
+        console.error('Failed to import mobileFileSystem:', importError);
+        showMessage('导入功能初始化失败，请刷新页面重试', 'error');
+        return;
+      }
+      
+      // 检查设备权限（带超时处理）
+      const permissionResult = await Promise.race([
+        checkAndRequestStoragePermission(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('权限检查超时')), 10000)
+        )
+      ]).catch((error) => {
+        if (error.message === '权限检查超时') {
+          return { granted: false, message: '权限检查超时，请重试' };
+        }
+        throw error;
+      });
+      
+      if (!permissionResult.granted) {
+        showMessage('存储权限不足：' + permissionResult.message, 'error');
         return;
       }
 
-      const blob = new Blob([jsonData], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `nice-today-configs-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
+      // 使用移动端文件系统工具读取文件（带超时处理）
+      const result = await Promise.race([
+        readFile('.json'),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('文件读取超时')), 30000)
+        )
+      ]).catch((error) => {
+        if (error.message === '文件读取超时') {
+          return { success: false, error: '文件读取超时，请重试' };
+        }
+        throw error;
+      });
       
-      // 确保元素存在后再移除
-      if (a.parentNode) {
-        document.body.removeChild(a);
+      if (result.success) {
+        const success = await enhancedUserConfigManager.importConfigs(result.content);
+        if (success) {
+          console.log('导入配置成功，监听器将自动更新状态');
+          showMessage('导入配置成功', 'success');
+        } else {
+          showMessage('导入配置失败，请检查文件格式', 'error');
+        }
+      } else {
+        if (result.error === '已取消选择' || result.error === '未选择文件') {
+          showMessage('已取消导入', 'info');
+        } else {
+          showMessage('导入配置失败: ' + result.error, 'error');
+        }
+      }
+    } catch (error) {
+      console.error('导入配置失败:', error);
+      if (error.message?.includes('权限')) {
+        showMessage('存储权限不足，请在浏览器设置中允许文件访问', 'error');
+      } else if (error.message?.includes('超时')) {
+        showMessage('操作超时，请重试', 'error');
+      } else {
+        showMessage('导入失败: ' + (error.message || '未知错误'), 'error');
+      }
+    } finally {
+      isProcessingRef.current = false;
+    }
+  }, [showMessage]);
+
+  // 处理导出配置（使用移动端文件系统工具，优化版）
+  const handleExportConfigs = useCallback(async () => {
+    // 防止重复触发
+    if (isProcessingRef.current) {
+      console.warn('导出操作正在进行中，请稍候');
+      return;
+    }
+
+    try {
+      isProcessingRef.current = true;
+
+      const jsonData = enhancedUserConfigManager.exportConfigs();
+      if (!jsonData) {
+        showMessage('导出配置失败，没有可导出的数据', 'error');
+        return;
+      }
+
+      // 验证数据大小
+      const dataSize = new Blob([jsonData]).size;
+      if (dataSize > 10 * 1024 * 1024) { // 10MB
+        showMessage('配置数据过大，无法导出', 'error');
+        return;
+      }
+
+      // 动态导入移动端文件系统工具（带错误处理）
+      let saveFile, checkAndRequestStoragePermission;
+      try {
+        const mobileFileSystemModule = await import('../utils/mobileFileSystem');
+        saveFile = mobileFileSystemModule.saveFile;
+        checkAndRequestStoragePermission = mobileFileSystemModule.checkAndRequestStoragePermission;
+      } catch (importError) {
+        console.error('Failed to import mobileFileSystem:', importError);
+        showMessage('导出功能初始化失败，请刷新页面重试', 'error');
+        return;
       }
       
+      // 检查设备权限（带超时处理）
+      const permissionResult = await Promise.race([
+        checkAndRequestStoragePermission(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('权限检查超时')), 10000)
+        )
+      ]).catch((error) => {
+        if (error.message === '权限检查超时') {
+          return { granted: false, message: '权限检查超时，请重试' };
+        }
+        throw error;
+      });
+      
+      if (!permissionResult.granted) {
+        showMessage('存储权限不足：' + permissionResult.message, 'error');
+        return;
+      }
 
-      URL.revokeObjectURL(url);
-      showMessage('导出配置成功', 'success');
+      // 使用移动端文件系统工具保存文件（带超时处理）
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `nice-today-configs-${timestamp}.json`;
+      
+      const result = await Promise.race([
+        saveFile(filename, jsonData, 'application/json'),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('文件保存超时')), 30000)
+        )
+      ]).catch((error) => {
+        if (error.message === '文件保存超时') {
+          return { success: false, error: '文件保存超时，请重试' };
+        }
+        throw error;
+      });
+      
+      if (result.success) {
+        const methodText = result.method === 'capacitor-filesystem' 
+          ? '已保存到设备存储'
+          : result.method === 'filesystem-access-api'
+          ? '已保存到选择的位置'
+          : '已下载到默认位置';
+        
+        showMessage(`配置${methodText}`, 'success');
+      } else {
+        if (result.error === '已取消保存') {
+          showMessage('已取消保存', 'info');
+        } else {
+          showMessage('导出配置失败: ' + result.error, 'error');
+        }
+      }
     } catch (error) {
-      showMessage('导出配置失败: ' + error.message, 'error');
+      console.error('导出配置失败:', error);
+      if (error.message?.includes('权限')) {
+        showMessage('存储权限不足，请在浏览器设置中允许文件访问', 'error');
+      } else if (error.message?.includes('超时')) {
+        showMessage('操作超时，请重试', 'error');
+      } else {
+        showMessage('导出配置失败: ' + (error.message || '未知错误'), 'error');
+      }
+    } finally {
+      isProcessingRef.current = false;
     }
   }, [showMessage]);
 
@@ -2860,6 +2977,8 @@ const UserConfigManagerComponent = () => {
         )}
       </div>
 
+      {/* 用户数据管理专区 */}
+      <UserDataManager showMessage={showMessage} />
 
     </div>
   );
