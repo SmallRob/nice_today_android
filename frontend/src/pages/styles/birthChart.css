@@ -1,0 +1,369 @@
+/* BirthChart.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+}
+
+.birth-chart-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* 标题区域 */
+.header-section {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-left: 5px solid #8B4513;
+}
+
+.header-section h1 {
+  color: #5D4037;
+  margin-bottom: 20px;
+  font-size: 28px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 12px;
+}
+
+.birth-info p {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.birth-info strong {
+  color: #5D4037;
+  min-width: 100px;
+  display: inline-block;
+}
+
+/* 通用卡片样式 */
+.card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.card-icon {
+  font-size: 24px;
+  margin-right: 12px;
+}
+
+.card h2 {
+  color: #5D4037;
+  font-size: 22px;
+}
+
+.card-subtitle {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+/* 格局卡片 */
+.pattern-card {
+  border-left: 5px solid #8B4513;
+}
+
+.pattern-title {
+  margin-bottom: 16px;
+}
+
+.pattern-title h3 {
+  color: #8B4513;
+  font-size: 18px;
+}
+
+.pattern-description {
+  margin-bottom: 20px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.pattern-description strong {
+  color: #8B4513;
+}
+
+.quote {
+  background-color: #f9f3e9;
+  border-left: 4px solid #D4AF37;
+  padding: 16px;
+  margin-top: 20px;
+  font-style: italic;
+  color: #5D4037;
+  border-radius: 0 8px 8px 0;
+}
+
+/* 五行能量卡片 */
+.elements-card {
+  border-left: 5px solid #2196F3;
+}
+
+.elements-container {
+  margin-bottom: 24px;
+}
+
+.element-item {
+  margin-bottom: 16px;
+}
+
+.element-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.element-name {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.element-percentage {
+  color: #666;
+  font-weight: bold;
+}
+
+.element-bar {
+  height: 24px;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.element-fill {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 1s ease;
+}
+
+.elements-interpretation ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.elements-interpretation li {
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.elements-interpretation li:last-child {
+  border-bottom: none;
+}
+
+.elements-interpretation strong {
+  color: #5D4037;
+}
+
+/* 财运卡片 */
+.fortune-card {
+  border-left: 5px solid #4CAF50;
+}
+
+.fortune-card p {
+  margin-bottom: 20px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.view-details {
+  margin-top: 24px;
+}
+
+.view-details-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.view-details-btn:hover {
+  background-color: #388E3C;
+}
+
+.more-fortune-details {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.more-fortune-details h4 {
+  color: #5D4037;
+  margin-bottom: 12px;
+}
+
+.more-fortune-details ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.more-fortune-details li {
+  padding: 8px 0;
+  border-bottom: 1px dashed #ddd;
+}
+
+.more-fortune-details li:last-child {
+  border-bottom: none;
+}
+
+.more-fortune-details strong {
+  color: #4CAF50;
+}
+
+/* 行业卡片 */
+.industry-card {
+  border-left: 5px solid #F44336;
+}
+
+.industries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.industry-item {
+  display: flex;
+  align-items: center;
+}
+
+.industry-bullet {
+  width: 10px;
+  height: 10px;
+  background-color: #F44336;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.industry-note {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+/* 伴侣卡片 */
+.partner-card {
+  border-left: 5px solid #9C27B0;
+}
+
+.partner-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.partner-element {
+  display: flex;
+  align-items: center;
+}
+
+.element-circle {
+  width: 60px;
+  height: 60px;
+  background-color: #F44336;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: 16px;
+}
+
+.partner-element-info h4 {
+  color: #5D4037;
+  margin-bottom: 4px;
+}
+
+.partner-element-info p {
+  color: #666;
+  font-size: 14px;
+}
+
+.partner-traits h4,
+.partner-fields h4,
+.partner-timing h4 {
+  color: #5D4037;
+  margin-bottom: 8px;
+}
+
+.timing-highlight {
+  background-color: #f9f3e9;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.timing-highlight strong {
+  color: #9C27B0;
+  font-size: 18px;
+}
+
+/* 底部声明 */
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+  font-size: 14px;
+}
+
+.footer em {
+  color: #5D4037;
+  font-style: italic;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .birth-chart-container {
+    padding: 12px;
+  }
+  
+  .header-section,
+  .card {
+    padding: 18px;
+  }
+  
+  .header-section h1 {
+    font-size: 24px;
+  }
+  
+  .card h2 {
+    font-size: 20px;
+  }
+  
+  .partner-details {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .birth-info strong {
+    min-width: 80px;
+  }
+}

@@ -3,26 +3,25 @@
  * 从星座运势分离出的独立功能
  * 专门展示八字相关月运内容
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { normalizeBirthInfo } from '../utils/baziDataManager';
 import { calculateLiuNianDaYun, getMonthlyBaziFortune, calculateDailyEnergy } from '../utils/baziHelper';
-import { Solar } from 'lunar-javascript';
+import BaziCalculator from '../utils/baziCalculator';
 import FortuneTrendChart from '../components/bazi/FortuneTrendChart';
 
 const BaziPage = () => {
   const { theme } = useTheme();
   const { currentConfig } = useUserConfig();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   // 状态管理
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
   const [error, setError] = useState(null);
-  const [lunarData, setLunarData] = useState(null);
+  const [baziData, setBaziData] = useState(null);
   const [liuNianData, setLiuNianData] = useState(null);
   const [monthlyFortune, setMonthlyFortune] = useState(null);
   const [dailyEnergyData, setDailyEnergyData] = useState(null);
@@ -72,7 +71,7 @@ const BaziPage = () => {
       const birthInfo = normalizeBirthInfo(currentConfig);
 
       // 从字符串格式解析日期和时间
-      let year, month, day, hour;
+      let year, month, day, hour, minute;
 
       try {
         // 解析出生日期 (格式: YYYY-MM-DD)
@@ -84,6 +83,7 @@ const BaziPage = () => {
         // 解析出生时间 (格式: HH:mm)，默认使用 12:00
         const timeParts = birthInfo.birthTime.split(':');
         hour = timeParts.length >= 1 ? parseInt(timeParts[0]) : 12;
+        minute = timeParts.length >= 2 ? parseInt(timeParts[1]) : 0;
       } catch (parseError) {
         // 如果解析失败，使用默认值
         console.warn('日期时间解析失败，使用默认值:', parseError);
@@ -91,6 +91,7 @@ const BaziPage = () => {
         month = 1;
         day = 1;
         hour = 12;
+        minute = 0;
       }
 
       // 验证解析结果
@@ -103,34 +104,19 @@ const BaziPage = () => {
         console.log('使用默认出生时间: 12:00');
       }
 
-      // 计算八字数据
-      const solarDate = Solar.fromYmdHms(year, month, day, hour, 0, 0);
-      const lunar = solarDate.getLunar();
-      const eightChar = lunar.getEightChar();
+      // 使用 BaziCalculator 计算八字
+      const calculatedBazi = BaziCalculator.calculateBazi(year, month, day, hour, minute, 110);
 
-      const lunarData = {
-        year: lunar.getYear(),
-        month: lunar.getMonth(),
-        day: lunar.getDay(),
-        hour: lunar.getHour(),
-        yearGanZhi: lunar.getYearInGanZhi(),
-        monthGanZhi: lunar.getMonthInGanZhi(),
-        dayGanZhi: lunar.getDayInGanZhi(),
-        hourGanZhi: lunar.getTimeInGanZhi(),
-        pillars: [
-          lunar.getYearInGanZhi(),  // 年柱
-          lunar.getMonthInGanZhi(), // 月柱
-          lunar.getDayInGanZhi(),   // 日柱
-          lunar.getTimeInGanZhi()   // 时柱
-        ],
-        zodiac: lunar.getYearShengXiao(),
-        yearXing: eightChar.getYearWuXing(),
-        monthXing: eightChar.getMonthWuXing(),
-        dayXing: eightChar.getDayWuXing(),
-        hourXing: eightChar.getTimeWuXing()
-      };
+      // 添加 pillars 数组以兼容现有代码
+      calculatedBazi.pillars = [calculatedBazi.year, calculatedBazi.month, calculatedBazi.day, calculatedBazi.hour];
 
-      setLunarData(lunarData);
+      // 添加生肖（地支计算生肖）
+      const zhi = calculatedBazi.details.year.zhi;
+      const zhiIndex = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'].indexOf(zhi);
+      const zodiacs = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+      calculatedBazi.zodiac = zodiacs[zhiIndex];
+
+      setBaziData(calculatedBazi);
 
       // 计算流年大运
       const liuNian = calculateLiuNianDaYun(year, month, day, hour);
@@ -138,20 +124,25 @@ const BaziPage = () => {
 
       // 创建目标日期对象
       let targetDate = new Date(selectedYear, selectedMonth - 1, 1);
-      
-      const monthlyFortune = getMonthlyBaziFortune(lunarData.pillars, targetDate);
+
+      const monthlyFortune = getMonthlyBaziFortune([
+        baziData.year,
+        baziData.month,
+        baziData.day,
+        baziData.hour
+      ], targetDate);
       setMonthlyFortune(monthlyFortune);
-      
+
       // 计算每日能量运势
       // 构造符合 calculateDailyEnergy 函数要求的八字数据格式
       const baziDataForDaily = {
         bazi: {
-          year: lunarData.yearGanZhi,
-          month: lunarData.monthGanZhi,
-          day: lunarData.dayGanZhi,
-          hour: lunarData.hourGanZhi
+          year: baziData.year,
+          month: baziData.month,
+          day: baziData.day,
+          hour: baziData.hour
         },
-        day: lunarData.dayGanZhi
+        day: baziData.day
       };
       const dailyEnergy = calculateDailyEnergy(baziDataForDaily);
       setDailyEnergyData(dailyEnergy);
@@ -171,7 +162,12 @@ const BaziPage = () => {
             targetMonth % 12,
             1
           );
-          const monthFortune = getMonthlyBaziFortune(lunarData.pillars, targetDate);
+          const monthFortune = getMonthlyBaziFortune([
+            baziData.year,
+            baziData.month,
+            baziData.day,
+            baziData.hour
+          ], targetDate);
           trendData.push({
             date: `${targetDate.getMonth() + 1}月`,
             lifeScore: monthFortune.score * 0.9 + Math.random() * 10,
@@ -192,7 +188,12 @@ const BaziPage = () => {
         for (let i = 0; i < 7; i++) {
           const targetDate = new Date(startOfWeek);
           targetDate.setDate(startOfWeek.getDate() + i);
-          const dailyFortune = getMonthlyBaziFortune(lunarData.pillars, targetDate);
+          const dailyFortune = getMonthlyBaziFortune([
+            baziData.year,
+            baziData.month,
+            baziData.day,
+            baziData.hour
+          ], targetDate);
           const weekDayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
           trendData.push({
             date: weekDayNames[i],
@@ -219,7 +220,12 @@ const BaziPage = () => {
       // 根据选择的视图模式计算不同的运势
       if (viewMode === 'monthly') {
         targetDate = new Date(selectedYear, selectedMonth - 1, 1);
-        const monthlyFortune = getMonthlyBaziFortune(lunarData.pillars, targetDate);
+        const monthlyFortune = getMonthlyBaziFortune([
+          baziData.year,
+          baziData.month,
+          baziData.day,
+          baziData.hour
+        ], targetDate);
         setMonthlyFortune(monthlyFortune);
       } else if (viewMode === 'weekly') {
         // 计算当前周的运势（假设每周从周一开始）
@@ -229,7 +235,12 @@ const BaziPage = () => {
         const startOfWeek = new Date(today);
         startOfWeek.setDate(today.getDate() - diff);
         targetDate = startOfWeek;
-        const weeklyFortune = getMonthlyBaziFortune(lunarData.pillars, targetDate);
+        const weeklyFortune = getMonthlyBaziFortune([
+          baziData.year,
+          baziData.month,
+          baziData.day,
+          baziData.hour
+        ], targetDate);
         setMonthlyFortune(weeklyFortune);
       }
       // yearly 模式使用流年运势数据，已经在前面计算
@@ -253,10 +264,41 @@ const BaziPage = () => {
 
   // 月份选择
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
-  
+
   // 月份名称
-  const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', 
+  const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月',
                      '七月', '八月', '九月', '十月', '十一月', '十二月'];
+
+  // 使用 useMemo 缓存八字分析结果，优化性能
+  const baziAnalysis = useMemo(() => {
+    if (!baziData) return null;
+    return BaziCalculator.analyzeBazi(baziData);
+  }, [baziData]);
+
+  // 使用 useMemo 缓存五行颜色配置
+  const elementColors = useMemo(() => ({
+    '金': { bg: '#FFD700', text: '#B8860B', darkBg: '#B8860B', darkText: '#FFF8DC' },
+    '木': { bg: '#4CAF50', text: '#1B5E20', darkBg: '#1B5E20', darkText: '#C8E6C9' },
+    '水': { bg: '#2196F3', text: '#0D47A1', darkBg: '#0D47A1', darkText: '#BBDEFB' },
+    '火': { bg: '#FF5722', text: '#BF360C', darkBg: '#BF360C', darkText: '#FFCCBC' },
+    '土': { bg: '#8D6E63', text: '#3E2723', darkBg: '#3E2723', darkText: '#D7CCC8' }
+  }), []);
+
+  // 使用 useMemo 缓存十神颜色配置
+  const tenGodColors = useMemo(() => ({
+    '正官': { bg: '#E3F2FD', text: '#1976D2', darkBg: '#1565C0', darkText: '#E3F2FD' },
+    '七杀': { bg: '#FFEBEE', text: '#C62828', darkBg: '#C62828', darkText: '#FFEBEE' },
+    '正财': { bg: '#E8F5E9', text: '#388E3C', darkBg: '#388E3C', darkText: '#E8F5E9' },
+    '偏财': { bg: '#FFF3E0', text: '#F57C00', darkBg: '#F57C00', darkText: '#FFF3E0' },
+    '正印': { bg: '#F3E5F5', text: '#7B1FA2', darkBg: '#7B1FA2', darkText: '#F3E5F5' },
+    '偏印': { bg: '#ECEFF1', text: '#455A64', darkBg: '#455A64', darkText: '#ECEFF1' },
+    '比肩': { bg: '#E0F2F1', text: '#00695C', darkBg: '#00695C', darkText: '#E0F2F1' },
+    '劫财': { bg: '#FFEBEE', text: '#C62828', darkBg: '#C62828', darkText: '#FFEBEE' },
+    '食神': { bg: '#FFF8E1', text: '#FF8F00', darkBg: '#FF8F00', darkText: '#FFF8E1' },
+    '伤官': { bg: '#FFEBEE', text: '#D32F2F', darkBg: '#D32F2F', darkText: '#FFEBEE' }
+  }), []);
+
+  // 移动端响应式样式
 
   if (loading) {
     return (
@@ -392,24 +434,8 @@ const BaziPage = () => {
           </div>
         </div>
 
-        {/* 八字信息卡片 */}
-        {lunarData && (
-          <div className="bg-gradient-to-br from-purple-600 to-violet-700 text-white rounded-xl shadow-lg p-6 mb-6">
-            <div className="text-center mb-4">
-              <h2 className="text-2xl font-bold mb-2">您的八字</h2>
-              <div className="flex justify-center space-x-4 text-xl font-mono">
-                <span className="bg-white/20 px-4 py-2 rounded-lg">{lunarData.yearGanZhi}</span>
-                <span className="bg-white/20 px-4 py-2 rounded-lg">{lunarData.monthGanZhi}</span>
-                <span className="bg-white/20 px-4 py-2 rounded-lg">{lunarData.dayGanZhi}</span>
-                <span className="bg-white/20 px-4 py-2 rounded-lg">{lunarData.hourGanZhi}</span>
-              </div>
-              <p className="mt-3 text-purple-100">{lunarData.zodiac}年</p>
-            </div>
-          </div>
-        )}
-
         {/* 八字运势卡片（支持动态月份） - 统一字体大小 */}
-        {lunarData && (
+        {baziData && (
           <div className="bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-lg md:shadow-xl p-3 sm:p-4 md:p-5 border border-amber-200/50 dark:border-amber-700/50 mb-4 sm:mb-6 overflow-hidden relative group will-change-transform">
             {/* 背景装饰 - 移动端简化 */}
             <div className="hidden md:block absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-100 dark:bg-amber-900/20 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
@@ -466,8 +492,8 @@ const BaziPage = () => {
                   <div className={`w-full aspect-[4/5] flex flex-col items-center justify-center rounded-lg sm:rounded-xl border-2 transition-all ${i === 2 ? 'bg-amber-500 border-amber-400 text-white shadow-lg scale-105' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-100'
                     }`}>
                     <span className="text-lg sm:text-xl md:text-2xl font-bold tracking-widest flex flex-col items-center leading-tight">
-                      <span className="font-bold drop-shadow-sm">{lunarData.pillars[i].charAt(0)}</span>
-                      <span className="font-bold drop-shadow-sm">{lunarData.pillars[i].charAt(1)}</span>
+                      <span className="font-bold drop-shadow-sm">{baziData.pillars[i].charAt(0)}</span>
+                      <span className="font-bold drop-shadow-sm">{baziData.pillars[i].charAt(1)}</span>
                     </span>
                   </div>
                 </div>
@@ -629,9 +655,422 @@ const BaziPage = () => {
             </div>
           </div>
         )}
+
+        {/* 八字信息卡片 - 优化版本 */}
+        {baziData && baziAnalysis && (
+          <>
+            {/* 基本信息卡片 - 优化样式和暗主题 */}
+            <div className="bazi-info-card bazi-card-responsive" style={{
+              background: theme === 'dark' ? '#1f2937' : '#ffffff',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px',
+              borderLeft: theme === 'dark' ? '5px solid #D4AF37' : '5px solid #8B4513',
+              boxShadow: theme === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.05)',
+              transition: 'background-color 0.3s ease, box-shadow 0.3s ease'
+            }}>
+              <h2 style={{
+                color: theme === 'dark' ? '#D4AF37' : '#5D4037',
+                marginBottom: '16px',
+                fontSize: '22px',
+                borderBottom: `1px solid ${theme === 'dark' ? '#374151' : '#eee'}`,
+                paddingBottom: '12px'
+              }}>
+                八字基本信息
+              </h2>
+              <div className="bazi-info-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '12px',
+                marginBottom: '16px'
+              }}>
+                {[
+                  { label: '年柱', value: baziData.year, detail: `(${baziData.details.year.gan}${baziData.details.year.zhi})` },
+                  { label: '月柱', value: baziData.month, detail: `(${baziData.details.month.gan}${baziData.details.month.zhi})` },
+                  { label: '日柱', value: baziData.day, detail: `(${baziData.details.day.gan}${baziData.details.day.zhi})` },
+                  { label: '时柱', value: baziData.hour, detail: `(${baziData.details.hour.gan}${baziData.details.hour.zhi})` }
+                ].map((item, index) => (
+                  <div key={index} style={{
+                    background: theme === 'dark' ? '#374151' : '#f0e6d6',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    transition: 'background-color 0.3s ease'
+                  }}>
+                    <p style={{ marginBottom: '4px', fontSize: '13px', color: theme === 'dark' ? '#9CA3AF' : '#666' }}>
+                      <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>{item.label}</strong>
+                    </p>
+                    <p style={{ fontSize: '16px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#333' }}>
+                      {item.value} <span style={{ fontSize: '14px', color: theme === 'dark' ? '#9CA3AF' : '#8B4513' }}>{item.detail}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '12px',
+                padding: '12px',
+                background: theme === 'dark' ? '#374151' : '#f9f3e9',
+                borderRadius: '8px'
+              }}>
+                <p style={{ fontSize: '14px', color: theme === 'dark' ? '#9CA3AF' : '#666', margin: '0' }}>
+                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>时辰</strong>：{baziData.shichen}
+                </p>
+                <p style={{ fontSize: '14px', color: theme === 'dark' ? '#9CA3AF' : '#666', margin: '0' }}>
+                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>生肖</strong>：{baziData.zodiac}
+                </p>
+                <p style={{ fontSize: '14px', color: theme === 'dark' ? '#9CA3AF' : '#666', margin: '0' }}>
+                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>日主</strong>：{baziData.details.day.gan}（{baziAnalysis.elementPreference.dayElement}命）
+                </p>
+              </div>
+            </div>
+
+            {/* 五行能量分布卡片 */}
+            <div className="bazi-elements-card bazi-card-responsive" style={{
+              background: theme === 'dark' ? '#1f2937' : '#ffffff',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px',
+              borderLeft: '5px solid #2196F3',
+              boxShadow: theme === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.05)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '16px',
+                borderBottom: `1px solid ${theme === 'dark' ? '#374151' : '#f0f0f0'}`,
+                paddingBottom: '12px'
+              }}>
+                <span style={{ fontSize: '24px', marginRight: '12px' }}>⚖️</span>
+                <h2 style={{ color: theme === 'dark' ? '#60A5FA' : '#5D4037', fontSize: '20px', margin: '0' }}>五行能量分布</h2>
+              </div>
+
+              {/* 五行能量条 */}
+              <div style={{ marginBottom: '20px' }}>
+                {Object.entries(baziAnalysis.fiveElements.percentages).map(([element, percentage], index) => {
+                  const colors = elementColors[element];
+                  const bgColor = theme === 'dark' ? colors.darkBg : colors.bg;
+                  const textColor = theme === 'dark' ? colors.darkText : colors.text;
+                  return (
+                    <div key={index} style={{ marginBottom: '14px' }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: '6px'
+                      }}>
+                        <span style={{
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          color: textColor,
+                          background: bgColor,
+                          padding: '2px 8px',
+                          borderRadius: '4px'
+                        }}>
+                          {element}
+                        </span>
+                        <span style={{ color: theme === 'dark' ? '#9CA3AF' : '#666', fontWeight: 'bold', fontSize: '14px' }}>
+                          {percentage}%
+                        </span>
+                      </div>
+                      <div style={{
+                        height: '20px',
+                        backgroundColor: theme === 'dark' ? '#374151' : '#f0f0f0',
+                        borderRadius: '10px',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${percentage}%`,
+                          backgroundColor: bgColor,
+                          borderRadius: '10px',
+                          transition: 'width 0.8s ease',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        }}></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 五行喜好 */}
+              <div style={{
+                padding: '16px',
+                background: theme === 'dark' ? '#374151' : '#f9fafb',
+                borderRadius: '8px',
+                marginBottom: '16px'
+              }}>
+                <h3 style={{
+                  color: theme === 'dark' ? '#D4AF37' : '#5D4037',
+                  fontSize: '16px',
+                  marginBottom: '12px',
+                  marginTop: '0'
+                }}>
+                  五行喜好
+                </h3>
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '10px',
+                  marginBottom: '12px'
+                }}>
+                  {[
+                    { label: '用神', value: baziAnalysis.elementPreference.useGod },
+                    { label: '喜神', value: baziAnalysis.elementPreference.happyGods.join('、') },
+                    { label: '最旺', value: baziAnalysis.elementPreference.strongest },
+                    { label: '最弱', value: baziAnalysis.elementPreference.weakest }
+                  ].map((item, index) => (
+                    <span key={index} style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      background: elementColors[item.value]?.darkBg || '#374151',
+                      color: elementColors[item.value]?.darkText || '#fff',
+                      border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : 'none'
+                    }}>
+                      {item.label}：{item.value}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 十神占比卡片 */}
+            <div className="bazi-ten-gods-card bazi-card-responsive" style={{
+              background: theme === 'dark' ? '#1f2937' : '#ffffff',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px',
+              borderLeft: '5px solid #9C27B0',
+              boxShadow: theme === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.05)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '16px',
+                borderBottom: `1px solid ${theme === 'dark' ? '#374151' : '#f0f0f0'}`,
+                paddingBottom: '12px'
+              }}>
+                <span style={{ fontSize: '24px', marginRight: '12px' }}>⭐</span>
+                <h2 style={{ color: theme === 'dark' ? '#A855F7' : '#5D4037', fontSize: '20px', margin: '0' }}>十神占比</h2>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                {Object.entries(baziAnalysis.tenGods.percentages)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([god, percentage], index) => {
+                    const colors = tenGodColors[god] || { bg: '#E0E0E0', text: '#333', darkBg: '#424242', darkText: '#fff' };
+                    const bgColor = theme === 'dark' ? colors.darkBg : colors.bg;
+                    const textColor = theme === 'dark' ? colors.darkText : colors.text;
+                    return (
+                      <div key={index} style={{ marginBottom: '14px' }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '6px',
+                          alignItems: 'center'
+                        }}>
+                          <span style={{
+                            fontWeight: 'bold',
+                            fontSize: '14px',
+                            color: textColor,
+                            background: bgColor,
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            minWidth: '60px',
+                            textAlign: 'center'
+                          }}>
+                            {god}
+                          </span>
+                          <span style={{ color: theme === 'dark' ? '#9CA3AF' : '#666', fontWeight: 'bold', fontSize: '14px' }}>
+                            {percentage}%
+                          </span>
+                        </div>
+                        <div style={{
+                          height: '18px',
+                          backgroundColor: theme === 'dark' ? '#374151' : '#f0f0f0',
+                          borderRadius: '9px',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{
+                            height: '100%',
+                            width: `${percentage}%`,
+                            backgroundColor: bgColor,
+                            borderRadius: '9px',
+                            transition: 'width 0.8s ease',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                          }}></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* 十神解析 */}
+              <div style={{
+                padding: '14px',
+                background: theme === 'dark' ? '#374151' : '#f9fafb',
+                borderRadius: '8px',
+                fontSize: '14px',
+                lineHeight: '1.6',
+                color: theme === 'dark' ? '#E5E7EB' : '#374151'
+              }}>
+                <p style={{ marginBottom: '8px', margin: '0 0 8px 0' }}>
+                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>十神解读</strong>：十神代表命局中各天干地支与日干的关系，反映您的性格特质、处事风格和人生方向。
+                </p>
+              </div>
+            </div>
+
+            {/* 适合职业卡片 */}
+            <div className="bazi-career-card bazi-card-responsive" style={{
+              background: theme === 'dark' ? '#1f2937' : '#ffffff',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px',
+              borderLeft: '5px solid #F44336',
+              boxShadow: theme === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.05)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '16px',
+                borderBottom: `1px solid ${theme === 'dark' ? '#374151' : '#f0f0f0'}`,
+                paddingBottom: '12px'
+              }}>
+                <span style={{ fontSize: '24px', marginRight: '12px' }}>💼</span>
+                <h2 style={{ color: theme === 'dark' ? '#F87171' : '#5D4037', fontSize: '20px', margin: '0' }}>适合职业</h2>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px'
+              }}>
+                {baziAnalysis.elementPreference.suggestedCareers.slice(0, 12).map((career, index) => (
+                  <span key={index} style={{
+                    padding: '6px 14px',
+                    background: theme === 'dark' ? '#374151' : '#FFF3E0',
+                    color: theme === 'dark' ? '#FCA5A5' : '#E65100',
+                    borderRadius: '20px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    border: theme === 'dark' ? '1px solid rgba(248, 113, 113, 0.3)' : '1px solid #FFB74D',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    {career}
+                  </span>
+                ))}
+              </div>
+
+              <div style={{
+                marginTop: '16px',
+                padding: '14px',
+                background: theme === 'dark' ? '#374151' : '#f9fafb',
+                borderRadius: '8px',
+                fontSize: '13px',
+                lineHeight: '1.6',
+                color: theme === 'dark' ? '#9CA3AF' : '#666'
+              }}>
+                <p style={{ margin: '0' }}>
+                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>职业建议</strong>：根据您的八字五行喜好，以上行业与您的命局较为契合。建议选择能发挥您天赋优势的职业，并注意与喜神五行相关的行业发展。
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 };
+
+// 注入移动端响应式样式 - 优化性能，使用CSS变量和类名
+const injectMobileStyles = () => {
+  if (typeof document !== 'undefined') {
+    const existingStyle = document.getElementById('bazi-mobile-responsive-styles');
+    if (!existingStyle) {
+      const style = document.createElement('style');
+      style.id = 'bazi-mobile-responsive-styles';
+      style.innerHTML = `
+        @media (max-width: 768px) {
+          .bazi-card-responsive {
+            padding: 16px !important;
+            border-radius: 10px !important;
+            margin-bottom: 16px !important;
+          }
+
+          .bazi-card-responsive h2 {
+            font-size: 18px !important;
+          }
+
+          .bazi-info-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+          }
+
+          .bazi-info-grid > div {
+            padding: 8px !important;
+          }
+
+          .bazi-info-grid p {
+            font-size: 13px !important;
+            margin-bottom: 3px !important;
+          }
+
+          .bazi-info-grid p:last-child {
+            font-size: 14px !important;
+          }
+        }
+
+        @media (max-width: 576px) {
+          .bazi-card-responsive {
+            padding: 14px !important;
+            margin-bottom: 14px !important;
+          }
+
+          .bazi-card-responsive h2 {
+            font-size: 16px !important;
+            padding-bottom: 10px !important;
+          }
+
+          .bazi-info-grid {
+            gap: 8px !important;
+          }
+
+          .bazi-info-grid > div {
+            padding: 6px !important;
+          }
+
+          .bazi-info-grid p {
+            font-size: 12px !important;
+          }
+
+          .bazi-info-grid p:last-child {
+            font-size: 13px !important;
+          }
+        }
+
+        /* 优化动画性能 */
+        .bazi-card-responsive,
+        .bazi-info-grid > div {
+          transform: translateZ(0);
+          backface-visibility: hidden;
+          will-change: background-color;
+        }
+
+        /* 减少重绘 */
+        .bazi-elements-card > div > div > div > div {
+          transform: translateZ(0);
+          will-change: width;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+};
+
+// 组件挂载时注入样式
+if (typeof window !== 'undefined') {
+  injectMobileStyles();
+}
 
 export default BaziPage;

@@ -94,12 +94,12 @@ class BaziCalculator {
 
   /**
    * 判断是否在立春之后
-   * @param {number} year 年
+   * @param {number} _year 年（未使用但保留参数以保持接口一致）
    * @param {number} month 月
    * @param {number} day 日
    * @returns {boolean} 是否立春之后
    */
-  static isAfterLichun(year, month, day) {
+  static isAfterLichun(_year, month, day) {
     const lichun = JIEQI[0];
     if (month > lichun.month) return true;
     if (month < lichun.month) return false;
@@ -351,8 +351,8 @@ class BaziCalculator {
    * @returns {string} 运势洞察文本
    */
   static getBaziInsight(currentData) {
-    const { overallScore, career, wealth, health, relationship } = currentData;
-    
+    const { overallScore } = currentData;
+
     if (overallScore > 0.7) {
       return "当前运势极佳，各方面都处于有利时期，适合大胆尝试新事物，把握机会，积极进取。";
     } else if (overallScore > 0.3) {
@@ -364,6 +364,242 @@ class BaziCalculator {
     } else {
       return "当前运势面临挑战，建议保守行事，注意身体健康，保持耐心，等待时机好转。";
     }
+  }
+
+  /**
+   * 计算五行能量分布
+   * @param {Object} bazi 八字对象
+   * @returns {Object} 五行能量分布
+   */
+  static calculateFiveElements(bazi) {
+    const pillars = [bazi.details.year, bazi.details.month, bazi.details.day, bazi.details.hour];
+    
+    // 五行属性映射
+    const ganWuxing = {
+      '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+      '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
+    };
+    
+    const zhiWuxing = {
+      '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土', '巳': '火',
+      '午': '火', '未': '土', '申': '金', '酉': '金', '戌': '土', '亥': '水'
+    };
+    
+    // 五行藏干权重（简化版）
+    const zhiCangGan = {
+      '子': { '癸': 1 },
+      '丑': { '己': 0.6, '癸': 0.4 },
+      '寅': { '甲': 0.8, '丙': 0.1, '戊': 0.1 },
+      '卯': { '乙': 1 },
+      '辰': { '戊': 0.5, '乙': 0.3, '癸': 0.2 },
+      '巳': { '丙': 0.7, '庚': 0.3 },
+      '午': { '丁': 0.8, '己': 0.2 },
+      '未': { '己': 0.5, '丁': 0.3, '乙': 0.2 },
+      '申': { '庚': 0.8, '壬': 0.2 },
+      '酉': { '辛': 1 },
+      '戌': { '戊': 0.5, '辛': 0.3, '丁': 0.2 },
+      '亥': { '壬': 0.8, '甲': 0.2 }
+    };
+    
+    // 统计五行
+    const elements = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
+    
+    pillars.forEach(pillar => {
+      // 天干
+      elements[ganWuxing[pillar.gan]] += 1.2;
+      
+      // 地支（含藏干）
+      elements[zhiWuxing[pillar.zhi]] += 0.8;
+      const cangGan = zhiCangGan[pillar.zhi];
+      if (cangGan) {
+        Object.entries(cangGan).forEach(([gan, weight]) => {
+          elements[ganWuxing[gan]] += weight;
+        });
+      }
+    });
+    
+    // 计算百分比
+    const total = Object.values(elements).reduce((sum, val) => sum + val, 0);
+    const percentages = {};
+    Object.keys(elements).forEach(key => {
+      percentages[key] = Math.round((elements[key] / total) * 100);
+    });
+    
+    return {
+      raw: elements,
+      percentages: percentages,
+      total: total
+    };
+  }
+
+  /**
+   * 获取五行喜好
+   * @param {Object} bazi 八字对象
+   * @param {Object} fiveElements 五行能量分布
+   * @returns {Object} 五行喜好信息
+   */
+  static getElementPreference(bazi, fiveElements) {
+    const dayGan = bazi.details.day.gan;
+    
+    // 日干五行属性
+    const dayGanWuxing = {
+      '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+      '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
+    };
+    
+    const dayElement = dayGanWuxing[dayGan];
+    const percentages = fiveElements.percentages;
+    
+    // 判断五行强弱
+    const sortedElements = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+    const strongest = sortedElements[0][0];
+    const weakest = sortedElements[sortedElements.length - 1][0];
+    
+    // 五行生克关系
+    const sheng = {
+      '木': '火', '火': '土', '土': '金', '金': '水', '水': '木'
+    };
+    
+    const ke = {
+      '木': '土', '土': '水', '水': '火', '火': '金', '金': '木'
+    };
+    
+    // 判断用神和喜神
+    let useGod, happyGods,忌神;
+    
+    // 如果日主（日干五行）最旺，则喜克泄耗
+    if (dayElement === strongest) {
+      useGod = ke[dayElement];
+      happyGods = [ke[dayElement], sheng[ke[dayElement]]];
+      忌神 = [dayElement, sheng[dayElement]];
+    } 
+    // 如果日主最弱，则喜生扶
+    else if (dayElement === weakest) {
+      useGod = sheng[dayElement];
+      happyGods = [sheng[dayElement], sheng[sheng[dayElement]]];
+      忌神 = [ke[dayElement], sheng[ke[dayElement]]];
+    }
+    // 中等情况，取平衡
+    else {
+      useGod = weakest;
+      happyGods = [weakest, sheng[weakest]];
+      忌神 = [strongest, ke[weakest]];
+    }
+    
+    // 职业建议
+    const careerMap = {
+      '金': ['金融', '珠宝', '五金', '汽车', '医疗', '法律', '行政', '银行', '精密制造', '机械'],
+      '木': ['教育', '出版', '林业', '园艺', '纺织', '家具', '服装', '文化', '艺术', '设计'],
+      '水': ['贸易', '物流', '旅游', '航运', '水产', '清洁', '饮料', '酒类', '水产养殖', '进出口'],
+      '火': ['电子', '能源', '餐饮', '照明', '广告', '娱乐', 'IT', '网络', '影视', '化工'],
+      '土': ['房地产', '建筑', '农业', '陶瓷', '石材', '古董', '仓储', '保险', '地质', '管理']
+    };
+    
+    const suggestedCareers = [...new Set(happyGods.flatMap(e => careerMap[e] || []))];
+    
+    return {
+      dayElement: dayElement,
+      useGod: useGod,
+      happyGods: happyGods,
+      忌神: 忌神,
+      strongest: strongest,
+      weakest: weakest,
+      suggestedCareers: suggestedCareers
+    };
+  }
+
+  /**
+   * 计算十神占比
+   * @param {Object} bazi 八字对象
+   * @returns {Object} 十神占比
+   */
+  static calculateTenGods(bazi) {
+    const dayGan = bazi.details.day.gan;
+    const pillars = [bazi.details.year, bazi.details.month, bazi.details.day, bazi.details.hour];
+    
+    // 十神映射（基于日干和其他干支的关系）
+    const ganYinYang = {
+      '甲': '阳', '乙': '阴', '丙': '阳', '丁': '阴', '戊': '阳',
+      '己': '阴', '庚': '阳', '辛': '阴', '壬': '阳', '癸': '阴'
+    };
+    
+    const getTenGod = (targetGan, targetGanYinYang, dayGan, dayGanYinYang) => {
+      // 同性为偏，异性为正
+      // 相生：正印、偏印、正印（食伤生印）
+      // 相克：正官、七杀、正财、偏财、食神、伤官、劫财、比肩
+      
+      const elementRelation = {
+        '甲': { '木': 'same', '火': 'sheng', '土': 'ke', '金': 'bei_ke', '水': 'bei_sheng' },
+        '乙': { '木': 'same', '火': 'sheng', '土': 'ke', '金': 'bei_ke', '水': 'bei_sheng' },
+        '丙': { '木': 'bei_sheng', '火': 'same', '土': 'sheng', '金': 'ke', '水': 'bei_ke' },
+        '丁': { '木': 'bei_sheng', '火': 'same', '土': 'sheng', '金': 'ke', '水': 'bei_ke' },
+        '戊': { '木': 'ke', '火': 'bei_sheng', '土': 'same', '金': 'sheng', '水': 'bei_ke' },
+        '己': { '木': 'ke', '火': 'bei_sheng', '土': 'same', '金': 'sheng', '水': 'bei_ke' },
+        '庚': { '木': 'bei_ke', '火': 'ke', '土': 'bei_sheng', '金': 'same', '水': 'sheng' },
+        '辛': { '木': 'bei_ke', '火': 'ke', '土': 'bei_sheng', '金': 'same', '水': 'sheng' },
+        '壬': { '木': 'sheng', '火': 'bei_ke', '土': 'ke', '金': 'bei_sheng', '水': 'same' },
+        '癸': { '木': 'sheng', '火': 'bei_ke', '土': 'ke', '金': 'bei_sheng', '水': 'same' }
+      };
+      
+      const targetElement = targetGan;
+      const dayElement = dayGan;
+      
+      const relation = elementRelation[dayElement][targetElement];
+      const isSamePolarity = (dayGanYinYang === targetGanYinYang);
+      
+      switch (relation) {
+        case 'same':
+          return isSamePolarity ? '比肩' : '劫财';
+        case 'sheng':
+          return isSamePolarity ? '食神' : '伤官';
+        case 'bei_sheng':
+          return isSamePolarity ? '偏印' : '正印';
+        case 'ke':
+          return isSamePolarity ? '偏财' : '正财';
+        case 'bei_ke':
+          return isSamePolarity ? '七杀' : '正官';
+        default:
+          return '未知';
+      }
+    };
+    
+    const dayGanYinYang = ganYinYang[dayGan];
+    const tenGodsCount = {};
+    
+    // 统计天干十神
+    pillars.forEach(pillar => {
+      const tenGod = getTenGod(pillar.gan, ganYinYang[pillar.gan], dayGan, dayGanYinYang);
+      tenGodsCount[tenGod] = (tenGodsCount[tenGod] || 0) + 1.5; // 天干权重高
+    });
+    
+    // 计算百分比
+    const total = Object.values(tenGodsCount).reduce((sum, val) => sum + val, 0);
+    const percentages = {};
+    Object.keys(tenGodsCount).forEach(key => {
+      percentages[key] = Math.round((tenGodsCount[key] / total) * 100);
+    });
+    
+    return {
+      count: tenGodsCount,
+      percentages: percentages
+    };
+  }
+
+  /**
+   * 获取完整的八字分析
+   * @param {Object} bazi 八字对象
+   * @returns {Object} 完整分析结果
+   */
+  static analyzeBazi(bazi) {
+    const fiveElements = this.calculateFiveElements(bazi);
+    const elementPreference = this.getElementPreference(bazi, fiveElements);
+    const tenGods = this.calculateTenGods(bazi);
+    
+    return {
+      fiveElements: fiveElements,
+      elementPreference: elementPreference,
+      tenGods: tenGods
+    };
   }
 }
 
