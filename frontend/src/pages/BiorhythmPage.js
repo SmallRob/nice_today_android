@@ -8,7 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import BiorhythmChart from '../components/biorhythm/BiorhythmChart';
 import BiorhythmBanner from '../components/biorhythm/BiorhythmBanner';
-import { calculateBiorhythmData, getBiorhythmRange } from '../services/localDataService';
+import { getBiorhythmRange } from '../services/localDataService';
 
 const BiorhythmPage = () => {
   const { theme } = useTheme();
@@ -76,6 +76,100 @@ const BiorhythmPage = () => {
     if (diff > -5) return '→';
     if (diff > -30) return '↓';
     return '↓↓';
+  };
+
+  // 获取今日数据
+  const getTodayData = () => {
+    if (!biorhythmData || biorhythmData.length === 0) return null;
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    const todayData = biorhythmData.find(item => {
+      const itemDate = new Date(item.date);
+      return itemDate.toISOString().split('T')[0] === todayStr;
+    });
+
+    return todayData;
+  };
+
+  // 根据节律值获取健康提示
+  const getHealthAdvice = (physical, emotional, intellectual) => {
+    const advice = [];
+
+    // 体力建议
+    if (physical > 50) {
+      advice.push({
+        type: 'success',
+        category: '体力',
+        icon: '💪',
+        text: '体力充沛,适合运动锻炼或体力活动'
+      });
+    } else if (physical > 0) {
+      advice.push({
+        type: 'info',
+        category: '体力',
+        icon: '🏃',
+        text: '体力一般,建议适量运动,注意休息'
+      });
+    } else {
+      advice.push({
+        type: 'warning',
+        category: '体力',
+        icon: '😴',
+        text: '体力不足,避免剧烈运动,多休息保重'
+      });
+    }
+
+    // 情绪建议
+    if (emotional > 50) {
+      advice.push({
+        type: 'success',
+        category: '情绪',
+        icon: '😊',
+        text: '情绪高涨,适合社交活动和重要决策'
+      });
+    } else if (emotional > 0) {
+      advice.push({
+        type: 'info',
+        category: '情绪',
+        icon: '😐',
+        text: '情绪平稳,保持平常心,适度社交'
+      });
+    } else {
+      advice.push({
+        type: 'warning',
+        category: '情绪',
+        icon: '😢',
+        text: '情绪低落,注意调节心态,多与人交流'
+      });
+    }
+
+    // 智力建议
+    if (intellectual > 50) {
+      advice.push({
+        type: 'success',
+        category: '智力',
+        icon: '🧠',
+        text: '思维敏捷,适合学习、工作和重要思考'
+      });
+    } else if (intellectual > 0) {
+      advice.push({
+        type: 'info',
+        category: '智力',
+        icon: '📚',
+        text: '思维一般,专注力尚可,适合常规工作'
+      });
+    } else {
+      advice.push({
+        type: 'warning',
+        category: '智力',
+        icon: '💭',
+        text: '思维迟钝,避免重要决策,注意休息'
+      });
+    }
+
+    return advice;
   };
 
   // 计算未来7天数据
@@ -157,6 +251,116 @@ const BiorhythmPage = () => {
             <p className="text-red-600 dark:text-red-400 text-xs sm:text-sm">{error}</p>
           </div>
         )}
+
+        {/* 今日状态卡片 - 移动端一行三列紧凑显示 */}
+        {biorhythmData && (() => {
+          const todayData = getTodayData();
+          const healthAdvice = todayData ? getHealthAdvice(todayData.physical, todayData.emotional, todayData.intellectual) : [];
+
+          return todayData && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2 sm:p-3 mb-3 sm:mb-4">
+              <h3 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
+                今日状态
+              </h3>
+
+              {/* 三个节律值 - 移动端紧凑三列 */}
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+                {/* 体力 */}
+                <div className={`rounded-lg p-2 sm:p-3 transition-all ${
+                  todayData.physical > 50 ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/50 dark:to-emerald-900/50 border border-green-200 dark:border-green-700' :
+                  todayData.physical > 0 ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 border border-blue-200 dark:border-blue-700' :
+                  'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
+                }`}>
+                  <div className="text-center">
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1">体力</div>
+                    <div className={`text-base sm:text-xl font-bold ${
+                      todayData.physical > 50 ? 'text-green-600 dark:text-green-400' :
+                      todayData.physical > 0 ? 'text-blue-600 dark:text-blue-400' :
+                      'text-red-600 dark:text-red-400'
+                    }`}>
+                      {todayData.physical.toFixed(0)}
+                    </div>
+                    <div className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                      {todayData.physical > 50 ? '充沛' : todayData.physical > 0 ? '一般' : '疲劳'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 情绪 */}
+                <div className={`rounded-lg p-2 sm:p-3 transition-all ${
+                  todayData.emotional > 50 ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/50 dark:to-pink-900/50 border border-purple-200 dark:border-purple-700' :
+                  todayData.emotional > 0 ? 'bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-indigo-700' :
+                  'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/50 dark:to-red-900/50 border border-orange-200 dark:border-orange-700'
+                }`}>
+                  <div className="text-center">
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1">情绪</div>
+                    <div className={`text-base sm:text-xl font-bold ${
+                      todayData.emotional > 50 ? 'text-purple-600 dark:text-purple-400' :
+                      todayData.emotional > 0 ? 'text-indigo-600 dark:text-indigo-400' :
+                      'text-orange-600 dark:text-orange-400'
+                    }`}>
+                      {todayData.emotional.toFixed(0)}
+                    </div>
+                    <div className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                      {todayData.emotional > 50 ? '高涨' : todayData.emotional > 0 ? '平稳' : '低落'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 智力 */}
+                <div className={`rounded-lg p-2 sm:p-3 transition-all ${
+                  todayData.intellectual > 50 ? 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/50 dark:to-cyan-900/50 border border-blue-200 dark:border-blue-700' :
+                  todayData.intellectual > 0 ? 'bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/50 dark:to-violet-900/50 border border-indigo-200 dark:border-indigo-700' :
+                  'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
+                }`}>
+                  <div className="text-center">
+                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1">智力</div>
+                    <div className={`text-base sm:text-xl font-bold ${
+                      todayData.intellectual > 50 ? 'text-blue-600 dark:text-blue-400' :
+                      todayData.intellectual > 0 ? 'text-indigo-600 dark:text-indigo-400' :
+                      'text-red-600 dark:text-red-400'
+                    }`}>
+                      {todayData.intellectual.toFixed(0)}
+                    </div>
+                    <div className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                      {todayData.intellectual > 50 ? '敏捷' : todayData.intellectual > 0 ? '一般' : '迟钝'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 健康提示 */}
+              {healthAdvice.length > 0 && (
+                <div className="space-y-1.5 sm:space-y-2">
+                  {healthAdvice.map((advice, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-start gap-2 p-2 sm:p-2.5 rounded-lg transition-all ${
+                        advice.type === 'success' ?
+                          'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/40 border-l-2 border-green-500' :
+                          advice.type === 'warning' ?
+                          'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/40 dark:to-amber-900/40 border-l-2 border-orange-500' :
+                          'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border-l-2 border-blue-500'
+                      }`}
+                    >
+                      <span className="text-sm sm:text-base flex-shrink-0 mt-0.5">{advice.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[10px] sm:text-xs font-semibold text-gray-600 dark:text-gray-300">
+                            {advice.category}
+                          </span>
+                        </div>
+                        <p className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-200 leading-snug">
+                          {advice.text}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* 生物节律图表 */}
         {biorhythmData && (

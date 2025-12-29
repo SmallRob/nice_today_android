@@ -37,7 +37,8 @@
 }
 
 .dark .ziwei-title {
-  color: #f1f5f9;
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 .ziwei-icon {
@@ -58,7 +59,7 @@
 }
 
 .dark .ziwei-subtitle {
-  color: #cbd5e1;
+  color: #e2e8f0;
 }
 
 .ziwei-user-info {
@@ -71,8 +72,9 @@
 }
 
 .dark .ziwei-user-info {
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .info-item {
@@ -93,7 +95,7 @@
 }
 
 .dark .info-label {
-  color: #94a3b8;
+  color: #cbd5e1;
 }
 
 .info-value {
@@ -103,7 +105,8 @@
 }
 
 .dark .info-value {
-  color: #f1f5f9;
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 /* 内容区域 */
@@ -123,8 +126,9 @@
 }
 
 .dark .loading-container {
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .loading-spinner {
@@ -171,7 +175,8 @@
 }
 
 .dark .loading-text {
-  color: #f1f5f9;
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 .loading-subtext {
@@ -181,7 +186,7 @@
 }
 
 .dark .loading-subtext {
-  color: #94a3b8;
+  color: #cbd5e1;
 }
 
 /* 错误状态 */
@@ -195,8 +200,9 @@
 }
 
 .dark .error-container {
-  background: rgba(30, 41, 59, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .error-icon {
@@ -212,7 +218,8 @@
 }
 
 .dark .error-title {
-  color: #f87171;
+  color: #fca5a5;
+  text-shadow: 0 0 2px rgba(252, 165, 165, 0.3);
 }
 
 .error-message {
@@ -223,7 +230,7 @@
 }
 
 .dark .error-message {
-  color: #cbd5e1;
+  color: #e2e8f0;
 }
 
 .error-suggestion {
@@ -234,8 +241,8 @@
 }
 
 .dark .error-suggestion {
-  background: rgba(127, 29, 29, 0.3);
-  border: 1px solid rgba(252, 165, 165, 0.2);
+  background: rgba(127, 29, 29, 0.7);
+  border: 1px solid rgba(252, 165, 165, 0.5);
 }
 
 /* 空状态 */
@@ -249,8 +256,9 @@
 }
 
 .dark .empty-container {
-  background: rgba(30, 41, 59, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .empty-icon {
@@ -266,7 +274,8 @@
 }
 
 .dark .empty-title {
-  color: #f1f5f9;
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 .empty-message {
@@ -276,7 +285,7 @@
 }
 
 .dark .empty-message {
-  color: #cbd5e1;
+  color: #e2e8f0;
 }
 
 .required-info {

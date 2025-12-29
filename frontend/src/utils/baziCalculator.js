@@ -514,39 +514,50 @@ class BaziCalculator {
    * @returns {Object} 十神占比
    */
   static calculateTenGods(bazi) {
+    // 检查 bazi 和 details 是否存在
+    if (!bazi || !bazi.details || !bazi.details.day || !bazi.details.day.gan) {
+      console.error('Invalid bazi data:', bazi);
+      return {
+        count: {},
+        percentages: {}
+      };
+    }
+
     const dayGan = bazi.details.day.gan;
     const pillars = [bazi.details.year, bazi.details.month, bazi.details.day, bazi.details.hour];
-    
+
+    // 天干五行映射
+    const ganWuxing = {
+      '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+      '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
+    };
+
     // 十神映射（基于日干和其他干支的关系）
     const ganYinYang = {
       '甲': '阳', '乙': '阴', '丙': '阳', '丁': '阴', '戊': '阳',
       '己': '阴', '庚': '阳', '辛': '阴', '壬': '阳', '癸': '阴'
     };
-    
+
     const getTenGod = (targetGan, targetGanYinYang, dayGan, dayGanYinYang) => {
+      // 获取五行属性
+      const targetElement = ganWuxing[targetGan] || '木';
+      const dayElement = ganWuxing[dayGan] || '木';
+
       // 同性为偏，异性为正
       // 相生：正印、偏印、正印（食伤生印）
       // 相克：正官、七杀、正财、偏财、食神、伤官、劫财、比肩
-      
+
       const elementRelation = {
-        '甲': { '木': 'same', '火': 'sheng', '土': 'ke', '金': 'bei_ke', '水': 'bei_sheng' },
-        '乙': { '木': 'same', '火': 'sheng', '土': 'ke', '金': 'bei_ke', '水': 'bei_sheng' },
-        '丙': { '木': 'bei_sheng', '火': 'same', '土': 'sheng', '金': 'ke', '水': 'bei_ke' },
-        '丁': { '木': 'bei_sheng', '火': 'same', '土': 'sheng', '金': 'ke', '水': 'bei_ke' },
-        '戊': { '木': 'ke', '火': 'bei_sheng', '土': 'same', '金': 'sheng', '水': 'bei_ke' },
-        '己': { '木': 'ke', '火': 'bei_sheng', '土': 'same', '金': 'sheng', '水': 'bei_ke' },
-        '庚': { '木': 'bei_ke', '火': 'ke', '土': 'bei_sheng', '金': 'same', '水': 'sheng' },
-        '辛': { '木': 'bei_ke', '火': 'ke', '土': 'bei_sheng', '金': 'same', '水': 'sheng' },
-        '壬': { '木': 'sheng', '火': 'bei_ke', '土': 'ke', '金': 'bei_sheng', '水': 'same' },
-        '癸': { '木': 'sheng', '火': 'bei_ke', '土': 'ke', '金': 'bei_sheng', '水': 'same' }
+        '木': { '木': 'same', '火': 'sheng', '土': 'ke', '金': 'bei_ke', '水': 'bei_sheng' },
+        '火': { '木': 'bei_sheng', '火': 'same', '土': 'sheng', '金': 'ke', '水': 'bei_ke' },
+        '土': { '木': 'ke', '火': 'bei_sheng', '土': 'same', '金': 'sheng', '水': 'bei_ke' },
+        '金': { '木': 'bei_ke', '火': 'ke', '土': 'bei_sheng', '金': 'same', '水': 'sheng' },
+        '水': { '木': 'sheng', '火': 'bei_ke', '土': 'ke', '金': 'bei_sheng', '水': 'same' }
       };
-      
-      const targetElement = targetGan;
-      const dayElement = dayGan;
-      
-      const relation = elementRelation[dayElement][targetElement];
+
+      const relation = elementRelation[dayElement]?.[targetElement];
       const isSamePolarity = (dayGanYinYang === targetGanYinYang);
-      
+
       switch (relation) {
         case 'same':
           return isSamePolarity ? '比肩' : '劫财';
@@ -559,26 +570,43 @@ class BaziCalculator {
         case 'bei_ke':
           return isSamePolarity ? '七杀' : '正官';
         default:
+          console.warn(`Unknown relation: dayElement=${dayElement}, targetElement=${targetElement}`);
           return '未知';
       }
     };
-    
+
     const dayGanYinYang = ganYinYang[dayGan];
     const tenGodsCount = {};
-    
+
     // 统计天干十神
     pillars.forEach(pillar => {
-      const tenGod = getTenGod(pillar.gan, ganYinYang[pillar.gan], dayGan, dayGanYinYang);
+      if (!pillar || !pillar.gan) {
+        console.warn('Invalid pillar:', pillar);
+        return;
+      }
+
+      const targetGan = pillar.gan;
+      const targetGanYinYang = ganYinYang[targetGan];
+      const tenGod = getTenGod(targetGan, targetGanYinYang, dayGan, dayGanYinYang);
       tenGodsCount[tenGod] = (tenGodsCount[tenGod] || 0) + 1.5; // 天干权重高
     });
-    
+
     // 计算百分比
     const total = Object.values(tenGodsCount).reduce((sum, val) => sum + val, 0);
+
+    // 如果总数为0，避免除以0
+    if (total === 0) {
+      return {
+        count: {},
+        percentages: {}
+      };
+    }
+
     const percentages = {};
     Object.keys(tenGodsCount).forEach(key => {
       percentages[key] = Math.round((tenGodsCount[key] / total) * 100);
     });
-    
+
     return {
       count: tenGodsCount,
       percentages: percentages

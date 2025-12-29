@@ -116,33 +116,34 @@ const BaziPage = () => {
       const zodiacs = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
       calculatedBazi.zodiac = zodiacs[zhiIndex];
 
+      // 先设置 baziData，确保其他函数可以使用
       setBaziData(calculatedBazi);
 
-      // 计算流年大运
-      const liuNian = calculateLiuNianDaYun(year, month, day, hour);
+      // 计算流年大运 - 传递正确的 baziData 对象
+      const liuNian = calculateLiuNianDaYun(calculatedBazi);
       setLiuNianData(liuNian);
 
       // 创建目标日期对象
       let targetDate = new Date(selectedYear, selectedMonth - 1, 1);
 
+      // 使用 calculatedBazi 而不是 baziData（此时 baziData 状态还未更新）
       const monthlyFortune = getMonthlyBaziFortune([
-        baziData.year,
-        baziData.month,
-        baziData.day,
-        baziData.hour
+        calculatedBazi.year,
+        calculatedBazi.month,
+        calculatedBazi.day,
+        calculatedBazi.hour
       ], targetDate);
       setMonthlyFortune(monthlyFortune);
 
-      // 计算每日能量运势
-      // 构造符合 calculateDailyEnergy 函数要求的八字数据格式
+      // 计算每日能量运势 - 使用 calculatedBazi
       const baziDataForDaily = {
         bazi: {
-          year: baziData.year,
-          month: baziData.month,
-          day: baziData.day,
-          hour: baziData.hour
+          year: calculatedBazi.year,
+          month: calculatedBazi.month,
+          day: calculatedBazi.day,
+          hour: calculatedBazi.hour
         },
-        day: baziData.day
+        day: calculatedBazi.day
       };
       const dailyEnergy = calculateDailyEnergy(baziDataForDaily);
       setDailyEnergyData(dailyEnergy);
@@ -163,10 +164,10 @@ const BaziPage = () => {
             1
           );
           const monthFortune = getMonthlyBaziFortune([
-            baziData.year,
-            baziData.month,
-            baziData.day,
-            baziData.hour
+            calculatedBazi.year,
+            calculatedBazi.month,
+            calculatedBazi.day,
+            calculatedBazi.hour
           ], targetDate);
           trendData.push({
             date: `${targetDate.getMonth() + 1}月`,
@@ -189,10 +190,10 @@ const BaziPage = () => {
           const targetDate = new Date(startOfWeek);
           targetDate.setDate(startOfWeek.getDate() + i);
           const dailyFortune = getMonthlyBaziFortune([
-            baziData.year,
-            baziData.month,
-            baziData.day,
-            baziData.hour
+            calculatedBazi.year,
+            calculatedBazi.month,
+            calculatedBazi.day,
+            calculatedBazi.hour
           ], targetDate);
           const weekDayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
           trendData.push({
@@ -221,10 +222,10 @@ const BaziPage = () => {
       if (viewMode === 'monthly') {
         targetDate = new Date(selectedYear, selectedMonth - 1, 1);
         const monthlyFortune = getMonthlyBaziFortune([
-          baziData.year,
-          baziData.month,
-          baziData.day,
-          baziData.hour
+          calculatedBazi.year,
+          calculatedBazi.month,
+          calculatedBazi.day,
+          calculatedBazi.hour
         ], targetDate);
         setMonthlyFortune(monthlyFortune);
       } else if (viewMode === 'weekly') {
@@ -236,10 +237,10 @@ const BaziPage = () => {
         startOfWeek.setDate(today.getDate() - diff);
         targetDate = startOfWeek;
         const weeklyFortune = getMonthlyBaziFortune([
-          baziData.year,
-          baziData.month,
-          baziData.day,
-          baziData.hour
+          calculatedBazi.year,
+          calculatedBazi.month,
+          calculatedBazi.day,
+          calculatedBazi.hour
         ], targetDate);
         setMonthlyFortune(weeklyFortune);
       }

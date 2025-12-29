@@ -21,13 +21,13 @@ const getCardColor = (strength) => {
  */
 const getCardColorDark = (strength) => {
   switch (strength) {
-    case '强': return 'from-green-800/90 to-emerald-900/90 dark:border-green-400/60 dark:shadow-green-900/30';
-    case '偏强': return 'from-blue-800/90 to-indigo-900/90 dark:border-blue-400/60 dark:shadow-blue-900/30';
-    case '中偏强': return 'from-indigo-800/90 to-purple-900/90 dark:border-indigo-400/60 dark:shadow-indigo-900/30';
-    case '中': return 'from-gray-700/90 to-slate-800/90 dark:border-gray-400/60 dark:shadow-gray-800/30';
-    case '偏弱': return 'from-orange-800/90 to-amber-900/90 dark:border-orange-400/60 dark:shadow-orange-900/30';
-    case '弱': return 'from-red-800/90 to-rose-900/90 dark:border-red-400/60 dark:shadow-red-900/30';
-    default: return 'from-gray-700/90 to-slate-800/90 dark:border-gray-400/60 dark:shadow-gray-800/30';
+    case '强': return 'from-green-900 to-emerald-950 dark:border-green-400 dark:shadow-green-900/50';
+    case '偏强': return 'from-blue-900 to-indigo-950 dark:border-blue-400 dark:shadow-blue-900/50';
+    case '中偏强': return 'from-indigo-900 to-purple-950 dark:border-indigo-400 dark:shadow-indigo-900/50';
+    case '中': return 'from-gray-800 to-slate-900 dark:border-gray-400 dark:shadow-gray-800/50';
+    case '偏弱': return 'from-orange-900 to-amber-950 dark:border-orange-400 dark:shadow-orange-900/50';
+    case '弱': return 'from-red-900 to-rose-950 dark:border-red-400 dark:shadow-red-900/50';
+    default: return 'from-gray-800 to-slate-900 dark:border-gray-400 dark:shadow-gray-800/50';
   }
 };
 
