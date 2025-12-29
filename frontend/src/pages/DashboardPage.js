@@ -16,10 +16,14 @@ import {
   LifeMatrixCard,
   DailyCardCard,
   TarotGardenCard,
-  CulturalCupCard
+  CulturalCupCard,
+  DressGuideCard,
+  WuxingHealthCard,
+  OrganRhythmCard
 } from '../components/dashboard/FeatureCards';
 import { useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css';
+import FestivalCard from '../components/dashboard/FestivalCard';
 import {
   loadFeatureSortOrder,
   saveFeatureSortOrder,
@@ -50,6 +54,9 @@ const Dashboard = () => {
     { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
     { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
     { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
+    { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类' },
+    { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类' },
+    { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类' },
     { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
     { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
     { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
@@ -152,11 +159,13 @@ const Dashboard = () => {
         { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
         { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
         { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
-    { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
-    { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
-    { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
-    { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
-    { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
+        { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类' },
+        { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类' },
+        { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
+        { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
+        { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
+        { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
+        { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
       ];
       setFeatures(allFeatures);
 
@@ -172,6 +181,9 @@ const Dashboard = () => {
 
       {/* 每日运势能量卡片 */}
       <DailyFortuneCard />
+
+      {/* 节日节气提醒 */}
+      <FestivalCard />
 
       {/* 快速操作 - 置顶的功能 */}
       <div className="quick-actions">
@@ -191,18 +203,12 @@ const Dashboard = () => {
         </button>
         <button
           className="quick-action-btn"
-          onClick={() => navigate('/bazi?mode=weekly')}
+          onClick={() => navigate('/dress')}
         >
-          <span>📊</span>
-          <span>本周趋势</span>
+          <span>👕</span>
+          <span>穿衣指南</span>
         </button>
-        <button
-          className="quick-action-btn"
-          onClick={() => navigate('/biorhythm')}
-        >
-          <span>💡</span>
-          <span>每日建议</span>
-        </button>
+
       </div>
 
       {/* 全部功能标题和分割线 */}

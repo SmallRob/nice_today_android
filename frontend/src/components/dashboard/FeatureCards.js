@@ -278,6 +278,51 @@ const CulturalCupCard = () => {
   );
 };
 
+/**
+ * 穿衣指南组件
+ */
+const DressGuideCard = () => {
+  return (
+    <FeatureCard
+      title="穿衣指南"
+      description="五行穿衣 · 每日运势"
+      icon="👕"
+      color="#ec4899"
+      route="/dress"
+    />
+  );
+};
+
+/**
+ * 五行养生组件
+ */
+const WuxingHealthCard = () => {
+  return (
+    <FeatureCard
+      title="五行养生"
+      description="季节调养 · 身心平衡"
+      icon="💚"
+      color="#8b5cf6"
+      route="/wuxing-health"
+    />
+  );
+};
+
+/**
+ * 器官节律组件
+ */
+const OrganRhythmCard = () => {
+  return (
+    <FeatureCard
+      title="器官节律"
+      description="子午流注 · 十二时辰"
+      icon="⏰"
+      color="#9333ea"
+      route="/organ-rhythm"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -294,5 +339,8 @@ export {
   LifeMatrixCard,
   DailyCardCard,
   TarotGardenCard,
-  CulturalCupCard
+  CulturalCupCard,
+  DressGuideCard,
+  WuxingHealthCard,
+  OrganRhythmCard
 };
