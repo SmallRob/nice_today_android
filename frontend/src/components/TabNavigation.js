@@ -80,22 +80,6 @@ const TabNavigation = () => {
       )
     },
     {
-      id: 'maya',
-      label: '玛雅图腾',
-      path: '/maya',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="3" strokeWidth={2} />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v3m0 13v4M2 10h3m14 0h3M4.93 4.93l2.12 2.12m9.9 9.9l2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9l2.12-2.12" />
-        </svg>
-      ),
-      activeIcon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="4" />
-        </svg>
-      )
-    },
-    {
       id: 'trend',
       label: '人生趋势',
       path: '/trend',
@@ -151,9 +135,6 @@ const TabNavigation = () => {
     if (path === '/') {
       // 清除首页相关缓存
       storageManager.removeGlobalCache('dashboard_data');
-    } else if (path === '/maya') {
-      // 清除玛雅页面相关缓存
-      storageManager.removeGlobalCache('maya_data');
     } else if (path === '/trend') {
       // 清除人生趋势页面相关缓存
       storageManager.removeGlobalCache('lifeTrend_data');

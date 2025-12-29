@@ -31,6 +31,20 @@ function TarotGardenPage() {
             </Card>
 
             <Card>
+              <div className="text-center p-6 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-600 rounded-lg text-white relative">
+                <div className="text-5xl mb-3">🌟</div>
+                <h2 className="text-2xl font-bold mb-2">玛雅图腾</h2>
+                <p className="text-amber-100">探索古老的玛雅智慧</p>
+                <button
+                  onClick={() => window.location.href = '/maya'}
+                  className="absolute bottom-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1 rounded-md text-sm transition-all"
+                >
+                  进入 →
+                </button>
+              </div>
+            </Card>
+
+            <Card>
               <div className="text-center p-6 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-600 rounded-lg text-white relative">
                 <div className="text-5xl mb-3">🔢</div>
                 <h2 className="text-2xl font-bold mb-2">数字之灵</h2>
