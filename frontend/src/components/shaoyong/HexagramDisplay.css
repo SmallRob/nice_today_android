@@ -1,0 +1,194 @@
+.hexagram-display {
+  padding: 10px 0;
+}
+
+.divination-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.divination-info h3 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.divination-info p {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.hexagrams-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+  .hexagrams-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hexagram-card {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.hexagram-card:hover {
+  transform: translateY(-5px);
+}
+
+.hexagram-card.changing {
+  border-color: #e74c3c;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+}
+
+.hexagram-card h4 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.changing-badge {
+  background: #e74c3c;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  margin-left: 8px;
+}
+
+.hexagram-symbol {
+  margin: 20px 0;
+}
+
+.hexagram-line {
+  margin: 8px auto;
+  position: relative;
+  width: 80%;
+  max-width: 200px;
+}
+
+.line-yang {
+  height: 8px;
+  background: #2c3e50;
+  margin: 0 auto;
+}
+
+.line-yin {
+  height: 8px;
+  background: #2c3e50;
+  margin: 0 auto;
+  width: 60%;
+}
+
+.hexagram-line.changing .line-yang,
+.hexagram-line.changing .line-yin {
+  background: #e74c3c;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.line-number {
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.hexagram-info {
+  margin-top: 20px;
+}
+
+.hexagram-name {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.hexagram-enname {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.hexagram-desc {
+  font-size: 0.9rem;
+  color: #34495e;
+  margin-bottom: 12px;
+}
+
+.hexagram-composition {
+  font-size: 0.85rem;
+  color: #95a5a6;
+  padding: 6px 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.trigram-explanation {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.trigram-explanation h4 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.trigrams-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+@media (max-width: 768px) {
+  .trigrams-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.trigram-item {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.trigram-symbol {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.trigram-name {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-right: 8px;
+}
+
+.trigram-nature,
+.trigram-attribute {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin: 0 4px;
+}

@@ -489,7 +489,7 @@ const MayaCalendarTab = memo(() => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden">
+    <div className="flex flex-col bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
       <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized bg-white dark:bg-black -webkit-overflow-scrolling-touch">
         {/* 统一的标题区域：今日玛雅启示 */}

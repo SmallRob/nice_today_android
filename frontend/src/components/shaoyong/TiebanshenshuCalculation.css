@@ -1,0 +1,539 @@
+.tiebanshenshu-calculation {
+  padding: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 开始计算界面 */
+.start-calculation {
+  text-align: center;
+}
+
+.bazi-review {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+.bazi-review h4 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.bazi-display {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bazi-pillars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.pillar {
+  text-align: center;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.pillar-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.pillar-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bazi-info {
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.bazi-info p {
+  margin: 0.25rem 0;
+}
+
+/* 五行分析 */
+.wuxing-analysis {
+  margin-top: 1rem;
+}
+
+.wuxing-analysis h5 {
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.wuxing-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wuxing-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wuxing-label {
+  width: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.bar-container {
+  flex: 1;
+  height: 24px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.bar-木 {
+  background: linear-gradient(90deg, #4CAF50, #66BB6A);
+}
+
+.bar-火 {
+  background: linear-gradient(90deg, #F44336, #EF5350);
+}
+
+.bar-土 {
+  background: linear-gradient(90deg, #795548, #8D6E63);
+}
+
+.bar-金 {
+  background: linear-gradient(90deg, #FFC107, #FFCA28);
+}
+
+.bar-水 {
+  background: linear-gradient(90deg, #2196F3, #42A5F5);
+}
+
+.bar-count {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* 计算说明 */
+.calculation-instructions {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+.calculation-instructions h4 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.calculation-instructions ul {
+  text-align: left;
+  padding-left: 1.5rem;
+}
+
+.calculation-instructions li {
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* 按钮 */
+.start-btn {
+  width: 100%;
+  max-width: 280px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.start-btn:active {
+  transform: translateY(0);
+}
+
+/* 计算进行中 */
+.calculation-in-progress {
+  text-align: center;
+}
+
+.calculation-in-progress h4 {
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.progress-container {
+  margin-bottom: 2rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8B5CF6, #7C3AED);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* 计算步骤 */
+.calculation-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.calculation-step {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.calculation-step.completed {
+  border-color: #8B5CF6;
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.calculation-step.completed .step-number {
+  background: #8B5CF6;
+  color: white;
+}
+
+.step-title {
+  flex: 1;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.step-status {
+  font-weight: 600;
+  color: #8B5CF6;
+}
+
+.step-description {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.step-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.step-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--border-color);
+}
+
+/* 计算提示 */
+.calculation-tip {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* 计算完成 */
+.calculation-complete {
+  text-align: center;
+}
+
+.result-header {
+  margin-bottom: 1.5rem;
+}
+
+.result-header h4 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.result-id {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+}
+
+/* 结果摘要 */
+.result-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.summary-icon {
+  font-size: 2rem;
+}
+
+.summary-content h5 {
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.summary-content p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* 条文预览 */
+.clause-preview {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.clause-preview h5 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.clause-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.clause-number {
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  font-family: monospace;
+}
+
+.clause-more {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* 计算回顾 */
+.calculation-review {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.calculation-review h5 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.steps-review {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.review-step {
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+}
+
+.review-step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.step-index {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.step-title {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.review-step-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* 操作按钮 */
+.calculation-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-tertiary);
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .tiebanshenshu-calculation {
+    padding: 0.5rem;
+  }
+  
+  .bazi-pillars {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .calculation-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary, .btn-secondary {
+    width: 100%;
+  }
+}
+
+/* 主题变量 */
+:root {
+  --card-bg: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] {
+  --card-bg: #1e293b;
+  --bg-secondary: #334155;
+  --bg-tertiary: #475569;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #475569;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+}

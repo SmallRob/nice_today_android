@@ -1,0 +1,528 @@
+/* 邵雍易学 - 统一主题样式系统 */
+
+/* CSS 变量定义 - 支持主题切换 */
+:root {
+  /* 深色主题 (默认) */
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #2d4059;
+  --bg-card: linear-gradient(145deg, #2d4059, #1a1a2e);
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-accent: #4fc3f7;
+  --border-color: #405175;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --hover-color: rgba(79, 195, 247, 0.1);
+}
+
+[data-theme="light"] {
+  /* 浅色主题 */
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --bg-card: linear-gradient(145deg, #ffffff, #f5f7fa);
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-accent: #3498db;
+  --border-color: #e0e0e0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --hover-color: rgba(52, 152, 219, 0.1);
+}
+
+/* 全局重置 */
+.shaoyong-yixue * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.shaoyong-yixue {
+  font-family: 'SimSun', '宋体', 'Microsoft YaHei', serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+}
+
+/* 头部样式 */
+.app-header {
+  background: linear-gradient(to right, var(--bg-secondary), var(--bg-primary));
+  color: var(--text-primary);
+  padding: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.app-header::before {
+  content: '☰ ☱ ☲ ☳ ☴ ☵ ☶ ☷';
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  color: var(--text-secondary);
+  opacity: 0.1;
+  font-size: 3rem;
+  letter-spacing: 15px;
+  text-align: center;
+}
+
+.header-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.title-section h1 {
+  font-size: 2.8rem;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+  text-shadow: 0 2px 10px var(--shadow-color);
+  color: var(--text-accent);
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.header-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.theme-toggle {
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  border-color: var(--text-accent);
+}
+
+/* 标签页导航 */
+.tab-navigation {
+  max-width: 1600px;
+  margin: 20px auto 0;
+  padding: 0 20px;
+  display: flex;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 15px 25px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 15px 15px 0 0;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tab-btn:hover {
+  background: var(--hover-color);
+  border-color: var(--text-accent);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: var(--bg-secondary);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+.tab-icon {
+  font-size: 1.3rem;
+}
+
+/* 主要内容区域 */
+.main-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+/* 卡片样式 */
+.card {
+  background: var(--bg-card);
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 32px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px var(--shadow-color);
+}
+
+.card h2 {
+  color: var(--text-accent);
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--border-color);
+  font-size: 1.8rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+/* 占位符样式 */
+.placeholder {
+  text-align: center;
+  padding: 60px 30px;
+  color: var(--text-secondary);
+}
+
+.placeholder-card {
+  text-align: center;
+  padding: 60px 30px;
+}
+
+.placeholder-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.abacus-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.placeholder-content h3 {
+  color: var(--text-accent);
+  margin-bottom: 15px;
+  font-size: 1.8rem;
+}
+
+.placeholder-content p {
+  color: var(--text-secondary);
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: var(--hover-color);
+  border-radius: 10px;
+  border-left: 4px solid var(--text-accent);
+}
+
+.feature-icon {
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* 阴阳图 */
+.yin-yang {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(to bottom, var(--text-primary) 50%, var(--bg-secondary) 50%);
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+.yin-yang:before,
+.yin-yang:after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  top: 25px;
+}
+
+.yin-yang:before {
+  background: var(--bg-secondary);
+  left: 10px;
+  border: 10px solid var(--text-primary);
+}
+
+.yin-yang:after {
+  background: var(--text-primary);
+  right: 10px;
+  border: 10px solid var(--bg-secondary);
+}
+
+/* 底部样式 */
+.app-footer {
+  text-align: center;
+  padding: 25px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 20px;
+  background: var(--bg-card);
+  border-radius: 10px;
+}
+
+.footer-content {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.tip {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 10px;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+/* 按钮样式 */
+.btn-primary, .btn-secondary {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--text-accent), var(--text-accent));
+  color: var(--bg-primary);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 195, 247, 0.3);
+}
+
+.btn-secondary {
+  background: var(--hover-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--hover-color);
+  transform: translateY(-2px);
+  border-color: var(--text-accent);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .card {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .shaoyong-yixue {
+    padding: 10px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .title-section h1 {
+    font-size: 2.2rem;
+  }
+  
+  .tab-navigation {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .tab-btn {
+    border-radius: 10px;
+    padding: 12px 20px;
+  }
+  
+  .content-grid {
+    gap: 15px;
+  }
+  
+  .card {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .card h2 {
+    font-size: 1.5rem;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .app-footer {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title-section h1 {
+    font-size: 1.8rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .tab-btn {
+    font-size: 1rem;
+    padding: 10px 15px;
+  }
+  
+  .card {
+    padding: 15px;
+  }
+  
+  .card h2 {
+    font-size: 1.3rem;
+  }
+}
+
+/* 特殊动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-content {
+  animation: fadeIn 0.5s ease;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+.loading::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--text-secondary);
+  border-top: 2px solid var(--text-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 八卦图标特殊样式 */
+.bagua-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px var(--shadow-color));
+  transition: transform 0.3s ease;
+}
+
+.bagua-icon:hover {
+  transform: scale(1.1);
+}
+
+/* 古风边框装饰 */
+.antique-border {
+  position: relative;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.antique-border::before,
+.antique-border::after {
+  content: '❖';
+  position: absolute;
+  color: var(--text-accent);
+  font-size: 0.8rem;
+}
+
+.antique-border::before {
+  top: -5px;
+  left: -5px;
+}
+
+.antique-border::after {
+  bottom: -5px;
+  right: -5px;
+}

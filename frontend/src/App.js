@@ -105,6 +105,7 @@ const CulturalCupPage = lazyLoadWithErrorHandling(() => import('./pages/Cultural
 const BaziAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/BaziAnalysisPage'));
 const WuxingHealthPage = lazyLoadWithErrorHandling(() => import('./pages/WuxingHealthPage'));
 const OrganRhythmPage = lazyLoadWithErrorHandling(() => import('./pages/OrganRhythmPage'));
+const ShaoyongYixuePage = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -186,6 +187,7 @@ const AppLayout = () => {
             <Route path="/wuxing-health" element={<WuxingHealthPage />} />
             <Route path="/organ-rhythm" element={<OrganRhythmPage />} />
             <Route path="/dress" element={<DressGuidePage />} />
+            <Route path="/shaoyong-yixue" element={<ShaoyongYixuePage />} />
           </Routes>
         </SafeSuspense>
       </div>

@@ -354,10 +354,36 @@ const MayanTattoo = () => {
   useEffect(() => {
     try {
       setLoading(true);
-      // 直接从 currentConfig.birthDate 获取出生日期
-      let birthDateToUse = currentConfig?.birthDate || DEFAULT_BIRTH_DATE;
+      
+      // 确保从配置中获取正确的出生日期
+      let birthDateToUse = null;
+      
+      // 优先从标准配置获取
+      if (currentConfig?.birthDate) {
+        birthDateToUse = currentConfig.birthDate;
+      } else if (currentConfig?.birthInfo?.birthDate) {
+        birthDateToUse = currentConfig.birthInfo.birthDate;
+      } else if (currentConfig?.userInfo?.birthDate) {
+        birthDateToUse = currentConfig.userInfo.birthDate;
+      } else {
+        // 如果都没有，使用默认日期
+        birthDateToUse = DEFAULT_BIRTH_DATE;
+        console.warn('未找到用户出生日期，使用默认值:', birthDateToUse);
+      }
 
-      const data = calculateTattooData(birthDateToUse);
+      // 确保birthDateToUse是有效的日期格式
+      let validBirthDate = birthDateToUse;
+      if (typeof validBirthDate === 'string') {
+        // 尝试转换为Date对象验证
+        const testDate = new Date(validBirthDate);
+        if (isNaN(testDate.getTime())) {
+          console.warn('出生日期格式无效，使用默认值');
+          validBirthDate = DEFAULT_BIRTH_DATE;
+        }
+      }
+
+      console.log('计算玛雅图腾使用的出生日期:', validBirthDate);
+      const data = calculateTattooData(validBirthDate);
       setTattooData(data);
     } catch (error) {
       console.error('加载图腾数据时出错:', error);
@@ -382,7 +408,32 @@ const MayanTattoo = () => {
     } finally {
       setLoading(false);
     }
-  }, [calculateTattooData, currentConfig?.birthDate]);
+  }, [calculateTattooData, currentConfig?.birthDate, currentConfig?.birthInfo?.birthDate, currentConfig?.userInfo?.birthDate]);
+
+  // 监听用户配置变化，当出生日期更新时重新计算
+  useEffect(() => {
+    if (currentConfig && tattooData) {
+      // 检查出生日期是否有变化
+      const currentBirthDate = currentConfig?.birthDate || 
+                              currentConfig?.birthInfo?.birthDate || 
+                              currentConfig?.userInfo?.birthDate || 
+                              DEFAULT_BIRTH_DATE;
+      
+      // 比较当前使用的出生日期和配置中的出生日期
+      if (currentBirthDate !== tattooData.birthDate) {
+        console.log('检测到出生日期变化，重新计算玛雅图腾');
+        try {
+          setLoading(true);
+          const data = calculateTattooData(currentBirthDate);
+          setTattooData(data);
+        } catch (error) {
+          console.error('重新计算图腾数据时出错:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    }
+  }, [currentConfig, tattooData, calculateTattooData]);
 
   // 获取图腾渐变色类名
   const getSealGradientClass = (sealName) => {

@@ -22,6 +22,14 @@ function MoreFeaturesPage() {
       icon: '👤'
     },
     {
+      id: 'shaoyong-yixue',
+      title: '🌸 邵雍易学',
+      description: '梅花易数与铁板神数的智慧融合，探索古法占卜',
+      path: '/shaoyong-yixue',
+      gradient: 'from-indigo-500 via-purple-500 to-pink-600',
+      icon: '🌸'
+    },
+    {
       id: 'system-settings',
       title: '⚙️ 系统设置',
       description: '配置应用系统参数和高级选项',

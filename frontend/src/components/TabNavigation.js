@@ -111,6 +111,25 @@ const TabNavigation = () => {
       )
     },
     {
+      id: 'shaoyong',
+      label: '邵雍易学',
+      path: '/shaoyong-yixue',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" strokeWidth={2} />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 6l2 2m10 0l-2 2M6 18l2-2m10 0l-2-2" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 2v3m0 14v3M2 12h3m14 0h3" stroke="white" strokeWidth={2} />
+          <path d="M6 6l2 2m10 0l-2 2M6 18l2-2m10 0l-2-2" stroke="white" strokeWidth={1.5} />
+        </svg>
+      )
+    },
+    {
       id: 'settings',
       label: '更多功能',
       path: '/more-features',
@@ -153,6 +172,9 @@ const TabNavigation = () => {
     } else if (path === '/numerology') {
       // 清除生命灵数页面相关缓存
       storageManager.removeGlobalCache('numerology_data');
+    } else if (path === '/shaoyong-yixue') {
+      // 清除邵雍易学页面相关缓存
+      storageManager.removeGlobalCache('shaoyong_data');
     }
 
     navigate(path);

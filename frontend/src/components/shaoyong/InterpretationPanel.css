@@ -1,0 +1,234 @@
+/* 卦象解读面板样式 - 适配主题系统 */
+
+.interpretation-panel {
+  padding: 10px 0;
+  font-family: inherit;
+}
+
+.interpretation-summary,
+.changing-line-interpretation,
+.practical-advice,
+.meihua-principles {
+  margin-bottom: 30px;
+}
+
+.interpretation-panel h3 {
+  color: var(--text-accent);
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  font-weight: 300;
+  font-family: inherit;
+}
+
+.summary-card,
+.changing-line-card,
+.advice-card {
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px var(--shadow-color);
+  border-left: 4px solid var(--text-accent);
+  border: 1px solid var(--border-color);
+}
+
+.summary-card h4 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  color: var(--text-accent);
+  font-family: inherit;
+}
+
+.summary-card p {
+  line-height: 1.6;
+  margin-bottom: 15px;
+  color: var(--text-primary);
+}
+
+.summary-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: var(--hover-color);
+  color: var(--text-accent);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  border: 1px solid var(--border-color);
+}
+
+.line-number {
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-left: 10px;
+}
+
+.changing-line-card {
+  border-left-color: #e74c3c;
+}
+
+.line-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.line-position {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.line-type {
+  background: var(--hover-color);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.line-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.line-advice h4 {
+  color: var(--text-accent);
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+.line-advice p {
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.advice-card {
+  border-left-color: #2ecc71;
+}
+
+.advice-details {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.advice-details h4 {
+  color: var(--text-accent);
+  margin-bottom: 12px;
+  font-family: inherit;
+}
+
+.advice-details ul {
+  padding-left: 20px;
+}
+
+.advice-details li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.principles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.principle-item {
+  display: flex;
+  gap: 15px;
+  background: var(--bg-card);
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  border: 1px solid var(--border-color);
+}
+
+.principle-number {
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.principle-item p {
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.note {
+  margin-top: 20px;
+  padding: 15px;
+  background: var(--hover-color);
+  border-radius: 8px;
+  border-left: 4px solid var(--text-accent);
+}
+
+.note p {
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.note strong {
+  color: var(--text-accent);
+}
+
+.method-note {
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--hover-color);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.method-note h4 {
+  color: var(--text-accent);
+  margin-bottom: 12px;
+  font-family: inherit;
+}
+
+.method-note p {
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .summary-card,
+  .changing-line-card,
+  .advice-card {
+    padding: 15px;
+  }
+  
+  .line-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .principle-item {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .summary-tags {
+    justify-content: center;
+  }
+}

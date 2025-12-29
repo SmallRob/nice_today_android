@@ -1,0 +1,240 @@
+/* 梅花易数组件样式 - 适配主题系统 */
+
+.hexagram-display {
+  font-family: inherit;
+}
+
+.divination-info {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: var(--hover-color);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.divination-info h3 {
+  color: var(--text-accent);
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  font-weight: 300;
+}
+
+.divination-info p {
+  margin: 8px 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.divination-info strong {
+  color: var(--text-accent);
+}
+
+.hexagrams-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.hexagram-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.hexagram-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px var(--shadow-color);
+}
+
+.hexagram-card.changing {
+  border-color: var(--text-accent);
+  background: linear-gradient(145deg, var(--hover-color), var(--bg-card));
+}
+
+.hexagram-card h4 {
+  color: var(--text-accent);
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  font-weight: 300;
+}
+
+.changing-badge {
+  background: var(--text-accent);
+  color: var(--bg-primary);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  margin-left: 8px;
+}
+
+.hexagram-symbol {
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hexagram-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.hexagram-line.changing {
+  position: relative;
+}
+
+.hexagram-line.changing::before {
+  content: '⚡';
+  position: absolute;
+  left: -25px;
+  color: var(--text-accent);
+  font-size: 0.9rem;
+}
+
+.line-yang, .line-yin {
+  width: 60px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.line-yang {
+  background: var(--text-primary);
+}
+
+.line-yin {
+  background: transparent;
+  border: 2px solid var(--text-primary);
+  height: 8px;
+}
+
+.line-number {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  min-width: 30px;
+}
+
+.hexagram-info {
+  margin-top: 15px;
+}
+
+.hexagram-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--text-accent);
+  margin-bottom: 5px;
+}
+
+.hexagram-enname {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 5px;
+}
+
+.hexagram-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.hexagram-composition {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.trigram-explanation {
+  margin-top: 25px;
+}
+
+.trigram-explanation h4 {
+  color: var(--text-accent);
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.trigrams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+}
+
+.trigram-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  background: var(--hover-color);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.trigram-item:hover {
+  transform: scale(1.05);
+  border-color: var(--text-accent);
+}
+
+.trigram-symbol {
+  font-size: 2rem;
+  margin-bottom: 5px;
+  color: var(--text-accent);
+}
+
+.trigram-name {
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.trigram-nature, .trigram-attribute {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .hexagrams-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .hexagram-card {
+    padding: 15px;
+  }
+  
+  .trigrams-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  
+  .trigram-item {
+    padding: 8px;
+  }
+  
+  .trigram-symbol {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .trigrams-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .hexagram-line {
+    gap: 5px;
+  }
+  
+  .line-yang, .line-yin {
+    width: 40px;
+  }
+}
