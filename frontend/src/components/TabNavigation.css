@@ -5,8 +5,9 @@
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
   position: relative;
   z-index: 100;
-  max-width: 100%;
-  margin: 0 auto;
+  width: 100%;
+  left: 0;
+  right: 0;
 }
 
 /* 暗黑模式 */
@@ -25,16 +26,14 @@
   padding: 0.25rem;
   position: relative;
   gap: 0.25rem;
-  max-width: 1200px;
-  margin: 0 auto;
   width: 100%;
+  margin: 0;
 }
 
 /* Tab 按钮 */
 .tab-button {
   flex: 1;
   min-width: 0;
-  max-width: calc(100% / 6 - 0.5rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -259,7 +258,7 @@
 
   .tab-button.active::before {
     height: 2.5px;
-    width: 35%;
+    width: 40%;
   }
 
   .tab-content {
@@ -318,7 +317,7 @@
 
   .tab-button.active::before {
     height: 2px;
-    width: 30%;
+    width: 35%;
   }
 }
 
@@ -344,7 +343,7 @@
 
   .tab-button.active::before {
     height: 3.5px;
-    width: 45%;
+    width: 50%;
   }
 }
 
@@ -404,7 +403,6 @@
 
   .tab-button {
     padding: 0.25rem 0.375rem;
-    max-width: calc(100% / 6 - 0.75rem);
   }
 
   .tab-content {
@@ -425,12 +423,10 @@
 @media (min-width: 1280px) {
   .tab-navigation-container {
     padding: 0.75rem 2rem;
-    max-width: 1400px;
   }
 
   .tab-button {
     padding: 1rem 1rem;
-    max-width: calc(100% / 6 - 1rem);
   }
 
   .tab-icon svg {
@@ -441,6 +437,11 @@
   .tab-label {
     font-size: 14px;
     letter-spacing: 0.03em;
+  }
+
+  .tab-button.active::before {
+    height: 4px;
+    width: 55%;
   }
 }
 
@@ -503,10 +504,13 @@
   .tab-button {
     flex: 1;
     min-width: 0;
-    max-width: none;
   }
 
   .tab-content {
     width: 100%;
+  }
+
+  .tab-button.active::before {
+    width: 35%;
   }
 }
