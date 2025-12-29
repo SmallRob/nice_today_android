@@ -184,6 +184,13 @@ const Dashboard = () => {
         </button>
         <button
           className="quick-action-btn"
+          onClick={() => navigate('/bazi-analysis')}
+        >
+          <span>☯️</span>
+          <span>八字命格</span>
+        </button>
+        <button
+          className="quick-action-btn"
           onClick={() => navigate('/bazi?mode=weekly')}
         >
           <span>📊</span>

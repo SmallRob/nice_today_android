@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
-import { useTheme } from '../context/ThemeContext';
 import { storageManager } from '../utils/storageManager';
+import './TabNavigation.css';
 
 const TabNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme } = useTheme();
   
   // 检测是否为iOS设备，用于调整底部安全区域
   const isIOS = Capacitor.getPlatform() === 'ios';
@@ -45,19 +44,9 @@ const TabNavigation = () => {
 
   // 优化的Tab样式类 - 根据文本长度自适应宽度
   const getTabClassName = (isActive) => {
-    const baseClasses = "flex flex-col items-center justify-center h-full transition-all duration-200 relative min-w-0 flex-1 px-1";
-    
-    if (isActive) {
-      return `${baseClasses} text-blue-600 dark:text-blue-400`;
-    } else {
-      return `${baseClasses} text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300`;
-    }
+    const baseClasses = "tab-button";
+    return isActive ? `${baseClasses} active` : baseClasses;
   };
-
-  // 活跃Tab指示器样式
-  const activeIndicatorClass = theme === 'dark' 
-    ? 'bg-blue-400' 
-    : 'bg-blue-600';
 
   const tabs = [
     {
@@ -72,6 +61,21 @@ const TabNavigation = () => {
       activeIcon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>
+      )
+    },
+    {
+      id: 'bazi-analysis',
+      label: '八字命格',
+      path: '/bazi-analysis',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      ),
+      activeIcon: (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
         </svg>
       )
     },
@@ -103,21 +107,6 @@ const TabNavigation = () => {
       activeIcon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 20h18M5 16l4-4 6 6M15 12l4 4" />
-        </svg>
-      )
-    },
-    {
-      id: 'dress',
-      label: '穿衣养生',
-      path: '/dress',
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-        </svg>
-      ),
-      activeIcon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
         </svg>
       )
     },
@@ -170,13 +159,13 @@ const TabNavigation = () => {
   };
 
   return (
-    <div 
-      className={`bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 ${
+    <div
+      className={`tab-navigation ${
         isIOS ? 'pb-safe-bottom' : ''
-      } shadow-lg`}
+      }`}
     >
-      {/* 减少高度，优化间距 */}
-      <div className="flex justify-around items-center h-12 relative px-0.5">
+      {/* 增加高度到 63px，优化响应式布局 */}
+      <div className="tab-navigation-container">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
           return (
@@ -185,26 +174,18 @@ const TabNavigation = () => {
               onClick={() => handleTabClick(tab.path)}
               className={getTabClassName(isActive)}
             >
-              {/* 活跃指示器 - 增强高亮效果 */}
-              {isActive && (
-                <>
-                  <div className={`absolute top-0 w-full h-0.5 ${activeIndicatorClass}`}></div>
-                  <div className={`absolute inset-0 rounded-lg ${activeIndicatorClass} opacity-10`}></div>
-                </>
-              )}
-              
-              {/* 图标和文字容器 - 超紧凑布局 */}
-              <div className="flex flex-col items-center justify-center space-y-0 max-w-full overflow-hidden">
-                {/* 图标 - 保持适当大小 */}
-                <div className="relative flex-shrink-0">
-                  {isActive ? 
-                    React.cloneElement(tab.activeIcon, { className: "w-5 h-5" }) : 
-                    React.cloneElement(tab.icon, { className: "w-5 h-5" })
+              {/* 图标和文字容器 */}
+              <div className="tab-content">
+                {/* 图标容器 */}
+                <div className="tab-icon">
+                  {isActive ?
+                    React.cloneElement(tab.activeIcon) :
+                    React.cloneElement(tab.icon)
                   }
                 </div>
-                
-                {/* 标签文字 - 减小字体大小，去除内边距 */}
-                <span className="text-xs font-medium truncate w-full leading-tight">{tab.label}</span>
+
+                {/* 标签文字 */}
+                <span className="tab-label">{tab.label}</span>
               </div>
             </button>
           );

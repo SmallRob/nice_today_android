@@ -1,0 +1,409 @@
+/* 底部导航栏容器 */
+.tab-navigation {
+  background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 100;
+}
+
+/* 暗黑模式 */
+.dark .tab-navigation {
+  background: linear-gradient(to bottom, #111827 0%, #0f172a 100%);
+  border-top: 1px solid #374151;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 导航栏内容器 - 增加高度到 63px */
+.tab-navigation-container {
+  min-height: 63px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.25rem;
+  position: relative;
+  gap: 0.25rem;
+}
+
+/* Tab 按钮 */
+.tab-button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.25rem;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+/* Tab 按钮悬停效果 */
+.tab-button:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.dark .tab-button:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+/* 活跃 Tab 按钮背景 */
+.tab-button.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+}
+
+.dark .tab-button.active {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.15) 0%, rgba(96, 165, 250, 0.08) 100%);
+}
+
+/* 活跃指示器 - 顶部 */
+.tab-button.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40%;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  animation: slideDown 0.3s ease-out;
+}
+
+.dark .tab-button.active::before {
+  background: linear-gradient(90deg, #60a5fa 0%, #93c5fd 100%);
+  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.5);
+}
+
+/* 活跃指示器 - 背景光晕 */
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  border-radius: 12px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.dark .tab-button.active::after {
+  background: radial-gradient(circle at center, rgba(96, 165, 250, 0.15) 0%, transparent 70%);
+}
+
+/* 图标和文字容器 */
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* 图标容器 */
+.tab-icon {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* 非活跃图标样式 */
+.tab-button:not(.active) .tab-icon svg {
+  color: #6b7280;
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+}
+
+.dark .tab-button:not(.active) .tab-icon svg {
+  color: #9ca3af;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* 活跃图标样式 */
+.tab-button.active .tab-icon {
+  animation: iconBounce 0.4s ease-out;
+}
+
+.tab-button.active .tab-icon svg {
+  color: #3b82f6;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4));
+  transition: all 0.3s ease;
+}
+
+.dark .tab-button.active .tab-icon svg {
+  color: #60a5fa;
+  filter: drop-shadow(0 2px 4px rgba(96, 165, 250, 0.5));
+}
+
+/* 图标尺寸 - 响应式 */
+.tab-icon svg {
+  width: 24px;
+  height: 24px;
+  transition: all 0.3s ease;
+}
+
+/* 标签文字 */
+.tab-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.dark .tab-label {
+  color: #9ca3af;
+}
+
+/* 活跃标签文字 */
+.tab-button.active .tab-label {
+  color: #3b82f6;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(59, 130, 246, 0.2);
+}
+
+.dark .tab-button.active .tab-label {
+  color: #60a5fa;
+}
+
+/* iOS 安全区域适配 */
+.pb-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 动画定义 */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes iconBounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 响应式断点 */
+
+/* 超小屏幕 (iPhone SE 等) */
+@media (max-width: 360px) {
+  .tab-navigation-container {
+    min-height: 58px;
+    padding: 0.125rem;
+    gap: 0.125rem;
+  }
+
+  .tab-button {
+    padding: 0.375rem 0.125rem;
+  }
+
+  .tab-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tab-label {
+    font-size: 10px;
+  }
+
+  .tab-button.active::before {
+    height: 2.5px;
+    width: 35%;
+  }
+}
+
+/* 小屏幕 (iPhone, Android 小屏) */
+@media (max-width: 480px) {
+  .tab-navigation-container {
+    min-height: 60px;
+  }
+
+  .tab-icon svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .tab-label {
+    font-size: 10px;
+  }
+}
+
+/* 中等屏幕 (平板竖屏) */
+@media (min-width: 768px) {
+  .tab-navigation-container {
+    min-height: 65px;
+    padding: 0.5rem 1rem;
+  }
+
+  .tab-button {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .tab-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .tab-label {
+    font-size: 12px;
+  }
+
+  .tab-button.active::before {
+    height: 3.5px;
+    width: 45%;
+  }
+}
+
+/* 大屏幕 (平板横屏, 桌面) */
+@media (min-width: 1024px) {
+  .tab-navigation-container {
+    min-height: 70px;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .tab-button {
+    padding: 1rem 0.75rem;
+  }
+
+  .tab-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tab-label {
+    font-size: 13px;
+  }
+}
+
+/* 防止内容溢出和截断 */
+@media (max-height: 600px) {
+  .tab-navigation-container {
+    min-height: 55px;
+  }
+
+  .tab-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .tab-label {
+    font-size: 9px;
+  }
+}
+
+/* 横屏模式 */
+@media (max-height: 500px) and (orientation: landscape) {
+  .tab-navigation-container {
+    min-height: 50px;
+  }
+
+  .tab-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .tab-label {
+    font-size: 8px;
+  }
+
+  .tab-button {
+    padding: 0.25rem 0.125rem;
+  }
+
+  .tab-content {
+    gap: 0.125rem;
+  }
+
+  .tab-button.active::before {
+    height: 2px;
+    width: 30%;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .tab-navigation {
+    display: none;
+  }
+}
+
+/* 辅助功能增强 */
+.tab-button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.tab-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 暗黑模式下的焦点指示器 */
+.dark .tab-button:focus-visible {
+  outline-color: #60a5fa;
+}
+
+/* 可选：添加触摸反馈动画 */
+@media (hover: none) {
+  .tab-button:active {
+    transform: scale(0.95);
+    background: rgba(59, 130, 246, 0.15);
+  }
+
+  .dark .tab-button:active {
+    background: rgba(96, 165, 250, 0.2);
+  }
+}
+
+/* 确保 flex 布局在小屏幕上正确工作 */
+@media (max-width: 375px) {
+  .tab-button {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .tab-content {
+    width: 100%;
+  }
+}
