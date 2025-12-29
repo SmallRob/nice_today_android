@@ -52,6 +52,11 @@ const FinancePage = () => {
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [tempIncome, setTempIncome] = useState('');
 
+  // 首次使用引导
+  const [showWelcomeModal, setShowWelcomeModal] = useState(() => {
+    return !localStorage.getItem('financeOnboarded');
+  });
+
   // 保存月收入
   useEffect(() => {
     localStorage.setItem('monthlyIncome', monthlyIncome.toString());
@@ -77,13 +82,6 @@ const FinancePage = () => {
   // 计算临时支出
   const getTemporaryExpenses = () => {
     return getCurrentMonthExpenses().filter(expense => expense.type === 'temporary');
-  };
-
-  // 计算当前年份的支出
-  const getYearlyExpenses = (year) => {
-    return expenses.filter(expense =>
-      expense.date.startsWith(`${year}`)
-    );
   };
 
   // 按月份统计支出
@@ -216,52 +214,34 @@ const FinancePage = () => {
     );
   };
 
-  // 渲染曲线图（按月实时计算）
-  const renderLineChart = () => {
-    const monthlyData = getMonthlyExpensesData();
-    const months = Object.keys(monthlyData).sort();
-
-    // 计算斩杀线位置（3000 / 月收入）
-    const income = monthlyIncome > 0 ? monthlyIncome : 10000;
-    const warningLinePosition = (3000 / income) * 100;
-
-    // 生成数据点
-    const dataPoints = months.map(month => {
-      const monthData = monthlyData[month];
-      const remaining = income - monthData.total;
-      const isBelowWarningLine = remaining < 3000;
-      return {
-        month: month,
-        amount: monthData.total,
-        remaining: remaining,
-        isBelowWarning: isBelowWarningLine
-      };
-    });
-
-    const maxAmount = Math.max(...dataPoints.map(d => d.amount), 1);
+  // 渲染本月每日余额曲线图（斩杀线）
+  const renderDailyBalanceChart = () => {
+    const dailyData = getDailyBalanceData();
 
     return (
-      <div className="line-chart-container">
-        <h3>月度支出曲线图</h3>
+      <div className="daily-balance-chart-container">
+        <h3>本月余额变化（斩杀线）</h3>
         <div className="chart-legend">
           <div className="legend-item">
             <div className="legend-color line-chart-danger-line"></div>
-            <span className="legend-text">余额: 警示线 ¥3,000</span>
+            <span className="legend-text">警示线 ¥3,000</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-color line-chart-remaining-line"></div>
+            <span className="legend-text">余额</span>
           </div>
         </div>
-        {dataPoints.length > 0 ? (
-          <div className="line-chart-wrapper">
-            <div className="chart-canvas-container">
-              <canvas ref={chartRef} className="line-chart-canvas" />
-            </div>
-            <div className="line-chart-legend">
-              <div className="legend-item">
-                <div className="legend-color line-chart-line"></div>
-                <span className="legend-text">支出</span>
+        {dailyData.length > 0 ? (
+          <div className="daily-chart-wrapper">
+            <canvas ref={chartRef} className="daily-chart-canvas" />
+            <div className="daily-chart-summary">
+              <div className={`summary-item ${dailyData[dailyData.length - 1]?.isBelowWarning ? 'warning' : 'safe'}`}>
+                <span className="summary-label">今日余额：</span>
+                <span className="summary-value">¥{dailyData[dailyData.length - 1]?.remaining.toFixed(2)}</span>
               </div>
-              <div className="legend-item">
-                <div className="legend-color line-chart-remaining-line"></div>
-                <span className="legend-text">余额</span>
+              <div className="summary-item">
+                <span className="summary-label">本月支出：</span>
+                <span className="summary-value">¥{dailyData[dailyData.length - 1]?.accumulated.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -274,19 +254,59 @@ const FinancePage = () => {
     );
   };
 
+  // 计算本月每日余额（斩杀线曲线）
+  const getDailyBalanceData = () => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+    const currentDay = today.getDate();
+    
+    // 获取本月所有支出
+    const monthExpenses = expenses.filter(expense =>
+      expense.date.startsWith(`${currentYear}-${currentMonth}`)
+    );
+
+    // 按日期累计支出
+    const dailyExpenses = {};
+    monthExpenses.forEach(expense => {
+      const day = parseInt(expense.date.split('-')[2]);
+      if (!dailyExpenses[day]) {
+        dailyExpenses[day] = 0;
+      }
+      dailyExpenses[day] += expense.amount;
+    });
+
+    // 生成从1日到今日的每日余额
+    const dailyData = [];
+    let accumulatedExpense = 0;
+    const income = monthlyIncome > 0 ? monthlyIncome : 10000;
+
+    for (let day = 1; day <= currentDay; day++) {
+      if (dailyExpenses[day]) {
+        accumulatedExpense += dailyExpenses[day];
+      }
+      const remaining = income - accumulatedExpense;
+      dailyData.push({
+        day: day,
+        expense: dailyExpenses[day] || 0,
+        accumulated: accumulatedExpense,
+        remaining: remaining,
+        isBelowWarning: remaining < 3000
+      });
+    }
+
+    return dailyData;
+  };
+
   // 渲染 Canvas 曲线图
   useEffect(() => {
-    if (viewMode === 'yearly' && chartRef.current) {
-      const monthlyData = getMonthlyExpensesData();
-      const months = Object.keys(monthlyData).sort();
-      const income = monthlyIncome > 0 ? monthlyIncome : 10000;
-      
+    if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d');
       if (!ctx) return;
-      
+
       const canvas = chartRef.current;
       const dpr = window.devicePixelRatio || 1;
-      
+
       // 设置Canvas尺寸
       const width = canvas.offsetWidth * dpr;
       const height = canvas.offsetHeight * dpr;
@@ -294,80 +314,154 @@ const FinancePage = () => {
       canvas.height = height;
       canvas.style.width = width / dpr + 'px';
       canvas.style.height = height / dpr + 'px';
-      
+
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
 
-      const padding = 40;
+      const padding = viewMode === 'monthly' ? 30 : 40;
       const chartWidth = width - padding * 2;
       const chartHeight = height - padding * 2;
-      const dataPoints = [];
-      const labels = [];
+      const income = monthlyIncome > 0 ? monthlyIncome : 10000;
 
-      months.forEach(month => {
-        const monthData = monthlyData[month];
-        const remaining = income - monthData.total;
-        dataPoints.push({ x: dataPoints.length, y: remaining });
-        labels.push(month.substring(5) + '月');
-      });
+      if (viewMode === 'monthly') {
+        // 绘制每日余额曲线
+        const dailyData = getDailyBalanceData();
 
-      // 计算斩杀线位置
-      const warningLineY = chartHeight - ((3000 / income) * chartHeight);
+        if (dailyData.length > 0) {
+          const dataPoints = dailyData.map(d => d.remaining);
+          const maxRemaining = Math.max(...dataPoints, income);
 
-      // 绘制斩杀线
-      ctx.beginPath();
-      ctx.strokeStyle = isDarkTheme() ? '#ef4444' : '#ef4444';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([5, 5]);
-      ctx.moveTo(padding, warningLineY);
-      ctx.lineTo(chartWidth - padding, warningLineY);
-      ctx.stroke();
-      ctx.setLineDash([]);
+          // 计算斩杀线位置
+          const warningLineY = chartHeight - ((3000 / maxRemaining) * chartHeight);
 
-      // 绘制余额曲线
-      if (dataPoints.length > 0) {
-        ctx.beginPath();
-        ctx.strokeStyle = isDarkTheme() ? '#10b981' : '#10b981';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        
-        dataPoints.forEach((point, index) => {
-          const x = padding + (index / (dataPoints.length - 1)) * chartWidth;
-          const y = chartHeight - (point.y / Math.max(...dataPoints.map(d => d.y), 1)) * chartHeight;
-
-          if (index === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
-        });
-        ctx.stroke();
-
-        // 绘制数据点
-        dataPoints.forEach((point, index) => {
-          const x = padding + (index / (dataPoints.length - 1)) * chartWidth;
-          const y = chartHeight - (point.y / Math.max(...dataPoints.map(d => d.y), 1)) * chartHeight;
-          
+          // 绘制斩杀线
           ctx.beginPath();
-          ctx.arc(x, y, 4, 0, Math.PI * 2, false);
-          ctx.fillStyle = isDarkTheme() ? '#10b981' : '#10b981';
-          ctx.fill();
-          ctx.beginPath();
-          ctx.strokeStyle = isDarkTheme() ? '#ffffff' : '#ffffff';
+          ctx.strokeStyle = isDarkTheme() ? '#ef4444' : '#ef4444';
           ctx.lineWidth = 2;
+          ctx.setLineDash([5, 5]);
+          ctx.moveTo(padding, warningLineY);
+          ctx.lineTo(chartWidth - padding, warningLineY);
           ctx.stroke();
+          ctx.setLineDash([]);
+
+          // 绘制余额曲线
+          ctx.beginPath();
+          ctx.strokeStyle = isDarkTheme() ? '#10b981' : '#10b981';
+          ctx.lineWidth = 2.5;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          dailyData.forEach((day, index) => {
+            const x = padding + (index / (dailyData.length - 1)) * chartWidth;
+            const y = chartHeight - (day.remaining / maxRemaining) * chartHeight;
+
+            if (index === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          });
+          ctx.stroke();
+
+          // 绘制数据点
+          dailyData.forEach((day, index) => {
+            const x = padding + (index / (dailyData.length - 1)) * chartWidth;
+            const y = chartHeight - (day.remaining / maxRemaining) * chartHeight;
+
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2, false);
+            ctx.fillStyle = day.isBelowWarning ? '#ef4444' : '#10b981';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.strokeStyle = isDarkTheme() ? '#ffffff' : '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          });
+
+          // 绘制日期标签（每隔几天显示一个）
+          ctx.fillStyle = isDarkTheme() ? '#6b7280' : '#374151';
+          ctx.font = `${10 * dpr}px sans-serif`;
+          ctx.textAlign = 'center';
+          const labelInterval = Math.ceil(dailyData.length / 5);
+          dailyData.forEach((day, index) => {
+            if (index % labelInterval === 0 || index === dailyData.length - 1) {
+              const x = padding + (index / (dailyData.length - 1)) * chartWidth;
+              ctx.fillText(`${day.day}日`, x, chartHeight + 15);
+            }
+          });
+        }
+      } else {
+        // 绘制年度曲线
+        const monthlyData = getMonthlyExpensesData();
+        const months = Object.keys(monthlyData).sort();
+        const dataPoints = [];
+        const labels = [];
+
+        months.forEach(month => {
+          const monthData = monthlyData[month];
+          const remaining = income - monthData.total;
+          dataPoints.push({ x: dataPoints.length, y: remaining });
+          labels.push(month.substring(5) + '月');
         });
 
-        // 绘制标签
-        ctx.fillStyle = isDarkTheme() ? '#6b7280' : '#374151';
-        ctx.font = `${12 * dpr}px sans-serif`;
-        ctx.textAlign = 'center';
-        labels.forEach((label, index) => {
-          const x = padding + (index / (labels.length - 1)) * chartWidth;
-          ctx.textBaseline = 'middle';
-          ctx.fillText(label, x, chartHeight + 10);
-        });
+        // 计算斩杀线位置
+        const warningLineY = chartHeight - ((3000 / income) * chartHeight);
+
+        // 绘制斩杀线
+        ctx.beginPath();
+        ctx.strokeStyle = isDarkTheme() ? '#ef4444' : '#ef4444';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(padding, warningLineY);
+        ctx.lineTo(chartWidth - padding, warningLineY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 绘制余额曲线
+        if (dataPoints.length > 0) {
+          ctx.beginPath();
+          ctx.strokeStyle = isDarkTheme() ? '#10b981' : '#10b981';
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          dataPoints.forEach((point, index) => {
+            const x = padding + (index / (dataPoints.length - 1)) * chartWidth;
+            const y = chartHeight - (point.y / Math.max(...dataPoints.map(d => d.y), 1)) * chartHeight;
+
+            if (index === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          });
+          ctx.stroke();
+
+          // 绘制数据点
+          dataPoints.forEach((point, index) => {
+            const x = padding + (index / (dataPoints.length - 1)) * chartWidth;
+            const y = chartHeight - (point.y / Math.max(...dataPoints.map(d => d.y), 1)) * chartHeight;
+
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2, false);
+            ctx.fillStyle = isDarkTheme() ? '#10b981' : '#10b981';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.strokeStyle = isDarkTheme() ? '#ffffff' : '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          });
+
+          // 绘制标签
+          ctx.fillStyle = isDarkTheme() ? '#6b7280' : '#374151';
+          ctx.font = `${12 * dpr}px sans-serif`;
+          ctx.textAlign = 'center';
+          labels.forEach((label, index) => {
+            const x = padding + (index / (labels.length - 1)) * chartWidth;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, x, chartHeight + 10);
+          });
+        }
       }
     }
   }, [viewMode, monthlyIncome, expenses, isDarkTheme]);
@@ -390,11 +484,11 @@ const FinancePage = () => {
     return (
       <div className="year-chart-container">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {Object.keys(yearlyData).sort().map((year, index) => {
+          {Object.keys(yearlyData).sort().map((year) => {
             const yearDataItem = yearlyData[year];
             const remaining = monthlyIncome * 12 - yearDataItem.total;
             const isBelowWarningLine = remaining < 3000;
-            
+
             return (
               <div key={year} className="year-stat-card">
                 <div className="year-stat-year text-base font-semibold text-gray-800 dark:text-gray-100">
@@ -425,6 +519,58 @@ const FinancePage = () => {
 
   return (
     <div className={`finance-page ${isDarkTheme() ? 'dark' : ''}`}>
+      {/* 新用户引导弹窗 */}
+      {showWelcomeModal && (
+        <div className="welcome-modal-overlay" onClick={() => {
+          setShowWelcomeModal(false);
+          localStorage.setItem('financeOnboarded', 'true');
+        }}>
+          <div className="welcome-modal" onClick={e => e.stopPropagation()}>
+            <div className="welcome-icon">💰</div>
+            <h2 className="welcome-title">欢迎使用财务斩杀线</h2>
+            <div className="welcome-content">
+              <p>帮助您更好地管理财务，控制支出，实现财务自由！</p>
+              <div className="welcome-features">
+                <div className="feature-item">
+                  <span className="feature-icon">📊</span>
+                  <span>实时追踪收支</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-icon">⚠️</span>
+                  <span>智能警示提醒</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-icon">📈</span>
+                  <span>可视化数据分析</span>
+                </div>
+              </div>
+            </div>
+            <div className="welcome-actions">
+              <button
+                className="welcome-btn skip-btn"
+                onClick={() => {
+                  setShowWelcomeModal(false);
+                  localStorage.setItem('financeOnboarded', 'true');
+                }}
+              >
+                稍后再说
+              </button>
+              <button
+                className="welcome-btn primary-btn"
+                onClick={() => {
+                  setShowWelcomeModal(false);
+                  setShowIncomeModal(true);
+                  setTempIncome(monthlyIncome.toString());
+                  localStorage.setItem('financeOnboarded', 'true');
+                }}
+              >
+                立即设置
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 顶部导航栏 */}
       <div className="finance-header">
         <button className="back-btn" onClick={() => navigate(-1)}>
@@ -439,7 +585,7 @@ const FinancePage = () => {
           className={`view-mode-btn ${viewMode === 'monthly' ? 'active' : ''}`}
           onClick={() => setViewMode('monthly')}
         >
-          月度视图
+          本月视图
         </button>
         <button
           className={`view-mode-btn ${viewMode === 'yearly' ? 'active' : ''}`}
@@ -567,6 +713,11 @@ const FinancePage = () => {
       {/* 根据视图模式显示不同的图表 */}
       {viewMode === 'monthly' && (
         <>
+          {/* 本月余额变化曲线图（斩杀线） */}
+          <div className="chart-card">
+            {renderDailyBalanceChart()}
+          </div>
+
           {/* 支出分类统计图 */}
           {Object.keys(categoryTotals).length > 0 && (
             <div className="chart-card">
@@ -574,12 +725,6 @@ const FinancePage = () => {
               {renderChart()}
             </div>
           )}
-
-          {/* 月度支出曲线图 */}
-          <div className="chart-card">
-            <h3>月度支出曲线图</h3>
-            {renderLineChart()}
-          </div>
         </>
       )}
 

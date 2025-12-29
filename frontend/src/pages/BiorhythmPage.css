@@ -6,6 +6,11 @@
   margin: 0;
 }
 
+/* Dark主题 */
+.biorhythm-page.dark {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+}
+
 /* 页面头部 */
 .page-header {
   background: rgba(255, 255, 255, 0.95);
@@ -19,6 +24,12 @@
   gap: 12px;
 }
 
+.dark .page-header {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .back-button {
   background: none;
   border: none;
@@ -30,8 +41,16 @@
   transition: background-color 0.2s;
 }
 
+.dark .back-button {
+  color: #cbd5e1;
+}
+
 .back-button:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark .back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .page-title {
@@ -43,10 +62,19 @@
   text-align: center;
 }
 
+.dark .page-title {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
+}
+
 .header-date {
   font-size: 14px;
   color: #718096;
   text-align: right;
+}
+
+.dark .header-date {
+  color: #e2e8f0;
 }
 
 /* 主要内容区 */
@@ -68,6 +96,12 @@
   gap: 16px;
 }
 
+.dark .daily-tips-card {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .tips-icon {
   font-size: 24px;
   flex-shrink: 0;
@@ -79,10 +113,19 @@
   font-size: 18px;
 }
 
+.dark .tips-content h3 {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
+}
+
 .tips-content p {
   margin: 0;
   color: #4a5568;
   line-height: 1.5;
+}
+
+.dark .tips-content p {
+  color: #e2e8f0;
 }
 
 /* 今日节律状态 */
@@ -91,6 +134,11 @@
   font-weight: bold;
   color: #2d3748;
   margin: 0 0 16px 0;
+}
+
+.dark .section-title {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 .today-rhythm {
@@ -110,6 +158,12 @@
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
+}
+
+.dark .rhythm-card {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .rhythm-card:hover {
@@ -148,6 +202,10 @@
   margin-bottom: 4px;
 }
 
+.dark .rhythm-value {
+  color: #cbd5e1;
+}
+
 .rhythm-status {
   font-size: 12px;
   font-weight: bold;
@@ -159,6 +217,10 @@
   color: #718096;
 }
 
+.dark .rhythm-label {
+  color: #94a3b8;
+}
+
 /* 生物节律图表 */
 .biorhythm-chart-container {
   background: rgba(255, 255, 255, 0.95);
@@ -168,12 +230,23 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
+.dark .biorhythm-chart-container {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .chart-title {
   font-size: 16px;
   font-weight: bold;
   color: #2d3748;
   margin: 0 0 16px 0;
   text-align: center;
+}
+
+.dark .chart-title {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 .trend-chart {
@@ -243,6 +316,10 @@
   text-align: center;
 }
 
+.dark .chart-label {
+  color: #94a3b8;
+}
+
 .chart-legend {
   display: flex;
   justify-content: center;
@@ -279,6 +356,10 @@
   color: #4a5568;
 }
 
+.dark .legend-item span {
+  color: #cbd5e1;
+}
+
 /* 节律说明 */
 .rhythm-explanation {
   background: rgba(255, 255, 255, 0.95);
@@ -287,12 +368,23 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
+.dark .rhythm-explanation {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .rhythm-explanation h3 {
   font-size: 18px;
   font-weight: bold;
   color: #2d3748;
   margin: 0 0 16px 0;
   text-align: center;
+}
+
+.dark .rhythm-explanation h3 {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 .explanation-grid {
@@ -319,11 +411,19 @@
   font-weight: bold;
 }
 
+.dark .item-content h4 {
+  color: #f8fafc;
+}
+
 .item-content p {
   margin: 0;
   color: #4a5568;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.dark .item-content p {
+  color: #e2e8f0;
 }
 
 /* 移动端适配 */

@@ -6,6 +6,11 @@
   margin: 0;
 }
 
+/* Dark主题 */
+.life-trend-page.dark {
+  background: linear-gradient(135deg, #7c2d12 0%, #9a3412 100%);
+}
+
 /* 页面头部 */
 .page-header {
   background: rgba(255, 255, 255, 0.95);
@@ -19,6 +24,12 @@
   gap: 12px;
 }
 
+.dark .page-header {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .back-button {
   background: none;
   border: none;
@@ -30,8 +41,16 @@
   transition: background-color 0.2s;
 }
 
+.dark .back-button {
+  color: #cbd5e1;
+}
+
 .back-button:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark .back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .page-title {
@@ -43,10 +62,19 @@
   text-align: center;
 }
 
+.dark .page-title {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
+}
+
 .header-date {
   font-size: 14px;
   color: #718096;
   text-align: right;
+}
+
+.dark .header-date {
+  color: #e2e8f0;
 }
 
 /* 主要内容区 */
@@ -100,6 +128,12 @@
   gap: 16px;
 }
 
+.dark .insight-card {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .insight-icon {
   font-size: 24px;
   flex-shrink: 0;
@@ -111,10 +145,19 @@
   font-size: 18px;
 }
 
+.dark .insight-content h3 {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
+}
+
 .insight-content p {
   margin: 0;
   color: #4a5568;
   line-height: 1.5;
+}
+
+.dark .insight-content p {
+  color: #e2e8f0;
 }
 
 /* 趋势图表容器 */
@@ -126,12 +169,23 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
+.dark .trend-chart-container {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .chart-title {
   font-size: 16px;
   font-weight: bold;
   color: #2d3748;
   margin: 0 0 16px 0;
   text-align: center;
+}
+
+.dark .chart-title {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 .trend-chart {
@@ -196,6 +250,10 @@
   margin-top: 8px;
 }
 
+.dark .chart-label {
+  color: #94a3b8;
+}
+
 /* 当前运势详情 */
 .current-trend {
   background: rgba(248, 250, 252, 0.8);
@@ -204,12 +262,21 @@
   margin-top: 16px;
 }
 
+.dark .current-trend {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
 .current-trend h4 {
   margin: 0 0 12px 0;
   color: #2d3748;
   font-size: 14px;
   font-weight: bold;
   text-align: center;
+}
+
+.dark .current-trend h4 {
+  color: #f8fafc;
 }
 
 .score-display {
@@ -224,9 +291,18 @@
   display: block;
 }
 
+.dark .score-value {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
+}
+
 .score-label {
   font-size: 12px;
   color: #718096;
+}
+
+.dark .score-label {
+  color: #e2e8f0;
 }
 
 .aspect-scores {
@@ -244,9 +320,18 @@
   border-radius: 8px;
 }
 
+.dark .aspect-item {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
 .aspect-name {
   font-size: 12px;
   color: #4a5568;
+}
+
+.dark .aspect-name {
+  color: #cbd5e1;
 }
 
 .aspect-value {
@@ -275,12 +360,23 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
+.dark .advice-section {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .advice-section h3 {
   font-size: 18px;
   font-weight: bold;
   color: #2d3748;
   margin: 0 0 16px 0;
   text-align: center;
+}
+
+.dark .advice-section h3 {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
 }
 
 .advice-grid {
@@ -298,6 +394,11 @@
   border-radius: 8px;
 }
 
+.dark .advice-item {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
 .advice-icon {
   font-size: 16px;
   flex-shrink: 0;
@@ -311,11 +412,19 @@
   font-weight: bold;
 }
 
+.dark .advice-content h4 {
+  color: #f8fafc;
+}
+
 .advice-content p {
   margin: 0;
   color: #4a5568;
   font-size: 11px;
   line-height: 1.3;
+}
+
+.dark .advice-content p {
+  color: #e2e8f0;
 }
 
 /* 八字说明 */
@@ -326,6 +435,12 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
+.dark .bazi-explanation {
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .bazi-explanation h3 {
   font-size: 18px;
   font-weight: bold;
@@ -334,11 +449,20 @@
   text-align: center;
 }
 
+.dark .bazi-explanation h3 {
+  color: #f8fafc;
+  text-shadow: 0 0 2px rgba(248, 250, 252, 0.1);
+}
+
 .explanation-content p {
   margin: 0 0 12px 0;
   color: #4a5568;
   line-height: 1.5;
   font-size: 14px;
+}
+
+.dark .explanation-content p {
+  color: #e2e8f0;
 }
 
 .explanation-content ul {
@@ -353,8 +477,16 @@
   font-size: 13px;
 }
 
+.dark .explanation-content li {
+  color: #e2e8f0;
+}
+
 .explanation-content strong {
   color: #2d3748;
+}
+
+.dark .explanation-content strong {
+  color: #f8fafc;
 }
 
 /* 移动端适配 */
