@@ -124,7 +124,7 @@ const TabNavigation = () => {
     {
       id: 'settings',
       label: '更多功能',
-      path: '/settings',
+      path: '/more-features',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -156,8 +156,11 @@ const TabNavigation = () => {
       // 清除塔罗页面相关缓存
       storageManager.removeGlobalCache('tarot_data');
     } else if (path === '/settings') {
-      // 清除设置页面相关缓存
+      // 清除系统设置页面相关缓存
       storageManager.removeGlobalCache('settings_data');
+    } else if (path === '/more-features') {
+      // 清除更多功能页面相关缓存
+      storageManager.removeGlobalCache('more_features_data');
     } else if (path === '/numerology') {
       // 清除生命灵数页面相关缓存
       storageManager.removeGlobalCache('numerology_data');

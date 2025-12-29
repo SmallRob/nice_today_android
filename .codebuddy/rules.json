@@ -1,0 +1,112 @@
+{
+  "project_rules": {
+    "name": "NiceTodayAndroid",
+    "description": "适用于nice_today_android项目的开发规则",
+    "version": "1.0.0"
+  },
+  "always_on_rules": [
+    {
+      "name": "mobile_first_development",
+      "description": "移动端优先开发原则",
+      "content": "始终以移动端体验为设计起点，采用弹性布局和相对单位（rem, em, %），优先考虑触摸交互而非鼠标操作，关注网络性能和加载速度。"
+    },
+    {
+      "name": "react_component_best_practices",
+      "description": "React组件开发最佳实践",
+      "content": "遵循单一职责原则，每个组件只做一件事；Props设计要明确、类型化；命名规范：组件用PascalCase，函数/变量用camelCase，常量用UPPER_SNAKE_CASE，CSS类名用kebab-case。"
+    },
+    {
+      "name": "capacitor_mobile_development",
+      "description": "Capacitor移动开发规范",
+      "content": "使用Capacitor进行跨平台开发，遵循Capacitor的插件使用规范，注意Android和iOS平台差异，合理使用Capacitor提供的原生API。"
+    },
+    {
+      "name": "performance_optimization_principles",
+      "description": "性能优化核心指标",
+      "content": "确保首次内容绘制(FCP) < 1.8s，最大内容绘制(LCP) < 2.5s，首次输入延迟(FID) < 100ms，累积布局偏移(CLS) < 0.1。"
+    },
+    {
+      "name": "error_handling_strategy",
+      "description": "错误处理策略",
+      "content": "全面处理异步操作的错误，使用try-catch包装可能出错的代码块，提供友好的错误提示给用户，记录错误日志以便调试。"
+    },
+    {
+      "name": "data_persistence_guidelines",
+      "description": "数据持久化指南",
+      "content": "优先使用Capacitor Preferences进行简单的键值对存储，对于复杂数据结构使用IndexedDB，敏感数据需要加密存储。"
+    }
+  ],
+  "language_specific_rules": {
+    "javascript": [
+      {
+        "name": "javascript_style_guide",
+        "description": "JavaScript代码风格指南",
+        "content": "使用ES6+语法，优先使用const/let而非var，使用箭头函数适当场景，遵循函数式编程原则，保持函数纯度。"
+      },
+      {
+        "name": "react_hooks_usage",
+        "description": "React Hooks使用规范",
+        "content": "遵循Hooks规则，只在组件顶层调用Hooks，自定义Hooks以'use'开头，合理使用useMemo和useCallback优化性能，正确处理useEffect的依赖数组。"
+      }
+    ],
+    "css": [
+      {
+        "name": "css_responsive_design",
+        "description": "CSS响应式设计原则",
+        "content": "使用标准移动端断点：--mobile: 320px, --small-mobile: 375px, --mobile-lg: 414px, --tablet: 768px, --tablet-lg: 1024px, --desktop: 1280px；优先使用rem/em，使用CSS Grid/Flexbox构建自适应布局。"
+      },
+      {
+        "name": "mobile_touch_optimization",
+        "description": "移动端触摸优化",
+        "content": "最小触摸目标44x44px，使用min-width: 44px和min-height: 44px或padding: 12px确保触摸区域足够大；合理处理滚动行为，避免滚动穿透。"
+      }
+    ]
+  },
+  "file_specific_rules": {
+    "glob_patterns": {
+      "**/*.js": [
+        {
+          "name": "js_react_component_rules",
+          "description": "JS/JSX组件规则",
+          "content": "React组件文件使用.js或.jsx扩展名，组件名称使用PascalCase，每个文件只导出一个主要组件，正确使用PropTypes或TypeScript进行类型检查。"
+        }
+      ],
+      "**/*.css": [
+        {
+          "name": "css_mobile_optimization",
+          "description": "CSS移动端优化",
+          "content": "禁用用户选择防止误触(-webkit-user-select: none)，高分辨率屏幕优化，字体渲染优化，安全区域适配(刘海屏/圆角屏)。"
+        }
+      ],
+      "**/android/**/*": [
+        {
+          "name": "android_development_rules",
+          "description": "Android开发规则",
+          "content": "遵循Capacitor Android插件开发规范，注意Android权限管理，使用适当的资源限定符适配不同屏幕密度，遵循Android代码规范。"
+        }
+      ]
+    }
+  },
+  "project_specific_guidelines": [
+    {
+      "name": "biorhythm_calculation_accuracy",
+      "description": "生物节律计算准确性",
+      "content": "确保生物节律相关算法的准确性，进行充分的单元测试验证计算结果，保持与农历、八字等传统文化算法的一致性。"
+    },
+    {
+      "name": "offline_first_approach",
+      "description": "离线优先策略",
+      "content": "应用应能在离线状态下正常运行核心功能，合理使用PWA技术，缓存关键数据和资源，提供良好的离线用户体验。"
+    },
+    {
+      "name": "data_consistency_across_platforms",
+      "description": "跨平台数据一致性",
+      "content": "确保在不同设备和平台上数据表现一致，特别注意日期、时区、农历计算的准确性，保持用户配置数据的同步和一致性。"
+    },
+    {
+      "name": "compatibility_considerations",
+      "description": "兼容性考虑",
+      "content": "支持Android 6.0+和iOS 12+，处理不同版本系统的API差异，确保在低端设备上也能流畅运行，进行充分的兼容性测试。"
+    }
+  ]
+}

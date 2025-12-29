@@ -15,7 +15,8 @@ import {
   FinanceCard,
   TakashimaDivinationCard,
   LifeMatrixCard,
-  DailyCardCard
+  DailyCardCard,
+  TarotGardenCard
 } from '../components/dashboard/FeatureCards';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { useNavigate } from 'react-router-dom';
@@ -39,23 +40,24 @@ const Dashboard = () => {
 
   // 初始化功能列表
   useEffect(() => {
-    // 定义所有功能组件
-    const allFeatures = [
-      { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
-      { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
-      { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类' },
-      { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类' },
-      { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类' },
-      { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
-      { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
-      { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
-      { component: PersonalityTraitCard, name: 'PersonalityTraitCard', category: '个人成长类' },
-      { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
-      { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
-      { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
-      { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
-      { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
-    ];
+  // 定义所有功能组件
+  const allFeatures = [
+    { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
+    { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
+    { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类' },
+    { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类' },
+    { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类' },
+    { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
+    { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
+    { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
+    { component: PersonalityTraitCard, name: 'PersonalityTraitCard', category: '个人成长类' },
+    { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
+    { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
+    { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
+    { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
+    { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
+    { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
+  ];
 
     // 加载保存的排序配置
     const savedOrder = loadFeatureSortOrder();
@@ -121,6 +123,7 @@ const Dashboard = () => {
         { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
         { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
         { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
+        { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
         { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
         { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
       ];

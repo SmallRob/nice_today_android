@@ -6,6 +6,7 @@ frontend/build/
 .DS_Store
 node_modules/.bin/
 node_modules/
-backup_20251218_163823/
+backup/
 frontend/test/results/
 .codebuddy/skills/
+.qoder/

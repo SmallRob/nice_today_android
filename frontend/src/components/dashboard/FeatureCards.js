@@ -248,6 +248,21 @@ const DailyCardCard = () => {
   );
 };
 
+/**
+ * 塔罗花园组件
+ */
+const TarotGardenCard = () => {
+  return (
+    <FeatureCard
+      title="塔罗花园"
+      description="探索塔罗牌的智慧与奥秘"
+      icon="cards"
+      color="#9333ea"
+      route="/tarot"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -262,5 +277,6 @@ export {
   FinanceCard,
   TakashimaDivinationCard,
   LifeMatrixCard,
-  DailyCardCard
+  DailyCardCard,
+  TarotGardenCard
 };

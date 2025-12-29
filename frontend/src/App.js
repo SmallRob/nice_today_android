@@ -80,6 +80,9 @@ const MayaPage = lazyLoadWithErrorHandling(() => import('./pages/MayaPage'));
 const DressGuidePage = lazyLoadWithErrorHandling(() => import('./pages/DressGuidePage'));
 const LifeEnergyTrendPage = lazyLoadWithErrorHandling(() => import('./pages/LifeTrendPage'));
 const SettingsPage = lazyLoadWithErrorHandling(() => import('./pages/SettingsPage'));
+const MoreFeaturesPage = lazyLoadWithErrorHandling(() => import('./pages/MoreFeaturesPage'));
+const TarotGardenPage = lazyLoadWithErrorHandling(() => import('./pages/TarotGardenPage'));
+const UserConfigPage = lazyLoadWithErrorHandling(() => import('./pages/UserConfigPage'));
 const TarotPage = lazyLoadWithErrorHandling(() => import('./pages/TarotPage'));
 const NumerologyPage = lazyLoadWithErrorHandling(() => import('./pages/NumerologyPage'));
 const BiorhythmPage = lazyLoadWithErrorHandling(() => import('./pages/BiorhythmPage'));
@@ -151,9 +154,12 @@ const AppLayout = () => {
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/life-energy" element={<LifeEnergyTrendPage />} />
             <Route path="/trend" element={<LifeEnergyTrendPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/more-features" element={<MoreFeaturesPage />} />
+            <Route path="/tarot-garden" element={<TarotGardenPage />} />
+            <Route path="/user-config" element={<UserConfigPage />} />
             <Route path="/tarot" element={<TarotPage />} />
             <Route path="/numerology" element={<NumerologyPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/biorhythm" element={<BiorhythmPage />} />
             <Route path="/horoscope" element={<HoroscopePage />} />
             <Route path="/bazi" element={<BaziPage />} />

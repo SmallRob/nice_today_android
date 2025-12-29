@@ -14,6 +14,12 @@ body {
   min-height: 100vh;
 }
 
+/* Dark主题支持 */
+.dark body {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+  color: #f9fafb;
+}
+
 /* 主应用容器 */
 .app {
   max-width: 1400px;
@@ -22,6 +28,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.dark .app {
+  background: transparent;
 }
 
 /* 头部样式 */
@@ -33,6 +43,13 @@ body {
   border-radius: 16px;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dark .app-header {
+  background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .app-header h1 {
@@ -66,6 +83,11 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.dark .game-controls {
+  background: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 /* 按钮样式 */
 button {
   padding: 10px 20px;
@@ -79,6 +101,11 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  /* 移动端优化触摸区域 */
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-primary {
@@ -135,6 +162,14 @@ button {
 @media (max-width: 768px) {
   .game-area {
     gap: 15px;
+    /* 移动端优化：更紧凑的布局 */
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .game-area {
+    gap: 12px;
   }
 }
 
@@ -144,6 +179,11 @@ button {
   border-radius: 16px;
   padding: 25px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.dark .matrix-section {
+  background: #1f2937;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 /* 矩阵网格样式 */
@@ -428,10 +468,20 @@ button {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
+.dark .dimension-info,
+.dark .ritual-guide {
+  background: #1f2937;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
 .dimension-placeholder {
   text-align: center;
   padding: 40px 20px;
   color: #666;
+}
+
+.dark .dimension-placeholder {
+  color: #9ca3af;
 }
 
 .dimension-placeholder h3 {
@@ -801,51 +851,88 @@ button {
 /* 响应式调整 */
 @media (max-width: 768px) {
   .app {
-    padding: 10px;
+    padding: 12px;
+    /* 移动端安全区域支持 */
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  
+  .app-header {
+    padding: 20px 15px;
+    margin-bottom: 20px;
   }
   
   .app-header h1 {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
   }
   
   .game-controls {
     flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 13px;
+    min-height: 44px;
   }
   
   .matrix-section {
     padding: 15px;
     overflow: hidden;
+    margin-bottom: 15px;
   }
   
   .matrix-grid {
-    gap: 4px;
-    padding: 8px;
-    max-height: 60vh;
+    gap: 3px;
+    padding: 6px;
+    max-height: 50vh;
     max-width: 100%;
   }
   
   .matrix-row {
-    gap: 4px;
+    gap: 3px;
   }
   
   .matrix-cell {
-    padding: 8px;
+    padding: 6px 4px;
     min-width: 0;
     overflow: hidden;
+    min-height: 60px;
   }
   
   .dimension-name {
-    font-size: clamp(0.45rem, 1.3vw, 0.6rem); /* 移动设备上更小的字体范围 */
+    font-size: clamp(0.4rem, 1.1vw, 0.55rem);
     line-height: 1.1;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
     text-align: center;
-    word-break: keep-all; /* 保持单词完整性 */
-    hyphens: auto; /* 允许连字符断词 */
+    word-break: keep-all;
+    hyphens: auto;
   }
   
   .energy-value {
-    font-size: 1.2rem;
-    margin-bottom: 3px;
+    font-size: 1rem;
+    margin-bottom: 2px;
+  }
+  
+  .energy-bar {
+    height: 4px;
+  }
+  
+  .info-section {
+    gap: 15px;
+  }
+  
+  .dimension-info, .ritual-guide {
+    padding: 15px;
   }
   
   .archive-manager {
@@ -859,43 +946,124 @@ button {
   .archives-grid {
     grid-template-columns: 1fr;
   }
+  
+  /* 移动端优化：游戏区域更紧凑 */
+  .game-area {
+    gap: 12px;
+  }
+  
+  /* 移动端优化：dimension-placeholder */
+  .dimension-placeholder {
+    padding: 30px 15px;
+  }
+  
+  .dimension-placeholder h3 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+  
+  .dimension-placeholder p {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  
+  /* 移动端优化：页脚 */
+  .app-footer {
+    padding: 20px 15px;
+    margin-top: 30px;
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 576px) {
+  .app {
+    padding: 10px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  
+  .app-header {
+    padding: 15px 10px;
+    margin-bottom: 15px;
+  }
+  
+  .app-header h1 {
+    font-size: 1.6rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
   .matrix-grid {
-    gap: 3px;
-    padding: 6px;
-    max-height: 55vh;
+    gap: 2px;
+    padding: 4px;
+    max-height: 45vh;
   }
   
   .matrix-row {
-    gap: 3px;
+    gap: 2px;
   }
   
   .matrix-cell {
-    padding: 6px;
+    padding: 4px 2px;
+    min-height: 50px;
   }
   
   .dimension-name {
-    font-size: clamp(0.4rem, 1.1vw, 0.55rem); /* 小屏幕上最小的字体范围 */
-    line-height: 1.1;
-    margin-bottom: 1px;
-    text-align: center;
-    word-break: keep-all; /* 保持单词完整性 */
-    hyphens: auto; /* 允许连字符断词 */
+    font-size: 0.35rem;
+    line-height: 1;
+    margin-bottom: 0;
   }
   
   .energy-value {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
   
   .energy-bar {
-    height: 4px;
+    height: 3px;
   }
   
   .imprint-count {
-    font-size: 0.7rem;
-    padding: 1px 6px;
+    font-size: 0.6rem;
+    padding: 0 4px;
+  }
+  
+  /* 超小屏幕按钮优化 */
+  button {
+    padding: 10px 12px;
+    font-size: 12px;
+    min-height: 40px;
+  }
+  
+  /* 超小屏幕布局优化 */
+  .game-controls {
+    padding: 10px;
+    gap: 6px;
+  }
+  
+  .matrix-section {
+    padding: 10px;
+  }
+  
+  .info-section {
+    gap: 10px;
+  }
+  
+  .dimension-info, .ritual-guide {
+    padding: 12px;
+  }
+  
+  .dimension-placeholder {
+    padding: 20px 10px;
+  }
+  
+  .dimension-placeholder h3 {
+    font-size: 1.1rem;
+  }
+  
+  .dimension-placeholder p {
+    font-size: 0.8rem;
   }
 }
 

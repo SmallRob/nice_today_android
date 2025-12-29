@@ -1,63 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef, Suspense, lazy } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { getAppVersion } from '../utils/capacitor';
 import { Capacitor } from '@capacitor/core';
-import PageLayout, { Card, Button } from '../components/PageLayout';
+import { Card, Button } from '../components/PageLayout';
 import updateCheckService from '../utils/updateCheckService';
 import { useNotification } from '../context/NotificationContext';
 import versionDetector from '../utils/versionDetector';
 import { restartApp } from '../utils/restartApp';
 import { errorTrackingSettings } from '../utils/errorTrackingSettings';
-import { errorLogger } from '../utils/errorLogger';
 import versionData from '../version.json';
 import '../index.css';
 
 // 懒加载大型组件，避免启动时阻塞
 const DarkModeToggle = lazy(() => import('../components/DarkModeToggle'));
 const PerformanceTestTool = lazy(() => import('../components/PerformanceTestTool'));
-const UserConfigManager = lazy(() => import('../components/UserConfigManager'));
-
-// 配置错误边界组件
-const ConfigErrorBoundary = ({ children, fallback }) => {
-  const [hasError, setHasError] = useState(false);
-  const [errorInfo, setErrorInfo] = useState(null);
-
-  useEffect(() => {
-    const handleError = (error) => {
-      console.error('ConfigErrorBoundary 捕获到错误:', error);
-      setHasError(true);
-      setErrorInfo(error?.message || '未知错误');
-      errorLogger.log(error, { component: 'ConfigErrorBoundary' });
-    };
-
-    // 监听全局错误
-    const errorHandler = (event) => {
-      event.preventDefault();
-      handleError(event.error);
-    };
-
-    window.addEventListener('error', errorHandler);
-    return () => window.removeEventListener('error', errorHandler);
-  }, []);
-
-  if (hasError) {
-    return fallback || (
-      <div className="p-6 bg-red-50 dark:bg-red-900 border-l-4 border-red-400 rounded-lg">
-        <h3 className="text-lg font-bold text-red-900 dark:text-red-100 mb-2">配置加载失败</h3>
-        <p className="text-sm text-red-700 dark:text-red-300 mb-4">
-          {errorInfo || '配置管理器加载失败，请刷新页面重试'}
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
-        >
-          刷新页面
-        </button>
-      </div>
-    );
-  }
-
-  return children;
-};
 
 // 组件加载占位符
 const ComponentLoadingFallback = ({ componentName = '组件' }) => (
@@ -68,10 +23,6 @@ const ComponentLoadingFallback = ({ componentName = '组件' }) => (
 );
 
 function SettingsPage() {
-  // 从URL查询参数获取当前标签
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab') || 'tarot';
-
   const [appVersion, setAppVersion] = useState({
     version: versionData.versionName,
     build: 'web'
@@ -87,18 +38,9 @@ function SettingsPage() {
   const [cacheTimeout, setCacheTimeout] = useState(180000); // 默认3分钟
   const [dataSyncEnabled, setDataSyncEnabled] = useState(true); // 数据同步状态
   const [isLoaded, setIsLoaded] = useState(false);
-  const [activeTab, setActiveTab] = useState(initialTab);
   const { showNotification } = useNotification();
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-
-  // 通知设置状态（已禁用）
-  const [notificationSettings, setNotificationSettings] = useState({
-    enabled: false,
-    morningTime: '07:00',
-    eveningTime: '21:00',
-    permissionGranted: false
-  });
 
   // 更新检查设置状态
   const [updateCheckSettings, setUpdateCheckSettings] = useState({
@@ -116,34 +58,6 @@ function SettingsPage() {
   // 滚动容器引用
   const scrollContainerRef = useRef(null);
 
-  // 滚动到顶部函数
-  const scrollToTop = useCallback(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
-  }, []);
-
-  // 简化的标签切换函数，提高移动端兼容性
-  const handleTabChange = useCallback((tab) => {
-    if (tab === activeTab) return;
-
-    // 更新URL参数
-    const newUrl = new URL(window.location);
-    newUrl.searchParams.set('tab', tab);
-    window.history.replaceState({}, '', newUrl);
-
-    // 滚动到顶部
-    scrollToTop();
-
-    // 直接切换标签，移除动画效果提高兼容性
-    setActiveTab(tab);
-  }, [activeTab, scrollToTop]);
-
-  // 标签切换时自动滚动到顶部
-  useEffect(() => {
-    scrollToTop();
-  }, [activeTab, scrollToTop]);
-
   // 切换错误日志追踪
   const handleToggleErrorTracking = useCallback(() => {
     const newState = errorTrackingSettings.toggle();
@@ -156,15 +70,15 @@ function SettingsPage() {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const loadAppInfo = async () => {
       try {
         if (!isMounted) return;
-        
+
         setError(null);
 
         // 分阶段加载数据，避免同时处理多个异步操作
-        
+
         // 阶段1：加载基础信息（不依赖外部服务）
         try {
           // 获取平台信息（同步操作）
@@ -216,17 +130,7 @@ function SettingsPage() {
           }
         }
 
-        // 阶段3：通知设置（已禁用）
-        if (isMounted) {
-          setNotificationSettings({
-            enabled: false,
-            morningTime: '07:00',
-            eveningTime: '21:00',
-            permissionGranted: false
-          });
-        }
-
-        // 阶段4：加载更新检查设置
+        // 阶段3：加载更新检查设置
         try {
           const updateConfig = updateCheckService.getConfig();
           const checkRecords = updateCheckService.getCheckRecords();
@@ -301,24 +205,6 @@ function SettingsPage() {
     localStorage.setItem('dataSyncEnabled', newValue.toString());
   };
 
-  // 通知功能已禁用
-  const handleNotificationChange = (field, value) => {
-    // 通知功能已禁用，不做任何操作
-    console.log('通知功能已禁用，无法修改设置');
-  };
-
-  // 通知权限请求已禁用
-  const handleRequestPermission = useCallback(() => {
-    setError('通知功能已禁用，无法请求权限');
-    setTimeout(() => setError(null), 3000);
-  }, []);
-
-  // 测试通知已禁用
-  const handleTestNotification = useCallback(() => {
-    setError('通知功能已禁用，无法发送测试通知');
-    setTimeout(() => setError(null), 3000);
-  }, []);
-
   // 切换应用版本
   const handleVersionSwitch = (version) => {
     const currentVersion = versionDetector.getCurrentVersion();
@@ -379,10 +265,6 @@ function SettingsPage() {
           label: '立即刷新',
           primary: true,
           onClick: () => {
-            // 保存当前标签页状态
-            const currentTab = activeTab;
-            localStorage.setItem('settingsActiveTab', currentTab);
-
             // 刷新页面
             window.location.reload();
           }
@@ -397,7 +279,7 @@ function SettingsPage() {
     });
   };
 
-  // 处理更新检查设置变更 - 修复错误处理
+  // 处理更新检查设置变更
   const handleUpdateCheckChange = useCallback(async (field, value) => {
     try {
       const newSettings = {
@@ -477,20 +359,19 @@ function SettingsPage() {
     }
   };
 
-  // 清除检查记录 - 实现真正的存储清除
+  // 清除检查记录
   const handleClearCheckRecords = useCallback(() => {
     try {
-      // 实际清除存储中的记录
-      updateCheckService.clearCheckRecords();
-      
-      // 保留最近10条记录在状态中
-      const newRecords = updateCheckService.getCheckRecords().slice(-10);
+      // 直接清除本地存储中的记录
+      localStorage.removeItem('app_update_check_records');
+
+      // 更新状态为空数组
       setUpdateCheckSettings(prev => ({
         ...prev,
-        checkRecords: newRecords
+        checkRecords: []
       }));
 
-      setSuccess('检查记录已清除（保留最近10条）');
+      setSuccess('检查记录已清除');
       setTimeout(() => setSuccess(null), 2000);
     } catch (error) {
       setError('清除检查记录失败: ' + error.message);
@@ -502,7 +383,7 @@ function SettingsPage() {
     return (
       <div className="h-full bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4">设置</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4">系统设置</h1>
         </div>
         <div className="flex justify-center items-center py-20">
           <div className="text-center space-y-4">
@@ -527,11 +408,12 @@ function SettingsPage() {
       {/* 顶部标题区域 */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">设置</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">⚙️ 系统设置</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">配置应用系统参数</p>
         </div>
       </div>
 
-      {/* 固定顶部区域 - 包含错误提示和标签导航 */}
+      {/* 固定顶部区域 - 包含错误提示和成功提示 */}
       <div className="flex-shrink-0 bg-white dark:bg-gray-800">
         {/* 错误提示 */}
         {error && (
@@ -562,39 +444,6 @@ function SettingsPage() {
             </div>
           </div>
         )}
-
-        {/* 标签导航 - 传统矩形圆角风格 */}
-        <div className="container mx-auto px-4 py-2">
-          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 max-w-md mx-auto">
-            <button
-              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'tarot'
-                ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              onClick={() => { handleTabChange('tarot'); }}
-            >
-              🔮 塔罗花园
-            </button>
-            <button
-              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'userConfigs'
-                ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              onClick={() => handleTabChange('userConfigs')}
-            >
-              👤 用户配置
-            </button>
-            <button
-              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-colors ${activeTab === 'app'
-                ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              onClick={() => handleTabChange('app')}
-            >
-              ⚙️ 应用设置
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* 独立滚动的内容区域 */}
@@ -608,462 +457,270 @@ function SettingsPage() {
           }}
         >
           <div className="container mx-auto px-4 py-4 max-w-4xl">
-            <div>
-              {activeTab === 'tarot' && (
-                <div>
-                  <Card>
-                    <div className="text-center p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 rounded-lg text-white relative">
-                      <div className="text-5xl mb-3">🔮</div>
-                      <h2 className="text-2xl font-bold mb-2">神秘塔罗</h2>
-                      <p className="text-purple-100">聆听命运的指引</p>
-                      <button
-                        onClick={() => window.location.href = '/tarot'}
-                        className="absolute bottom-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1 rounded-md text-sm transition-all"
-                      >
-                        进入 →
-                      </button>
+            <div className="space-y-6">
+              {/* 应用设置部分 */}
+              <Card title="应用设置">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
                     </div>
-                  </Card>
-                  <Card>
-                    <div className="text-center p-6 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-600 rounded-lg text-white relative">
-                      <div className="text-5xl mb-3">🔢</div>
-                      <h2 className="text-2xl font-bold mb-2">数字之灵</h2>
-                      <p className="text-blue-100">探索生命密码的奥秘</p>
-                      <button
-                        onClick={() => window.location.href = '/numerology'}
-                        className="absolute bottom-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-1 rounded-md text-sm transition-all"
-                      >
-                        进入 →
-                      </button>
-                    </div>
-                  </Card>
-                  <Card>
-                    <div className="text-center py-8">
-                      <p className="text-gray-600 dark:text-gray-400 mb-6">
-                        神秘塔罗功能正在建设中...
+                    <Suspense fallback={<ComponentLoadingFallback componentName="深色模式切换器" />}>
+                      <DarkModeToggle />
+                    </Suspense>
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">切换应用版本以适应不同设备性能</p>
+                      <div className="flex space-x-4 mb-3">
+                        <button
+                          className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                          onClick={() => handleVersionSwitch('lite')}
+                        >
+                          轻量版
+                        </button>
+                        <button
+                          className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                          onClick={() => handleVersionSwitch('full')}
+                        >
+                          炫彩版
+                        </button>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm transition-colors flex items-center justify-center space-x-2"
+                          onClick={() => handleReloadCurrentVersion()}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          <span>重新加载当前版本</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        {getCurrentVersion() === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
                       </p>
-                      <div className="space-y-4">
-                        <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 p-4 rounded-lg">
-                          <div className="text-3xl mb-2">🎴</div>
-                          <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">塔罗牌占卜</h3>
-                          <p className="text-sm text-purple-700 dark:text-purple-300">多种牌阵选择，深度解读命运指引</p>
-                        </div>
-                        <div className="bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 p-4 rounded-lg">
-                          <div className="text-3xl mb-2">🔮</div>
-                          <h3 className="font-medium text-indigo-900 dark:text-indigo-100 mb-2">每日指引</h3>
-                          <p className="text-sm text-indigo-700 dark:text-indigo-300">每日塔罗运势，陪伴您的生活旅程</p>
-                        </div>
-                        <div className="bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-4 rounded-lg">
-                          <div className="text-3xl mb-2">📚</div>
-                          <h3 className="font-medium text-pink-900 dark:text-pink-100 mb-2">塔罗知识</h3>
-                          <p className="text-sm text-pink-700 dark:text-pink-300">学习塔罗牌义，掌握占卜技巧</p>
-                        </div>
-                      </div>
-                      <div className="mt-6">
-                        <div className="inline-flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                          <span>功能开发中，敬请期待...</span>
-                        </div>
-                      </div>
                     </div>
-                  </Card>
-                </div>
-              )}
+                  </div>
 
-              {activeTab === 'app' && (
-                <div className="space-y-6">
-                  {/* 应用设置部分 */}
-                  <Card title="应用设置">
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div className="mb-4">
+                      <p className="font-medium text-gray-900 dark:text-white">API服务地址</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置后端服务地址</p>
+                      <input
+                        type="text"
+                        value={apiBaseUrl}
+                        onChange={handleApiBaseUrlChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="https://nice-mcp.leansoftx.com/api"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">使用本地计算</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">启用后将使用本地JavaScript计算代替API调用</p>
+                      </div>
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={useLocalCalculation}
+                          onChange={handleUseLocalCalculationChange}
+                        />
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">数据同步</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">自动备份您的数据</p>
+                    </div>
+                    <label className="inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={dataSyncEnabled}
+                        onChange={handleDataSyncChange}
+                      />
+                      <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">缓存超时时间</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置数据缓存的有效时间</p>
+                      <select
+                        value={cacheTimeout}
+                        onChange={handleCacheTimeoutChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      >
+                        <option value="60000">1分钟</option>
+                        <option value="120000">2分钟</option>
+                        <option value="180000">3分钟</option>
+                        <option value="300000">5分钟</option>
+                        <option value="600000">10分钟</option>
+                        <option value="1800000">30分钟</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 更新检查设置 */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between py-3">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
-                        </div>
-                        <Suspense fallback={<ComponentLoadingFallback componentName="深色模式切换器" />}>
-                          <DarkModeToggle />
-                        </Suspense>
-                      </div>
-
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">切换应用版本以适应不同设备性能</p>
-                          <div className="flex space-x-4 mb-3">
-                            <button
-                              className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                              onClick={() => handleVersionSwitch('lite')}
-                            >
-                              轻量版
-                            </button>
-                            <button
-                              className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                              onClick={() => handleVersionSwitch('full')}
-                            >
-                              炫彩版
-                            </button>
-                          </div>
-                          <div className="flex space-x-2">
-                            <button
-                              className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm transition-colors flex items-center justify-center space-x-2"
-                              onClick={() => handleReloadCurrentVersion()}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                              </svg>
-                              <span>重新加载当前版本</span>
-                            </button>
-                          </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            {getCurrentVersion() === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* 通知设置 - 暂时隐藏以避免闪退问题 */}
-                      {/* <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                          <div className="mb-4">
-                            <h4 className="font-medium text-gray-900 dark:text-white mb-2">通知设置</h4>
-                            
-                            {!notificationSettings.permissionGranted ? (
-                              <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-30 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                                <p className="text-yellow-700 dark:text-yellow-200 text-sm mb-2">
-                                  通知权限未授权，需要授权后才能接收提醒
-                                </p>
-                                <button 
-                                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition-colors"
-                                  onClick={handleRequestPermission}
-                                >
-                                  授权通知权限
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900 dark:bg-opacity-30 border border-green-200 dark:border-green-700 rounded-lg">
-                                <p className="text-green-700 dark:text-green-200 text-sm mb-2">
-                                  ✓ 通知权限已授权
-                                </p>
-                                <button 
-                                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors"
-                                  onClick={handleTestNotification}
-                                >
-                                  测试通知
-                                </button>
-                              </div>
-                            )}
-                            
-                            <div className="flex items-center justify-between mb-4">
-                              <div>
-                                <p className="font-medium text-gray-900 dark:text-white">启用通知提醒</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">接收生物节律变化提醒</p>
-                              </div>
-                              <label className="inline-flex items-center cursor-pointer">
-                                <input 
-                                  type="checkbox" 
-                                  className="sr-only peer" 
-                                  checked={notificationSettings.enabled}
-                                  onChange={(e) => handleNotificationChange('enabled', e.target.checked)}
-                                  disabled={!notificationSettings.permissionGranted}
-                                />
-                                <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                              </label>
-                            </div>
-                            
-                            {notificationSettings.enabled && notificationSettings.permissionGranted && (
-                              <div className="space-y-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-lg">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    早上提醒时间:
-                                  </label>
-                                  <input
-                                    type="time"
-                                    value={notificationSettings.morningTime}
-                                    onChange={(e) => handleNotificationChange('morningTime', e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    style={{width: '120px'}}
-                                  />
-                                </div>
-                                
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    晚上提醒时间:
-                                  </label>
-                                  <input
-                                    type="time"
-                                    value={notificationSettings.eveningTime}
-                                    onChange={(e) => handleNotificationChange('eveningTime', e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    style={{width: '120px'}}
-                                  />
-                                </div>
-                                
-                                <div className="text-xs text-gray-600 dark:text-gray-400">
-                                  <p>• 系统会在指定时间推送节律提醒</p>
-                                  <p>• 当节律值达到极值（≤-90或≥90）时，会额外推送预警提醒</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div> */}
-
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <div className="mb-4">
-                          <p className="font-medium text-gray-900 dark:text-white">API服务地址</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置后端服务地址</p>
-                          <input
-                            type="text"
-                            value={apiBaseUrl}
-                            onChange={handleApiBaseUrlChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="https://nice-mcp.leansoftx.com/api"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">使用本地计算</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">启用后将使用本地JavaScript计算代替API调用</p>
-                          </div>
-                          <label className="inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="sr-only peer"
-                              checked={useLocalCalculation}
-                              onChange={handleUseLocalCalculationChange}
-                            />
-                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">数据同步</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">自动备份您的数据</p>
+                          <p className="font-medium text-gray-900 dark:text-white">启用自动更新检查</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">自动检查新版本并提示更新</p>
                         </div>
                         <label className="inline-flex items-center cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="sr-only peer" 
-                            checked={dataSyncEnabled}
-                            onChange={handleDataSyncChange}
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={updateCheckSettings.enabled}
+                            onChange={(e) => handleUpdateCheckChange('enabled', e.target.checked)}
                           />
                           <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                       </div>
 
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">缓存超时时间</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置数据缓存的有效时间</p>
-                          <select
-                            value={cacheTimeout}
-                            onChange={handleCacheTimeoutChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                          >
-                            <option value="60000">1分钟</option>
-                            <option value="120000">2分钟</option>
-                            <option value="180000">3分钟</option>
-                            <option value="300000">5分钟</option>
-                            <option value="600000">10分钟</option>
-                            <option value="1800000">30分钟</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* 更新检查设置 */}
-                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-white">启用自动更新检查</p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">自动检查新版本并提示更新</p>
-                            </div>
-                            <label className="inline-flex items-center cursor-pointer">
-                              <input
-                                type="checkbox"
-                                className="sr-only peer"
-                                checked={updateCheckSettings.enabled}
-                                onChange={(e) => handleUpdateCheckChange('enabled', e.target.checked)}
-                              />
-                              <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      {updateCheckSettings.enabled && (
+                        <div className="space-y-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-lg">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              检查频率:
                             </label>
+                            <select
+                              value={updateCheckSettings.checkFrequency}
+                              onChange={(e) => handleUpdateCheckChange('checkFrequency', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            >
+                              <option value="startup">启动时检查</option>
+                              <option value="daily">每天检查</option>
+                              <option value="weekly">每周检查</option>
+                            </select>
                           </div>
 
-                          {updateCheckSettings.enabled && (
-                            <div className="space-y-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-lg">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  检查频率:
-                                </label>
-                                <select
-                                  value={updateCheckSettings.checkFrequency}
-                                  onChange={(e) => handleUpdateCheckChange('checkFrequency', e.target.value)}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                >
-                                  <option value="startup">启动时检查</option>
-                                  <option value="daily">每天检查</option>
-                                  <option value="weekly">每周检查</option>
-                                </select>
-                              </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={handleManualCheckUpdate}
+                              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors"
+                            >
+                              立即检查更新
+                            </button>
+                            <button
+                              onClick={handleClearCheckRecords}
+                              className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors"
+                            >
+                              清除记录
+                            </button>
+                          </div>
 
-                              <div className="flex space-x-2">
-                                <button
-                                  onClick={handleManualCheckUpdate}
-                                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors"
-                                >
-                                  立即检查更新
-                                </button>
-                                <button
-                                  onClick={handleClearCheckRecords}
-                                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors"
-                                >
-                                  清除记录
-                                </button>
-                              </div>
+                          {updateCheckSettings.lastCheckTime && (
+                            <div className="text-xs text-gray-600 dark:text-gray-400">
+                              上次检查: {new Date(updateCheckSettings.lastCheckTime).toLocaleString()}
+                            </div>
+                          )}
 
-                              {updateCheckSettings.lastCheckTime && (
-                                <div className="text-xs text-gray-600 dark:text-gray-400">
-                                  上次检查: {new Date(updateCheckSettings.lastCheckTime).toLocaleString()}
-                                </div>
-                              )}
-
-                              {updateCheckSettings.checkRecords.length > 0 && (
-                                <div className="text-xs text-gray-600 dark:text-gray-400">
-                                  检查记录: {updateCheckSettings.checkRecords.length} 条
-                                </div>
-                              )}
+                          {updateCheckSettings.checkRecords.length > 0 && (
+                            <div className="text-xs text-gray-600 dark:text-gray-400">
+                              检查记录: {updateCheckSettings.checkRecords.length} 条
                             </div>
                           )}
                         </div>
-                      </div>
+                      )}
                     </div>
-                  </Card>
-
-                  {/* 关于信息 - 合并到应用设置 */}
-                  <Card title="关于">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between py-2">
-                        <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                        <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-                          {platformInfo.isNative ?
-                            (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
-                            'Web'
-                          }
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                        <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
-                      </div>
-
-                      {/* 性能测试工具 */}
-                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <Suspense fallback={<ComponentLoadingFallback componentName="性能测试工具" />}>
-                          <PerformanceTestTool />
-                        </Suspense>
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* 其他设置 */}
-                  <Card title="其他">
-                    <div className="space-y-1">
-                      <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                        <span className="font-medium text-gray-900 dark:text-white">用户协议</span>
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-
-                      <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                        <span className="font-medium text-gray-900 dark:text-white">隐私政策</span>
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-
-                      <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                        <span className="font-medium text-gray-900 dark:text-white">意见反馈</span>
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-
-                      {/* 错误日志追踪开关 */}
-                      <button
-                        onClick={handleToggleErrorTracking}
-                        className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <span className="text-xl">🔴</span>
-                          <div className="flex flex-col">
-                            <span className="font-medium text-gray-900 dark:text-white">错误日志追踪</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {errorTrackingEnabled ? '已启用 - 显示错误追踪球' : '已关闭 - 隐藏错误追踪球'}
-                            </span>
-                          </div>
-                        </div>
-                        {/* 开关图标 */}
-                        <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${
-                          errorTrackingEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                        }`}>
-                          <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
-                            errorTrackingEnabled ? 'translate-x-5' : 'translate-x-0'
-                          }`}></div>
-                        </div>
-                      </button>
-                    </div>
-                  </Card>
+                  </div>
                 </div>
-              )}
+              </Card>
 
-              {activeTab === 'userConfigs' && (
-                <div>
-                  <ConfigErrorBoundary fallback={
-                    <div className="p-6">
-                      <div className="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 rounded-lg mb-4">
-                        <h3 className="font-bold text-yellow-900 dark:text-yellow-100 mb-2">用户配置加载失败</h3>
-                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                          配置管理器遇到问题。可能是网络问题或存储空间不足。
-                        </p>
-                      </div>
-                      <div className="space-y-3">
-                        <button
-                          onClick={() => {
-                            console.log('尝试清除存储并重置');
-                            try {
-                              localStorage.clear();
-                              sessionStorage.clear();
-                              window.location.reload();
-                            } catch (e) {
-                              console.error('清除存储失败:', e);
-                            }
-                          }}
-                          className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-md"
-                        >
-                          清除存储并重置
-                        </button>
-                        <button
-                          onClick={() => window.location.reload()}
-                          className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
-                        >
-                          刷新页面
-                        </button>
-                      </div>
-                    </div>
-                  }>
-                    <Suspense fallback={<ComponentLoadingFallback componentName="用户配置管理器" />}>
-                      <UserConfigManager />
+              {/* 关于信息 */}
+              <Card title="关于">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
+                    <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                      {platformInfo.isNative ?
+                        (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
+                        'Web'
+                      }
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
+                    <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
+                  </div>
+
+                  {/* 性能测试工具 */}
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <Suspense fallback={<ComponentLoadingFallback componentName="性能测试工具" />}>
+                      <PerformanceTestTool />
                     </Suspense>
-                  </ConfigErrorBoundary>
+                  </div>
                 </div>
-              )}
+              </Card>
+
+              {/* 其他设置 */}
+              <Card title="其他">
+                <div className="space-y-1">
+                  <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                    <span className="font-medium text-gray-900 dark:text-white">用户协议</span>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+
+                  <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                    <span className="font-medium text-gray-900 dark:text-white">隐私政策</span>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+
+                  <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
+                    <span className="font-medium text-gray-900 dark:text-white">意见反馈</span>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+
+                  {/* 错误日志追踪开关 */}
+                  <button
+                    onClick={handleToggleErrorTracking}
+                    className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-xl">🔴</span>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900 dark:text-white">错误日志追踪</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {errorTrackingEnabled ? '已启用 - 显示错误追踪球' : '已关闭 - 隐藏错误追踪球'}
+                        </span>
+                      </div>
+                    </div>
+                    {/* 开关图标 */}
+                    <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${
+                      errorTrackingEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                    }`}>
+                      <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                        errorTrackingEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}></div>
+                    </div>
+                  </button>
+                </div>
+              </Card>
             </div>
 
             {/* 仅在原生应用中显示的重置按钮 */}
