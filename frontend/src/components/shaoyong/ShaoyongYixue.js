@@ -18,11 +18,11 @@ import HistoryPanel from './HistoryPanel';
 const ShaoyongYixue = () => {
   const [activeTab, setActiveTab] = useState('meihua'); // 梅花易数 | 铁板神数
   const [theme, setTheme] = useState('dark'); // light | dark
-  
+
   // 梅花易数状态
   const [divinationResult, setDivinationResult] = useState(null);
   const [meihuaHistory, setMeihuaHistory] = useState([]);
-  
+
   // 铁板神数状态
   const [baziData, setBaziData] = useState(null);
   const [calculationResult, setCalculationResult] = useState(null);
@@ -39,7 +39,7 @@ const ShaoyongYixue = () => {
     // 加载历史记录
     const savedMeihuaHistory = localStorage.getItem('shaoyong_meihua_history');
     const savedTiebanHistory = localStorage.getItem('shaoyong_tieban_history');
-    
+
     if (savedMeihuaHistory) {
       try {
         setMeihuaHistory(JSON.parse(savedMeihuaHistory));
@@ -47,7 +47,7 @@ const ShaoyongYixue = () => {
         console.error('加载梅花易数历史记录失败:', e);
       }
     }
-    
+
     if (savedTiebanHistory) {
       try {
         setTiebanHistory(JSON.parse(savedTiebanHistory));
@@ -139,9 +139,9 @@ const ShaoyongYixue = () => {
             <h1>邵雍易学</h1>
             <p className="subtitle">梅花易数 • 铁板神数 • 皇极经世</p>
           </div>
-          
+
           <div className="header-controls">
-            <button 
+            <button
               className={`theme-toggle ${theme}`}
               onClick={toggleTheme}
               title={`切换到${theme === 'dark' ? '浅色' : '深色'}主题`}
@@ -153,15 +153,15 @@ const ShaoyongYixue = () => {
 
         {/* 标签页导航 */}
         <nav className="tab-navigation">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'meihua' ? 'active' : ''}`}
             onClick={() => setActiveTab('meihua')}
           >
             <span className="tab-icon">🌸</span>
             <span className="tab-label">梅花易数</span>
           </button>
-          
-          <button 
+
+          <button
             className={`tab-btn ${activeTab === 'tieban' ? 'active' : ''}`}
             onClick={() => setActiveTab('tieban')}
           >
@@ -212,7 +212,7 @@ const ShaoyongYixue = () => {
             {/* 历史记录 - 放到最后 */}
             <div className="card history-section">
               <h2>历史记录</h2>
-              <HistoryPanel 
+              <HistoryPanel
                 history={meihuaHistory}
                 onLoad={loadMeihuaHistory}
                 onClear={clearMeihuaHistory}
@@ -234,7 +234,7 @@ const ShaoyongYixue = () => {
                   <>
                     <div className="card">
                       <h2>皇极起数计算</h2>
-                      <TiebanshenshuCalculation 
+                      <TiebanshenshuCalculation
                         baziData={baziData}
                         onCalculationComplete={handleCalculationComplete}
                         result={calculationResult}
@@ -244,7 +244,7 @@ const ShaoyongYixue = () => {
                     {calculationResult && (
                       <div className="card">
                         <h2>神数条文抽取与解读</h2>
-                        <ClauseDisplay 
+                        <ClauseDisplay
                           calculationResult={calculationResult}
                           onClauseSelect={handleClauseSelect}
                           selectedClause={selectedClause}
@@ -286,7 +286,7 @@ const ShaoyongYixue = () => {
             {tiebanHistory.length > 0 && (
               <div className="card history-section">
                 <h2>历史记录</h2>
-                <HistoryPanel 
+                <HistoryPanel
                   history={tiebanHistory}
                   onLoad={loadTiebanHistory}
                   onClear={clearTiebanHistory}
@@ -298,12 +298,12 @@ const ShaoyongYixue = () => {
       </main>
 
       {/* 底部信息 */}
-      <footer className="app-footer">
+      <footer className="app-footer safe-area-inset-bottom">
         <div className="footer-content">
           <p>邵雍易学 - 融合梅花易数之简易与铁板神数之精微</p>
           <p className="tip">
-            {activeTab === 'meihua' 
-              ? '提示：梅花易数强调"心易"，卦象解读需结合当下心境' 
+            {activeTab === 'meihua'
+              ? '提示：梅花易数强调"心易"，卦象解读需结合当下心境'
               : '提示：铁板神数乃"数术之王"，条文解读需结合八字整体'}
           </p>
           <div className="footer-links">

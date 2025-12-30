@@ -160,6 +160,53 @@ const MOON_PHASES = [
   { name: '下弦月', emoji: '🌗', description: '释放与清理' }
 ];
 
+
+// 计算星座
+const calculateZodiac = (birthDate) => {
+  if (!birthDate) return null;
+
+  const date = new Date(birthDate);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  for (const sign of ZODIAC_SIGNS) {
+    const [startMonth, startDay] = sign.dates.split('.')[0].split('-')[0].split('.').map(Number);
+    const [endMonth, endDay] = sign.dates.split('.')[1].split('-')[0].split('.').map(Number);
+
+    if ((month === startMonth && day >= startDay) || (month === endMonth && day <= endDay)) {
+      return sign;
+    }
+  }
+  return null;
+};
+
+// 从全局配置获取默认用户信息
+const getDefaultUserInfo = () => {
+  try {
+    const globalConfig = userConfigManager.getCurrentConfig();
+    if (globalConfig && globalConfig.birthDate) {
+      // 如果全局配置有效，直接使用
+      const defaultBirthDate = globalConfig.birthDate === '1991-04-30' ? '1991-01-01' : globalConfig.birthDate;
+      const zodiacSign = calculateZodiac(defaultBirthDate);
+      return {
+        birthDate: defaultBirthDate,
+        zodiac: zodiacSign ? zodiacSign.name : globalConfig.zodiac || '',
+        zodiacSign
+      };
+    }
+  } catch (error) {
+    console.error('获取全局配置失败:', error);
+  }
+
+  // 默认返回1991-01-01
+  const defaultZodiac = calculateZodiac('1991-01-01');
+  return {
+    birthDate: '1991-01-01',
+    zodiac: defaultZodiac ? defaultZodiac.name : '摩羯座',
+    zodiacSign: defaultZodiac
+  };
+};
+
 function TarotPage() {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('daily');
@@ -170,7 +217,7 @@ function TarotPage() {
   const [wishHistory, setWishHistory] = useState([]);
   const [expandedSuit, setExpandedSuit] = useState(null);
   const [showDetailedReading, setShowDetailedReading] = useState(false);
-  
+
   // 新增状态
   const [userInfo, setUserInfo] = useState({
     birthDate: '',
@@ -183,12 +230,12 @@ function TarotPage() {
   const [showUserInfoModal, setShowUserInfoModal] = useState(false);
   const [globalUserConfig, setGlobalUserConfig] = useState(null);
   const [cardsRevealed, setCardsRevealed] = useState(false);
-  
+
   const scrollContainerRef = useRef(null);
 
   // 使用 useMemo 缓存计算结果，避免重复计算
   const defaultUserInfo = useMemo(() => getDefaultUserInfo(), []);
-  
+
   const handleSaveUserInfo = useCallback((birthDate) => {
     const zodiacSign = calculateZodiac(birthDate);
     const newUserInfo = {
@@ -256,17 +303,17 @@ function TarotPage() {
   const drawCards = useCallback(() => {
     setIsDrawing(true);
     setCardsRevealed(false);
-    
+
     // 使用 setTimeout 延迟计算，避免阻塞主线程
     setTimeout(() => {
       // 使用分批计算避免一次性处理太多数据
       const allCards = MAJOR_ARCANA; // 直接使用引用，避免复制
-      
+
       if (drawMode === DRAW_MODES.SINGLE) {
         // 单张抽卡
         const randomIndex = Math.floor(Math.random() * allCards.length);
         const randomCard = allCards[randomIndex];
-        
+
         setDrawnCards({
           mode: DRAW_MODES.SINGLE,
           cards: [randomCard]
@@ -279,7 +326,7 @@ function TarotPage() {
           [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         const selectedCards = shuffled.slice(0, 3);
-        
+
         setDrawnCards({
           mode: DRAW_MODES.TRIPLE,
           cards: selectedCards
@@ -287,7 +334,7 @@ function TarotPage() {
       }
 
       setIsDrawing(false);
-      
+
       // 延迟翻牌动画
       setTimeout(() => {
         setCardsRevealed(true);
@@ -385,74 +432,18 @@ function TarotPage() {
     }
   }, []);
 
-  // 计算星座
-  const calculateZodiac = (birthDate) => {
-    if (!birthDate) return null;
-    
-    const date = new Date(birthDate);
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    
-    for (const sign of ZODIAC_SIGNS) {
-      const [startMonth, startDay] = sign.dates.split('.')[0].split('-')[0].split('.').map(Number);
-      const [endMonth, endDay] = sign.dates.split('.')[1].split('-')[0].split('.').map(Number);
-      
-      if ((month === startMonth && day >= startDay) || (month === endMonth && day <= endDay)) {
-        return sign;
-      }
-    }
-    return null;
-  };
 
-  // 保存用户信息（独立存储，不与全局配置冲突）
-  const saveUserInfo = (birthDate) => {
-    const zodiacSign = calculateZodiac(birthDate);
-    const newUserInfo = {
-      birthDate,
-      zodiac: zodiacSign ? zodiacSign.name : '',
-      zodiacSign
-    };
-    setUserInfo(newUserInfo);
-    // 使用独立的键名保存塔罗牌页面的用户信息
-    localStorage.setItem('tarotUserInfo', JSON.stringify(newUserInfo));
-    setShowUserInfoModal(false);
-  };
-
-  // 从全局配置获取默认用户信息
-  const getDefaultUserInfo = () => {
-    try {
-      const globalConfig = userConfigManager.getCurrentConfig();
-      if (globalConfig && globalConfig.birthDate) {
-        const defaultBirthDate = globalConfig.birthDate === '1991-04-30' ? '1991-01-01' : globalConfig.birthDate;
-        const zodiacSign = calculateZodiac(defaultBirthDate);
-        return {
-          birthDate: defaultBirthDate,
-          zodiac: zodiacSign ? zodiacSign.name : globalConfig.zodiac || '',
-          zodiacSign
-        };
-      }
-    } catch (error) {
-      console.error('获取全局配置失败:', error);
-    }
-    // 默认返回1991-01-01
-    const defaultZodiac = calculateZodiac('1991-01-01');
-    return {
-      birthDate: '1991-01-01',
-      zodiac: defaultZodiac ? defaultZodiac.name : '摩羯座',
-      zodiacSign: defaultZodiac
-    };
-  };
 
   // 加载用户信息 - 优化：使用分批加载避免长任务
   useEffect(() => {
     let isMounted = true;
-    
+
     // 使用 requestIdleCallback 或 setTimeout 分批执行
     const loadUserConfig = () => {
       // 延迟初始化用户配置管理器，避免阻塞主线程
       setTimeout(async () => {
         if (!isMounted) return;
-        
+
         try {
           await userConfigManager.initialize();
           const globalConfig = userConfigManager.getCurrentConfig();
@@ -464,7 +455,7 @@ function TarotPage() {
         }
       }, 0);
     };
-    
+
     loadUserConfig();
 
     // 使用 requestIdleCallback 优化 localStorage 读取
@@ -518,7 +509,7 @@ function TarotPage() {
     };
 
     loadUserInfo();
-    
+
     // 设置月相 - 延迟执行
     setTimeout(() => {
       if (isMounted) {
@@ -539,14 +530,14 @@ function TarotPage() {
       const today = new Date();
       const randomIndex = Math.floor(Math.random() * MAJOR_ARCANA.length);
       const randomCard = MAJOR_ARCANA[randomIndex];
-      
+
       // 使用预定义数组提高性能
       const energyLevels = ['低', '中', '高'];
       const luckLevels = ['一般', '不错', '很好'];
       const focusAreas = ['爱情', '事业', '健康', '财富', '人际关系'];
       const mindsets = ['积极', '耐心', '开放'];
       const colors = ['红色', '蓝色', '绿色', '黄色', '紫色'];
-      
+
       const reading = {
         date: today.toLocaleDateString(),
         zodiac: userInfo.zodiacSign,
@@ -558,10 +549,10 @@ function TarotPage() {
         luckyColor: colors[Math.floor(Math.random() * colors.length)],
         luckyNumber: Math.floor(Math.random() * 9) + 1
       };
-      
+
       setFortuneReading(reading);
       setIsDrawing(false);
-      
+
       // 滚动到命运指引区域 - 延迟执行
       setTimeout(() => {
         const element = document.getElementById('fortune-reading');
@@ -582,13 +573,13 @@ function TarotPage() {
         { name: '声音疗愈', emoji: '🎵', description: '通过音波振动清理能量场' },
         { name: '烟雾净化', emoji: '💨', description: '使用草药烟雾净化空间' }
       ];
-      
+
       const method = cleansingMethods[Math.floor(Math.random() * cleansingMethods.length)];
       const newEnergyLevel = Math.min(100, energyLevel + Math.floor(Math.random() * 20) + 10);
-      
+
       setEnergyLevel(newEnergyLevel);
       setIsDrawing(false);
-      
+
       alert(`✨ 能量清理完成！\n使用方式：${method.name} ${method.emoji}\n效果：${method.description}\n当前能量水平：${newEnergyLevel}%`);
     }, 1500);
   }, [energyLevel]);
@@ -603,10 +594,10 @@ function TarotPage() {
         { name: '水星祝福', emoji: '☄️', effect: '提升沟通和思维能力', duration: '5天' },
         { name: '火星祝福', emoji: '🔥', effect: '增强行动力和勇气', duration: '2天' }
       ];
-      
+
       const blessing = blessings[Math.floor(Math.random() * blessings.length)];
       setIsDrawing(false);
-      
+
       alert(`🌟 星象祝福已接收！\n祝福类型：${blessing.name} ${blessing.emoji}\n效果：${blessing.effect}\n持续时间：${blessing.duration}`);
     }, 1500);
   }, []);
@@ -615,17 +606,17 @@ function TarotPage() {
   const recordMoonPhase = () => {
     const today = new Date();
     const moonRecords = JSON.parse(localStorage.getItem('moonRecords') || '[]');
-    
+
     const newRecord = {
       date: today.toLocaleDateString(),
       phase: moonPhase,
       notes: '',
       emotions: ['平静', '兴奋', '沉思', '感恩'][Math.floor(Math.random() * 4)]
     };
-    
+
     moonRecords.unshift(newRecord);
     localStorage.setItem('moonRecords', JSON.stringify(moonRecords.slice(0, 30)));
-    
+
     alert(`🌙 月相记录已保存！\n日期：${newRecord.date}\n月相：${moonPhase.name} ${moonPhase.emoji}\n情绪：${newRecord.emotions}`);
   };
 
@@ -672,366 +663,413 @@ function TarotPage() {
         }
       `}</style>
       <PageLayout title="神秘塔罗">
-      <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
-        {/* 标签导航 */}
-        <div className="flex-shrink-0 bg-white dark:bg-gray-800 shadow-sm">
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex space-x-2">
-              <button
-                onClick={() => { setActiveTab('daily'); scrollToTop(); }}
-                className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all ${
-                  activeTab === 'daily'
+        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+          {/* 标签导航 */}
+          <div className="flex-shrink-0 bg-white dark:bg-gray-800 shadow-sm">
+            <div className="max-w-4xl mx-auto px-4 py-3">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => { setActiveTab('daily'); scrollToTop(); }}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all ${activeTab === 'daily'
                     ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                🎴 每日抽卡
-              </button>
-              <button
-                onClick={() => { setActiveTab('library'); scrollToTop(); }}
-                className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all ${
-                  activeTab === 'library'
+                    }`}
+                >
+                  🎴 每日抽卡
+                </button>
+                <button
+                  onClick={() => { setActiveTab('library'); scrollToTop(); }}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all ${activeTab === 'library'
                     ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                📚 塔罗大全
-              </button>
+                    }`}
+                >
+                  📚 塔罗大全
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 内容区域 */}
-        <div className="flex-1 overflow-hidden">
-          <div
-            ref={scrollContainerRef}
-            className="h-full overflow-y-auto"
-            style={{
-              WebkitOverflowScrolling: 'touch',
-              overscrollBehaviorY: 'contain'
-            }}
-          >
-            <div className="max-w-4xl mx-auto p-3 pb-16">
-              {activeTab === 'daily' && (
-                <div className="space-y-6">
-                  {/* 欢迎卡片 */}
-                  <Card>
-                    <div className="text-center p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 rounded-lg text-white">
-                      <div className="text-5xl mb-3">🔮</div>
-                      <h2 className="text-2xl font-bold mb-2">神秘塔罗</h2>
-                      <p className="text-purple-100">每日抽卡，聆听命运的指引</p>
-                      
-                      {/* 用户信息显示 */}
-                      <div className="mt-4 bg-white/20 rounded-lg p-3">
-                        <div className="flex items-center justify-center space-x-3 text-sm">
-                          <span>🎂 {userInfo.birthDate}</span>
-                          <span>✨ {userInfo.zodiac}</span>
-                          <button 
-                            onClick={() => setShowUserInfoModal(true)}
-                            className="bg-white/30 hover:bg-white/40 px-2 py-1 rounded text-xs transition-all"
-                          >
-                            修改
-                          </button>
-                        </div>
-                        {globalUserConfig && globalUserConfig.birthDate && globalUserConfig.birthDate !== userInfo.birthDate && (
-                          <div className="text-xs text-center mt-2 opacity-80">
-                            全局配置: {globalUserConfig.birthDate} · {globalUserConfig.zodiac}
+          {/* 内容区域 */}
+          <div className="flex-1 overflow-hidden">
+            <div
+              ref={scrollContainerRef}
+              className="h-full overflow-y-auto"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehaviorY: 'contain'
+              }}
+            >
+              <div className="max-w-4xl mx-auto p-3 pb-16">
+                {activeTab === 'daily' && (
+                  <div className="space-y-6">
+                    {/* 欢迎卡片 */}
+                    <Card>
+                      <div className="text-center p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 rounded-lg text-white">
+                        <div className="text-5xl mb-3">🔮</div>
+                        <h2 className="text-2xl font-bold mb-2">神秘塔罗</h2>
+                        <p className="text-purple-100">每日抽卡，聆听命运的指引</p>
+
+                        {/* 用户信息显示 */}
+                        <div className="mt-4 bg-white/20 rounded-lg p-3">
+                          <div className="flex items-center justify-center space-x-3 text-sm">
+                            <span>🎂 {userInfo.birthDate}</span>
+                            <span>✨ {userInfo.zodiac}</span>
+                            <button
+                              onClick={() => setShowUserInfoModal(true)}
+                              className="bg-white/30 hover:bg-white/40 px-2 py-1 rounded text-xs transition-all"
+                            >
+                              修改
+                            </button>
                           </div>
-                        )}
+                          {globalUserConfig && globalUserConfig.birthDate && globalUserConfig.birthDate !== userInfo.birthDate && (
+                            <div className="text-xs text-center mt-2 opacity-80">
+                              全局配置: {globalUserConfig.birthDate} · {globalUserConfig.zodiac}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
 
-                  {/* 抽卡模式选择 - 紧凑布局优化 */}
-                  <Card>
-                    <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-center text-lg">🎴 选择抽卡模式</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button
-                        onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                        className={`p-4 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[120px] ${
-                          drawMode === DRAW_MODES.SINGLE
+                    {/* 抽卡模式选择 - 紧凑布局优化 */}
+                    <Card>
+                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-center text-lg">🎴 选择抽卡模式</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button
+                          onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
+                          className={`p-4 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[120px] ${drawMode === DRAW_MODES.SINGLE
                             ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-2xl scale-105 ring-2 ring-purple-300 dark:ring-purple-700'
                             : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
-                        }`}
-                      >
-                        <div className="text-4xl mb-2">🃏</div>
-                        <div className="font-bold text-sm leading-tight">单张抽卡</div>
-                        <div className="text-xs opacity-90 mt-1 leading-tight whitespace-nowrap">
-                          简明扼要·即时解答
-                        </div>
-                      </Button>
-                      <Button
-                        onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                        className={`p-4 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[120px] ${
-                          drawMode === DRAW_MODES.TRIPLE
+                            }`}
+                        >
+                          <div className="text-4xl mb-2">🃏</div>
+                          <div className="font-bold text-sm leading-tight">单张抽卡</div>
+                          <div className="text-xs opacity-90 mt-1 leading-tight whitespace-nowrap">
+                            简明扼要·即时解答
+                          </div>
+                        </Button>
+                        <Button
+                          onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
+                          className={`p-4 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[120px] ${drawMode === DRAW_MODES.TRIPLE
                             ? 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-2xl scale-105 ring-2 ring-pink-300 dark:ring-pink-700'
                             : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
-                        }`}
-                      >
-                        <div className="text-4xl mb-2">🃏🃏🃏</div>
-                        <div className="font-bold text-sm leading-tight">三张抽卡</div>
-                        <div className="text-xs opacity-90 mt-1 leading-tight whitespace-nowrap">
-                          时间线分析·深度解读
-                        </div>
-                      </Button>
-                    </div>
-                  </Card>
-
-                  {/* 抽卡区域 */}
-                  <Card>
-                    <div className="text-center">
-                      {!drawnCards ? (
-                        <div className="py-12">
-                          <div className={`mb-6 ${isDrawing ? 'animate-bounce' : ''}`}>
-                            <div className="text-8xl">
-                              {drawMode === DRAW_MODES.SINGLE ? '🎴' : '🎴🎴🎴'}
-                            </div>
+                            }`}
+                        >
+                          <div className="text-4xl mb-2">🃏🃏🃏</div>
+                          <div className="font-bold text-sm leading-tight">三张抽卡</div>
+                          <div className="text-xs opacity-90 mt-1 leading-tight whitespace-nowrap">
+                            时间线分析·深度解读
                           </div>
-                          <Button
-                            onClick={drawCards}
-                            disabled={isDrawing}
-                            className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-4 rounded-full text-base font-medium shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
-                          >
-                            {isDrawing ? '正在抽牌中...' : drawMode === DRAW_MODES.SINGLE ? '开始单张抽卡' : '开始三张抽卡'}
-                          </Button>
-                          <p className="text-gray-500 dark:text-gray-400 mt-4 text-sm px-4">
-                            {drawMode === DRAW_MODES.SINGLE
-                              ? '深呼吸，放松身心，点击抽取今日的核心指引'
-                              : '深呼吸，放松身心，点击抽取三张牌进行深度解读'}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="py-6 space-y-6">
-                          {/* 卡片展示区域 */}
-                          <div className="space-y-6">
-                                {/* 单张牌展示 */}
-                                {drawnCards.mode === DRAW_MODES.SINGLE && drawnCards.cards[0] && (
-                                  <>
-                                    <div className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-2xl p-4 sm:p-6 shadow-2xl border border-purple-100 dark:border-purple-800">
-                                      <div className="flex items-center justify-center">
-                                        {!cardsRevealed ? (
-                                          <div className="flex items-center justify-center">
-                                            <div className="w-40 h-60 sm:w-56 sm:h-84 relative perspective-1000">
-                                              <div className="relative w-full h-full transition-transform duration-700">
-                                                <img
-                                                  src={tarotCardImage}
-                                                  alt="塔罗牌背面"
-                                                  className="w-full h-full object-cover rounded-xl shadow-lg animate-pulse"
-                                                  style={{ transform: 'rotateY(0deg)' }}
-                                                />
+                        </Button>
+                      </div>
+                    </Card>
+
+                    {/* 抽卡区域 */}
+                    <Card>
+                      <div className="text-center">
+                        {!drawnCards ? (
+                          <div className="py-12">
+                            <div className={`mb-6 ${isDrawing ? 'animate-bounce' : ''}`}>
+                              <div className="text-8xl">
+                                {drawMode === DRAW_MODES.SINGLE ? '🎴' : '🎴🎴🎴'}
+                              </div>
+                            </div>
+                            <Button
+                              onClick={drawCards}
+                              disabled={isDrawing}
+                              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-4 rounded-full text-base font-medium shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+                            >
+                              {isDrawing ? '正在抽牌中...' : drawMode === DRAW_MODES.SINGLE ? '开始单张抽卡' : '开始三张抽卡'}
+                            </Button>
+                            <p className="text-gray-500 dark:text-gray-400 mt-4 text-sm px-4">
+                              {drawMode === DRAW_MODES.SINGLE
+                                ? '深呼吸，放松身心，点击抽取今日的核心指引'
+                                : '深呼吸，放松身心，点击抽取三张牌进行深度解读'}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="py-6 space-y-6">
+                            {/* 卡片展示区域 */}
+                            <div className="space-y-6">
+                              {/* 单张牌展示 */}
+                              {drawnCards.mode === DRAW_MODES.SINGLE && drawnCards.cards[0] && (
+                                <>
+                                  <div className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-2xl p-4 sm:p-6 shadow-2xl border border-purple-100 dark:border-purple-800">
+                                    <div className="flex items-center justify-center">
+                                      {!cardsRevealed ? (
+                                        <div className="flex items-center justify-center">
+                                          <div className="w-40 h-60 sm:w-56 sm:h-84 relative perspective-1000">
+                                            <div className="relative w-full h-full transition-transform duration-700">
+                                              <img
+                                                src={tarotCardImage}
+                                                alt="塔罗牌背面"
+                                                className="w-full h-full object-cover rounded-xl shadow-lg animate-pulse"
+                                                style={{ transform: 'rotateY(0deg)' }}
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center justify-center">
+                                          <div className="w-40 h-60 sm:w-56 sm:h-84 relative perspective-1000">
+                                            <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 py-6 transition-transform duration-700 animate-card-reveal">
+                                              {/* 卡牌图标 */}
+                                              <div className="text-6xl sm:text-7xl mb-3 sm:mb-4 animate-pulse animate-fade-in-up" style={{ animationDelay: '0.1s' }}>🃏</div>
+
+                                              {/* 牌面名称 */}
+                                              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1.5 sm:mb-2 tracking-wide animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                                                {drawnCards.cards[0].name}
+                                              </h3>
+
+                                              {/* 英文名称 */}
+                                              <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4 font-medium animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                                                {drawnCards.cards[0].nameEn}
+                                              </p>
+
+                                              {/* 关键词标签 */}
+                                              <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                                                {drawnCards.cards[0].keywords.map((keyword, index) => (
+                                                  <span
+                                                    key={index}
+                                                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-[10px] sm:text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
+                                                  >
+                                                    {keyword}
+                                                  </span>
+                                                ))}
                                               </div>
                                             </div>
                                           </div>
-                                        ) : (
-                                          <div className="flex items-center justify-center">
-                                            <div className="w-40 h-60 sm:w-56 sm:h-84 relative perspective-1000">
-                                              <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 py-6 transition-transform duration-700 animate-card-reveal">
-                                                {/* 卡牌图标 */}
-                                                <div className="text-6xl sm:text-7xl mb-3 sm:mb-4 animate-pulse animate-fade-in-up" style={{ animationDelay: '0.1s' }}>🃏</div>
-                                                
-                                                {/* 牌面名称 */}
-                                                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1.5 sm:mb-2 tracking-wide animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                                                  {drawnCards.cards[0].name}
-                                                </h3>
-                                                
-                                                {/* 英文名称 */}
-                                                <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4 font-medium animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                                                  {drawnCards.cards[0].nameEn}
-                                                </p>
-                                                
-                                                {/* 关键词标签 */}
-                                                <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                                                  {drawnCards.cards[0].keywords.map((keyword, index) => (
-                                                    <span
-                                                      key={index}
-                                                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-[10px] sm:text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
-                                                    >
-                                                      {keyword}
-                                                    </span>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                {/* 单张牌解读 */}
-                                <Card>
-                                  <div className="space-y-4">
-                                    <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 rounded-lg">
-                                      <h4 className="font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center">
-                                        <span className="mr-2">⚡</span>
-                                        即时解答
-                                      </h4>
-                                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                        {drawnCards.cards[0].meaning}
-                                      </p>
-                                    </div>
-
-                                    {drawnCards.cards[0].reversed && (
-                                      <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 rounded-lg">
-                                        <h4 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2 flex items-center">
-                                          <span className="mr-2">⚠️</span>
-                                          逆位警示
-                                        </h4>
-                                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                          {drawnCards.cards[0].reversed}
-                                        </p>
-                                      </div>
-                                    )}
-
-                                    <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 rounded-lg">
-                                      <h4 className="font-bold text-purple-800 dark:text-purple-200 mb-2 flex items-center">
-                                        <span className="mr-2">💡</span>
-                                        今日建议
-                                      </h4>
-                                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                        这是今日的核心指引，请铭记于心并付诸行动。相信你的直觉，勇敢面对挑战。
-                                      </p>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
-                                </Card>
 
-                                {/* 重新抽卡 */}
-                                <div className="flex gap-3">
-                                  <Button
-                                    onClick={() => { setDrawnCards(null); setCardsRevealed(false); drawCards(); }}
-                                    className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
-                                  >
-                                    🔄 重新抽卡
-                                  </Button>
-                                  <Button
-                                    onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
-                                  >
-                                    📊 尝试三张抽卡
-                                  </Button>
-                                </div>
-                              </>
-                            )}
+                                  {/* 单张牌解读 */}
+                                  <Card>
+                                    <div className="space-y-4">
+                                      <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 rounded-lg">
+                                        <h4 className="font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center">
+                                          <span className="mr-2">⚡</span>
+                                          即时解答
+                                        </h4>
+                                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                          {drawnCards.cards[0].meaning}
+                                        </p>
+                                      </div>
 
-                            {/* 三张牌展示 */}
-                            {drawnCards.mode === DRAW_MODES.TRIPLE && (
-                              <>
-                                <div className="grid grid-cols-3 gap-2">
-                                  {drawnCards.cards.map((card, index) => (
-                                    <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-2 sm:p-3 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
-                                      <div className="flex items-center justify-center">
-                                        {!cardsRevealed ? (
-                                          <div className="flex items-center justify-center">
-                                            <div className="w-28 h-42 sm:w-36 sm:h-54 relative perspective-1000">
-                                              <div className="relative w-full h-full transition-transform duration-700" style={{ animationDelay: `${index * 150}ms` }}>
-                                                <img
-                                                  src={tarotCardImage}
-                                                  alt="塔罗牌背面"
-                                                  className="w-full h-full object-cover rounded-xl shadow-lg animate-pulse"
-                                                  style={{ transform: 'rotateY(0deg)' }}
-                                                />
+                                      {drawnCards.cards[0].reversed && (
+                                        <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 rounded-lg">
+                                          <h4 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2 flex items-center">
+                                            <span className="mr-2">⚠️</span>
+                                            逆位警示
+                                          </h4>
+                                          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                            {drawnCards.cards[0].reversed}
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 rounded-lg">
+                                        <h4 className="font-bold text-purple-800 dark:text-purple-200 mb-2 flex items-center">
+                                          <span className="mr-2">💡</span>
+                                          今日建议
+                                        </h4>
+                                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                          这是今日的核心指引，请铭记于心并付诸行动。相信你的直觉，勇敢面对挑战。
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </Card>
+
+                                  {/* 重新抽卡 */}
+                                  <div className="flex gap-3">
+                                    <Button
+                                      onClick={() => { setDrawnCards(null); setCardsRevealed(false); drawCards(); }}
+                                      className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                    >
+                                      🔄 重新抽卡
+                                    </Button>
+                                    <Button
+                                      onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
+                                      className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                    >
+                                      📊 尝试三张抽卡
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+
+                              {/* 三张牌展示 */}
+                              {drawnCards.mode === DRAW_MODES.TRIPLE && (
+                                <>
+                                  <div className="grid grid-cols-3 gap-2">
+                                    {drawnCards.cards.map((card, index) => (
+                                      <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-2 sm:p-3 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
+                                        <div className="flex items-center justify-center">
+                                          {!cardsRevealed ? (
+                                            <div className="flex items-center justify-center">
+                                              <div className="w-28 h-42 sm:w-36 sm:h-54 relative perspective-1000">
+                                                <div className="relative w-full h-full transition-transform duration-700" style={{ animationDelay: `${index * 150}ms` }}>
+                                                  <img
+                                                    src={tarotCardImage}
+                                                    alt="塔罗牌背面"
+                                                    className="w-full h-full object-cover rounded-xl shadow-lg animate-pulse"
+                                                    style={{ transform: 'rotateY(0deg)' }}
+                                                  />
+                                                </div>
                                               </div>
                                             </div>
-                                          </div>
-                                        ) : (
-                                          <div className="flex items-center justify-center">
-                                            <div className="w-28 h-42 sm:w-36 sm:h-54 relative perspective-1000">
-                                              <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-2 sm:px-3 py-3 sm:py-4 transition-transform duration-700 animate-card-reveal" style={{ animationDelay: `${index * 200}ms` }}>
-                                                {/* 位置标签 */}
-                                                <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 mb-2 sm:mb-3 shadow-sm order-1 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 100}ms` }}>
-                                                  <h4 className="font-bold text-[10px] sm:text-xs text-purple-700 dark:text-purple-300 tracking-wide">{CARD_POSITIONS[index]}</h4>
+                                          ) : (
+                                            <div className="flex items-center justify-center">
+                                              <div className="w-28 h-42 sm:w-36 sm:h-54 relative perspective-1000">
+                                                <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-2 sm:px-3 py-3 sm:py-4 transition-transform duration-700 animate-card-reveal" style={{ animationDelay: `${index * 200}ms` }}>
+                                                  {/* 位置标签 */}
+                                                  <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 mb-2 sm:mb-3 shadow-sm order-1 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 100}ms` }}>
+                                                    <h4 className="font-bold text-[10px] sm:text-xs text-purple-700 dark:text-purple-300 tracking-wide">{CARD_POSITIONS[index]}</h4>
+                                                  </div>
+
+                                                  {/* 卡牌图标 */}
+                                                  <div className="text-3xl sm:text-4xl mb-2 sm:mb-3 animate-pulse animate-fade-in-up order-2" style={{ animationDelay: `${index * 200 + 150}ms` }}>🃏</div>
+
+                                                  {/* 牌面名称 */}
+                                                  <h3 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-100 mb-0.5 sm:mb-1 leading-tight order-3 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 200}ms` }}>
+                                                    {card.name}
+                                                  </h3>
+
+                                                  {/* 英文名称 */}
+                                                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-300 font-medium mb-2 sm:mb-2 order-4 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 250}ms` }}>
+                                                    {card.nameEn}
+                                                  </p>
                                                 </div>
-                                                
-                                                {/* 卡牌图标 */}
-                                                <div className="text-3xl sm:text-4xl mb-2 sm:mb-3 animate-pulse animate-fade-in-up order-2" style={{ animationDelay: `${index * 200 + 150}ms` }}>🃏</div>
-                                                
-                                                {/* 牌面名称 */}
-                                                <h3 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-100 mb-0.5 sm:mb-1 leading-tight order-3 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 200}ms` }}>
-                                                  {card.name}
-                                                </h3>
-                                                
-                                                {/* 英文名称 */}
-                                                <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-300 font-medium mb-2 sm:mb-2 order-4 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 250}ms` }}>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* 三张牌解读模式选择 */}
+                                  <Card>
+                                    <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 text-center text-base">📖 选择解读方式</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <Button
+                                        onClick={() => setShowDetailedReading(!showDetailedReading)}
+                                        className={`p-4 rounded-xl text-center transition-all duration-300 ${!showDetailedReading
+                                          ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-2xl scale-105 ring-2 ring-blue-300 dark:ring-blue-700'
+                                          : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
+                                          }`}
+                                      >
+                                        <div className="text-2xl mb-2">🕐</div>
+                                        <div className="font-bold text-sm mb-1 leading-tight">时间线分析</div>
+                                        <div className="text-xs opacity-90 leading-relaxed">
+                                          过去·现在·未来
+                                        </div>
+                                      </Button>
+                                      <Button
+                                        onClick={() => setShowDetailedReading(!showDetailedReading)}
+                                        className={`p-4 rounded-xl text-center transition-all duration-300 ${showDetailedReading
+                                          ? 'bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-2xl scale-105 ring-2 ring-orange-300 dark:ring-orange-700'
+                                          : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
+                                          }`}
+                                      >
+                                        <div className="text-2xl mb-2">🎯</div>
+                                        <div className="font-bold text-sm mb-1 leading-tight">关联性分析</div>
+                                        <div className="text-xs opacity-90 leading-relaxed">
+                                          问题·阻碍·建议
+                                        </div>
+                                      </Button>
+                                    </div>
+                                  </Card>
+
+                                  {/* 时间线解读 */}
+                                  {!showDetailedReading && drawnCards.mode === DRAW_MODES.TRIPLE && (
+                                    <Card>
+                                      <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
+                                        <span className="mr-2">🕐</span>
+                                        时间线解读（过去-现在-未来）
+                                      </h4>
+                                      <div className="space-y-4">
+                                        {drawnCards.cards.map((card, index) => (
+                                          <div
+                                            key={index}
+                                            className={`p-4 rounded-lg border-l-4 ${index === 0 ? 'bg-blue-50 dark:bg-blue-900 border-blue-400' :
+                                              index === 1 ? 'bg-purple-50 dark:bg-purple-900 border-purple-400' :
+                                                'bg-pink-50 dark:bg-pink-900 border-pink-400'
+                                              }`}
+                                          >
+                                            <div className="flex items-center mb-2">
+                                              <span className="text-2xl mr-3">
+                                                {index === 0 ? '↩️' : index === 1 ? '📍' : '➡️'}
+                                              </span>
+                                              <div>
+                                                <h5 className="font-bold text-lg text-gray-800 dark:text-white">
+                                                  {CARD_POSITIONS[index]} - {card.name}
+                                                </h5>
+                                                <p className="text-xs text-gray-600 dark:text-gray-300">
                                                   {card.nameEn}
                                                 </p>
                                               </div>
                                             </div>
+                                            <div className="space-y-2">
+                                              <div className="flex flex-wrap gap-1">
+                                                {card.keywords.map((keyword, kIndex) => (
+                                                  <span
+                                                    key={kIndex}
+                                                    className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300"
+                                                  >
+                                                    {keyword}
+                                                  </span>
+                                                ))}
+                                              </div>
+                                              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                {index === 0 ? `过去的背景：${card.meaning.substring(0, 40)}...` :
+                                                  index === 1 ? `当前的状况：${card.meaning.substring(0, 40)}...` :
+                                                    `未来的走向：${card.meaning.substring(0, 40)}...`}
+                                              </p>
+                                            </div>
                                           </div>
-                                        )}
+                                        ))}
                                       </div>
-                                    </div>
-                                  ))}
-                                </div>
 
-                                {/* 三张牌解读模式选择 */}
-                                <Card>
-                                  <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 text-center text-base">📖 选择解读方式</h4>
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <Button
-                                      onClick={() => setShowDetailedReading(!showDetailedReading)}
-                                      className={`p-4 rounded-xl text-center transition-all duration-300 ${
-                                        !showDetailedReading
-                                          ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-2xl scale-105 ring-2 ring-blue-300 dark:ring-blue-700'
-                                          : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
-                                      }`}
-                                    >
-                                      <div className="text-2xl mb-2">🕐</div>
-                                      <div className="font-bold text-sm mb-1 leading-tight">时间线分析</div>
-                                      <div className="text-xs opacity-90 leading-relaxed">
-                                        过去·现在·未来
+                                      <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-lg">
+                                        <h5 className="font-bold text-gray-800 dark:text-white mb-2 flex items-center">
+                                          <span className="mr-2">💫</span>
+                                          综合启示
+                                        </h5>
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                          从{drawnCards.cards[0].keywords[0]}的过去，经历{drawnCards.cards[1].keywords[0]}的现在，向着{drawnCards.cards[2].keywords[0]}的未来发展。保持积极的心态，顺应变化，相信自己的直觉。每一步都是命运的指引，勇敢前行。
+                                        </p>
                                       </div>
-                                    </Button>
-                                    <Button
-                                      onClick={() => setShowDetailedReading(!showDetailedReading)}
-                                      className={`p-4 rounded-xl text-center transition-all duration-300 ${
-                                        showDetailedReading
-                                          ? 'bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-2xl scale-105 ring-2 ring-orange-300 dark:ring-orange-700'
-                                          : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
-                                      }`}
-                                    >
-                                      <div className="text-2xl mb-2">🎯</div>
-                                      <div className="font-bold text-sm mb-1 leading-tight">关联性分析</div>
-                                      <div className="text-xs opacity-90 leading-relaxed">
-                                        问题·阻碍·建议
-                                      </div>
-                                    </Button>
-                                  </div>
-                                </Card>
+                                    </Card>
+                                  )}
 
-                                {/* 时间线解读 */}
-                                {!showDetailedReading && drawnCards.mode === DRAW_MODES.TRIPLE && (
-                                  <Card>
-                                    <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
-                                      <span className="mr-2">🕐</span>
-                                      时间线解读（过去-现在-未来）
-                                    </h4>
-                                    <div className="space-y-4">
-                                      {drawnCards.cards.map((card, index) => (
-                                        <div
-                                          key={index}
-                                          className={`p-4 rounded-lg border-l-4 ${
-                                            index === 0 ? 'bg-blue-50 dark:bg-blue-900 border-blue-400' :
-                                            index === 1 ? 'bg-purple-50 dark:bg-purple-900 border-purple-400' :
-                                            'bg-pink-50 dark:bg-pink-900 border-pink-400'
-                                          }`}
-                                        >
-                                          <div className="flex items-center mb-2">
-                                            <span className="text-2xl mr-3">
-                                              {index === 0 ? '↩️' : index === 1 ? '📍' : '➡️'}
-                                            </span>
+                                  {/* 关联性解读 */}
+                                  {showDetailedReading && drawnCards.mode === DRAW_MODES.TRIPLE && (
+                                    <Card>
+                                      <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
+                                        <span className="mr-2">🎯</span>
+                                        关联性解读（问题-阻碍-建议）
+                                      </h4>
+                                      <div className="space-y-4">
+                                        {/* 问题 */}
+                                        <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900 dark:to-orange-900 rounded-lg">
+                                          <div className="flex items-center mb-3">
+                                            <span className="text-3xl mr-3">❓</span>
                                             <div>
-                                              <h5 className="font-bold text-lg text-gray-800 dark:text-white">
-                                                {CARD_POSITIONS[index]} - {card.name}
+                                              <h5 className="font-bold text-lg text-red-800 dark:text-red-200">
+                                                第一张牌 - 核心问题
                                               </h5>
-                                              <p className="text-xs text-gray-600 dark:text-gray-300">
-                                                {card.nameEn}
+                                              <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                {drawnCards.cards[0].nameEn}
                                               </p>
                                             </div>
                                           </div>
                                           <div className="space-y-2">
                                             <div className="flex flex-wrap gap-1">
-                                              {card.keywords.map((keyword, kIndex) => (
+                                              {drawnCards.cards[0].keywords.map((keyword, index) => (
                                                 <span
-                                                  key={kIndex}
+                                                  key={index}
                                                   className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300"
                                                 >
                                                   {keyword}
@@ -1039,560 +1077,506 @@ function TarotPage() {
                                               ))}
                                             </div>
                                             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                              {index === 0 ? `过去的背景：${card.meaning.substring(0, 40)}...` :
-                                                index === 1 ? `当前的状况：${card.meaning.substring(0, 40)}...` :
-                                                `未来的走向：${card.meaning.substring(0, 40)}...`}
+                                              这张牌揭示了当前面临的<strong>核心问题</strong>：{drawnCards.cards[0].meaning.substring(0, 50)}...
                                             </p>
                                           </div>
                                         </div>
-                                      ))}
-                                    </div>
 
-                                    <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-lg">
-                                      <h5 className="font-bold text-gray-800 dark:text-white mb-2 flex items-center">
-                                        <span className="mr-2">💫</span>
-                                        综合启示
-                                      </h5>
-                                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                        从{drawnCards.cards[0].keywords[0]}的过去，经历{drawnCards.cards[1].keywords[0]}的现在，向着{drawnCards.cards[2].keywords[0]}的未来发展。保持积极的心态，顺应变化，相信自己的直觉。每一步都是命运的指引，勇敢前行。
-                                      </p>
-                                    </div>
-                                  </Card>
-                                )}
-
-                                {/* 关联性解读 */}
-                                {showDetailedReading && drawnCards.mode === DRAW_MODES.TRIPLE && (
-                                  <Card>
-                                    <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
-                                      <span className="mr-2">🎯</span>
-                                      关联性解读（问题-阻碍-建议）
-                                    </h4>
-                                    <div className="space-y-4">
-                                      {/* 问题 */}
-                                      <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900 dark:to-orange-900 rounded-lg">
-                                        <div className="flex items-center mb-3">
-                                          <span className="text-3xl mr-3">❓</span>
-                                          <div>
-                                            <h5 className="font-bold text-lg text-red-800 dark:text-red-200">
-                                              第一张牌 - 核心问题
-                                            </h5>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                              {drawnCards.cards[0].nameEn}
+                                        {/* 阻碍 */}
+                                        <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900 dark:to-amber-900 rounded-lg">
+                                          <div className="flex items-center mb-3">
+                                            <span className="text-3xl mr-3">⚠️</span>
+                                            <div>
+                                              <h5 className="font-bold text-lg text-yellow-800 dark:text-yellow-200">
+                                                第二张牌 - 可能阻碍
+                                              </h5>
+                                              <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                {drawnCards.cards[1].nameEn}
+                                              </p>
+                                            </div>
+                                          </div>
+                                          <div className="space-y-2">
+                                            <div className="flex flex-wrap gap-1">
+                                              {drawnCards.cards[1].keywords.map((keyword, index) => (
+                                                <span
+                                                  key={index}
+                                                  className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300"
+                                                >
+                                                  {keyword}
+                                                </span>
+                                              ))}
+                                            </div>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                              这张牌指出了<strong>可能的阻碍</strong>：{drawnCards.cards[1].meaning.substring(0, 50)}...
                                             </p>
                                           </div>
                                         </div>
-                                        <div className="space-y-2">
-                                          <div className="flex flex-wrap gap-1">
-                                            {drawnCards.cards[0].keywords.map((keyword, index) => (
-                                              <span
-                                                key={index}
-                                                className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300"
-                                              >
-                                                {keyword}
-                                              </span>
-                                            ))}
+
+                                        {/* 建议 */}
+                                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 rounded-lg">
+                                          <div className="flex items-center mb-3">
+                                            <span className="text-3xl mr-3">💡</span>
+                                            <div>
+                                              <h5 className="font-bold text-lg text-green-800 dark:text-green-200">
+                                                第三张牌 - 解决建议
+                                              </h5>
+                                              <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                {drawnCards.cards[2].nameEn}
+                                              </p>
+                                            </div>
                                           </div>
-                                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                            这张牌揭示了当前面临的<strong>核心问题</strong>：{drawnCards.cards[0].meaning.substring(0, 50)}...
-                                          </p>
+                                          <div className="space-y-2">
+                                            <div className="flex flex-wrap gap-1">
+                                              {drawnCards.cards[2].keywords.map((keyword, index) => (
+                                                <span
+                                                  key={index}
+                                                  className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300"
+                                                >
+                                                  {keyword}
+                                                </span>
+                                              ))}
+                                            </div>
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                              这张牌提供了<strong>解决方案</strong>：{drawnCards.cards[2].meaning.substring(0, 50)}...
+                                            </p>
+                                          </div>
                                         </div>
                                       </div>
 
-                                      {/* 阻碍 */}
-                                      <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900 dark:to-amber-900 rounded-lg">
-                                        <div className="flex items-center mb-3">
-                                          <span className="text-3xl mr-3">⚠️</span>
-                                          <div>
-                                            <h5 className="font-bold text-lg text-yellow-800 dark:text-yellow-200">
-                                              第二张牌 - 可能阻碍
-                                            </h5>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                              {drawnCards.cards[1].nameEn}
-                                            </p>
-                                          </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                          <div className="flex flex-wrap gap-1">
-                                            {drawnCards.cards[1].keywords.map((keyword, index) => (
-                                              <span
-                                                key={index}
-                                                className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300"
-                                              >
-                                                {keyword}
-                                              </span>
-                                            ))}
-                                          </div>
-                                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                            这张牌指出了<strong>可能的阻碍</strong>：{drawnCards.cards[1].meaning.substring(0, 50)}...
-                                          </p>
-                                        </div>
+                                      <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 rounded-lg">
+                                        <h5 className="font-bold text-gray-800 dark:text-white mb-2 flex items-center">
+                                          <span className="mr-2">🌟</span>
+                                          综合指引
+                                        </h5>
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                          <strong>核心问题：</strong>{drawnCards.cards[0].keywords[0]} · <strong>潜在阻碍：</strong>{drawnCards.cards[1].keywords[0]} · <strong>解决建议：</strong>{drawnCards.cards[2].keywords[0]}
+                                        </p>
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mt-2">
+                                          综合三张牌的指引，建议你：首先{drawnCards.cards[0].keywords[0]}面对问题，同时注意{drawnCards.cards[1].keywords[0]}的阻碍，最后采纳{drawnCards.cards[2].keywords[0]}的建议。保持耐心和信心，逐步解决问题。
+                                        </p>
                                       </div>
+                                    </Card>
+                                  )}
 
-                                      {/* 建议 */}
-                                      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 rounded-lg">
-                                        <div className="flex items-center mb-3">
-                                          <span className="text-3xl mr-3">💡</span>
-                                          <div>
-                                            <h5 className="font-bold text-lg text-green-800 dark:text-green-200">
-                                              第三张牌 - 解决建议
-                                            </h5>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                              {drawnCards.cards[2].nameEn}
-                                            </p>
-                                          </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                          <div className="flex flex-wrap gap-1">
-                                            {drawnCards.cards[2].keywords.map((keyword, index) => (
-                                              <span
-                                                key={index}
-                                                className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-gray-700 dark:text-gray-300"
-                                              >
-                                                {keyword}
-                                              </span>
-                                            ))}
-                                          </div>
-                                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                            这张牌提供了<strong>解决方案</strong>：{drawnCards.cards[2].meaning.substring(0, 50)}...
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 rounded-lg">
-                                      <h5 className="font-bold text-gray-800 dark:text-white mb-2 flex items-center">
-                                        <span className="mr-2">🌟</span>
-                                        综合指引
-                                      </h5>
-                                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                        <strong>核心问题：</strong>{drawnCards.cards[0].keywords[0]} · <strong>潜在阻碍：</strong>{drawnCards.cards[1].keywords[0]} · <strong>解决建议：</strong>{drawnCards.cards[2].keywords[0]}
-                                      </p>
-                                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mt-2">
-                                        综合三张牌的指引，建议你：首先{drawnCards.cards[0].keywords[0]}面对问题，同时注意{drawnCards.cards[1].keywords[0]}的阻碍，最后采纳{drawnCards.cards[2].keywords[0]}的建议。保持耐心和信心，逐步解决问题。
-                                      </p>
-                                    </div>
-                                  </Card>
-                                )}
-
-                                {/* 重新抽卡按钮 */}
-                                <div className="flex gap-3">
-                                  <Button
-                                    onClick={() => { setDrawnCards(null); setShowDetailedReading(false); setCardsRevealed(false); drawCards(); }}
-                                    className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
-                                  >
-                                    🔄 重新抽卡
-                                  </Button>
-                                  <Button
-                                    onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                                    className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
-                                  >
-                                    🎴 尝试单张抽卡
-                                  </Button>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-
-                  {/* 许愿区域 */}
-                  {drawnCards && (
-                    <Card>
-                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-lg">🌟 许下心愿</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                        借助今日抽到的卡牌能量，许下你的心愿
-                      </p>
-                      <textarea
-                        value={wish}
-                        onChange={(e) => setWish(e.target.value)}
-                        placeholder="在这里写下你的心愿..."
-                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white resize-none transition-all duration-300 focus:border-purple-400 dark:focus:border-purple-600"
-                        rows={3}
-                      />
-                      <Button
-                        onClick={makeWish}
-                        className="mt-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
-                      >
-                        ✨ 许下心愿
-                      </Button>
-                    </Card>
-                  )}
-
-                  {/* 许愿历史 */}
-                  {wishHistory.length > 0 && (
-                    <Card>
-                      <h3 className="font-bold text-gray-800 dark:text-white mb-4">📝 许愿记录</h3>
-                      <div className="space-y-3">
-                        {wishHistory.map((item) => (
-                          <div
-                            key={item.id}
-                            className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                                {item.drawMode === DRAW_MODES.SINGLE ? '🎴 单张' : '🃏🃏🃏 三张'}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
-                                {item.date}
-                              </span>
+                                  {/* 重新抽卡按钮 */}
+                                  <div className="flex gap-3">
+                                    <Button
+                                      onClick={() => { setDrawnCards(null); setShowDetailedReading(false); setCardsRevealed(false); drawCards(); }}
+                                      className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                    >
+                                      🔄 重新抽卡
+                                    </Button>
+                                    <Button
+                                      onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
+                                      className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                    >
+                                      🎴 尝试单张抽卡
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
-                              抽到：{item.cards}
-                            </p>
-                            <p className="text-sm text-gray-700 dark:text-gray-300">
-                              {item.content}
-                            </p>
                           </div>
-                        ))}
+                        )}
                       </div>
                     </Card>
-                  )}
 
-                  {/* 命运指引功能 */}
-                  {fortuneReading && (
-                    <Card id="fortune-reading">
-                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-                        <span className="mr-2">🎯</span>
-                        {userInfo.zodiacSign ? `${userInfo.zodiacSign.name}今日运势` : '今日运势指引'}
-                      </h3>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          <div className="p-2 bg-blue-50 dark:bg-blue-900 rounded-lg">
-                            <div className="text-xs text-gray-600 dark:text-gray-300">能量水平</div>
-                            <div className="font-bold text-sm text-blue-600 dark:text-blue-300">{fortuneReading.energyLevel}</div>
-                          </div>
-                          <div className="p-2 bg-green-50 dark:bg-green-900 rounded-lg">
-                            <div className="text-xs text-gray-600 dark:text-gray-300">幸运指数</div>
-                            <div className="font-bold text-sm text-green-600 dark:text-green-300">{fortuneReading.luckLevel}</div>
-                          </div>
-                          <div className="p-2 bg-purple-50 dark:bg-purple-900 rounded-lg">
-                            <div className="text-xs text-gray-600 dark:text-gray-300">关注领域</div>
-                            <div className="font-bold text-sm text-purple-600 dark:text-purple-300">{fortuneReading.focusArea}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 rounded-lg">
-                          <h4 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2 flex items-center text-sm">
-                            <span className="mr-2">💡</span>
-                            指引卡牌：{fortuneReading.guidanceCard.name}
-                          </h4>
-                          <p className="text-xs text-gray-700 dark:text-gray-300">{fortuneReading.guidanceCard.meaning}</p>
-                        </div>
-                        
-                        <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-lg">
-                          <h4 className="font-bold text-indigo-800 dark:text-indigo-200 mb-2 text-sm">今日建议</h4>
-                          <p className="text-xs text-gray-700 dark:text-gray-300">{fortuneReading.advice}</p>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2 text-xs space-y-1 sm:space-y-0">
-                            <span>幸运色：{fortuneReading.luckyColor}</span>
-                            <span>幸运数字：{fortuneReading.luckyNumber}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  )}
-
-                  {/* 实用功能区域 - 移动端优化 */}
-                  <Card>
-                    <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-lg">✨ 能量管理</h3>
-                    
-                    {/* 功能按钮网格 - 优化标签显示 */}
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <Button 
-                        onClick={generateFortuneReading}
-                        disabled={isDrawing}
-                        className="p-3 sm:p-4 bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
-                      >
-                        <div className="text-xl sm:text-2xl mb-1">🎯</div>
-                        <div className="font-bold text-sm sm:text-base mb-1 leading-tight">命运指引</div>
-                        <div className="text-xs opacity-80 leading-tight text-center">查看近期运势</div>
-                      </Button>
-                      <Button 
-                        onClick={performEnergyCleansing}
-                        disabled={isDrawing}
-                        className="p-3 sm:p-4 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
-                      >
-                        <div className="text-xl sm:text-2xl mb-1">💎</div>
-                        <div className="font-bold text-sm sm:text-base mb-1 leading-tight">能量清理</div>
-                        <div className="text-xs opacity-80 leading-tight text-center">清理负面能量</div>
-                      </Button>
-                      <Button 
-                        onClick={receiveStarBlessing}
-                        disabled={isDrawing}
-                        className="p-3 sm:p-4 bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
-                      >
-                        <div className="text-xl sm:text-2xl mb-1">🔥</div>
-                        <div className="font-bold text-sm sm:text-base mb-1 leading-tight">星象祝福</div>
-                        <div className="text-xs opacity-80 leading-tight text-center">获取星辰祝福</div>
-                      </Button>
-                      <Button 
-                        onClick={recordMoonPhase}
-                        className="p-3 sm:p-4 bg-gradient-to-br from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
-                      >
-                        <div className="text-xl sm:text-2xl mb-1">🌙</div>
-                        <div className="font-bold text-sm sm:text-base mb-1 leading-tight">月相记录</div>
-                        <div className="text-xs opacity-80 leading-tight text-center">记录月相变化</div>
-                      </Button>
-                    </div>
-                    
-                    {/* 能量水平指示器 */}
-                    <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">当前能量水平</span>
-                        <span className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">{energyLevel}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                        <div 
-                          className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${energyLevel}%` }}
-                        ></div>
-                      </div>
-                      <div className="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                        <span>低</span>
-                        <span>中</span>
-                        <span>高</span>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {activeTab === 'library' && (
-                <div className="space-y-4">
-                  {/* 大阿卡纳牌 */}
-                  <Card>
-                    <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-                      <span className="mr-2">👑</span>
-                      大阿卡纳牌（22张）
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      大阿卡纳牌代表重要的人生课题和精神层面的启示
-                    </p>
-                    <div className="grid grid-cols-2 gap-3">
-                      {MAJOR_ARCANA.map((card) => (
-                        <div
-                          key={card.id}
-                          className="p-3 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-lg text-sm"
+                    {/* 许愿区域 */}
+                    {drawnCards && (
+                      <Card>
+                        <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-lg">🌟 许下心愿</h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                          借助今日抽到的卡牌能量，许下你的心愿
+                        </p>
+                        <textarea
+                          value={wish}
+                          onChange={(e) => setWish(e.target.value)}
+                          placeholder="在这里写下你的心愿..."
+                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white resize-none transition-all duration-300 focus:border-purple-400 dark:focus:border-purple-600"
+                          rows={3}
+                        />
+                        <Button
+                          onClick={makeWish}
+                          className="mt-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
                         >
-                          <div className="font-bold text-gray-800 dark:text-white mb-1">
-                            {card.id}. {card.name}
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
-                            {card.nameEn}
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {card.keywords.slice(0, 2).map((keyword, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-purple-600 dark:text-purple-300"
-                              >
-                                {keyword}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
+                          ✨ 许下心愿
+                        </Button>
+                      </Card>
+                    )}
 
-                  {/* 小阿卡纳牌 */}
-                  {MINOR_ARCANA.map((suit) => (
-                    <Card key={suit.suit}>
-                      <button
-                        onClick={() => setExpandedSuit(expandedSuit === suit.suit ? null : suit.suit)}
-                        className="w-full flex items-center justify-between p-4 text-left"
-                      >
-                        <div className="flex items-center">
-                          <div
-                            className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getSuitColor(suit.color)} flex items-center justify-center text-white text-xl font-bold mr-3`}
-                          >
-                            {suit.element[0]}
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-gray-800 dark:text-white text-lg">
-                              {suit.suit}（{suit.suitEn}）
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {suit.element} · {suit.cards.length}张牌
-                            </p>
-                          </div>
-                        </div>
-                        <svg
-                          className={`w-5 h-5 text-gray-400 transition-transform ${expandedSuit === suit.suit ? 'rotate-180' : ''}`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-
-                      {expandedSuit === suit.suit && (
-                        <div className="px-4 pb-4 space-y-2">
-                          {suit.cards.map((card) => (
+                    {/* 许愿历史 */}
+                    {wishHistory.length > 0 && (
+                      <Card>
+                        <h3 className="font-bold text-gray-800 dark:text-white mb-4">📝 许愿记录</h3>
+                        <div className="space-y-3">
+                          {wishHistory.map((item) => (
                             <div
-                              key={`${suit.suit}-${card.id}`}
+                              key={item.id}
                               className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
                             >
-                              <div className="flex items-center justify-between mb-1">
-                                <h4 className="font-medium text-gray-800 dark:text-white">
-                                  {card.name}
-                                </h4>
-                                <div className="flex flex-wrap gap-1">
-                                  {card.keywords.slice(0, 2).map((keyword, index) => (
-                                    <span
-                                      key={index}
-                                      className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded text-xs"
-                                    >
-                                      {keyword}
-                                    </span>
-                                  ))}
-                                </div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                                  {item.drawMode === DRAW_MODES.SINGLE ? '🎴 单张' : '🃏🃏🃏 三张'}
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  {item.date}
+                                </span>
                               </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {card.meaning}
+                              <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                                抽到：{item.cards}
+                              </p>
+                              <p className="text-sm text-gray-700 dark:text-gray-300">
+                                {item.content}
                               </p>
                             </div>
                           ))}
                         </div>
-                      )}
+                      </Card>
+                    )}
+
+                    {/* 命运指引功能 */}
+                    {fortuneReading && (
+                      <Card id="fortune-reading">
+                        <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                          <span className="mr-2">🎯</span>
+                          {userInfo.zodiacSign ? `${userInfo.zodiacSign.name}今日运势` : '今日运势指引'}
+                        </h3>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div className="p-2 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                              <div className="text-xs text-gray-600 dark:text-gray-300">能量水平</div>
+                              <div className="font-bold text-sm text-blue-600 dark:text-blue-300">{fortuneReading.energyLevel}</div>
+                            </div>
+                            <div className="p-2 bg-green-50 dark:bg-green-900 rounded-lg">
+                              <div className="text-xs text-gray-600 dark:text-gray-300">幸运指数</div>
+                              <div className="font-bold text-sm text-green-600 dark:text-green-300">{fortuneReading.luckLevel}</div>
+                            </div>
+                            <div className="p-2 bg-purple-50 dark:bg-purple-900 rounded-lg">
+                              <div className="text-xs text-gray-600 dark:text-gray-300">关注领域</div>
+                              <div className="font-bold text-sm text-purple-600 dark:text-purple-300">{fortuneReading.focusArea}</div>
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 rounded-lg">
+                            <h4 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2 flex items-center text-sm">
+                              <span className="mr-2">💡</span>
+                              指引卡牌：{fortuneReading.guidanceCard.name}
+                            </h4>
+                            <p className="text-xs text-gray-700 dark:text-gray-300">{fortuneReading.guidanceCard.meaning}</p>
+                          </div>
+
+                          <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-lg">
+                            <h4 className="font-bold text-indigo-800 dark:text-indigo-200 mb-2 text-sm">今日建议</h4>
+                            <p className="text-xs text-gray-700 dark:text-gray-300">{fortuneReading.advice}</p>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2 text-xs space-y-1 sm:space-y-0">
+                              <span>幸运色：{fortuneReading.luckyColor}</span>
+                              <span>幸运数字：{fortuneReading.luckyNumber}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* 实用功能区域 - 移动端优化 */}
+                    <Card>
+                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-lg">✨ 能量管理</h3>
+
+                      {/* 功能按钮网格 - 优化标签显示 */}
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                        <Button
+                          onClick={generateFortuneReading}
+                          disabled={isDrawing}
+                          className="p-3 sm:p-4 bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
+                        >
+                          <div className="text-xl sm:text-2xl mb-1">🎯</div>
+                          <div className="font-bold text-sm sm:text-base mb-1 leading-tight">命运指引</div>
+                          <div className="text-xs opacity-80 leading-tight text-center">查看近期运势</div>
+                        </Button>
+                        <Button
+                          onClick={performEnergyCleansing}
+                          disabled={isDrawing}
+                          className="p-3 sm:p-4 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
+                        >
+                          <div className="text-xl sm:text-2xl mb-1">💎</div>
+                          <div className="font-bold text-sm sm:text-base mb-1 leading-tight">能量清理</div>
+                          <div className="text-xs opacity-80 leading-tight text-center">清理负面能量</div>
+                        </Button>
+                        <Button
+                          onClick={receiveStarBlessing}
+                          disabled={isDrawing}
+                          className="p-3 sm:p-4 bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
+                        >
+                          <div className="text-xl sm:text-2xl mb-1">🔥</div>
+                          <div className="font-bold text-sm sm:text-base mb-1 leading-tight">星象祝福</div>
+                          <div className="text-xs opacity-80 leading-tight text-center">获取星辰祝福</div>
+                        </Button>
+                        <Button
+                          onClick={recordMoonPhase}
+                          className="p-3 sm:p-4 bg-gradient-to-br from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
+                        >
+                          <div className="text-xl sm:text-2xl mb-1">🌙</div>
+                          <div className="font-bold text-sm sm:text-base mb-1 leading-tight">月相记录</div>
+                          <div className="text-xs opacity-80 leading-tight text-center">记录月相变化</div>
+                        </Button>
+                      </div>
+
+                      {/* 能量水平指示器 */}
+                      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">当前能量水平</span>
+                          <span className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">{energyLevel}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${energyLevel}%` }}
+                          ></div>
+                        </div>
+                        <div className="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                          <span>低</span>
+                          <span>中</span>
+                          <span>高</span>
+                        </div>
+                      </div>
                     </Card>
-                  ))}
+                  </div>
+                )}
 
-                  {/* 塔罗使用指南 */}
-                  <Card>
-                    <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-                      <span className="mr-2">📖</span>
-                      塔罗使用指南
-                    </h3>
-                    <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
-                      <div className="flex items-start">
-                        <span className="mr-2">1️⃣</span>
-                        <p><strong>静心准备：</strong>在抽牌前，深呼吸，放松身心，专注于你的问题。</p>
+                {activeTab === 'library' && (
+                  <div className="space-y-4">
+                    {/* 大阿卡纳牌 */}
+                    <Card>
+                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <span className="mr-2">👑</span>
+                        大阿卡纳牌（22张）
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        大阿卡纳牌代表重要的人生课题和精神层面的启示
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {MAJOR_ARCANA.map((card) => (
+                          <div
+                            key={card.id}
+                            className="p-3 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-lg text-sm"
+                          >
+                            <div className="font-bold text-gray-800 dark:text-white mb-1">
+                              {card.id}. {card.name}
+                            </div>
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                              {card.nameEn}
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {card.keywords.slice(0, 2).map((keyword, index) => (
+                                <span
+                                  key={index}
+                                  className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-purple-600 dark:text-purple-300"
+                                >
+                                  {keyword}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex items-start">
-                        <span className="mr-2">2️⃣</span>
-                        <p><strong>明确问题：</strong>在心中默念你的问题或困惑，越具体越好。</p>
-                      </div>
-                      <div className="flex items-start">
-                        <span className="mr-2">3️⃣</span>
-                        <p><strong>抽取卡牌：</strong>凭直觉选择或随机抽取一张牌。</p>
-                      </div>
-                      <div className="flex items-start">
-                        <span className="mr-2">4️⃣</span>
-                        <p><strong>解读牌意：</strong>结合你的问题，仔细阅读牌义和关键词。</p>
-                      </div>
-                      <div className="flex items-start">
-                        <span className="mr-2">5️⃣</span>
-                        <p><strong>反思内省：</strong>思考牌面传达的信息，寻找解决问题的线索。</p>
-                      </div>
-                    </div>
-                  </Card>
+                    </Card>
 
-                  {/* 牌阵介绍 */}
-                  <Card>
-                    <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-                      <span className="mr-2">🎴</span>
-                      常用牌阵介绍
-                    </h3>
-                    <div className="space-y-4">
-                      <div className="p-3 bg-blue-50 dark:bg-blue-900 rounded-lg">
-                        <h4 className="font-medium text-gray-800 dark:text-white mb-2">
-                          单张牌阵
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          适合快速回答简单问题，提供即时的指引和启示。
-                        </p>
+                    {/* 小阿卡纳牌 */}
+                    {MINOR_ARCANA.map((suit) => (
+                      <Card key={suit.suit}>
+                        <button
+                          onClick={() => setExpandedSuit(expandedSuit === suit.suit ? null : suit.suit)}
+                          className="w-full flex items-center justify-between p-4 text-left"
+                        >
+                          <div className="flex items-center">
+                            <div
+                              className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getSuitColor(suit.color)} flex items-center justify-center text-white text-xl font-bold mr-3`}
+                            >
+                              {suit.element[0]}
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-gray-800 dark:text-white text-lg">
+                                {suit.suit}（{suit.suitEn}）
+                              </h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {suit.element} · {suit.cards.length}张牌
+                              </p>
+                            </div>
+                          </div>
+                          <svg
+                            className={`w-5 h-5 text-gray-400 transition-transform ${expandedSuit === suit.suit ? 'rotate-180' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+
+                        {expandedSuit === suit.suit && (
+                          <div className="px-4 pb-4 space-y-2">
+                            {suit.cards.map((card) => (
+                              <div
+                                key={`${suit.suit}-${card.id}`}
+                                className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                              >
+                                <div className="flex items-center justify-between mb-1">
+                                  <h4 className="font-medium text-gray-800 dark:text-white">
+                                    {card.name}
+                                  </h4>
+                                  <div className="flex flex-wrap gap-1">
+                                    {card.keywords.slice(0, 2).map((keyword, index) => (
+                                      <span
+                                        key={index}
+                                        className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded text-xs"
+                                      >
+                                        {keyword}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  {card.meaning}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </Card>
+                    ))}
+
+                    {/* 塔罗使用指南 */}
+                    <Card>
+                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <span className="mr-2">📖</span>
+                        塔罗使用指南
+                      </h3>
+                      <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                        <div className="flex items-start">
+                          <span className="mr-2">1️⃣</span>
+                          <p><strong>静心准备：</strong>在抽牌前，深呼吸，放松身心，专注于你的问题。</p>
+                        </div>
+                        <div className="flex items-start">
+                          <span className="mr-2">2️⃣</span>
+                          <p><strong>明确问题：</strong>在心中默念你的问题或困惑，越具体越好。</p>
+                        </div>
+                        <div className="flex items-start">
+                          <span className="mr-2">3️⃣</span>
+                          <p><strong>抽取卡牌：</strong>凭直觉选择或随机抽取一张牌。</p>
+                        </div>
+                        <div className="flex items-start">
+                          <span className="mr-2">4️⃣</span>
+                          <p><strong>解读牌意：</strong>结合你的问题，仔细阅读牌义和关键词。</p>
+                        </div>
+                        <div className="flex items-start">
+                          <span className="mr-2">5️⃣</span>
+                          <p><strong>反思内省：</strong>思考牌面传达的信息，寻找解决问题的线索。</p>
+                        </div>
                       </div>
-                      <div className="p-3 bg-green-50 dark:bg-green-900 rounded-lg">
-                        <h4 className="font-medium text-gray-800 dark:text-white mb-2">
-                          三张牌阵（过去-现在-未来）
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          展示问题的发展历程，帮助你理解因果和趋势。
-                        </p>
+                    </Card>
+
+                    {/* 牌阵介绍 */}
+                    <Card>
+                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                        <span className="mr-2">🎴</span>
+                        常用牌阵介绍
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                          <h4 className="font-medium text-gray-800 dark:text-white mb-2">
+                            单张牌阵
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            适合快速回答简单问题，提供即时的指引和启示。
+                          </p>
+                        </div>
+                        <div className="p-3 bg-green-50 dark:bg-green-900 rounded-lg">
+                          <h4 className="font-medium text-gray-800 dark:text-white mb-2">
+                            三张牌阵（过去-现在-未来）
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            展示问题的发展历程，帮助你理解因果和趋势。
+                          </p>
+                        </div>
+                        <div className="p-3 bg-purple-50 dark:bg-purple-900 rounded-lg">
+                          <h4 className="font-medium text-gray-800 dark:text-white mb-2">
+                            凯尔特十字牌阵
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            最全面的牌阵之一，深入分析问题的各个方面。
+                          </p>
+                        </div>
                       </div>
-                      <div className="p-3 bg-purple-50 dark:bg-purple-900 rounded-lg">
-                        <h4 className="font-medium text-gray-800 dark:text-white mb-2">
-                          凯尔特十字牌阵
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          最全面的牌阵之一，深入分析问题的各个方面。
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              )}
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 用户信息设置模态框 */}
-      {showUserInfoModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-              <span className="mr-2">✨</span>
-              设置塔罗牌个人信息
-            </h3>
-            
-            <div className="space-y-4">
-              {/* 全局配置信息显示 */}
-              {globalUserConfig && globalUserConfig.birthDate && (
-                <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-lg">
-                  <h4 className="font-bold text-blue-800 dark:text-blue-200 mb-2 text-sm flex items-center">
-                    <span className="mr-2">🌍</span>
-                    全局配置信息
-                  </h4>
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
-                    生日: {globalUserConfig.birthDate} · 星座: {globalUserConfig.zodiac}
-                  </p>
-                  <button
-                    onClick={handleUseGlobalConfig}
-                    className="mt-2 text-xs bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 px-2 py-1 rounded text-blue-700 dark:text-blue-300 transition-all duration-300"
-                  >
-                    使用全局配置
-                  </button>
-                </div>
-              )}
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  塔罗牌出生日期
-                </label>
-                <input
-                  type="date"
-                  value={userInfo.birthDate}
-                  onChange={handleUserInfoChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  此设置仅用于塔罗牌功能，独立于全局配置
-                </p>
-              </div>
-              
-              {userInfo.zodiacSign && (
-                <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 rounded-lg">
-                  <h4 className="font-bold text-purple-800 dark:text-purple-200 mb-2">
-                    {userInfo.zodiacSign.name} ({userInfo.zodiacSign.element}象星座)
-                  </h4>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    出生日期范围：{userInfo.zodiacSign.dates}
-                  </p>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {userInfo.zodiacSign.traits.map((trait, index) => (
-                      <span key={index} className="px-2 py-1 bg-white dark:bg-gray-800 rounded text-xs text-purple-600 dark:text-purple-300">
-                        {trait}
-                      </span>
-                    ))}
+        {/* 用户信息设置模态框 */}
+        {showUserInfoModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                <span className="mr-2">✨</span>
+                设置塔罗牌个人信息
+              </h3>
+
+              <div className="space-y-4">
+                {/* 全局配置信息显示 */}
+                {globalUserConfig && globalUserConfig.birthDate && (
+                  <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-lg">
+                    <h4 className="font-bold text-blue-800 dark:text-blue-200 mb-2 text-sm flex items-center">
+                      <span className="mr-2">🌍</span>
+                      全局配置信息
+                    </h4>
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                      生日: {globalUserConfig.birthDate} · 星座: {globalUserConfig.zodiac}
+                    </p>
+                    <button
+                      onClick={handleUseGlobalConfig}
+                      className="mt-2 text-xs bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 px-2 py-1 rounded text-blue-700 dark:text-blue-300 transition-all duration-300"
+                    >
+                      使用全局配置
+                    </button>
                   </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    塔罗牌出生日期
+                  </label>
+                  <input
+                    type="date"
+                    value={userInfo.birthDate}
+                    onChange={handleUserInfoChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    此设置仅用于塔罗牌功能，独立于全局配置
+                  </p>
                 </div>
-              )}
-              
-              <div className="flex gap-3 mt-6">
+
+                {userInfo.zodiacSign && (
+                  <div className="p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 rounded-lg">
+                    <h4 className="font-bold text-purple-800 dark:text-purple-200 mb-2">
+                      {userInfo.zodiacSign.name} ({userInfo.zodiacSign.element}象星座)
+                    </h4>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      出生日期范围：{userInfo.zodiacSign.dates}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {userInfo.zodiacSign.traits.map((trait, index) => (
+                        <span key={index} className="px-2 py-1 bg-white dark:bg-gray-800 rounded text-xs text-purple-600 dark:text-purple-300">
+                          {trait}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3 mt-6">
                   <Button
                     onClick={handleResetUserInfo}
                     className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300"
@@ -1606,30 +1590,30 @@ function TarotPage() {
                     取消
                   </Button>
                   <Button
-                    onClick={() => saveUserInfo(userInfo.birthDate)}
+                    onClick={() => handleSaveUserInfo(userInfo.birthDate)}
                     disabled={!userInfo.birthDate}
                     className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                   >
                     保存
                   </Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 加载动画 */}
-      {isDrawing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl">
-            <div className="text-center">
-              <div className="text-6xl animate-spin mb-4">🌀</div>
-              <p className="text-gray-700 dark:text-gray-300 font-medium">正在连接宇宙能量...</p>
+        {/* 加载动画 */}
+        {isDrawing && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl">
+              <div className="text-center">
+                <div className="text-6xl animate-spin mb-4">🌀</div>
+                <p className="text-gray-700 dark:text-gray-300 font-medium">正在连接宇宙能量...</p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </PageLayout>
+        )}
+      </PageLayout>
     </>
   );
 }
