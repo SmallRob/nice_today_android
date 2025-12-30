@@ -1,72 +1,78 @@
-import featureIcons from '../../config/featureIcons.json';
+// 导入所有图标组件
+import MBTIIcon from '../icons/MBTIIcon';
+import ChineseZodiacIcon from '../icons/ChineseZodiacIcon';
+import HoroscopeIcon from '../icons/HoroscopeIcon';
+import BaziIcon from '../icons/BaziIcon';
+import BiorhythmIcon from '../icons/BiorhythmIcon';
+import PersonalityTraitIcon from '../icons/PersonalityTraitIcon';
+import EnergyBoostIcon from '../icons/EnergyBoostIcon';
+import PeriodTrackerIcon from '../icons/PeriodTrackerIcon';
+import ZiWeiIcon from '../icons/ZiWeiIcon';
+import TodoIcon from '../icons/TodoIcon';
+import FinanceIcon from '../icons/FinanceIcon';
+import TakashimaIcon from '../icons/TakashimaIcon';
+import LifeMatrixIcon from '../icons/LifeMatrixIcon';
+import DailyCardIcon from '../icons/DailyCardIcon';
+import TarotGardenIcon from '../icons/TarotGardenIcon';
+import CulturalCupIcon from '../icons/CulturalCupIcon';
+import DressGuideIcon from '../icons/DressGuideIcon';
+import WuxingHealthIcon from '../icons/WuxingHealthIcon';
+import OrganRhythmIcon from '../icons/OrganRhythmIcon';
 
-const ModernIcon = ({ name, size = 24, color = '#ffffff' }) => {
-  // 从 JSON 配置中获取图标
-  const iconConfig = featureIcons.icons[name];
+/**
+ * 图标映射表 - 稳定的React组件渲染
+ */
+const iconMap = {
+  // 功能图标
+  'mbti': MBTIIcon,
+  'chinese-zodiac': ChineseZodiacIcon,
+  'horoscope': HoroscopeIcon,
+  'bazi': BaziIcon,
+  'biorhythm': BiorhythmIcon,
+  'personality': PersonalityTraitIcon,
+  'energy-boost': EnergyBoostIcon,
+  'period-tracker': PeriodTrackerIcon,
+  'ziwei': ZiWeiIcon,
+  'todo': TodoIcon,
+  'finance': FinanceIcon,
+  'takashima': TakashimaIcon,
+  'life-matrix': LifeMatrixIcon,
+  'daily-card': DailyCardIcon,
+  'tarot-garden': TarotGardenIcon,
+  'cultural-cup': CulturalCupIcon,
+  'dress-guide': DressGuideIcon,
+  'wuxing-health': WuxingHealthIcon,
+  'organ-rhythm': OrganRhythmIcon,
   
-  // 如果有配置，使用配置中的 SVG，否则使用默认图标
-  const iconSvg = iconConfig ? (
-    <div 
-      dangerouslySetInnerHTML={{ __html: iconConfig.svg }}
-      style={{ 
-        width: size, 
-        height: size, 
-        color: color,
-        display: 'inline-block' 
-      }}
-    />
-  ) : null;
+  // 默认图标（用于category）
+  'daily': TodoIcon,
+  'fortune': HoroscopeIcon,
+  'growth': EnergyBoostIcon,
+  'health': BiorhythmIcon,
+  'entertainment': TarotGardenIcon,
+};
 
-  // 默认图标
-  const icons = {
-    // 日常生活类图标
-    daily: (
-      <svg viewBox="0 0 24 24" width={size} height={size} fill={color}>
-        <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
+const ModernIcon = ({ name, size = 24, color = '#1a1a1a', className = '' }) => {
+  // 获取对应的图标组件
+  const IconComponent = iconMap[name] || iconMap.default;
+  
+  if (!IconComponent) {
+    console.warn(`Icon "${name}" not found, using default icon`);
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        className={className}
+      >
+        <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
       </svg>
-    ),
-    
-    // 运势分析类图标
-    fortune: (
-      <svg viewBox="0 0 24 24" width={size} height={size} fill={color}>
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-      </svg>
-    ),
-    
-    // 个人成长类图标
-    growth: (
-      <svg viewBox="0 0 24 24" width={size} height={size} fill={color}>
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-    ),
-    
-    // 健康管理类图标
-    health: (
-      <svg viewBox="0 0 24 24" width={size} height={size} fill={color}>
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-      </svg>
-    ),
-    
-    // 娱乐休闲类图标
-    entertainment: (
-      <svg viewBox="0 0 24 24" width={size} height={size} fill={color}>
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
-      </svg>
-    ),
-    
-    // 通用图标
-    default: (
-      <svg viewBox="0 0 24 24" width={size} height={size} fill={color}>
-        <circle cx="12" cy="12" r="10" />
-      </svg>
-    )
-  };
+    );
+  }
 
-  return (
-    <div className="modern-icon">
-      {iconSvg || icons[name] || icons.default}
-    </div>
-  );
+  // 渲染图标组件
+  return <IconComponent size={size} color={color} className={className} />;
 };
 
 export default ModernIcon;

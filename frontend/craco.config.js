@@ -9,6 +9,7 @@ module.exports = {
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@utils': path.resolve(__dirname, 'src/utils'),
       '@styles': path.resolve(__dirname, 'src/styles'),
+      '@icons': path.resolve(__dirname, 'src/components/icons'),
     },
     configure: (webpackConfig, { env, paths }) => {
       // 检查是否构建轻量版

@@ -20,7 +20,7 @@
 
 /* 导航栏内容器 - 固定高度，自适应宽度 */
 .tab-navigation-container {
-  height: 60px;
+  height: 63px;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -271,7 +271,7 @@
 /* 小屏幕 (iPhone, Android 小屏) */
 @media (max-width: 480px) {
   .tab-navigation-container {
-    height: 60px;
+    height: 63px;
     padding: 0.25rem 0.5rem;
   }
 

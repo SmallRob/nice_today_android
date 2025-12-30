@@ -33,7 +33,9 @@ const FeatureCard = ({
   onDragStart,
   onDragEnd,
   index,
-  id
+  id,
+  showDragHandle = false,
+  ...props
 }) => {
   const navigate = useNavigate();
 
@@ -83,9 +85,14 @@ const FeatureCard = ({
 
   // 获取图标内容 (使用 memo 缓存)
   const iconContent = useMemo(() => {
-    // 对于新的现代化设计，使用 SVG 图标
+    // 直接使用传入的 icon 名称作为 SVG 图标名
+    // 如果 icon 存在且不在默认分类中，使用它
+    if (icon && !['daily', 'fortune', 'growth', 'health', 'entertainment', 'default'].includes(icon)) {
+      return <ModernIcon name={icon} color="#ffffff" />;
+    }
+    // 对于默认分类，使用映射
     if (getIconName() !== 'default') {
-      return <ModernIcon name={getIconName()} />;
+      return <ModernIcon name={getIconName()} color="#ffffff" />;
     }
     // 对于未定义的情况，使用原有逻辑
     return getIconContent(icon);
@@ -131,6 +138,7 @@ const FeatureCard = ({
           </div>
         </div>
         <h3 className="feature-card-title">{title}</h3>
+        {showDragHandle && <div className="drag-handle">⋮⋮</div>}
       </div>
     </div>
   );
@@ -159,7 +167,9 @@ FeatureCard.propTypes = {
   /** 卡片索引 */
   index: PropTypes.number,
   /** 卡片唯一标识 */
-  id: PropTypes.string
+  id: PropTypes.string,
+  /** 是否显示拖拽手柄 */
+  showDragHandle: PropTypes.bool
 };
 
 // 默认 props

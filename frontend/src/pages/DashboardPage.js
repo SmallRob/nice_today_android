@@ -31,6 +31,28 @@ import {
   getFeatureId
 } from '../utils/featureSortConfig';
 
+// 定义所有功能组件（移到外部，避免每次渲染创建新引用）
+const ALL_FEATURES = [
+  { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
+  { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
+  { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类' },
+  { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类' },
+  { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类' },
+  { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
+  { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
+  { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
+  { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
+  { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
+  { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类' },
+  { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类' },
+  { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类' },
+  { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
+  { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
+  { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
+  { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
+  { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
+];
+
 /**
  * Dashboard首页 - 功能导航中心
  * 采用移动端优先设计，扁平化风格，紧凑布局
@@ -38,59 +60,25 @@ import {
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
-  const [features, setFeatures] = useState([]);
+  const [features, setFeatures] = useState(ALL_FEATURES);
 
-  // 获取分类类名
-  const getCategoryClass = (category) => {
-    const categoryMap = {
-      '日常管理类': 'daily',
-      '运势分析类': 'fortune',
-      '个人成长类': 'growth',
-      '健康管理类': 'health',
-      '娱乐休闲类': 'entertainment'
-    };
-    return categoryMap[category] || 'daily';
-  };
-
-  // 初始化功能列表
+  // 初始化功能排序（仅在组件挂载时执行一次）
   useEffect(() => {
-    // 定义所有功能组件
-    const allFeatures = [
-      { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
-      { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
-      { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类' },
-      { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类' },
-      { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类' },
-      { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
-      { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
-      { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
-      { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
-      { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
-      { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类' },
-      { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类' },
-      { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类' },
-      { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
-      { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
-      { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
-      { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
-      { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
-    ];
-
     // 加载保存的排序配置
     const savedOrder = loadFeatureSortOrder();
 
     // 合并排序（处理新增功能）
-    const mergedOrder = mergeFeatureOrder(savedOrder, allFeatures.map(f => f.name));
+    const mergedOrder = mergeFeatureOrder(savedOrder, ALL_FEATURES.map(f => f.name));
 
     // 根据排序配置重新排序功能列表
-    const sortedFeatures = [...allFeatures].sort((a, b) => {
+    const sortedFeatures = [...ALL_FEATURES].sort((a, b) => {
       const aIndex = mergedOrder.indexOf(getFeatureId(a.name));
       const bIndex = mergedOrder.indexOf(getFeatureId(b.name));
       return aIndex - bIndex;
     });
 
     setFeatures(sortedFeatures);
-  }, []);
+  }, []); // 空依赖数组，只在挂载时执行一次
 
   // 处理拖拽开始
   const handleDragStart = (e, index) => {
@@ -160,29 +148,17 @@ const Dashboard = () => {
   // 重置为默认排序
   const resetToDefault = () => {
     if (window.confirm('确定要重置为默认排序吗？您的自定义排序将被清除。')) {
-      const allFeatures = [
-        { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
-        { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
-        { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类' },
-        { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类' },
-        { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类' },
-        { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
-        { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
-        { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
-        { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
-        { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
-        { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类' },
-        { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类' },
-        { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
-        { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
-        { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
-        { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
-        { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
-      ];
-      setFeatures(allFeatures);
-
       // 清除保存的配置
       localStorage.removeItem('feature_cards_sort_order');
+      // 使用默认顺序
+      const savedOrder = loadFeatureSortOrder();
+      const mergedOrder = mergeFeatureOrder(savedOrder, ALL_FEATURES.map(f => f.name));
+      const sortedFeatures = [...ALL_FEATURES].sort((a, b) => {
+        const aIndex = mergedOrder.indexOf(getFeatureId(a.name));
+        const bIndex = mergedOrder.indexOf(getFeatureId(b.name));
+        return aIndex - bIndex;
+      });
+      setFeatures(sortedFeatures);
     }
   };
 
@@ -229,6 +205,13 @@ const Dashboard = () => {
             <span>⚡</span>
             <span className="quick-action-label">今日节律</span>
           </button>
+          <button
+            className="quick-action-btn"
+            onClick={() => navigate('/tarot')}
+          >
+            <span>🎴</span>
+            <span className="quick-action-label">塔罗抽卡</span>
+          </button>
         </div>
 
         {/* 全部功能标题 */}
@@ -265,27 +248,18 @@ const Dashboard = () => {
               const featureId = getFeatureId(feature.name);
 
               return (
-                <div
+                <FeatureComponent
                   key={featureId}
-                  className={`feature-card ${isEditMode ? 'editable' : ''} category-${getCategoryClass(feature.category)}`}
                   draggable={isEditMode}
+                  index={index}
+                  id={featureId}
+                  showDragHandle={isEditMode}
                   onDragStart={isEditMode ? (e) => handleDragStart(e, index) : undefined}
                   onDragEnd={isEditMode ? handleDragEnd : undefined}
                   onDragOver={isEditMode ? handleDragOver : undefined}
                   onDragLeave={isEditMode ? handleDragLeave : undefined}
                   onDrop={isEditMode ? (e) => handleDrop(e, index) : undefined}
-                >
-                  <FeatureComponent
-                    draggable={false}
-                    index={index}
-                    id={featureId}
-                    onDragStart={undefined}
-                    onDragEnd={undefined}
-                  />
-                  {isEditMode && (
-                    <div className="drag-handle">⋮⋮</div>
-                  )}
-                </div>
+                />
               );
             })}
           </div>
