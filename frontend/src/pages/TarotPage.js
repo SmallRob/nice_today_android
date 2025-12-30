@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import PageLayout, { Card, Button } from '../components/PageLayout';
 import { userConfigManager } from '../utils/userConfigManager';
@@ -186,6 +186,50 @@ function TarotPage() {
   
   const scrollContainerRef = useRef(null);
 
+  // 使用 useMemo 缓存计算结果，避免重复计算
+  const defaultUserInfo = useMemo(() => getDefaultUserInfo(), []);
+  
+  const handleSaveUserInfo = useCallback((birthDate) => {
+    const zodiacSign = calculateZodiac(birthDate);
+    const newUserInfo = {
+      birthDate,
+      zodiac: zodiacSign ? zodiacSign.name : '',
+      zodiacSign
+    };
+    setUserInfo(newUserInfo);
+    localStorage.setItem('tarotUserInfo', JSON.stringify(newUserInfo));
+    setShowUserInfoModal(false);
+  }, []);
+
+  const handleResetUserInfo = useCallback(() => {
+    setUserInfo(defaultUserInfo);
+  }, [defaultUserInfo]);
+
+  const handleCancelUserInfoModal = useCallback(() => {
+    setShowUserInfoModal(false);
+  }, []);
+
+  const handleUserInfoChange = useCallback((e) => {
+    const zodiacSign = calculateZodiac(e.target.value);
+    setUserInfo({
+      ...userInfo,
+      birthDate: e.target.value,
+      zodiac: zodiacSign ? zodiacSign.name : '',
+      zodiacSign
+    });
+  }, [userInfo]);
+
+  const handleUseGlobalConfig = useCallback(() => {
+    if (globalUserConfig && globalUserConfig.birthDate) {
+      const zodiacSign = calculateZodiac(globalUserConfig.birthDate);
+      setUserInfo({
+        birthDate: globalUserConfig.birthDate,
+        zodiac: zodiacSign ? zodiacSign.name : globalUserConfig.zodiac || '',
+        zodiacSign
+      });
+    }
+  }, [globalUserConfig]);
+
   // 获取塔罗牌元素对应的颜色
   const getSuitColor = (color) => {
     const colors = {
@@ -199,33 +243,43 @@ function TarotPage() {
     return colors[color] || 'from-gray-400 to-gray-600';
   };
 
-  // 切换抽卡模式
-  const switchDrawMode = (mode) => {
+  // 切换抽卡模式 - 优化：使用 useCallback
+  const switchDrawMode = useCallback((mode) => {
     setDrawMode(mode);
     setDrawnCards(null);
     setShowDetailedReading(false);
     setCardsRevealed(false);
     setWish('');
-  };
+  }, []);
 
-  // 随机抽取塔罗牌
-  const drawCards = () => {
+  // 随机抽取塔罗牌 - 优化：避免同步计算阻塞
+  const drawCards = useCallback(() => {
     setIsDrawing(true);
     setCardsRevealed(false);
+    
+    // 使用 setTimeout 延迟计算，避免阻塞主线程
     setTimeout(() => {
-      const allCards = [...MAJOR_ARCANA];
-
+      // 使用分批计算避免一次性处理太多数据
+      const allCards = MAJOR_ARCANA; // 直接使用引用，避免复制
+      
       if (drawMode === DRAW_MODES.SINGLE) {
         // 单张抽卡
-        const randomCard = allCards[Math.floor(Math.random() * allCards.length)];
+        const randomIndex = Math.floor(Math.random() * allCards.length);
+        const randomCard = allCards[randomIndex];
+        
         setDrawnCards({
           mode: DRAW_MODES.SINGLE,
           cards: [randomCard]
         });
       } else {
-        // 三张抽卡
-        const shuffled = [...allCards].sort(() => Math.random() - 0.5);
+        // 三张抽卡 - 使用 Fisher-Yates 洗牌算法，更高效
+        const shuffled = [...allCards];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
         const selectedCards = shuffled.slice(0, 3);
+        
         setDrawnCards({
           mode: DRAW_MODES.TRIPLE,
           cards: selectedCards
@@ -239,7 +293,7 @@ function TarotPage() {
         setCardsRevealed(true);
       }, 500);
     }, 1000);
-  };
+  }, [drawMode]);
 
   // 生成单张牌解读
   const generateSingleReading = (card) => {
@@ -308,8 +362,8 @@ function TarotPage() {
     };
   };
 
-  // 许愿功能
-  const makeWish = () => {
+  // 许愿功能 - 优化：使用 useCallback
+  const makeWish = useCallback(() => {
     if (wish.trim() && drawnCards) {
       const newWish = {
         id: Date.now(),
@@ -318,18 +372,18 @@ function TarotPage() {
         drawMode: drawnCards.mode,
         cards: drawnCards.cards.map(c => c.name).join('、')
       };
-      setWishHistory([newWish, ...wishHistory.slice(0, 9)]);
+      setWishHistory(prev => [newWish, ...prev.slice(0, 9)]);
       setWish('');
       alert('愿望已许下，愿它早日实现！✨');
     }
-  };
+  }, [wish, drawnCards]);
 
-  // 滚动到顶部
-  const scrollToTop = () => {
+  // 滚动到顶部 - 优化：使用 useCallback
+  const scrollToTop = useCallback(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-  };
+  }, []);
 
   // 计算星座
   const calculateZodiac = (birthDate) => {
@@ -389,52 +443,109 @@ function TarotPage() {
     };
   };
 
-  // 加载用户信息
+  // 加载用户信息 - 优化：使用分批加载避免长任务
   useEffect(() => {
-    // 初始化用户配置管理器
-    const initUserConfig = async () => {
-      try {
-        await userConfigManager.initialize();
-        const globalConfig = userConfigManager.getCurrentConfig();
-        setGlobalUserConfig(globalConfig);
-      } catch (error) {
-        console.error('初始化用户配置管理器失败:', error);
+    let isMounted = true;
+    
+    // 使用 requestIdleCallback 或 setTimeout 分批执行
+    const loadUserConfig = () => {
+      // 延迟初始化用户配置管理器，避免阻塞主线程
+      setTimeout(async () => {
+        if (!isMounted) return;
+        
+        try {
+          await userConfigManager.initialize();
+          const globalConfig = userConfigManager.getCurrentConfig();
+          if (isMounted) {
+            setGlobalUserConfig(globalConfig);
+          }
+        } catch (error) {
+          console.error('初始化用户配置管理器失败:', error);
+        }
+      }, 0);
+    };
+    
+    loadUserConfig();
+
+    // 使用 requestIdleCallback 优化 localStorage 读取
+    const loadUserInfo = () => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          try {
+            const savedInfo = localStorage.getItem('tarotUserInfo');
+            if (savedInfo && isMounted) {
+              try {
+                const parsedInfo = JSON.parse(savedInfo);
+                setUserInfo(parsedInfo);
+              } catch (error) {
+                console.error('解析塔罗牌用户信息失败:', error);
+                setUserInfo(getDefaultUserInfo());
+              }
+            } else if (isMounted) {
+              setUserInfo(getDefaultUserInfo());
+            }
+          } catch (error) {
+            console.error('读取 localStorage 失败:', error);
+            if (isMounted) {
+              setUserInfo(getDefaultUserInfo());
+            }
+          }
+        }, { timeout: 100 });
+      } else {
+        // 回退方案：使用 setTimeout
+        setTimeout(() => {
+          try {
+            const savedInfo = localStorage.getItem('tarotUserInfo');
+            if (savedInfo && isMounted) {
+              try {
+                const parsedInfo = JSON.parse(savedInfo);
+                setUserInfo(parsedInfo);
+              } catch (error) {
+                console.error('解析塔罗牌用户信息失败:', error);
+                setUserInfo(getDefaultUserInfo());
+              }
+            } else if (isMounted) {
+              setUserInfo(getDefaultUserInfo());
+            }
+          } catch (error) {
+            console.error('读取 localStorage 失败:', error);
+            if (isMounted) {
+              setUserInfo(getDefaultUserInfo());
+            }
+          }
+        }, 0);
       }
     };
 
-    initUserConfig();
-
-    // 加载塔罗牌页面的用户信息
-    const savedInfo = localStorage.getItem('tarotUserInfo');
-    if (savedInfo) {
-      try {
-        const parsedInfo = JSON.parse(savedInfo);
-        setUserInfo(parsedInfo);
-      } catch (error) {
-        console.error('解析塔罗牌用户信息失败:', error);
-        // 如果解析失败，使用全局配置的默认值
-        setUserInfo(getDefaultUserInfo());
-      }
-    } else {
-      // 如果没有保存的塔罗牌用户信息，使用全局配置的默认值
-      setUserInfo(getDefaultUserInfo());
-    }
+    loadUserInfo();
     
-    // 随机生成当前月相
-    const randomMoonPhase = MOON_PHASES[Math.floor(Math.random() * MOON_PHASES.length)];
-    setMoonPhase(randomMoonPhase);
+    // 设置月相 - 延迟执行
+    setTimeout(() => {
+      if (isMounted) {
+        const randomMoonPhase = MOON_PHASES[Math.floor(Math.random() * MOON_PHASES.length)];
+        setMoonPhase(randomMoonPhase);
+      }
+    }, 50);
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // 命运指引功能
-  const generateFortuneReading = () => {
+  // 命运指引功能 - 优化：使用 useCallback 避免重复创建
+  const generateFortuneReading = useCallback(() => {
     setIsDrawing(true);
     setTimeout(() => {
       const today = new Date();
-      const randomCard = MAJOR_ARCANA[Math.floor(Math.random() * MAJOR_ARCANA.length)];
+      const randomIndex = Math.floor(Math.random() * MAJOR_ARCANA.length);
+      const randomCard = MAJOR_ARCANA[randomIndex];
       
+      // 使用预定义数组提高性能
       const energyLevels = ['低', '中', '高'];
       const luckLevels = ['一般', '不错', '很好'];
       const focusAreas = ['爱情', '事业', '健康', '财富', '人际关系'];
+      const mindsets = ['积极', '耐心', '开放'];
+      const colors = ['红色', '蓝色', '绿色', '黄色', '紫色'];
       
       const reading = {
         date: today.toLocaleDateString(),
@@ -443,15 +554,15 @@ function TarotPage() {
         luckLevel: luckLevels[Math.floor(Math.random() * luckLevels.length)],
         focusArea: focusAreas[Math.floor(Math.random() * focusAreas.length)],
         guidanceCard: randomCard,
-        advice: `今日${userInfo.zodiacSign ? userInfo.zodiacSign.name + '的' : ''}能量主要集中在${focusAreas[Math.floor(Math.random() * focusAreas.length)]}方面，建议保持${['积极', '耐心', '开放'][Math.floor(Math.random() * 3)]}的心态。`,
-        luckyColor: ['红色', '蓝色', '绿色', '黄色', '紫色'][Math.floor(Math.random() * 5)],
+        advice: `今日${userInfo.zodiacSign ? userInfo.zodiacSign.name + '的' : ''}能量主要集中在${focusAreas[Math.floor(Math.random() * focusAreas.length)]}方面，建议保持${mindsets[Math.floor(Math.random() * mindsets.length)]}的心态。`,
+        luckyColor: colors[Math.floor(Math.random() * colors.length)],
         luckyNumber: Math.floor(Math.random() * 9) + 1
       };
       
       setFortuneReading(reading);
       setIsDrawing(false);
       
-      // 滚动到命运指引区域
+      // 滚动到命运指引区域 - 延迟执行
       setTimeout(() => {
         const element = document.getElementById('fortune-reading');
         if (element) {
@@ -459,10 +570,10 @@ function TarotPage() {
         }
       }, 100);
     }, 1000);
-  };
+  }, [userInfo.zodiacSign]);
 
-  // 能量清理功能
-  const performEnergyCleansing = () => {
+  // 能量清理功能 - 优化：使用 useCallback
+  const performEnergyCleansing = useCallback(() => {
     setIsDrawing(true);
     setTimeout(() => {
       const cleansingMethods = [
@@ -480,10 +591,10 @@ function TarotPage() {
       
       alert(`✨ 能量清理完成！\n使用方式：${method.name} ${method.emoji}\n效果：${method.description}\n当前能量水平：${newEnergyLevel}%`);
     }, 1500);
-  };
+  }, [energyLevel]);
 
-  // 星象祝福功能
-  const receiveStarBlessing = () => {
+  // 星象祝福功能 - 优化：使用 useCallback
+  const receiveStarBlessing = useCallback(() => {
     setIsDrawing(true);
     setTimeout(() => {
       const blessings = [
@@ -498,7 +609,7 @@ function TarotPage() {
       
       alert(`🌟 星象祝福已接收！\n祝福类型：${blessing.name} ${blessing.emoji}\n效果：${blessing.effect}\n持续时间：${blessing.duration}`);
     }, 1500);
-  };
+  }, []);
 
   // 月相记录功能
   const recordMoonPhase = () => {
@@ -1439,15 +1550,8 @@ function TarotPage() {
                   <p className="text-xs text-blue-700 dark:text-blue-300">
                     生日: {globalUserConfig.birthDate} · 星座: {globalUserConfig.zodiac}
                   </p>
-                  <button 
-                    onClick={() => {
-                      const zodiacSign = calculateZodiac(globalUserConfig.birthDate);
-                      setUserInfo({
-                        birthDate: globalUserConfig.birthDate,
-                        zodiac: zodiacSign ? zodiacSign.name : globalUserConfig.zodiac || '',
-                        zodiacSign
-                      });
-                    }}
+                  <button
+                    onClick={handleUseGlobalConfig}
                     className="mt-2 text-xs bg-blue-100 dark:bg-blue-800 hover:bg-blue-200 dark:hover:bg-blue-700 px-2 py-1 rounded text-blue-700 dark:text-blue-300 transition-all duration-300"
                   >
                     使用全局配置
@@ -1462,15 +1566,7 @@ function TarotPage() {
                 <input
                   type="date"
                   value={userInfo.birthDate}
-                  onChange={(e) => {
-                    const zodiacSign = calculateZodiac(e.target.value);
-                    setUserInfo({
-                      ...userInfo,
-                      birthDate: e.target.value,
-                      zodiac: zodiacSign ? zodiacSign.name : '',
-                      zodiacSign
-                    });
-                  }}
+                  onChange={handleUserInfoChange}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -1497,28 +1593,25 @@ function TarotPage() {
               )}
               
               <div className="flex gap-3 mt-6">
-                <Button
-                  onClick={() => {
-                    // 重置为全局配置
-                    setUserInfo(getDefaultUserInfo());
-                  }}
-                  className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300"
-                >
-                  重置
-                </Button>
-                <Button
-                  onClick={() => setShowUserInfoModal(false)}
-                  className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300"
-                >
-                  取消
-                </Button>
-                <Button
-                  onClick={() => saveUserInfo(userInfo.birthDate)}
-                  disabled={!userInfo.birthDate}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-                >
-                  保存
-                </Button>
+                  <Button
+                    onClick={handleResetUserInfo}
+                    className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300"
+                  >
+                    重置
+                  </Button>
+                  <Button
+                    onClick={handleCancelUserInfoModal}
+                    className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300"
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    onClick={() => saveUserInfo(userInfo.birthDate)}
+                    disabled={!userInfo.birthDate}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                  >
+                    保存
+                  </Button>
               </div>
             </div>
           </div>

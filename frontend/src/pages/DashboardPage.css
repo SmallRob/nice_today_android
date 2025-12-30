@@ -180,6 +180,11 @@
   max-width: 100%;
   margin: 0;
   box-sizing: border-box;
+  /* 强制GPU加速，防止样式污染 */
+  will-change: transform;
+  transform: translateZ(0);
+  /* 确保布局稳定 */
+  contain: layout;
 }
 
 /* 功能卡片 - 安卓现代化风格 */
@@ -203,6 +208,10 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-sizing: border-box;
+  /* 强制稳定的布局 */
+  contain: layout;
+  /* 防止样式污染 */
+  isolation: isolate;
 }
 
 /* 卡片内容区域 */
@@ -339,6 +348,9 @@
 /* 应用阴影到卡片 */
 .feature-card {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  /* 强制使用GPU加速 */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* 卡片悬停效果 */
@@ -915,7 +927,7 @@
 }
 
 /* ============================================
-   性能优化
+   性能优化和布局稳定
    ============================================ */
 
 .quick-action-btn,
@@ -926,6 +938,22 @@
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* 防止样式污染和布局不稳定 */
+  isolation: isolate;
+  contain: layout style;
+}
+
+/* 强制重置可能被其他页面污染的样式 */
+.features-grid {
+  /* 确保网格布局不会被外部样式影响 */
+  grid-auto-flow: dense !important;
+  align-items: stretch !important;
+}
+
+.feature-card {
+  /* 确保卡片尺寸稳定 */
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
 }
 
 /* 隐藏滚动条 */

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './DashboardPage.css';
 import MergedBannerCard from '../components/dashboard/MergedBannerCard';
@@ -61,6 +61,43 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
   const [features, setFeatures] = useState(ALL_FEATURES);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const featuresGridRef = useRef(null);
+
+  // 清理DOM样式类，防止其他页面的样式污染
+  const cleanupDOMStyles = () => {
+    // 移除所有可能残留的拖拽相关类
+    document.querySelectorAll('.feature-card').forEach(el => {
+      el.classList.remove('dragging');
+      el.classList.remove('drag-over');
+    });
+
+    // 清理features-grid的可能样式
+    const gridEl = document.querySelector('.features-grid');
+    if (gridEl) {
+      gridEl.style.transform = '';
+      gridEl.style.opacity = '';
+      gridEl.style.transition = '';
+    }
+  };
+
+  // 强制重新计算布局
+  const forceLayoutRefresh = () => {
+    if (featuresGridRef.current) {
+      // 触发重排
+      // eslint-disable-next-line no-unused-expressions
+      featuresGridRef.current.offsetHeight;
+      // 强制重新应用样式
+      featuresGridRef.current.style.transform = 'translateZ(0)';
+      setTimeout(() => {
+        if (featuresGridRef.current) {
+          featuresGridRef.current.style.transform = '';
+        }
+      }, 10);
+    }
+    // 触发刷新
+    setRefreshKey(prev => prev + 1);
+  };
 
   // 初始化功能排序（仅在组件挂载时执行一次）
   useEffect(() => {
@@ -78,7 +115,49 @@ const Dashboard = () => {
     });
 
     setFeatures(sortedFeatures);
+
+    // 组件挂载后清理样式并强制刷新
+    setTimeout(() => {
+      cleanupDOMStyles();
+      forceLayoutRefresh();
+    }, 100);
   }, []); // 空依赖数组，只在挂载时执行一次
+
+  // 监听页面可见性变化，从其他页面返回时强制刷新布局
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // 页面变为可见时，清理样式并强制刷新
+        setTimeout(() => {
+          cleanupDOMStyles();
+          forceLayoutRefresh();
+        }, 50);
+      }
+    };
+
+    // 监听页面可见性变化
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // 监听页面获得焦点（从其他页面返回）
+    window.addEventListener('focus', () => {
+      setTimeout(() => {
+        cleanupDOMStyles();
+        forceLayoutRefresh();
+      }, 50);
+    });
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
+  }, []);
+
+  // 清理组件卸载时的DOM样式
+  useEffect(() => {
+    return () => {
+      cleanupDOMStyles();
+    };
+  }, []);
 
   // 处理拖拽开始
   const handleDragStart = (e, index) => {
@@ -241,15 +320,20 @@ const Dashboard = () => {
       {/* 可滚动内容区域 */}
       <div className="content-area hide-scrollbar">
         <div className="page-container">
-          {/* 全部功能 - 4列网格布局 */}
-          <div className="features-grid">
+          {/* 全部功能 - 5列网格布局 */}
+          <div
+            ref={featuresGridRef}
+            key={refreshKey}
+            className="features-grid"
+            style={{ animation: 'none' }}
+          >
             {features.map((feature, index) => {
               const FeatureComponent = feature.component;
               const featureId = getFeatureId(feature.name);
 
               return (
                 <FeatureComponent
-                  key={featureId}
+                  key={`${featureId}-${refreshKey}`}
                   draggable={isEditMode}
                   index={index}
                   id={featureId}
