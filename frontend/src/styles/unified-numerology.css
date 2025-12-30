@@ -101,7 +101,7 @@
   box-shadow: var(--shadow-md);
 }
 
-.header-background {
+.unified-header-background {
   background: var(--gradient-header);
   padding: calc(var(--spacing-lg) * 0.75) var(--spacing-md) calc(var(--spacing-lg) * 0.5);
   color: var(--text-primary);
@@ -109,7 +109,7 @@
   border-bottom: 1px solid var(--border-light);
 }
 
-.header-content {
+.unified-header-content {
   max-width: 800px;
   margin: 0 auto;
   display: flex;
@@ -119,12 +119,12 @@
 }
 
 /* 标题区域 */
-.title-section {
+.unified-title-section {
   text-align: center;
   margin-bottom: var(--spacing-xs);
 }
 
-.main-title {
+.unified-main-title {
   font-size: 1.75rem;
   font-weight: 600;
   margin: 0 0 var(--spacing-sm) 0;
@@ -133,7 +133,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.subtitle {
+.unified-subtitle {
   font-size: 0.875rem;
   color: var(--text-secondary);
   margin: 0;
@@ -142,7 +142,7 @@
 }
 
 /* 用户徽章 - 紧凑设计 */
-.user-badge {
+.unified-user-badge {
   display: inline-flex;
   align-items: center;
   background: var(--bg-card);
@@ -153,12 +153,12 @@
   transition: all var(--transition-fast);
 }
 
-.user-badge:hover {
+.unified-user-badge:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--primary-light);
 }
 
-.user-avatar {
+.unified-user-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -170,26 +170,26 @@
   flex-shrink: 0;
 }
 
-.avatar-text {
+.unified-avatar-text {
   font-size: 0.875rem;
   font-weight: 600;
   color: white;
 }
 
-.user-details {
+.unified-user-details {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-.user-name {
+.unified-user-name {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-primary);
   margin-bottom: 2px;
 }
 
-.user-birth {
+.unified-user-birth {
   font-size: 0.75rem;
   color: var(--text-muted);
 }
@@ -197,7 +197,7 @@
 /* ========================================
    标签导航 - 紧凑横向布局
    ======================================== */
-.tab-navigation {
+.unified-tab-navigation {
   display: flex;
   max-width: 800px;
   margin: 0 auto;
@@ -211,11 +211,11 @@
   scrollbar-width: none; /* Firefox */
 }
 
-.tab-navigation::-webkit-scrollbar {
+.unified-tab-navigation::-webkit-scrollbar {
   display: none; /* Chrome/Safari/Edge */
 }
 
-.tab-button {
+.unified-tab-button {
   flex: 0 1 auto;
   min-width: 100px;
   display: flex;
@@ -235,7 +235,7 @@
   font-weight: 500;
 }
 
-.tab-button::after {
+.unified-tab-button::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -248,22 +248,22 @@
   border-radius: 2px;
 }
 
-.tab-button.active::after {
+.unified-tab-button.active::after {
   width: 60%;
 }
 
-.tab-button:hover:not(.active) {
+.unified-tab-button:hover:not(.active) {
   background: var(--bg-secondary);
   color: var(--text-primary);
 }
 
-.tab-button.active {
+.unified-tab-button.active {
   background: var(--gradient-active);
   color: white;
   box-shadow: var(--shadow-sm);
 }
 
-.tab-icon {
+.unified-tab-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -271,11 +271,11 @@
   transition: transform var(--transition-fast);
 }
 
-.tab-button:active .tab-icon {
+.unified-tab-button:active .unified-tab-icon {
   transform: scale(0.95);
 }
 
-.tab-label {
+.unified-tab-label {
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -294,7 +294,7 @@
   flex-direction: column;
 }
 
-.tab-content {
+.unified-tab-content {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
@@ -306,8 +306,8 @@
 }
 
 /* 个人灵数和灵数解析标签页样式 */
-.personal-tab,
-.enhanced-tab {
+.unified-personal-tab,
+.unified-enhanced-tab {
   background: var(--bg-card);
   flex: 1;
   display: flex;
@@ -318,7 +318,7 @@
 /* ========================================
    加载状态
    ======================================== */
-.loading-overlay {
+.unified-loading-overlay {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -326,12 +326,12 @@
   background: var(--bg-card);
 }
 
-.loading-content {
+.unified-loading-content {
   text-align: center;
   padding: var(--spacing-xl);
 }
 
-.loading-spinner {
+.unified-loading-spinner {
   width: 48px;
   height: 48px;
   border: 3px solid var(--border-color);
@@ -341,7 +341,7 @@
   margin: 0 auto var(--spacing-md);
 }
 
-.loading-content p {
+.unified-loading-content p {
   color: var(--text-secondary);
   font-size: 0.875rem;
   margin: 0;
@@ -354,7 +354,7 @@
 /* ========================================
    错误状态
    ======================================== */
-.error-container {
+.unified-error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -365,7 +365,7 @@
   background: var(--bg-primary);
 }
 
-.error-icon {
+.unified-error-icon {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -377,21 +377,21 @@
   color: var(--primary-color);
 }
 
-.error-title {
+.unified-error-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 var(--spacing-sm) 0;
 }
 
-.error-message {
+.unified-error-message {
   font-size: 0.875rem;
   color: var(--text-secondary);
   margin: 0 0 var(--spacing-lg) 0;
   max-width: 400px;
 }
 
-.error-button {
+.unified-error-button {
   padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--gradient-active);
   color: white;
@@ -404,12 +404,12 @@
   box-shadow: var(--shadow-sm);
 }
 
-.error-button:hover {
+.unified-error-button:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
-.error-button:active {
+.unified-error-button:active {
   transform: translateY(0);
 }
 
@@ -417,52 +417,52 @@
    响应式设计 - 平板
    ======================================== */
 @media (max-width: 768px) {
-  .header-background {
+  .unified-header-background {
     padding: var(--spacing-md) var(--spacing-sm) var(--spacing-sm);
   }
   
-  .main-title {
+  .unified-main-title {
     font-size: 1.5rem;
   }
   
-  .subtitle {
+  .unified-subtitle {
     font-size: 0.8125rem;
   }
   
-  .user-badge {
+  .unified-user-badge {
     padding: 4px var(--spacing-xs);
   }
   
-  .user-avatar {
+  .unified-user-avatar {
     width: 26px;
     height: 26px;
   }
   
-  .user-name {
+  .unified-user-name {
     font-size: 0.8125rem;
   }
   
-  .user-birth {
+  .unified-user-birth {
     font-size: 0.625rem;
   }
   
-  .tab-navigation {
+  .unified-tab-navigation {
     padding: 0 var(--spacing-xs);
     gap: 0;
   }
   
-  .tab-navigation {
+  .unified-tab-navigation {
     padding: 0 var(--spacing-xs);
     gap: 0;
   }
   
-  .tab-button {
+  .unified-tab-button {
     min-width: 75px;
     padding: 6px var(--spacing-xs);
     font-size: 0.8125rem;
   }
   
-  .tab-icon {
+  .unified-tab-icon {
     width: 16px;
     height: 16px;
   }
@@ -477,68 +477,68 @@
    响应式设计 - 小屏手机
    ======================================== */
 @media (max-width: 480px) {
-  .header-background {
+  .unified-header-background {
     padding: var(--spacing-sm) var(--spacing-xs) var(--spacing-xs);
   }
   
-  .header-content {
+  .unified-header-content {
     gap: var(--spacing-xs);
   }
   
-  .main-title {
+  .unified-main-title {
     font-size: 1.375rem;
     letter-spacing: 0;
   }
   
-  .subtitle {
+  .unified-subtitle {
     font-size: 0.75rem;
   }
   
-  .user-badge {
+  .unified-user-badge {
     padding: 4px var(--spacing-xs);
     flex-direction: row;
   }
   
-  .user-avatar {
+  .unified-user-avatar {
     width: 22px;
     height: 22px;
     margin-right: var(--spacing-xs);
   }
   
-  .avatar-text {
+  .unified-avatar-text {
     font-size: 0.6875rem;
   }
   
-  .user-name {
+  .unified-user-name {
     font-size: 0.6875rem;
   }
   
-  .user-birth {
+  .unified-user-birth {
     font-size: 0.625rem;
   }
   
-  .tab-navigation {
+  .unified-tab-navigation {
     padding: 0 var(--spacing-xs);
     gap: 0;
   }
   
-  .tab-button {
+  .unified-tab-button {
     min-width: 65px;
     padding: 6px var(--spacing-xs);
     font-size: 0.75rem;
     border-radius: var(--radius-sm);
   }
   
-  .tab-icon {
+  .unified-tab-icon {
     width: 14px;
     height: 14px;
   }
   
-  .tab-button::after {
+  .unified-tab-button::after {
     height: 1.5px;
   }
   
-  .tab-button.active::after {
+  .unified-tab-button.active::after {
     width: 50%;
   }
   
@@ -547,17 +547,17 @@
     padding-bottom: calc(var(--spacing-sm) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
   }
   
-  .tab-content {
+  .unified-tab-content {
     border-radius: var(--radius-md);
     min-height: 0;
   }
   
-  .loading-spinner {
+  .unified-loading-spinner {
     width: 36px;
     height: 36px;
   }
   
-  .loading-content p {
+  .unified-loading-content p {
     font-size: 0.8125rem;
   }
 }
@@ -566,27 +566,27 @@
    超小屏幕优化
    ======================================== */
 @media (max-width: 360px) {
-  .main-title {
+  .unified-main-title {
     font-size: 1.25rem;
   }
   
-  .tab-navigation {
+  .unified-tab-navigation {
     padding: 0 var(--spacing-xs);
     gap: 0;
   }
   
-  .tab-button {
+  .unified-tab-button {
     min-width: 55px;
     padding: 5px var(--spacing-xs);
     font-size: 0.6875rem;
   }
   
-  .tab-icon {
+  .unified-tab-icon {
     width: 12px;
     height: 12px;
   }
   
-  .tab-label {
+  .unified-tab-label {
     font-size: 0.6875rem;
   }
 }
@@ -595,30 +595,30 @@
    横屏模式优化
    ======================================== */
 @media (max-height: 600px) and (orientation: landscape) {
-  .header-background {
+  .unified-header-background {
     padding: var(--spacing-sm) var(--spacing-md);
   }
   
-  .main-title {
+  .unified-main-title {
     font-size: 1.25rem;
     margin-bottom: 2px;
   }
   
-  .subtitle {
+  .unified-subtitle {
     font-size: 0.75rem;
     margin-bottom: var(--spacing-xs);
   }
   
-  .user-badge {
+  .unified-user-badge {
     padding: 4px var(--spacing-sm);
   }
   
-  .tab-navigation {
+  .unified-tab-navigation {
     padding: 0 var(--spacing-xs);
     gap: 0;
   }
   
-  .tab-button {
+  .unified-tab-button {
     padding: var(--spacing-xs) var(--spacing-sm);
   }
   
