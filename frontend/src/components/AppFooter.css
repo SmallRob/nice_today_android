@@ -1,0 +1,145 @@
+/* ============================================
+   AppFooter样式 - 扁平化设计，紧凑间距
+   ============================================ */
+
+/* 普通页脚 */
+.app-footer {
+  width: 100%;
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-border-light);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  text-align: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.footer-content {
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.footer-copyright {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.footer-version {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+/* 固定页脚 */
+.fixed-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-border-light);
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  /* 优化移动端性能 */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.fixed-footer .footer-copyright {
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
+}
+
+.fixed-footer .footer-version {
+  font-size: 0.65rem;
+  line-height: 1.3;
+}
+
+/* ============================================
+   主题适配
+   ============================================ */
+
+.app-footer.dark,
+.fixed-footer.dark {
+  background-color: var(--color-secondary);
+  border-top-color: var(--color-border);
+}
+
+.app-footer.dark .footer-copyright,
+.app-footer.dark .footer-version,
+.fixed-footer.dark .footer-copyright,
+.fixed-footer.dark .footer-version {
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+   移动端优化
+   ============================================ */
+
+@media (max-width: 768px) {
+  .app-footer {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .app-footer .footer-copyright {
+    font-size: 0.7rem;
+  }
+
+  .app-footer .footer-version {
+    font-size: 0.65rem;
+  }
+
+  .fixed-footer {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .app-footer {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .app-footer .footer-copyright {
+    font-size: 0.65rem;
+  }
+
+  .app-footer .footer-version {
+    font-size: 0.6rem;
+  }
+
+  .fixed-footer {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .fixed-footer .footer-copyright {
+    font-size: 0.6rem;
+  }
+
+  .fixed-footer .footer-version {
+    font-size: 0.55rem;
+  }
+}
+
+/* ============================================
+   安全区域适配
+   ============================================ */
+
+/* 确保底部内容不被遮挡 */
+.fixed-footer {
+  padding-bottom: calc(var(--spacing-lg) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
+}
+
+@media (max-width: 768px) {
+  .fixed-footer {
+    padding-bottom: calc(var(--spacing-md) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
+  }
+}

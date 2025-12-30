@@ -48,13 +48,14 @@
   min-height: 100vh;
   line-height: 1.6;
   transition: all 0.3s ease;
+  padding: 0;
 }
 
 /* 头部样式 */
 .app-header {
   background: linear-gradient(to right, var(--bg-secondary), var(--bg-primary));
   color: var(--text-primary);
-  padding: 20px 0;
+  padding: clamp(8px, 2vw, 15px) 0;
   position: relative;
   overflow: hidden;
 }
@@ -62,61 +63,77 @@
 .app-header::before {
   content: '☰ ☱ ☲ ☳ ☴ ☵ ☶ ☷';
   position: absolute;
-  top: 10px;
+  top: clamp(5px, 1.5vw, 10px);
   left: 0;
   right: 0;
   color: var(--text-secondary);
   opacity: 0.1;
-  font-size: 3rem;
-  letter-spacing: 15px;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  letter-spacing: clamp(5px, 1.5vw, 15px);
   text-align: center;
 }
 
 .header-content {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 clamp(8px, 2vw, 15px);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   position: relative;
   z-index: 1;
+  gap: clamp(6px, 1.5vw, 12px);
+}
+
+.title-section {
+  flex: 0 1 auto;
+  text-align: center;
+  min-width: 0;
 }
 
 .title-section h1 {
-  font-size: 2.8rem;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
   font-weight: 300;
-  letter-spacing: 2px;
-  margin-bottom: 5px;
+  letter-spacing: 1px;
+  margin-bottom: clamp(3px, 0.8vw, 5px);
   text-shadow: 0 2px 10px var(--shadow-color);
   color: var(--text-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .subtitle {
-  font-size: 1.2rem;
+  font-size: clamp(0.75rem, 2vw, 1rem);
   opacity: 0.9;
   font-style: italic;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-controls {
   display: flex;
-  gap: 15px;
+  gap: clamp(6px, 1.5vw, 12px);
   align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .theme-toggle {
   background: var(--bg-card);
   border: 2px solid var(--border-color);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: clamp(36px, 9vw, 44px);
+  height: clamp(36px, 9vw, 44px);
   cursor: pointer;
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .theme-toggle:hover {
@@ -127,29 +144,33 @@
 /* 标签页导航 */
 .tab-navigation {
   max-width: 1600px;
-  margin: 20px auto 0;
-  padding: 0 20px;
+  margin: clamp(6px, 1.5vw, 12px) auto 0;
+  padding: 0 clamp(8px, 2vw, 12px);
   display: flex;
-  gap: 10px;
+  gap: clamp(5px, 1.5vw, 10px);
   position: relative;
   z-index: 1;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 15px 25px;
+  min-width: 0;
+  padding: clamp(10px, 2.5vw, 15px) clamp(12px, 3vw, 20px);
   background: var(--bg-card);
   border: 2px solid var(--border-color);
-  border-radius: 15px 15px 0 0;
+  border-radius: clamp(10px, 2.5vw, 15px) clamp(10px, 2.5vw, 15px) 0 0;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
   font-weight: 500;
   color: var(--text-secondary);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: clamp(5px, 1.5vw, 10px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tab-btn:hover {
@@ -167,120 +188,168 @@
 }
 
 .tab-icon {
-  font-size: 1.3rem;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  flex-shrink: 0;
+}
+
+.tab-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 主要内容区域 */
 .main-content {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 0 clamp(8px, 2vw, 15px);
+  padding-bottom: clamp(12px, 3vw, 20px);
 }
 
 .content-grid {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 30px;
-  margin-bottom: 40px;
+  gap: clamp(15px, 4vw, 25px);
+  margin-bottom: clamp(20px, 5vw, 30px);
 }
 
 /* 卡片样式 */
 .card {
   background: var(--bg-card);
-  border-radius: 15px;
-  padding: 30px;
-  margin-bottom: 30px;
-  box-shadow: 0 8px 32px var(--shadow-color);
+  border-radius: clamp(10px, 2.5vw, 15px);
+  padding: clamp(15px, 4vw, 25px);
+  margin-bottom: clamp(15px, 4vw, 25px);
+  box-shadow: 0 4px 16px var(--shadow-color);
   border: 1px solid var(--border-color);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px var(--shadow-color);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px var(--shadow-color);
 }
 
 .card h2 {
   color: var(--text-accent);
-  margin-bottom: 25px;
-  padding-bottom: 15px;
+  margin-bottom: clamp(12px, 3vw, 20px);
+  padding-bottom: clamp(8px, 2vw, 12px);
   border-bottom: 2px solid var(--border-color);
-  font-size: 1.8rem;
-  font-weight: 300;
-  letter-spacing: 1px;
+  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 占位符样式 */
 .placeholder {
   text-align: center;
-  padding: 60px 30px;
+  padding: clamp(30px, 8vw, 50px) clamp(15px, 4vw, 25px);
   color: var(--text-secondary);
+}
+
+.placeholder p {
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
 }
 
 .placeholder-card {
   text-align: center;
-  padding: 60px 30px;
+  padding: clamp(30px, 8vw, 50px) clamp(15px, 4vw, 25px);
 }
 
 .placeholder-content {
-  max-width: 500px;
+  max-width: clamp(280px, 80vw, 450px);
   margin: 0 auto;
 }
 
 .abacus-icon {
-  font-size: 4rem;
-  margin-bottom: 20px;
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: clamp(10px, 2.5vw, 15px);
 }
 
 .placeholder-content h3 {
   color: var(--text-accent);
-  margin-bottom: 15px;
-  font-size: 1.8rem;
+  margin-bottom: clamp(8px, 2vw, 12px);
+  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
 }
 
 .placeholder-content p {
   color: var(--text-secondary);
-  margin-bottom: 30px;
-  font-size: 1.1rem;
+  margin-bottom: clamp(15px, 4vw, 25px);
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
 }
 
 .features-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 30px;
+  gap: clamp(10px, 2.5vw, 15px);
+  margin-top: clamp(15px, 4vw, 25px);
 }
 
 .feature {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 15px;
+  gap: clamp(8px, 2vw, 15px);
+  padding: clamp(10px, 2.5vw, 15px);
   background: var(--hover-color);
-  border-radius: 10px;
-  border-left: 4px solid var(--text-accent);
+  border-radius: clamp(8px, 2vw, 10px);
+  border-left: 3px solid var(--text-accent);
+}
+
+.feature span:last-child {
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
 }
 
 .feature-icon {
   background: var(--text-accent);
   color: var(--bg-primary);
-  width: 30px;
-  height: 30px;
+  width: clamp(24px, 6vw, 30px);
+  height: clamp(24px, 6vw, 30px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
+  flex-shrink: 0;
 }
 
 /* 阴阳图 */
 .yin-yang {
-  width: 80px;
-  height: 80px;
+  width: clamp(50px, 12vw, 70px);
+  height: clamp(50px, 12vw, 70px);
   background: linear-gradient(to bottom, var(--text-primary) 50%, var(--bg-secondary) 50%);
   border-radius: 50%;
-  margin: 0 auto 20px;
+  margin: 0 auto clamp(12px, 3vw, 18px);
   position: relative;
+}
+
+/* 主面板样式 */
+.main-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 3vw, 20px);
+}
+
+/* 历史记录区域 */
+.history-section {
+  margin-top: clamp(15px, 4vw, 25px);
+  padding: clamp(15px, 4vw, 25px);
+}
+
+.history-section h2 {
+  color: var(--text-accent);
+  margin-bottom: clamp(12px, 3vw, 20px);
+  padding-bottom: clamp(8px, 2vw, 12px);
+  border-bottom: 2px solid var(--border-color);
+  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .yin-yang:before,
@@ -308,13 +377,13 @@
 /* 底部样式 */
 .app-footer {
   text-align: center;
-  padding: 25px;
+  padding: clamp(15px, 4vw, 25px);
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
   border-top: 1px solid var(--border-color);
-  margin-top: 20px;
+  margin-top: clamp(15px, 4vw, 25px);
   background: var(--bg-card);
-  border-radius: 10px;
+  border-radius: clamp(8px, 2vw, 10px);
 }
 
 .footer-content {
@@ -323,32 +392,41 @@
 }
 
 .tip {
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
   color: var(--text-secondary);
-  margin-top: 10px;
+  margin-top: clamp(6px, 1.5vw, 10px);
   font-style: italic;
   opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .footer-links {
   display: flex;
   justify-content: center;
-  gap: 30px;
-  margin-top: 15px;
-  font-size: 0.9rem;
+  gap: clamp(15px, 4vw, 30px);
+  margin-top: clamp(10px, 2.5vw, 15px);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  flex-wrap: wrap;
+}
+
+.footer-links span {
+  white-space: nowrap;
 }
 
 /* 按钮样式 */
 .btn-primary, .btn-secondary {
-  padding: 14px 28px;
+  padding: clamp(10px, 2.5vw, 14px) clamp(20px, 5vw, 28px);
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: clamp(6px, 1.5vw, 8px);
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
   font-weight: 500;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -377,115 +455,194 @@
 @media (max-width: 1200px) {
   .content-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: clamp(12px, 3vw, 20px);
   }
   
   .card {
-    padding: 25px;
+    padding: clamp(12px, 3vw, 20px);
+  }
+  
+  .main-panel {
+    gap: clamp(10px, 2.5vw, 15px);
   }
 }
 
 @media (max-width: 768px) {
   .shaoyong-yixue {
-    padding: 10px;
-    padding-top: env(safe-area-inset-top, 20px);
+    padding: clamp(6px, 1.5vw, 10px);
+    padding-top: env(safe-area-inset-top, clamp(10px, 2.5vw, 15px));
   }
-  
+
   .header-content {
     flex-direction: column;
-    gap: 15px;
+    gap: clamp(6px, 1.5vw, 10px);
+    align-items: center;
+  }
+
+  .header-controls {
+    margin-left: 0;
+    margin-top: 0;
+    width: 100%;
+    justify-content: center;
+    align-self: center;
+  }
+
+  .title-section {
+    flex: 0 1 auto;
     text-align: center;
   }
-  
+
   .title-section h1 {
-    font-size: 2.2rem;
+    font-size: clamp(1.2rem, 3.2vw, 1.6rem);
   }
-  
+
+  .subtitle {
+    font-size: clamp(0.75rem, 2vw, 0.9rem);
+  }
+
   .tab-navigation {
     flex-direction: row;
-    flex-wrap: wrap;
-    gap: 5px;
+    gap: clamp(4px, 1vw, 8px);
+    margin-top: clamp(4px, 1vw, 6px);
   }
   
   .tab-btn {
-    flex: 1 1 calc(50% - 5px);
-    border-radius: 10px;
-    padding: 12px 10px;
-    min-width: auto;
-    font-size: 0.9rem;
+    flex: 1 1 calc(50% - 4px);
+    border-radius: clamp(8px, 2vw, 12px);
+    padding: clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px);
+    font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+    gap: clamp(4px, 1vw, 8px);
+  }
+  
+  .tab-icon {
+    font-size: clamp(0.9rem, 2.2vw, 1.1rem);
   }
   
   .content-grid {
-    gap: 15px;
+    gap: clamp(10px, 2.5vw, 15px);
   }
-  
+
+  .main-panel {
+    gap: clamp(6px, 1.5vw, 10px);
+  }
+
   .card {
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: clamp(10px, 2.5vw, 15px);
+    margin-bottom: clamp(10px, 2.5vw, 15px);
   }
-  
+
   .card h2 {
-    font-size: 1.5rem;
+    font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+    margin-bottom: clamp(8px, 2vw, 12px);
+    padding-bottom: clamp(5px, 1.5vw, 8px);
   }
-  
+
+  .history-section h2 {
+    font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+    margin-bottom: clamp(8px, 2vw, 12px);
+    padding-bottom: clamp(5px, 1.5vw, 8px);
+  }
+
+  .history-section {
+    margin-top: clamp(10px, 2.5vw, 15px);
+    padding: clamp(10px, 2.5vw, 15px);
+  }
+
   .footer-links {
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    gap: clamp(6px, 1.5vw, 10px);
   }
-  
+
   .app-footer {
-    padding: 20px;
+    padding: clamp(10px, 2.5vw, 15px);
+  }
+
+  .tip {
+    white-space: normal;
   }
 }
 
 @media (max-width: 480px) {
   .shaoyong-yixue {
-    padding: 5px;
-    padding-top: env(safe-area-inset-top, 10px);
+    padding: clamp(4px, 1vw, 8px);
+    padding-top: env(safe-area-inset-top, clamp(8px, 2vw, 12px));
   }
-  
-  .title-section h1 {
-    font-size: 1.8rem;
+
+  .header-content {
+    align-items: center;
+    gap: clamp(4px, 1vw, 6px);
   }
-  
-  .subtitle {
-    font-size: 1rem;
-  }
-  
+
   .header-controls {
     width: 100%;
     justify-content: flex-end;
+    margin-left: 0;
   }
-  
+
+  .title-section h1 {
+    font-size: clamp(1rem, 2.8vw, 1.4rem);
+  }
+
+  .subtitle {
+    font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+  }
+
+  .theme-toggle {
+    width: clamp(32px, 8vw, 36px);
+    height: clamp(32px, 8vw, 36px);
+  }
+
   .tab-btn {
     flex: 1 1 100%;
-    font-size: 1rem;
-    padding: 15px 10px;
+    font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+    padding: clamp(6px, 1.5vw, 10px) clamp(6px, 1.5vw, 10px);
+    gap: clamp(3px, 1vw, 6px);
+  }
+
+  .tab-icon {
+    font-size: clamp(0.85rem, 2.2vw, 1rem);
+  }
+
+  .tab-navigation {
+    margin-top: clamp(3px, 0.8vw, 5px);
+    padding: 0 clamp(6px, 1.5vw, 10px);
+  }
+  
+  .main-panel {
+    gap: clamp(6px, 1.5vw, 10px);
   }
   
   .card {
-    padding: 15px;
+    padding: clamp(10px, 2.5vw, 15px);
   }
   
   .card h2 {
-    font-size: 1.3rem;
+    font-size: clamp(0.9rem, 2.2vw, 1.15rem);
   }
   
-  .method-selector {
-    flex-direction: column;
+  .history-section {
+    margin-top: clamp(12px, 3vw, 18px);
+    padding: clamp(12px, 3vw, 18px);
   }
   
-  .method-btn {
-    min-width: auto;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-    gap: 10px;
+  .history-section h2 {
+    font-size: clamp(0.9rem, 2.2vw, 1.15rem);
+    margin-bottom: clamp(8px, 2vw, 12px);
+    padding-bottom: clamp(5px, 1.5vw, 8px);
   }
   
   .btn-primary, .btn-secondary {
-    width: 100%;
+    padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
+    font-size: clamp(0.8rem, 2vw, 0.95rem);
+  }
+  
+  .footer-links {
+    gap: clamp(6px, 1.5vw, 10px);
+  }
+
+  /* 扩大移动端显示视野 */
+  .main-content {
+    max-height: calc(100vh - 110px);
   }
 }
 
@@ -493,7 +650,7 @@
 @media (max-width: 768px) {
   /* 滚动性能优化 */
   .main-content {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 140px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -521,7 +678,7 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
@@ -529,8 +686,39 @@
   }
 }
 
+/* 标签页容器统一样式 */
 .tab-content {
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.4s ease;
+  width: 100%;
+}
+
+/* 梅花易数和铁板神数容器样式 - 与主页面完全对齐 */
+.meihua-content,
+.tieban-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  padding-left: 20px;
+  padding-right: 20px;
+  min-width: 0;
+}
+
+/* 响应式断点 - 保持宽度自适应 */
+@media (max-width: 768px) {
+  .meihua-content,
+  .tieban-content {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .meihua-content,
+  .tieban-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 }
 
 /* 加载状态 */
@@ -538,19 +726,20 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px;
+  padding: clamp(25px, 6vw, 40px);
   color: var(--text-secondary);
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
 }
 
 .loading::after {
   content: '';
-  width: 20px;
-  height: 20px;
+  width: clamp(16px, 4vw, 20px);
+  height: clamp(16px, 4vw, 20px);
   border: 2px solid var(--text-secondary);
   border-top: 2px solid var(--text-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-left: 10px;
+  margin-left: clamp(6px, 1.5vw, 10px);
 }
 
 @keyframes spin {

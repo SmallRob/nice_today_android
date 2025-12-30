@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './DashboardPage.css';
 import MergedBannerCard from '../components/dashboard/MergedBannerCard';
 import DailyFortuneCard from '../components/dashboard/DailyFortuneCard';
+import FestivalCard from '../components/dashboard/FestivalCard';
 import {
   MBTICard,
   ChineseZodiacCard,
@@ -21,9 +24,6 @@ import {
   WuxingHealthCard,
   OrganRhythmCard
 } from '../components/dashboard/FeatureCards';
-import { useNavigate } from 'react-router-dom';
-import '../styles/dashboard.css';
-import FestivalCard from '../components/dashboard/FestivalCard';
 import {
   loadFeatureSortOrder,
   saveFeatureSortOrder,
@@ -33,36 +33,48 @@ import {
 
 /**
  * Dashboard首页 - 功能导航中心
- * 采用响应式网格布局，提供清晰的功能入口
+ * 采用移动端优先设计，扁平化风格，紧凑布局
  */
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
   const [features, setFeatures] = useState([]);
 
+  // 获取分类类名
+  const getCategoryClass = (category) => {
+    const categoryMap = {
+      '日常管理类': 'daily',
+      '运势分析类': 'fortune',
+      '个人成长类': 'growth',
+      '健康管理类': 'health',
+      '娱乐休闲类': 'entertainment'
+    };
+    return categoryMap[category] || 'daily';
+  };
+
   // 初始化功能列表
   useEffect(() => {
-  // 定义所有功能组件
-  const allFeatures = [
-    { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
-    { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
-    { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类' },
-    { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类' },
-    { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类' },
-    { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
-    { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
-    { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
-    { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
-    { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
-    { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类' },
-    { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类' },
-    { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类' },
-    { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
-    { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
-    { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
-    { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
-    { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
-  ];
+    // 定义所有功能组件
+    const allFeatures = [
+      { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
+      { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
+      { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类' },
+      { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类' },
+      { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类' },
+      { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
+      { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
+      { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
+      { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
+      { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
+      { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类' },
+      { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类' },
+      { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类' },
+      { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
+      { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
+      { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
+      { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
+      { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
+    ];
 
     // 加载保存的排序配置
     const savedOrder = loadFeatureSortOrder();
@@ -94,7 +106,7 @@ const Dashboard = () => {
   // 处理拖拽结束
   const handleDragEnd = () => {
     // 移除所有卡片的拖拽样式
-    document.querySelectorAll('.feature-wrapper').forEach(el => {
+    document.querySelectorAll('.feature-card').forEach(el => {
       el.classList.remove('dragging');
       el.classList.remove('drag-over');
     });
@@ -147,7 +159,7 @@ const Dashboard = () => {
 
   // 重置为默认排序
   const resetToDefault = () => {
-      if (window.confirm('确定要重置为默认排序吗？您的自定义排序将被清除。')) {
+    if (window.confirm('确定要重置为默认排序吗？您的自定义排序将被清除。')) {
       const allFeatures = [
         { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
         { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
@@ -175,9 +187,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="app-container">
       {/* 固定头部区域 */}
-      <div className="dashboard-fixed-header">
+      <div className="fixed-height-container">
         {/* 合并的Banner和用户信息卡片 */}
         <MergedBannerCard />
 
@@ -194,42 +206,46 @@ const Dashboard = () => {
             onClick={() => navigate('/horoscope')}
           >
             <span>📅</span>
-            <span>今日运势</span>
+            <span className="quick-action-label">今日运势</span>
           </button>
           <button
             className="quick-action-btn"
             onClick={() => navigate('/bazi-analysis')}
           >
             <span>☯️</span>
-            <span>八字命格</span>
+            <span className="quick-action-label">八字命格</span>
           </button>
           <button
             className="quick-action-btn"
             onClick={() => navigate('/dress')}
           >
             <span>👕</span>
-            <span>穿衣指南</span>
+            <span className="quick-action-label">穿衣指南</span>
           </button>
-        </div>
-
-        {/* 全部功能标题和分割线 */}
-        <div className="features-header">
-          <div className="features-header-center">
-            <div className="features-divider"></div>
-            <h2 className="features-title">所有功能</h2>
-            <div className="features-divider"></div>
-          </div>
-          {/* 编辑排序按钮 - 只显示图标 */}
           <button
-            className={`edit-icon-btn ${isEditMode ? 'edit-mode-active' : ''}`}
-            onClick={toggleEditMode}
-            title={isEditMode ? '完成排序' : '编辑排序'}
+            className="quick-action-btn"
+            onClick={() => navigate('/biorhythm')}
           >
-            {isEditMode ? '✓' : '✏️'}
+            <span>⚡</span>
+            <span className="quick-action-label">今日节律</span>
           </button>
         </div>
 
-        {/* 编辑模式控制按钮 - 只在编辑模式显示重置按钮 */}
+        {/* 全部功能标题 */}
+        <div className="features-header">
+          <h2 className="features-title">
+            所有功能
+            <button
+              className={`dashboard-edit-icon-btn edit-icon-btn ${isEditMode ? 'edit-mode-active' : ''}`}
+              onClick={toggleEditMode}
+              title={isEditMode ? '完成排序' : '编辑排序'}
+            >
+              {isEditMode ? '✅' : '✏️'}
+            </button>
+          </h2>
+        </div>
+
+        {/* 编辑模式控制按钮 */}
         {isEditMode && (
           <div className="features-controls">
             <button className="reset-order-btn" onClick={resetToDefault}>
@@ -240,10 +256,10 @@ const Dashboard = () => {
       </div>
 
       {/* 可滚动内容区域 */}
-      <div className="dashboard-scrollable-content">
-        <div>
-          {/* 全部功能 - 3列网格布局 */}
-          <div className="features-grid-three-col">
+      <div className="content-area hide-scrollbar">
+        <div className="page-container">
+          {/* 全部功能 - 4列网格布局 */}
+          <div className="features-grid">
             {features.map((feature, index) => {
               const FeatureComponent = feature.component;
               const featureId = getFeatureId(feature.name);
@@ -251,16 +267,13 @@ const Dashboard = () => {
               return (
                 <div
                   key={featureId}
-                  className="feature-wrapper"
+                  className={`feature-card ${isEditMode ? 'editable' : ''} category-${getCategoryClass(feature.category)}`}
                   draggable={isEditMode}
                   onDragStart={isEditMode ? (e) => handleDragStart(e, index) : undefined}
                   onDragEnd={isEditMode ? handleDragEnd : undefined}
                   onDragOver={isEditMode ? handleDragOver : undefined}
                   onDragLeave={isEditMode ? handleDragLeave : undefined}
                   onDrop={isEditMode ? (e) => handleDrop(e, index) : undefined}
-                  style={{
-                    cursor: isEditMode ? 'move' : 'pointer'
-                  }}
                 >
                   <FeatureComponent
                     draggable={false}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Lunar } from 'lunar-javascript';
 import './BaziInput.css';
 
@@ -155,7 +155,7 @@ const BaziInput = ({ onSubmit }) => {
         <div className="auto-input">
           <div className="form-row">
             <div className="form-group">
-              <label>出生日期</label>
+              <label className="whitespace-nowrap">出生日期</label>
               <input
                 type="date"
                 value={birthDate}
@@ -164,7 +164,7 @@ const BaziInput = ({ onSubmit }) => {
               />
             </div>
             <div className="form-group">
-              <label>出生时间</label>
+              <label className="whitespace-nowrap">出生时间</label>
               <input
                 type="time"
                 value={birthTime}
@@ -172,27 +172,27 @@ const BaziInput = ({ onSubmit }) => {
               />
             </div>
           </div>
-          
+
           <div className="form-row">
             <div className="form-group">
-              <label>性别</label>
+              <label className="whitespace-nowrap">性别</label>
               <div className="gender-selector">
-                <button 
+                <button
                   className={`gender-btn ${gender === 'male' ? 'active' : ''}`}
                   onClick={() => setGender('male')}
                 >
-                  男
+                  <span className="whitespace-nowrap">男</span>
                 </button>
-                <button 
+                <button
                   className={`gender-btn ${gender === 'female' ? 'active' : ''}`}
                   onClick={() => setGender('female')}
                 >
-                  女
+                  <span className="whitespace-nowrap">女</span>
                 </button>
               </div>
             </div>
             <div className="form-group">
-              <label>闰月</label>
+              <label className="whitespace-nowrap">闰月</label>
               <div className="checkbox-group">
                 <input
                   type="checkbox"
@@ -200,16 +200,16 @@ const BaziInput = ({ onSubmit }) => {
                   onChange={(e) => setIsLeapMonth(e.target.checked)}
                   id="leap-month"
                 />
-                <label htmlFor="leap-month">是否闰月出生</label>
+                <label htmlFor="leap-month" className="whitespace-nowrap">是否闰月出生</label>
               </div>
             </div>
           </div>
-          
+
           <div className="form-actions">
-            <button className="btn-secondary" onClick={handleAutoCalculate}>
+            <button className="btn-secondary whitespace-nowrap" onClick={handleAutoCalculate}>
               自动排盘
             </button>
-            <button className="btn-secondary" onClick={handleRandomBazi}>
+            <button className="btn-secondary whitespace-nowrap" onClick={handleRandomBazi}>
               随机八字
             </button>
           </div>
@@ -217,10 +217,10 @@ const BaziInput = ({ onSubmit }) => {
       )}
 
       <div className="bazi-display-input">
-        <h4>四柱八字</h4>
+        <h4 className="whitespace-nowrap">四柱八字</h4>
         <div className="bazi-grid">
           <div className="bazi-column">
-            <div className="bazi-label">年柱</div>
+            <div className="bazi-label whitespace-nowrap">年柱</div>
             <div className="bazi-selectors">
               <select value={yearStem} onChange={(e) => setYearStem(e.target.value)}>
                 {heavenlyStems.map(stem => (
@@ -240,15 +240,15 @@ const BaziInput = ({ onSubmit }) => {
             <div className="bazi-info">
               {yearStem && yearBranch && (
                 <>
-                  <span>{stemBranchInfo[yearStem].wuxing}{stemBranchInfo[yearStem].yinyang}年</span>
-                  <span>{branchInfo[yearBranch].zodiac}年</span>
+                  <span className="whitespace-nowrap">{stemBranchInfo[yearStem].wuxing}{stemBranchInfo[yearStem].yinyang}年</span>
+                  <span className="whitespace-nowrap">{branchInfo[yearBranch].zodiac}年</span>
                 </>
               )}
             </div>
           </div>
 
           <div className="bazi-column">
-            <div className="bazi-label">月柱</div>
+            <div className="bazi-label whitespace-nowrap">月柱</div>
             <div className="bazi-selectors">
               <select value={monthStem} onChange={(e) => setMonthStem(e.target.value)}>
                 {heavenlyStems.map(stem => (
@@ -262,12 +262,12 @@ const BaziInput = ({ onSubmit }) => {
               </select>
             </div>
             <div className="bazi-info">
-              {monthBranch && <span>{branchInfo[monthBranch].season}季</span>}
+              {monthBranch && <span className="whitespace-nowrap">{branchInfo[monthBranch].season}季</span>}
             </div>
           </div>
 
           <div className="bazi-column">
-            <div className="bazi-label">日柱</div>
+            <div className="bazi-label whitespace-nowrap">日柱</div>
             <div className="bazi-selectors">
               <select value={dayStem} onChange={(e) => setDayStem(e.target.value)}>
                 {heavenlyStems.map(stem => (
@@ -281,12 +281,12 @@ const BaziInput = ({ onSubmit }) => {
               </select>
             </div>
             <div className="bazi-info">
-              {dayStem && <span>日主{dayStem}{stemBranchInfo[dayStem].wuxing}</span>}
+              {dayStem && <span className="whitespace-nowrap">日主{dayStem}{stemBranchInfo[dayStem].wuxing}</span>}
             </div>
           </div>
 
           <div className="bazi-column">
-            <div className="bazi-label">时柱</div>
+            <div className="bazi-label whitespace-nowrap">时柱</div>
             <div className="bazi-selectors">
               <select value={hourStem} onChange={(e) => setHourStem(e.target.value)}>
                 {heavenlyStems.map(stem => (
@@ -300,39 +300,39 @@ const BaziInput = ({ onSubmit }) => {
               </select>
             </div>
             <div className="bazi-info">
-              {hourBranch && <span>{branchInfo[hourBranch].hour}时</span>}
+              {hourBranch && <span className="whitespace-nowrap">{branchInfo[hourBranch].hour}时</span>}
             </div>
           </div>
         </div>
 
         <div className="gender-selection">
-          <label>性别：</label>
+          <label className="whitespace-nowrap">性别：</label>
           <div className="gender-buttons">
-            <button 
+            <button
               className={`gender-option ${gender === 'male' ? 'active' : ''}`}
               onClick={() => setGender('male')}
             >
-              男命
+              <span className="whitespace-nowrap">男命</span>
             </button>
-            <button 
+            <button
               className={`gender-option ${gender === 'female' ? 'active' : ''}`}
               onClick={() => setGender('female')}
             >
-              女命
+              <span className="whitespace-nowrap">女命</span>
             </button>
           </div>
           <div className="gender-note">
-            {gender === 'male' ? '男命顺行，大运顺排' : '女命逆行，大运逆排'}
+            <span className="whitespace-nowrap">{gender === 'male' ? '男命顺行，大运顺排' : '女命逆行，大运逆排'}</span>
           </div>
         </div>
 
         <div className="bazi-summary">
-          <h4>八字摘要</h4>
+          <h4 className="whitespace-nowrap">八字摘要</h4>
           <div className="summary-content">
-            <p>
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
               {yearStem}{yearBranch}年 {monthStem}{monthBranch}月 {dayStem}{dayBranch}日 {hourStem}{hourBranch}时
             </p>
-            <p>
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
               {gender === 'male' ? '男' : '女'}命，日主{dayStem}{stemBranchInfo[dayStem].wuxing}
               ，生于{branchInfo[yearBranch].zodiac}年{branchInfo[monthBranch].season}季
             </p>
@@ -340,23 +340,23 @@ const BaziInput = ({ onSubmit }) => {
         </div>
 
         <div className="submit-section">
-          <button className="btn-primary" onClick={handleSubmit}>
+          <button className="btn-primary whitespace-nowrap" onClick={handleSubmit}>
             确认八字，开始皇极起数
           </button>
-          <button className="btn-secondary" onClick={handleRandomBazi}>
+          <button className="btn-secondary whitespace-nowrap" onClick={handleRandomBazi}>
             随机生成八字
           </button>
         </div>
       </div>
 
       <div className="bazi-guide">
-        <h4>八字输入指南</h4>
+        <h4 className="whitespace-nowrap">八字输入指南</h4>
         <div className="guide-content">
-          <p><strong>年柱：</strong>出生年份的天干地支，代表祖上、父母</p>
-          <p><strong>月柱：</strong>出生月份的天干地支，代表兄弟、事业</p>
-          <p><strong>日柱：</strong>出生日的天干地支，日干代表自己，日支代表配偶</p>
-          <p><strong>时柱：</strong>出生时辰的天干地支，代表子女、晚年</p>
-          <p><strong>性别：</strong>铁板神数男女命推算方法不同，必须准确选择</p>
+          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>年柱：</strong>出生年份的天干地支，代表祖上、父母</p>
+          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>月柱：</strong>出生月份的天干地支，代表兄弟、事业</p>
+          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>日柱：</strong>出生日的天干地支，日干代表自己，日支代表配偶</p>
+          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>时柱：</strong>出生时辰的天干地支，代表子女、晚年</p>
+          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>性别：</strong>铁板神数男女命推算方法不同，必须准确选择</p>
         </div>
       </div>
     </div>

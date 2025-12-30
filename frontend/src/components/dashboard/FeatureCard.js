@@ -1,8 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import ModernIcon from '../common/ModernIcon';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
-import { getIconContent, getValidColor } from './utils/cardHelpers';
+import { getIconContent } from './utils/cardHelpers';
 import { CARD_DEFAULTS } from './constants';
 
 /**
@@ -23,9 +24,8 @@ import { CARD_DEFAULTS } from './constants';
  */
 const FeatureCard = ({
   title,
-  description,
   icon,
-  color,
+  category = 'default',
   route,
   onClick,
   disabled,
@@ -36,9 +36,6 @@ const FeatureCard = ({
   id
 }) => {
   const navigate = useNavigate();
-
-  // 验证和规范化 props
-  const validColor = useMemo(() => getValidColor(color), [color]);
 
   // 使用拖拽 hook
   const { isDragging, handleDragStart, handleDragEnd, handleDragOver, handleDrop } = useDragAndDrop({
@@ -65,12 +62,38 @@ const FeatureCard = ({
     handleDrop(e, id || String(index));
   }, [handleDrop, id, index]);
 
+  // 获取图标名称，根据类别或图标映射
+  const getIconName = useCallback(() => {
+    // 优先使用直接提供的 icon 属性作为 SVG 图标名
+    if (icon && ['daily', 'fortune', 'growth', 'health', 'entertainment'].includes(icon)) {
+      return icon;
+    }
+    
+    // 如果没有提供，则根据 category 映射
+    const iconMap = {
+      'daily': 'daily',
+      'fortune': 'fortune',
+      'growth': 'growth',
+      'health': 'health',
+      'entertainment': 'entertainment'
+    };
+    
+    return iconMap[category] || 'default';
+  }, [icon, category]);
+
   // 获取图标内容 (使用 memo 缓存)
-  const iconContent = useMemo(() => getIconContent(icon), [icon]);
+  const iconContent = useMemo(() => {
+    // 对于新的现代化设计，使用 SVG 图标
+    if (getIconName() !== 'default') {
+      return <ModernIcon name={getIconName()} />;
+    }
+    // 对于未定义的情况，使用原有逻辑
+    return getIconContent(icon);
+  }, [icon, getIconName]);
 
   // 构建 className
   const cardClassName = useMemo(() => {
-    const classes = ['feature-card'];
+    const classes = ['feature-card', `category-${category}`];
 
     if (disabled) {
       classes.push('feature-card-loading');
@@ -85,7 +108,7 @@ const FeatureCard = ({
     }
 
     return classes.join(' ');
-  }, [disabled, draggable, isDragging]);
+  }, [disabled, draggable, isDragging, category]);
 
   return (
     <div
@@ -96,21 +119,18 @@ const FeatureCard = ({
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
       onDrop={handleCardDrop}
-      style={{
-        '--card-color': validColor
-      }}
       role="button"
       tabIndex={disabled ? -1 : 0}
       aria-disabled={disabled}
       aria-label={title}
     >
-      <div className="feature-card-icon">
-        {iconContent}
-      </div>
-
       <div className="feature-card-content">
+        <div className="feature-card-icon-wrapper">
+          <div className="feature-card-icon">
+            {iconContent}
+          </div>
+        </div>
         <h3 className="feature-card-title">{title}</h3>
-        <p className="feature-card-description">{description}</p>
       </div>
     </div>
   );
@@ -120,12 +140,10 @@ const FeatureCard = ({
 FeatureCard.propTypes = {
   /** 卡片标题 */
   title: PropTypes.string.isRequired,
-  /** 卡片描述 */
-  description: PropTypes.string.isRequired,
   /** 图标名称或 emoji */
   icon: PropTypes.string,
-  /** 卡片主题色 */
-  color: PropTypes.string,
+  /** 卡片类别，用于确定主题色 */
+  category: PropTypes.oneOf(['daily', 'fortune', 'growth', 'health', 'entertainment', 'default']),
   /** 路由路径 */
   route: PropTypes.string,
   /** 点击回调函数 */
@@ -148,6 +166,7 @@ FeatureCard.propTypes = {
 FeatureCard.defaultProps = {
   icon: CARD_DEFAULTS.DEFAULT_ICON,
   color: CARD_DEFAULTS.DEFAULT_COLOR,
+  category: 'default',
   route: null,
   onClick: null,
   disabled: false,

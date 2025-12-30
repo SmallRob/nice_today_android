@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './ShaoyongYixue.css';
 import './shaoyong-mobile-styles.css';
 
@@ -177,25 +177,13 @@ const ShaoyongYixue = () => {
           // 梅花易数标签页
           <div className="tab-content meihua-content">
             <div className="content-grid">
-              {/* 左侧面板 - 起卦和历史 */}
-              <div className="left-panel">
+              {/* 主要内容区域 - 起卦和卦象展示 */}
+              <div className="main-panel">
                 <div className="card">
                   <h2>起卦方式</h2>
                   <DivinationForm onDivination={handleDivination} />
                 </div>
-                
-                <div className="card">
-                  <h2>历史记录</h2>
-                  <HistoryPanel 
-                    history={meihuaHistory}
-                    onLoad={loadMeihuaHistory}
-                    onClear={clearMeihuaHistory}
-                  />
-                </div>
-              </div>
 
-              {/* 右侧面板 - 卦象展示和解读 */}
-              <div className="right-panel">
                 <div className="card">
                   <h2>卦象展示</h2>
                   {divinationResult ? (
@@ -220,30 +208,28 @@ const ShaoyongYixue = () => {
                 </div>
               </div>
             </div>
+
+            {/* 历史记录 - 放到最后 */}
+            <div className="card history-section">
+              <h2>历史记录</h2>
+              <HistoryPanel 
+                history={meihuaHistory}
+                onLoad={loadMeihuaHistory}
+                onClear={clearMeihuaHistory}
+              />
+            </div>
           </div>
         ) : (
           // 铁板神数标签页
           <div className="tab-content tieban-content">
             <div className="content-grid">
-              {/* 左侧面板 - 八字输入和历史 */}
-              <div className="left-panel">
+              {/* 主要内容区域 - 八字输入和计算 */}
+              <div className="main-panel">
                 <div className="card">
                   <h2>八字信息输入</h2>
                   <BaziInput onSubmit={handleBaziSubmit} />
                 </div>
-                
-                <div className="card">
-                  <h2>历史记录</h2>
-                  <HistoryPanel 
-                    history={tiebanHistory}
-                    onLoad={loadTiebanHistory}
-                    onClear={clearTiebanHistory}
-                  />
-                </div>
-              </div>
 
-              {/* 右侧面板 - 计算和条文 */}
-              <div className="right-panel">
                 {baziData ? (
                   <>
                     <div className="card">
@@ -295,6 +281,18 @@ const ShaoyongYixue = () => {
                 )}
               </div>
             </div>
+
+            {/* 历史记录 - 放到最后 */}
+            {tiebanHistory.length > 0 && (
+              <div className="card history-section">
+                <h2>历史记录</h2>
+                <HistoryPanel 
+                  history={tiebanHistory}
+                  onLoad={loadTiebanHistory}
+                  onClear={clearTiebanHistory}
+                />
+              </div>
+            )}
           </div>
         )}
       </main>

@@ -600,7 +600,7 @@ function TarotPage() {
               overscrollBehaviorY: 'contain'
             }}
           >
-            <div className="max-w-4xl mx-auto p-4 pb-20">
+            <div className="max-w-4xl mx-auto p-3 pb-16">
               {activeTab === 'daily' && (
                 <div className="space-y-6">
                   {/* 欢迎卡片 */}
@@ -700,7 +700,7 @@ function TarotPage() {
                                       <div className="flex items-center justify-center">
                                         {!cardsRevealed ? (
                                           <div className="flex items-center justify-center">
-                                            <div className="w-48 h-72 sm:w-64 sm:h-96 relative perspective-1000">
+                                            <div className="w-40 h-60 sm:w-56 sm:h-84 relative perspective-1000">
                                               <div className="relative w-full h-full transition-transform duration-700">
                                                 <img
                                                   src={tarotCardImage}
@@ -713,7 +713,7 @@ function TarotPage() {
                                           </div>
                                         ) : (
                                           <div className="flex items-center justify-center">
-                                            <div className="w-48 h-72 sm:w-64 sm:h-96 relative perspective-1000">
+                                            <div className="w-40 h-60 sm:w-56 sm:h-84 relative perspective-1000">
                                               <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 py-6 transition-transform duration-700 animate-card-reveal">
                                                 {/* 卡牌图标 */}
                                                 <div className="text-6xl sm:text-7xl mb-3 sm:mb-4 animate-pulse animate-fade-in-up" style={{ animationDelay: '0.1s' }}>🃏</div>
@@ -804,13 +804,13 @@ function TarotPage() {
                             {/* 三张牌展示 */}
                             {drawnCards.mode === DRAW_MODES.TRIPLE && (
                               <>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-3 gap-2">
                                   {drawnCards.cards.map((card, index) => (
-                                    <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-3 sm:p-4 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
+                                    <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-2 sm:p-3 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
                                       <div className="flex items-center justify-center">
                                         {!cardsRevealed ? (
                                           <div className="flex items-center justify-center">
-                                            <div className="w-32 h-48 sm:w-40 sm:h-60 relative perspective-1000">
+                                            <div className="w-28 h-42 sm:w-36 sm:h-54 relative perspective-1000">
                                               <div className="relative w-full h-full transition-transform duration-700" style={{ animationDelay: `${index * 150}ms` }}>
                                                 <img
                                                   src={tarotCardImage}
@@ -823,7 +823,7 @@ function TarotPage() {
                                           </div>
                                         ) : (
                                           <div className="flex items-center justify-center">
-                                            <div className="w-32 h-48 sm:w-40 sm:h-60 relative perspective-1000">
+                                            <div className="w-28 h-42 sm:w-36 sm:h-54 relative perspective-1000">
                                               <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-2 sm:px-3 py-3 sm:py-4 transition-transform duration-700 animate-card-reveal" style={{ animationDelay: `${index * 200}ms` }}>
                                                 {/* 位置标签 */}
                                                 <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 mb-2 sm:mb-3 shadow-sm order-1 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 100}ms` }}>

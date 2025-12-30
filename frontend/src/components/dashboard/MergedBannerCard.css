@@ -231,11 +231,13 @@
 }
 
 .user-avatar-small {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
+  -webkit-border-radius: 50%;
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,6 +245,10 @@
   font-weight: 600;
   border: 1.5px solid rgba(255, 255, 255, 0.4);
   flex-shrink: 0;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .user-avatar-small.guest {
@@ -253,19 +259,31 @@
 
 .user-tags-inline {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 4px;
   align-items: center;
   max-width: 100%;
-  min-height: 20px;
-  height: auto;
+  height: 22px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.user-tags-inline::-webkit-scrollbar {
+  display: none;
+  -webkit-appearance: none;
 }
 
 .user-tag-inline {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  border-radius: 6px;
+  -webkit-border-radius: 6px;
   padding: 2px 6px;
   font-size: 10px;
   font-weight: 500;
@@ -274,11 +292,18 @@
   transition: all 0.3s ease;
   white-space: nowrap;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  min-height: 18px;
-  line-height: 14px;
+  height: 22px;
+  line-height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  /* 确保圆角在缩放时清晰 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  /* 防止边缘锯齿 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .user-tag-inline:hover {
@@ -321,14 +346,17 @@
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
+  height: 100%;
+  max-height: 100%;
 }
 
 .user-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .user-nickname {
@@ -337,6 +365,7 @@
   margin: 0;
   letter-spacing: -0.5px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .guest-section {
@@ -356,6 +385,7 @@
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
+  -webkit-border-radius: 6px;
   padding: 4px 10px;
   font-size: 10px;
   color: white;
@@ -363,7 +393,12 @@
   transition: all 0.3s ease;
   align-self: flex-start;
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .setup-profile-btn:hover {
@@ -379,8 +414,10 @@
   right: 8px;
   background: rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
+  -webkit-border-radius: 6px;
   padding: 4px 8px;
   font-size: 10px;
   color: rgba(255, 255, 255, 0.9);
@@ -393,6 +430,10 @@
   min-width: 42px;
   min-height: 24px;
   box-sizing: border-box;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .old-version-btn:hover {
@@ -527,13 +568,30 @@
     width: 24px;
     height: 24px;
     font-size: 11px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .user-info-section {
+    gap: 5px;
   }
 
   .user-tag-inline {
     padding: 2px 5px;
     font-size: 9px;
-    min-height: 16px;
-    line-height: 12px;
+    height: 20px;
+    line-height: 16px;
+    border-radius: 6px;
+    -webkit-border-radius: 6px;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .user-tags-inline {
+    height: 20px;
+    gap: 3px;
   }
 
   .greeting {
@@ -552,6 +610,10 @@
     padding: 3px 6px;
     min-width: 38px;
     min-height: 22px;
+    border-radius: 6px;
+    -webkit-border-radius: 6px;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   .old-version-icon {
@@ -592,20 +654,41 @@
   .user-tag-inline {
     padding: 1px 4px;
     font-size: 9px;
-    min-height: 16px;
-    line-height: 12px;
+    height: 18px;
+    line-height: 14px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .user-tags-inline {
+    height: 18px;
+    gap: 3px;
   }
 
   .user-avatar-small {
     width: 22px;
     height: 22px;
     font-size: 10px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .user-info-section {
+    gap: 4px;
   }
 
   .old-version-btn {
     padding: 2px 5px;
     min-width: 36px;
     min-height: 20px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   .old-version-icon {

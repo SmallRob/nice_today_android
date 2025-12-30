@@ -48,6 +48,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .lunar-date-info {
@@ -70,6 +71,7 @@
   font-size: 12px;
   color: #059669;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .dark .lunar-date {
@@ -91,6 +93,7 @@
   border-radius: 4px;
   font-size: 11px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .taboo-benefit {
@@ -440,30 +443,19 @@
   .fortune-header {
     margin-bottom: 10px;
     padding-bottom: 8px;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
   }
 
-  .fortune-title-section {
-    width: 100%;
-  }
+
 
   .lunar-info-section {
-    width: 100%;
-    align-items: flex-start;
-    background: rgba(0, 0, 0, 0.03);
-    border-radius: 8px;
-    padding: 8px 12px;
+    align-items: flex-end;
+    flex-shrink: 0;
   }
 
-  .dark .lunar-info-section {
-    background: rgba(255, 255, 255, 0.05);
-  }
 
-  .lunar-date-info {
-    justify-content: flex-start;
-  }
 
   .fortune-date {
     font-size: 10px;
@@ -529,9 +521,7 @@
     gap: 8px;
   }
 
-  .lunar-info-section {
-    padding: 6px 10px;
-  }
+
 
   .fortune-title {
     font-size: 12px;
@@ -593,9 +583,7 @@
     gap: 9px;
   }
 
-  .lunar-info-section {
-    padding: 7px 11px;
-  }
+
 
   .fortune-title {
     font-size: 12.5px;

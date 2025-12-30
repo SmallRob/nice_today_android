@@ -2,7 +2,7 @@
 
 .user-info-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 100%;
   background-color: #1b2838;
   border-radius: 4px;
   overflow: hidden;
@@ -118,8 +118,10 @@
 
 /* 详情行 */
 .detail-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(auto, 120px) 1fr;
   align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
   padding-bottom: 16px;
   border-bottom: 1px solid #2a475e;
@@ -133,17 +135,21 @@
 }
 
 .detail-label {
-  width: 100px;
   font-size: 14px;
   color: #8f98a0;
-  flex-shrink: 0;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .detail-value {
-  flex-grow: 1;
   font-size: 16px;
   font-weight: 500;
   color: #c6d4df;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* 特殊值的样式 */
@@ -352,4 +358,45 @@
 @keyframes loading {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* 大屏幕优化 */
+@media (min-width: 768px) {
+  .user-info-card {
+    max-width: 600px;
+  }
+
+  .detail-row {
+    grid-template-columns: minmax(auto, 150px) 1fr;
+    gap: 16px;
+  }
+
+  .detail-label {
+    font-size: 15px;
+  }
+
+  .detail-value {
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .user-info-card {
+    max-width: 700px;
+  }
+}
+
+@media (max-width: 375px) {
+  .detail-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .detail-label {
+    font-size: 12px;
+  }
+
+  .detail-value {
+    font-size: 13px;
+  }
 }

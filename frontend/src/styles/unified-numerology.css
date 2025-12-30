@@ -81,6 +81,8 @@
 .unified-numerology-container {
   font-family: 'Georgia', 'Times New Roman', 'PingFang SC', 'Microsoft YaHei', serif;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
@@ -286,6 +288,10 @@
   max-width: 800px;
   margin: 0 auto;
   padding: var(--spacing-lg) var(--spacing-md);
+  padding-bottom: calc(var(--spacing-lg) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .tab-content {
@@ -293,13 +299,20 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  min-height: 400px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* 允许弹性收缩 */
 }
 
 /* 个人灵数和灵数解析标签页样式 */
 .personal-tab,
 .enhanced-tab {
   background: var(--bg-card);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* 允许滚动 */
 }
 
 /* ========================================
@@ -405,7 +418,7 @@
    ======================================== */
 @media (max-width: 768px) {
   .header-background {
-    padding: var(--spacing-lg) var(--spacing-md) var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-sm) var(--spacing-sm);
   }
   
   .main-title {
@@ -417,12 +430,12 @@
   }
   
   .user-badge {
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: 4px var(--spacing-xs);
   }
   
   .user-avatar {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
   
   .user-name {
@@ -430,17 +443,22 @@
   }
   
   .user-birth {
-    font-size: 0.6875rem;
+    font-size: 0.625rem;
   }
   
   .tab-navigation {
-    padding: 0 var(--spacing-sm);
+    padding: 0 var(--spacing-xs);
+    gap: 0;
+  }
+  
+  .tab-navigation {
+    padding: 0 var(--spacing-xs);
     gap: 0;
   }
   
   .tab-button {
-    min-width: 80px;
-    padding: var(--spacing-xs) var(--spacing-sm);
+    min-width: 75px;
+    padding: 6px var(--spacing-xs);
     font-size: 0.8125rem;
   }
   
@@ -450,7 +468,8 @@
   }
   
   .unified-content {
-    padding: var(--spacing-md) var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-xs);
+    padding-bottom: calc(var(--spacing-md) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
   }
 }
 
@@ -459,11 +478,11 @@
    ======================================== */
 @media (max-width: 480px) {
   .header-background {
-    padding: var(--spacing-md) var(--spacing-sm) var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-xs) var(--spacing-xs);
   }
   
   .header-content {
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
   }
   
   .main-title {
@@ -476,31 +495,36 @@
   }
   
   .user-badge {
-    padding: 6px var(--spacing-sm);
+    padding: 4px var(--spacing-xs);
     flex-direction: row;
   }
   
   .user-avatar {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     margin-right: var(--spacing-xs);
   }
   
   .avatar-text {
-    font-size: 0.75rem;
-  }
-  
-  .user-name {
-    font-size: 0.75rem;
-  }
-  
-  .user-birth {
     font-size: 0.6875rem;
   }
   
+  .user-name {
+    font-size: 0.6875rem;
+  }
+  
+  .user-birth {
+    font-size: 0.625rem;
+  }
+  
+  .tab-navigation {
+    padding: 0 var(--spacing-xs);
+    gap: 0;
+  }
+  
   .tab-button {
-    min-width: 70px;
-    padding: 8px var(--spacing-xs);
+    min-width: 65px;
+    padding: 6px var(--spacing-xs);
     font-size: 0.75rem;
     border-radius: var(--radius-sm);
   }
@@ -519,17 +543,18 @@
   }
   
   .unified-content {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
+    padding-bottom: calc(var(--spacing-sm) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
   }
   
   .tab-content {
     border-radius: var(--radius-md);
-    min-height: 350px;
+    min-height: 0;
   }
   
   .loading-spinner {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
   
   .loading-content p {
@@ -545,9 +570,14 @@
     font-size: 1.25rem;
   }
   
+  .tab-navigation {
+    padding: 0 var(--spacing-xs);
+    gap: 0;
+  }
+  
   .tab-button {
-    min-width: 60px;
-    padding: 6px var(--spacing-xs);
+    min-width: 55px;
+    padding: 5px var(--spacing-xs);
     font-size: 0.6875rem;
   }
   
@@ -583,12 +613,18 @@
     padding: 4px var(--spacing-sm);
   }
   
+  .tab-navigation {
+    padding: 0 var(--spacing-xs);
+    gap: 0;
+  }
+  
   .tab-button {
     padding: var(--spacing-xs) var(--spacing-sm);
   }
   
   .unified-content {
     padding: var(--spacing-md) var(--spacing-md);
+    padding-bottom: calc(var(--spacing-md) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
   }
 }
 

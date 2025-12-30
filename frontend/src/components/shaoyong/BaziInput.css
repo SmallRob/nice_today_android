@@ -2,28 +2,46 @@
 
 .bazi-input {
   font-family: inherit;
-  padding: 10px 0;
+  padding: clamp(8px, 2vw, 10px) 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* 文本溢出处理 */
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.text-ellipsis {
+  text-overflow: ellipsis;
 }
 
 .method-selector {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: clamp(8px, 2vw, 12px);
+  margin-bottom: clamp(16px, 4vw, 24px);
   flex-wrap: wrap;
 }
 
 .method-btn {
-  padding: 12px 24px;
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
   border: 2px solid var(--border-color);
   background: var(--bg-secondary);
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
   transition: all 0.3s ease;
   flex: 1;
-  min-width: 140px;
+  min-width: clamp(100px, 25vw, 140px);
   color: var(--text-primary);
   font-family: inherit;
+  white-space: nowrap;
 }
 
 .method-btn:hover {
@@ -80,12 +98,12 @@
 
 .gender-selector {
   display: flex;
-  gap: 10px;
+  gap: clamp(8px, 2vw, 10px);
 }
 
 .gender-btn {
   flex: 1;
-  padding: 10px 15px;
+  padding: clamp(8px, 2vw, 10px) clamp(12px, 3vw, 15px);
   border: 2px solid var(--border-color);
   background: var(--bg-secondary);
   border-radius: 6px;
@@ -93,6 +111,8 @@
   transition: all 0.3s ease;
   color: var(--text-primary);
   font-family: inherit;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+  white-space: nowrap;
 }
 
 .gender-btn:hover {
@@ -123,9 +143,17 @@
 
 .form-actions {
   display: flex;
-  gap: 12px;
-  margin: 20px 0;
+  gap: clamp(8px, 2vw, 12px);
+  margin: clamp(12px, 3vw, 20px) 0;
   flex-wrap: wrap;
+}
+
+.form-actions button {
+  flex: 1;
+  min-width: clamp(120px, 30vw, 150px);
+  padding: clamp(10px, 2.5vw, 14px) clamp(16px, 4vw, 24px);
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+  white-space: nowrap;
 }
 
 .bazi-display-input {
@@ -193,8 +221,8 @@
 }
 
 .gender-selection {
-  margin: 25px 0;
-  padding: 20px;
+  margin: clamp(16px, 4vw, 25px) 0;
+  padding: clamp(12px, 3vw, 20px);
   background: var(--hover-color);
   border-radius: 10px;
   border: 1px solid var(--border-color);
@@ -204,19 +232,22 @@
 .gender-selection label {
   font-weight: bold;
   color: var(--text-primary);
-  margin-bottom: 15px;
+  margin-bottom: clamp(10px, 2.5vw, 15px);
   display: block;
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
+  white-space: nowrap;
 }
 
 .gender-buttons {
   display: flex;
-  gap: 15px;
+  gap: clamp(10px, 2.5vw, 15px);
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: clamp(8px, 2vw, 10px);
+  flex-wrap: nowrap;
 }
 
 .gender-option {
-  padding: 10px 25px;
+  padding: clamp(10px, 2.5vw, 14px) clamp(20px, 5vw, 25px);
   border: 2px solid var(--border-color);
   background: var(--bg-secondary);
   border-radius: 8px;
@@ -224,6 +255,11 @@
   transition: all 0.3s ease;
   color: var(--text-primary);
   font-family: inherit;
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
+  flex: 1;
+  min-width: clamp(100px, 25vw, 130px);
+  max-width: clamp(140px, 35vw, 180px);
+  white-space: nowrap;
 }
 
 .gender-option:hover {
@@ -266,10 +302,18 @@
 
 .submit-section {
   display: flex;
-  gap: 15px;
+  gap: clamp(10px, 2.5vw, 15px);
   justify-content: center;
-  margin-top: 30px;
+  margin-top: clamp(20px, 5vw, 30px);
   flex-wrap: wrap;
+}
+
+.submit-section button {
+  flex: 1;
+  min-width: clamp(130px, 35vw, 160px);
+  padding: clamp(10px, 2.5vw, 14px) clamp(20px, 5vw, 28px);
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
+  white-space: nowrap;
 }
 
 .bazi-guide {
@@ -299,77 +343,107 @@
 /* 响应式设计 */
 @media (max-width: 768px) {
   .method-selector {
-    flex-direction: column;
+    flex-direction: row;
   }
-  
+
   .method-btn {
-    min-width: auto;
+    min-width: clamp(100px, 25vw, 120px);
+    font-size: clamp(0.85rem, 2vw, 0.95rem);
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .bazi-grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .gender-buttons {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    flex-wrap: nowrap;
   }
-  
+
   .gender-option {
-    width: 150px;
+    min-width: clamp(90px, 22vw, 110px);
+    max-width: clamp(130px, 32vw, 150px);
+    font-size: clamp(0.85rem, 2vw, 0.95rem);
   }
-  
+
   .submit-section {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    flex-wrap: nowrap;
   }
-  
+
+  .submit-section button {
+    min-width: clamp(110px, 28vw, 130px);
+  }
+
+  .form-actions {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
   .bazi-selectors {
-    flex-direction: column;
+    flex-direction: row;
   }
 }
 
 @media (max-width: 480px) {
   .bazi-column {
-    padding: 10px;
+    padding: clamp(8px, 2vw, 10px);
   }
-  
+
   .bazi-guide,
   .bazi-summary,
   .gender-selection {
-    padding: 15px;
+    padding: clamp(10px, 2.5vw, 15px);
   }
-  
+
   .form-group input {
-    padding: 14px 16px; /* 增加触摸目标大小 */
-    font-size: 1rem; /* 防止iOS缩放 */
+    padding: clamp(10px, 2.5vw, 14px) clamp(12px, 3vw, 16px);
+    font-size: clamp(0.9rem, 2.2vw, 1rem);
   }
-  
+
   .bazi-selectors select {
-    padding: 12px; /* 增加触摸目标大小 */
-    font-size: 1rem; /* 防止iOS缩放 */
+    padding: clamp(8px, 2vw, 12px);
+    font-size: clamp(0.9rem, 2.2vw, 1rem);
+  }
+
+  .gender-option {
+    padding: clamp(8px, 2vw, 10px) clamp(14px, 3.5vw, 18px);
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+  }
+
+  .submit-section button {
+    padding: clamp(8px, 2vw, 12px) clamp(14px, 3.5vw, 20px);
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+  }
+
+  .form-actions button {
+    padding: clamp(8px, 2vw, 12px) clamp(14px, 3.5vw, 20px);
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
   }
 }
 
 /* 移动端优化 */
 @media (max-width: 768px) {
   .method-btn {
-    padding: 14px 20px; /* 增加触摸目标大小 */
-    min-height: 44px;
+    padding: clamp(10px, 2.5vw, 14px) clamp(16px, 4vw, 20px);
+    min-height: clamp(40px, 10vw, 44px);
   }
-  
+
   .gender-option {
-    padding: 12px 20px; /* 增加触摸目标大小 */
-    min-height: 44px;
+    padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 20px);
+    min-height: clamp(40px, 10vw, 44px);
   }
-  
+
   .form-group label {
-    font-size: 0.9rem;
+    font-size: clamp(0.85rem, 2vw, 0.9rem);
   }
 }

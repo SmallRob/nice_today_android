@@ -419,20 +419,20 @@
   }
 }
 
-/* 功能卡片 - 优化行高固定和宽度自适应 */
+/* 功能卡片 - 使用伪元素背景，实现图标和标题分离绘制 */
 .feature-card {
-  background: white;
-  border-radius: 12px;
-  padding: 14px 10px;
+  background: transparent;
+  border-radius: 16px;
+  padding: 20px 12px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100px; /* 固定最小高度 */
+  justify-content: flex-start;
+  min-height: 120px; /* 增加最小高度，为图标和标题提供更多空间 */
   height: 100%; /* 确保卡片填满网格单元格高度 */
   text-align: center;
   /* 优化触摸区域 */
@@ -444,10 +444,11 @@
   box-sizing: border-box;
   /* 防止内容溢出 */
   overflow: hidden;
+  isolation: isolate; /* 创建新的堆叠上下文 */
 }
 
 .dark .feature-card {
-  background: #1f2937;
+  background: transparent;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -465,49 +466,122 @@
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* 卡片图标 - 与背景色融合 */
+/* 卡片图标 - 与背景分离绘制，确保图标独立显示 */
 .feature-card-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
-  background: var(--card-color);
-  color: white;
-  font-size: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: var(--card-color);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 3;
+  margin-bottom: 14px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .feature-card:hover .feature-card-icon {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.98);
 }
 
-/* 卡片内容 */
+/* 图标容器 - 确保图标与背景分离 */
+.feature-card-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 2;
+}
+
+/* 卡片内容 - 优化图标和标题的分离绘制 */
 .feature-card-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   width: 100%;
+  padding: 0 8px;
+  position: relative;
+  z-index: 2;
 }
 
+/* 为卡片添加背景渐变效果，与图标分离 */
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--card-color) 0%, rgba(var(--card-color-rgb), 0.8) 100%);
+  border-radius: 16px;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+.feature-card:hover::before {
+  opacity: 0.95;
+}
+
+/* 确保卡片内容在背景之上 */
+.feature-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* 功能卡片标题 - 与背景分离，确保清晰可见 */
 .feature-card-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 2px 0;
-  line-height: 1.3;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  line-height: 1.4;
   text-align: center;
   word-wrap: break-word;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-height: 2.8em;
+  min-height: 1.4em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dark .feature-card-title {
-  color: #f9fafb;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* 移动端标题优化 */
+@media (max-width: 576px) {
+  .feature-card-title {
+    font-size: 13px;
+    line-height: 1.3;
+    -webkit-line-clamp: 2;
+    max-height: 2.6em;
+  }
 }
 
 .feature-card-description {
@@ -694,15 +768,16 @@
     font-size: 13px;
   }
 
-  /* 移动端3列布局优化 */
+  /* 移动端3列布局优化 - 确保图标和标题清晰可见 */
   .feature-card {
-    min-height: 95px;
+    min-height: 110px;
     height: 100%; /* 确保填满网格单元格 */
-    padding: 12px 8px;
+    padding: 16px 10px;
     text-align: center;
     align-items: center;
     width: 100%; /* 宽度自适应 */
     box-sizing: border-box;
+    border-radius: 14px;
   }
 
   .feature-card:hover {
@@ -713,23 +788,38 @@
     transform: scale(0.98);
   }
 
+  /* 移动端图标优化 - 与背景分离 */
   .feature-card-icon {
-    width: 36px;
-    height: 36px;
-    margin-bottom: 6px;
-    border-radius: 8px;
-    font-size: 18px;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 
+  /* 移动端标题优化 - 与背景分离 */
   .feature-card-title {
     font-size: 12px;
-    margin-bottom: 0;
-    line-height: 1.2;
-    -webkit-line-clamp: 1;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.3;
+    -webkit-line-clamp: 2;
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;
     width: 100%;
+    max-height: 2.6em;
+    min-height: 1.3em;
+    color: white;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 3px 6px;
+    border-radius: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .feature-card-description {

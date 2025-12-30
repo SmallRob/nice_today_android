@@ -20,6 +20,9 @@ const MatrixGrid = ({ matrixData, matrixSize, onCellClick, selectedCell, onAddIm
     if (energy < 80) return 'high';
     return 'max';
   };
+
+  // 确保matrixSize有效
+  const validMatrixSize = matrixSize && (matrixSize === 3 || matrixSize === 7) ? matrixSize : 3;
   
   if (!matrixData || matrixData.length === 0) {
     return (
@@ -31,7 +34,7 @@ const MatrixGrid = ({ matrixData, matrixSize, onCellClick, selectedCell, onAddIm
   
   return (
     <div className="matrix-container">
-      <div className="matrix-grid" style={{ '--grid-size': matrixSize }}>
+      <div className="matrix-grid" style={{ '--grid-size': validMatrixSize, display: 'grid', height: '100%' }}>
         {matrixData.map((row, rowIndex) => (
           <div key={rowIndex} className="matrix-row">
             {row.map((cell, colIndex) => {

@@ -1,0 +1,350 @@
+/* MoreFeaturesPage样式 - 现代化设计 */
+
+/* 容器样式 */
+.feature-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 功能标题区域 */
+.feature-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 24px);
+  margin-bottom: clamp(16px, 4vw, 24px);
+  border-radius: clamp(16px, 4vw, 24px);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, 
+    rgba(0, 0, 0, 0.05) 0%, 
+    rgba(0, 0, 0, 0) 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+.feature-header.category-entertainment::before {
+  background: linear-gradient(135deg, #E91E63 0%, #FF5722 100%);
+}
+
+.feature-header.category-daily::before {
+  background: linear-gradient(135deg, #FF5252 0%, #FF9800 100%);
+}
+
+.feature-header.category-growth::before {
+  background: linear-gradient(135deg, #4CAF50 0%, #FF9800 100%);
+}
+
+.feature-title {
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 700;
+  margin: 0 0 clamp(8px, 2vw, 12px) 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.feature-desc {
+  font-size: clamp(14px, 3vw, 18px);
+  margin: 0;
+  opacity: 0.9;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Tab导航样式 */
+.tab-button {
+  flex: 1;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: clamp(8px, 2vw, 12px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 clamp(2px, 0.5vw, 4px);
+}
+
+.tab-button.active {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.dark .tab-button.active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(12px, 3vw, 16px);
+  gap: clamp(4px, 1vw, 8px);
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(24px, 6vw, 32px);
+  height: clamp(24px, 6vw, 32px);
+  border-radius: clamp(8px, 2vw, 12px);
+  background: rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.dark .tab-icon {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tab-button.active .tab-icon {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.tab-text {
+  font-size: clamp(12px, 3vw, 16px);
+  font-weight: 500;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+
+.dark .tab-text {
+  color: #d1d5db;
+}
+
+.tab-button.active .tab-text {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.dark .tab-button.active .tab-text {
+  color: #f9fafb;
+}
+
+/* 功能网格布局 */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(16px, 4vw, 24px);
+}
+
+/* 功能卡片样式 - 复用DashboardPage的样式 */
+.feature-card {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(8px, 2vw, 16px);
+  border-radius: clamp(16px, 4vw, 24px);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0.1, 1);
+  position: relative;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  max-width: 100%;
+  min-height: clamp(100px, 30vw, 150px);
+  border: 0;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  z-index: 1;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  border-radius: inherit;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.feature-card:hover::after {
+  opacity: 1;
+}
+
+.feature-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: clamp(4px, 1vw, 8px);
+  position: relative;
+  z-index: 2;
+}
+
+.feature-card-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(36px, 8vw, 48px);
+  height: clamp(36px, 8vw, 48px);
+  border-radius: clamp(12px, 3vw, 16px);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  margin-bottom: clamp(4px, 1vw, 8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  z-index: 3;
+}
+
+.feature-card:hover .feature-card-icon-wrapper {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card .feature-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  transition: transform 0.2s ease;
+  z-index: 4;
+}
+
+.feature-card .feature-card-title {
+  font-size: clamp(0.7rem, 2vw, 0.85rem);
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+  z-index: 3;
+}
+
+/* 不同类别的卡片背景色 */
+.feature-card.category-entertainment::before {
+  background: linear-gradient(135deg, #E91E63 0%, #FF5722 100%);
+}
+
+.feature-card.category-daily::before {
+  background: linear-gradient(135deg, #FF5252 0%, #FF9800 100%);
+}
+
+.feature-card.category-growth::before {
+  background: linear-gradient(135deg, #4CAF50 0%, #FF9800 100%);
+}
+
+/* 卡片悬停效果 */
+.feature-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.feature-card:hover .feature-card-icon {
+  transform: scale(1.1);
+}
+
+.feature-card:active {
+  transform: translateY(-2px) scale(1.01);
+  transition-duration: 0.1s;
+}
+
+/* 深色模式调整 */
+.dark .feature-card {
+  filter: brightness(1.05) saturate(1.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dark .feature-card.category-entertainment::before {
+  background: linear-gradient(135deg, #8E24AA 0%, #E64A19 100%);
+  box-shadow: 0 4px 20px rgba(142, 36, 170, 0.5);
+}
+
+.dark .feature-card.category-daily::before {
+  background: linear-gradient(135deg, #FF5252 0%, #FF9800 100%);
+  box-shadow: 0 4px 20px rgba(255, 82, 82, 0.5);
+}
+
+.dark .feature-card.category-growth::before {
+  background: linear-gradient(135deg, #388E3C 0%, #F57C00 100%);
+  box-shadow: 0 4px 20px rgba(56, 142, 60, 0.5);
+}
+
+.dark .feature-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.dark .feature-card .feature-card-icon-wrapper {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark .feature-card .feature-card-title {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(12px, 3vw, 16px);
+  }
+  
+  .feature-card {
+    min-height: clamp(80px, 25vw, 120px);
+  }
+}
+
+@media (max-width: 480px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(8px, 2vw, 12px);
+  }
+  
+  .feature-card {
+    min-height: clamp(70px, 25vw, 100px);
+  }
+  
+  .tab-content {
+    flex-direction: row;
+    padding: clamp(8px, 2vw, 12px);
+  }
+  
+  .tab-icon {
+    width: clamp(20px, 5vw, 24px);
+    height: clamp(20px, 5vw, 24px);
+  }
+  
+  .tab-text {
+    font-size: clamp(10px, 2.5vw, 12px);
+  }
+}

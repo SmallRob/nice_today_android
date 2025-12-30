@@ -9,9 +9,8 @@ const MBTICard = () => {
   return (
     <FeatureCard
       title="MBTI测试"
-      description="探索您的性格类型"
-      icon="brain"
-      color="#6366f1"
+      icon="mbti"
+      category="growth"
       route="/mbti-test"
     />
   );
@@ -24,9 +23,8 @@ const ChineseZodiacCard = () => {
   return (
     <FeatureCard
       title="生肖运势"
-      description="了解您的生肖性格"
-      icon="dragon"
-      color="#f59e0b"
+      icon="chinese-zodiac"
+      category="fortune"
       route="/chinese-zodiac"
     />
   );
@@ -39,9 +37,8 @@ const HoroscopeCard = () => {
   return (
     <FeatureCard
       title="星座运势"
-      description="十二星座每日运势"
-      icon="weather-sunny"
-      color="#ec4899"
+      icon="horoscope"
+      category="fortune"
       route="/horoscope"
     />
   );
@@ -54,9 +51,8 @@ const BaziCard = () => {
   return (
     <FeatureCard
       title="八字月运"
-      description="命理运势深度解析"
-      icon="book"
-      color="#8b5cf6"
+      icon="bazi"
+      category="fortune"
       route="/bazi?mode=monthly"
     />
   );
@@ -69,9 +65,8 @@ const BiorhythmCard = () => {
   return (
     <FeatureCard
       title="人体节律"
-      description="体力、情绪、智力周期"
-      icon="chart-line"
-      color="#10b981"
+      icon="biorhythm"
+      category="health"
       route="/biorhythm"
     />
   );
@@ -107,9 +102,8 @@ const PersonalityTraitCard = () => {
   return (
     <FeatureCard
       title="星座特质"
-      description="了解您的星座性格"
-      icon="sparkles"
-      color="#06b6d4"
+      icon="horoscope"
+      category="fortune"
       onClick={handleClick}
     />
   );
@@ -122,9 +116,8 @@ const EnergyBoostCard = () => {
   return (
     <FeatureCard
       title="能量提升"
-      description="日常能量管理建议"
-      icon="lightning-bolt"
-      color="#f97316"
+      icon="energy-boost"
+      category="growth"
       route="/energy"
     />
   );
@@ -137,9 +130,8 @@ const PeriodTrackerCard = () => {
   return (
     <FeatureCard
       title="经期助手"
-      description="智能周期追踪记录"
-      icon="heart"
-      color="#db2777"
+      icon="period-tracker"
+      category="health"
       route="/period-tracker"
     />
   );
@@ -165,9 +157,8 @@ const ZiWeiCard = () => {
   return (
     <FeatureCard
       title="紫微命宫"
-      description="传统命理深度分析"
-      icon="star-outline"
-      color="#d946ef"
+      icon="ziwei"
+      category="fortune"
       onClick={handleClick}
     />
   );
@@ -180,9 +171,8 @@ const TodoCard = () => {
   return (
     <FeatureCard
       title="待办事项"
-      description="高效管理日常任务"
-      icon="check-circle"
-      color="#3b82f6"
+      icon="todo"
+      category="daily"
       route="/todo-list"
     />
   );
@@ -195,9 +185,8 @@ const FinanceCard = () => {
   return (
     <FeatureCard
       title="财务斩杀线"
-      description="智能收支管理分析"
-      icon="money"
-      color="#ef4444"
+      icon="finance"
+      category="daily"
       route="/finance"
     />
   );
@@ -210,9 +199,8 @@ const TakashimaDivinationCard = () => {
   return (
     <FeatureCard
       title="高岛易断"
-      description="传统周易卦象占卜"
-      icon="divination"
-      color="#0ea5e9"
+      icon="takashima"
+      category="fortune"
       route="/takashima-advice"
     />
   );
@@ -225,9 +213,8 @@ const LifeMatrixCard = () => {
   return (
     <FeatureCard
       title="生命矩阵"
-      description="构建你的意义能量图谱"
-      icon="grid"
-      color="#14b8a6"
+      icon="life-matrix"
+      category="growth"
       route="/lifestyle-guide"
     />
   );
@@ -240,9 +227,8 @@ const DailyCardCard = () => {
   return (
     <FeatureCard
       title="每日集卡"
-      description="摇一摇收集精美卡牌"
-      icon="shuffle"
-      color="#f472b6"
+      icon="daily-card"
+      category="entertainment"
       route="/daily-cards"
     />
   );
@@ -255,9 +241,8 @@ const TarotGardenCard = () => {
   return (
     <FeatureCard
       title="塔罗花园"
-      description="探索塔罗牌的智慧与奥秘"
-      icon="cards"
-      color="#9333ea"
+      icon="tarot-garden"
+      category="entertainment"
       route="/tarot-garden"
     />
   );
@@ -270,9 +255,8 @@ const CulturalCupCard = () => {
   return (
     <FeatureCard
       title="摔杯请卦"
-      description="传统卜卦 · 心诚则灵"
-      icon="🏆"
-      color="#8B4513"
+      icon="cultural-cup"
+      category="entertainment"
       route="/cultural-cup"
     />
   );
@@ -285,9 +269,8 @@ const DressGuideCard = () => {
   return (
     <FeatureCard
       title="穿衣指南"
-      description="五行穿衣 · 每日运势"
-      icon="👕"
-      color="#ec4899"
+      icon="dress-guide"
+      category="growth"
       route="/dress"
     />
   );
@@ -300,9 +283,8 @@ const WuxingHealthCard = () => {
   return (
     <FeatureCard
       title="五行养生"
-      description="季节调养 · 身心平衡"
-      icon="💚"
-      color="#8b5cf6"
+      icon="wuxing-health"
+      category="health"
       route="/wuxing-health"
     />
   );
@@ -315,9 +297,8 @@ const OrganRhythmCard = () => {
   return (
     <FeatureCard
       title="器官节律"
-      description="子午流注 · 十二时辰"
-      icon="⏰"
-      color="#9333ea"
+      icon="organ-rhythm"
+      category="health"
       route="/organ-rhythm"
     />
   );
