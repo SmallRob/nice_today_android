@@ -17,10 +17,10 @@ class VersionDetector {
       // 1. 检查URL参数中的版本设置（优先级最高）
       const urlParams = new URLSearchParams(window.location.search);
       const urlVersion = urlParams.get('version');
-      
+
       // 2. 检查localStorage中的版本设置
       const savedVersion = localStorage.getItem('appVersion');
-      
+
       // 3. 确定当前版本（URL参数 > localStorage > 默认）
       if (urlVersion && (urlVersion === 'lite' || urlVersion === 'full')) {
         this.version = urlVersion;
@@ -30,19 +30,19 @@ class VersionDetector {
       } else if (savedVersion) {
         this.version = savedVersion;
       } else {
-        // 默认使用轻量版
-        this.version = 'lite';
-        localStorage.setItem('appVersion', 'lite');
+        // 默认使用炫彩版
+        this.version = 'full';
+        localStorage.setItem('appVersion', 'full');
       }
 
       // 4. 检查是否为Capacitor原生应用
       this.isNativeApp = this.checkIsNativeApp();
-      
+
       // 5. 记录版本信息
       console.log(`应用版本检测完成: ${this.getVersionName()}, 运行环境: ${this.isNativeApp ? 'Android原生' : 'Web浏览器'}`);
-      
+
       this.isInitialized = true;
-      
+
       return this.version;
     } catch (error) {
       console.error('版本检测器初始化失败:', error);
@@ -81,12 +81,12 @@ class VersionDetector {
     if (targetVersion !== 'lite' && targetVersion !== 'full') {
       throw new Error('无效的版本类型: ' + targetVersion);
     }
-    
+
     this.version = targetVersion;
     localStorage.setItem('appVersion', targetVersion);
-    
+
     console.log(`版本已切换到: ${this.getVersionName()}`);
-    
+
     // 触发版本切换事件
     this.triggerVersionChange(targetVersion);
   }
@@ -103,7 +103,7 @@ class VersionDetector {
         timestamp: Date.now()
       }
     });
-    
+
     // 分发事件
     window.dispatchEvent(versionChangeEvent);
   }
@@ -121,7 +121,7 @@ class VersionDetector {
 
     // 获取当前路径
     const currentPath = window.location.pathname;
-    
+
     // 如果是根路径，根据版本跳转
     if (currentPath === '/' || currentPath === '/index.html') {
       if (this.version === 'full') {
@@ -142,9 +142,9 @@ class VersionDetector {
     if (window.location.pathname !== '/') {
       window.history.replaceState(null, '', '/');
     }
-    
+
     console.log('炫彩版：直接打开app首页');
-    
+
     // 触发页面刷新以应用新路由
     if (window.location.pathname === '/') {
       // 如果已经在首页，触发路由更新
@@ -160,9 +160,9 @@ class VersionDetector {
     if (window.location.pathname !== '/lite') {
       window.history.replaceState(null, '', '/lite');
     }
-    
+
     console.log('轻量版：直接打开app');
-    
+
     // 触发页面刷新以应用新路由
     if (window.location.pathname === '/lite') {
       // 如果已经在轻量版首页，触发路由更新
@@ -189,9 +189,9 @@ class VersionDetector {
     const listener = (event) => {
       callback(event.detail);
     };
-    
+
     window.addEventListener('appVersionChanged', listener);
-    
+
     // 返回移除监听器的函数
     return () => {
       window.removeEventListener('appVersionChanged', listener);

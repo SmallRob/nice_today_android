@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import { userConfigManager } from '../utils/userConfigManager';
 import * as horoscopeAlgorithm from '../utils/horoscopeAlgorithm';
 import ZodiacTraitsDisplay from './ZodiacTraitsDisplay';
 import {
@@ -87,79 +86,41 @@ const HoroscopeTab = () => {
   const [showZodiacModal, setShowZodiacModal] = useState(false);
   const [globalUserConfig, setGlobalUserConfig] = useState(null);
 
+  const { configManagerReady, currentConfig } = useUserConfig();
+
+  // 当全局配置变化时同步本地状态
+  useEffect(() => {
+    if (configManagerReady && currentConfig) {
+      setGlobalUserConfig(currentConfig);
+      const zodiac = currentConfig.zodiac || '';
+      if (zodiac) {
+        setUserHoroscope(zodiac);
+        setIsTemporaryHoroscope(false);
+        isTemporaryRef.current = false;
+      }
+      setInitialized(true);
+      setDataLoaded(false);
+    }
+  }, [configManagerReady, currentConfig]);
+
   // 初始化缓存管理器和性能优化 - 增强稳定性版本
   useEffect(() => {
     let isMounted = true;
-    let retryCount = 0;
-    const maxRetries = 3;
 
     const initOptimizations = async () => {
       try {
-        // 检查函数是否存在再初始化性能优化
         if (typeof initializePerformanceOptimization === 'function') {
           initializePerformanceOptimization();
         }
-
-        // 检查函数是否存在再初始化缓存管理器
         if (typeof initializeHoroscopeCache === 'function') {
           initializeHoroscopeCache();
         }
       } catch (error) {
         console.error('优化初始化失败:', error);
-        if (isMounted) {
-          setError('初始化失败: ' + error.message);
-        }
-      }
-    };
-
-    // 初始化用户配置管理器并获取全局配置
-    const initUserConfig = async () => {
-      try {
-        console.log('初始化星座组件，重试次数:', retryCount);
-        
-        await userConfigManager.initialize();
-        const config = userConfigManager.getCurrentConfig();
-        
-        if (isMounted) {
-          setGlobalUserConfig(config);
-
-          // 获取用户星座
-          const zodiac = config?.zodiac || '';
-          if (zodiac) {
-            setUserHoroscope(zodiac);
-            setIsTemporaryHoroscope(false);
-            isTemporaryRef.current = false;
-          } else {
-            // 未配置时显示默认星座
-            setDefaultHoroscopeState();
-          }
-          setInitialized(true);
-          setDataLoaded(false);
-          console.log('星座组件初始化成功');
-        }
-      } catch (error) {
-        console.error('初始化用户配置管理器失败:', error);
-
-        // 重试逻辑
-        if (retryCount < maxRetries && isMounted) {
-          retryCount++;
-          console.log('重试初始化，当前重试次数:', retryCount);
-          setTimeout(initUserConfig, 500); // 500ms后重试
-          return;
-        }
-
-        // 最终降级处理
-        if (isMounted) {
-          setDefaultHoroscopeState();
-          setInitialized(true);
-          setDataLoaded(false);
-          console.log('使用降级方案初始化成功');
-        }
       }
     };
 
     initOptimizations();
-    initUserConfig();
 
     return () => {
       isMounted = false;
@@ -354,7 +315,7 @@ const HoroscopeTab = () => {
     return (
       <div className="space-y-5">
         <ScoreCard overallScore={overallScore} scores={scores} sortedScores={sortedScores} />
-        
+
         {renderTrendChart()}
 
         <div className="horoscope-card">
@@ -467,35 +428,35 @@ const HoroscopeTab = () => {
       <div className="horoscope-banner relative overflow-hidden flex-shrink-0">
         {/* 星宿渐变背景 - 合并容器 */}
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 via-indigo-600/30 to-blue-700/30">
-        {/* 预生成的星点效果 - 使用useMemo优化性能 */}
-        {useMemo(() => Array.from({ length: 20 }, (_, i) => {
-          // 使用基于索引的确定性算法而非随机数，避免每次渲染重新计算
-          const index = i + 1;
-          const left = (index * 37) % 100;
-          const top = (index * 23) % 100;
-          const size = 2 + (index % 3);
-          const opacity = 0.3 + ((index % 5) / 10);
-          const delay = (index % 5);
-          const duration = 3 + (index % 2);
-          
-          return (
-            <div
-              key={i}
-              className="absolute animate-pulse"
-              style={{
-                left: `${left}%`,
-                top: `${top}%`,
-                width: `${size}px`,
-                height: `${size}px`,
-                backgroundColor: 'white',
-                borderRadius: '50%',
-                opacity,
-                animationDelay: `${delay}s`,
-                animationDuration: `${duration}s`
-              }}
-            />
-          );
-        }), [])}
+          {/* 预生成的星点效果 - 使用useMemo优化性能 */}
+          {useMemo(() => Array.from({ length: 20 }, (_, i) => {
+            // 使用基于索引的确定性算法而非随机数，避免每次渲染重新计算
+            const index = i + 1;
+            const left = (index * 37) % 100;
+            const top = (index * 23) % 100;
+            const size = 2 + (index % 3);
+            const opacity = 0.3 + ((index % 5) / 10);
+            const delay = (index % 5);
+            const duration = 3 + (index % 2);
+
+            return (
+              <div
+                key={i}
+                className="absolute animate-pulse"
+                style={{
+                  left: `${left}%`,
+                  top: `${top}%`,
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  backgroundColor: 'white',
+                  borderRadius: '50%',
+                  opacity,
+                  animationDelay: `${delay}s`,
+                  animationDuration: `${duration}s`
+                }}
+              />
+            );
+          }), [])}
         </div>
 
         {/* 星宿装饰符号 - 简化布局 */}

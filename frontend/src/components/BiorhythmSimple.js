@@ -3,7 +3,7 @@ import BiorhythmChart from './BiorhythmChart';
 import { getBiorhythmRange } from '../services/localDataService';
 import elementConfig from '../config/elementConfig.json';
 import { initDataMigration } from '../utils/dataMigration';
-import { userConfigManager } from '../utils/userConfigManager';
+import { useUserConfig, useCurrentConfig } from '../contexts/UserConfigContext';
 import { useTheme } from '../context/ThemeContext';
 import notificationService from '../utils/notificationService';
 
@@ -28,49 +28,27 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     initDataMigration();
   }, []);
 
-  // 从用户配置管理器获取出生日期
+  const { configManagerReady, currentConfig } = useUserConfig();
+  const fallbackConfig = useCurrentConfig();
+  const effectiveConfig = currentConfig || fallbackConfig || {};
+
+  // 从用户配置获取昵称和出生日期
   const [birthDate, setBirthDate] = useState(null);
-  const [configManagerReady, setConfigManagerReady] = useState(false);
   const [userInfo, setUserInfo] = useState({
     nickname: '',
     birthDate: ''
   });
 
-  // 初始化配置管理器并获取用户配置
+  // 同步用户配置
   useEffect(() => {
-    const initConfigManager = async () => {
-      await userConfigManager.initialize();
-      setConfigManagerReady(true);
-
-      const currentConfig = userConfigManager.getCurrentConfig();
-      if (currentConfig && currentConfig.birthDate) {
-        setBirthDate(new Date(currentConfig.birthDate));
-        setUserInfo({
-          nickname: currentConfig.nickname,
-          birthDate: currentConfig.birthDate
-        });
-      }
-    };
-
-    initConfigManager();
-
-    // 添加配置变更监听器
-    const removeListener = userConfigManager.addListener(({
-      currentConfig
-    }) => {
-      if (currentConfig && currentConfig.birthDate) {
-        setBirthDate(new Date(currentConfig.birthDate));
-        setUserInfo({
-          nickname: currentConfig.nickname,
-          birthDate: currentConfig.birthDate
-        });
-      }
-    });
-
-    return () => {
-      removeListener();
-    };
-  }, []);
+    if (effectiveConfig && effectiveConfig.birthDate) {
+      setBirthDate(new Date(effectiveConfig.birthDate));
+      setUserInfo({
+        nickname: effectiveConfig.nickname || '用户',
+        birthDate: effectiveConfig.birthDate
+      });
+    }
+  }, [effectiveConfig.birthDate, effectiveConfig.nickname]);
 
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
@@ -161,9 +139,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
   }, [rhythmData, todayData]);
 
   // 加载生物节律数据 - 本地化版本
-  const loadBiorhythmData = useCallback(async (selectedDate = null) => {
-    const dateToUse = selectedDate || birthDate;
-
+  const loadBiorhythmData = useCallback(async (dateToUse) => {
     if (!dateToUse) {
       setError("请选择出生日期");
       return;
@@ -202,31 +178,41 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
     }
 
     setLoading(false);
-  }, [birthDate]);
+  }, []); // 移除 birthDate 依赖，使其更加稳定
 
-  // 组件挂载时自动加载默认数据
+  // 组件挂载时或配置变更时自动加载数据
   useEffect(() => {
     const loadDefaultData = async () => {
-      // 等待配置管理器初始化完成
+      // 等待配置管理器就绪
       if (!configManagerReady) return;
 
-      // 如果已有出生日期，则使用它
-      if (birthDate) {
-        await loadBiorhythmData(birthDate);
-        return;
+      // 如果有有效配置且有出生日期，则加载
+      if (effectiveConfig && effectiveConfig.birthDate) {
+        const dateObj = parseDateLocal(effectiveConfig.birthDate);
+        if (dateObj && !isNaN(dateObj.getTime())) {
+          setBirthDate(dateObj);
+          await loadBiorhythmData(dateObj);
+          return;
+        }
       }
 
-      // 否则使用默认日期
-      const defaultDate = parseDateLocal(DEFAULT_BIRTH_DATE);
-      setBirthDate(defaultDate);
-      await loadBiorhythmData(defaultDate);
+      // 否则回退到默认日期（仅在没有任何有效配置时）
+      if (!birthDate) {
+        const defaultDate = parseDateLocal(DEFAULT_BIRTH_DATE);
+        setBirthDate(defaultDate);
+        await loadBiorhythmData(defaultDate);
+      }
     };
 
     loadDefaultData();
+  }, [loadBiorhythmData, effectiveConfig.birthDate, configManagerReady, DEFAULT_BIRTH_DATE]);
 
-    // 初始化实践活动
-    setPracticeActivities(getRandomActivities());
-  }, [loadBiorhythmData, birthDate, DEFAULT_BIRTH_DATE, configManagerReady, getRandomActivities]);
+  // 初始化实践活动 - 仅在挂载时运行一次，避免因配置变更导致的不必要刷新
+  useEffect(() => {
+    if (practiceActivities.length === 0) {
+      setPracticeActivities(getRandomActivities());
+    }
+  }, [getRandomActivities, practiceActivities.length]);
 
   // 检测节律极值并发送通知
   useEffect(() => {
@@ -302,7 +288,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         <h3 className="text-red-800 dark:text-red-300 text-sm font-medium mb-1">加载失败</h3>
         <p className="text-red-600 dark:text-red-400 text-xs">{error}</p>
         <button
-          onClick={() => loadBiorhythmData()}
+          onClick={() => loadBiorhythmData(birthDate || DEFAULT_BIRTH_DATE)}
           className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
         >
           重新加载
@@ -322,7 +308,7 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
         <h3 className="text-gray-800 dark:text-gray-300 text-sm font-medium mb-1">暂无数据</h3>
         <p className="text-gray-600 dark:text-gray-400 text-xs">暂时无法获取生物节律数据</p>
         <button
-          onClick={() => loadBiorhythmData()}
+          onClick={() => loadBiorhythmData(birthDate || DEFAULT_BIRTH_DATE)}
           className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
         >
           重新加载

@@ -29,31 +29,46 @@ const CardResultModal = ({ card, rarity, onClose, onCollect, visible }) => {
   return (
     <div className={`card-result-modal-overlay ${visible ? 'visible' : ''}`}>
       <div className={`card-result-content ${isSSR ? 'ssr-effect' : ''}`}>
-        <div
-          className="rarity-badge"
-          style={{
-            background: rarityInfo.gradient,
-            boxShadow: rarityInfo.shadow
-          }}
-        >
-          ★★ {rarityInfo.label} ★★
-        </div>
+        {/* 四角装饰 */}
+        <div className="corner-decoration"></div>
+        <div className="corner-decoration"></div>
+        <div className="corner-decoration"></div>
+        <div className="corner-decoration"></div>
 
-        <div className="card-display-area">
-          <div className="card-icon">{card.icon}</div>
-          <h2 className="card-name">{card.name}</h2>
-          {card.alias && <p className="card-alias">{card.alias}</p>}
-          <p className="card-english">{card.englishName}</p>
-          <p className="card-description">{card.description}</p>
-        </div>
+        {/* 凤凰花纹 */}
+        <div className="phoenix-ornament">❖</div>
+        <div className="phoenix-ornament">❖</div>
+        <div className="phoenix-ornament">❖</div>
+        <div className="phoenix-ornament">❖</div>
 
-        <div className="card-actions">
-          <button className="action-button" onClick={onClose}>
-            确定
-          </button>
-          <button className="action-button primary" onClick={onCollect}>
-            收藏
-          </button>
+        <div className="card-result-inner">
+          <div
+            className="rarity-badge"
+            style={{
+              background: rarityInfo.gradient,
+              boxShadow: rarityInfo.shadow
+            }}
+          >
+            ★★ {rarityInfo.label} ★★
+          </div>
+
+          <div className="card-display-area">
+            <div className="card-icon">{card.icon}</div>
+            <h2 className="card-name">{card.name}</h2>
+            {card.alias && <p className="card-alias">{card.alias}</p>}
+            <p className="card-english">{card.englishName}</p>
+            <div className="card-divider"></div>
+            <p className="card-description">{card.description}</p>
+          </div>
+
+          <div className="card-actions">
+            <button className="action-button secondary" onClick={onClose}>
+              离开
+            </button>
+            <button className="action-button primary" onClick={onCollect}>
+              放入集卡册
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -205,19 +220,19 @@ const CardCollection = ({ collectionStats, isDark }) => {
 };
 
 /**
- * Tab 切换组件
+ * 每日抽卡专用 Tab 切换组件
  */
-const TabNavigation = ({ activeTab, onTabChange }) => {
+const DailyCardTabs = ({ activeTab, onTabChange }) => {
   return (
-    <div className="tab-navigation">
+    <div className="daily-tabs-container">
       <button
-        className={`tab-button ${activeTab === 'draw' ? 'active' : ''}`}
+        className={`daily-tab-button ${activeTab === 'draw' ? 'active' : ''}`}
         onClick={() => onTabChange('draw')}
       >
         🎰 抽卡
       </button>
       <button
-        className={`tab-button ${activeTab === 'collection' ? 'active' : ''}`}
+        className={`daily-tab-button ${activeTab === 'collection' ? 'active' : ''}`}
         onClick={() => onTabChange('collection')}
       >
         📖 图鉴
@@ -278,7 +293,7 @@ const CardDraw = ({ remaining, onDraw, isDrawing }) => {
           <div>
             <div className="card-pattern">🎴</div>
             <div className="draw-hint">
-              {isDrawing ? '🎰 抽卡中...' : '📱 摇一摇或点击抽卡'}
+              {isDrawing ? '🎰 抽卡中...' : '📱 摇一摇或点击卡牌抽取'}
             </div>
           </div>
         </div>
@@ -523,7 +538,7 @@ const DailyCardPage = () => {
       </header>
 
       {/* Tab 切换 */}
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <DailyCardTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* 抽卡页面 */}
       {activeTab === 'draw' && (

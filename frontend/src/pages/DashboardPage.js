@@ -35,26 +35,26 @@ import {
 
 // 定义所有功能组件（移到外部，避免每次渲染创建新引用）
 const ALL_FEATURES = [
-  { component: TodoCard, name: 'TodoCard', category: '日常管理类' },
-  { component: FinanceCard, name: 'FinanceCard', category: '日常管理类' },
-  { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类' },
-  { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类' },
-  { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类' },
-  { component: BaziCard, name: 'BaziCard', category: '运势分析类' },
-  { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类' },
-  { component: MBTICard, name: 'MBTICard', category: '个人成长类' },
-  { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类' },
-  { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类' },
-  { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类' },
-  { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类' },
-  { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类' },
-  { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
-  { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
-  { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
-  { component: FishingGameCard, name: 'FishingGameCard', category: '娱乐休闲类' },
-  { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
-  { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' },
-  { component: FengShuiCompassCard, name: 'FengShuiCompassCard', category: '日常管理类' }
+  { component: TodoCard, name: 'TodoCard', category: '日常管理类', type: 'daily' },
+  { component: FinanceCard, name: 'FinanceCard', category: '日常管理类', type: 'daily' },
+  { component: FengShuiCompassCard, name: 'FengShuiCompassCard', category: '日常管理类', type: 'tool' },
+  { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类', type: 'fortune' },
+  { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类', type: 'fortune' },
+  { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类', type: 'fortune' },
+  { component: BaziCard, name: 'BaziCard', category: '运势分析类', type: 'fortune' },
+  { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类', type: 'fortune' },
+  { component: MBTICard, name: 'MBTICard', category: '个人成长类', type: 'growth' },
+  { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类', type: 'growth' },
+  { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类', type: 'growth' },
+  { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类', type: 'growth' },
+  { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类', type: 'health' },
+  { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类', type: 'health' },
+  { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类', type: 'entertainment' },
+  { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类', type: 'entertainment' },
+  { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类', type: 'entertainment' },
+  { component: FishingGameCard, name: 'FishingGameCard', category: '娱乐休闲类', type: 'entertainment' },
+  { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类', type: 'health' },
+  { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类', type: 'health' }
 ];
 
 /**
@@ -144,32 +144,51 @@ const Dashboard = () => {
     newFeatures.splice(targetIndex, 0, draggedFeature);
 
     setFeatures(newFeatures);
-
-    // 保存新的排序配置
-    const newOrder = newFeatures.map(f => getFeatureId(f.name));
-    saveFeatureSortOrder(newOrder);
   };
 
   // 切换编辑模式
   const toggleEditMode = () => {
+    if (isEditMode) {
+      // 退出编辑模式时保存排序
+      const newOrder = features.map(f => getFeatureId(f.name));
+      const success = saveFeatureSortOrder(newOrder);
+      if (success) {
+        console.log('功能排序已保存');
+      }
+    }
     setIsEditMode(!isEditMode);
   };
 
   // 重置为默认排序
   const resetToDefault = () => {
-    if (window.confirm('确定要重置为默认排序吗？您的自定义排序将被清除。')) {
-      // 清除保存的配置
-      localStorage.removeItem('feature_cards_sort_order');
-      // 使用默认顺序
-      const savedOrder = loadFeatureSortOrder();
-      const mergedOrder = mergeFeatureOrder(savedOrder, ALL_FEATURES.map(f => f.name));
-      const sortedFeatures = [...ALL_FEATURES].sort((a, b) => {
-        const aIndex = mergedOrder.indexOf(getFeatureId(a.name));
-        const bIndex = mergedOrder.indexOf(getFeatureId(b.name));
-        return aIndex - bIndex;
-      });
-      setFeatures(sortedFeatures);
+    if (window.confirm('确定要重置为默认排序吗？')) {
+      const defaultOrder = [...ALL_FEATURES];
+      setFeatures(defaultOrder);
     }
+  };
+
+  // 按功能分类排序
+  const sortByCategory = () => {
+    const categoryOrder = ['日常管理类', '运势分析类', '个人成长类', '健康管理类', '娱乐休闲类'];
+    const sorted = [...features].sort((a, b) => {
+      const aIdx = categoryOrder.indexOf(a.category);
+      const bIdx = categoryOrder.indexOf(b.category);
+      if (aIdx !== bIdx) return aIdx - bIdx;
+      return 0;
+    });
+    setFeatures(sorted);
+  };
+
+  // 按图标颜色排序 (基于 type)
+  const sortByColor = () => {
+    const typeOrder = ['daily', 'fortune', 'growth', 'health', 'entertainment', 'tool'];
+    const sorted = [...features].sort((a, b) => {
+      const aIdx = typeOrder.indexOf(a.type);
+      const bIdx = typeOrder.indexOf(b.type);
+      if (aIdx !== bIdx) return aIdx - bIdx;
+      return 0;
+    });
+    setFeatures(sorted);
   };
 
   return (
@@ -240,9 +259,15 @@ const Dashboard = () => {
 
         {/* 编辑模式控制按钮 */}
         {isEditMode && (
-          <div className="features-controls">
-            <button className="reset-order-btn" onClick={resetToDefault}>
-              ↺ 重置默认
+          <div className="features-controls hide-scrollbar">
+            <button className="control-btn sort-btn" onClick={sortByCategory}>
+              📂 按分类
+            </button>
+            <button className="control-btn sort-btn" onClick={sortByColor}>
+              🎨 按颜色
+            </button>
+            <button className="control-btn reset-btn" onClick={resetToDefault}>
+              ↺ 恢复默认
             </button>
           </div>
         )}

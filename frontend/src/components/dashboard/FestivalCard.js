@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { getSolarTermState } from '../../utils/solarTerms';
 import LunarCalendar from '../../utils/lunarCalendar';
 import { solarTermHealthTips, chineseFestivals } from '../../config/healthTipsConfig';
+import './FestivalCard.css';
 
 /**
  * 节日节气卡片组件
@@ -22,7 +23,7 @@ const FestivalCard = () => {
   // 扩展的节日配置
   const extendedFestivals = {
     // 中国传统节日
-    "春节": { emoji: "🧧", color: "from-red-500 to-orange-600", date: "农历正月初一" },
+    "春节": { emoji: "🧧", color: "from-red-600 to-red-800", date: "农历正月初一", desc: "万象更新，岁启华章", advice: "合家团圆，守岁迎新，共享天伦之乐", action: "贴春联，放鞭炮，辞旧迎新" },
     "元宵节": { emoji: "🏮", color: "from-yellow-500 to-amber-600", date: "农历正月十五" },
     "端午节": { emoji: "🎏", color: "from-green-500 to-teal-600", date: "农历五月初五" },
     "七夕节": { emoji: "💝", color: "from-pink-500 to-purple-600", date: "农历七月初七" },
@@ -30,10 +31,10 @@ const FestivalCard = () => {
     "中秋节": { emoji: "🌕", color: "from-yellow-400 to-orange-500", date: "农历八月十五" },
     "重阳节": { emoji: "🍂", color: "from-orange-500 to-red-600", date: "农历九月初九" },
     "腊八节": { emoji: "🍲", color: "from-amber-500 to-yellow-600", date: "农历腊月初八" },
-    "除夕": { emoji: "🎆", color: "from-red-600 to-pink-600", date: "农历腊月最后一天" },
+    "除夕": { emoji: "🎆", color: "from-red-700 to-red-900", date: "农历腊月最后一天", desc: "除旧布新，阖家守岁", advice: "阖家围炉团聚，共享丰盛年夜饭", action: "辞旧灵鸡歌日丽，迎新瑞犬报年丰" },
 
     // 国际节日
-    "元旦节": { emoji: "🎉", color: "from-blue-500 to-purple-600", date: "1月1日" },
+    "元旦节": { emoji: "🎉", color: "from-red-500 to-red-700", date: "1月1日", desc: "元启新程，旦旦有福", advice: "总结过去，展望未来，设定新一年的目标", action: "焕然一新，迎接新年第一缕阳光" },
     "情人节": { emoji: "💖", color: "from-pink-400 to-red-500", date: "2月14日" },
     "植树节": { emoji: "🌳", color: "from-green-400 to-emerald-600", date: "3月12日" },
     "愚人节": { emoji: "🤪", color: "from-yellow-400 to-orange-400", date: "4月1日" },
@@ -158,53 +159,88 @@ const FestivalCard = () => {
   // 获取当前事件状态（优先显示节日）
   const currentEvent = getFestivalState || solarTermState;
 
+  // 是否是新年类节日（元旦、春节、除夕）
+  const isNewYear = useMemo(() => {
+    return currentEvent && ["元旦节", "春节", "除夕"].includes(currentEvent.name);
+  }, [currentEvent]);
+
   if (!currentEvent || currentEvent.diff !== 0) {
     return null;
   }
 
   const isFestival = currentEvent.isFestival;
   const festivalData = currentEvent.festivalData;
+
   const tip = isFestival && festivalData
-    ? extendedFestivals[currentEvent.name] || { emoji: "🎉", desc: "节日快乐", advice: "享受节日时光", action: "与家人朋友团聚" }
+    ? {
+      ... (extendedFestivals[currentEvent.name] || { emoji: "🎉", desc: "节日快乐", advice: "享受节日时光", action: "与家人朋友团聚" }),
+      ...festivalData // 优先使用 festivalData 中的动态数据
+    }
     : solarTermHealthTips[currentEvent.name] || { desc: "节气更替，顺时养生", advice: "注意起居规律，调养身心。", action: "保持心情舒畅。" };
 
   return (
-    <div className={`rounded-2xl overflow-hidden shadow-lg border-2 ${isFestival
-        ? 'border-red-200 dark:border-red-800'
-        : 'border-amber-200 dark:border-amber-800'
+    <div className={`festival-card-newyear rounded-2xl overflow-hidden shadow-lg border-2 ${isNewYear
+      ? 'new-year-red-theme border-yellow-400'
+      : (isFestival ? 'border-red-200 dark:border-red-800' : 'border-amber-200 dark:border-amber-800')
       } animate-fade-in-down`}>
+
+      {/* 新年装饰组件 */}
+      {isNewYear && (
+        <>
+          <div className="firework-container">
+            <div className="firework"></div>
+            <div className="firework"></div>
+            <div className="firework"></div>
+            <div className="firework"></div>
+          </div>
+          <div className="lantern-decoration lantern-left">
+            <div className="lantern-body"></div>
+            <div className="lantern-tassel"></div>
+          </div>
+          <div className="lantern-decoration lantern-right">
+            <div className="lantern-body"></div>
+            <div className="lantern-tassel"></div>
+          </div>
+          <div className="cloud-decoration"></div>
+        </>
+      )}
+
       <div className={`bg-gradient-to-r ${isFestival
-          ? (festivalData?.color || "from-red-500 to-orange-600")
-          : "from-amber-500 to-orange-600"
-        } p-3 text-white`}>
+        ? (festivalData?.color || "from-red-500 to-orange-600")
+        : "from-amber-500 to-orange-600"
+        } p-3 text-white relative z-10`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-xl">{isFestival ? (festivalData?.emoji || "🎉") : "📅"}</span>
             <div>
-              <span className="font-bold text-sm">{currentEvent.name}</span>
+              <span className={`font-bold text-sm ${isNewYear ? 'new-year-glow-text' : ''}`}>{currentEvent.name}</span>
               {currentEvent.lunarDate && (
                 <span className="text-xs opacity-90 block">{currentEvent.lunarDate}</span>
               )}
             </div>
           </div>
           {isFestival && (
-            <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">节日</span>
+            <span className={`text-xs ${isNewYear ? 'bg-yellow-400/30 text-yellow-100' : 'bg-white/20 text-white'} px-2 py-1 rounded-full backdrop-blur-sm`}>节日</span>
           )}
         </div>
       </div>
-      <div className="bg-white dark:bg-gray-800 p-3">
+
+      <div className={`${isNewYear ? 'bg-red-800/20 dark:bg-black/40' : 'bg-white dark:bg-gray-800'} p-3 relative z-10`}>
         <div className="text-center mb-2">
-          <h3 className="text-sm font-bold text-gray-800 dark:text-white">{tip.desc}</h3>
+          <h3 className={`text-sm font-bold ${isNewYear ? 'text-yellow-100' : 'text-gray-800 dark:text-white'}`}>{tip.desc}</h3>
         </div>
         <div className="text-xs space-y-1">
-          <div className={`p-2 rounded-lg ${isFestival
-              ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
-              : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'
+          <div className={`p-2 rounded-lg ${isNewYear
+            ? 'bg-red-900/40 text-yellow-100/90 border border-yellow-500/30'
+            : (isFestival ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400')
             }`}>
-            <span className="font-bold">宜:</span> {tip.advice}
+            <span className={`font-bold ${isNewYear ? 'text-yellow-400' : ''}`}>宜:</span> {tip.advice}
           </div>
-          <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded-lg text-green-600 dark:text-green-400">
-            <span className="font-bold">行:</span> {tip.action}
+          <div className={`p-2 rounded-lg ${isNewYear
+            ? 'bg-orange-900/40 text-yellow-100/90 border border-yellow-500/30'
+            : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+            }`}>
+            <span className={`font-bold ${isNewYear ? 'text-yellow-400' : ''}`}>行:</span> {tip.action}
           </div>
         </div>
       </div>

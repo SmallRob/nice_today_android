@@ -61,7 +61,7 @@ const DailyFortuneCard = () => {
 
     // 基于确定性算法生成各维度分数 (0-100)
     const baseScore = 60 + ((seed * zodiacSeed) % 35);
-    
+
     const dimensions = [
       { name: '爱情', icon: '💕', color: '#ec4899' },
       { name: '工作', icon: '💼', color: '#f59e0b' },
@@ -89,11 +89,11 @@ const DailyFortuneCard = () => {
 
   useEffect(() => {
     setLoading(true);
-    
+
     // 生成运势数据
     const data = generateFortuneData();
     setFortuneData(data);
-    
+
     // 计算农历数据
     const today = new Date();
     const lunarInfo = LunarCalendar.solarToLunar(
@@ -102,210 +102,132 @@ const DailyFortuneCard = () => {
       today.getDate()
     );
     setLunarData(lunarInfo);
-    
+
     // 生成每日禁忌
     const taboo = generateDailyTaboo(lunarInfo.lunarDay);
     setDailyTaboo(taboo);
-    
+
     setLoading(false);
   }, [generateFortuneData]);
 
-  // 圆形水波效果
+  // 能量球展示效果
   const WaterFlask = ({ score }) => {
-    const waterLevel = Math.max(10, Math.min(90, score));
+    const waterLevel = Math.max(15, Math.min(85, score));
 
-    // 根据分数选择颜色主题
     const getColorTheme = (s) => {
-      if (s >= 85) return ['#22c55e', '#3b82f6', '#8b5cf6']; // 绿-蓝-紫
-      if (s >= 70) return ['#06b6d4', '#3b82f6', '#6366f1']; // 青绿-蓝-靛蓝
-      if (s >= 55) return ['#f59e0b', '#8b5cf6', '#ec4899']; // 橙-紫-粉
-      if (s >= 40) return ['#eab308', '#f59e0b', '#ef4444']; // 黄-橙-红
-      return ['#64748b', '#64748b', '#94a3b8']; // 灰色系
+      if (s >= 85) return ['#4ade80', '#22c55e', '#166534']; // 卓越
+      if (s >= 70) return ['#60a5fa', '#3b82f6', '#1e40af']; // 良好
+      if (s >= 55) return ['#fbbf24', '#f59e0b', '#92400e']; // 一般
+      if (s >= 40) return ['#f87171', '#ef4444', '#991b1b']; // 欠佳
+      return ['#94a3b8', '#64748b', '#334155']; // 极低
     };
 
     const colors = getColorTheme(score);
     const radius = 60;
-    const waterHeight = radius * 2 * (waterLevel / 100);
-    const waterY = radius * 2 - waterHeight;
+    const waterY = radius * 2 - (radius * 2 * (waterLevel / 100));
 
     return (
-      <div className="water-flask-container">
-        <svg
-          className="water-flask-svg"
-          viewBox={`0 0 ${radius * 2} ${radius * 2}`}
-          xmlns="http://www.w3.org/2000/svg"
-        >
+      <div className="energy-ball-container">
+        <svg className="energy-ball-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            {/* 水面渐变 */}
-            <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={colors[0]} stopOpacity="0.9" />
-              <stop offset="50%" stopColor={colors[1]} stopOpacity="0.7" />
-              <stop offset="100%" stopColor={colors[2]} stopOpacity="0.5" />
-            </linearGradient>
-
-            {/* 玻璃球渐变 */}
-            <radialGradient id="glassGradient" cx="30%" cy="30%" r="70%">
-              <stop offset="0%" stopColor={theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'} />
-              <stop offset="100%" stopColor={theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.1)'} />
+            {/* 核心发光 */}
+            <radialGradient id="ballGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor={colors[0]} stopOpacity="0.4" />
+              <stop offset="100%" stopColor={colors[1]} stopOpacity="0" />
             </radialGradient>
 
-            {/* 气泡动画 */}
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" in2="SourceGraphic" />
-              </feMerge>
+            {/* 发光滤镜 */}
+            <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
 
-            {/* 剪切圆形 */}
-            <clipPath id="circleClip">
-              <circle cx={radius} cy={radius} r={radius - 2} />
+            {/* 边框/边沿渐变 */}
+            <linearGradient id="rimGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.8)'} />
+              <stop offset="100%" stopColor={theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)'} />
+            </linearGradient>
+
+            {/* 水面渐变 */}
+            <linearGradient id="liquidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={colors[0]} stopOpacity="0.95" />
+              <stop offset="100%" stopColor={colors[2]} stopOpacity="0.8" />
+            </linearGradient>
+
+            {/* 玻璃质感 */}
+            <radialGradient id="glassReflect" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="white" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="transparent" />
+            </radialGradient>
+
+            <clipPath id="ballClip">
+              <circle cx="60" cy="60" r="56" />
             </clipPath>
           </defs>
 
-          {/* 玻璃球外圈 */}
-          <circle
-            cx={radius}
-            cy={radius}
-            r={radius - 2}
-            fill="url(#glassGradient)"
-            stroke={theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)'}
-            strokeWidth="3"
-          />
+          {/* 基础容器与背景微光 */}
+          <circle cx="60" cy="60" r="58" fill={theme === 'dark' ? '#111827' : '#f9fafb'} />
+          <circle cx="60" cy="60" r="58" fill={colors[1]} opacity="0.05" />
 
-          {/* 玻璃球高光 */}
-          <ellipse
-            cx={radius - 18}
-            cy={radius - 18}
-            rx={15}
-            ry={8}
-            fill={theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.6)'}
-            opacity="0.7"
-            transform="rotate(-45, {radius - 18}, {radius - 18})"
-          />
+          {/* 外溢发光环 */}
+          <circle cx="60" cy="60" r="57" fill="none" stroke={colors[0]} strokeWidth="1" opacity="0.3" filter="url(#softGlow)" />
 
-          {/* 水体（带剪切） */}
-          <g clipPath="url(#circleClip)">
-            {/* 水体背景 */}
-            <rect
-              x="0"
-              y={waterY}
-              width={radius * 2}
-              height={radius * 2 - waterY}
-              fill="url(#waterGradient)"
-              filter="url(#glow)"
-            />
+          {/* 渐变玻璃边沿 */}
+          <circle cx="60" cy="60" r="57" fill="none" stroke="url(#rimGradient)" strokeWidth="1.5" opacity="0.8" />
 
-            {/* 水波动画 - 第一层 */}
-            <path
-              d={`M 0 ${waterY}
-                 Q ${radius} ${waterY + 15} ${radius * 2} ${waterY}
-                 L ${radius * 2} ${radius * 2}
-                 L 0 ${radius * 2}
-                 Z`}
-              fill={colors[0]}
-              fillOpacity="0.6"
-            >
-              <animate
-                attributeName="d"
-                dur="3s"
-                repeatCount="indefinite"
+          {/* 液体填充 */}
+          <g clipPath="url(#ballClip)">
+            <rect x="0" y={waterY} width="120" height="120" fill="url(#liquidGradient)" />
+
+            {/* 动态波动 - 层1 */}
+            <path fill={colors[0]} fillOpacity="0.4">
+              <animate attributeName="d" dur="4s" repeatCount="indefinite"
                 values={`
-                  M 0 ${waterY} Q ${radius} ${waterY + 15} ${radius * 2} ${waterY} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z;
-                  M 0 ${waterY} Q ${radius} ${waterY - 15} ${radius * 2} ${waterY} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z;
-                  M 0 ${waterY} Q ${radius} ${waterY + 15} ${radius * 2} ${waterY} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z
+                  M0,${waterY} C30,${waterY - 10} 90,${waterY + 10} 120,${waterY} V120 H0 Z;
+                  M0,${waterY} C30,${waterY + 10} 90,${waterY - 10} 120,${waterY} V120 H0 Z;
+                  M0,${waterY} C30,${waterY - 10} 90,${waterY + 10} 120,${waterY} V120 H0 Z
                 `}
               />
             </path>
 
-            {/* 水波动画 - 第二层 */}
-            <path
-              d={`M 0 ${waterY + 10}
-                 Q ${radius} ${waterY + 25} ${radius * 2} ${waterY + 10}
-                 L ${radius * 2} ${radius * 2}
-                 L 0 ${radius * 2}
-                 Z`}
-              fill={colors[1]}
-              fillOpacity="0.4"
-            >
-              <animate
-                attributeName="d"
-                dur="4s"
-                repeatCount="indefinite"
+            {/* 动态波动 - 层2 */}
+            <path fill={colors[1]} fillOpacity="0.3">
+              <animate attributeName="d" dur="6s" repeatCount="indefinite"
                 values={`
-                  M 0 ${waterY + 10} Q ${radius} ${waterY + 25} ${radius * 2} ${waterY + 10} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z;
-                  M 0 ${waterY + 10} Q ${radius} ${waterY - 5} ${radius * 2} ${waterY + 10} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z;
-                  M 0 ${waterY + 10} Q ${radius} ${waterY + 25} ${radius * 2} ${waterY + 10} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z
+                  M0,${waterY + 5} C40,${waterY + 15} 80,${waterY - 5} 120,${waterY + 5} V120 H0 Z;
+                  M0,${waterY + 5} C40,${waterY - 5} 80,${waterY + 15} 120,${waterY + 5} V120 H0 Z;
+                  M0,${waterY + 5} C40,${waterY + 15} 80,${waterY - 5} 120,${waterY + 5} V120 H0 Z
                 `}
               />
             </path>
-
-            {/* 水波动画 - 第三层 */}
-            <path
-              d={`M 0 ${waterY + 20}
-                 Q ${radius} ${waterY + 35} ${radius * 2} ${waterY + 20}
-                 L ${radius * 2} ${radius * 2}
-                 L 0 ${radius * 2}
-                 Z`}
-              fill={colors[2]}
-              fillOpacity="0.3"
-            >
-              <animate
-                attributeName="d"
-                dur="5s"
-                repeatCount="indefinite"
-                values={`
-                  M 0 ${waterY + 20} Q ${radius} ${waterY + 35} ${radius * 2} ${waterY + 20} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z;
-                  M 0 ${waterY + 20} Q ${radius} ${waterY + 5} ${radius * 2} ${waterY + 20} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z;
-                  M 0 ${waterY + 20} Q ${radius} ${waterY + 35} ${radius * 2} ${waterY + 20} L ${radius * 2} ${radius * 2} L 0 ${radius * 2} Z
-                `}
-              />
-            </path>
+            {/* 顶部涟漪光效 */}
+            <rect x="0" y={waterY - 2} width="120" height="4" fill="white" fillOpacity="0.15" filter="blur(1px)" />
           </g>
 
-          {/* 分数显示 */}
-          <text
-            x={radius}
-            y={radius + 3}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill={theme === 'dark' ? '#ffffff' : '#1f2937'}
-            fontSize="24"
-            fontWeight="bold"
-            style={{ textShadow: '0 0 10px rgba(255,255,255,0.5)' }}
-          >
-            {score}
-          </text>
+          {/* 玻璃反光层 - 高光点 */}
+          <circle cx="60" cy="60" r="58" fill="url(#glassReflect)" pointerEvents="none" />
+          <ellipse cx="40" cy="35" rx="10" ry="5" fill="white" fillOpacity="0.25" transform="rotate(-30, 40, 35)" />
 
-          <text
-            x={radius}
-            y={radius + 24}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill={theme === 'dark' ? '#9ca3af' : '#6b7280'}
-            fontSize="9"
-            fontWeight="600"
-          >
-            综合能量
-          </text>
+          {/* 分数文本 */}
+          <g className="score-group">
+            <text x="60" y="58" textAnchor="middle" fontSize="28" fontWeight="800" fill={theme === 'dark' ? 'white' : '#1f2937'} filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))">
+              {score}
+            </text>
+            <text x="60" y="78" textAnchor="middle" fontSize="10" fontWeight="600" fill={theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'} letterSpacing="1">
+              综合能量
+            </text>
+          </g>
         </svg>
 
-        {/* 气泡效果 */}
-        <div className="bubbles">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="bubble"
-              style={{
-                left: `${20 + Math.random() * 60}%`,
-                bottom: `${10 + waterLevel * 0.7}%`,
-                animationDelay: `${i * 0.4}s`,
-                animationDuration: `${2 + Math.random() * 1.5}s`,
-                backgroundColor: colors[i % 3],
-                width: `${6 + Math.random() * 6}px`,
-                height: `${6 + Math.random() * 6}px`
-              }}
-            />
+        {/* 悬浮粒子 */}
+        <div className="energy-particles">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="particle" style={{
+              '--p-color': colors[0],
+              '--p-delay': `${i * 0.7}s`,
+              '--p-left': `${30 + Math.random() * 40}%`
+            }}></div>
           ))}
         </div>
       </div>
@@ -328,9 +250,9 @@ const DailyFortuneCard = () => {
           </span>
         </div>
         <div className="energy-progress-track">
-          <div 
+          <div
             className="energy-progress-fill"
-            style={{ 
+            style={{
               width,
               backgroundColor: color,
               background: `linear-gradient(90deg, ${color} 0%, ${color}99 100%)`
@@ -373,7 +295,7 @@ const DailyFortuneCard = () => {
           <span className="fortune-date">{fortuneData.date}</span>
           <h3 className="fortune-title">今日运势能量</h3>
         </div>
-        
+
         {/* 农历信息和禁忌 */}
         {lunarData && dailyTaboo && (
           <div className="lunar-info-section">

@@ -111,8 +111,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .fishing-icon {
@@ -122,8 +129,15 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .fishing-text {
@@ -145,8 +159,15 @@
 }
 
 @keyframes popIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .fish-emoji {
@@ -203,7 +224,7 @@
 }
 
 /* 标签页 */
-.tabs-container {
+.fishing-tabs-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
@@ -214,7 +235,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.tab-btn {
+.fishing-tab-btn {
   padding: 10px 8px;
   background: transparent;
   border: none;
@@ -226,14 +247,14 @@
   transition: all 0.3s ease;
 }
 
-.tab-btn.active {
+.fishing-tab-btn.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   font-weight: bold;
 }
 
 /* 标签页内容 */
-.tab-content {
+.fishing-tab-content {
   background: white;
   border-radius: 12px;
   padding: 16px;
@@ -256,22 +277,26 @@
 }
 
 .lake-card {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 2px solid transparent;
+  background: white;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .lake-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
 }
 
 .lake-card.selected {
   border-color: #667eea;
   background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
 }
 
 .lake-icon {
@@ -281,20 +306,20 @@
 
 .lake-name {
   font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 4px;
-  color: #1f2937;
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: #111827;
 }
 
 .lake-desc {
   font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 8px;
-  line-height: 1.4;
+  color: #4b5563;
+  margin-bottom: 10px;
+  line-height: 1.5;
 }
 
 .lake-cost {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   color: #059669;
 }
@@ -468,6 +493,21 @@
   border-radius: 12px;
   padding: 16px;
   text-align: center;
+  position: relative;
+}
+
+.fish-item-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #f59e0b;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
 }
 
 .fish-emoji-large {
@@ -567,27 +607,27 @@
   .equipment-status {
     gap: 4px;
   }
-  
+
   .status-label {
     font-size: 11px;
   }
-  
+
   .status-value {
     font-size: 12px;
   }
-  
+
   .lakes-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .rods-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .bait-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .inventory-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -598,26 +638,64 @@
   .fishing-game-container {
     background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
   }
-  
+
   .game-header,
   .equipment-status,
   .fishing-area,
-  .tabs-container,
-  .tab-content,
+  .fishing-tabs-container,
+  .fishing-tab-content,
   .messages-container {
     background: #1f2937;
     color: #f3f4f6;
   }
-  
+
   .status-value,
   .tab-title,
   .messages-title {
     color: #f3f4f6;
   }
-  
+
+  .lake-card.selected {
+    border-color: #818cf8;
+    background: linear-gradient(135deg, #3730a3 0%, #312e81 100%);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    border-width: 2px;
+  }
+
+  .bait-icon.selected {
+    border-color: #818cf8;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+  }
+
+  .fish-item {
+    background: #374151;
+    border: 1px solid #4b5563;
+  }
+
+  /* 确保深色模式下文字始终清晰 */
   .lake-name,
   .rod-name,
-  .fish-name {
-    color: #f3f4f6;
+  .fish-name,
+  .fish-item-name {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .lake-card {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .lake-desc {
+    color: #e5e7eb;
+  }
+
+  .lake-cost {
+    color: #34d399;
+    font-weight: bold;
+  }
+
+  .status-value {
+    color: #ffffff;
   }
 }

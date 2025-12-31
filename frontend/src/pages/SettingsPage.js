@@ -12,7 +12,6 @@ import '../index.css';
 
 // 懒加载大型组件，避免启动时阻塞
 const DarkModeToggle = lazy(() => import('../components/DarkModeToggle'));
-const PerformanceTestTool = lazy(() => import('../components/PerformanceTestTool'));
 
 // 组件加载占位符
 const ComponentLoadingFallback = ({ componentName = '组件' }) => (
@@ -34,7 +33,7 @@ function SettingsPage() {
     isIOS: false
   });
   const [apiBaseUrl, setApiBaseUrl] = useState('https://nice-mcp.leansoftx.com/api');
-  const [useLocalCalculation, setUseLocalCalculation] = useState(false);
+  const [useLocalCalculation, setUseLocalCalculation] = useState(true);
   const [cacheTimeout, setCacheTimeout] = useState(180000); // 默认3分钟
   const [dataSyncEnabled, setDataSyncEnabled] = useState(true); // 数据同步状态
   const [isLoaded, setIsLoaded] = useState(false);
@@ -99,6 +98,10 @@ function SettingsPage() {
           const savedUseLocal = localStorage.getItem('useLocalCalculation');
           if (savedUseLocal) {
             setUseLocalCalculation(savedUseLocal === 'true');
+          } else {
+            // 首次使用时默认开启并保存
+            localStorage.setItem('useLocalCalculation', 'true');
+            setUseLocalCalculation(true);
           }
 
           // 从本地存储加载缓存超时设置
@@ -250,7 +253,7 @@ function SettingsPage() {
 
   // 获取当前版本
   const getCurrentVersion = () => {
-    return localStorage.getItem('appVersion') || 'lite';
+    return localStorage.getItem('appVersion') || 'full';
   };
 
   // 重新加载当前版本
@@ -663,12 +666,7 @@ function SettingsPage() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
                   </div>
 
-                  {/* 性能测试工具 */}
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <Suspense fallback={<ComponentLoadingFallback componentName="性能测试工具" />}>
-                      <PerformanceTestTool />
-                    </Suspense>
-                  </div>
+                  {/* 移除了性能测试工具 */}
                 </div>
               </Card>
 

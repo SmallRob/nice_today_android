@@ -298,27 +298,27 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       // 扩展的错误检查，包含更多关键错误类型
       // 修复：添加对未定义变量错误（包括压缩后的变量名如'se'）的检测
       const isReferenceError = error instanceof ReferenceError ||
-                             error.name === 'ReferenceError' ||
-                             appError.type === 'COMPONENT_ERROR';
+        error.name === 'ReferenceError' ||
+        appError.type === 'COMPONENT_ERROR';
 
       const isUndefinedVariableError = isReferenceError &&
-                                     (error.message?.includes('is not defined') ||
-                                      error.message?.includes('is not defined') ||
-                                      error.message?.includes('undefined') ||
-                                      error.message?.includes('not defined'));
+        (error.message?.includes('is not defined') ||
+          error.message?.includes('is not defined') ||
+          error.message?.includes('undefined') ||
+          error.message?.includes('not defined'));
 
       const isCriticalError = appError.type === 'CHUNK_LOAD_ERROR' ||
-                             appError.type === 'MOBILE_WEBVIEW_ERROR' ||
-                             appError.type === 'SOURCE_MAP_ERROR' ||
-                             appError.type === 'COMPONENT_ERROR' ||
-                             error.name === 'ChunkLoadError' ||
-                             error.message?.includes('加载失败') ||
-                             error.message?.includes('网络错误') ||
-                             error.message?.includes('Network Error') ||
-                             error.message?.includes('Failed to fetch') ||
-                             error.message?.includes('not defined') ||
-                             error.code === 'MODULE_NOT_FOUND' ||
-                             error.code === 'NETWORK_ERROR';
+        appError.type === 'MOBILE_WEBVIEW_ERROR' ||
+        appError.type === 'SOURCE_MAP_ERROR' ||
+        appError.type === 'COMPONENT_ERROR' ||
+        error.name === 'ChunkLoadError' ||
+        error.message?.includes('加载失败') ||
+        error.message?.includes('网络错误') ||
+        error.message?.includes('Network Error') ||
+        error.message?.includes('Failed to fetch') ||
+        error.message?.includes('not defined') ||
+        error.code === 'MODULE_NOT_FOUND' ||
+        error.code === 'NETWORK_ERROR';
 
       // 移动设备特殊处理
       if (isAndroidWebView() || isIOSWebView()) {
@@ -647,20 +647,22 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
           </div>
 
           {/* 体验新版入口 - 右上角 - 优化版 */}
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="taoist-new-version-btn"
-            title="体验新版炫彩版主页"
-          >
-            <svg
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="absolute top-4 right-4 sm:top-5 sm:right-6">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="taoist-new-version-btn flex items-center space-x-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 border border-white/30 rounded-full text-white text-xs sm:text-sm font-medium transition-all duration-300 backdrop-blur-sm flex-shrink-0 whitespace-nowrap group"
+              title="体验新版炫彩版主页"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span>新版</span>
-          </button>
+              <svg
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span>新版</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -688,11 +690,10 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`flex-1 py-3 px-2 text-center font-medium transition-all duration-300 relative ${
-                    isActive
-                      ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700`
-                      : 'text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
+                  className={`flex-1 py-3 px-2 text-center font-medium transition-all duration-300 relative ${isActive
+                    ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700`
+                    : 'text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
                 >
                   {isActive && (
                     <div className={`absolute bottom-0 left-0 w-full h-0.5 ${colorMap[tab.color]}`}></div>
@@ -715,85 +716,85 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
         <div className="container mx-auto px-4 py-4">
           {/* 错误显示 */}
           {error && (
-              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4">
-                <div className="flex items-center">
-                  <span className="text-red-500 mr-2">⚠️</span>
-                  <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
-                  <button
-                    onClick={() => setError(null)}
-                    className="ml-auto text-red-500 hover:text-red-700"
-                  >
-                    ✕
-                  </button>
-                </div>
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4">
+              <div className="flex items-center">
+                <span className="text-red-500 mr-2">⚠️</span>
+                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+                <button
+                  onClick={() => setError(null)}
+                  className="ml-auto text-red-500 hover:text-red-700"
+                >
+                  ✕
+                </button>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* 标签内容 - 修复：移除嵌套Suspense，简化结构以提升Android WebView兼容性 */}
-            {fallbackMode ? (
-              <FallbackComponent />
-            ) : (
-              <>
-                {activeTab === 'biorhythm' && loadedTabs.has('biorhythm') && (
-                  <React.Suspense fallback={
-                    <div className="flex items-center justify-center h-64">
-                      <div className="text-center">
-                        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
-                        <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载生物节律模块...</p>
-                      </div>
+          {/* 标签内容 - 修复：移除嵌套Suspense，简化结构以提升Android WebView兼容性 */}
+          {fallbackMode ? (
+            <FallbackComponent />
+          ) : (
+            <>
+              {activeTab === 'biorhythm' && loadedTabs.has('biorhythm') && (
+                <React.Suspense fallback={
+                  <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载生物节律模块...</p>
                     </div>
-                  }>
-                    <BiorhythmTab
-                      serviceStatus={serviceStatus.biorhythm}
-                      isDesktop={appInfo.isDesktop}
-                      onError={(error) => handleError(error, 'BiorhythmTab')}
-                    />
-                  </React.Suspense>
-                )}
-                {activeTab === 'zodiac' && loadedTabs.has('zodiac') && (
-                  <React.Suspense fallback={
-                    <div className="flex items-center justify-center h-64">
-                      <div className="text-center">
-                        <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-2"></div>
-                        <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载生肖能量模块...</p>
-                      </div>
+                  </div>
+                }>
+                  <BiorhythmTab
+                    serviceStatus={serviceStatus.biorhythm}
+                    isDesktop={appInfo.isDesktop}
+                    onError={(error) => handleError(error, 'BiorhythmTab')}
+                  />
+                </React.Suspense>
+              )}
+              {activeTab === 'zodiac' && loadedTabs.has('zodiac') && (
+                <React.Suspense fallback={
+                  <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载生肖能量模块...</p>
                     </div>
-                  }>
-                    <ZodiacEnergyTab
-                      onError={(error) => handleError(error, 'ZodiacEnergyTab')}
-                    />
-                  </React.Suspense>
-                )}
-                {activeTab === 'horoscope' && loadedTabs.has('horoscope') && (
-                  <React.Suspense fallback={
-                    <div className="flex items-center justify-center h-64">
-                      <div className="text-center">
-                        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2"></div>
-                        <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载星座运程模块...</p>
-                      </div>
+                  </div>
+                }>
+                  <ZodiacEnergyTab
+                    onError={(error) => handleError(error, 'ZodiacEnergyTab')}
+                  />
+                </React.Suspense>
+              )}
+              {activeTab === 'horoscope' && loadedTabs.has('horoscope') && (
+                <React.Suspense fallback={
+                  <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载星座运程模块...</p>
                     </div>
-                  }>
-                    <HoroscopeTab
-                      onError={(error) => handleError(error, 'HoroscopeTab')}
-                    />
-                  </React.Suspense>
-                )}
-                {activeTab === 'mbti' && loadedTabs.has('mbti') && (
-                  <React.Suspense fallback={
-                    <div className="flex items-center justify-center h-64">
-                      <div className="text-center">
-                        <div className="w-8 h-8 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-2"></div>
-                        <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载人格魅力模块...</p>
-                      </div>
+                  </div>
+                }>
+                  <HoroscopeTab
+                    onError={(error) => handleError(error, 'HoroscopeTab')}
+                  />
+                </React.Suspense>
+              )}
+              {activeTab === 'mbti' && loadedTabs.has('mbti') && (
+                <React.Suspense fallback={
+                  <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载人格魅力模块...</p>
                     </div>
-                  }>
-                    <MBTIPersonalityTab
-                      onError={(error) => handleError(error, 'MBTIPersonalityTab')}
-                    />
-                  </React.Suspense>
-                )}
-              </>
-            )}
+                  </div>
+                }>
+                  <MBTIPersonalityTab
+                    onError={(error) => handleError(error, 'MBTIPersonalityTab')}
+                  />
+                </React.Suspense>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import { userConfigManager } from '../utils/userConfigManager';
 import { Card } from './PageLayout';
 import { useTheme } from '../context/ThemeContext';
 import '../styles/dashboard-layout.css';
@@ -383,83 +382,37 @@ const MBTIPersonalityTabHome = () => {
     'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
   ], []);
 
-  // 初始化组件 - 增强稳定性版本
+  const { configManagerReady, currentConfig } = useUserConfig();
+
+  // 监听用户配置变化 - 优化配置数据加载逻辑
   useEffect(() => {
-    let isMounted = true;
-    let retryCount = 0;
-    const maxRetries = 3;
+    if (!configManagerReady || !currentConfig) return;
 
-    const initialize = async () => {
-      try {
-        console.log('初始化MBTI组件，重试次数:', retryCount);
-        
-        // 初始化用户配置管理器
-        await userConfigManager.initialize();
-        const config = userConfigManager.getCurrentConfig();
+    // 更新基本用户信息
+    setGlobalUserConfig(currentConfig);
+    setUserInfo({
+      nickname: (currentConfig.nickname || '').toString(),
+      birthDate: (currentConfig.birthDate || '').toString(),
+      mbti: (currentConfig.mbti || '').toString()
+    });
 
-        // 确保 config 是有效对象
-        const safeConfig = config && typeof config === 'object' ? config : {};
-        
-        if (isMounted) {
-          setGlobalUserConfig(safeConfig);
+    // 优先从 URL 参数获取 MBTI
+    const urlMBTI = getMBTIFromURL();
+    const mbtiFromConfig = (currentConfig.mbti && typeof currentConfig.mbti === 'string' && currentConfig.mbti.trim()) || 'INFP';
 
-          // 立即加载所有MBTI类型
-          setAllMBTIs(mbtiList);
-
-          // 如果用户有配置的MBTI，则使用；否则使用默认值（增加容错）
-          const initialMBTI = (safeConfig.mbti && typeof safeConfig.mbti === 'string' && safeConfig.mbti.trim()) || 'INFP';
-          setUserMBTI(initialMBTI);
-          setTempMBTI('');
-          setInitialized(true);
-          setDataLoaded(false);
-
-          // 设置用户信息（增加容错）
-          setUserInfo({
-            nickname: (safeConfig.nickname || '').toString(),
-            birthDate: (safeConfig.birthDate || '').toString(),
-            mbti: (safeConfig.mbti || '').toString()
-          });
-
-          // 如果用户配置了MBTI，则加载数据
-          if (safeConfig.mbti && typeof safeConfig.mbti === 'string' && safeConfig.mbti.trim()) {
-            loadPersonalityAnalysis(safeConfig.mbti);
-            setDataLoaded(true);
-          }
-          console.log('MBTI组件初始化成功');
-        }
-      } catch (error) {
-        console.error('初始化MBTI组件失败:', error);
-
-        // 重试逻辑
-        if (retryCount < maxRetries && isMounted) {
-          retryCount++;
-          console.log('重试初始化，当前重试次数:', retryCount);
-          setTimeout(initialize, 500); // 500ms后重试
-          return;
-        }
-
-        // 最终降级处理
-        if (isMounted) {
-          setAllMBTIs(mbtiList);
-          setUserMBTI('INFP');
-          setTempMBTI('');
-          setUserInfo({
-            nickname: '',
-            birthDate: '',
-            mbti: ''
-          });
-          setInitialized(true);
-          console.log('使用降级方案初始化成功');
-        }
+    // 如果没有临时切换，则根据优先级设置显示的MBTI
+    if (!tempMBTI) {
+      if (urlMBTI && mbtiList.includes(urlMBTI)) {
+        setUserMBTI(urlMBTI);
+      } else {
+        setUserMBTI(mbtiFromConfig);
       }
-    };
+      setDataLoaded(false);
+    }
 
-    initialize();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [mbtiList]);
+    setInitialized(true);
+    setAllMBTIs(mbtiList);
+  }, [currentConfig, configManagerReady, tempMBTI, mbtiList, location]);
 
   // 加载MBTI分析数据
   const loadPersonalityAnalysis = (mbtiType) => {
@@ -601,88 +554,7 @@ const MBTIPersonalityTabHome = () => {
     }
   };
 
-  // 使用新的配置上下文
-  const { currentConfig, loading: configLoading, error: configError } = useUserConfig();
 
-  // 初始化组件 - 优化为立即加载默认数据
-  useEffect(() => {
-    let isMounted = true;
-
-    const initialize = async () => {
-      try {
-        // 优先从 URL 参数获取 MBTI
-        const urlMBTI = getMBTIFromURL();
-
-        // 立即加载所有MBTI类型和默认MBTI，不等待用户配置
-        setAllMBTIs(mbtiList);
-
-        // 设置初始 MBTI：URL 参数 > 用户配置 > 默认值
-        let initialMBTI = 'INFP';
-        if (urlMBTI && mbtiList.includes(urlMBTI)) {
-          initialMBTI = urlMBTI;
-          console.log('从URL参数加载MBTI:', urlMBTI);
-        }
-
-        setUserMBTI(initialMBTI);
-        setTempMBTI('');
-
-        // 异步获取用户配置，但不阻塞界面
-        setTimeout(() => {
-          try {
-            // 从用户配置上下文获取用户信息（增加容错）
-            if (isMounted && currentConfig && typeof currentConfig === 'object') {
-              const safeConfig = currentConfig;
-
-              // 避免默认值覆盖用户配置
-              const isDefaultBirthDate = safeConfig.birthDate === '1991-04-30';
-              const currentBirthDate = userInfo.birthDate || '';
-
-              setUserInfo({
-                nickname: (safeConfig.nickname || '').toString(),
-                birthDate: (!isDefaultBirthDate || !currentBirthDate) ? (safeConfig.birthDate || '').toString() : currentBirthDate,
-                mbti: (safeConfig.mbti || '').toString()
-              });
-
-              // 如果用户有配置的MBTI且不是默认值，并且URL没有指定MBTI，则使用用户配置的MBTI
-              const userMBTI = safeConfig.mbti;
-              if (!urlMBTI && userMBTI && typeof userMBTI === 'string' && userMBTI.trim() && userMBTI !== 'INFP') {
-                setUserMBTI(userMBTI);
-                // 标记需要重新加载数据
-                setDataLoaded(false);
-              }
-            }
-          } catch (error) {
-            console.warn('异步加载用户配置失败:', error);
-          }
-        }, 50); // 短延迟，确保界面先显示
-
-        if (isMounted) {
-          setInitialized(true);
-        }
-      } catch (error) {
-        console.error('初始化MBTI组件失败:', error);
-
-        // 降级处理
-        if (isMounted) {
-          setAllMBTIs(mbtiList);
-          setUserMBTI('INFP');
-          setTempMBTI('');
-          setUserInfo({
-            nickname: '',
-            birthDate: '',
-            mbti: ''
-          });
-          setInitialized(true);
-        }
-      }
-    };
-
-    initialize();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [mbtiList, currentConfig, location]);
 
   // 当MBTI类型变化时重新加载数据
   useEffect(() => {

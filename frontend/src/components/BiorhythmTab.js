@@ -335,7 +335,7 @@ const BiorhythmTab = ({ isDesktop }) => {
   const [error, setError] = useState(null);
   const [rhythmData, setRhythmData] = useState(null);
   const [todayData, setTodayData] = useState(null);
-  
+
   // 当前日期状态，用于检测日期变化
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -432,7 +432,7 @@ const BiorhythmTab = ({ isDesktop }) => {
         console.error('配置初始化失败:', error);
       }
     };
-    
+
     initializeConfig();
   }, [configManagerReady, initializeConfigManager]);
 
@@ -452,11 +452,11 @@ const BiorhythmTab = ({ isDesktop }) => {
         nickname = effectiveConfig.nickname || '用户';
       }
 
-      console.log('初始化用户信息:', { 
-        nickname, 
-        birthDate, 
+      console.log('初始化用户信息:', {
+        nickname,
+        birthDate,
         configManagerReady,
-        hasBirthDate: !!birthDate 
+        hasBirthDate: !!birthDate
       });
 
       // 更新用户信息状态
@@ -489,10 +489,10 @@ const BiorhythmTab = ({ isDesktop }) => {
 
     const { nickname, birthDate } = effectiveConfig;
 
-    console.log('配置变化检测:', { 
-      nickname, 
-      birthDate, 
-      configManagerReady 
+    console.log('配置变化检测:', {
+      nickname,
+      birthDate,
+      configManagerReady
     });
 
     // 验证出生日期格式
@@ -524,12 +524,12 @@ const BiorhythmTab = ({ isDesktop }) => {
       const now = new Date();
       const todayString = now.toDateString();
       const currentDateString = currentDate.toDateString();
-      
+
       // 如果日期发生变化，重新加载数据
       if (todayString !== currentDateString) {
         console.log('检测到日期变化，重新加载节律数据');
         setCurrentDate(now);
-        
+
         // 如果有出生日期，重新加载数据
         if (birthDate) {
           loadBiorhythmData(birthDate);
@@ -539,7 +539,7 @@ const BiorhythmTab = ({ isDesktop }) => {
 
     // 每分钟检查一次日期变化
     const interval = setInterval(checkDateChange, 60000);
-    
+
     // 组件卸载时清除定时器
     return () => clearInterval(interval);
   }, [birthDate, currentDate, loadBiorhythmData]);
@@ -582,7 +582,7 @@ const BiorhythmTab = ({ isDesktop }) => {
 
         for (const zodiac of zodiacDates) {
           if ((month === zodiac.startMonth && day >= zodiac.startDay) ||
-              (month === zodiac.endMonth && day <= zodiac.endDay)) {
+            (month === zodiac.endMonth && day <= zodiac.endDay)) {
             return zodiac.name;
           }
         }
@@ -591,20 +591,28 @@ const BiorhythmTab = ({ isDesktop }) => {
 
       const zodiac = calculateZodiac(tempBirthDate);
 
-      // 导入userConfigManager来更新配置
-      const { userConfigManager } = await import('../utils/userConfigManager');
-
-      // 检查管理器是否初始化
-      if (!userConfigManager.initialized) {
-        await userConfigManager.initialize();
+      // 更新当前配置 - 使用 context 中的 updateConfig
+      if (updateConfig) {
+        await updateConfig({
+          birthDate: tempBirthDate,
+          nickname: tempNickname,
+          zodiac: zodiac
+        });
+      } else {
+        // 后备方案：导入 enhancedUserConfigManager 来更新配置
+        const { enhancedUserConfigManager } = await import('../utils/EnhancedUserConfigManager');
+        if (!enhancedUserConfigManager.initialized) {
+          await enhancedUserConfigManager.initialize();
+        }
+        await enhancedUserConfigManager.updateConfig(
+          enhancedUserConfigManager.getActiveConfigIndex(),
+          {
+            birthDate: tempBirthDate,
+            nickname: tempNickname,
+            zodiac: zodiac
+          }
+        );
       }
-
-      // 更新当前配置
-      await userConfigManager.updateCurrentConfig({
-        birthDate: tempBirthDate,
-        nickname: tempNickname,
-        zodiac: zodiac
-      });
 
       // 更新本地状态
       const newBirthDate = new Date(tempBirthDate);
@@ -668,7 +676,7 @@ const BiorhythmTab = ({ isDesktop }) => {
 
   // 标记任务完成/取消完成
   const toggleTaskCompletion = useCallback((taskId) => {
-    const newCompleted = completedTasks.includes(taskId) 
+    const newCompleted = completedTasks.includes(taskId)
       ? completedTasks.filter(id => id !== taskId) // 取消完成
       : [...completedTasks, taskId]; // 标记完成
     saveCompletedTasks(newCompleted);
@@ -759,7 +767,7 @@ const BiorhythmTab = ({ isDesktop }) => {
         console.error('加载任务完成状态失败:', error);
       }
     };
-    
+
     loadTasks();
   }, []);
 
@@ -843,7 +851,7 @@ const BiorhythmTab = ({ isDesktop }) => {
       setEnergyGuidance(
         generateEnergyGuidance(todayData.physical, todayData.emotional, todayData.intellectual)
       );
-      
+
       // 初始化每日提示
       setDailyTip(generateDailyTip());
     }
@@ -1035,21 +1043,21 @@ const BiorhythmTab = ({ isDesktop }) => {
         <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
           <div className="mb-4 space-y-4 h-full dashboard-content">
             {/* 简化的用户信息卡片 */}
-            <UserInfoCard 
+            <UserInfoCard
               userInfo={userInfo}
               todayData={todayData}
               onEditInfo={() => setShowUserInfoModal(true)}
             />
 
             {/* 简化的今日节律总结 */}
-            <DailySummaryCard 
+            <DailySummaryCard
               totalScore={totalScore}
               dailyTip={dailyTip}
               onRefreshTip={refreshTip}
             />
 
             {/* 简化的正念活动组件 */}
-            <MindfulnessActivities 
+            <MindfulnessActivities
               activities={mindfulnessActivities}
               completedTasks={completedTasks}
               onToggleTask={toggleTaskCompletion}

@@ -21,8 +21,7 @@ const ZodiacEnergyTab = memo(() => {
     ensureChartRegistered();
   }, []);
 
-  // 使用用户配置
-  const { currentConfig } = useUserConfig();
+  const { configManagerReady, currentConfig } = useUserConfig();
 
   // 状态管理
   const [userZodiac, setUserZodiac] = useState('');
@@ -45,39 +44,31 @@ const ZodiacEnergyTab = memo(() => {
 
   // 监听用户配置变化 - 优化配置数据加载逻辑
   useEffect(() => {
-    if (!currentConfig) return;
+    if (!configManagerReady || !currentConfig) return;
 
-    // 避免默认值覆盖用户配置
-    const isDefaultBirthDate = currentConfig.birthDate === '1991-04-30';
-    
-    // 只有当配置数据有效时才更新
-    if (!isDefaultBirthDate || !userInfo.birthDate) {
-      setUserInfo(currentConfig);
-    }
+    // 更新基本用户信息
+    setUserInfo(currentConfig);
 
-    // 仅在没有临时生肖时更新生肖信息，避免覆盖用户临时选择
-    if (currentConfig.zodiacAnimal &&
-      currentConfig.zodiacAnimal !== userZodiac &&
-      !tempZodiac) {
-      setUserZodiac(currentConfig.zodiacAnimal);
-      setDataLoaded(false);
-    } else if (currentConfig.birthDate && !isDefaultBirthDate && userZodiac === '鼠') {
-      // 如果没有生肖但有出生日期，计算生肖（排除默认日期）
-      // 增强日期验证
-      const birthDateObj = new Date(currentConfig.birthDate.replace(/-/g, '/'));
-      // 检查日期是否有效
-      if (!isNaN(birthDateObj.getTime())) {
-        const birthYear = birthDateObj.getFullYear();
-        if (birthYear && birthYear > 1900 && birthYear < 2100) {
-          const calculatedZodiac = ZODIAC_LIST[(birthYear - 4) % 12];
-          if (calculatedZodiac && calculatedZodiac !== '鼠') {
+    // 只有在没有临时切换生肖的情况下，才根据配置更新生肖显示
+    if (!tempZodiac) {
+      const zodiacFromConfig = currentConfig.zodiacAnimal;
+
+      if (zodiacFromConfig) {
+        setUserZodiac(zodiacFromConfig);
+      } else if (currentConfig.birthDate) {
+        // 如果没有显式生肖但有出生日期，尝试计算（避免使用硬编码默认值）
+        const birthDateObj = new Date(currentConfig.birthDate.replace(/-/g, '/'));
+        if (!isNaN(birthDateObj.getTime())) {
+          const birthYear = birthDateObj.getFullYear();
+          if (birthYear > 1900 && birthYear < 2100) {
+            const calculatedZodiac = ZODIAC_LIST[(birthYear - 4) % 12];
             setUserZodiac(calculatedZodiac);
-            setDataLoaded(false);
           }
         }
       }
+      setDataLoaded(false);
     }
-  }, [currentConfig, userZodiac, tempZodiac, userInfo.birthDate]);
+  }, [currentConfig, configManagerReady, tempZodiac]);
 
   // 五行元素数据 - 使用useMemo缓存，避免重复创建
   const wuxingElements = React.useMemo(() => [
@@ -291,39 +282,12 @@ const ZodiacEnergyTab = memo(() => {
     }
   }, [userZodiac, selectedDate, wuxingElements]);
 
-  // 初始化组件 - 优化为立即加载默认数据
+  // 初始化组件
   useEffect(() => {
-    let isMounted = true;
-
-    const initialize = async () => {
-      try {
-        if (!isMounted) return;
-
-        // 设置默认生肖为"羊"，确保有数据可显示
-        setUserZodiac('羊');
-        setTempZodiac('');
-
-        if (isMounted) {
-          setInitialized(true);
-        }
-      } catch (error) {
-        console.error('初始化生肖能量组件失败:', error);
-
-        // 降级处理：使用默认逻辑
-        setUserZodiac('羊');
-        setTempZodiac('');
-        if (isMounted) {
-          setInitialized(true);
-        }
-      }
-    };
-
-    initialize();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    if (configManagerReady) {
+      setInitialized(true);
+    }
+  }, [configManagerReady]);
 
   // 当生肖或日期变化时重新加载数据 - 优化加载逻辑
   useEffect(() => {
@@ -959,8 +923,8 @@ const ZodiacEnergyTab = memo(() => {
 
   // 渲染生肖选择器
   const renderZodiacSelector = () => {
-  return (
-    <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
+    return (
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-lg shadow-sm p-2.5 md:p-4 border border-gray-200/50 dark:border-gray-700/50 mb-4 will-change-transform">
         <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white mb-2.5 md:mb-4 flex items-center">
           <svg className="w-3.5 h-3.5 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />

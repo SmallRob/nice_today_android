@@ -52,7 +52,7 @@ const AppBanner = () => {
 
           {/* 应用名称 */}
           <div className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-bold mb-1 text-shadow-lg">
+            <h1 className="text-3xl md:text-4xl font-black mb-1 text-shadow-xl tracking-tight">
               Nice Today
             </h1>
             <p className="text-sm md:text-base opacity-95 font-medium">
@@ -64,7 +64,7 @@ const AppBanner = () => {
         {/* 回到旧版主页链接 - 右上角 */}
         <button
           onClick={handleSwitchToOldVersion}
-          className="absolute top-3 right-3 text-xs md:text-sm text-white/80 hover:text-white hover:underline transition-all duration-200 flex items-center space-x-1 bg-black/10 hover:bg-black/20 px-2 py-1 rounded-md z-20"
+          className="absolute top-3 right-3 text-xs md:text-sm text-white hover:scale-105 active:scale-95 transition-all duration-200 flex items-center space-x-1 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full border border-white/30 z-20 font-bold"
           title="回到旧版炫彩版主页"
           style={{ backdropFilter: 'blur(4px)' }}
         >
