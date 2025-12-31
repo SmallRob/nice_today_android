@@ -185,10 +185,10 @@ const SeasonalHealthTab = () => {
     const tip = eventState.isFestival && eventState.festivalData
       ? eventState.festivalData
       : solarTermHealthTips[eventState.name] || {
-          desc: "节气更替，顺时养生",
-          advice: "注意起居规律，调养身心。",
-          action: "保持心情舒畅。"
-        };
+        desc: "节气更替，顺时养生",
+        advice: "注意起居规律，调养身心。",
+        action: "保持心情舒畅。"
+      };
 
     // 活跃状态 (前后3天)
     if (eventState.active) {
@@ -202,24 +202,23 @@ const SeasonalHealthTab = () => {
       const isFestival = eventState.isFestival;
 
       return (
-        <div className={`mb-4 rounded-2xl overflow-hidden shadow-md bg-white dark:bg-gray-800 border-2 ${isFestival ? 'border-red-200 dark:border-red-800' : 'border-amber-200 dark:border-amber-800'} animate-fade-in-down`}>
-          <div className={`bg-gradient-to-r ${getEventColor(eventState)} p-3 text-white flex justify-between items-center`}>
-            <div className="flex items-center space-x-2">
-              <span className="text-xl">{isFestival && tip.emoji ? tip.emoji : "📅"}</span>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg">{eventState.name} · {dayText}</span>
-                {eventState.lunarDate && (
-                  <span className="text-xs opacity-90">{eventState.lunarDate}</span>
-                )}
-              </div>
-              {isFestival && (
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">节日</span>
+        <div className={`mb-4 rounded-2xl overflow-hidden shadow-md bg-white dark:bg-gray-800 border-2 ${isFestival ? 'border-red-200 dark:border-red-800' : 'border-amber-200 dark:border-amber-800'} animate-fade-in-down`}>          <div className={`bg-gradient-to-r ${getEventColor(eventState)} p-3 text-white flex justify-between items-center gap-3`}>
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
+            <span className="text-xl flex-shrink-0">{isFestival && tip.emoji ? tip.emoji : "📅"}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-lg truncate">{eventState.name} · {dayText}</span>
+              {eventState.lunarDate && (
+                <span className="text-xs opacity-90 truncate">{eventState.lunarDate}</span>
               )}
             </div>
-            <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
-              {eventState.date}
-            </span>
+            {isFestival && (
+              <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm whitespace-nowrap flex-shrink-0">节日</span>
+            )}
           </div>
+          <span className="text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm whitespace-nowrap flex-shrink-0 font-mono">
+            {eventState.date}
+          </span>
+        </div>
           <div className="p-4 space-y-3">
             <div className="text-center">
               <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">{tip.desc}</h3>
@@ -228,11 +227,11 @@ const SeasonalHealthTab = () => {
               <div className={`p-2 rounded-lg border ${isFestival
                 ? 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800'
                 : 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800'
-              }`}>
+                }`}>
                 <span className={`font-bold ${isFestival
                   ? 'text-red-600 dark:text-red-400'
                   : 'text-amber-600 dark:text-amber-400'
-                }`}>宜:</span>
+                  }`}>宜:</span>
                 <span className="ml-2 text-gray-700 dark:text-gray-300">{tip.advice}</span>
               </div>
               <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded-lg border border-green-100 dark:border-green-800">
@@ -388,7 +387,7 @@ const SeasonalHealthTab = () => {
       {activeTab === 'season' && (
         <div className="space-y-6">
           {/* 当前季节信息卡片 */}
-          <div className={`${seasonColors[getCurrentSeason.name].bg} ${seasonColors[getCurrentSeason.name].border} border-l-4 border-teal-500 dark:border-teal-400 rounded-2xl p-5 shadow-sm border`}>
+          <div className={`${seasonColors[getCurrentSeason.name].bg} ${seasonColors[getCurrentSeason.name].border} border-l-4 border-teal-500 dark:border-teal-400 rounded-2xl p-4 md:p-5 shadow-sm border`}>
             <div className="flex justify-between items-center mb-4">
               <h3 className={`text-lg font-bold ${seasonColors[getCurrentSeason.name].text} flex items-center`}>
                 <span className={`w-3 h-3 ${elementColors[getCurrentSeason.element]} rounded-full mr-2 shadow-sm`}></span>
@@ -425,7 +424,7 @@ const SeasonalHealthTab = () => {
           </div>
 
           {/* 通用养生贴士 */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100 dark:border-gray-700">
             <h4 className="text-base font-bold mb-3">养生要领</h4>
             <div className="grid grid-cols-1 gap-2">
               {seasonGeneralTips.map((tip, index) => (
@@ -443,7 +442,7 @@ const SeasonalHealthTab = () => {
       {activeTab === 'organ' && (
         <div className="space-y-6">
           {/* 当前/选择的器官信息 */}
-          <div className="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 rounded-2xl p-5 shadow-sm border border-purple-100 dark:border-purple-800">
+          <div className="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 rounded-2xl p-4 md:p-5 shadow-sm border border-purple-100 dark:border-purple-800">
             {/* 标题和时间标签 */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
               <h3 className="text-lg font-bold text-purple-800 dark:text-purple-200 flex items-center">
@@ -484,19 +483,11 @@ const SeasonalHealthTab = () => {
               <p className="text-sm font-medium leading-relaxed">{(selectedOrganIndex !== null ? getSelectedOrganInfo : getCurrentOrganInfo).healthTip}</p>
             </div>
 
-            {/* 返回按钮 */}
-            {selectedOrganIndex !== null && (
-              <button
-                onClick={() => setSelectedOrganIndex(null)}
-                className="w-full mt-4 py-2.5 text-xs text-purple-600 dark:text-purple-400 font-bold hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
-              >
-                ← 返回当前时间
-              </button>
-            )}
+            {/* 返回提示 (自动隐去按钮，点击任意其他区域或再次点击该时辰可取消) */}
           </div>
 
           {/* 24小时表格 */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100 dark:border-gray-700">
             <h3 className="text-base font-bold mb-4">子午流注·十二时辰</h3>
             <div className="grid grid-cols-3 gap-2">
               {organRhythmTips.organTimes.map((time, index) => {
@@ -505,7 +496,7 @@ const SeasonalHealthTab = () => {
                 return (
                   <div
                     key={index}
-                    onClick={() => setSelectedOrganIndex(index)}
+                    onClick={() => setSelectedOrganIndex(selectedOrganIndex === index ? null : index)}
                     className={`p-3 rounded-xl text-center transition-all duration-300 cursor-pointer border ${isSelected
                       ? 'bg-purple-600 text-white border-purple-600 shadow-lg scale-105 z-10'
                       : isCurrent

@@ -185,15 +185,15 @@ const SeasonalHealth = () => {
       </h3>
 
       <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-3">
-            <span className="text-2xl sm:text-3xl">{currentSeason.name === '春' ? '🍃' : currentSeason.name === '夏' ? '☀️' : currentSeason.name === '秋' ? '🍂' : '❄️'}</span>
-            <div>
-              <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">当前季节：{currentSeason.name}</p>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{currentSeason.desc}</p>
+        <div className="flex items-center justify-between mb-2 gap-3">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <span className="text-2xl sm:text-3xl flex-shrink-0">{currentSeason.name === '春' ? '🍃' : currentSeason.name === '夏' ? '☀️' : currentSeason.name === '秋' ? '🍂' : '❄️'}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">当前季节：{currentSeason.name}</p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 truncate">{currentSeason.desc}</p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex-shrink-0">
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">主导五行</p>
             <p className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">{currentSeason.element}</p>
           </div>
@@ -276,8 +276,10 @@ const PersonalizedHealth = ({ baziInfo }) => {
 
   // 获取日主五行
   const dayMaster = baziInfo.bazi.day && typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 ? baziInfo.bazi.day.charAt(0) : '甲';
-  const dayMasterElement = { '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
-                                '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水' }[dayMaster] || '木';
+  const dayMasterElement = {
+    '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+    '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
+  }[dayMaster] || '木';
 
   const organMap = {
     '木': { organ: '肝', advice: '养肝护眼，疏肝理气', food: '绿茶、枸杞、菊花、菠菜' },
@@ -297,12 +299,12 @@ const PersonalizedHealth = ({ baziInfo }) => {
       </h3>
 
       <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-100 dark:border-purple-800">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">您的日主</p>
-            <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dayMaster}</p>
+        <div className="flex items-center justify-between mb-3 gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1 truncate">您的日主</p>
+            <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate">{dayMaster}</p>
           </div>
-          <div className="text-right">
+          <div className="text-right flex-shrink-0">
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">日主五行</p>
             <p className={`text-lg sm:text-xl font-bold ${dayMasterElement === '木' ? 'text-green-600 dark:text-green-400' : dayMasterElement === '火' ? 'text-red-600 dark:text-red-400' : dayMasterElement === '土' ? 'text-yellow-600 dark:text-yellow-400' : dayMasterElement === '金' ? 'text-gray-600 dark:text-gray-400' : 'text-blue-600 dark:text-blue-400'}`}>
               {dayMasterElement}
@@ -387,21 +389,15 @@ const WuxingHealthPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-pink-900/30">
       {/* 导航标题栏 */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-white hover:text-white/80 flex items-center"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">五行养生</h1>
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center space-x-2 min-w-0">
+              <span className="text-2xl sm:text-3xl flex-shrink-0">☯️</span>
+              <h1 className="text-xl font-bold truncate">五行养生</h1>
+            </div>
             <button
               onClick={() => navigate('/dress')}
-              className="text-white hover:text-white/80 text-sm"
+              className="text-white hover:text-white/90 text-sm bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-all whitespace-nowrap backdrop-blur-sm shadow-sm flex-shrink-0"
             >
               穿衣指南
             </button>
