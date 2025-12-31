@@ -11,6 +11,7 @@ import { normalizeBirthInfo } from '../utils/baziDataManager';
 import { calculateLiuNianDaYun, getMonthlyBaziFortune, calculateDailyEnergy } from '../utils/baziHelper';
 import BaziCalculator from '../utils/baziCalculator';
 import FortuneTrendChart from '../components/bazi/FortuneTrendChart';
+import '../styles/bazi-page.css';
 
 const BaziPage = () => {
   const { theme } = useTheme();
@@ -268,7 +269,7 @@ const BaziPage = () => {
 
   // 月份名称
   const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月',
-                     '七月', '八月', '九月', '十月', '十一月', '十二月'];
+    '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
   // 使用 useMemo 缓存八字分析结果，优化性能
   const baziAnalysis = useMemo(() => {
@@ -310,7 +311,7 @@ const BaziPage = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-fuchsia-900/30 ${theme}`}>
+    <div className={`bazi-page-container min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-fuchsia-900/30 ${theme}`}>
       {/* 导航标题栏 */}
       <div className="bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
@@ -344,31 +345,28 @@ const BaziPage = () => {
           <div className="flex overflow-x-auto space-x-2 sm:space-x-4 py-2 sm:py-3">
             <button
               onClick={() => handleViewModeChange('monthly')}
-              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
-                viewMode === 'monthly'
-                  ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
-              }`}
+              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${viewMode === 'monthly'
+                ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+                }`}
             >
               月运
             </button>
             <button
               onClick={() => handleViewModeChange('weekly')}
-              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
-                viewMode === 'weekly'
-                  ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
-              }`}
+              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${viewMode === 'weekly'
+                ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+                }`}
             >
               周运
             </button>
             <button
               onClick={() => handleViewModeChange('yearly')}
-              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
-                viewMode === 'yearly'
-                  ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
-              }`}
+              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${viewMode === 'yearly'
+                ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+                }`}
             >
               年运
             </button>
@@ -661,42 +659,18 @@ const BaziPage = () => {
         {baziData && baziAnalysis && (
           <>
             {/* 基本信息卡片 - 优化样式和暗主题 */}
-            <div className="bazi-info-card bazi-card-responsive" style={{
-              background: theme === 'dark' ? '#1f2937' : '#ffffff',
-              borderRadius: '12px',
-              padding: '20px',
-              marginBottom: '20px',
-              borderLeft: theme === 'dark' ? '5px solid #D4AF37' : '5px solid #8B4513',
-              boxShadow: theme === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.05)',
-              transition: 'background-color 0.3s ease, box-shadow 0.3s ease'
-            }}>
-              <h2 style={{
-                color: theme === 'dark' ? '#D4AF37' : '#5D4037',
-                marginBottom: '16px',
-                fontSize: '22px',
-                borderBottom: `1px solid ${theme === 'dark' ? '#374151' : '#eee'}`,
-                paddingBottom: '12px'
-              }}>
+            <div className="bazi-card bazi-card-info">
+              <h2 className="bazi-card-title">
                 八字基本信息
               </h2>
-              <div className="bazi-info-grid" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '12px',
-                marginBottom: '16px'
-              }}>
+              <div className="bazi-info-grid">
                 {[
                   { label: '年柱', value: baziData.year, detail: `(${baziData.details.year.gan}${baziData.details.year.zhi})` },
                   { label: '月柱', value: baziData.month, detail: `(${baziData.details.month.gan}${baziData.details.month.zhi})` },
                   { label: '日柱', value: baziData.day, detail: `(${baziData.details.day.gan}${baziData.details.day.zhi})` },
                   { label: '时柱', value: baziData.hour, detail: `(${baziData.details.hour.gan}${baziData.details.hour.zhi})` }
                 ].map((item, index) => (
-                  <div key={index} style={{
-                    background: theme === 'dark' ? '#374151' : '#f0e6d6',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    transition: 'background-color 0.3s ease'
-                  }}>
+                  <div key={index} className="bazi-info-grid-item">
                     <p style={{ marginBottom: '4px', fontSize: '13px', color: theme === 'dark' ? '#9CA3AF' : '#666' }}>
                       <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>{item.label}</strong>
                     </p>
@@ -727,14 +701,7 @@ const BaziPage = () => {
             </div>
 
             {/* 五行能量分布卡片 */}
-            <div className="bazi-elements-card bazi-card-responsive" style={{
-              background: theme === 'dark' ? '#1f2937' : '#ffffff',
-              borderRadius: '12px',
-              padding: '20px',
-              marginBottom: '20px',
-              borderLeft: '5px solid #2196F3',
-              boxShadow: theme === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.05)'
-            }}>
+            <div className="bazi-card bazi-card-elements">
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -743,7 +710,7 @@ const BaziPage = () => {
                 paddingBottom: '12px'
               }}>
                 <span style={{ fontSize: '24px', marginRight: '12px' }}>⚖️</span>
-                <h2 style={{ color: theme === 'dark' ? '#60A5FA' : '#5D4037', fontSize: '20px', margin: '0' }}>五行能量分布</h2>
+                <h2 className="bazi-card-title-elements">五行能量分布</h2>
               </div>
 
               {/* 五行能量条 */}
@@ -837,14 +804,7 @@ const BaziPage = () => {
             </div>
 
             {/* 十神占比卡片 */}
-            <div className="bazi-ten-gods-card bazi-card-responsive" style={{
-              background: theme === 'dark' ? '#1f2937' : '#ffffff',
-              borderRadius: '12px',
-              padding: '20px',
-              marginBottom: '20px',
-              borderLeft: '5px solid #9C27B0',
-              boxShadow: theme === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.05)'
-            }}>
+            <div className="bazi-card bazi-card-ten-gods">
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -853,7 +813,7 @@ const BaziPage = () => {
                 paddingBottom: '12px'
               }}>
                 <span style={{ fontSize: '24px', marginRight: '12px' }}>⭐</span>
-                <h2 style={{ color: theme === 'dark' ? '#A855F7' : '#5D4037', fontSize: '20px', margin: '0' }}>十神占比</h2>
+                <h2 className="bazi-card-title-ten-gods">十神占比</h2>
               </div>
 
               <div style={{ marginBottom: '20px' }}>
@@ -923,14 +883,7 @@ const BaziPage = () => {
             </div>
 
             {/* 适合职业卡片 */}
-            <div className="bazi-career-card bazi-card-responsive" style={{
-              background: theme === 'dark' ? '#1f2937' : '#ffffff',
-              borderRadius: '12px',
-              padding: '20px',
-              marginBottom: '20px',
-              borderLeft: '5px solid #F44336',
-              boxShadow: theme === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.05)'
-            }}>
+            <div className="bazi-card bazi-card-career">
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -939,7 +892,7 @@ const BaziPage = () => {
                 paddingBottom: '12px'
               }}>
                 <span style={{ fontSize: '24px', marginRight: '12px' }}>💼</span>
-                <h2 style={{ color: theme === 'dark' ? '#F87171' : '#5D4037', fontSize: '20px', margin: '0' }}>适合职业</h2>
+                <h2 className="bazi-card-title-career">适合职业</h2>
               </div>
 
               <div style={{
@@ -984,94 +937,6 @@ const BaziPage = () => {
   );
 };
 
-// 注入移动端响应式样式 - 优化性能，使用CSS变量和类名
-const injectMobileStyles = () => {
-  if (typeof document !== 'undefined') {
-    const existingStyle = document.getElementById('bazi-mobile-responsive-styles');
-    if (!existingStyle) {
-      const style = document.createElement('style');
-      style.id = 'bazi-mobile-responsive-styles';
-      style.innerHTML = `
-        @media (max-width: 768px) {
-          .bazi-card-responsive {
-            padding: 16px !important;
-            border-radius: 10px !important;
-            margin-bottom: 16px !important;
-          }
-
-          .bazi-card-responsive h2 {
-            font-size: 18px !important;
-          }
-
-          .bazi-info-grid {
-            grid-template-columns: 1fr !important;
-            gap: 10px !important;
-          }
-
-          .bazi-info-grid > div {
-            padding: 8px !important;
-          }
-
-          .bazi-info-grid p {
-            font-size: 13px !important;
-            margin-bottom: 3px !important;
-          }
-
-          .bazi-info-grid p:last-child {
-            font-size: 14px !important;
-          }
-        }
-
-        @media (max-width: 576px) {
-          .bazi-card-responsive {
-            padding: 14px !important;
-            margin-bottom: 14px !important;
-          }
-
-          .bazi-card-responsive h2 {
-            font-size: 16px !important;
-            padding-bottom: 10px !important;
-          }
-
-          .bazi-info-grid {
-            gap: 8px !important;
-          }
-
-          .bazi-info-grid > div {
-            padding: 6px !important;
-          }
-
-          .bazi-info-grid p {
-            font-size: 12px !important;
-          }
-
-          .bazi-info-grid p:last-child {
-            font-size: 13px !important;
-          }
-        }
-
-        /* 优化动画性能 */
-        .bazi-card-responsive,
-        .bazi-info-grid > div {
-          transform: translateZ(0);
-          backface-visibility: hidden;
-          will-change: background-color;
-        }
-
-        /* 减少重绘 */
-        .bazi-elements-card > div > div > div > div {
-          transform: translateZ(0);
-          will-change: width;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }
-};
-
-// 组件挂载时注入样式
-if (typeof window !== 'undefined') {
-  injectMobileStyles();
-}
+// 样式已移至 ../styles/bazi-page.css
 
 export default BaziPage;

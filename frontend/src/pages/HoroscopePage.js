@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import HoroscopeTab from '../components/HoroscopeTab';
+import '../styles/horoscope-page.css';
 
 const HoroscopePage = () => {
   const { theme } = useTheme();
@@ -39,7 +40,7 @@ const HoroscopePage = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-purple-900/30 ${theme}`}>
+    <div className={`horoscope-page-container min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-purple-900/30 ${theme}`}>
       {/* 导航标题栏 */}
       <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
@@ -65,31 +66,28 @@ const HoroscopePage = () => {
           <div className="flex overflow-x-auto space-x-4 py-3">
             <button
               onClick={() => handleTabChange('daily')}
-              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${
-                selectedTab === 'daily'
+              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'daily'
                   ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700'
-              }`}
+                }`}
             >
               今日运势
             </button>
             <button
               onClick={() => handleTabChange('weekly')}
-              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${
-                selectedTab === 'weekly'
+              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'weekly'
                   ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700'
-              }`}
+                }`}
             >
               本周运势
             </button>
             <button
               onClick={() => handleTabChange('monthly')}
-              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${
-                selectedTab === 'monthly'
+              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'monthly'
                   ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700'
-              }`}
+                }`}
             >
               本月运势
             </button>

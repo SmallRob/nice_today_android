@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 导入全局响应式配置 */
+@import './styles/global-responsive.css';
+
 @layer base {
   :root {
     /* 核心颜色系统 - 扁平化设计 */
@@ -15,13 +18,13 @@
     --color-text-secondary: #64748b;
     --color-border: #e2e8f0;
     --color-border-light: #f1f5f9;
-    
+
     /* 卡片和容器颜色 */
     --color-card-bg: #ffffff;
     --color-card-hover: #f8fafc;
     --color-card-border: #e2e8f0;
     --color-divider: #f1f5f9;
-    
+
     /* 功能颜色 */
     --color-info-bg: #f1f5f9;
     --color-warning-bg: #fef3c7;
@@ -31,22 +34,34 @@
     --color-warning-text: #0f172a;
     --color-success-text: #0f172a;
     --color-danger-text: #0f172a;
-    
+
     /* 紧凑间距变量 */
-    --spacing-xs: 0.125rem;  /* 2px */
-    --spacing-sm: 0.25rem;   /* 4px */
-    --spacing-md: 0.5rem;    /* 8px */
-    --spacing-lg: 0.75rem;    /* 12px */
-    --spacing-xl: 1rem;      /* 16px */
-    --spacing-2xl: 1.5rem;   /* 24px */
-    
+    --spacing-xs: 0.125rem;
+    /* 2px */
+    --spacing-sm: 0.25rem;
+    /* 4px */
+    --spacing-md: 0.5rem;
+    /* 8px */
+    --spacing-lg: 0.75rem;
+    /* 12px */
+    --spacing-xl: 1rem;
+    /* 16px */
+    --spacing-2xl: 1.5rem;
+    /* 24px */
+
     /* 字体大小变量 */
-    --font-size-xs: 0.75rem;   /* 12px */
-    --font-size-sm: 0.875rem;  /* 14px */
-    --font-size-base: 1rem;    /* 16px */
-    --font-size-lg: 1.125rem;  /* 18px */
-    --font-size-xl: 1.25rem;   /* 20px */
-    --font-size-2xl: 1.5rem;   /* 24px */
+    --font-size-xs: 0.75rem;
+    /* 12px */
+    --font-size-sm: 0.875rem;
+    /* 14px */
+    --font-size-base: 1rem;
+    /* 16px */
+    --font-size-lg: 1.125rem;
+    /* 18px */
+    --font-size-xl: 1.25rem;
+    /* 20px */
+    --font-size-2xl: 1.5rem;
+    /* 24px */
   }
 
   .dark {
@@ -61,13 +76,13 @@
     --color-text-secondary: #94a3b8;
     --color-border: #334155;
     --color-border-light: #1e293b;
-    
+
     /* 卡片和容器颜色 */
     --color-card-bg: #1e293b;
     --color-card-hover: #334155;
     --color-card-border: #334155;
     --color-divider: #1e293b;
-    
+
     /* 功能颜色 - 深色模式 */
     --color-info-bg: #1e3a8a;
     --color-warning-bg: #713f12;
@@ -90,17 +105,18 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   /* 防止页面缩放 */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
-  
+
   /* 优化滚动性能 */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   touch-action: pan-y;
-  
+
   /* 移除默认滚动条（保持功能） */
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -115,18 +131,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-background);
   color: var(--color-text);
-  
+
   /* 防止字体缩放 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  
+
   /* 防止文本选择（移动端） */
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
-  
+
   /* 移动端字体优化 */
   font-size: var(--font-size-base);
   line-height: 1.4;
@@ -433,49 +449,57 @@ body {
 
 /* 移动端触摸优化 */
 @media (max-width: 768px) {
+
   /* 链接和按钮触摸优化 */
-  a, button, input[type="button"], input[type="submit"], .touch-target {
+  a,
+  button,
+  input[type="button"],
+  input[type="submit"],
+  .touch-target {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* 防止文本选择（移动端） */
   * {
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
   }
-  
+
   /* 输入框允许文本选择 */
-  input, textarea {
+  input,
+  textarea {
     -webkit-user-select: text;
     user-select: text;
   }
-  
+
   /* 移动端卡片优化 */
   .card {
     margin-bottom: var(--spacing-sm);
     padding: var(--spacing-md);
     border-radius: var(--spacing-sm);
   }
-  
+
   /* 移动端按钮优化 */
   .button {
     padding: var(--spacing-md) var(--spacing-lg);
   }
-  
+
   /* 移动端标签导航优化 */
   .nav-tab {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-xs);
   }
-  
+
   /* 防止iOS缩放 */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px;
   }
-  
+
   /* 优化iOS Safari 100vh问题 */
   .full-height {
     height: 100vh;
@@ -489,12 +513,12 @@ body {
     padding: var(--spacing-md);
     border-radius: var(--spacing-xs);
   }
-  
+
   .button {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-xs);
   }
-  
+
   .nav-tab {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-size-xs);
@@ -553,36 +577,101 @@ body {
   flex: 1;
 }
 
-.gap-xs { gap: var(--spacing-xs); }
-.gap-sm { gap: var(--spacing-sm); }
-.gap-md { gap: var(--spacing-md); }
-.gap-lg { gap: var(--spacing-lg); }
+.gap-xs {
+  gap: var(--spacing-xs);
+}
 
-.p-xs { padding: var(--spacing-xs); }
-.p-sm { padding: var(--spacing-sm); }
-.p-md { padding: var(--spacing-md); }
-.p-lg { padding: var(--spacing-lg); }
-.p-xl { padding: var(--spacing-xl); }
+.gap-sm {
+  gap: var(--spacing-sm);
+}
 
-.m-xs { margin: var(--spacing-xs); }
-.m-sm { margin: var(--spacing-sm); }
-.m-md { margin: var(--spacing-md); }
-.m-lg { margin: var(--spacing-lg); }
-.m-xl { margin: var(--spacing-xl); }
+.gap-md {
+  gap: var(--spacing-md);
+}
 
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
+.gap-lg {
+  gap: var(--spacing-lg);
+}
 
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-.mb-lg { margin-bottom: var(--spacing-lg); }
+.p-xs {
+  padding: var(--spacing-xs);
+}
 
-.ml-sm { margin-left: var(--spacing-sm); }
-.ml-md { margin-left: var(--spacing-md); }
+.p-sm {
+  padding: var(--spacing-sm);
+}
 
-.mr-sm { margin-right: var(--spacing-sm); }
-.mr-md { margin-right: var(--spacing-md); }
+.p-md {
+  padding: var(--spacing-md);
+}
+
+.p-lg {
+  padding: var(--spacing-lg);
+}
+
+.p-xl {
+  padding: var(--spacing-xl);
+}
+
+.m-xs {
+  margin: var(--spacing-xs);
+}
+
+.m-sm {
+  margin: var(--spacing-sm);
+}
+
+.m-md {
+  margin: var(--spacing-md);
+}
+
+.m-lg {
+  margin: var(--spacing-lg);
+}
+
+.m-xl {
+  margin: var(--spacing-xl);
+}
+
+.mt-sm {
+  margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+  margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+}
+
+.mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
+
+.ml-sm {
+  margin-left: var(--spacing-sm);
+}
+
+.ml-md {
+  margin-left: var(--spacing-md);
+}
+
+.mr-sm {
+  margin-right: var(--spacing-sm);
+}
+
+.mr-md {
+  margin-right: var(--spacing-md);
+}
 
 .w-full {
   width: 100%;

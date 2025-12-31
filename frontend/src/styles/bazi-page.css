@@ -1,0 +1,232 @@
+/* BaziPage 专用样式文件 */
+/* 使用 CSS 变量确保主题一致性，避免全局样式污染 */
+
+/* ============================================
+   BaziPage 容器
+   ============================================ */
+
+.bazi-page-container {
+  width: 100%;
+  min-width: 0;
+  max-width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: linear-gradient(to bottom right, #faf5ff, #f3e8ff, #fce7f3);
+}
+
+.dark .bazi-page-container {
+  background: linear-gradient(to bottom right, #111827, #581c87, #831843);
+}
+
+/* ============================================
+   BaziPage 卡片样式
+   ============================================ */
+
+.bazi-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bazi-card-info {
+  background-color: var(--color-card-bg, #ffffff);
+  border-left: 5px solid #8B4513;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dark .bazi-card-info {
+  background-color: #1f2937;
+  border-left-color: #D4AF37;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.bazi-card-elements {
+  background-color: var(--color-card-bg, #ffffff);
+  border-left: 5px solid #2196F3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dark .bazi-card-elements {
+  background-color: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.bazi-card-ten-gods {
+  background-color: var(--color-card-bg, #ffffff);
+  border-left: 5px solid #9C27B0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dark .bazi-card-ten-gods {
+  background-color: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.bazi-card-career {
+  background-color: var(--color-card-bg, #ffffff);
+  border-left: 5px solid #F44336;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dark .bazi-card-career {
+  background-color: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================
+   BaziPage 标题样式
+   ============================================ */
+
+.bazi-card-title {
+  color: #5D4037;
+  margin-bottom: 16px;
+  font-size: 22px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 12px;
+}
+
+.dark .bazi-card-title {
+  color: #D4AF37;
+  border-bottom-color: #374151;
+}
+
+.bazi-card-title-elements {
+  color: #5D4037;
+  font-size: 20px;
+  margin: 0;
+}
+
+.dark .bazi-card-title-elements {
+  color: #60A5FA;
+}
+
+.bazi-card-title-ten-gods {
+  color: #5D4037;
+  font-size: 20px;
+  margin: 0;
+}
+
+.dark .bazi-card-title-ten-gods {
+  color: #A855F7;
+}
+
+.bazi-card-title-career {
+  color: #5D4037;
+  font-size: 20px;
+  margin: 0;
+}
+
+.dark .bazi-card-title-career {
+  color: #F87171;
+}
+
+/* ============================================
+   BaziPage 网格布局
+   ============================================ */
+
+.bazi-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.bazi-info-grid-item {
+  background-color: #f0e6d6;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.dark .bazi-info-grid-item {
+  background-color: #374151;
+}
+
+/* ============================================
+   响应式优化
+   ============================================ */
+
+/* 平板和桌面 */
+@media (min-width: 768px) {
+  .bazi-card {
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+
+  .bazi-card-title {
+    font-size: 22px;
+  }
+
+  .bazi-info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 767px) {
+  .bazi-card {
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .bazi-card-title {
+    font-size: 18px;
+    padding-bottom: 10px;
+  }
+
+  .bazi-info-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .bazi-info-grid-item {
+    padding: 8px;
+  }
+}
+
+/* 超小屏幕 */
+@media (max-width: 576px) {
+  .bazi-card {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .bazi-card-title {
+    font-size: 16px;
+  }
+
+  .bazi-info-grid {
+    gap: 8px;
+  }
+
+  .bazi-info-grid-item {
+    padding: 6px;
+  }
+}
+
+/* ============================================
+   性能优化
+   ============================================ */
+
+.bazi-card,
+.bazi-info-grid-item {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: background-color;
+}
+
+/* 减少重绘 */
+.bazi-card .progress-bar {
+  transform: translateZ(0);
+  will-change: width;
+}
