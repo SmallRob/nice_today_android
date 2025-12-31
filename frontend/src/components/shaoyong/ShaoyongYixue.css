@@ -96,7 +96,7 @@
 }
 
 .title-section h1 {
-  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
   font-weight: 300;
   letter-spacing: 1px;
   margin-bottom: clamp(3px, 0.8vw, 5px);
@@ -154,6 +154,7 @@
   gap: clamp(5px, 1.5vw, 10px);
   position: relative;
   z-index: 1;
+  flex-wrap: nowrap; /* 防止换行 */
 }
 
 .tab-btn {
@@ -175,6 +176,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 100px; /* 设置最小宽度 */
+  flex-basis: 0; /* 让flex item能正确收缩 */
 }
 
 .tab-btn:hover {
@@ -209,6 +212,8 @@
   padding: 0 16px;
   padding-bottom: 20px;
   flex: 1;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .content-grid {
@@ -216,6 +221,8 @@
   grid-template-columns: 1fr 2fr;
   gap: 16px;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* 卡片样式 */
@@ -236,10 +243,10 @@
 
 .card h2 {
   color: var(--text-accent);
-  margin-bottom: clamp(12px, 3vw, 20px);
-  padding-bottom: clamp(8px, 2vw, 12px);
+  margin-bottom: clamp(8px, 2vw, 15px);
+  padding-bottom: clamp(6px, 1.5vw, 10px);
   border-bottom: 2px solid var(--border-color);
-  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
   font-weight: 400;
   letter-spacing: 0.5px;
   white-space: nowrap;
@@ -250,12 +257,12 @@
 /* 占位符样式 */
 .placeholder {
   text-align: center;
-  padding: clamp(30px, 8vw, 50px) clamp(15px, 4vw, 25px);
+  padding: clamp(20px, 6vw, 40px) clamp(10px, 3vw, 20px);
   color: var(--text-secondary);
 }
 
 .placeholder p {
-  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
 }
 
 .placeholder-card {
@@ -423,10 +430,10 @@
 /* 按钮样式 */
 .btn-primary,
 .btn-secondary {
-  padding: clamp(10px, 2.5vw, 14px) clamp(20px, 5vw, 28px);
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
   border: none;
   border-radius: clamp(6px, 1.5vw, 8px);
-  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
@@ -510,6 +517,7 @@
     flex-direction: row;
     gap: clamp(4px, 1vw, 8px);
     margin-top: clamp(4px, 1vw, 6px);
+    flex-wrap: nowrap; /* 防止换行 */
   }
 
   .tab-btn {
@@ -518,6 +526,7 @@
     padding: clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px);
     font-size: clamp(0.8rem, 2.2vw, 0.95rem);
     gap: clamp(4px, 1vw, 8px);
+    min-width: 80px; /* 调整最小宽度 */
   }
 
   .tab-icon {
@@ -566,6 +575,133 @@
   .tip {
     white-space: normal;
   }
+
+  /* 防止内容溢出 */
+  .shaoyong-yixue {
+    overflow-x: hidden;
+  }
+
+  /* 确保所有元素不会造成溢出 */
+  .main-content,
+  .content-grid,
+  .tab-content {
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 768px) {
+  .shaoyong-yixue {
+    padding: 0;
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: clamp(6px, 1.5vw, 10px);
+    align-items: center;
+  }
+
+  .header-controls {
+    margin-left: 0;
+    margin-top: 0;
+    width: 100%;
+    justify-content: center;
+    align-self: center;
+  }
+
+  .title-section {
+    flex: 0 1 auto;
+    text-align: center;
+  }
+
+  .title-section h1 {
+    font-size: clamp(1.2rem, 3.2vw, 1.6rem);
+  }
+
+  .subtitle {
+    font-size: clamp(0.75rem, 2vw, 0.9rem);
+  }
+
+  .tab-navigation {
+    flex-direction: row;
+    gap: clamp(4px, 1vw, 8px);
+    margin-top: clamp(4px, 1vw, 6px);
+    flex-wrap: nowrap; /* 防止换行 */
+  }
+
+  .tab-btn {
+    flex: 1 1 calc(50% - 4px);
+    border-radius: clamp(8px, 2vw, 12px);
+    padding: clamp(8px, 2vw, 12px) clamp(8px, 2vw, 12px);
+    font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+    gap: clamp(4px, 1vw, 8px);
+    min-width: 80px; /* 调整最小宽度 */
+  }
+
+  .tab-icon {
+    font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+  }
+
+  .content-grid {
+    gap: 12px;
+  }
+
+  .main-panel {
+    gap: 10px;
+  }
+
+  .card {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .card h2 {
+    font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+    margin-bottom: clamp(8px, 2vw, 12px);
+    padding-bottom: clamp(5px, 1.5vw, 8px);
+  }
+
+  .history-section h2 {
+    font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+    margin-bottom: clamp(8px, 2vw, 12px);
+    padding-bottom: clamp(5px, 1.5vw, 8px);
+  }
+
+  .history-section {
+    margin-top: clamp(10px, 2.5vw, 15px);
+    padding: clamp(10px, 2.5vw, 15px);
+  }
+
+  .footer-links {
+    flex-direction: row;
+    gap: clamp(6px, 1.5vw, 10px);
+  }
+
+  .app-footer {
+    padding: clamp(10px, 2.5vw, 15px);
+  }
+
+  .tip {
+    white-space: normal;
+  }
+
+  /* 防止内容溢出 */
+  .shaoyong-yixue {
+    overflow-x: hidden;
+  }
+
+  /* 确保所有元素不会造成溢出 */
+  .main-content,
+  .content-grid,
+  .tab-content {
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
 }
 
 @media (max-width: 480px) {
@@ -598,11 +734,16 @@
     height: clamp(32px, 8vw, 36px);
   }
 
+  .tab-navigation {
+    flex-wrap: nowrap; /* 防止换行 */
+  }
+
   .tab-btn {
-    flex: 1 1 100%;
+    flex: 1;
     font-size: clamp(0.7rem, 1.8vw, 0.85rem);
     padding: clamp(6px, 1.5vw, 10px) clamp(6px, 1.5vw, 10px);
     gap: clamp(3px, 1vw, 6px);
+    min-width: 70px; /* 调整最小宽度 */
   }
 
   .tab-icon {
@@ -645,12 +786,44 @@
 
   .footer-links {
     gap: clamp(6px, 1.5vw, 10px);
+    flex-wrap: wrap;
   }
 
   /* 扩大移动端显示视野 - 移除固定高度，让内容自然撑开 */
   .main-content {
     max-height: none;
   }
+
+  /* 防止横向溢出 */
+  .shaoyong-yixue {
+    overflow-x: hidden;
+  }
+
+  /* 确保所有元素不会造成溢出 */
+  .main-content,
+  .content-grid,
+  .tab-content {
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+}
+
+/* 防止内容溢出 */
+.shaoyong-yixue {
+  overflow-x: hidden;
+}
+
+/* 确保所有元素不会造成溢出 */
+.main-content,
+.content-grid,
+.tab-content,
+.card {
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* 移动端优化 */
@@ -702,6 +875,9 @@
 .tab-content {
   animation: fadeIn 0.4s ease;
   width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* 梅花易数和铁板神数容器样式 - 与主页面完全对齐 */
@@ -714,6 +890,7 @@
   padding-left: 0;
   padding-right: 0;
   min-width: 0;
+  overflow-x: hidden;
 }
 
 /* 响应式断点 - 保持宽度自适应 */

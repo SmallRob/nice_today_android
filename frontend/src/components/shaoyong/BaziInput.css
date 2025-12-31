@@ -247,7 +247,7 @@
 }
 
 .gender-option {
-  padding: clamp(10px, 2.5vw, 14px) clamp(20px, 5vw, 25px);
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 20px);
   border: 2px solid var(--border-color);
   background: var(--bg-secondary);
   border-radius: 8px;
@@ -255,10 +255,10 @@
   transition: all 0.3s ease;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: clamp(0.9rem, 2.2vw, 1rem);
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
   flex: 1;
-  min-width: clamp(100px, 25vw, 130px);
-  max-width: clamp(140px, 35vw, 180px);
+  min-width: clamp(80px, 20vw, 110px);
+  max-width: clamp(120px, 30vw, 150px);
   white-space: nowrap;
 }
 

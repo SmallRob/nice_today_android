@@ -24,6 +24,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   margin-bottom: 30px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 @media (max-width: 768px) {
@@ -76,8 +79,9 @@
 .hexagram-line {
   margin: 8px auto;
   position: relative;
-  width: 80%;
-  max-width: 200px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .line-yang {
@@ -191,6 +195,15 @@
   .hexagram-composition {
     font-size: 0.8rem;
     padding: 4px 8px;
+  }
+  
+  /* 防止内容溢出 */
+  .hexagram-card {
+    overflow-x: hidden;
+  }
+  
+  .hexagram-info {
+    overflow-x: hidden;
   }
 }
 
