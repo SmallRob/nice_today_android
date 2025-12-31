@@ -63,7 +63,7 @@ const getExpForLevel = (level) => Math.floor(100 * Math.pow(1.5, level - 1));
 const FishingGamePage = () => {
   // 游戏状态
   const [gameState, setGameState] = useState({
-    money: 100,
+    money: 300,
     level: 1,
     exp: 0,
     currentLake: null,
@@ -71,7 +71,7 @@ const FishingGamePage = () => {
     currentBait: null,
     inventory: {
       rods: ['rod1'],
-      bait: { bait1: 5 }
+      bait: { bait1: 10 }
     },
     caughtFish: [],
     messages: []
@@ -88,16 +88,28 @@ const FishingGamePage = () => {
     const savedData = localStorage.getItem('fishingGameSave');
     if (savedData) {
       try {
-        setGameState(JSON.parse(savedData));
+        const parsed = JSON.parse(savedData);
+        setGameState(parsed);
       } catch (error) {
         console.error('加载游戏数据失败:', error);
       }
+    } else {
+      // 新游戏，显示欢迎消息
+      setTimeout(() => {
+        setGameState(prev => ({
+          ...prev,
+          messages: [
+            '🎮 欢迎来到钓了么！初始资金：300金币，蚯蚓×10',
+            '💡 提示：先选择湖泊，装备钓竿和饵料，然后开始钓鱼！'
+          ]
+        }));
+      }, 500);
     }
   }, []);
 
   // 自动保存游戏数据
   useEffect(() => {
-    if (gameState.money !== 100 || gameState.level !== 1) {
+    if (gameState.money !== 300 || gameState.level !== 1 || gameState.messages.length > 2) {
       localStorage.setItem('fishingGameSave', JSON.stringify(gameState));
     }
   }, [gameState]);
@@ -296,7 +308,7 @@ const FishingGamePage = () => {
     if (window.confirm('确定要重置游戏吗？所有进度将丢失！')) {
       localStorage.removeItem('fishingGameSave');
       setGameState({
-        money: 100,
+        money: 300,
         level: 1,
         exp: 0,
         currentLake: null,
@@ -304,7 +316,7 @@ const FishingGamePage = () => {
         currentBait: null,
         inventory: {
           rods: ['rod1'],
-          bait: { bait1: 5 }
+          bait: { bait1: 10 }
         },
         caughtFish: [],
         messages: []
