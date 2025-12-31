@@ -193,6 +193,74 @@
   color: #059669;
 }
 
+/* 遗憾脱钩 */
+.miss-result {
+  text-align: center;
+  animation: shake 0.5s ease-out;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+.miss-emoji {
+  font-size: 80px;
+  margin-bottom: 12px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.miss-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ef4444;
+  margin-bottom: 8px;
+}
+
+.miss-message {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.miss-encourage {
+  font-size: 20px;
+  font-weight: bold;
+  color: #3b82f6;
+  margin-top: 8px;
+  animation: fadeInUp 1s ease-out 0.3s backwards;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 开始钓鱼按钮 */
 .start-fishing-btn {
   width: 100%;
@@ -284,6 +352,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
 }
 
 .lake-card:hover {
@@ -324,6 +394,123 @@
   color: #059669;
 }
 
+.lake-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.lake-level {
+  font-size: 12px;
+  font-weight: bold;
+  color: #6366f1;
+  background: #e0e7ff;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.lake-lock {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+.lake-card.locked {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.lake-card.locked:hover {
+  transform: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.lake-check-mark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  z-index: 3;
+  animation: popIn 0.3s ease-out;
+}
+
+.confirm-lake-section {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+.confirm-lake-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.confirm-lake-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.cancel-lake-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-lake-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .confirm-lake-btn {
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  }
+
+  .confirm-lake-btn:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.6);
+  }
+}
+
 /* 钓竿网格 */
 .rods-grid {
   display: grid;
@@ -336,6 +523,8 @@
   border-radius: 12px;
   padding: 16px;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .rod-header {
@@ -369,6 +558,61 @@
 .rod-power {
   font-size: 12px;
   color: #6b7280;
+  font-weight: 500;
+}
+
+.owned-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.owned-actions .equip-btn,
+.owned-actions .sell-btn-small {
+  flex: 1;
+}
+
+.sell-btn-small {
+  width: 100%;
+  padding: 8px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sell-btn-small:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* 确保dark模式下鱼竿文字清晰 */
+@media (prefers-color-scheme: dark) {
+
+  .rod-name,
+  .rod-power {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .rod-card {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+  }
+
+  .bait-card {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+  }
+
+  .bait-name,
+  .bait-power,
+  .bait-quantity {
+    color: #e5e7eb !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .equip-btn,
@@ -415,6 +659,8 @@
   border-radius: 12px;
   padding: 16px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .bait-icon {
@@ -456,12 +702,67 @@
   margin-bottom: 8px;
 }
 
+.bait-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.bait-actions button {
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 11px;
+}
+
+.sell-bait-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sell-bait-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
 /* 库存网格 */
 .inventory-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+}
+
+.inventory-sub-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+  background: #f9fafb;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.inventory-sub-tab {
+  padding: 10px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.inventory-sub-tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: bold;
 }
 
 .sell-all-btn {
@@ -544,6 +845,28 @@
   box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
 }
 
+.rod-item .fish-emoji-large {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 8px;
+}
+
+.bait-item .fish-emoji-large {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 8px;
+}
+
 /* 消息区域 */
 .messages-container {
   background: white;
@@ -606,6 +929,15 @@
 @media (max-width: 640px) {
   .equipment-status {
     gap: 4px;
+  }
+
+  .confirm-lake-section {
+    flex-direction: column;
+  }
+
+  .confirm-lake-btn,
+  .cancel-lake-btn {
+    width: 100%;
   }
 
   .status-label {
@@ -695,7 +1027,57 @@
     font-weight: bold;
   }
 
+  .confirm-lake-btn {
+    background: linear-gradient(135deg, #818cf8 0%, #4b5563 100%);
+  }
+
+  .confirm-lake-btn:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
+  }
+
+  .cancel-lake-btn {
+    background: #7f1d1d;
+  }
+
+  .cancel-lake-btn:hover {
+    background: #f87171;
+  }
+
   .status-value {
     color: #ffffff;
+  }
+
+  /* 遗憾脱钩深色模式 */
+  .miss-title {
+    color: #f87171;
+  }
+
+  .miss-message {
+    color: #9ca3af;
+  }
+
+  .miss-encourage {
+    color: #60a5fa;
+  }
+
+  /* 库存子标签深色模式 */
+  .inventory-sub-tabs {
+    background: #374151;
+  }
+
+  .lake-level {
+    background: #3730a3;
+    color: #c7d2fe;
+  }
+
+  /* 湖泊锁定状态深色模式 */
+  .lake-lock {
+    background: rgba(31, 41, 55, 0.9);
+  }
+
+  /* 湖泊打勾标记深色模式 */
+  .lake-check-mark {
+    background: linear-gradient(135deg, #818cf8 0%, #4b5563 100%);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.5);
   }
 }

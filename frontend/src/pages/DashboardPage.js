@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './DashboardPage.css';
 import MergedBannerCard from '../components/dashboard/MergedBannerCard';
@@ -266,7 +266,7 @@ const Dashboard = () => {
             <button className="control-btn sort-btn" onClick={sortByColor}>
               🎨 按颜色
             </button>
-            <button className="control-btn reset-btn" onClick={resetToDefault}>
+            <button className="control-btn dashboard-reset-btn" onClick={resetToDefault}>
               ↺ 恢复默认
             </button>
           </div>
