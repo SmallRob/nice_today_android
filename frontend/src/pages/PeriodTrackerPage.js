@@ -192,7 +192,7 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod }) =
         </button>
 
         <div className="flex items-center space-x-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h2>
           <button
@@ -218,11 +218,10 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod }) =
         {dayNames.map((day, index) => (
           <div
             key={day}
-            className={`text-center py-2 text-sm font-medium ${
-              index === 0 ? 'text-red-500 dark:text-red-400' :
+            className={`text-center py-2 text-sm font-medium ${index === 0 ? 'text-red-500 dark:text-red-400' :
               index === 6 ? 'text-blue-500 dark:text-blue-400' :
-              'text-gray-500 dark:text-gray-400'
-            }`}
+                'text-gray-500 dark:text-gray-400'
+              }`}
           >
             {day}
           </div>
@@ -268,9 +267,8 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod }) =
               `}
             >
               {/* 日期数字 */}
-              <div className={`text-center text-sm ${
-                day.isToday ? 'font-bold text-pink-600 dark:text-pink-400' : ''
-              }`}>
+              <div className={`text-center text-sm ${day.isToday ? 'font-bold text-pink-600 dark:text-pink-400' : ''
+                }`}>
                 {day.date.getDate()}
               </div>
 
@@ -588,26 +586,32 @@ const PeriodTrackerPage = () => {
     today >= cyclePrediction.fertileWindowStart && today <= cyclePrediction.fertileWindowEnd;
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-red-900/30 ${theme}`}>
-      {/* 导航标题栏 */}
-      <div className="bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
+    <div className={`min-h-screen pb-32 px-4 md:px-6 bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-red-900/30 ${theme}`}>
+      {/* 导航标题栏 - 优化版 */}
+      <div className="bg-gradient-to-r from-pink-500/90 to-rose-600/90 text-white shadow-lg sticky top-0 z-40 backdrop-blur-md">
+        <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => window.history.back()}
-              className="text-white hover:text-pink-100 flex items-center"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">经期助手</h1>
+            <div className="flex items-center gap-2">
+              <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm">
+                <span className="text-xl md:text-2xl">🌺</span>
+              </div>
+              <h1 className="text-lg md:text-xl font-bold whitespace-nowrap tracking-wide text-shadow-sm">
+                经期助手
+              </h1>
+            </div>
+
             <button
               onClick={() => setSelectedDate(new Date())}
-              className="text-white hover:text-pink-100 text-sm bg-white/20 px-3 py-1 rounded-full"
+              className="group relative flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 active:bg-white/30 
+                border border-white/20 rounded-full transition-all duration-300 shadow-sm hover:shadow-md
+                text-sm font-medium whitespace-nowrap overflow-hidden min-w-[80px] max-w-[100px]"
             >
-              记录今日
+              <span className="relative z-10 flex items-center gap-1">
+                <span className="text-base">✏️</span>
+                <span className="hidden md:inline">记录今日</span>
+                <span className="md:hidden">今日</span>
+              </span>
+              <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             </button>
           </div>
         </div>
@@ -617,13 +621,13 @@ const PeriodTrackerPage = () => {
       <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
         {/* 当前周期阶段卡片 */}
         {currentPhase && (
-          <div className="bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-2xl shadow-2xl p-6">
+          <div className="bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-2xl shadow-2xl p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-2xl font-bold mb-2">当前阶段</h2>
                 <div className="text-4xl font-bold">{phaseNames[currentPhase]}</div>
               </div>
-              <div className="text-8xl opacity-20">🌸</div>
+              <div className="text-6xl md:text-8xl opacity-20">🌸</div>
             </div>
 
             {/* 周期阶段指示条 */}
@@ -710,7 +714,7 @@ const PeriodTrackerPage = () => {
 
         {/* 健康建议 */}
         {currentPhase && (
-          <div className="bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl p-6 border border-pink-200 dark:border-pink-800">
+          <div className="bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl p-4 md:p-6 border border-pink-200 dark:border-pink-800">
             <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
               健康建议
             </h3>
@@ -726,7 +730,7 @@ const PeriodTrackerPage = () => {
         )}
 
         {/* 周期设置 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
           <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
             周期设置
           </h3>
@@ -768,7 +772,7 @@ const PeriodTrackerPage = () => {
 
         {/* 历史记录 */}
         {periodHistory.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
             <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
               历史记录
             </h3>

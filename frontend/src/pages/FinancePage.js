@@ -258,7 +258,7 @@ const FinancePage = () => {
     const currentYear = today.getFullYear();
     const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
     const currentDay = today.getDate();
-    
+
     // 获取本月所有支出
     const monthExpenses = expenses.filter(expense =>
       expense.date.startsWith(`${currentYear}-${currentMonth}`)
@@ -516,7 +516,7 @@ const FinancePage = () => {
   const temporaryTotal = getTemporaryExpenses().reduce((sum, e) => sum + e.amount, 0);
 
   return (
-    <div className={`finance-page ${isDarkTheme() ? 'dark' : ''}`}>
+    <div className={`finance-page min-h-screen pb-32 px-4 md:px-6 ${isDarkTheme() ? 'dark' : ''}`}>
       {/* 新用户引导弹窗 */}
       {showWelcomeModal && (
         <div className="welcome-modal-overlay" onClick={() => {
@@ -570,20 +570,20 @@ const FinancePage = () => {
       )}
 
       {/* 顶部导航栏 */}
-      <div className="finance-header">
-        <h1 className="page-title">💰 财务斩杀线</h1>
+      <div className="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-900 z-10 py-2">
+        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">💰 财务斩杀线</h1>
       </div>
 
       {/* 视图切换 */}
-      <div className="view-mode-selector">
+      <div className="flex justify-center space-x-2 mb-4">
         <button
-          className={`view-mode-btn ${viewMode === 'monthly' ? 'active' : ''}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${viewMode === 'monthly' ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}
           onClick={() => setViewMode('monthly')}
         >
           本月视图
         </button>
         <button
-          className={`view-mode-btn ${viewMode === 'yearly' ? 'active' : ''}`}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${viewMode === 'yearly' ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}
           onClick={() => setViewMode('yearly')}
         >
           年度视图
@@ -591,23 +591,20 @@ const FinancePage = () => {
       </div>
 
       {/* 月收入设置 */}
-      <div className="income-card">
-        <h3>月收入设置</h3>
-        <div className="income-display">
-          <div>
-            <span className="currency-symbol">¥</span>
-            <span className="income-amount">{monthlyIncome.toFixed(2)}</span>
-            <button
-              className="edit-income-btn"
-              onClick={() => {
-                setShowIncomeModal(true);
-                setTempIncome(monthlyIncome.toString());
-              }}
-              title="编辑月收入"
-            >
-              ✏️
-            </button>
-          </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-3 mb-4 shadow-sm flex justify-between items-center">
+        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">月收入设置</h3>
+        <div className="flex items-center">
+          <span className="text-xs text-gray-500 mr-1">¥</span>
+          <span className="text-lg font-bold text-gray-800 dark:text-white mr-2">{monthlyIncome.toFixed(2)}</span>
+          <button
+            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400"
+            onClick={() => {
+              setShowIncomeModal(true);
+              setTempIncome(monthlyIncome.toString());
+            }}
+          >
+            ✏️
+          </button>
         </div>
       </div>
 
@@ -653,41 +650,38 @@ const FinancePage = () => {
       )}
 
       {/* 月份选择 */}
-      <div className="month-selector">
-        <button className="month-nav-btn" onClick={() => changeMonth(-1)}>
-          ← 上月
+      <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2 mb-4">
+        <button className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white" onClick={() => changeMonth(-1)}>
+          ←
         </button>
-        <span className="current-month">
+        <span className="font-bold text-gray-800 dark:text-white">
           {currentMonth}
         </span>
-        <button className="month-nav-btn" onClick={() => changeMonth(1)}>
-          下月 →
+        <button className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white" onClick={() => changeMonth(1)}>
+          →
         </button>
       </div>
 
-      {/* 统计卡片 */}
-      <div className="stats-grid">
-        <div className="stat-card income">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <div className="stat-label">月收入</div>
-            <div className="stat-value">¥{monthlyIncome.toFixed(2)}</div>
+      {/* 统计卡片 - 3列布局 */}
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">月收入</div>
+          <div className="text-sm md:text-lg font-bold text-green-600 dark:text-green-400 truncate w-full text-center">
+            <span className="text-xs scale-75 inline-block mr-0.5">¥</span>{monthlyIncome.toFixed(0)}
           </div>
         </div>
 
-        <div className="stat-card expenses">
-          <div className="stat-icon">💸</div>
-          <div className="stat-content">
-            <div className="stat-label">总支出</div>
-            <div className="stat-value">¥{totalExpenses.toFixed(2)}</div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm flex flex-col items-center justify-center">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">总支出</div>
+          <div className="text-sm md:text-lg font-bold text-red-500 dark:text-red-400 truncate w-full text-center">
+            <span className="text-xs scale-75 inline-block mr-0.5">¥</span>{totalExpenses.toFixed(0)}
           </div>
         </div>
 
-        <div className={`stat-card ${needsWarning() ? 'warning' : 'remaining'}`}>
-          <div className="stat-icon">{needsWarning() ? '⚠️' : '🎯'}</div>
-          <div className="stat-content">
-            <div className="stat-label">剩余额度</div>
-            <div className="stat-value">¥{remainingBudget.toFixed(2)}</div>
+        <div className={`rounded-xl p-3 shadow-sm flex flex-col items-center justify-center ${needsWarning() ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'}`}>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">剩余</div>
+          <div className={`text-sm md:text-lg font-bold truncate w-full text-center ${needsWarning() ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+            <span className="text-xs scale-75 inline-block mr-0.5">¥</span>{remainingBudget.toFixed(0)}
           </div>
         </div>
       </div>
@@ -824,44 +818,54 @@ const FinancePage = () => {
       </div>
 
       {/* 支出记录列表 */}
-      <div className="expenses-list">
-        <h3>
-          支出记录
-          <span className="record-count">
-            ({getCurrentMonthExpenses().length}条)
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
+          <h3 className="font-bold text-gray-800 dark:text-white text-sm">支出记录</h3>
+          <span className="text-xs text-gray-500 bg-white dark:bg-gray-800 px-2 py-0.5 rounded-full shadow-sm">
+            {getCurrentMonthExpenses().length}笔
           </span>
-        </h3>
+        </div>
 
         {getCurrentMonthExpenses().length === 0 ? (
-          <div className="empty-state">
-            <p>暂无支出记录</p>
-            <p className="empty-hint">添加您的第一笔支出记录</p>
+          <div className="p-8 text-center text-gray-400 text-sm">
+            <p className="mb-2">👻</p>
+            <p>暂无支出，去记一笔吧</p>
           </div>
         ) : (
-          <div className="expense-items">
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {getCurrentMonthExpenses().map(expense => (
-              <div key={expense.id} className="expense-item">
-                <div className="expense-left">
-                  <div className="expense-category">{expense.category}</div>
-                  <div className="expense-meta">
-                    <span className={`expense-type ${expense.type}`}>
+              <div key={expense.id} className="p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div className="flex flex-col min-w-0 flex-1 mr-3">
+                  <div className="flex items-center mb-0.5">
+                    <span className="font-medium text-gray-800 dark:text-gray-200 text-sm mr-2 truncate">
+                      {expense.category}
+                    </span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded border ${expense.type === 'fixed'
+                      ? 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
+                      : 'bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800'
+                      }`}>
                       {expense.type === 'fixed' ? '固定' : '临时'}
                     </span>
-                    <span className="expense-date">
-                      {new Date(expense.date).toLocaleDateString('zh-CN')}
-                    </span>
                   </div>
-                  {expense.description && (
-                    <div className="expense-description">{expense.description}</div>
-                  )}
+                  <div className="flex items-center text-xs text-gray-400">
+                    <span className="mr-2">{new Date(expense.date).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}</span>
+                    {expense.description && (
+                      <span className="truncate border-l border-gray-200 pl-2 max-w-[120px]">{expense.description}</span>
+                    )}
+                  </div>
                 </div>
-                <div className="expense-right">
-                  <div className="expense-amount">-¥{expense.amount.toFixed(2)}</div>
+
+                <div className="flex items-center">
+                  <span className="font-bold text-gray-800 dark:text-gray-100 text-sm mr-2">
+                    -¥{expense.amount.toFixed(2)}
+                  </span>
                   <button
-                    className="delete-btn"
+                    className="text-gray-300 hover:text-red-500 p-1 -mr-2"
                     onClick={() => deleteExpense(expense.id)}
                   >
-                    🗑️
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
                 </div>
               </div>
