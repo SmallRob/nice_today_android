@@ -22,7 +22,7 @@ function LifestyleGuide() {
     initializeStorage();
     const savedArchives = getArchives();
     setArchives(savedArchives);
-    
+
     const savedCurrent = getCurrentArchive();
     if (savedCurrent) {
       loadArchive(savedCurrent);
@@ -68,10 +68,10 @@ function LifestyleGuide() {
       matrix: createEmptyMatrix(size),
       totalScore: 0
     };
-    
+
     // 保存到本地存储
     localStorage.setItem(`life_matrix_archive_${archiveId}`, JSON.stringify(newArchive));
-    
+
     // 更新存档列表
     const updatedArchives = [...archives, {
       id: archiveId,
@@ -80,10 +80,10 @@ function LifestyleGuide() {
       matrixSize: size,
       totalScore: 0
     }];
-    
+
     localStorage.setItem('life_matrix_archives', JSON.stringify(updatedArchives));
     setArchives(updatedArchives);
-    
+
     // 设置为当前存档
     loadArchive(archiveId);
   };
@@ -92,7 +92,7 @@ function LifestyleGuide() {
   const createEmptyMatrix = (size) => {
     const matrix = [];
     const dimensions = size === 3 ? DIMENSIONS_3x3 : DIMENSIONS_7x7;
-    
+
     for (let i = 0; i < size; i++) {
       const row = [];
       for (let j = 0; j < size; j++) {
@@ -109,7 +109,7 @@ function LifestyleGuide() {
       }
       matrix.push(row);
     }
-    
+
     return matrix;
   };
 
@@ -120,12 +120,12 @@ function LifestyleGuide() {
       const confirmSwitch = window.confirm(
         `切换矩阵大小将从${matrixSize}x${matrixSize}变为${newSize}x${newSize}，当前矩阵数据将会重置。确定要继续吗？`
       );
-      
+
       if (confirmSwitch) {
         setMatrixSize(newSize);
         const newMatrix = createEmptyMatrix(newSize);
         setMatrixData(newMatrix);
-        
+
         // 更新存档
         updateArchive({ matrixSize: newSize, matrix: newMatrix });
       }
@@ -135,7 +135,7 @@ function LifestyleGuide() {
   // 更新存档
   const updateArchive = (updates) => {
     if (!currentArchive) return;
-    
+
     try {
       const archiveData = JSON.parse(localStorage.getItem(`life_matrix_archive_${currentArchive}`));
       const updatedData = {
@@ -144,10 +144,10 @@ function LifestyleGuide() {
         lastModified: new Date().toISOString(),
         totalScore: totalScore
       };
-      
+
       localStorage.setItem(`life_matrix_archive_${currentArchive}`, JSON.stringify(updatedData));
       setMatrixData(updatedData.matrix);
-      
+
       // 更新存档列表中的信息
       const updatedArchives = archives.map(archive => {
         if (archive.id === currentArchive) {
@@ -159,7 +159,7 @@ function LifestyleGuide() {
         }
         return archive;
       });
-      
+
       localStorage.setItem('life_matrix_archives', JSON.stringify(updatedArchives));
       setArchives(updatedArchives);
     } catch (error) {
@@ -173,24 +173,24 @@ function LifestyleGuide() {
       alert('请先选择一个存档！');
       return;
     }
-    
+
     const newMatrix = [...matrixData];
     const cell = newMatrix[row][col];
-    
+
     // 添加印记
     cell.imprints.push({
       ...imprint,
       id: `imprint_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       addedAt: new Date().toISOString()
     });
-    
+
     // 计算新的能量值
     const energyIncrease = imprint.power || 10;
     cell.energy = Math.min(100, (cell.energy || 0) + energyIncrease);
-    
+
     setMatrixData(newMatrix);
     updateArchive({ matrix: newMatrix });
-    
+
     // 检查是否触发能量叠加效果
     checkEnergyEffects(row, col, newMatrix);
   };
@@ -199,19 +199,19 @@ function LifestyleGuide() {
   const checkEnergyEffects = (row, col, matrix) => {
     const size = matrix.length;
     const cell = matrix[row][col];
-    
+
     // 横向连接检查（同一行）
     const rowConnections = matrix[row].filter(c => c.energy > 20);
     if (rowConnections.length >= 3) {
       console.log(`触发横向连接！行${row}有${rowConnections.length}个高能量单元格`);
     }
-    
+
     // 纵向连接检查（同一列）
     const colConnections = matrix.map(r => r[col]).filter(c => c.energy > 20);
     if (colConnections.length >= 3) {
       console.log(`触发纵向连接！列${col}有${colConnections.length}个高能量单元格`);
     }
-    
+
     // 检查3x3能量集群
     if (size === 7) {
       checkEnergyCluster(row, col, matrix);
@@ -222,7 +222,7 @@ function LifestyleGuide() {
   const checkEnergyCluster = (centerRow, centerCol, matrix) => {
     let clusterEnergy = 0;
     let clusterCells = [];
-    
+
     for (let i = Math.max(0, centerRow - 1); i <= Math.min(6, centerRow + 1); i++) {
       for (let j = Math.max(0, centerCol - 1); j <= Math.min(6, centerCol + 1); j++) {
         if (matrix[i][j].energy > 15) {
@@ -231,7 +231,7 @@ function LifestyleGuide() {
         }
       }
     }
-    
+
     if (clusterCells.length >= 6 && clusterEnergy > 100) {
       console.log('发现能量集群！', clusterCells);
       // 这里可以触发特殊效果或仪式
@@ -252,12 +252,12 @@ function LifestyleGuide() {
     if (window.confirm('确定要删除这个存档吗？此操作不可撤销。')) {
       // 从本地存储移除
       localStorage.removeItem(`life_matrix_archive_${archiveId}`);
-      
+
       // 更新存档列表
       const updatedArchives = archives.filter(archive => archive.id !== archiveId);
       localStorage.setItem('life_matrix_archives', JSON.stringify(updatedArchives));
       setArchives(updatedArchives);
-      
+
       // 如果删除的是当前存档，清空当前状态
       if (archiveId === currentArchive) {
         setCurrentArchive(null);
@@ -268,112 +268,114 @@ function LifestyleGuide() {
   };
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>生命矩阵</h1>
-        <p className="subtitle">构建你的意义能量图谱</p>
-      </header>
-      
-      <main className="app-main">
-        {!currentArchive ? (
-          <ArchiveManager
-            archives={archives}
-            onCreateArchive={createNewArchive}
-            onLoadArchive={loadArchive}
-            onDeleteArchive={deleteArchive}
-          />
-        ) : (
-          <>
-            <div className="game-controls">
-              <button 
-                className="btn-secondary"
-                onClick={() => setCurrentArchive(null)}
-              >
-                返回存档选择
-              </button>
-              
-              <button 
-                className="btn-secondary"
-                onClick={toggleMatrixSize}
-              >
-                切换矩阵: {matrixSize}x{matrixSize}
-              </button>
-              
-              <button 
-                className="btn-warning"
-                onClick={resetCurrentArchive}
-              >
-                重置当前存档
-              </button>
-              
-              <button 
-                className="btn-ritual"
-                onClick={() => setShowRitual(!showRitual)}
-              >
-                {showRitual ? '隐藏仪式指南' : '显示仪式指南'}
-              </button>
-            </div>
-            
-            <div className="game-area">
-              <div className="matrix-section">
-                <TotalScore 
-                  score={totalScore} 
-                  matrixSize={matrixSize}
-                  archiveName={archives.find(a => a.id === currentArchive)?.name || '未命名存档'}
-                />
-                
-                <MatrixGrid
-                  matrixData={matrixData}
-                  matrixSize={matrixSize}
-                  onCellClick={setSelectedCell}
-                  selectedCell={selectedCell}
-                  onAddImprint={addImprintToCell}
-                />
+    <div className="lifestyle-guide-page">
+      <div className="app">
+        <header className="app-header">
+          <h1>生命矩阵</h1>
+          <p className="subtitle">构建你的意义能量图谱</p>
+        </header>
+
+        <main className="app-main">
+          {!currentArchive ? (
+            <ArchiveManager
+              archives={archives}
+              onCreateArchive={createNewArchive}
+              onLoadArchive={loadArchive}
+              onDeleteArchive={deleteArchive}
+            />
+          ) : (
+            <>
+              <div className="game-controls">
+                <button
+                  className="btn-secondary"
+                  onClick={() => setCurrentArchive(null)}
+                >
+                  返回存档选择
+                </button>
+
+                <button
+                  className="btn-secondary"
+                  onClick={toggleMatrixSize}
+                >
+                  切换矩阵: {matrixSize}x{matrixSize}
+                </button>
+
+                <button
+                  className="btn-warning"
+                  onClick={resetCurrentArchive}
+                >
+                  重置当前存档
+                </button>
+
+                <button
+                  className="btn-ritual"
+                  onClick={() => setShowRitual(!showRitual)}
+                >
+                  {showRitual ? '隐藏仪式指南' : '显示仪式指南'}
+                </button>
               </div>
-              
-              <div className="info-section">
-                {selectedCell ? (
-                  <DimensionInfo
-                    cell={selectedCell}
+
+              <div className="game-area">
+                <div className="matrix-section">
+                  <TotalScore
+                    score={totalScore}
+                    matrixSize={matrixSize}
+                    archiveName={archives.find(a => a.id === currentArchive)?.name || '未命名存档'}
+                  />
+
+                  <MatrixGrid
                     matrixData={matrixData}
+                    matrixSize={matrixSize}
+                    onCellClick={setSelectedCell}
+                    selectedCell={selectedCell}
                     onAddImprint={addImprintToCell}
                   />
-                ) : (
-                  <div className="dimension-placeholder">
-                    <h3>点击矩阵中的单元格查看详细信息</h3>
-                    <p>每个单元格代表你生命的一个维度</p>
-                    <p>添加能量印记来增强该维度的能量</p>
-                    <div className="imprint-types-preview">
-                      <h4>能量印记类型</h4>
-                      <ul>
-                        {IMPRINT_TYPES.slice(0, 5).map(type => (
-                          <li key={type.id}>
-                            <span className={`imprint-badge ${type.category}`}>{type.name}</span>
-                            <span> - {type.description}</span>
-                          </li>
-                        ))}
-                      </ul>
+                </div>
+
+                <div className="info-section">
+                  {selectedCell ? (
+                    <DimensionInfo
+                      cell={selectedCell}
+                      matrixData={matrixData}
+                      onAddImprint={addImprintToCell}
+                    />
+                  ) : (
+                    <div className="dimension-placeholder">
+                      <h3>点击矩阵中的单元格查看详细信息</h3>
+                      <p>每个单元格代表你生命的一个维度</p>
+                      <p>添加能量印记来增强该维度的能量</p>
+                      <div className="imprint-types-preview">
+                        <h4>能量印记类型</h4>
+                        <ul>
+                          {IMPRINT_TYPES.slice(0, 5).map(type => (
+                            <li key={type.id}>
+                              <span className={`imprint-badge ${type.category}`}>{type.name}</span>
+                              <span> - {type.description}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                {showRitual && (
-                  <RitualGuide
-                    matrixData={matrixData}
-                    totalScore={totalScore}
-                    matrixSize={matrixSize}
-                  />
-                )}
+                  )}
+
+                  {showRitual && (
+                    <RitualGuide
+                      matrixData={matrixData}
+                      totalScore={totalScore}
+                      matrixSize={matrixSize}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </main>
-      
-      <footer className="app-footer">
-        <p>生命矩阵 - 离线版本 | 数据存储在本地浏览器中</p>
-        <p>所有数据仅保存在您的设备上，不会被上传到任何服务器</p>
-      </footer>
+            </>
+          )}
+        </main>
+
+        <footer className="app-footer">
+          <p>生命矩阵 - 离线版本 | 数据存储在本地浏览器中</p>
+          <p>所有数据仅保存在您的设备上，不会被上传到任何服务器</p>
+        </footer>
+      </div>
     </div>
   );
 }

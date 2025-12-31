@@ -204,24 +204,32 @@
 
 /* 矩阵行样式 - 现在使用grid容器直接管理布局 */
 .lifestyle-guide-page .matrix-row {
-  display: contents; /* 让子元素直接参与grid布局 */
+  display: contents;
+  /* 让子元素直接参与grid布局 */
 }
 
 .lifestyle-guide-page .matrix-cell {
   border-radius: 10px;
   border: 2px solid;
-  padding: 8px 4px; /* 减少内边距，增加左右空间 */
+  padding: 8px 4px;
+  /* 减少内边距，增加左右空间 */
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* 均匀分布内容 */
-  align-items: center; /* 居中对齐 */
-  overflow: visible; /* 允许内容显示 */
-  min-width: 0; /* 允许单元格收缩 */
-  min-height: 70px; /* 增加最小高度 */
-  flex: 1; /* 确保单元格均匀分布 */
+  justify-content: space-between;
+  /* 均匀分布内容 */
+  align-items: center;
+  /* 居中对齐 */
+  overflow: visible;
+  /* 允许内容显示 */
+  min-width: 0;
+  /* 允许单元格收缩 */
+  min-height: 70px;
+  /* 增加最小高度 */
+  flex: 1;
+  /* 确保单元格均匀分布 */
 }
 
 .lifestyle-guide-page .matrix-cell:hover {
@@ -260,9 +268,17 @@
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
 }
 
 /* 单元格内容 */
@@ -279,28 +295,37 @@
 }
 
 .dimension-name {
-  font-size: clamp(0.5rem, 1.8vw, 0.9rem); /* 更小的字体范围确保移动设备适配 */
+  font-size: clamp(0.5rem, 1.8vw, 0.9rem);
+  /* 更小的字体范围确保移动设备适配 */
   font-weight: 600;
   display: block;
-  margin-bottom: 4px; /* 减少间距 */
+  margin-bottom: 4px;
+  /* 减少间距 */
   line-height: 1.1;
   text-align: center;
-  word-break: keep-all; /* 保持单词完整性 */
-  hyphens: auto; /* 允许连字符断词 */
+  word-break: keep-all;
+  /* 保持单词完整性 */
+  hyphens: auto;
+  /* 允许连字符断词 */
   max-width: 100%;
-  flex-shrink: 0; /* 防止文字被压缩 */
+  flex-shrink: 0;
+  /* 防止文字被压缩 */
 }
 
 .cell-energy {
-  margin: 2px 0; /* 减少间距 */
-  flex-shrink: 0; /* 防止能量值被压缩 */
+  margin: 2px 0;
+  /* 减少间距 */
+  flex-shrink: 0;
+  /* 防止能量值被压缩 */
 }
 
 .energy-value {
-  font-size: clamp(1.2rem, 3vw, 1.8rem); /* 能量值也自适应 */
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  /* 能量值也自适应 */
   font-weight: 800;
   display: block;
-  margin-bottom: 2px; /* 减少间距 */
+  margin-bottom: 2px;
+  /* 减少间距 */
   line-height: 1;
 }
 
@@ -346,6 +371,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -456,7 +482,8 @@
   gap: 15px;
 }
 
-.dimension-info, .ritual-guide {
+.dimension-info,
+.ritual-guide {
   background: white;
   border-radius: 12px;
   padding: 18px;
@@ -712,14 +739,14 @@
   border-color: #4b5563;
 }
 
-.size-option input[type="radio"]:checked + .size-option-content {
+.size-option input[type="radio"]:checked+.size-option-content {
   border-color: #667eea;
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(102, 126, 234, 0.2);
 }
 
-.dark .size-option input[type="radio"]:checked + .size-option-content {
+.dark .size-option input[type="radio"]:checked+.size-option-content {
   border-color: #7e22ce;
   background: linear-gradient(135deg, rgba(126, 34, 206, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
   box-shadow: 0 6px 15px rgba(126, 34, 206, 0.3);
@@ -962,66 +989,66 @@
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-  .app {
+  .lifestyle-guide-page .app {
     padding: 12px;
     /* 移动端安全区域支持 */
     padding-top: max(12px, env(safe-area-inset-top));
     padding-bottom: max(12px, env(safe-area-inset-bottom));
   }
-  
-  .app-header {
+
+  .lifestyle-guide-page .app-header {
     padding: 20px 15px;
     margin-bottom: 20px;
   }
-  
-  .app-header h1 {
+
+  .lifestyle-guide-page .app-header h1 {
     font-size: 1.8rem;
     letter-spacing: 1px;
   }
-  
-  .subtitle {
+
+  .lifestyle-guide-page .subtitle {
     font-size: 1rem;
   }
-  
-  .game-controls {
+
+  .lifestyle-guide-page .game-controls {
     flex-direction: column;
     gap: 8px;
     padding: 12px;
     margin-bottom: 15px;
   }
-  
-  button {
+
+  .lifestyle-guide-page button {
     width: 100%;
     padding: 12px 16px;
     font-size: 13px;
     min-height: 44px;
   }
-  
-  .matrix-section {
+
+  .lifestyle-guide-page .matrix-section {
     padding: 15px;
     overflow: hidden;
     margin-bottom: 15px;
   }
-  
-  .matrix-grid {
+
+  .lifestyle-guide-page .matrix-grid {
     gap: 3px;
     padding: 6px;
     max-height: 50vh;
     max-width: 100%;
   }
-  
-  .matrix-row {
+
+  .lifestyle-guide-page .matrix-row {
     gap: 3px;
   }
-  
-  .matrix-cell {
+
+  .lifestyle-guide-page .matrix-cell {
     padding: 6px 4px;
     min-width: 0;
     overflow: hidden;
     min-height: 60px;
   }
-  
-  .dimension-name {
+
+  .lifestyle-guide-page .dimension-name {
     font-size: clamp(0.4rem, 1.1vw, 0.55rem);
     line-height: 1.1;
     margin-bottom: 1px;
@@ -1029,58 +1056,59 @@
     word-break: keep-all;
     hyphens: auto;
   }
-  
-  .energy-value {
+
+  .lifestyle-guide-page .energy-value {
     font-size: 1rem;
     margin-bottom: 2px;
   }
-  
-  .energy-bar {
+
+  .lifestyle-guide-page .energy-bar {
     height: 4px;
   }
-  
-  .info-section {
+
+  .lifestyle-guide-page .info-section {
     gap: 15px;
   }
-  
-  .dimension-info, .ritual-guide {
+
+  .lifestyle-guide-page .dimension-info,
+  .lifestyle-guide-page .ritual-guide {
     padding: 15px;
   }
-  
-  .archive-manager {
+
+  .lifestyle-guide-page .archive-manager {
     padding: 15px;
   }
-  
-  .size-options {
+
+  .lifestyle-guide-page .size-options {
     grid-template-columns: 1fr;
   }
-  
-  .archives-grid {
+
+  .lifestyle-guide-page .archives-grid {
     grid-template-columns: 1fr;
   }
-  
+
   /* 移动端优化：游戏区域更紧凑 */
-  .game-area {
+  .lifestyle-guide-page .game-area {
     gap: 12px;
   }
-  
+
   /* 移动端优化：dimension-placeholder */
-  .dimension-placeholder {
+  .lifestyle-guide-page .dimension-placeholder {
     padding: 30px 15px;
   }
-  
-  .dimension-placeholder h3 {
+
+  .lifestyle-guide-page .dimension-placeholder h3 {
     font-size: 1.2rem;
     margin-bottom: 12px;
   }
-  
-  .dimension-placeholder p {
+
+  .lifestyle-guide-page .dimension-placeholder p {
     font-size: 0.9rem;
     margin-bottom: 8px;
   }
-  
+
   /* 移动端优化：页脚 */
-  .app-footer {
+  .lifestyle-guide-page .app-footer {
     padding: 20px 15px;
     margin-top: 30px;
     font-size: 0.8rem;
@@ -1088,92 +1116,93 @@
 }
 
 @media (max-width: 576px) {
-  .app {
+  .lifestyle-guide-page .app {
     padding: 10px;
     padding-top: max(10px, env(safe-area-inset-top));
     padding-bottom: max(10px, env(safe-area-inset-bottom));
   }
-  
-  .app-header {
+
+  .lifestyle-guide-page .app-header {
     padding: 15px 10px;
     margin-bottom: 15px;
   }
-  
-  .app-header h1 {
+
+  .lifestyle-guide-page .app-header h1 {
     font-size: 1.6rem;
   }
-  
-  .subtitle {
+
+  .lifestyle-guide-page .subtitle {
     font-size: 0.9rem;
   }
-  
-  .matrix-grid {
+
+  .lifestyle-guide-page .matrix-grid {
     gap: 2px;
     padding: 4px;
     max-height: 45vh;
   }
-  
-  .matrix-row {
+
+  .lifestyle-guide-page .matrix-row {
     gap: 2px;
   }
-  
-  .matrix-cell {
+
+  .lifestyle-guide-page .matrix-cell {
     padding: 4px 2px;
     min-height: 50px;
   }
-  
-  .dimension-name {
+
+  .lifestyle-guide-page .dimension-name {
     font-size: 0.35rem;
     line-height: 1;
     margin-bottom: 0;
   }
-  
-  .energy-value {
+
+  .lifestyle-guide-page .energy-value {
     font-size: 0.8rem;
   }
-  
-  .energy-bar {
+
+  .lifestyle-guide-page .energy-bar {
     height: 3px;
   }
-  
-  .imprint-count {
+
+  .lifestyle-guide-page .imprint-count {
     font-size: 0.6rem;
     padding: 0 4px;
   }
-  
+
   /* 超小屏幕按钮优化 */
-  button {
+  .lifestyle-guide-page button {
     padding: 10px 12px;
     font-size: 12px;
     min-height: 40px;
   }
-  
+
   /* 超小屏幕布局优化 */
   .game-controls {
     padding: 10px;
     gap: 6px;
   }
-  
+
   .matrix-section {
     padding: 10px;
   }
-  
+
   .info-section {
     gap: 10px;
   }
-  
-  .dimension-info, .ritual-guide {
+
+  .dimension-info,
+  .ritual-guide {
     padding: 12px;
   }
-  
+
   .dimension-placeholder {
     padding: 20px 10px;
   }
-  
+
   .dimension-placeholder h3 {
     font-size: 1.1rem;
   }
-  
+
   .dimension-placeholder p {
     font-size: 0.8rem;
   }
@@ -1444,8 +1473,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
@@ -1470,6 +1504,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1741,8 +1776,15 @@
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .score-value {
@@ -2318,6 +2360,7 @@
 
 /* 响应式调整 - 新增组件 */
 @media (max-width: 768px) {
+
   .dimension-info,
   .total-score-container,
   .ritual-guide {
