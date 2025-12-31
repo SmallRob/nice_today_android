@@ -7,119 +7,25 @@ import './TabNavigation.css';
 const TabNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [refreshKey, setRefreshKey] = useState(0);
-  const tabNavRef = useRef(null);
-  
+
   // 检测是否为iOS设备，用于调整底部安全区域
   const isIOS = Capacitor.getPlatform() === 'ios';
-  
-  // 清理DOM样式，防止样式污染
-  const cleanupStyles = () => {
-    if (tabNavRef.current) {
-      // 清理所有tab按钮的样式 - 只清除transform和fontSize，保留width/height由CSS控制
-      const buttons = tabNavRef.current.querySelectorAll('.tab-button');
-      buttons.forEach(btn => {
-        btn.style.transform = '';
-        btn.style.fontSize = '';
-      });
-      
-      // 清理图标容器样式 - 只清除transform和fontSize
-      const icons = tabNavRef.current.querySelectorAll('.tab-icon');
-      icons.forEach(icon => {
-        icon.style.transform = '';
-        icon.style.fontSize = '';
-      });
-    }
-  };
 
-  // 强制刷新导航栏
-  const forceRefresh = () => {
-    setRefreshKey(prev => prev + 1);
-    // 触发重排
-    if (tabNavRef.current) {
-      // eslint-disable-next-line no-unused-expressions
-      tabNavRef.current.offsetHeight;
-      // 强制重新应用样式
-      setTimeout(() => {
-        cleanupStyles();
-      }, 10);
-    }
-  };
-  
   // 页面切换时更新缓存
   useEffect(() => {
-    let isMounted = true;
-    
     const updateCache = async () => {
-      if (!isMounted) return;
-      
       try {
         // 从本地存储获取缓存超时设置
         const savedCacheTimeout = localStorage.getItem('cacheTimeout');
         const timeout = savedCacheTimeout ? parseInt(savedCacheTimeout) : 180000; // 默认3分钟
         storageManager.setGlobalCacheTimeout(timeout);
-        
-        // 根据当前路径触发相应页面的缓存更新逻辑
-        const updatePageCache = async () => {
-          if (!isMounted) return;
-        };  
-        
-        await updatePageCache();
       } catch (error) {
         console.warn('缓存更新失败:', error);
       }
     };
-    
+
     updateCache();
-    
-    // 页面切换时强制刷新
-    setTimeout(() => {
-      if (isMounted) {
-        cleanupStyles();
-        forceRefresh();
-      }
-    }, 50);
-    
-    return () => {
-      isMounted = false;
-    };
   }, [location.pathname]);
-
-  // 监听页面可见性变化，从其他页面返回时强制刷新
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        // 页面变为可见时，清理样式并强制刷新
-        setTimeout(() => {
-          cleanupStyles();
-          forceRefresh();
-        }, 50);
-      }
-    };
-
-    // 监听页面获得焦点（从其他页面返回）
-    window.addEventListener('focus', () => {
-      setTimeout(() => {
-        cleanupStyles();
-        forceRefresh();
-      }, 50);
-    });
-
-    // 监听页面可见性变化
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('focus', handleVisibilityChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-
-  // 组件卸载时清理样式
-  useEffect(() => {
-    return () => {
-      cleanupStyles();
-    };
-  }, []);
 
   // 优化的Tab样式类 - 根据文本长度自适应宽度
   const getTabClassName = (isActive) => {
@@ -242,12 +148,8 @@ const TabNavigation = () => {
 
   return (
     <div
-      ref={tabNavRef}
-      key={refreshKey}
-      className={`tab-navigation ${
-        isIOS ? 'pb-safe-bottom' : ''
-      }`}
-      style={{ animation: 'none' }}
+      className={`tab-navigation ${isIOS ? 'pb-safe-bottom' : ''
+        }`}
     >
       {/* 增加高度到 63px，优化响应式布局 */}
       <div className="tab-navigation-container">
@@ -255,7 +157,7 @@ const TabNavigation = () => {
           const isActive = location.pathname === tab.path;
           return (
             <button
-              key={`${tab.id}-${refreshKey}`}
+              key={tab.id}
               onClick={() => handleTabClick(tab.path)}
               className={getTabClassName(isActive)}
             >
@@ -264,19 +166,13 @@ const TabNavigation = () => {
                 {/* 图标容器 */}
                 <div className="tab-icon">
                   {isActive ?
-                    React.cloneElement(tab.activeIcon, {
-                      key: `active-${refreshKey}`,
-                      style: { animation: 'none' }
-                    }) :
-                    React.cloneElement(tab.icon, {
-                      key: `inactive-${refreshKey}`,
-                      style: { animation: 'none' }
-                    })
+                    tab.activeIcon :
+                    tab.icon
                   }
                 </div>
 
                 {/* 标签文字 */}
-                <span className="tab-label" key={`label-${refreshKey}`}>{tab.label}</span>
+                <span className="tab-label">{tab.label}</span>
               </div>
             </button>
           );

@@ -106,6 +106,7 @@ const BaziAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/BaziAna
 const WuxingHealthPage = lazyLoadWithErrorHandling(() => import('./pages/WuxingHealthPage'));
 const OrganRhythmPage = lazyLoadWithErrorHandling(() => import('./pages/OrganRhythmPage'));
 const ShaoyongYixuePage = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
+const FishingGamePage = lazyLoadWithErrorHandling(() => import('./pages/FishingGamePage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -186,6 +187,7 @@ const AppLayout = () => {
             <Route path="/bazi-analysis" element={<BaziAnalysisPage />} />
             <Route path="/wuxing-health" element={<WuxingHealthPage />} />
             <Route path="/organ-rhythm" element={<OrganRhythmPage />} />
+            <Route path="/fishing-game" element={<FishingGamePage />} />
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/shaoyong-yixue" element={<ShaoyongYixuePage />} />
           </Routes>

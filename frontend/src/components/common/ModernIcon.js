@@ -18,6 +18,7 @@ import CulturalCupIcon from '../icons/CulturalCupIcon';
 import DressGuideIcon from '../icons/DressGuideIcon';
 import WuxingHealthIcon from '../icons/WuxingHealthIcon';
 import OrganRhythmIcon from '../icons/OrganRhythmIcon';
+import FishingGameIcon from '../icons/FishingGameIcon';
 
 /**
  * 图标映射表 - 稳定的React组件渲染
@@ -43,6 +44,7 @@ const iconMap = {
   'dress-guide': DressGuideIcon,
   'wuxing-health': WuxingHealthIcon,
   'organ-rhythm': OrganRhythmIcon,
+  'fishing-game': FishingGameIcon,
   
   // 默认图标（用于category）
   'daily': TodoIcon,

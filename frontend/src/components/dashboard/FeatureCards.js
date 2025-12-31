@@ -304,6 +304,20 @@ const OrganRhythmCard = () => {
   );
 };
 
+/**
+ * 钓了么钓鱼游戏组件
+ */
+const FishingGameCard = () => {
+  return (
+    <FeatureCard
+      title="钓了么"
+      icon="fishing-game"
+      category="entertainment"
+      route="/fishing-game"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -323,5 +337,6 @@ export {
   CulturalCupCard,
   DressGuideCard,
   WuxingHealthCard,
-  OrganRhythmCard
+  OrganRhythmCard,
+  FishingGameCard
 };

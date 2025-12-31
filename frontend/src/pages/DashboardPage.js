@@ -22,7 +22,8 @@ import {
   CulturalCupCard,
   DressGuideCard,
   WuxingHealthCard,
-  OrganRhythmCard
+  OrganRhythmCard,
+  FishingGameCard
 } from '../components/dashboard/FeatureCards';
 import {
   loadFeatureSortOrder,
@@ -49,6 +50,7 @@ const ALL_FEATURES = [
   { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类' },
   { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类' },
   { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类' },
+  { component: FishingGameCard, name: 'FishingGameCard', category: '娱乐休闲类' },
   { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类' },
   { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类' }
 ];
