@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ModernIcon from '../common/ModernIcon';
@@ -64,15 +64,16 @@ const FeatureCard = ({
     handleDrop(e, id || String(index));
   }, [handleDrop, id, index]);
 
-  // 获取图标名称，根据类别或图标映射
-  const getIconName = useCallback(() => {
-    // 优先使用直接提供的 icon 属性作为 SVG 图标名
-    if (icon && ['daily', 'fortune', 'growth', 'health', 'entertainment'].includes(icon)) {
-      return icon;
+  // 获取图标内容 (使用 memo 缓存)
+  const iconContent = useMemo(() => {
+    // 直接使用传入的 icon 名称作为 SVG 图标名
+    // 如果 icon 存在，优先使用它
+    if (icon) {
+      return <ModernIcon name={icon} color="#ffffff" />;
     }
     
-    // 如果没有提供，则根据 category 映射
-    const iconMap = {
+    // 如果没有提供 icon，则根据 category 映射
+    const categoryIconMap = {
       'daily': 'daily',
       'fortune': 'fortune',
       'growth': 'growth',
@@ -80,23 +81,14 @@ const FeatureCard = ({
       'entertainment': 'entertainment'
     };
     
-    return iconMap[category] || 'default';
-  }, [icon, category]);
-
-  // 获取图标内容 (使用 memo 缓存)
-  const iconContent = useMemo(() => {
-    // 直接使用传入的 icon 名称作为 SVG 图标名
-    // 如果 icon 存在且不在默认分类中，使用它
-    if (icon && !['daily', 'fortune', 'growth', 'health', 'entertainment', 'default'].includes(icon)) {
-      return <ModernIcon name={icon} color="#ffffff" />;
+    const categoryIcon = categoryIconMap[category] || 'default';
+    if (categoryIcon !== 'default') {
+      return <ModernIcon name={categoryIcon} color="#ffffff" />;
     }
-    // 对于默认分类，使用映射
-    if (getIconName() !== 'default') {
-      return <ModernIcon name={getIconName()} color="#ffffff" />;
-    }
+    
     // 对于未定义的情况，使用原有逻辑
     return getIconContent(icon);
-  }, [icon, getIconName]);
+  }, [icon, category]);
 
   // 构建 className
   const cardClassName = useMemo(() => {
@@ -188,4 +180,4 @@ FeatureCard.defaultProps = {
 };
 
 // 性能优化:使用 React.memo 避免不必要的重新渲染
-export default React.memo(FeatureCard);
+export default memo(FeatureCard);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './styles/lifegrid-styles.css';
 import ArchiveManager from '../components/lifeStyleGride/ArchiveManager';
 import MatrixGrid from '../components/lifeStyleGride/MatrixGrid';
 import DimensionInfo from '../components/lifeStyleGride/DimensionInfo';
@@ -6,7 +7,6 @@ import TotalScore from '../components/lifeStyleGride/TotalScore';
 import RitualGuide from '../components/lifeStyleGride/RitualGuide';
 import { initializeStorage, getArchives, getCurrentArchive } from '../utils/lifeGridStorage';
 import { DIMENSIONS_3x3, DIMENSIONS_7x7, IMPRINT_TYPES } from '../utils/matrixData';
-import './styles/lifegrid-styles.css';
 
 function LifestyleGuide() {
   const [currentArchive, setCurrentArchive] = useState(null);

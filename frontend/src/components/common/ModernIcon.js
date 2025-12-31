@@ -54,8 +54,9 @@ const iconMap = {
 
 const ModernIcon = ({ name, size = 24, color = '#1a1a1a', className = '' }) => {
   // 获取对应的图标组件
-  const IconComponent = iconMap[name] || iconMap.default;
+  const IconComponent = iconMap[name];
   
+  // 如果找不到指定的图标，但有默认图标
   if (!IconComponent) {
     console.warn(`Icon "${name}" not found, using default icon`);
     return (
@@ -71,8 +72,24 @@ const ModernIcon = ({ name, size = 24, color = '#1a1a1a', className = '' }) => {
     );
   }
 
-  // 渲染图标组件
-  return <IconComponent size={size} color={color} className={className} />;
+  // 安全渲染图标组件，避免渲染错误
+  try {
+    return <IconComponent size={size} color={color} className={className} />;
+  } catch (error) {
+    console.error(`Error rendering icon "${name}":`, error);
+    // 如果渲染出错，返回默认图标
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        className={className}
+      >
+        <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
+      </svg>
+    );
+  }
 };
 
 export default ModernIcon;

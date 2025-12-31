@@ -2,14 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { useUserSummary } from '../hooks/useUserInfo';
-import { useNavigate } from 'react-router-dom';
 import { generateDailyHoroscope, generateWeeklyHoroscope, generateMonthlyHoroscope } from '../utils/horoscopeAlgorithm';
-import '../styles/dashboard.css';
 
 const HoroscopePage = () => {
   const { theme } = useTheme();
   const { currentConfig } = useUserConfig();
-  const navigate = useNavigate();
+
   const userSummary = useUserSummary();
 
   // 状态管理
@@ -91,88 +89,70 @@ const HoroscopePage = () => {
     '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'
   ];
 
-  // 返回上一页
-  const handleBack = () => {
-    navigate('/dashboard');
-  };
+
 
   // 渲染运势分数
   const renderScore = (score, label) => (
-    <div className="flex flex-col items-center p-3 bg-white/80 dark:bg-gray-800/80 rounded-lg shadow-sm">
-      <div className="text-lg font-bold text-gray-800 dark:text-white">{score}</div>
-      <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">{label}</div>
-      <div className="w-16 h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-2 overflow-hidden">
-        <div 
-          className="h-full bg-gradient-to-r from-blue-500 to-purple-600" 
-          style={{ width: `${score}%` }}
-        />
+    <div className={`p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className="text-center">
+        <div className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{score}</div>
+        <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{label}</div>
       </div>
     </div>
   );
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-pink-900/20 ${theme}`}>
+    <div className={`min-h-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} pb-6`}>
       {/* 头部 */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={handleBack}
-              className="text-white hover:text-purple-100 flex items-center"
-            >
-              <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回首页
-            </button>
-            <h1 className="text-xl font-bold">
-              {viewMode === 'daily' ? '今日运势' : viewMode === 'weekly' ? '本周运势' : '本月运势'}
+      <div className={`px-4 pt-6 pb-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className="text-center mb-4">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="text-2xl">✨</span>
+            <h1 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              星座运势
             </h1>
-            <div className="w-12"></div>
           </div>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            星座运势分析 · 每日能量预测
+          </p>
         </div>
       </div>
 
       {/* 视图切换 */}
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-md sticky top-16 z-30">
-        <div className="container mx-auto px-4">
-          <div className="flex overflow-x-auto space-x-2 py-3">
-            <button
-              onClick={() => setViewMode('daily')}
-              className={`flex-shrink-0 px-4 py-2 rounded-full font-medium transition-all text-sm ${
-                viewMode === 'daily'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+      <div className={`px-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className="flex overflow-x-auto space-x-4 py-3">
+          <button
+            onClick={() => setViewMode('daily')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'daily'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
-            >
-              今日运势
-            </button>
-            <button
-              onClick={() => setViewMode('weekly')}
-              className={`flex-shrink-0 px-4 py-2 rounded-full font-medium transition-all text-sm ${
-                viewMode === 'weekly'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+          >
+            今日运势
+          </button>
+          <button
+            onClick={() => setViewMode('weekly')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'weekly'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
-            >
-              本周运势
-            </button>
-            <button
-              onClick={() => setViewMode('monthly')}
-              className={`flex-shrink-0 px-4 py-2 rounded-full font-medium transition-all text-sm ${
-                viewMode === 'monthly'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+          >
+            本周运势
+          </button>
+          <button
+            onClick={() => setViewMode('monthly')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'monthly'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
-            >
-              本月运势
-            </button>
-          </div>
+          >
+            本月运势
+          </button>
         </div>
       </div>
 
       {/* 主内容 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="px-4 py-6 max-w-4xl mx-auto">
         {/* 星座选择器 */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
           <div className="flex items-center justify-between mb-4">
@@ -210,14 +190,8 @@ const HoroscopePage = () => {
 
         {/* 错误提示 */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
-            <p className="text-red-600 dark:text-red-400">{error}</p>
-            <button
-              onClick={loadHoroscopeData}
-              className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors"
-            >
-              重新加载
-            </button>
+          <div className={`mb-3 px-4 py-2 rounded-lg text-center ${theme === 'dark' ? 'bg-red-900/30 text-red-300' : 'bg-red-100 text-red-700'}`}>
+            <p>{error}</p>
           </div>
         )}
 
@@ -381,13 +355,9 @@ const HoroscopePage = () => {
         )}
 
         {/* 运势说明 */}
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            ※ 运势仅供参考，请以积极心态面对每一天 ※
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            数据更新时间：{new Date().toLocaleString('zh-CN')}
-          </p>
+        <div className="text-center text-gray-600 dark:text-gray-300 text-xs">
+          <p>数据更新时间：{new Date().toLocaleString('zh-CN')}</p>
+          <p className="mt-1">星座运势仅供参考，请理性看待，结合实际情况做出决策</p>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import HoroscopeTab from '../components/HoroscopeTab';
-import '../styles/horoscope-page.css';
+
 
 const HoroscopePage = () => {
   const { theme } = useTheme();
@@ -40,66 +40,60 @@ const HoroscopePage = () => {
   }
 
   return (
-    <div className={`horoscope-page-container min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-purple-900/30 ${theme}`}>
-      {/* 导航标题栏 */}
-      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => window.history.back()}
-              className="text-white hover:text-pink-100 flex items-center"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">星座运势</h1>
-            <div className="w-12"></div>
+    <div className={`min-h-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} pb-6`}>
+      {/* 头部 */}
+      <div className={`px-4 pt-6 pb-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className="text-center mb-4">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="text-2xl">✨</span>
+            <h1 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              星座运势
+            </h1>
           </div>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            星座运势分析 · 每日能量预测
+          </p>
         </div>
       </div>
 
       {/* Tab导航 */}
-      <div className="bg-white dark:bg-gray-800 shadow-md sticky top-16 z-30">
-        <div className="container mx-auto px-4">
-          <div className="flex overflow-x-auto space-x-4 py-3">
-            <button
-              onClick={() => handleTabChange('daily')}
-              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'daily'
-                  ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700'
-                }`}
-            >
-              今日运势
-            </button>
-            <button
-              onClick={() => handleTabChange('weekly')}
-              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'weekly'
-                  ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700'
-                }`}
-            >
-              本周运势
-            </button>
-            <button
-              onClick={() => handleTabChange('monthly')}
-              className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'monthly'
-                  ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-gray-700'
-                }`}
-            >
-              本月运势
-            </button>
-          </div>
+      <div className={`px-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className="flex overflow-x-auto space-x-4 py-3">
+          <button
+            onClick={() => handleTabChange('daily')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'daily'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
+              }`}
+          >
+            今日运势
+          </button>
+          <button
+            onClick={() => handleTabChange('weekly')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'weekly'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
+              }`}
+          >
+            本周运势
+          </button>
+          <button
+            onClick={() => handleTabChange('monthly')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${selectedTab === 'monthly'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
+              }`}
+          >
+            本月运势
+          </button>
         </div>
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="px-4 py-6 max-w-4xl mx-auto">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
-            <p className="text-red-600 dark:text-red-400">{error}</p>
+          <div className={`mb-3 px-4 py-2 rounded-lg text-center ${theme === 'dark' ? 'bg-red-900/30 text-red-300' : 'bg-red-100 text-red-700'}`}>
+            <p>{error}</p>
           </div>
         )}
 
