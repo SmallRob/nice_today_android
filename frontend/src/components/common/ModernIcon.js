@@ -19,6 +19,7 @@ import DressGuideIcon from '../icons/DressGuideIcon';
 import WuxingHealthIcon from '../icons/WuxingHealthIcon';
 import OrganRhythmIcon from '../icons/OrganRhythmIcon';
 import FishingGameIcon from '../icons/FishingGameIcon';
+import FengShuiCompassIcon from '../icons/FengShuiCompassIcon';
 
 /**
  * 图标映射表 - 稳定的React组件渲染
@@ -45,13 +46,15 @@ const iconMap = {
   'wuxing-health': WuxingHealthIcon,
   'organ-rhythm': OrganRhythmIcon,
   'fishing-game': FishingGameIcon,
-  
+  'feng-shui-compass': FengShuiCompassIcon,
+
   // 默认图标（用于category）
   'daily': TodoIcon,
   'fortune': HoroscopeIcon,
   'growth': EnergyBoostIcon,
   'health': BiorhythmIcon,
   'entertainment': TarotGardenIcon,
+  'tool': FengShuiCompassIcon,
 };
 
 const ModernIcon = ({ name, size = 24, color = '#1a1a1a', className = '' }) => {

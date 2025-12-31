@@ -376,6 +376,11 @@
   box-shadow: 0 4px 20px rgba(233, 30, 99, 0.4) !important;
 }
 
+.feature-card.category-tool::before {
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 50%, #C41E3A 100%) !important;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4) !important;
+}
+
 /* 应用阴影到卡片 */
 /* 应用阴影到卡片 */
 .dashboard-page-wrapper .feature-card {
@@ -901,6 +906,11 @@
 .dark .feature-card.category-entertainment::before {
   background: linear-gradient(135deg, #E91E63 0%, #FF5722 100%);
   box-shadow: 0 4px 20px rgba(233, 30, 99, 0.5);
+}
+
+.dark .feature-card.category-tool::before {
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 50%, #C41E3A 100%);
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);
 }
 
 .dark .feature-card:hover {

@@ -143,7 +143,7 @@ FeatureCard.propTypes = {
   /** 图标名称或 emoji */
   icon: PropTypes.string,
   /** 卡片类别，用于确定主题色 */
-  category: PropTypes.oneOf(['daily', 'fortune', 'growth', 'health', 'entertainment', 'default']),
+  category: PropTypes.oneOf(['daily', 'fortune', 'growth', 'health', 'entertainment', 'default', 'tool']),
   /** 路由路径 */
   route: PropTypes.string,
   /** 点击回调函数 */

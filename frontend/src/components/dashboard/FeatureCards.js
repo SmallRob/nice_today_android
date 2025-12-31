@@ -87,8 +87,8 @@ const PersonalityTraitCard = () => {
       console.log('从功能卡片跳转到星座特质页面:', userZodiac);
       // 优化：直接跳转到用户的星座特质页面，传递URL参数
       navigate(`/zodiac-traits/${encodeURIComponent(userZodiac)}`, {
-        state: { 
-          from: 'feature-card', 
+        state: {
+          from: 'feature-card',
           userZodiac: userZodiac,
           timestamp: Date.now()
         }
@@ -318,6 +318,20 @@ const FishingGameCard = () => {
   );
 };
 
+/**
+ * 风水罗盘组件
+ */
+const FengShuiCompassCard = () => {
+  return (
+    <FeatureCard
+      title="风水罗盘"
+      icon="feng-shui-compass"
+      category="tool"
+      route="/feng-shui-compass"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -338,5 +352,6 @@ export {
   DressGuideCard,
   WuxingHealthCard,
   OrganRhythmCard,
-  FishingGameCard
+  FishingGameCard,
+  FengShuiCompassCard
 };

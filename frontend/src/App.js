@@ -17,14 +17,14 @@ const { Suspense } = React;
 
 // 创建带有错误处理的懒加载函数
 const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
-  return React.lazy(() => 
+  return React.lazy(() =>
     importFunc().catch(error => {
       console.error('组件加载失败:', error);
-      
+
       // 如果是ChunkLoadError，记录错误并尝试恢复
       if (error.name === 'ChunkLoadError') {
         console.error('检测到ChunkLoadError，尝试恢复...');
-        
+
         // 记录错误信息
         if (typeof window !== 'undefined' && window.localStorage) {
           try {
@@ -35,7 +35,7 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
               timestamp: new Date().toISOString(),
               url: window.location.href
             };
-            
+
             const errors = JSON.parse(window.localStorage.getItem('chunkLoadErrors') || '[]');
             errors.push(errorInfo);
             window.localStorage.setItem('chunkLoadErrors', JSON.stringify(errors));
@@ -44,12 +44,12 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
           }
         }
       }
-      
+
       // 返回回退组件或错误页面
       if (fallbackComponent) {
         return fallbackComponent;
       }
-      
+
       // 默认返回错误页面组件
       return {
         default: () => (
@@ -107,6 +107,7 @@ const WuxingHealthPage = lazyLoadWithErrorHandling(() => import('./pages/WuxingH
 const OrganRhythmPage = lazyLoadWithErrorHandling(() => import('./pages/OrganRhythmPage'));
 const ShaoyongYixuePage = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
 const FishingGamePage = lazyLoadWithErrorHandling(() => import('./pages/FishingGamePage'));
+const FengShuiCompassPage = lazyLoadWithErrorHandling(() => import('./pages/FengShuiCompassPage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -125,7 +126,7 @@ const AppLayout = () => {
   useThemeColor();
 
   // 检测是否在移动设备环境中
-  const isMobile = typeof window !== 'undefined' && 
+  const isMobile = typeof window !== 'undefined' &&
     (window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   // 移动设备兼容的Suspense实现
@@ -146,8 +147,8 @@ const AppLayout = () => {
     );
   };
 
-    return (
-      <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
+  return (
+    <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
       <div className="flex-1 relative overflow-y-auto overflow-x-hidden">
         <SafeSuspense fallback={<div className="flex items-center justify-center h-full">
           <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -190,6 +191,7 @@ const AppLayout = () => {
             <Route path="/fishing-game" element={<FishingGamePage />} />
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/shaoyong-yixue" element={<ShaoyongYixuePage />} />
+            <Route path="/feng-shui-compass" element={<FengShuiCompassPage />} />
           </Routes>
         </SafeSuspense>
       </div>
@@ -206,10 +208,10 @@ function App() {
     initialized: false,
     error: null
   });
-  
+
   // 初始化Chunk错误恢复工具
   const { handleChunkError, checkChunkHealth } = useChunkErrorRecovery();
-  
+
   // 初始化版本管理工具
   const {
     current: currentVersion,
@@ -217,25 +219,25 @@ function App() {
     needsUpdate,
     clearAndReload
   } = useVersionManager();
-  
+
   // 版本更新通知状态
   const [showUpdateNotification, setShowUpdateNotification] = React.useState(false);
 
   // 检测是否在移动设备环境中
   const isMobileEnvironment = () => {
     if (typeof window === 'undefined') return false;
-    
+
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    
+
     // 检查是否为移动设备
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-    
+
     // 检查是否为WebView环境
     const isWebView = /wv|WebView|; wv\)/.test(userAgent);
-    
+
     // 检查是否为Android WebView
     const isAndroidWebView = /Android/.test(userAgent) && /wv/.test(userAgent);
-    
+
     return {
       isMobile,
       isWebView,
@@ -248,7 +250,7 @@ function App() {
   useEffect(() => {
     const deviceInfo = isMobileEnvironment();
     console.log('设备信息:', deviceInfo);
-    
+
     // 在开发环境中显示设备信息
     if (process.env.NODE_ENV === 'development') {
       console.info('应用运行环境:', {
@@ -257,7 +259,7 @@ function App() {
         isAndroidWebView: deviceInfo.isAndroidWebView
       });
     }
-    
+
     // 检查关键chunk健康状态
     try {
       const isHealthy = checkChunkHealth();
@@ -267,7 +269,7 @@ function App() {
     } catch (e) {
       console.warn('Chunk健康检查失败:', e);
     }
-    
+
     // 监听全局错误，特别是ChunkLoadError
     const handleGlobalError = (event) => {
       if (event.error && event.error.name === 'ChunkLoadError') {
@@ -275,23 +277,23 @@ function App() {
         handleChunkError(event.error);
       }
     };
-    
+
     const handleUnhandledRejection = (event) => {
       if (event.reason && event.reason.name === 'ChunkLoadError') {
         console.log('全局Promise拒绝ChunkLoadError捕获:', event.reason.message);
         handleChunkError(event.reason);
       }
     };
-    
+
     window.addEventListener('error', handleGlobalError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    
+
     return () => {
       window.removeEventListener('error', handleGlobalError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, [handleChunkError, checkChunkHealth]);
-  
+
   // 监听版本更新
   React.useEffect(() => {
     if (needsUpdate) {
@@ -475,7 +477,7 @@ function App() {
             }}
           />
         )}
-        
+
         <ChunkLoadErrorBoundary maxRetries={3}>
           <EnhancedErrorBoundary componentName="App">
             <ThemeProvider>
