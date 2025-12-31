@@ -18,9 +18,9 @@
   color: white;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, 
-    rgba(0, 0, 0, 0.05) 0%, 
-    rgba(0, 0, 0, 0) 100%);
+  background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.05) 0%,
+      rgba(0, 0, 0, 0) 100%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -61,7 +61,7 @@
 }
 
 /* Tab导航样式 */
-.tab-button {
+.more-features-page-wrapper .tab-button {
   flex: 1;
   padding: 0;
   border: none;
@@ -72,16 +72,16 @@
   margin: 0 clamp(2px, 0.5vw, 4px);
 }
 
-.tab-button.active {
+.more-features-page-wrapper .tab-button.active {
   background: rgba(0, 0, 0, 0.05);
   transform: translateY(-1px);
 }
 
-.dark .tab-button.active {
+.dark .more-features-page-wrapper .tab-button.active {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.tab-content {
+.more-features-page-wrapper .tab-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -89,7 +89,7 @@
   gap: clamp(4px, 1vw, 8px);
 }
 
-.tab-icon {
+.more-features-page-wrapper .tab-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,32 +100,32 @@
   transition: all 0.2s ease;
 }
 
-.dark .tab-icon {
+.dark .more-features-page-wrapper .tab-icon {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.tab-button.active .tab-icon {
+.more-features-page-wrapper .tab-button.active .tab-icon {
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.1);
 }
 
-.tab-text {
+.more-features-page-wrapper .tab-text {
   font-size: clamp(12px, 3vw, 16px);
   font-weight: 500;
   color: #4b5563;
   transition: all 0.2s ease;
 }
 
-.dark .tab-text {
+.dark .more-features-page-wrapper .tab-text {
   color: #d1d5db;
 }
 
-.tab-button.active .tab-text {
+.more-features-page-wrapper .tab-button.active .tab-text {
   color: #1f2937;
   font-weight: 600;
 }
 
-.dark .tab-button.active .tab-text {
+.dark .more-features-page-wrapper .tab-button.active .tab-text {
   color: #f9fafb;
 }
 
@@ -179,9 +179,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.05) 100%);
   border-radius: inherit;
   z-index: 2;
   opacity: 0;
@@ -318,7 +318,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: clamp(12px, 3vw, 16px);
   }
-  
+
   .feature-card {
     min-height: clamp(80px, 25vw, 120px);
   }
@@ -329,22 +329,22 @@
     grid-template-columns: repeat(2, 1fr);
     gap: clamp(8px, 2vw, 12px);
   }
-  
+
   .feature-card {
     min-height: clamp(70px, 25vw, 100px);
   }
-  
-  .tab-content {
+
+  .more-features-page-wrapper .tab-content {
     flex-direction: row;
     padding: clamp(8px, 2vw, 12px);
   }
-  
-  .tab-icon {
+
+  .more-features-page-wrapper .tab-icon {
     width: clamp(20px, 5vw, 24px);
     height: clamp(20px, 5vw, 24px);
   }
-  
-  .tab-text {
+
+  .more-features-page-wrapper .tab-text {
     font-size: clamp(10px, 2.5vw, 12px);
   }
 }

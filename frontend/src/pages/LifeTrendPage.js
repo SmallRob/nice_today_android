@@ -1014,9 +1014,9 @@ const LifeTrendPage = () => {
       </div>
 
       {/* 视图切换 */}
-      <div className={`flex gap-2 mx-4 mb-4 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+      <div className={`flex gap-2 mx-4 mb-3 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
         <button
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${
             selectedView === 'kline'
               ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
               : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
@@ -1027,7 +1027,7 @@ const LifeTrendPage = () => {
           <span className="text-sm font-medium">生命K线</span>
         </button>
         <button
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${
             selectedView === 'radar'
               ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
               : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`

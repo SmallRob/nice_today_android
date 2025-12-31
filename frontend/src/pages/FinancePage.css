@@ -301,9 +301,12 @@
 }
 
 @keyframes pulse-warning {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
   }
+
   50% {
     box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
   }
@@ -354,6 +357,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -372,9 +376,12 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-3px);
   }
@@ -486,7 +493,7 @@
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .quick-stat-item {
     flex-direction: row;
     align-items: center;
@@ -897,10 +904,11 @@
   }
 
   .summary-item {
-    padding: 8px 12px;
+    padding: 8px 10px;
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
+    align-items: center;
   }
 
   .summary-value {
@@ -1261,8 +1269,9 @@
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 20vh;
   z-index: 1000;
   animation: fade-in 0.3s ease-out;
 }
@@ -1271,6 +1280,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1291,6 +1301,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1324,8 +1335,8 @@
   font-size: 15px;
   color: #6b7280;
   text-align: center;
-  margin: 0 0 20px 0;
-  line-height: 1.6;
+  margin: 0 0 15px 0;
+  line-height: 1.5;
 }
 
 .finance-page.dark .welcome-content p {
@@ -1367,9 +1378,10 @@
 }
 
 .feature-item span:not(.feature-icon) {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #374151;
+  line-height: 1.4;
 }
 
 .finance-page.dark .feature-item span:not(.feature-icon) {
@@ -1386,8 +1398,9 @@
   padding: 14px 20px;
   border: none;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -1430,8 +1443,9 @@
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(3px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 20vh;
   z-index: 1000;
   animation: fade-in 0.2s ease-out;
 }
@@ -1471,12 +1485,13 @@
 
 .modal-btn {
   flex: 1;
-  padding: 12px 20px;
+  padding: 10px 16px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.3s;
 }
 
@@ -1614,7 +1629,7 @@
 }
 
 /* 浏览器兼容性修复和性能优化 */
-.finance-page,
+/* 浏览器兼容性修复和性能优化 */
 .stat-card,
 .chart-card,
 .income-card,
@@ -1657,9 +1672,6 @@
   /* 防止滚动时出现空白 */
   background-clip: padding-box;
   -webkit-background-clip: padding-box;
-  /* 优化动画性能 */
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
 }
 
 /* 确保按钮在所有浏览器中显示一致 */
@@ -1694,16 +1706,7 @@
 }
 
 /* 优化加载动画性能 */
-@keyframes pulse-warning,
-@keyframes slide-in,
-@keyframes bounce,
-@keyframes fade-in,
-@keyframes slide-up {
-  /* 确保动画使用GPU加速 */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  will-change: transform, opacity;
-}
+/* 动画性能优化: 已在各元素类中应用 */
 
 /* 确保模态框在所有浏览器中显示一致 */
 .welcome-modal,
@@ -1737,7 +1740,8 @@
 }
 
 /* 高密度屏幕优化 */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
   .finance-page {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -1752,6 +1756,7 @@
 
 /* 触摸设备优化 */
 @media (hover: none) and (pointer: coarse) {
+
   .edit-income-btn,
   .month-nav-btn,
   .view-mode-btn,
@@ -1781,6 +1786,7 @@
 
 /* 低性能设备优化 */
 @media (prefers-reduced-motion: reduce) {
+
   .finance-page,
   .stat-card,
   .chart-card,
@@ -1797,14 +1803,7 @@
     animation: none;
   }
 
-  @keyframes pulse-warning,
-  @keyframes slide-in,
-  @keyframes bounce,
-  @keyframes fade-in,
-  @keyframes slide-up {
-    /* 禁用所有动画 */
-    animation: none;
-  }
+  /* 关键帧动画禁用需在元素上设置 animation: none */
 }
 
 /* 防止内容溢出容器 */
@@ -1887,7 +1886,9 @@
 }
 
 /* 防止IE浏览器兼容性问题 */
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+@media all and (-ms-high-contrast: none),
+(-ms-high-contrast: active) {
+
   .stat-card,
   .chart-card,
   .income-card,

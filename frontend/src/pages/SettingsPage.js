@@ -407,7 +407,7 @@ function SettingsPage() {
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* 顶部标题区域 */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">⚙️ 系统设置</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">配置应用系统参数</p>
         </div>
@@ -711,12 +711,10 @@ function SettingsPage() {
                       </div>
                     </div>
                     {/* 开关图标 */}
-                    <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${
-                      errorTrackingEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                    }`}>
-                      <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
-                        errorTrackingEnabled ? 'translate-x-5' : 'translate-x-0'
-                      }`}></div>
+                    <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${errorTrackingEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}>
+                      <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${errorTrackingEnabled ? 'translate-x-5' : 'translate-x-0'
+                        }`}></div>
                     </div>
                   </button>
                 </div>

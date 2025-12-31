@@ -61,53 +61,22 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
   const [features, setFeatures] = useState(ALL_FEATURES);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const featuresGridRef = useRef(null);
-
-  // 清理DOM样式类，防止其他页面的样式污染
-  const cleanupDOMStyles = () => {
-    // 移除所有可能残留的拖拽相关类
-    document.querySelectorAll('.feature-card').forEach(el => {
-      el.classList.remove('dragging');
-      el.classList.remove('drag-over');
-    });
-
-    // 清理features-grid的可能样式
-    const gridEl = document.querySelector('.features-grid');
-    if (gridEl) {
-      gridEl.style.transform = '';
-      gridEl.style.opacity = '';
-      gridEl.style.transition = '';
-    }
-  };
-
-  // 强制重新计算布局
-  const forceLayoutRefresh = () => {
-    if (featuresGridRef.current) {
-      // 触发重排
-      // eslint-disable-next-line no-unused-expressions
-      featuresGridRef.current.offsetHeight;
-      // 强制重新应用样式
-      featuresGridRef.current.style.transform = 'translateZ(0)';
-      setTimeout(() => {
-        if (featuresGridRef.current) {
-          featuresGridRef.current.style.transform = '';
-        }
-      }, 10);
-    }
-    // 触发刷新
-    setRefreshKey(prev => prev + 1);
-  };
-
-  // 初始化功能排序（仅在组件挂载时执行一次）
+  // 页面挂载时清理可能残留的拖拽样式
   useEffect(() => {
-    // 加载保存的排序配置
-    const savedOrder = loadFeatureSortOrder();
+    // 清理DOM样式类，防止其他页面的样式污染
+    const cleanupDOMStyles = () => {
+      document.querySelectorAll('.feature-card').forEach(el => {
+        el.classList.remove('dragging');
+        el.classList.remove('drag-over');
+      });
+    };
 
-    // 合并排序（处理新增功能）
+    cleanupDOMStyles();
+
+    // 初始化功能排序
+    const savedOrder = loadFeatureSortOrder();
     const mergedOrder = mergeFeatureOrder(savedOrder, ALL_FEATURES.map(f => f.name));
 
-    // 根据排序配置重新排序功能列表
     const sortedFeatures = [...ALL_FEATURES].sort((a, b) => {
       const aIndex = mergedOrder.indexOf(getFeatureId(a.name));
       const bIndex = mergedOrder.indexOf(getFeatureId(b.name));
@@ -115,55 +84,13 @@ const Dashboard = () => {
     });
 
     setFeatures(sortedFeatures);
-
-    // 组件挂载后清理样式并强制刷新
-    setTimeout(() => {
-      cleanupDOMStyles();
-      forceLayoutRefresh();
-    }, 100);
-  }, []); // 空依赖数组，只在挂载时执行一次
-
-  // 监听页面可见性变化，从其他页面返回时强制刷新布局
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        // 页面变为可见时，清理样式并强制刷新
-        setTimeout(() => {
-          cleanupDOMStyles();
-          forceLayoutRefresh();
-        }, 50);
-      }
-    };
-
-    // 监听页面可见性变化
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // 监听页面获得焦点（从其他页面返回）
-    window.addEventListener('focus', () => {
-      setTimeout(() => {
-        cleanupDOMStyles();
-        forceLayoutRefresh();
-      }, 50);
-    });
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleVisibilityChange);
-    };
-  }, []);
-
-  // 清理组件卸载时的DOM样式
-  useEffect(() => {
-    return () => {
-      cleanupDOMStyles();
-    };
   }, []);
 
   // 处理拖拽开始
   const handleDragStart = (e, index) => {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('dragIndex', index.toString());
-    
+
     // 添加拖拽时的视觉反馈
     setTimeout(() => {
       e.target.classList.add('dragging');
@@ -183,7 +110,7 @@ const Dashboard = () => {
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    
+
     // 添加目标卡片的视觉反馈
     const targetCard = e.currentTarget;
     targetCard.classList.add('drag-over');
@@ -203,7 +130,7 @@ const Dashboard = () => {
     if (!draggedIndexStr) return;
 
     const draggedIndex = parseInt(draggedIndexStr, 10);
-    
+
     // 如果拖拽和放置位置相同，不执行操作
     if (draggedIndex === targetIndex) return;
 
@@ -242,7 +169,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="app-container">
+    <div className="app-container dashboard-page-wrapper">
       {/* 固定头部区域 */}
       <div className="fixed-height-container">
         {/* 合并的Banner和用户信息卡片 */}
@@ -322,10 +249,7 @@ const Dashboard = () => {
         <div className="page-container">
           {/* 全部功能 - 5列网格布局 */}
           <div
-            ref={featuresGridRef}
-            key={refreshKey}
             className="features-grid"
-            style={{ animation: 'none' }}
           >
             {features.map((feature, index) => {
               const FeatureComponent = feature.component;
@@ -333,7 +257,7 @@ const Dashboard = () => {
 
               return (
                 <FeatureComponent
-                  key={`${featureId}-${refreshKey}`}
+                  key={featureId}
                   draggable={isEditMode}
                   index={index}
                   id={featureId}

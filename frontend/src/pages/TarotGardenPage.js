@@ -5,8 +5,9 @@ function TarotGardenPage() {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900">
       {/* 顶部标题区域 - 现代化设计 */}
+      {/* 顶部标题区域 - 现代化设计 */}
       <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-purple-100 dark:border-purple-800">
-        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4 relative overflow-hidden">
+        <div className="container mx-auto px-4 py-3 relative overflow-hidden">
           {/* 背景装饰 */}
           <div className="absolute inset-0 opacity-5 pointer-events-none">
             <div className="absolute top-2 right-6 text-4xl md:text-6xl">✨</div>
@@ -28,7 +29,7 @@ function TarotGardenPage() {
 
       {/* 内容区域 */}
       <div className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-3 py-4 max-w-4xl">
+        <div className="container mx-auto px-4 py-4 max-w-4xl">
           <div className="space-y-4">
             {/* 神秘塔罗卡片 */}
             <Card className="group">
@@ -121,9 +122,9 @@ function TarotGardenPage() {
 
             {/* 生命矩阵卡片 */}
             {/* <Card className="group"> */}
-              {/* <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 dark:from-green-700 dark:via-emerald-700 dark:to-teal-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"> */}
-                {/* 装饰图案 */}
-                {/* <div className="absolute inset-0 opacity-10">
+            {/* <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 dark:from-green-700 dark:via-emerald-700 dark:to-teal-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"> */}
+            {/* 装饰图案 */}
+            {/* <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-white rounded-full"></div>
                 </div>
 

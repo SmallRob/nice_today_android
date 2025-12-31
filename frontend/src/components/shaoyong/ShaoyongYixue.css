@@ -45,17 +45,21 @@
   font-family: 'SimSun', '宋体', 'Microsoft YaHei', serif;
   background: var(--bg-primary);
   color: var(--text-primary);
-  min-height: 100vh;
+  min-height: 100%;
   line-height: 1.6;
   transition: all 0.3s ease;
   padding: 0;
+  /* 确保自身不产生额外滚动条 */
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 头部样式 */
 .app-header {
   background: linear-gradient(to right, var(--bg-secondary), var(--bg-primary));
   color: var(--text-primary);
-  padding: clamp(8px, 2vw, 15px) 0;
+  padding: 12px 0;
   position: relative;
   overflow: hidden;
 }
@@ -74,9 +78,9 @@
 }
 
 .header-content {
-  max-width: 1600px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 clamp(8px, 2vw, 15px);
+  padding: 0 16px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -143,9 +147,9 @@
 
 /* 标签页导航 */
 .tab-navigation {
-  max-width: 1600px;
-  margin: clamp(6px, 1.5vw, 12px) auto 0;
-  padding: 0 clamp(8px, 2vw, 12px);
+  max-width: 100%;
+  margin: 12px auto 0;
+  padding: 0 16px;
   display: flex;
   gap: clamp(5px, 1.5vw, 10px);
   position: relative;
@@ -200,25 +204,26 @@
 
 /* 主要内容区域 */
 .main-content {
-  max-width: 1600px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 clamp(8px, 2vw, 15px);
-  padding-bottom: clamp(12px, 3vw, 20px);
+  padding: 0 16px;
+  padding-bottom: 20px;
+  flex: 1;
 }
 
 .content-grid {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: clamp(15px, 4vw, 25px);
-  margin-bottom: clamp(20px, 5vw, 30px);
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 /* 卡片样式 */
 .card {
   background: var(--bg-card);
-  border-radius: clamp(10px, 2.5vw, 15px);
-  padding: clamp(15px, 4vw, 25px);
-  margin-bottom: clamp(15px, 4vw, 25px);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
   box-shadow: 0 4px 16px var(--shadow-color);
   border: 1px solid var(--border-color);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -330,7 +335,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: clamp(12px, 3vw, 20px);
+  gap: 12px;
 }
 
 /* 历史记录区域 */
@@ -416,7 +421,8 @@
 }
 
 /* 按钮样式 */
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
   padding: clamp(10px, 2.5vw, 14px) clamp(20px, 5vw, 28px);
   border: none;
   border-radius: clamp(6px, 1.5vw, 8px);
@@ -457,11 +463,11 @@
     grid-template-columns: 1fr;
     gap: clamp(12px, 3vw, 20px);
   }
-  
+
   .card {
-    padding: clamp(12px, 3vw, 20px);
+    padding: 16px;
   }
-  
+
   .main-panel {
     gap: clamp(10px, 2.5vw, 15px);
   }
@@ -469,8 +475,8 @@
 
 @media (max-width: 768px) {
   .shaoyong-yixue {
-    padding: clamp(6px, 1.5vw, 10px);
-    padding-top: env(safe-area-inset-top, clamp(10px, 2.5vw, 15px));
+    padding: 0;
+    padding-top: env(safe-area-inset-top, 0);
   }
 
   .header-content {
@@ -505,7 +511,7 @@
     gap: clamp(4px, 1vw, 8px);
     margin-top: clamp(4px, 1vw, 6px);
   }
-  
+
   .tab-btn {
     flex: 1 1 calc(50% - 4px);
     border-radius: clamp(8px, 2vw, 12px);
@@ -513,22 +519,22 @@
     font-size: clamp(0.8rem, 2.2vw, 0.95rem);
     gap: clamp(4px, 1vw, 8px);
   }
-  
+
   .tab-icon {
     font-size: clamp(0.9rem, 2.2vw, 1.1rem);
   }
-  
+
   .content-grid {
-    gap: clamp(10px, 2.5vw, 15px);
+    gap: 12px;
   }
 
   .main-panel {
-    gap: clamp(6px, 1.5vw, 10px);
+    gap: 10px;
   }
 
   .card {
-    padding: clamp(10px, 2.5vw, 15px);
-    margin-bottom: clamp(10px, 2.5vw, 15px);
+    padding: 12px;
+    margin-bottom: 10px;
   }
 
   .card h2 {
@@ -607,67 +613,72 @@
     margin-top: clamp(3px, 0.8vw, 5px);
     padding: 0 clamp(6px, 1.5vw, 10px);
   }
-  
+
   .main-panel {
-    gap: clamp(6px, 1.5vw, 10px);
+    gap: 8px;
   }
-  
+
   .card {
-    padding: clamp(10px, 2.5vw, 15px);
+    padding: 12px;
   }
-  
+
   .card h2 {
     font-size: clamp(0.9rem, 2.2vw, 1.15rem);
   }
-  
+
   .history-section {
     margin-top: clamp(12px, 3vw, 18px);
     padding: clamp(12px, 3vw, 18px);
   }
-  
+
   .history-section h2 {
     font-size: clamp(0.9rem, 2.2vw, 1.15rem);
     margin-bottom: clamp(8px, 2vw, 12px);
     padding-bottom: clamp(5px, 1.5vw, 8px);
   }
-  
-  .btn-primary, .btn-secondary {
+
+  .btn-primary,
+  .btn-secondary {
     padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
     font-size: clamp(0.8rem, 2vw, 0.95rem);
   }
-  
+
   .footer-links {
     gap: clamp(6px, 1.5vw, 10px);
   }
 
-  /* 扩大移动端显示视野 */
+  /* 扩大移动端显示视野 - 移除固定高度，让内容自然撑开 */
   .main-content {
-    max-height: calc(100vh - 110px);
+    max-height: none;
   }
 }
 
 /* 移动端优化 */
 @media (max-width: 768px) {
+
   /* 滚动性能优化 */
+  /* 滚动性能优化 - 移除内部滚动，完全依赖父级滚动 */
   .main-content {
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    max-height: none;
+    overflow-y: visible;
   }
-  
+
   /* 触摸友好按钮 */
-  .tab-btn, .btn-primary, .btn-secondary {
+  .tab-btn,
+  .btn-primary,
+  .btn-secondary {
     min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  
+
   /* 字体大小优化 */
   body {
-    font-size: 16px; /* 防止iOS缩放 */
+    font-size: 16px;
+    /* 防止iOS缩放 */
   }
-  
+
   /* 安全区域适配 */
   .app-header {
     padding-top: env(safe-area-inset-top, 0px);
@@ -680,6 +691,7 @@
     opacity: 0;
     transform: translateY(15px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -699,25 +711,27 @@
   max-width: 100%;
   margin: 0;
   box-sizing: border-box;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: 0;
+  padding-right: 0;
   min-width: 0;
 }
 
 /* 响应式断点 - 保持宽度自适应 */
 @media (max-width: 768px) {
+
   .meihua-content,
   .tieban-content {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
 @media (max-width: 480px) {
+
   .meihua-content,
   .tieban-content {
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
@@ -743,8 +757,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 八卦图标特殊样式 */
