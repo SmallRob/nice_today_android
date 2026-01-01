@@ -386,7 +386,12 @@ const WuxingHealthPage = () => {
   }, [currentConfig]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-pink-900/30">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-pink-900/30 hide-scrollbar overflow-y-auto">
+      <style>{`
+        body::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+      `}</style>
       {/* 导航标题栏 */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-40">
         <div className="container mx-auto px-4 py-3">
@@ -405,8 +410,8 @@ const WuxingHealthPage = () => {
         </div>
       </div>
 
-      {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
+      {/* 主 content 区 */}
+      <div className="container mx-auto px-3 sm:px-4 pt-4 pb-24 sm:py-6 max-w-4xl space-y-6">
         {/* 提示卡片 */}
         <div className="bg-purple-100 dark:bg-purple-900/30 border-l-4 border-purple-500 p-4 rounded-r-xl">
           <div className="flex items-start">

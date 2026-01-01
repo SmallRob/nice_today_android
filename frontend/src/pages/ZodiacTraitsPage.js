@@ -277,6 +277,9 @@ const getFamousExamples = (zodiacName) => {
   const renderTrendChart = useCallback(() => {
     if (!weeklyTrendData) return null;
 
+    // 确保 Chart.js 组件已注册
+    ensureChartRegistered();
+
     const { dates, energyScores, wealthScores, careerScores, healthScores } = weeklyTrendData;
 
     const chartData = {
@@ -373,6 +376,7 @@ const getFamousExamples = (zodiacName) => {
       },
       scales: {
         x: {
+          type: 'category',
           grid: {
             display: false,
             drawBorder: false,
@@ -385,6 +389,7 @@ const getFamousExamples = (zodiacName) => {
           }
         },
         y: {
+          type: 'linear',
           min: 0,
           max: 100,
           grid: {
@@ -480,7 +485,7 @@ const getFamousExamples = (zodiacName) => {
   }
 
   return (
-    <div className={`min-h-screen ${theme}`}>
+    <div className={`min-h-screen ${theme}`} style={{ minHeight: '100vh', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* 顶部标题栏 */}
       <div className={`bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`}>
         <div className="container mx-auto px-3 md:px-4 py-2 md:py-3">
@@ -508,7 +513,7 @@ const getFamousExamples = (zodiacName) => {
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-3 md:px-4 py-3 md:py-6 max-w-4xl">
+      <div className="container mx-auto px-3 md:px-4 py-3 md:py-6 pb-20 md:pb-24 max-w-4xl">
         {/* 星座卡片 */}
         <div className={`bg-gradient-to-br ${elementColors.bg} ${elementColors.to} text-white rounded-xl shadow-lg p-4 md:p-6 mb-3 md:mb-5`}>
           <div className="text-center mb-3 md:mb-4">
@@ -596,45 +601,7 @@ const getFamousExamples = (zodiacName) => {
         ) : null}
 
         {/* 运势趋势图 */}
-        {weeklyTrendData && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">
-            <h3 className="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2 md:mb-3 flex items-center">
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM18 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1h-2a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-              </svg>
-              近7日运势趋势
-            </h3>
-            <div className="h-36 md:h-44">
-              <Line data={chartData} options={chartOptions} />
-            </div>
-            <div className="mt-2 md:mt-3 grid grid-cols-4 gap-1 md:gap-1.5 text-center">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-1 md:p-1.5 rounded-lg border border-blue-100 dark:border-blue-900/30">
-                <div className="text-[9px] md:text-xs text-blue-600 dark:text-blue-400 font-medium">综合</div>
-                <div className="text-sm md:text-base font-medium text-blue-700 dark:text-blue-300">
-                  {energyScores[energyScores.length - 1]}%
-                </div>
-              </div>
-              <div className="bg-amber-50 dark:bg-amber-900/20 p-1 md:p-1.5 rounded-lg border border-amber-100 dark:border-amber-900/30">
-                <div className="text-[9px] md:text-xs text-amber-600 dark:text-amber-400 font-medium">财运</div>
-                <div className="text-sm md:text-base font-medium text-amber-700 dark:text-amber-300">
-                  {wealthScores[wealthScores.length - 1]}%
-                </div>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/20 p-1 md:p-1.5 rounded-lg border border-green-100 dark:border-green-900/30">
-                <div className="text-[9px] md:text-xs text-green-600 dark:text-green-400 font-medium">事业</div>
-                <div className="text-sm md:text-base font-medium text-green-700 dark:text-green-300">
-                  {careerScores[careerScores.length - 1]}%
-                </div>
-              </div>
-              <div className="bg-red-50 dark:bg-red-900/20 p-1 md:p-1.5 rounded-lg border border-red-100 dark:border-red-900/30">
-                <div className="text-[9px] md:text-xs text-red-600 dark:text-red-400 font-medium">健康</div>
-                <div className="text-sm md:text-base font-medium text-red-700 dark:text-red-300">
-                  {healthScores[healthScores.length - 1]}%
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {renderTrendChart()}
 
         {/* 详细描述 */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">

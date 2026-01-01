@@ -12,7 +12,10 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  ArcElement,
+  BarElement,
+  RadialLinearScale
 } from 'chart.js';
 import annotationPlugin from 'chartjs-plugin-annotation';
 
@@ -36,6 +39,9 @@ export const registerChartComponents = () => {
       Tooltip,
       Legend,
       Filler,
+      ArcElement,
+      BarElement,
+      RadialLinearScale,
       annotationPlugin
     );
 

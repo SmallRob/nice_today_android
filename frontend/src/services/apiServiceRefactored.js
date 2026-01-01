@@ -16,11 +16,11 @@ export const testApiConnection = async (baseUrl) => {
     console.log("尝试连接API:", baseUrl);
     // 添加时间戳防止缓存
     const timestamp = new Date().getTime();
-    
+
     // 尝试访问API根路径
     const response = await apiClient.get(`${baseUrl}/?_=${timestamp}`);
     console.log("API连接成功:", response);
-    
+
     return {
       success: true,
       url: baseUrl,
@@ -45,14 +45,14 @@ export const testApiConnection = async (baseUrl) => {
 export const fetchHistoryDates = async (apiBaseUrl) => {
   try {
     const response = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.BIORHYTHM.HISTORY}`);
-    
+
     if (response && response.history) {
       return {
         success: true,
         history: response.history
       };
     }
-    
+
     return {
       success: false,
       error: "获取历史记录失败：API返回无效数据"
@@ -70,25 +70,25 @@ export const fetchHistoryDates = async (apiBaseUrl) => {
 export const fetchBiorhythmData = async (apiBaseUrl, birthDate) => {
   // 检查是否启用本地计算
   const useLocalCalculation = localStorage.getItem('useLocalCalculation') === 'true';
-  
+
   if (useLocalCalculation) {
     // 使用本地计算
     console.log("使用本地计算生物节律数据");
     const localDataService = await import('./localDataService');
-    
+
     try {
       // 获取图表数据
       const chartResult = await localDataService.getBiorhythmRange(birthDate, 10, 20);
-      
+
       // 获取今天的数据
       const today = new Date();
       const todayResult = await localDataService.calculateBiorhythmData(birthDate, today);
-      
+
       // 获取10天后的数据
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 10);
       const futureResult = await localDataService.calculateBiorhythmData(birthDate, futureDate);
-      
+
       if (chartResult.success && todayResult.success && futureResult.success) {
         return {
           success: true,
@@ -107,7 +107,7 @@ export const fetchBiorhythmData = async (apiBaseUrl, birthDate) => {
       };
     }
   }
-  
+
   if (!birthDate) {
     return {
       success: false,
@@ -117,34 +117,34 @@ export const fetchBiorhythmData = async (apiBaseUrl, birthDate) => {
 
   try {
     // 格式化日期为 YYYY-MM-DD，确保时区一致
-    const birthDateStr = typeof birthDate === 'string' 
-      ? birthDate 
+    const birthDateStr = typeof birthDate === 'string'
+      ? birthDate
       : formatDateString(birthDate);
-    
+
     console.log("正在请求API:", apiBaseUrl, "出生日期:", birthDateStr);
-    
+
     // 获取图表数据
     const chartResponse = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.BIORHYTHM.RANGE}`, {
       birth_date: birthDateStr,
       days_before: 10,
       days_after: 20
     });
-    
+
     // 获取今天的数据
     const todayResponse = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.BIORHYTHM.TODAY}`, {
       birth_date: birthDateStr
     });
-    
+
     // 获取10天后的数据
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 10);
     const futureDateStr = formatDateString(futureDate);
-    
+
     const futureResponse = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.BIORHYTHM.DATE}`, {
       birth_date: birthDateStr,
       date: futureDateStr
     });
-    
+
     return {
       success: true,
       rhythmData: chartResponse,
@@ -161,17 +161,17 @@ export const fetchBiorhythmData = async (apiBaseUrl, birthDate) => {
 };
 
 // 获取穿衣与饮食指南范围数据
-export const fetchDressInfoRange = async (apiBaseUrl) => {
+export const fetchDressInfoRange = async (apiBaseUrl, daysBefore = 0, daysAfter = 6) => {
   // 检查是否启用本地计算
   const useLocalCalculation = localStorage.getItem('useLocalCalculation') === 'true';
-  
+
   if (useLocalCalculation) {
     // 使用本地计算
     console.log("使用本地计算穿衣信息范围数据");
     const localDataService = await import('./localDataService');
-    
+
     try {
-      const result = await localDataService.getDressInfoRange(1, 6);
+      const result = await localDataService.getDressInfoRange(daysBefore, daysAfter);
       if (result.success) {
         return {
           success: true,
@@ -189,14 +189,14 @@ export const fetchDressInfoRange = async (apiBaseUrl) => {
       };
     }
   }
-  
+
   try {
     console.log("正在请求穿衣信息范围API:", `${apiBaseUrl}${API_ENDPOINTS.DRESS.RANGE}`);
     const response = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.DRESS.RANGE}`, {
-      days_before: 1,  // 昨天
-      days_after: 6    // 未来6天
+      days_before: daysBefore,
+      days_after: daysAfter
     });
-    
+
     return {
       success: true,
       dressInfoList: response.dress_info_list,
@@ -218,12 +218,12 @@ export const fetchDressInfoRange = async (apiBaseUrl) => {
 export const fetchSpecificDateDressInfo = async (apiBaseUrl, dateStr) => {
   // 检查是否启用本地计算
   const useLocalCalculation = localStorage.getItem('useLocalCalculation') === 'true';
-  
+
   if (useLocalCalculation) {
     // 使用本地计算
     console.log("使用本地计算特定日期穿衣信息");
     const localDataService = await import('./localDataService');
-    
+
     try {
       const result = await localDataService.getSpecificDateDressInfo(dateStr);
       if (result.success) {
@@ -242,13 +242,13 @@ export const fetchSpecificDateDressInfo = async (apiBaseUrl, dateStr) => {
       };
     }
   }
-  
+
   try {
     console.log(`正在请求特定日期穿衣信息:`, `${apiBaseUrl}${API_ENDPOINTS.DRESS.DATE}?date=${dateStr}`);
     const response = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.DRESS.DATE}`, {
       date: dateStr
     });
-    
+
     return {
       success: true,
       dressInfo: response
@@ -266,26 +266,26 @@ export const fetchSpecificDateDressInfo = async (apiBaseUrl, dateStr) => {
 export const fetchMayaCalendarRange = async (apiBaseUrl) => {
   // 检查是否启用本地计算
   const useLocalCalculation = localStorage.getItem('useLocalCalculation') === 'true';
-  
+
   if (useLocalCalculation) {
     // 使用本地计算（这里可以实现玛雅日历的本地计算逻辑）
     console.log("使用本地计算玛雅日历范围数据（模拟）");
-    
+
     // 返回模拟数据以便前端开发
     console.log("本地计算，返回模拟数据");
-    
+
     // 生成7天的模拟数据
     const generateMockData = (daysOffset) => {
       const date = new Date();
       date.setDate(date.getDate() + daysOffset);
       const dateStr = formatDateString(date);
       const weekday = "星期" + "日一二三四五六".charAt(date.getDay());
-      
+
       const mayaSeals = ["红龙", "白风", "蓝夜", "黄种子", "红蛇", "白世界连接者", "蓝手", "黄星星", "红月亮", "白狗", "蓝猴", "黄人", "红天空行者", "白巫师", "蓝鹰", "黄战士", "红地球", "白镜子", "蓝风暴", "黄太阳"];
       const mayaTones = ["磁性之月", "月亮之月", "电子之月", "自我存在之月", "倍音之月", "韵律之月", "共振之月", "银河之月", "太阳之月", "行星之月", "光谱之月", "水晶之月", "宇宙之月"];
       const luckyColors = ["银色", "蓝色", "绿色", "红色", "黄色", "紫色", "白色", "黑色"];
       const luckyFoods = ["牛奶", "苹果", "坚果", "蜂蜜", "绿茶", "燕麦", "香蕉", "红枣", "山药", "莲子"];
-      
+
       return {
         date: dateStr,
         weekday: weekday,
@@ -316,13 +316,13 @@ export const fetchMayaCalendarRange = async (apiBaseUrl) => {
         }
       };
     };
-    
+
     // 生成7天的数据（前3天 + 今天 + 后3天）
     const mockData = [];
     for (let i = -3; i <= 3; i++) {
       mockData.push(generateMockData(i));
     }
-    
+
     return {
       success: true,
       mayaInfoList: mockData,
@@ -332,14 +332,14 @@ export const fetchMayaCalendarRange = async (apiBaseUrl) => {
       }
     };
   }
-  
+
   try {
     console.log("正在请求玛雅日历范围API:", `${apiBaseUrl}${API_ENDPOINTS.MAYA.RANGE}`);
     const response = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.MAYA.RANGE}`, {
       days_before: 3,  // 前3天
       days_after: 3    // 后3天
     });
-    
+
     return {
       success: true,
       mayaInfoList: response.maya_info_list,
@@ -350,22 +350,22 @@ export const fetchMayaCalendarRange = async (apiBaseUrl) => {
     };
   } catch (err) {
     console.error("获取玛雅日历范围失败:", err);
-    
+
     // 返回模拟数据以便前端开发
     console.log("API请求失败，返回模拟数据");
-    
+
     // 生成7天的模拟数据
     const generateMockData = (daysOffset) => {
       const date = new Date();
       date.setDate(date.getDate() + daysOffset);
       const dateStr = formatDateString(date);
       const weekday = "星期" + "日一二三四五六".charAt(date.getDay());
-      
+
       const mayaSeals = ["红龙", "白风", "蓝夜", "黄种子", "红蛇", "白世界连接者", "蓝手", "黄星星", "红月亮", "白狗", "蓝猴", "黄人", "红天空行者", "白巫师", "蓝鹰", "黄战士", "红地球", "白镜子", "蓝风暴", "黄太阳"];
       const mayaTones = ["磁性之月", "月亮之月", "电子之月", "自我存在之月", "倍音之月", "韵律之月", "共振之月", "银河之月", "太阳之月", "行星之月", "光谱之月", "水晶之月", "宇宙之月"];
       const luckyColors = ["银色", "蓝色", "绿色", "红色", "黄色", "紫色", "白色", "黑色"];
       const luckyFoods = ["牛奶", "苹果", "坚果", "蜂蜜", "绿茶", "燕麦", "香蕉", "红枣", "山药", "莲子"];
-      
+
       return {
         date: dateStr,
         weekday: weekday,
@@ -396,13 +396,13 @@ export const fetchMayaCalendarRange = async (apiBaseUrl) => {
         }
       };
     };
-    
+
     // 生成7天的数据（前3天 + 今天 + 后3天）
     const mockData = [];
     for (let i = -3; i <= 3; i++) {
       mockData.push(generateMockData(i));
     }
-    
+
     return {
       success: true,
       mayaInfoList: mockData,
@@ -418,11 +418,11 @@ export const fetchMayaCalendarRange = async (apiBaseUrl) => {
 export const fetchSpecificDateMayaInfo = async (apiBaseUrl, dateStr) => {
   // 检查是否启用本地计算
   const useLocalCalculation = localStorage.getItem('useLocalCalculation') === 'true';
-  
+
   if (useLocalCalculation) {
     // 使用本地计算（这里可以实现玛雅日历的本地计算逻辑）
     console.log(`使用本地计算${dateStr}的玛雅日历信息（模拟）`);
-    
+
     // 返回模拟数据
     return {
       success: true,
@@ -457,20 +457,20 @@ export const fetchSpecificDateMayaInfo = async (apiBaseUrl, dateStr) => {
       }
     };
   }
-  
+
   try {
     console.log(`正在请求特定日期玛雅日历信息:`, `${apiBaseUrl}${API_ENDPOINTS.MAYA.DATE}?date=${dateStr}`);
     const response = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.MAYA.DATE}`, {
       date: dateStr
     });
-    
+
     return {
       success: true,
       mayaInfo: response
     };
   } catch (err) {
     console.error(`获取${dateStr}的玛雅日历信息失败:`, err);
-    
+
     // 返回模拟数据
     return {
       success: true,
@@ -511,11 +511,11 @@ export const fetchSpecificDateMayaInfo = async (apiBaseUrl, dateStr) => {
 export const fetchMayaHistory = async (apiBaseUrl) => {
   // 检查是否启用本地计算
   const useLocalCalculation = localStorage.getItem('useLocalCalculation') === 'true';
-  
+
   if (useLocalCalculation) {
     // 使用本地计算（这里可以实现玛雅历史记录的本地计算逻辑）
     console.log("使用本地计算玛雅历史记录（模拟）");
-    
+
     // 尝试从本地存储获取历史记录
     try {
       const mayaHistoryStr = localStorage.getItem('mayaCalendarHistory');
@@ -531,17 +531,17 @@ export const fetchMayaHistory = async (apiBaseUrl) => {
     } catch (localErr) {
       console.error("从本地存储获取玛雅历史记录失败:", localErr);
     }
-    
+
     return {
       success: false,
       error: "获取玛雅历史记录失败，请稍后再试"
     };
   }
-  
+
   try {
     console.log("正在请求玛雅历史记录API:", `${apiBaseUrl}${API_ENDPOINTS.MAYA.HISTORY}`);
     const response = await apiClient.get(`${apiBaseUrl}${API_ENDPOINTS.MAYA.HISTORY}`);
-    
+
     if (response && response.history) {
       return {
         success: true,
@@ -551,7 +551,7 @@ export const fetchMayaHistory = async (apiBaseUrl) => {
   } catch (err) {
     console.error("获取玛雅历史记录失败:", err);
   }
-  
+
   // 尝试从本地存储获取历史记录
   try {
     const mayaHistoryStr = localStorage.getItem('mayaCalendarHistory');
@@ -567,7 +567,7 @@ export const fetchMayaHistory = async (apiBaseUrl) => {
   } catch (localErr) {
     console.error("从本地存储获取玛雅历史记录失败:", localErr);
   }
-  
+
   return {
     success: false,
     error: "获取玛雅历史记录失败，请稍后再试"
@@ -589,17 +589,17 @@ export const fetchMayaBirthInfo = async (apiBaseUrl, birthDateStr) => {
     // 保存本次查询日期到本地存储
     localStorage.setItem('lastMayaBirthQueryDate', birthDateStr);
   }
-  
+
   // 始终使用本地计算
   console.log(`使用本地计算出生日期${birthDateStr}的玛雅日历信息`);
-  
+
   try {
     // 导入本地数据服务
     const localDataService = await import('./localDataService');
-    
+
     // 使用本地计算方法生成玛雅出生图信息
     const result = await localDataService.calculateMayaBirthInfo(birthDateStr);
-    
+
     if (result.success) {
       return {
         success: true,

@@ -127,14 +127,9 @@ const DressGuidePage = () => {
       const result = await fetchDressInfoRange(null);
       if (result.success) {
         setDressInfoList(result.dressInfoList);
-        // 修复：确保默认显示当天日期
-        const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
-        const todayInfo = result.dressInfoList.find(info => info.date === todayStr);
-        setSelectedDressInfo(todayInfo || result.dressInfoList[0]);
-        if (!todayInfo) {
-          setSelectedDate(today);
-        }
+        // 默认显示列表中的第一个日期（现在默认是今天）
+        setSelectedDressInfo(result.dressInfoList[0]);
+        setSelectedDate(new Date(result.dressInfoList[0].date));
       } else {
         setError(result.error);
       }
@@ -221,7 +216,12 @@ const DressGuidePage = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-pink-900/30 ${theme}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-pink-900/30 ${theme} hide-scrollbar overflow-y-auto`}>
+      <style>{`
+        body::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+      `}</style>
       {/* 导航标题栏 */}
       <div className={`bg-gradient-to-r ${seasonalStyles.gradient} text-white shadow-lg sticky top-0 z-40`}>
         <div className="container mx-auto px-4 py-4">
@@ -247,21 +247,21 @@ const DressGuidePage = () => {
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="container mx-auto px-3 sm:px-4 pt-4 pb-24 sm:py-6 max-w-4xl">
         {/* 顶部综合卡片 */}
         <div className="bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800 text-white rounded-2xl p-5 shadow-xl relative overflow-hidden mb-6">
           <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="text-2xl sm:text-3xl">{seasonalStyles.icon}</span>
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{selectedDressInfo?.weekday || '未知'}</h2>
+          <div className="relative z-10 flex flex-row justify-between items-center gap-4 flex-nowrap">
+            <div className="min-w-0">
+              <div className="flex items-center space-x-2 mb-1 sm:mb-2">
+                <span className="text-xl sm:text-3xl flex-shrink-0">{seasonalStyles.icon}</span>
+                <h2 className="text-xl sm:text-3xl font-black tracking-tight truncate">{selectedDressInfo?.weekday || '未知'}</h2>
               </div>
-              <p className="text-indigo-100 text-sm sm:text-base font-medium opacity-90">{selectedDressInfo?.date || '未知日期'}</p>
+              <p className="text-indigo-100 text-xs sm:text-base font-medium opacity-90">{selectedDressInfo?.date || '未知日期'}</p>
             </div>
-            <div className="text-left sm:text-right">
-              <div className="inline-block px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
-                <span className="text-xs sm:text-sm font-bold">每日能量：{selectedDressInfo?.daily_element || '未知'}</span>
+            <div className="flex-shrink-0">
+              <div className="inline-block px-2.5 py-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/30 whitespace-nowrap">
+                <span className="text-[10px] sm:text-sm font-bold">每日能量：{selectedDressInfo?.daily_element || '未知'}</span>
               </div>
             </div>
           </div>
@@ -281,12 +281,12 @@ const DressGuidePage = () => {
         {/* 日期选择 */}
         <div className="bg-white dark:bg-gray-800/95 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden mb-6">
           <div className="flex overflow-x-auto scroll-smooth hide-scrollbar">
-            {dressInfoList.slice(0, 10).map((info, index) => (
+            {dressInfoList.slice(0, 7).map((info, index) => (
               <div
                 key={index}
                 className={getDateTabClass(info.date)}
                 onClick={() => handleDateChange(new Date(info.date))}
-                style={{ minWidth: '20%' }}
+                style={{ minWidth: '14.28%', flexBasis: '14.28%' }}
               >
                 <div className="text-[10px] sm:text-xs opacity-70 mb-0.5">{info.weekday?.replace('星期', '') || ''}</div>
                 <div className="text-sm sm:text-base font-bold">{formatDate(info.date)}</div>

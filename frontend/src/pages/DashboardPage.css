@@ -29,27 +29,73 @@
 /* 扩展时调整标题栏样式 */
 .features-expanded .features-header {
   margin-top: 0;
-  padding-top: 20px;
-  background: var(--color-background);
+  padding-top: 24px;
+  padding-bottom: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
   z-index: 20;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* 快速操作按钮区域 */
+.dark.features-expanded .features-header {
+  background: rgba(15, 20, 25, 0.8);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 统一页眉卡片边距，对齐节日卡片 */
+.dashboard-page-wrapper .merged-banner-card,
+.dashboard-page-wrapper .daily-fortune-card,
+.dashboard-page-wrapper .festival-card-newyear {
+  margin-left: 12px !important;
+  margin-right: 12px !important;
+  width: auto !important;
+  /* 允许 margin 生效 */
+}
+
+@media (max-width: 768px) {
+
+  .dashboard-page-wrapper .merged-banner-card,
+  .dashboard-page-wrapper .daily-fortune-card,
+  .dashboard-page-wrapper .festival-card-newyear {
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+  }
+}
+
+/* 快速操作按钮区域 - 增强磨砂玻璃效果 */
 .dashboard-page-wrapper .quick-actions {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 4px;
-  padding: 6px 10px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 8px 10px;
+  background: rgba(118, 75, 162, 0.6);
+  /* 使用半透明紫色背景 */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-radius: var(--spacing-lg);
-  margin: 6px 10px;
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+  margin: 10px 12px;
+  /* 与其他卡片对齐 */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   border: none;
   /* 固定最大高度，防止缩放变形 */
-  max-height: 64px;
-  min-height: 56px;
+  max-height: 68px;
+  min-height: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-page-wrapper .quick-actions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
+  z-index: -1;
 }
 
 .quick-action-btn {
@@ -547,8 +593,8 @@
 
 @media (max-width: 768px) {
   .quick-actions {
-    padding: 5px 8px;
-    margin: 5px 8px;
+    padding: 6px 8px;
+    margin: 8px 10px;
     gap: 3px;
     border-radius: var(--spacing-md);
     max-height: 60px;
