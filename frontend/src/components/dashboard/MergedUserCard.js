@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { useUserSummary } from '../../hooks/useUserInfo';
 import { useNavigate } from 'react-router-dom';
 import { useUserConfig } from '../../contexts/UserConfigContext';
+import { getZodiacNumber } from '../../utils/horoscopeAlgorithm';
 import './MergedUserCard.css';
 
 /**
@@ -42,7 +43,9 @@ const MergedUserCard = () => {
   const navigateToZodiacTraits = () => {
     const userZodiac = currentConfig?.zodiac || zodiacSign;
     if (userZodiac) {
-      navigate(`/horoscope-traits/${encodeURIComponent(userZodiac)}`, {
+      // 使用数字编码作为URL参数，避免中文编码问题
+      const zodiacNumber = getZodiacNumber(userZodiac);
+      navigate(`/horoscope-traits/${zodiacNumber}`, {
         state: { from: 'dashboard', userZodiac, timestamp: Date.now() }
       });
     } else {

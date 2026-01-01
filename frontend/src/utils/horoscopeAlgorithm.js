@@ -200,6 +200,77 @@ export const HOROSCOPE_DATA_ENHANCED = [
   }
 ];
 
+// 星座数字编码映射函数
+/**
+ * 将数字编码（1-12）转换为星座名称
+ * 1: 白羊座, 2: 金牛座, 3: 双子座, 4: 巨蟹座, 
+ * 5: 狮子座, 6: 处女座, 7: 天秤座, 8: 天蝎座,
+ * 9: 射手座, 10: 摩羯座, 11: 水瓶座, 12: 双鱼座
+ */
+export const getZodiacByNumber = (number) => {
+  const zodiacs = [
+    '白羊座', '金牛座', '双子座', '巨蟹座', 
+    '狮子座', '处女座', '天秤座', '天蝎座',
+    '射手座', '摩羯座', '水瓶座', '双鱼座'
+  ];
+  const index = parseInt(number, 10);
+  if (isNaN(index) || index < 1 || index > 12) {
+    return '金牛座'; // 默认值
+  }
+  return zodiacs[index - 1];
+};
+
+/**
+ * 将星座名称转换为数字编码（1-12）
+ * 如果输入已经是数字，则直接验证并返回有效数字
+ */
+export const getZodiacNumber = (zodiacParam) => {
+  // 如果参数是数字，验证并返回有效数字
+  if (typeof zodiacParam === 'number' || !isNaN(parseInt(zodiacParam, 10))) {
+    const num = parseInt(zodiacParam, 10);
+    if (num >= 1 && num <= 12) {
+      return num;
+    }
+  }
+  
+  // 如果是字符串，转换为数字
+  const zodiacs = [
+    '白羊座', '金牛座', '双子座', '巨蟹座', 
+    '狮子座', '处女座', '天秤座', '天蝎座',
+    '射手座', '摩羯座', '水瓶座', '双鱼座'
+  ];
+  
+  const zodiacStr = String(zodiacParam);
+  const index = zodiacs.findIndex(zodiac => zodiac === zodiacStr);
+  return index >= 0 ? index + 1 : 2; // 默认金牛座对应2
+};
+
+/**
+ * 统一处理星座参数，支持数字编码和中文名称
+ * 返回规范的星座名称
+ */
+export const normalizeZodiacParam = (zodiacParam) => {
+  // 如果参数已经是有效的星座名称，直接返回
+  const zodiacs = [
+    '白羊座', '金牛座', '双子座', '巨蟹座', 
+    '狮子座', '处女座', '天秤座', '天蝎座',
+    '射手座', '摩羯座', '水瓶座', '双鱼座'
+  ];
+  
+  if (zodiacs.includes(zodiacParam)) {
+    return zodiacParam;
+  }
+  
+  // 尝试解析为数字
+  const number = parseInt(zodiacParam, 10);
+  if (!isNaN(number) && number >= 1 && number <= 12) {
+    return getZodiacByNumber(number);
+  }
+  
+  // 默认值
+  return '金牛座';
+};
+
 // 映射函数确保元素名称正确对应到内置键名
 // 映射函数确保元素名称正确对应到内置键名
 const getElementKey = (element) => {

@@ -18,58 +18,72 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
   // 计算八字信息
   useEffect(() => {
-    if (!birthDate) return;
+    // 添加参数验证
+    if (!birthDate) {
+      console.log('出生日期未设置，显示默认信息');
+      setBaziInfo(getFallbackBaziData(birthDate, birthTime));
+      setLoading(false);
+      return;
+    }
 
     const loadBazi = async () => {
-      setLoading(true);
       try {
+        setLoading(true);
         let finalBaziData = null;
 
         // 1. 优先从缓存获取八字信息
         if (nickname) {
-          const cachedBazi = baziCacheManager.getBaziByNickname(nickname, {
-            format: 'legacy',
-            validate: true,
-            fallbackToLegacy: true
-          });
+          try {
+            const cachedBazi = baziCacheManager.getBaziByNickname(nickname, {
+              format: 'legacy',
+              validate: true,
+              fallbackToLegacy: true
+            });
 
-          if (cachedBazi && (cachedBazi.bazi || cachedBazi.dualFormatBazi)) {
-            console.log('使用缓存中的八字信息:', nickname);
+            if (cachedBazi && (cachedBazi.bazi || cachedBazi.dualFormatBazi)) {
+              console.log('使用缓存中的八字信息:', nickname);
 
-            const displayBazi = getDisplayBaziInfo(cachedBazi.bazi || cachedBazi.dualFormatBazi);
+              const displayBazi = getDisplayBaziInfo(cachedBazi.bazi || cachedBazi.dualFormatBazi);
 
-            // 验证缓存数据是否与当前配置一致
-            if (validateBaziDataConsistency(displayBazi, birthDate, birthTime, birthLocation)) {
-              finalBaziData = displayBazi;
-              console.log('缓存数据验证通过');
-            } else {
-              console.log('缓存数据与当前配置不一致，重新计算');
-              baziCacheManager.clearCache(nickname);
+              // 验证缓存数据是否与当前配置一致
+              if (validateBaziDataConsistency(displayBazi, birthDate, birthTime, birthLocation)) {
+                finalBaziData = displayBazi;
+                console.log('缓存数据验证通过');
+              } else {
+                console.log('缓存数据与当前配置不一致，重新计算');
+                baziCacheManager.clearCache(nickname);
+              }
             }
+          } catch (cacheError) {
+            console.warn('缓存读取失败:', cacheError);
           }
         }
 
         // 2. 如果缓存无效，尝试使用保存的八字信息
         if (!finalBaziData && savedBaziInfo) {
-          console.log('使用配置中保存的八字信息');
-          const displayBazi = getDisplayBaziInfo(savedBaziInfo);
+          try {
+            console.log('使用配置中保存的八字信息');
+            const displayBazi = getDisplayBaziInfo(savedBaziInfo);
 
-          if (validateBaziDataConsistency(displayBazi, birthDate, birthTime, birthLocation)) {
-            finalBaziData = displayBazi;
-            console.log('配置数据验证通过');
-          } else {
-            console.log('配置数据与当前信息不一致，重新计算');
+            if (validateBaziDataConsistency(displayBazi, birthDate, birthTime, birthLocation)) {
+              finalBaziData = displayBazi;
+              console.log('配置数据验证通过');
+            } else {
+              console.log('配置数据与当前信息不一致，重新计算');
+            }
+          } catch (configError) {
+            console.warn('配置数据处理失败:', configError);
           }
         }
 
         // 3. 如果缓存和保存数据都无效，则实时计算
         if (!finalBaziData) {
           console.log('开始实时计算八字信息');
-          const lng = birthLocation?.lng || DEFAULT_REGION.lng;
-
-          const useTrueSolarTime = trueSolarTime || birthTime || '12:30';
-
           try {
+            const lng = birthLocation?.lng || DEFAULT_REGION.lng;
+
+            const useTrueSolarTime = trueSolarTime || birthTime || '12:30';
+
             const info = calculateDetailedBazi(birthDate, useTrueSolarTime, lng);
 
             finalBaziData = getDisplayBaziInfo(info);
@@ -83,18 +97,22 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
             // 计算完成后缓存八字信息
             if (finalBaziData && nickname) {
-              const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
-                birthDate,
-                birthTime: useTrueSolarTime,
-                longitude: lng
-              }, finalBaziData);
+              try {
+                const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
+                  birthDate,
+                  birthTime: useTrueSolarTime,
+                  longitude: lng
+                }, finalBaziData);
 
-              if (cacheSuccess) {
-                console.log('八字信息已缓存:', nickname);
+                if (cacheSuccess) {
+                  console.log('八字信息已缓存:', nickname);
+                }
+              } catch (cacheError) {
+                console.warn('缓存存储失败:', cacheError);
               }
             }
-          } catch (error) {
-            console.error('八字计算失败:', error);
+          } catch (calcError) {
+            console.error('八字计算失败:', calcError);
             finalBaziData = getFallbackBaziData(birthDate, birthTime);
           }
         }
@@ -405,6 +423,11 @@ const validateBaziDataConsistency = (baziData, birthDate, birthTime, birthLocati
   );
 
   if (!hasValidStructure) return false;
+
+  // 验证出生日期是否匹配
+  if (birthDate && baziData.birth && baziData.birth.solar && baziData.birth.solar.date !== birthDate) {
+    return false;
+  }
 
   return true;
 };

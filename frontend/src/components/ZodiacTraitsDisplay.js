@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HOROSCOPE_DATA_ENHANCED } from '../utils/horoscopeAlgorithm';
+import { HOROSCOPE_DATA_ENHANCED, getZodiacNumber } from '../utils/horoscopeAlgorithm';
 
 /**
  * 星座综合特质和人性特点展示组件
@@ -13,8 +13,10 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
 
   // 跳转到详细页面
   const handleViewDetails = () => {
-    navigate('/horoscope-traits/' + encodeURIComponent(currentHoroscope), {
-      state: { zodiac: currentHoroscope }
+    // 使用数字编码作为URL参数，避免中文编码问题
+    const zodiacNumber = getZodiacNumber(currentHoroscope);
+    navigate('/horoscope-traits/' + zodiacNumber, {
+      state: { userZodiac: currentHoroscope }
     });
   };
 

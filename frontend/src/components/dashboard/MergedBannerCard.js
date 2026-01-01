@@ -6,6 +6,7 @@ import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserSummary } from '../../hooks/useUserInfo';
 import { useUserConfig } from '../../contexts/UserConfigContext';
+import { getZodiacNumber } from '../../utils/horoscopeAlgorithm';
 import niceDayImage from '../../images/nice_day.png';
 import BreadCrumbMenu from './BreadCrumbMenu';
 import './MergedBannerCard.css';
@@ -39,8 +40,9 @@ const MergedBannerCard = () => {
     try {
       const userZodiac = currentConfig?.zodiac || zodiacSign;
       if (userZodiac) {
-        const encodedZodiac = encodeURIComponent(String(userZodiac));
-        navigate(`/horoscope-traits/${encodedZodiac}`, {
+        // 使用数字编码作为URL参数，避免中文编码问题
+        const zodiacNumber = getZodiacNumber(userZodiac);
+        navigate(`/horoscope-traits/${zodiacNumber}`, {
           state: { from: 'dashboard', userZodiac, timestamp: Date.now() }
         });
       } else {

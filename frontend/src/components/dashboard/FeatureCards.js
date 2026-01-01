@@ -1,6 +1,7 @@
 import FeatureCard from './FeatureCard';
 import { useUserConfig } from '../../contexts/UserConfigContext';
 import { useNavigate } from 'react-router-dom';
+import { getZodiacNumber } from '../../utils/horoscopeAlgorithm';
 
 /**
  * MBTI测试组件
@@ -85,8 +86,9 @@ const PersonalityTraitCard = () => {
   const handleClick = () => {
     if (userZodiac) {
       console.log('从功能卡片跳转到星座特质页面:', userZodiac);
-      // 优化：直接跳转到用户的星座特质页面，传递URL参数
-      navigate(`/horoscope-traits/${encodeURIComponent(userZodiac)}`, {
+      // 使用数字编码作为URL参数，避免中文编码问题
+      const zodiacNumber = getZodiacNumber(userZodiac);
+      navigate(`/horoscope-traits/${zodiacNumber}`, {
         state: {
           from: 'feature-card',
           userZodiac: userZodiac,

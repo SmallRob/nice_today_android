@@ -18,60 +18,91 @@ const { Suspense } = React;
 
 // 创建带有错误处理的懒加载函数
 const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
-  return React.lazy(() =>
-    importFunc().catch(error => {
-      console.error('组件加载失败:', error);
-
-      // 如果是ChunkLoadError，记录错误并尝试恢复
-      if (error.name === 'ChunkLoadError') {
-        console.error('检测到ChunkLoadError，尝试恢复...');
-
-        // 记录错误信息
-        if (typeof window !== 'undefined' && window.localStorage) {
-          try {
-            const errorInfo = {
-              type: 'ChunkLoadError',
-              message: error.message,
-              stack: error.stack,
-              timestamp: new Date().toISOString(),
-              url: window.location.href
-            };
-
-            const errors = JSON.parse(window.localStorage.getItem('chunkLoadErrors') || '[]');
-            errors.push(errorInfo);
-            window.localStorage.setItem('chunkLoadErrors', JSON.stringify(errors));
-          } catch (e) {
-            console.warn('无法记录ChunkLoadError:', e);
+  return React.lazy(() => {
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    const attemptImport = async () => {
+      try {
+        const module = await importFunc();
+        return module;
+      } catch (error) {
+        console.error('组件加载失败:', error);
+        
+        // 如果是ChunkLoadError，尝试恢复
+        if (error.name === 'ChunkLoadError' || error.message?.includes('Loading chunk')) {
+          console.error(`检测到ChunkLoadError (重试 ${retryCount + 1}/${maxRetries})，尝试恢复...`);
+          
+          // 记录错误信息
+          if (typeof window !== 'undefined' && window.localStorage) {
+            try {
+              const errorInfo = {
+                type: 'ChunkLoadError',
+                message: error.message,
+                stack: error.stack,
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                retryCount
+              };
+              
+              const errors = JSON.parse(window.localStorage.getItem('chunkLoadErrors') || '[]');
+              errors.push(errorInfo);
+              window.localStorage.setItem('chunkLoadErrors', JSON.stringify(errors));
+            } catch (e) {
+              console.warn('无法记录ChunkLoadError:', e);
+            }
+          }
+          
+          // 检查错误URL是否包含多余的路由前缀
+          const urlMatch = error.message.match(/(https?:\/\/[^\s]+\.js)/);
+          if (urlMatch) {
+            const failedUrl = urlMatch[1];
+            console.log('失败URL:', failedUrl);
+            
+            // 如果URL包含类似/horoscope-traits/的前缀，尝试从根目录加载
+            const pathMatch = failedUrl.match(/\/horoscope-traits(\/static\/js\/[^\/]+\.js)/);
+            if (pathMatch) {
+              const correctedPath = pathMatch[1];
+              const correctedUrl = `${window.location.origin}${correctedPath}`;
+              console.log('尝试修正URL:', correctedUrl);
+              
+              // 尝试从修正的URL加载
+              try {
+                const script = document.createElement('script');
+                script.src = correctedUrl;
+                script.type = 'application/javascript';
+                
+                await new Promise((resolve, reject) => {
+                  script.onload = resolve;
+                  script.onerror = reject;
+                  document.head.appendChild(script);
+                });
+                
+                // 如果脚本加载成功，重新尝试导入
+                console.log('修正URL加载成功，重新尝试导入');
+                return importFunc();
+              } catch (e) {
+                console.warn('修正URL加载失败:', e);
+              }
+            }
+          }
+          
+          // 如果重试次数未达到最大值，延迟后重试
+          if (retryCount < maxRetries - 1) {
+            retryCount++;
+            console.log(`延迟后重试 (${retryCount}/${maxRetries})...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+            return attemptImport();
           }
         }
+        
+        // 如果重试次数达到最大值或不是ChunkLoadError，抛出错误
+        throw error;
       }
-
-      // 返回回退组件或错误页面
-      if (fallbackComponent) {
-        return fallbackComponent;
-      }
-
-      // 默认返回错误页面组件
-      return {
-        default: () => (
-          <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-900 p-4">
-            <div className="text-red-500 text-xl mb-4">页面加载失败</div>
-            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-w-md">
-              <p className="text-gray-700 dark:text-white text-sm mb-4">
-                抱歉，页面资源加载失败。这通常是由于网络问题或应用更新导致的。
-              </p>
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={() => window.location.reload()}
-              >
-                刷新页面
-              </button>
-            </div>
-          </div>
-        )
-      };
-    })
-  );
+    };
+    
+    return attemptImport();
+  });
 };
 
 // 懒加载页面组件 - 添加错误处理

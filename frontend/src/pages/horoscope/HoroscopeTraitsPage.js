@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserConfig } from '../../contexts/UserConfigContext';
-import { HOROSCOPE_DATA_ENHANCED, generateDailyHoroscope } from '../../utils/horoscopeAlgorithm';
+import { HOROSCOPE_DATA_ENHANCED, generateDailyHoroscope, normalizeZodiacParam } from '../../utils/horoscopeAlgorithm';
 import { memo } from 'react';
 import { Line } from 'react-chartjs-2';
 import { ensureChartRegistered } from '../../utils/chartConfig';
@@ -19,15 +19,15 @@ const HoroscopeTraitsPage = () => {
     // 多层级参数获取：URL参数 > 传递状态 > 用户配置 > 默认值
     const stateZodiac = location.state?.userZodiac;
     const configZodiac = currentConfig?.zodiac;
-    
+
     // 解码URL参数（防止移动端编码问题）
     const decodedZodiacName = zodiacName ? decodeURIComponent(zodiacName) : '';
-    
-    // 验证星座名称是否有效
-    const validZodiac = decodedZodiacName || stateZodiac || configZodiac || '金牛座';
-    console.log('初始化星座参数:', { zodiacName: decodedZodiacName, stateZodiac, configZodiac, validZodiac });
-    
-    return validZodiac;
+
+    // 使用 normalizeZodiacParam 统一处理参数（支持数字编码和中文名称）
+    const normalizedZodiac = normalizeZodiacParam(decodedZodiacName || stateZodiac || configZodiac);
+    console.log('初始化星座参数:', { zodiacName: decodedZodiacName, stateZodiac, configZodiac, normalizedZodiac });
+
+    return normalizedZodiac;
   });
   
   // 运势数据状态
@@ -187,12 +187,12 @@ const getFamousExamples = (zodiacName) => {
     // 检查URL参数、状态和配置中的星座
     const stateZodiac = location.state?.userZodiac;
     const configZodiac = currentConfig?.zodiac;
-    
+
     // 解码URL参数
     const decodedZodiacName = zodiacName ? decodeURIComponent(zodiacName) : '';
 
-    // 优先级：URL参数 > 传递状态 > 用户配置 > 默认值
-    const targetZodiac = decodedZodiacName || stateZodiac || configZodiac || '金牛座';
+    // 使用 normalizeZodiacParam 统一处理参数（支持数字编码和中文名称）
+    const targetZodiac = normalizeZodiacParam(decodedZodiacName || stateZodiac || configZodiac);
 
     // 只有当目标星座有效且与当前不同时才更新
     if (targetZodiac && targetZodiac !== currentHoroscope) {
