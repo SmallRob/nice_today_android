@@ -160,13 +160,28 @@ const FishingGamePage = () => {
 
     if (savedData) {
       try {
-        const currentGameState = JSON.parse(savedData);
+        const loadedState = JSON.parse(savedData);
+
         // 验证金钱是否有效
-        if (!isValidMoney(currentGameState.money)) {
+        if (!isValidMoney(loadedState.money)) {
           console.warn('加载的金钱数据无效，重置为默认值');
-          currentGameState.money = 500;
+          loadedState.money = 500;
         }
-        setGameState(currentGameState);
+
+        // 深度合并逻辑，确保新字段（如 inventory.gear）存在
+        setGameState(prev => ({
+          ...prev,
+          ...loadedState,
+          inventory: {
+            ...prev.inventory,
+            ...(loadedState.inventory || {}),
+            rods: loadedState.inventory?.rods || prev.inventory.rods,
+            bait: loadedState.inventory?.bait || prev.inventory.bait,
+            gear: loadedState.inventory?.gear || []
+          },
+          caughtFish: loadedState.caughtFish || [],
+          messages: loadedState.messages || []
+        }));
       } catch (error) {
         console.error('加载游戏数据失败:', error);
       }
@@ -266,7 +281,7 @@ const FishingGamePage = () => {
       return;
     }
 
-    if (gameState.inventory.rods.includes(rod.id)) {
+    if ((gameState.inventory.rods || []).includes(rod.id)) {
       addMessage(`🎣 你已经拥有${rod.name}了`);
       return;
     }
@@ -323,7 +338,7 @@ const FishingGamePage = () => {
 
   // 装备钓竿
   const equipRod = (rodId) => {
-    if (!gameState.inventory.rods.includes(rodId)) return;
+    if (!(gameState.inventory.rods || []).includes(rodId)) return;
     setGameState(prev => ({ ...prev, currentRod: rodId }));
     const rod = RODS.find(r => r.id === rodId);
     addMessage(`🎣 已装备${rod.name}`);
@@ -454,7 +469,7 @@ const FishingGamePage = () => {
 
           // 检查库存上限
           const baseCapacity = 50;
-          const gearCapacity = prev.inventory.gear.reduce((acc, id) => {
+          const gearCapacity = (prev.inventory.gear || []).reduce((acc, id) => {
             const item = GEAR.find(g => g.id === id);
             return acc + (item?.type === 'basket' ? item.effect : 0);
           }, 0);
@@ -504,7 +519,7 @@ const FishingGamePage = () => {
 
           // 检查库存上限
           const baseCapacity = 50;
-          const gearCapacity = prev.inventory.gear.reduce((acc, id) => {
+          const gearCapacity = (prev.inventory.gear || []).reduce((acc, id) => {
             const item = GEAR.find(g => g.id === id);
             return acc + (item?.type === 'basket' ? item.effect : 0);
           }, 0);
@@ -689,7 +704,7 @@ const FishingGamePage = () => {
       return;
     }
 
-    if (gameState.inventory.gear.includes(item.id)) {
+    if ((gameState.inventory.gear || []).includes(item.id)) {
       addMessage(`📦 你已经拥有${item.name}了`);
       return;
     }
@@ -919,7 +934,7 @@ const FishingGamePage = () => {
             <h4 className="shop-subtitle">钓竿</h4>
             <div className="rods-grid">
               {RODS.map(rod => {
-                const isOwned = gameState.inventory.rods.includes(rod.id);
+                const isOwned = (gameState.inventory.rods || []).includes(rod.id);
                 const sellPrice = Math.floor(rod.price * 0.65);
                 return (
                   <div key={rod.id} className="rod-card">
@@ -967,7 +982,7 @@ const FishingGamePage = () => {
             <h4 className="shop-subtitle">功能装备</h4>
             <div className="rods-grid">
               {GEAR.map(item => {
-                const isOwned = gameState.inventory.gear.includes(item.id);
+                const isOwned = (gameState.inventory.gear || []).includes(item.id);
                 const sellPrice = Math.floor(item.price * 0.65);
                 return (
                   <div key={item.id} className="rod-card" style={{ background: 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)' }}>
@@ -1007,7 +1022,7 @@ const FishingGamePage = () => {
           <h3 className="tab-title">🪱 饵料商店</h3>
           <div className="bait-grid">
             {BAIT.map(bait => {
-              const amount = gameState.inventory.bait[bait.id] || 0;
+              const amount = (gameState.inventory.bait || {})[bait.id] || 0;
               const sellPrice = Math.floor(bait.price * 0.65);
               return (
                 <div key={bait.id} className="bait-card">
@@ -1112,7 +1127,7 @@ const FishingGamePage = () => {
           {inventoryTab === 'gear' && (
             <div className="inventory-grid">
               {/* 1. 钓竿 (Rods) */}
-              {gameState.inventory.rods.map(rodId => {
+              {(gameState.inventory.rods || []).map(rodId => {
                 const rod = RODS.find(r => r.id === rodId);
                 if (!rod) return null;
                 const sellPrice = Math.floor(rod.price * 0.65);
@@ -1140,7 +1155,7 @@ const FishingGamePage = () => {
               })}
 
               {/* 2. 饵料 (Bait) */}
-              {Object.entries(gameState.inventory.bait)
+              {Object.entries(gameState.inventory.bait || {})
                 .filter(([_, amount]) => amount > 0)
                 .map(([baitId, amount]) => {
                   const bait = BAIT.find(b => b.id === baitId);
@@ -1168,7 +1183,7 @@ const FishingGamePage = () => {
                 })}
 
               {/* 3. 功能装备 (Gear) */}
-              {gameState.inventory.gear.map(itemId => {
+              {(gameState.inventory.gear || []).map(itemId => {
                 const item = GEAR.find(g => g.id === itemId);
                 if (!item) return null;
                 const sellPrice = Math.floor(item.price * 0.65);
@@ -1192,9 +1207,9 @@ const FishingGamePage = () => {
               })}
 
               {/* 如果所有渔具都为空 */}
-              {gameState.inventory.rods.length === 0 &&
-                Object.values(gameState.inventory.bait).every(a => a <= 0) &&
-                gameState.inventory.gear.length === 0 && (
+              {(gameState.inventory.rods || []).length === 0 &&
+                Object.values(gameState.inventory.bait || {}).every(a => a <= 0) &&
+                (gameState.inventory.gear || []).length === 0 && (
                   <div className="empty-inventory" style={{ gridColumn: '1/-1' }}>渔具库存为空</div>
                 )}
             </div>
