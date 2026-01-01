@@ -7,15 +7,15 @@ import './BreadCrumbMenu.css';
 const ENTERTAINMENT_FEATURES = [
     { id: 'home', icon: '🏠', name: '首页面板', route: '/' },
     { id: 'tarot', icon: '🎴', name: '塔罗抽卡', route: '/tarot', category: 'main' },
-    { id: 'daily-card', icon: '🃏', name: '每日抽卡', route: '/daily-card', category: 'main' },
+    { id: 'daily-card', icon: '🃏', name: '每日抽卡', route: '/daily-cards', category: 'main' },
     { id: 'cultural-cup', icon: '🏵️', name: '文化抽签', route: '/cultural-cup', category: 'main' },
     { id: 'fishing', icon: '🎣', name: '垂钓游戏', route: '/fishing-game', category: 'main' },
-    { id: 'profile', icon: '👤', name: '个人中心', route: '/settings', category: 'main' },
+    { id: 'profile', icon: '👤', name: '用户配置', route: '/user-config', category: 'main' },
 ];
 
 const COMMON_FEATURES = [
     { id: 'finance', icon: '💰', name: '财务管理', route: '/finance' },
-    { id: 'todo', icon: '📝', name: '日程清单', route: '/todo' },
+    { id: 'todo', icon: '📝', name: '日程清单', route: '/todo-list' },
     { id: 'dress', icon: '👕', name: '穿衣指南', route: '/dress' },
     { id: 'bazi', icon: '☯️', name: '八字命理', route: '/bazi-analysis' },
     { id: 'horoscope', icon: '📅', name: '星座运势', route: '/horoscope' },
@@ -118,6 +118,25 @@ const BreadCrumbMenu = () => {
                                 </li>
                             ))}
                         </ul>
+                    </div>
+                </div>
+
+                {/* 底部系统设置和版本号 */}
+                <div className="menu-footer">
+                    <div className="menu-separator">
+                        <span>系统设置</span>
+                    </div>
+                    <ul className="menu-list">
+                        <li className="menu-item">
+                            <button onClick={() => handleNavigate('/settings')}>
+                                <div className="item-icon-box">⚙️</div>
+                                <span className="item-name">系统设置</span>
+                                {isActive('/settings') && <div className="active-dot"></div>}
+                            </button>
+                        </li>
+                    </ul>
+                    <div className="version-info">
+                        v1.0.12
                     </div>
                 </div>
             </div>

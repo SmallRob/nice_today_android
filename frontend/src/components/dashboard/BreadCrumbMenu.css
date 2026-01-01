@@ -306,3 +306,30 @@
         opacity: 1;
     }
 }
+
+/* 菜单底部区域 */
+.menu-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .menu-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.menu-footer .menu-separator {
+    margin: 0 0 12px 0;
+}
+
+.version-info {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #999;
+    padding: 8px 0;
+    margin-top: 8px;
+}
+
+.dark .version-info {
+    color: #aaa;
+}

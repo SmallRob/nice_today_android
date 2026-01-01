@@ -42,20 +42,20 @@ const AppBanner = () => {
 
       {/* Banner内容 */}
       <div className="container mx-auto relative z-10">
-        <div className="flex items-center justify-center space-x-4 py-6 md:py-8">
+        <div className="flex items-center justify-center space-x-3 md:space-x-4 py-2 md:py-3">
           {/* 应用图标 */}
           <img
             src={niceDayImage}
             alt="Nice Today"
-            className="w-16 h-16 md:w-20 md:h-20 rounded-xl shadow-lg"
+            className="w-12 h-12 md:w-14 md:h-14 rounded-lg shadow-md"
           />
 
           {/* 应用名称 */}
           <div className="text-center md:text-left">
-            <h1 className="text-3xl md:text-4xl font-black mb-1 text-shadow-xl tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-black mb-0.5 text-shadow-xl tracking-tight leading-tight">
               Nice Today
             </h1>
-            <p className="text-sm md:text-base opacity-95 font-medium">
+            <p className="text-xs md:text-sm opacity-95 font-medium leading-tight">
               探索运势·了解自己·精彩每一天
             </p>
           </div>

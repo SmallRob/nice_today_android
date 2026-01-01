@@ -69,6 +69,27 @@ export const getMonthGanzhi = (date = new Date()) => {
 };
 
 /**
+ * 获取指定日期的日干支
+ * @param {Date} date 日期对象
+ * @returns {string} 日干支
+ */
+export const getDayGanzhi = (date = new Date()) => {
+    const lunar = Lunar.fromDate(date);
+    return lunar.getEightChar().getDay();
+};
+
+/**
+ * 获取指定年份的年干支
+ * @param {number} year 年份
+ * @returns {string} 年干支
+ */
+export const getYearGanzhi = (year = new Date().getFullYear()) => {
+    const solar = Solar.fromYmd(year, 1, 1);
+    const lunar = solar.getLunar();
+    return lunar.getYearInGanZhi();
+};
+
+/**
  * 保持兼容: 获取当前月份干支
  */
 export const getCurrentMonthGanzhi = () => {
@@ -148,6 +169,151 @@ export const getMonthlyBaziFortune = (pillars, targetDate = new Date()) => {
         masterElement,
         monthGanzhi: targetMonthG,
         monthText
+    };
+};
+
+/**
+ * 获取指定日期的日运势描述（用于周运计算）
+ * @param {Array} pillars 八字四柱
+ * @param {Date} targetDate 目标日期
+ * @returns {Object} 运势信息
+ */
+export const getDailyBaziFortune = (pillars, targetDate = new Date()) => {
+    if (!pillars || pillars.length < 3 || pillars[2] === '未知' || pillars[2].includes('未知')) {
+        return {
+            summary: '出生日期信息不全，目前的分析仅供参考。',
+            score: 70,
+            relation: '未知',
+            dayMaster: '?',
+            masterElement: '未知',
+            dayGanzhi: '未知'
+        };
+    }
+
+    const dayMaster = pillars[2].charAt(0); // 日主
+    const targetDayG = getDayGanzhi(targetDate);
+
+    const elements = {
+        '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+        '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
+    };
+
+    const masterElement = elements[dayMaster];
+    const dayElement = targetDayG ? elements[targetDayG.charAt(0)] : null;
+
+    const relations = {
+        '木': { '木': '比劫', '火': '食伤', '土': '财星', '金': '官杀', '水': '印星' },
+        '火': { '木': '印星', '火': '比劫', '土': '食伤', '金': '财星', '水': '官杀' },
+        '土': { '木': '官杀', '火': '印星', '土': '比劫', '金': '食伤', '水': '财星' },
+        '金': { '木': '财星', '火': '官杀', '土': '印星', '金': '比劫', '水': '食伤' },
+        '水': { '木': '食伤', '火': '财星', '土': '官杀', '金': '印星', '水': '比劫' }
+    };
+
+    if (!masterElement || !dayElement || !relations[masterElement] || !relations[masterElement][dayElement]) {
+        return {
+            summary: '暂无法分析今日运势。',
+            score: 75,
+            relation: '未知',
+            dayMaster: dayMaster || '?',
+            masterElement: masterElement || '未知',
+            dayGanzhi: targetDayG || '未知'
+        };
+    }
+
+    const relation = relations[masterElement][dayElement];
+
+    const fortuneMap = {
+        '比劫': { summary: '今日人际关系活跃，适合社交合作。注意守财，避免冲动消费。', score: 75 },
+        '食伤': { summary: '今日思维敏捷，创意灵感迸发。适合展现才华、创意工作。', score: 85 },
+        '财星': { summary: '今日财运亨通，有利商业活动。把握机遇，理性投资。', score: 90 },
+        '官杀': { summary: '今日责任较重，可能有一定压力。宜稳扎稳打，保持耐心。', score: 70 },
+        '印星': { summary: '今日贵人相助，学习力强。适合深造、规划、签约。', score: 88 }
+    };
+
+    return {
+        summary: fortuneMap[relation]?.summary || '今日运势平稳。',
+        score: fortuneMap[relation]?.score || 80,
+        relation,
+        dayMaster,
+        masterElement,
+        dayGanzhi: targetDayG
+    };
+};
+
+/**
+ * 获取指定年份的年运势描述
+ * @param {Array} pillars 八字四柱
+ * @param {number} targetYear 目标年份
+ * @returns {Object} 运势信息
+ */
+export const getYearlyBaziFortune = (pillars, targetYear = new Date().getFullYear()) => {
+    if (!pillars || pillars.length < 3 || pillars[2] === '未知' || pillars[2].includes('未知')) {
+        return {
+            summary: '出生日期信息不全，目前的分析仅供参考。',
+            score: 70,
+            relation: '未知',
+            dayMaster: '?',
+            masterElement: '未知',
+            yearGanzhi: '未知'
+        };
+    }
+
+    const dayMaster = pillars[2].charAt(0); // 日主
+    const targetYearG = getYearGanzhi(targetYear);
+
+    const elements = {
+        '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+        '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
+    };
+
+    const masterElement = elements[dayMaster];
+    const yearGanElement = targetYearG ? elements[targetYearG.charAt(0)] : null;
+    const yearBranchElement = targetYearG ? elements[targetYearG.charAt(1)] : null;
+
+    const relations = {
+        '木': { '木': '比劫', '火': '食伤', '土': '财星', '金': '官杀', '水': '印星' },
+        '火': { '木': '印星', '火': '比劫', '土': '食伤', '金': '财星', '水': '官杀' },
+        '土': { '木': '官杀', '火': '印星', '土': '比劫', '金': '食伤', '水': '财星' },
+        '金': { '木': '财星', '火': '官杀', '土': '印星', '金': '比劫', '水': '食伤' },
+        '水': { '木': '食伤', '火': '财星', '土': '官杀', '金': '印星', '水': '比劫' }
+    };
+
+    if (!masterElement || !yearGanElement || !relations[masterElement]) {
+        return {
+            summary: '暂无法分析今年运势。',
+            score: 75,
+            relation: '未知',
+            dayMaster: dayMaster || '?',
+            masterElement: masterElement || '未知',
+            yearGanzhi: targetYearG || '未知'
+        };
+    }
+
+    const ganRelation = relations[masterElement][yearGanElement];
+    const branchRelation = yearBranchElement ? relations[masterElement][yearBranchElement] : ganRelation;
+
+    // 综合天干和地支关系
+    const relation = ganRelation === branchRelation ? ganRelation :
+                     (ganRelation === '财星' || branchRelation === '财星') ? '财星' :
+                     (ganRelation === '官杀' || branchRelation === '官杀') ? '官杀' :
+                     (ganRelation === '印星' || branchRelation === '印星') ? '印星' :
+                     (ganRelation === '食伤' || branchRelation === '食伤') ? '食伤' : '比劫';
+
+    const fortuneMap = {
+        '比劫': { summary: '今年人际关系活跃，适合社交合作。注意守财，避免冲动消费。稳扎稳打。', score: 75 },
+        '食伤': { summary: '今年才华展现，创意灵感迸发。适合展现才华、拓展新业务、创意工作。', score: 85 },
+        '财星': { summary: '今年财运亨通，商业运势强。把握机遇，理性投资，突破瓶颈。', score: 90 },
+        '官杀': { summary: '今年责任加重，可能面临较大压力。宜稳扎稳打，保持耐心，低调行事。', score: 70 },
+        '印星': { summary: '今年贵人相助，学习运强。适合深造、规划、签约、学习提升。', score: 88 }
+    };
+
+    return {
+        summary: fortuneMap[relation]?.summary || '今年运势平稳。',
+        score: fortuneMap[relation]?.score || 80,
+        relation,
+        dayMaster,
+        masterElement,
+        yearGanzhi: targetYearG
     };
 };
 

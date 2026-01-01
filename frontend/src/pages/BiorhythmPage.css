@@ -154,10 +154,10 @@
 .rhythm-card {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  padding: 16px;
+  padding: 20px 16px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .dark .rhythm-card {
@@ -167,7 +167,12 @@
 }
 
 .rhythm-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.dark .rhythm-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 .rhythm-card.excellent {
@@ -191,34 +196,84 @@
 }
 
 .rhythm-emoji {
-  font-size: 24px;
-  margin-bottom: 8px;
+  font-size: 32px;
+  margin-bottom: 12px;
 }
 
 .rhythm-value {
-  font-size: 14px;
-  font-weight: bold;
-  color: #4a5568;
-  margin-bottom: 4px;
+  font-size: 24px;
+  font-weight: 900;
+  color: #2d3748;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .dark .rhythm-value {
-  color: #cbd5e1;
+  color: #f8fafc;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
 }
 
 .rhythm-status {
-  font-size: 12px;
-  font-weight: bold;
-  margin-bottom: 4px;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.rhythm-card.excellent .rhythm-status {
+  color: #48bb78;
+}
+
+.rhythm-card.good .rhythm-status {
+  color: #38a169;
+}
+
+.rhythm-card.normal .rhythm-status {
+  color: #ecc94b;
+}
+
+.rhythm-card.poor .rhythm-status {
+  color: #ed8936;
+}
+
+.rhythm-card.low .rhythm-status {
+  color: #e53e3e;
+}
+
+.dark .rhythm-card.excellent .rhythm-status {
+  color: #68d391;
+  text-shadow: 0 0 8px rgba(104, 211, 145, 0.3);
+}
+
+.dark .rhythm-card.good .rhythm-status {
+  color: #9ae6b4;
+  text-shadow: 0 0 8px rgba(154, 230, 180, 0.3);
+}
+
+.dark .rhythm-card.normal .rhythm-status {
+  color: #f6e05e;
+  text-shadow: 0 0 8px rgba(246, 224, 94, 0.3);
+}
+
+.dark .rhythm-card.poor .rhythm-status {
+  color: #f6ad55;
+  text-shadow: 0 0 8px rgba(246, 173, 85, 0.3);
+}
+
+.dark .rhythm-card.low .rhythm-status {
+  color: #fc8181;
+  text-shadow: 0 0 8px rgba(252, 129, 129, 0.3);
 }
 
 .rhythm-label {
-  font-size: 11px;
-  color: #718096;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a5568;
+  margin-top: 4px;
 }
 
 .dark .rhythm-label {
-  color: #94a3b8;
+  color: #cbd5e1;
 }
 
 /* 生物节律图表 */
@@ -462,7 +517,20 @@
   }
 
   .rhythm-card {
-    padding: 12px;
+    padding: 16px 12px;
+  }
+
+  .rhythm-emoji {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+
+  .rhythm-value {
+    font-size: 20px;
+  }
+
+  .rhythm-status {
+    font-size: 14px;
   }
 
   .chart-grid {

@@ -8,7 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { useSearchParams } from 'react-router-dom';
 import { normalizeBirthInfo } from '../utils/baziDataManager';
-import { calculateLiuNianDaYun, getMonthlyBaziFortune, calculateDailyEnergy } from '../utils/baziHelper';
+import { calculateLiuNianDaYun, getMonthlyBaziFortune, getDailyBaziFortune, getYearlyBaziFortune, calculateDailyEnergy } from '../utils/baziHelper';
 import BaziCalculator from '../utils/baziCalculator';
 import FortuneTrendChart from '../components/bazi/FortuneTrendChart';
 import '../styles/bazi-page.css';
@@ -190,7 +190,7 @@ const BaziPage = () => {
         for (let i = 0; i < 7; i++) {
           const targetDate = new Date(startOfWeek);
           targetDate.setDate(startOfWeek.getDate() + i);
-          const dailyFortune = getMonthlyBaziFortune([
+          const dailyFortune = getDailyBaziFortune([
             calculatedBazi.year,
             calculatedBazi.month,
             calculatedBazi.day,
@@ -221,6 +221,7 @@ const BaziPage = () => {
 
       // 根据选择的视图模式计算不同的运势
       if (viewMode === 'monthly') {
+        // 月运模式：基于月份干支计算
         targetDate = new Date(selectedYear, selectedMonth - 1, 1);
         const monthlyFortune = getMonthlyBaziFortune([
           calculatedBazi.year,
@@ -230,22 +231,55 @@ const BaziPage = () => {
         ], targetDate);
         setMonthlyFortune(monthlyFortune);
       } else if (viewMode === 'weekly') {
-        // 计算当前周的运势（假设每周从周一开始）
+        // 周运模式：基于日干支计算（使用本周周一的日期）
         const today = new Date();
         const dayOfWeek = today.getDay();
         const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         const startOfWeek = new Date(today);
         startOfWeek.setDate(today.getDate() - diff);
         targetDate = startOfWeek;
-        const weeklyFortune = getMonthlyBaziFortune([
+        const weeklyFortune = getDailyBaziFortune([
           calculatedBazi.year,
           calculatedBazi.month,
           calculatedBazi.day,
           calculatedBazi.hour
         ], targetDate);
         setMonthlyFortune(weeklyFortune);
+      } else if (viewMode === 'yearly') {
+        // 年运模式：基于年干支计算
+        targetDate = new Date(selectedYear, 0, 1);
+        const yearlyFortune = getYearlyBaziFortune([
+          calculatedBazi.year,
+          calculatedBazi.month,
+          calculatedBazi.day,
+          calculatedBazi.hour
+        ], selectedYear);
+        setMonthlyFortune(yearlyFortune);
       }
       // yearly 模式使用流年运势数据，已经在前面计算
+
+      // 年运模式下生成流年运势明细数据
+      if (viewMode === 'yearly') {
+        const yearlyFortunes = [];
+        for (let i = 0; i < 11; i++) {
+          const year = selectedYear + i;
+          const yearFortune = calculateLiuNianDaYun(calculatedBazi, year);
+          if (yearFortune) {
+            yearlyFortunes.push({
+              year,
+              overallScore: yearFortune.overall.score,
+              loveScore: yearFortune.love.score,
+              careerScore: yearFortune.career.score,
+              studyScore: yearFortune.study.score,
+              healthScore: yearFortune.health.score,
+              wealthScore: yearFortune.wealth.score,
+              socialScore: yearFortune.social.score,
+              description: yearFortune.overall.description
+            });
+          }
+        }
+        setLiuNianData({ yearlyFortune: yearlyFortunes });
+      }
 
       setError(null);
       console.log('✅ 运势趋势数据已生成:', trendData);
@@ -311,71 +345,57 @@ const BaziPage = () => {
   }
 
   return (
-    <div className={`bazi-page-container min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-fuchsia-900/30 ${theme}`}>
-      {/* 导航标题栏 */}
-      <div className="bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => window.history.back()}
-              className="text-white hover:text-purple-100 flex items-center"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">八字运势</h1>
-            <button
-              onClick={calculateBaziFortune}
-              className="text-white hover:text-purple-100"
-              disabled={calculating}
-            >
-              <svg className={`w-6 h-6 ${calculating ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* 头部 */}
+      <div className={`px-4 pt-6 pb-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className="text-center mb-4">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="text-2xl">☯️</span>
+            <h1 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              八字运势
+            </h1>
           </div>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            八字月运分析 · 每日能量预测
+          </p>
         </div>
       </div>
 
-      {/* Tab导航 - 优化紧凑布局 */}
-      <div className="bg-white dark:bg-gray-800 shadow-md sticky top-16 z-30">
-        <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex overflow-x-auto space-x-2 sm:space-x-4 py-2 sm:py-3">
-            <button
-              onClick={() => handleViewModeChange('monthly')}
-              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${viewMode === 'monthly'
-                ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
-                : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+      {/* 视图切换 */}
+      <div className={`px-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className="flex overflow-x-auto space-x-4 py-3">
+          <button
+            onClick={() => handleViewModeChange('monthly')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'monthly'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
                 }`}
-            >
-              月运
-            </button>
-            <button
-              onClick={() => handleViewModeChange('weekly')}
-              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${viewMode === 'weekly'
-                ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
-                : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+          >
+            月运
+          </button>
+          <button
+            onClick={() => handleViewModeChange('weekly')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'weekly'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
                 }`}
-            >
-              周运
-            </button>
-            <button
-              onClick={() => handleViewModeChange('yearly')}
-              className={`flex-shrink-0 px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${viewMode === 'yearly'
-                ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md'
-                : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-700'
+          >
+            周运
+          </button>
+          <button
+            onClick={() => handleViewModeChange('yearly')}
+            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'yearly'
+                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
                 }`}
-            >
-              年运
-            </button>
-          </div>
+          >
+            年运
+          </button>
         </div>
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="px-4 py-6 max-w-4xl mx-auto">
         {/* 错误提示 */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
@@ -383,10 +403,10 @@ const BaziPage = () => {
           </div>
         )}
 
-        {/* 时间选择器 - 根据视图模式显示不同的选择器 - 优化紧凑布局 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4 mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-            <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white">
+        {/* 时间选择器 */}
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6 ${theme}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
               {viewMode === 'monthly' ? '选择月份' : viewMode === 'weekly' ? '选择周数' : '选择年份'}
             </h3>
             {viewMode === 'monthly' && (
@@ -397,7 +417,7 @@ const BaziPage = () => {
                   setSelectedYear(parseInt(year));
                   setSelectedMonth(parseInt(month));
                 }}
-                className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base text-gray-800 dark:text-white dark:bg-gray-700"
+                className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-800 dark:text-white dark:bg-gray-700"
               >
                 {[2024, 2025, 2026].map(year => (
                   months.map(month => (
@@ -412,7 +432,7 @@ const BaziPage = () => {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base text-gray-800 dark:text-white dark:bg-gray-700"
+                className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-800 dark:text-white dark:bg-gray-700"
               >
                 {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() + i).map(year => (
                   <option key={year} value={year}>{year}年</option>
@@ -423,7 +443,7 @@ const BaziPage = () => {
               <select
                 value={selectedWeek}
                 onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
-                className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base text-gray-800 dark:text-white dark:bg-gray-700"
+                className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-800 dark:text-white dark:bg-gray-700"
               >
                 {Array.from({ length: 52 }, (_, i) => i + 1).map(week => (
                   <option key={week} value={week}>第{week}周</option>
@@ -433,66 +453,32 @@ const BaziPage = () => {
           </div>
         </div>
 
-        {/* 八字运势卡片（支持动态月份） - 统一字体大小 */}
+        {/* 八字运势卡片 */}
         {baziData && (
-          <div className="bg-white/95 dark:bg-gray-900/95 rounded-2xl shadow-lg md:shadow-xl p-3 sm:p-4 md:p-5 border border-amber-200/50 dark:border-amber-700/50 mb-4 sm:mb-6 overflow-hidden relative group will-change-transform">
-            {/* 背景装饰 - 移动端简化 */}
-            <div className="hidden md:block absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-100 dark:bg-amber-900/20 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-
-            <h3 className="text-base sm:text-lg md:text-xl font-medium text-gray-900 dark:text-gray-100 mb-4 sm:mb-5 flex items-center justify-between">
-              <div className="flex items-center">
-                <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white mr-2 sm:mr-3 shadow-lg shadow-amber-500/20 text-xs sm:text-sm">
-                  ☯️
-                </span>
-                <span className="text-sm sm:text-base md:text-lg">
-                  {viewMode === 'monthly' ? (
-                    `${selectedMonth === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear() ? '本月' : monthNames[selectedMonth - 1]}八字运势`
-                  ) : viewMode === 'weekly' ? (
-                    `本周八字运势`
-                  ) : (
-                    `${selectedYear}年八字运势`
-                  )}
-                  {viewMode === 'monthly' && (
-                    <span className="text-xs sm:text-sm font-normal text-gray-500 dark:text-gray-100 ml-2">
-                      ({selectedYear}年)
-                    </span>
-                  )}
-                </span>
-              </div>
+          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 ${theme}`}>
+            <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 flex items-center`}>
+              <span className="mr-2">☯️</span>
+              {viewMode === 'monthly' ? (
+                `${selectedMonth === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear() ? '本月' : monthNames[selectedMonth - 1]}八字运势`
+              ) : viewMode === 'weekly' ? (
+                `本周八字运势`
+              ) : (
+                `${selectedYear}年八字运势`
+              )}
             </h3>
 
-            {/* 时间信息提示 */}
-            {viewMode === 'monthly' && !(selectedMonth === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear()) && (
-              <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
-                <div className="flex items-center text-blue-700 dark:text-blue-300 text-[10px] sm:text-xs">
-                  <span className="mr-1.5 sm:mr-2">💡</span>
-                  <span className="text-[10px] sm:text-xs">
-                    正在查看 <span className="font-semibold">{selectedYear}年{monthNames[selectedMonth - 1]}</span> 的运势分析
-                  </span>
-                </div>
-              </div>
-            )}
-            {viewMode === 'weekly' && (
-              <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
-                <div className="flex items-center text-blue-700 dark:text-blue-300 text-[10px] sm:text-xs">
-                  <span className="mr-1.5 sm:mr-2">💡</span>
-                  <span className="text-[10px] sm:text-xs">
-                    正在查看本周的运势分析
-                  </span>
-                </div>
-              </div>
-            )}
-
             {/* 八字展示 */}
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+            <div className="grid grid-cols-4 gap-3 mb-6">
               {['年柱', '月柱', '日柱', '时柱'].map((title, i) => (
                 <div key={i} className="flex flex-col items-center">
-                  <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-100 mb-0.5 sm:mb-1">{title}</span>
-                  <div className={`w-full aspect-[4/5] flex flex-col items-center justify-center rounded-lg sm:rounded-xl border-2 transition-all ${i === 2 ? 'bg-amber-500 border-amber-400 text-white shadow-lg scale-105' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-100'
-                    }`}>
-                    <span className="text-lg sm:text-xl md:text-2xl font-bold tracking-widest flex flex-col items-center leading-tight">
-                      <span className="font-bold drop-shadow-sm">{baziData.pillars[i].charAt(0)}</span>
-                      <span className="font-bold drop-shadow-sm">{baziData.pillars[i].charAt(1)}</span>
+                  <span className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{title}</span>
+                  <div className={`w-full aspect-[4/5] flex flex-col items-center justify-center rounded-lg border-2 transition-all ${
+                    i === 2 ? 'bg-amber-500 border-amber-400 text-white shadow-lg scale-105' : 
+                    theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-100 text-gray-800'
+                  }`}>
+                    <span className="text-xl md:text-2xl font-bold tracking-widest flex flex-col items-center leading-tight">
+                      <span>{baziData.pillars[i].charAt(0)}</span>
+                      <span>{baziData.pillars[i].charAt(1)}</span>
                     </span>
                   </div>
                 </div>
@@ -500,46 +486,50 @@ const BaziPage = () => {
             </div>
 
             {/* 运势分析 */}
-            <div className="space-y-3 sm:space-y-4">
-              <div className="p-3 sm:p-4 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg sm:rounded-xl border border-amber-100 dark:border-amber-800/50 shadow-inner">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <div className="space-y-4">
+              <div className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-amber-900/20 border-amber-800/50' : 'bg-amber-50 border-amber-200/50'}`}>
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center">
-                    <span className="text-[10px] sm:text-xs sm:text-sm font-normal text-amber-900 dark:text-amber-200 bg-amber-200/50 dark:bg-amber-800/50 px-1.5 sm:px-2 py-0.5 rounded">
+                    <span className={`px-3 py-1 rounded mr-3 text-sm font-medium ${theme === 'dark' ? 'bg-amber-800/50 text-amber-200' : 'bg-amber-200/50 text-amber-900'}`}>
                       {monthlyFortune?.relation || '暂无数据'}
                     </span>
-                    <span className="ml-1.5 sm:ml-2 text-[10px] sm:text-xs text-amber-700 dark:text-amber-400 font-medium">流月核心</span>
+                    <span className={`text-sm font-medium ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`}>流月核心</span>
                   </div>
-                  <div className="flex items-center bg-white/80 dark:bg-gray-800/80 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border border-amber-100 dark:border-amber-700 shadow-sm">
-                    <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-100 mr-1.5 sm:mr-2 uppercase tracking-tighter">Score</span>
-                    <span className="text-base sm:text-lg font-medium text-amber-600 dark:text-amber-400">{monthlyFortune?.score || '0'}</span>
+                  <div className={`flex items-center px-3 py-1.5 rounded-lg border shadow-sm ${theme === 'dark' ? 'bg-gray-700/80 border-amber-800' : 'bg-white/80 border-amber-100'}`}>
+                    <span className={`text-xs mr-2 uppercase tracking-tighter ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>Score</span>
+                    <span className={`text-lg font-medium ${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`}>{monthlyFortune?.score || '0'}</span>
                   </div>
                 </div>
-                <p className="text-[11px] sm:text-sm text-gray-800 dark:text-gray-100 leading-relaxed">
+                <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                   {monthlyFortune?.summary || '暂无运势分析数据'}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-1.5 sm:gap-2 md:gap-3">
-                <div className="p-1.5 sm:p-2 md:p-3 rounded-lg sm:rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-0.5 sm:p-1 opacity-10">
-                    <span className="text-lg sm:text-xl md:text-2xl">👤</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className={`p-4 rounded-lg border relative overflow-hidden ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600/50' : 'bg-gray-50 border-gray-100/50'}`}>
+                  <div className="absolute top-0 right-0 p-1 opacity-10">
+                    <span className="text-2xl md:text-3xl">👤</span>
                   </div>
-                  <div className="text-[8px] sm:text-[9px] md:text-[10px] text-gray-400 dark:text-gray-100 mb-0.5 sm:mb-1 font-normal">命主元神</div>
+                  <div className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>命主元神</div>
                   <div className="flex items-center">
-                    <span className="text-sm sm:text-base md:text-lg font-medium text-gray-800 dark:text-gray-100 mr-1 sm:mr-1.5 md:mr-2">{monthlyFortune?.dayMaster || '未知'}</span>
-                    <span className="text-[8px] sm:text-[9px] md:text-[10px] px-1 sm:px-1.5 md:px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                    <span className={`text-base md:text-lg font-medium mr-2 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>{monthlyFortune?.dayMaster || '未知'}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${theme === 'dark' ? 'bg-blue-900/30 text-blue-300 border-blue-800' : 'bg-blue-100 text-blue-600 border-blue-200'}`}>
                       {monthlyFortune?.masterElement}命人
                     </span>
                   </div>
                 </div>
-                <div className="p-1.5 sm:p-2 md:p-3 rounded-lg sm:rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-0.5 sm:p-1 opacity-10">
-                    <span className="text-lg sm:text-xl md:text-2xl">📅</span>
+                <div className={`p-4 rounded-lg border relative overflow-hidden ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600/50' : 'bg-gray-50 border-gray-100/50'}`}>
+                  <div className="absolute top-0 right-0 p-1 opacity-10">
+                    <span className="text-2xl md:text-3xl">📅</span>
                   </div>
-                  <div className="text-[8px] sm:text-[9px] md:text-[10px] text-gray-400 dark:text-gray-100 mb-0.5 sm:mb-1 font-normal">月份干支</div>
-                  <div className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-gray-800 dark:text-gray-100 mt-0.5 sm:mt-1 md:mt-1.5 flex items-center">
-                    <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-1 sm:px-1.5 md:px-2 py-0.5 rounded">
-                      {monthlyFortune?.monthGanzhi || '未知'}
+                  <div className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
+                    {viewMode === 'monthly' ? '月份干支' : viewMode === 'weekly' ? '日柱干支' : '年份干支'}
+                  </div>
+                  <div className={`text-xs font-black mt-1.5 flex items-center ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
+                    <span className={`px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-amber-900/40 text-amber-300' : 'bg-amber-100 text-amber-800'}`}>
+                      {viewMode === 'monthly' ? (monthlyFortune?.monthGanzhi || '未知') :
+                       viewMode === 'weekly' ? (monthlyFortune?.dayGanzhi || '未知') :
+                       (monthlyFortune?.yearGanzhi || '未知')}
                     </span>
                   </div>
                 </div>
@@ -547,49 +537,49 @@ const BaziPage = () => {
             </div>
 
             {/* 提示 */}
-            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center text-[9px] sm:text-[10px] text-gray-400">
-              <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <div className={`mt-4 pt-4 border-t flex items-center text-xs ${theme === 'dark' ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-400'}`}>
+              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
-              注：{viewMode === 'monthly' ? `基于日干与${selectedYear}年${monthNames[selectedMonth - 1]}干支的生克关系计算` : viewMode === 'weekly' ? '基于日干与本周干支的生克关系计算' : `基于日干与${selectedYear}年干支的生克关系计算`}
+              注：{viewMode === 'monthly' ? `基于日干与${selectedYear}年${monthNames[selectedMonth - 1]}干支的生克关系计算` : viewMode === 'weekly' ? '基于日干与本周日柱干支的生克关系计算' : `基于日干与${selectedYear}年干支的生克关系计算`}
             </div>
           </div>
         )}
 
-        {/* 每日运势提醒 - 统一字体大小 */}
+        {/* 每日运势提醒 */}
         {dailyEnergyData && (
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center">
-              <span className="mr-1.5 sm:mr-2 text-lg sm:text-xl md:text-2xl">✨</span>
-              <span className="text-sm sm:text-base md:text-lg">今日运势提醒</span>
+          <div className={`bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl shadow-lg p-6 mb-6 ${theme}`}>
+            <h3 className="text-xl font-bold mb-4 flex items-center">
+              <span className="mr-2 text-2xl">✨</span>
+              <span className="text-lg">今日运势提醒</span>
             </h3>
-            <div className="mb-3 sm:mb-4">
-              <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <span className="text-sm sm:text-base md:text-lg font-semibold">今日能量指数</span>
-                <span className="text-base sm:text-lg md:text-xl font-bold">{dailyEnergyData.overallScore}分</span>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-lg font-semibold">今日能量指数</span>
+                <span className="text-xl font-bold">{dailyEnergyData.overallScore}分</span>
               </div>
-              <div className="w-full bg-white/20 rounded-full h-2 sm:h-3">
+              <div className="w-full bg-white/20 rounded-full h-3">
                 <div
-                  className="bg-white h-2 sm:h-3 rounded-full"
+                  className="bg-white h-3 rounded-full"
                   style={{ width: `${dailyEnergyData.overallScore}%` }}
                 ></div>
               </div>
             </div>
 
-            <p className="mb-3 sm:mb-4 text-blue-100 text-xs sm:text-sm">{dailyEnergyData.description}</p>
+            <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-blue-100' : 'text-blue-100'}`}>{dailyEnergyData.description}</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* 建议 */}
               <div>
-                <h4 className="font-semibold mb-1.5 sm:mb-2 flex items-center text-xs sm:text-sm">
-                  <span className="mr-1.5 sm:mr-2">💡</span>
+                <h4 className={`font-semibold mb-2 flex items-center text-sm ${theme === 'dark' ? 'text-white' : 'text-white'}`}>
+                  <span className="mr-2">💡</span>
                   今日建议
                 </h4>
-                <div className="space-y-1.5 sm:space-y-2">
+                <div className="space-y-2">
                   {dailyEnergyData.suggestions && dailyEnergyData.suggestions.map((suggestion, index) => (
-                    <div key={`suggestion-${index}`} className="flex items-center bg-white/10 rounded-lg p-1.5 sm:p-2">
-                      <span className="mr-1.5 sm:mr-2 text-sm sm:text-base">{suggestion.icon}</span>
-                      <span className="text-[10px] sm:text-xs">{suggestion.label}</span>
+                    <div key={`suggestion-${index}`} className="flex items-center bg-white/10 rounded-lg p-2">
+                      <span className="mr-2 text-base">{suggestion.icon}</span>
+                      <span className="text-xs">{suggestion.label}</span>
                     </div>
                   ))}
                 </div>
@@ -597,15 +587,15 @@ const BaziPage = () => {
 
               {/* 注意事项 */}
               <div>
-                <h4 className="font-semibold mb-1.5 sm:mb-2 flex items-center text-xs sm:text-sm">
-                  <span className="mr-1.5 sm:mr-2">⚠️</span>
+                <h4 className={`font-semibold mb-2 flex items-center text-sm ${theme === 'dark' ? 'text-white' : 'text-white'}`}>
+                  <span className="mr-2">⚠️</span>
                   注意事项
                 </h4>
-                <div className="space-y-1.5 sm:space-y-2">
+                <div className="space-y-2">
                   {dailyEnergyData.attentions && dailyEnergyData.attentions.map((attention, index) => (
-                    <div key={`attention-${index}`} className="flex items-center bg-white/10 rounded-lg p-1.5 sm:p-2">
-                      <span className="mr-1.5 sm:mr-2 text-sm sm:text-base">{attention.icon}</span>
-                      <span className="text-[10px] sm:text-xs">{attention.label}</span>
+                    <div key={`attention-${index}`} className="flex items-center bg-white/10 rounded-lg p-2">
+                      <span className="mr-2 text-base">{attention.icon}</span>
+                      <span className="text-xs">{attention.label}</span>
                     </div>
                   ))}
                 </div>
@@ -614,144 +604,150 @@ const BaziPage = () => {
           </div>
         )}
 
-        {/* 运势趋势图 - 在月运和周运模式下显示 */}
-        <div className="mb-4 sm:mb-6">
-          {console.log('🔍 检查趋势图显示条件:', {
-            viewMode,
-            shouldShow: viewMode === 'monthly' || viewMode === 'weekly',
-            hasData: !!fortuneTrendData,
-            dataLength: fortuneTrendData?.length
-          })}
-          {(viewMode === 'monthly' || viewMode === 'weekly') && fortuneTrendData ? (
-            <FortuneTrendChart
-              data={fortuneTrendData}
-              isMobile={window.innerWidth <= 768}
-            />
-          ) : (
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 text-center text-sm text-yellow-800 dark:text-yellow-200">
-              ⚠️ {viewMode === 'monthly' || viewMode === 'weekly' ? '运势趋势图数据为空' : `当前模式(${viewMode})不显示趋势图`}
-            </div>
-          )}
-        </div>
+        {/* 运势趋势图 - 仅在月运和周运模式下显示 */}
+        {viewMode === 'monthly' || viewMode === 'weekly' ? (
+          <div className="mb-6">
+            {fortuneTrendData ? (
+              <FortuneTrendChart
+                data={fortuneTrendData}
+                isMobile={window.innerWidth <= 768}
+              />
+            ) : (
+              <div className={`rounded-lg p-4 text-center text-sm ${theme === 'dark' ? 'bg-yellow-900/20 border-yellow-700 text-yellow-200' : 'bg-yellow-50 border-yellow-200 text-yellow-800'}`}>
+                ⚠️ 运势趋势图数据为空
+              </div>
+            )}
+          </div>
+        ) : null}
 
-        {/* 流年运势 - 统一字体大小 */}
-        {liuNianData && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4 md:p-6">
-            <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 dark:text-white mb-2 sm:mb-4">
-              流年运势
+        {/* 流年运势 - 仅在年运模式下显示 */}
+        {viewMode === 'yearly' && liuNianData && liuNianData.yearlyFortune && (
+          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 ${theme}`}>
+            <h3 className={`text-xl font-bold mb-4 flex items-center ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+              <span className="mr-2">📅</span>
+              流年运势趋势
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
-              {liuNianData.yearlyFortune && liuNianData.yearlyFortune.slice(0, 6).map((year, index) => (
-                <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-2 sm:p-3 md:p-4">
-                  <h4 className="font-semibold text-gray-800 dark:text-white mb-1 sm:mb-2 text-xs sm:text-sm md:text-base">
-                    {year.year}年
-                  </h4>
-                  <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400">
-                    {year.fortune}
-                  </p>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <th className={`py-3 px-2 text-left ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>年份</th>
+                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>总运势</th>
+                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>爱情</th>
+                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>事业</th>
+                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>学习</th>
+                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>健康</th>
+                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>财运</th>
+                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>人际</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {liuNianData.yearlyFortune.map((yearData, index) => (
+                    <tr key={index} className={`border-b last:border-b-0 ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700/30' : 'border-gray-200 hover:bg-gray-50'} transition-colors`}>
+                      <td className={`py-3 px-2 font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                        {yearData.year}年
+                      </td>
+                      <td className={`py-3 px-2 text-center ${yearData.overallScore >= 80 ? 'text-green-600 dark:text-green-400 font-bold' : yearData.overallScore < 60 ? 'text-red-600 dark:text-red-400' : ''}`}>
+                        {yearData.overallScore}
+                      </td>
+                      <td className={`py-3 px-2 text-center ${yearData.loveScore >= 80 ? 'text-green-600 dark:text-green-400' : yearData.loveScore < 60 ? 'text-red-600 dark:text-red-400' : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {yearData.loveScore}
+                      </td>
+                      <td className={`py-3 px-2 text-center ${yearData.careerScore >= 80 ? 'text-green-600 dark:text-green-400' : yearData.careerScore < 60 ? 'text-red-600 dark:text-red-400' : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {yearData.careerScore}
+                      </td>
+                      <td className={`py-3 px-2 text-center ${yearData.studyScore >= 80 ? 'text-green-600 dark:text-green-400' : yearData.studyScore < 60 ? 'text-red-600 dark:text-red-400' : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {yearData.studyScore}
+                      </td>
+                      <td className={`py-3 px-2 text-center ${yearData.healthScore >= 80 ? 'text-green-600 dark:text-green-400' : yearData.healthScore < 60 ? 'text-red-600 dark:text-red-400' : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {yearData.healthScore}
+                      </td>
+                      <td className={`py-3 px-2 text-center ${yearData.wealthScore >= 80 ? 'text-green-600 dark:text-green-400' : yearData.wealthScore < 60 ? 'text-red-600 dark:text-red-400' : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {yearData.wealthScore}
+                      </td>
+                      <td className={`py-3 px-2 text-center ${yearData.socialScore >= 80 ? 'text-green-600 dark:text-green-400' : yearData.socialScore < 60 ? 'text-red-600 dark:text-red-400' : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {yearData.socialScore}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className={`mt-4 pt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+              <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                💡 表格说明：分数越高代表运势越好（80分以上为优秀，60分以下需注意）。绿色表示高分，红色表示低分。
+              </p>
             </div>
           </div>
         )}
 
-        {/* 八字信息卡片 - 优化版本 */}
+        {/* 八字信息卡片 */}
         {baziData && baziAnalysis && (
           <>
-            {/* 基本信息卡片 - 优化样式和暗主题 */}
-            <div className="bazi-card bazi-card-info">
-              <h2 className="bazi-card-title">
+            {/* 基本信息卡片 */}
+            <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 ${theme}`}>
+              <h2 className={`text-xl font-bold mb-4 flex items-center ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                <span className="mr-2">📋</span>
                 八字基本信息
               </h2>
-              <div className="bazi-info-grid">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {[
                   { label: '年柱', value: baziData.year, detail: `(${baziData.details.year.gan}${baziData.details.year.zhi})` },
                   { label: '月柱', value: baziData.month, detail: `(${baziData.details.month.gan}${baziData.details.month.zhi})` },
                   { label: '日柱', value: baziData.day, detail: `(${baziData.details.day.gan}${baziData.details.day.zhi})` },
                   { label: '时柱', value: baziData.hour, detail: `(${baziData.details.hour.gan}${baziData.details.hour.zhi})` }
                 ].map((item, index) => (
-                  <div key={index} className="bazi-info-grid-item">
-                    <p style={{ marginBottom: '4px', fontSize: '13px', color: theme === 'dark' ? '#9CA3AF' : '#666' }}>
-                      <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>{item.label}</strong>
-                    </p>
-                    <p style={{ fontSize: '16px', fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#333' }}>
-                      {item.value} <span style={{ fontSize: '14px', color: theme === 'dark' ? '#9CA3AF' : '#8B4513' }}>{item.detail}</span>
-                    </p>
+                  <div key={index} className={`p-3 rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <div className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <strong className={theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}>{item.label}</strong>
+                    </div>
+                    <div className={`text-base md:text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                      {item.value} <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.detail}</span>
+                    </div>
                   </div>
                 ))}
               </div>
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '12px',
-                padding: '12px',
-                background: theme === 'dark' ? '#374151' : '#f9f3e9',
-                borderRadius: '8px'
-              }}>
-                <p style={{ fontSize: '14px', color: theme === 'dark' ? '#9CA3AF' : '#666', margin: '0' }}>
-                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>时辰</strong>：{baziData.shichen}
+              <div className={`flex flex-wrap gap-4 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-amber-50'}`}>
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                  <strong className={theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}>时辰</strong>：{baziData.shichen}
                 </p>
-                <p style={{ fontSize: '14px', color: theme === 'dark' ? '#9CA3AF' : '#666', margin: '0' }}>
-                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>生肖</strong>：{baziData.zodiac}
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                  <strong className={theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}>生肖</strong>：{baziData.zodiac}
                 </p>
-                <p style={{ fontSize: '14px', color: theme === 'dark' ? '#9CA3AF' : '#666', margin: '0' }}>
-                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>日主</strong>：{baziData.details.day.gan}（{baziAnalysis.elementPreference.dayElement}命）
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                  <strong className={theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}>日主</strong>：{baziData.details.day.gan}（{baziAnalysis.elementPreference.dayElement}命）
                 </p>
               </div>
             </div>
 
             {/* 五行能量分布卡片 */}
-            <div className="bazi-card bazi-card-elements">
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: '16px',
-                borderBottom: `1px solid ${theme === 'dark' ? '#374151' : '#f0f0f0'}`,
-                paddingBottom: '12px'
-              }}>
-                <span style={{ fontSize: '24px', marginRight: '12px' }}>⚖️</span>
-                <h2 className="bazi-card-title-elements">五行能量分布</h2>
+            <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 ${theme}`}>
+              <div className="flex items-center mb-6 pb-4 border-b">
+                <span className="text-3xl mr-3">⚖️</span>
+                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>五行能量分布</h2>
               </div>
 
               {/* 五行能量条 */}
-              <div style={{ marginBottom: '20px' }}>
+              <div className="mb-6">
                 {Object.entries(baziAnalysis.fiveElements.percentages).map(([element, percentage], index) => {
                   const colors = elementColors[element];
                   const bgColor = theme === 'dark' ? colors.darkBg : colors.bg;
                   const textColor = theme === 'dark' ? colors.darkText : colors.text;
                   return (
-                    <div key={index} style={{ marginBottom: '14px' }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '6px'
-                      }}>
-                        <span style={{
-                          fontWeight: 'bold',
-                          fontSize: '14px',
-                          color: textColor,
-                          background: bgColor,
-                          padding: '2px 8px',
-                          borderRadius: '4px'
-                        }}>
+                    <div key={index} className="mb-4">
+                      <div className="flex justify-between mb-2">
+                        <span className="font-bold text-sm" style={{ color: textColor, background: bgColor, padding: '3px 10px', borderRadius: '4px' }}>
                           {element}
                         </span>
-                        <span style={{ color: theme === 'dark' ? '#9CA3AF' : '#666', fontWeight: 'bold', fontSize: '14px' }}>
+                        <span className={`font-bold text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                           {percentage}%
                         </span>
                       </div>
-                      <div style={{
-                        height: '20px',
-                        backgroundColor: theme === 'dark' ? '#374151' : '#f0f0f0',
-                        borderRadius: '10px',
-                        overflow: 'hidden'
-                      }}>
-                        <div style={{
-                          height: '100%',
+                      <div className="h-5 rounded-full overflow-hidden" style={{ backgroundColor: theme === 'dark' ? '#374151' : '#f0f0f0' }}>
+                        <div className="h-full transition-all duration-700" style={{
                           width: `${percentage}%`,
                           backgroundColor: bgColor,
-                          borderRadius: '10px',
-                          transition: 'width 0.8s ease',
+                          borderRadius: '9999px',
                           boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                         }}></div>
                       </div>
@@ -761,37 +757,18 @@ const BaziPage = () => {
               </div>
 
               {/* 五行喜好 */}
-              <div style={{
-                padding: '16px',
-                background: theme === 'dark' ? '#374151' : '#f9fafb',
-                borderRadius: '8px',
-                marginBottom: '16px'
-              }}>
-                <h3 style={{
-                  color: theme === 'dark' ? '#D4AF37' : '#5D4037',
-                  fontSize: '16px',
-                  marginBottom: '12px',
-                  marginTop: '0'
-                }}>
+              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-amber-50'} mb-4`}>
+                <h3 className={`text-base font-bold mb-3 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}`}>
                   五行喜好
                 </h3>
-                <div style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '10px',
-                  marginBottom: '12px'
-                }}>
+                <div className="flex flex-wrap gap-3">
                   {[
                     { label: '用神', value: baziAnalysis.elementPreference.useGod },
                     { label: '喜神', value: baziAnalysis.elementPreference.happyGods.join('、') },
                     { label: '最旺', value: baziAnalysis.elementPreference.strongest },
                     { label: '最弱', value: baziAnalysis.elementPreference.weakest }
                   ].map((item, index) => (
-                    <span key={index} style={{
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      fontWeight: 'bold',
+                    <span key={index} className="px-4 py-2 rounded-full text-sm font-bold" style={{
                       background: elementColors[item.value]?.darkBg || '#374151',
                       color: elementColors[item.value]?.darkText || '#fff',
                       border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : 'none'
@@ -804,19 +781,13 @@ const BaziPage = () => {
             </div>
 
             {/* 十神占比卡片 */}
-            <div className="bazi-card bazi-card-ten-gods">
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: '16px',
-                borderBottom: `1px solid ${theme === 'dark' ? '#374151' : '#f0f0f0'}`,
-                paddingBottom: '12px'
-              }}>
-                <span style={{ fontSize: '24px', marginRight: '12px' }}>⭐</span>
-                <h2 className="bazi-card-title-ten-gods">十神占比</h2>
+            <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 ${theme}`}>
+              <div className="flex items-center mb-6 pb-4 border-b">
+                <span className="text-3xl mr-3">⭐</span>
+                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>十神占比</h2>
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
+              <div className="mb-6">
                 {Object.entries(baziAnalysis.tenGods.percentages)
                   .sort((a, b) => b[1] - a[1])
                   .map(([god, percentage], index) => {
@@ -824,41 +795,23 @@ const BaziPage = () => {
                     const bgColor = theme === 'dark' ? colors.darkBg : colors.bg;
                     const textColor = theme === 'dark' ? colors.darkText : colors.text;
                     return (
-                      <div key={index} style={{ marginBottom: '14px' }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          marginBottom: '6px',
-                          alignItems: 'center'
-                        }}>
-                          <span style={{
-                            fontWeight: 'bold',
-                            fontSize: '14px',
+                      <div key={index} className="mb-4">
+                        <div className="flex justify-between mb-2 items-center">
+                          <span className="font-bold text-sm px-3 py-1 rounded text-center min-w-[60px]" style={{
                             color: textColor,
-                            background: bgColor,
-                            padding: '4px 10px',
-                            borderRadius: '4px',
-                            minWidth: '60px',
-                            textAlign: 'center'
+                            background: bgColor
                           }}>
                             {god}
                           </span>
-                          <span style={{ color: theme === 'dark' ? '#9CA3AF' : '#666', fontWeight: 'bold', fontSize: '14px' }}>
+                          <span className={`font-bold text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                             {percentage}%
                           </span>
                         </div>
-                        <div style={{
-                          height: '18px',
-                          backgroundColor: theme === 'dark' ? '#374151' : '#f0f0f0',
-                          borderRadius: '9px',
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{
-                            height: '100%',
+                        <div className="h-[18px] rounded-full overflow-hidden" style={{ backgroundColor: theme === 'dark' ? '#374151' : '#f0f0f0' }}>
+                          <div className="h-full transition-all duration-700" style={{
                             width: `${percentage}%`,
                             backgroundColor: bgColor,
-                            borderRadius: '9px',
-                            transition: 'width 0.8s ease',
+                            borderRadius: '9999px',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                           }}></div>
                         </div>
@@ -868,65 +821,35 @@ const BaziPage = () => {
               </div>
 
               {/* 十神解析 */}
-              <div style={{
-                padding: '14px',
-                background: theme === 'dark' ? '#374151' : '#f9fafb',
-                borderRadius: '8px',
-                fontSize: '14px',
-                lineHeight: '1.6',
-                color: theme === 'dark' ? '#E5E7EB' : '#374151'
-              }}>
-                <p style={{ marginBottom: '8px', margin: '0 0 8px 0' }}>
-                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>十神解读</strong>：十神代表命局中各天干地支与日干的关系，反映您的性格特质、处事风格和人生方向。
+              <div className={`p-4 rounded-lg text-sm leading-relaxed ${theme === 'dark' ? 'bg-gray-700/50 text-gray-200' : 'bg-gray-50 text-gray-700'}`}>
+                <p className="mb-2">
+                  <strong className={theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}>十神解读</strong>：十神代表命局中各天干地支与日干的关系，反映您的性格特质、处事风格和人生方向。
                 </p>
               </div>
             </div>
 
             {/* 适合职业卡片 */}
-            <div className="bazi-card bazi-card-career">
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: '16px',
-                borderBottom: `1px solid ${theme === 'dark' ? '#374151' : '#f0f0f0'}`,
-                paddingBottom: '12px'
-              }}>
-                <span style={{ fontSize: '24px', marginRight: '12px' }}>💼</span>
-                <h2 className="bazi-card-title-career">适合职业</h2>
+            <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${theme}`}>
+              <div className="flex items-center mb-6 pb-4 border-b">
+                <span className="text-3xl mr-3">💼</span>
+                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>适合职业</h2>
               </div>
 
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '8px'
-              }}>
+              <div className="flex flex-wrap gap-2 mb-4">
                 {baziAnalysis.elementPreference.suggestedCareers.slice(0, 12).map((career, index) => (
-                  <span key={index} style={{
-                    padding: '6px 14px',
+                  <span key={index} className="px-5 py-2 rounded-full text-sm font-bold transition-all duration-200" style={{
                     background: theme === 'dark' ? '#374151' : '#FFF3E0',
                     color: theme === 'dark' ? '#FCA5A5' : '#E65100',
-                    borderRadius: '20px',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
-                    border: theme === 'dark' ? '1px solid rgba(248, 113, 113, 0.3)' : '1px solid #FFB74D',
-                    transition: 'all 0.2s ease'
+                    border: theme === 'dark' ? '1px solid rgba(248, 113, 113, 0.3)' : '1px solid #FFB74D'
                   }}>
                     {career}
                   </span>
                 ))}
               </div>
 
-              <div style={{
-                marginTop: '16px',
-                padding: '14px',
-                background: theme === 'dark' ? '#374151' : '#f9fafb',
-                borderRadius: '8px',
-                fontSize: '13px',
-                lineHeight: '1.6',
-                color: theme === 'dark' ? '#9CA3AF' : '#666'
-              }}>
-                <p style={{ margin: '0' }}>
-                  <strong style={{ color: theme === 'dark' ? '#D4AF37' : '#5D4037' }}>职业建议</strong>：根据您的八字五行喜好，以上行业与您的命局较为契合。建议选择能发挥您天赋优势的职业，并注意与喜神五行相关的行业发展。
+              <div className={`p-4 rounded-lg text-sm leading-relaxed ${theme === 'dark' ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-50 text-gray-700'}`}>
+                <p>
+                  <strong className={theme === 'dark' ? 'text-amber-400' : 'text-amber-700'}>职业建议</strong>：根据您的八字五行喜好，以上行业与您的命局较为契合。建议选择能发挥您天赋优势的职业，并注意与喜神五行相关的行业发展。
                 </p>
               </div>
             </div>
@@ -936,7 +859,5 @@ const BaziPage = () => {
     </div>
   );
 };
-
-// 样式已移至 ../styles/bazi-page.css
 
 export default BaziPage;

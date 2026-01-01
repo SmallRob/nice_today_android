@@ -4,6 +4,8 @@ import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { HOROSCOPE_DATA_ENHANCED, generateDailyHoroscope } from '../utils/horoscopeAlgorithm';
 import { memo } from 'react';
+import { Line } from 'react-chartjs-2';
+import { ensureChartRegistered } from '../utils/chartConfig';
 
 const ZodiacTraitsPage = () => {
   const navigate = useNavigate();
@@ -206,6 +208,243 @@ const getFamousExamples = (zodiacName) => {
     }
   }, [currentHoroscope, generateDailyHoroscopeData]);
 
+  // 确保 Chart.js 组件已注册
+  useEffect(() => {
+    ensureChartRegistered();
+  }, []);
+
+  // 生成每周运势趋势数据 - 确定性算法
+  const weeklyTrendData = useMemo(() => {
+    if (!currentHoroscope) return { dates: [], energyScores: [], wealthScores: [], careerScores: [], healthScores: [] };
+
+    const dates = [];
+    const energyScores = [];
+    const wealthScores = [];
+    const careerScores = [];
+    const healthScores = [];
+
+    const baseDate = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(baseDate);
+      date.setDate(baseDate.getDate() - i);
+      dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
+
+      // 使用确定性算法计算分数
+      const seed = currentHoroscope.charCodeAt(0) + date.getDate() + date.getMonth() * 31;
+      const baseScore = 50 + (seed % 20);
+      const dayFactor = (date.getDay() + 1) * 3;
+      const deterministicVariation = ((seed * dayFactor) % 20) - 10;
+
+      const energyScore = Math.max(20, Math.min(95, baseScore + dayFactor + deterministicVariation));
+      const wealthScore = Math.max(15, Math.min(90, energyScore + ((seed * 2) % 25) - 12));
+      const careerScore = Math.max(10, Math.min(85, energyScore + ((seed * 3) % 30) - 15));
+      const healthScore = Math.max(10, Math.min(85, energyScore + ((seed * 4) % 25) - 12));
+
+      energyScores.push(energyScore);
+      wealthScores.push(wealthScore);
+      careerScores.push(careerScore);
+      healthScores.push(healthScore);
+    }
+
+    return { dates, energyScores, wealthScores, careerScores, healthScores };
+  }, [currentHoroscope]);
+
+  // 修复幸运颜色映射 - 使用完整的颜色名称
+  const getLuckyColorNames = (colors) => {
+    if (!colors || colors.length === 0) return ['蓝色', '绿色'];
+    
+    const colorNameMap = {
+      '#FF6B6B': '浅红', '#FF8E53': '橙红', '#FFD700': '金色', '#FFA500': '橙色',
+      '#4ECDC4': '青绿', '#44A08D': '深绿', '#64B3F4': '浅蓝', '#4A90E2': '蓝色',
+      '#96CEB4': '浅绿', '#FFEAA7': '淡黄', '#DA70D6': '兰紫', '#BA55D3': '紫色',
+      '#808080': '灰色', '#A9A9A9': '浅灰', '#00BFFF': '深蓝', '#1E90FF': '天蓝',
+      '#9370DB': '紫红', '#8A2BE2': '深紫',
+      '#FF0000': '红色', '#00FF00': '绿色', '#0000FF': '蓝色', '#FFFF00': '黄色',
+      '#FF00FF': '品红', '#00FFFF': '青色', '#000000': '黑色', '#FFFFFF': '白色'
+    };
+
+    return colors.map(color => {
+      if (color.startsWith('#')) {
+        return colorNameMap[color.toUpperCase()] || colorNameMap[color] || '红色';
+      } else {
+        return color;
+      }
+    });
+  };
+
+  // 渲染运势趋势图
+  const renderTrendChart = useCallback(() => {
+    if (!weeklyTrendData) return null;
+
+    const { dates, energyScores, wealthScores, careerScores, healthScores } = weeklyTrendData;
+
+    const chartData = {
+      labels: dates,
+      datasets: [
+        {
+          label: '综合运势',
+          data: energyScores,
+          borderColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
+          backgroundColor: theme === 'dark' ? 'rgba(96, 165, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 2,
+          pointBackgroundColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 3,
+          fill: true,
+          tension: 0.4,
+        },
+        {
+          label: '财运',
+          data: wealthScores,
+          borderColor: theme === 'dark' ? '#fbbf24' : '#fbbf24',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointBackgroundColor: theme === 'dark' ? '#fbbf24' : '#fbbf24',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 2,
+          borderDash: [5, 5],
+          tension: 0.3,
+        },
+        {
+          label: '事业',
+          data: careerScores,
+          borderColor: theme === 'dark' ? '#34d399' : '#34d399',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointBackgroundColor: theme === 'dark' ? '#34d399' : '#34d399',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 2,
+          tension: 0.3,
+        },
+        {
+          label: '健康',
+          data: healthScores,
+          borderColor: theme === 'dark' ? '#f87171' : '#f87171',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointBackgroundColor: theme === 'dark' ? '#f87171' : '#f87171',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 2,
+          tension: 0.3,
+        }
+      ]
+    };
+
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: theme === 'dark' || window.innerWidth <= 768 ? 0 : 300
+      },
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            color: theme === 'dark' ? '#d1d5db' : '#374151',
+            font: {
+              size: 10,
+              weight: '500',
+            },
+            padding: 8,
+            usePointStyle: true,
+            boxWidth: 16
+          }
+        },
+        tooltip: {
+          enabled: true,
+          backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+          titleColor: theme === 'dark' ? '#f3f4f6' : '#1f2937',
+          bodyColor: theme === 'dark' ? '#d1d5db' : '#374151',
+          borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
+          borderWidth: 1,
+          padding: 6,
+          cornerRadius: 4,
+          displayColors: true,
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false,
+          },
+          ticks: {
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+            font: {
+              size: 9,
+            }
+          }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          grid: {
+            color: theme === 'dark' ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.3)',
+            drawBorder: false,
+          },
+          ticks: {
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+            font: {
+              size: 9,
+            },
+            callback: function (value) {
+              return value + '%';
+            }
+          }
+        }
+      }
+    };
+
+    return (
+      <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 md:p-4 mb-3 md:mb-4 ${theme}`}>
+        <h3 className="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2 md:mb-3 flex items-center">
+          <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM18 7a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1h-2a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+          </svg>
+          近7日运势趋势
+        </h3>
+        <div className="h-36 md:h-48">
+          <Line data={chartData} options={chartOptions} />
+        </div>
+        <div className="mt-2 md:mt-3 grid grid-cols-4 gap-1.5 md:gap-2 text-center">
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-1.5 md:p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
+            <div className="text-[9px] md:text-xs text-blue-600 dark:text-blue-400 font-medium">综合</div>
+            <div className="text-sm md:text-base font-medium text-blue-700 dark:text-blue-300">
+              {energyScores[energyScores.length - 1]}%
+            </div>
+          </div>
+          <div className="bg-amber-50 dark:bg-amber-900/20 p-1.5 md:p-2 rounded-lg border border-amber-100 dark:border-amber-900/30">
+            <div className="text-[9px] md:text-xs text-amber-600 dark:text-amber-400 font-medium">财运</div>
+            <div className="text-sm md:text-base font-medium text-amber-700 dark:text-amber-300">
+              {wealthScores[wealthScores.length - 1]}%
+            </div>
+          </div>
+          <div className="bg-green-50 dark:bg-green-900/20 p-1.5 md:p-2 rounded-lg border border-green-100 dark:border-green-900/30">
+            <div className="text-[9px] md:text-xs text-green-600 dark:text-green-400 font-medium">事业</div>
+            <div className="text-sm md:text-base font-medium text-green-700 dark:text-green-300">
+              {careerScores[careerScores.length - 1]}%
+            </div>
+          </div>
+          <div className="bg-red-50 dark:bg-red-900/20 p-1.5 md:p-2 rounded-lg border border-red-100 dark:border-red-900/30">
+            <div className="text-[9px] md:text-xs text-red-600 dark:text-red-400 font-medium">健康</div>
+            <div className="text-sm md:text-base font-medium text-red-700 dark:text-red-300">
+              {healthScores[healthScores.length - 1]}%
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }, [weeklyTrendData, theme]);
+
   if (!zodiacData) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
@@ -244,23 +483,23 @@ const getFamousExamples = (zodiacName) => {
     <div className={`min-h-screen ${theme}`}>
       {/* 顶部标题栏 */}
       <div className={`bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`}>
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 md:px-4 py-2 md:py-3">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate(-1)}
               className="text-white hover:text-white/90 flex items-center"
             >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6 mr-1.5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              返回
+              <span className="text-sm md:text-base">返回</span>
             </button>
-            <h1 className="text-xl font-bold">星座特质详解</h1>
+            <h1 className="text-lg md:text-xl font-bold">星座特质详解</h1>
             <button
               onClick={() => navigate('/settings')}
               className="text-white hover:text-white/90"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </button>
@@ -269,239 +508,75 @@ const getFamousExamples = (zodiacName) => {
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="container mx-auto px-3 md:px-4 py-3 md:py-6 max-w-4xl">
         {/* 星座卡片 */}
-        <div className={`bg-gradient-to-br ${elementColors.bg} ${elementColors.to} text-white rounded-xl shadow-lg p-6 mb-6`}>
-          <div className="text-center mb-4">
-            <div className="text-6xl mb-3">{zodiacData.icon}</div>
-            <h2 className="text-3xl font-bold mb-2">{zodiacData.name}</h2>
-            <div className="flex items-center justify-center space-x-4 text-lg">
-              <span className={`px-3 py-1 bg-white/20 rounded-full`}>
+        <div className={`bg-gradient-to-br ${elementColors.bg} ${elementColors.to} text-white rounded-xl shadow-lg p-4 md:p-6 mb-3 md:mb-5`}>
+          <div className="text-center mb-3 md:mb-4">
+            <div className="text-5xl md:text-6xl mb-2 md:mb-3">{zodiacData.icon}</div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-1.5 md:mb-2">{zodiacData.name}</h2>
+            <div className="flex items-center justify-center space-x-3 md:space-x-4 text-sm md:text-lg">
+              <span className={`px-2 md:px-3 py-0.5 md:py-1 bg-white/20 rounded-full`}>
                 {zodiacData.element}
               </span>
-              <span className={`px-3 py-1 bg-white/20 rounded-full`}>
+              <span className={`px-2 md:px-3 py-0.5 md:py-1 bg-white/20 rounded-full`}>
                 {zodiacData.dateRange}
               </span>
             </div>
           </div>
         </div>
 
-        {/* 详细描述 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <span className="mr-2">📖</span> 星座概述
-          </h3>
-          <p className="text-gray-700 dark:text-gray-200 leading-relaxed">
-            {getZodiacDescription(zodiacData.name)}
-          </p>
-        </div>
-
-        {/* 个性特质 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <span className="mr-2">🌟</span> 性格特征
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {/* 修复：标准化数据结构处理，避免使用逻辑运算符 */}
-            {(() => {
-              const traits = zodiacData.personalityTraits || 
-                            (zodiacData.traits ? zodiacData.traits.split('、') : []);
-              
-              return traits.length > 0 ? traits.map((trait, index) => (
-                <div key={index} className="flex items-center p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700 dark:text-gray-200">{trait}</span>
-                </div>
-              )) : (
-                <p className="text-gray-500 dark:text-gray-400 col-span-2">暂无性格特征数据</p>
-              );
-            })()}
-          </div>
-        </div>
-
-        {/* 优点与缺点 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {/* 优点 */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-4 flex items-center">
-              <span className="mr-2">✨</span> 优点
-            </h3>
-            <div className="space-y-3">
-              {(() => {
-                const strengths = zodiacData.strengths || [];
-                return strengths.length > 0 ? strengths.map((strength, index) => (
-                  <div key={index} className="flex items-start">
-                    <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    <span className="text-gray-700 dark:text-gray-200">{strength}</span>
-                  </div>
-                )) : (
-                  <p className="text-gray-500 dark:text-gray-400">待补充</p>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* 需注意 */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center">
-              <span className="mr-2">⚠️</span> 需注意
-            </h3>
-            <div className="space-y-3">
-              {(() => {
-                const weaknesses = zodiacData.weaknesses || [];
-                return weaknesses.length > 0 ? weaknesses.map((weakness, index) => (
-                  <div key={index} className="flex items-start">
-                    <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    <span className="text-gray-700 dark:text-gray-200">{weakness}</span>
-                  </div>
-                )) : (
-                  <p className="text-gray-500 dark:text-gray-400">待补充</p>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-
-        {/* 幸运信息 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-4 flex items-center">
-            <span className="mr-2">🍀</span> 幸运信息
-          </h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">幸运色</div>
-              <div className="flex flex-wrap justify-center gap-1">
-                {(() => {
-                  const luckyColors = zodiacData.luckyColor || [];
-                  return luckyColors.length > 0 ? luckyColors.map((color, index) => (
-                    <div
-                      key={index}
-                      className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
-                      style={{ backgroundColor: color }}
-                      title={getColorName(color)}
-                      aria-label={`幸运色: ${getColorName(color)}`}
-                    />
-                  )) : (
-                    <div
-                      className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
-                      style={{ backgroundColor: '#FF6B6B' }}
-                      title="红色"
-                      aria-label="幸运色: 红色"
-                    />
-                  );
-                })()}
-              </div>
-              <div className="text-sm text-gray-700 dark:text-gray-200 mt-2">
-                {(() => {
-                  const luckyColors = zodiacData.luckyColor || [];
-                  return luckyColors.length > 0 
-                    ? luckyColors.map(c => getColorName(c)).join('、') 
-                    : '红色';
-                })()}
-              </div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">幸运数字</div>
-              <div className="flex flex-wrap justify-center gap-2">
-                {(() => {
-                  const luckyNumbers = zodiacData.luckyNumber || [7, 3, 9]; // 提供默认值
-                  return luckyNumbers.length > 0 ? luckyNumbers.map((num, index) => (
-                    <span key={index} className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full text-xl font-bold text-purple-600 dark:text-purple-400">
-                      {num}
-                    </span>
-                  )) : null;
-                })()}
-              </div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">速配星座</div>
-              <div className="flex flex-wrap justify-center gap-2">
-                {(() => {
-                  const compatibleSigns = zodiacData.compatible || [];
-                  return compatibleSigns.length > 0 ? compatibleSigns.slice(0, 4).map((sign, index) => (
-                    <span key={index} className="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-200">
-                      {sign}
-                    </span>
-                  )) : (
-                    <span className="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-200">
-                      未知
-                    </span>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 知名人物 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <span className="mr-2">⭐</span> 知名{zodiacData.name}
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            {getFamousExamples(zodiacData.name).map((name, index) => (
-              <div
-                key={index}
-                className="px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg flex items-center"
-              >
-                <span className="text-lg mr-2">👤</span>
-                {name}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 今日运势卡片 */}
+        {/* 今日运势卡片 - 移到性格特征之前 */}
         {loadingHoroscope ? (
-          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-              <span className="ml-3">运势数据加载中...</span>
+          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">
+            <div className="flex items-center justify-center py-6 md:py-8">
+              <div className="animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-b-2 border-white"></div>
+              <span className="ml-2 md:ml-3 text-sm md:text-base">运势数据加载中...</span>
             </div>
           </div>
         ) : horoscopeData ? (
-          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
-            <h3 className="text-xl font-bold mb-4 flex items-center">
-              <span className="mr-2">✨</span> 今日运势
+          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">
+            <h3 className="text-base md:text-lg font-bold mb-3 md:mb-4 flex items-center">
+              <span className="mr-2 text-xl md:text-2xl">✨</span> 今日运势
             </h3>
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-lg font-semibold">综合运势指数</span>
-                <span className="text-2xl font-bold">{horoscopeData.overallScore}分</span>
+            <div className="mb-3 md:mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm md:text-base font-semibold">综合运势指数</span>
+                <span className="text-xl md:text-2xl font-bold">{horoscopeData.overallScore}分</span>
               </div>
-              <div className="w-full bg-white/20 rounded-full h-3">
+              <div className="w-full bg-white/20 rounded-full h-2.5 md:h-3">
                 <div 
-                  className="bg-white h-3 rounded-full" 
+                  className="bg-white h-2.5 md:h-3 rounded-full" 
                   style={{ width: `${horoscopeData.overallScore}%` }}
                 ></div>
               </div>
             </div>
             
-            <p className="mb-4 text-blue-100">{horoscopeData.overallDescription}</p>
+            <p className="mb-3 md:mb-4 text-sm md:text-base text-blue-100">{horoscopeData.overallDescription}</p>
             
-            {/* 各领域运势 */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            {/* 各领域运势 - 包含健康运势 */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1.5 md:gap-2">
               {Object.entries(horoscopeData.dailyForecast || {}).map(([key, data]) => (
-                <div key={key} className="text-center p-2 bg-white/10 rounded-lg">
-                  <div className="text-xs text-blue-200 mb-1">
+                <div key={key} className="text-center p-1.5 md:p-2 bg-white/10 rounded-lg">
+                  <div className="text-[10px] md:text-xs text-blue-200 mb-0.5 md:mb-1">
                     {key === 'love' ? '爱情' : 
                      key === 'wealth' ? '财运' : 
                      key === 'career' ? '事业' : 
                      key === 'study' ? '学业' : 
-                     key === 'social' ? '社交' : key}
+                     key === 'social' ? '社交' : 
+                     key === 'health' ? '健康' : key}
                   </div>
-                  <div className="text-lg font-bold">{data.score}</div>
-                  <div className="text-xs text-blue-300">{data.description}</div>
+                  <div className="text-base md:text-lg font-bold">{data.score}</div>
+                  <div className="text-[10px] md:text-xs text-blue-300">{data.description}</div>
                 </div>
               ))}
             </div>
             
             {/* 幸运信息 */}
-            <div className="mt-4 pt-4 border-t border-white/20">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-white/20">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 text-xs md:text-sm">
                 <div>
                   <span className="text-blue-200">幸运色：</span>
-                  <span>{horoscopeData.recommendations?.luckyColorNames?.join('、') || '蓝色、绿色'}</span>
+                  <span>{getLuckyColorNames(horoscopeData.recommendations?.luckyColorNames || ['蓝色', '绿色']).join('、')}</span>
                 </div>
                 <div>
                   <span className="text-blue-200">幸运数字：</span>
@@ -520,24 +595,229 @@ const getFamousExamples = (zodiacName) => {
           </div>
         ) : null}
 
-        {/* 其他星座入口 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <span className="mr-2">🔮</span> 查看其他星座
+        {/* 运势趋势图 */}
+        {weeklyTrendData && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">
+            <h3 className="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2 md:mb-3 flex items-center">
+              <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM18 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1h-2a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+              </svg>
+              近7日运势趋势
+            </h3>
+            <div className="h-36 md:h-44">
+              <Line data={chartData} options={chartOptions} />
+            </div>
+            <div className="mt-2 md:mt-3 grid grid-cols-4 gap-1 md:gap-1.5 text-center">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-1 md:p-1.5 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                <div className="text-[9px] md:text-xs text-blue-600 dark:text-blue-400 font-medium">综合</div>
+                <div className="text-sm md:text-base font-medium text-blue-700 dark:text-blue-300">
+                  {energyScores[energyScores.length - 1]}%
+                </div>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-1 md:p-1.5 rounded-lg border border-amber-100 dark:border-amber-900/30">
+                <div className="text-[9px] md:text-xs text-amber-600 dark:text-amber-400 font-medium">财运</div>
+                <div className="text-sm md:text-base font-medium text-amber-700 dark:text-amber-300">
+                  {wealthScores[wealthScores.length - 1]}%
+                </div>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 p-1 md:p-1.5 rounded-lg border border-green-100 dark:border-green-900/30">
+                <div className="text-[9px] md:text-xs text-green-600 dark:text-green-400 font-medium">事业</div>
+                <div className="text-sm md:text-base font-medium text-green-700 dark:text-green-300">
+                  {careerScores[careerScores.length - 1]}%
+                </div>
+              </div>
+              <div className="bg-red-50 dark:bg-red-900/20 p-1 md:p-1.5 rounded-lg border border-red-100 dark:border-red-900/30">
+                <div className="text-[9px] md:text-xs text-red-600 dark:text-red-400 font-medium">健康</div>
+                <div className="text-sm md:text-base font-medium text-red-700 dark:text-red-300">
+                  {healthScores[healthScores.length - 1]}%
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 详细描述 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2 md:mb-3 flex items-center">
+            <span className="mr-1.5 md:mr-2 text-lg md:text-xl">📖</span> 星座概述
           </h3>
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+          <p className="text-sm md:text-base text-gray-700 dark:text-gray-200 leading-relaxed">
+            {getZodiacDescription(zodiacData.name)}
+          </p>
+        </div>
+
+        {/* 个性特质 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2 md:mb-3 flex items-center">
+            <span className="mr-1.5 md:mr-2 text-lg md:text-xl">🌟</span> 性格特征
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-2.5">
+            {(() => {
+              const traits = zodiacData.personalityTraits || 
+                            (zodiacData.traits ? zodiacData.traits.split('、') : []);
+              
+              return traits.length > 0 ? traits.map((trait, index) => (
+                <div key={index} className="flex items-center p-2 md:p-2.5 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 md:mr-2.5 flex-shrink-0"></span>
+                  <span className="text-sm md:text-base text-gray-700 dark:text-gray-200">{trait}</span>
+                </div>
+              )) : (
+                <p className="text-gray-500 dark:text-gray-400 col-span-2 text-sm md:text-base">暂无性格特征数据</p>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* 优点与缺点 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-3.5 mb-4 md:mb-5">
+          {/* 优点 */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5">
+            <h3 className="text-base md:text-lg font-bold text-green-600 dark:text-green-400 mb-2 md:mb-3 flex items-center">
+              <span className="mr-1.5 md:mr-2 text-lg md:text-xl">✨</span> 优点
+            </h3>
+            <div className="space-y-2 md:space-y-2.5">
+              {(() => {
+                const strengths = zodiacData.strengths || [];
+                return strengths.length > 0 ? strengths.map((strength, index) => (
+                  <div key={index} className="flex items-start">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1 md:mt-1.5 mr-2 md:mr-2.5 flex-shrink-0"></span>
+                    <span className="text-sm md:text-base text-gray-700 dark:text-gray-200">{strength}</span>
+                  </div>
+                )) : (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">待补充</p>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* 需注意 */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5">
+            <h3 className="text-base md:text-lg font-bold text-orange-600 dark:text-orange-400 mb-2 md:mb-3 flex items-center">
+              <span className="mr-1.5 md:mr-2 text-lg md:text-xl">⚠️</span> 需注意
+            </h3>
+            <div className="space-y-2 md:space-y-2.5">
+              {(() => {
+                const weaknesses = zodiacData.weaknesses || [];
+                return weaknesses.length > 0 ? weaknesses.map((weakness, index) => (
+                  <div key={index} className="flex items-start">
+                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1 md:mt-1.5 mr-2 md:mr-2.5 flex-shrink-0"></span>
+                    <span className="text-sm md:text-base text-gray-700 dark:text-gray-200">{weakness}</span>
+                  </div>
+                )) : (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">待补充</p>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+
+        {/* 幸运信息 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">
+          <h3 className="text-base md:text-lg font-bold text-purple-600 dark:text-purple-400 mb-2 md:mb-3 flex items-center">
+            <span className="mr-1.5 md:mr-2 text-lg md:text-xl">🍀</span> 幸运信息
+          </h3>
+          <div className="grid grid-cols-3 gap-2 md:gap-3">
+            <div className="text-center p-2.5 md:p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
+              <div className="text-gray-600 dark:text-gray-400 text-xs md:text-sm mb-1.5 md:mb-2">幸运色</div>
+              <div className="flex flex-wrap justify-center gap-0.5 md:gap-1">
+                {(() => {
+                  const luckyColors = zodiacData.luckyColor || [];
+                  return luckyColors.length > 0 ? luckyColors.map((color, index) => (
+                    <div
+                      key={index}
+                      className="w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-white shadow-sm"
+                      style={{ backgroundColor: color }}
+                      title={getColorName(color)}
+                      aria-label={`幸运色: ${getColorName(color)}`}
+                    />
+                  )) : (
+                    <div
+                      className="w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-white shadow-sm"
+                      style={{ backgroundColor: '#FF6B6B' }}
+                      title="红色"
+                      aria-label="幸运色: 红色"
+                    />
+                  );
+                })()}
+              </div>
+              <div className="text-xs md:text-sm text-gray-700 dark:text-gray-200 mt-1.5 md:mt-2">
+                {(() => {
+                  const luckyColors = zodiacData.luckyColor || [];
+                  return luckyColors.length > 0 
+                    ? luckyColors.map(c => getColorName(c)).join('、') 
+                    : '红色';
+                })()}
+              </div>
+            </div>
+            <div className="text-center p-2.5 md:p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
+              <div className="text-gray-600 dark:text-gray-400 text-xs md:text-sm mb-1.5 md:mb-2">幸运数字</div>
+              <div className="flex flex-wrap justify-center gap-1 md:gap-1.5">
+                {(() => {
+                  const luckyNumbers = zodiacData.luckyNumber || [7, 3, 9]; // 提供默认值
+                  return luckyNumbers.length > 0 ? luckyNumbers.map((num, index) => (
+                    <span key={index} className="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full text-base md:text-lg font-bold text-purple-600 dark:text-purple-400">
+                      {num}
+                    </span>
+                  )) : null;
+                })()}
+              </div>
+            </div>
+            <div className="text-center p-2.5 md:p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
+              <div className="text-gray-600 dark:text-gray-400 text-xs md:text-sm mb-1.5 md:mb-2">速配星座</div>
+              <div className="flex flex-wrap justify-center gap-1 md:gap-1.5">
+                {(() => {
+                  const compatibleSigns = zodiacData.compatible || [];
+                  return compatibleSigns.length > 0 ? compatibleSigns.slice(0, 4).map((sign, index) => (
+                    <span key={index} className="px-2 md:px-2.5 py-0.5 md:py-1 bg-white dark:bg-gray-700 rounded-full text-xs md:text-sm text-gray-700 dark:text-gray-200">
+                      {sign}
+                    </span>
+                  )) : (
+                    <span className="px-2 md:px-2.5 py-0.5 md:py-1 bg-white dark:bg-gray-700 rounded-full text-xs md:text-sm text-gray-700 dark:text-gray-200">
+                      未知
+                    </span>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 知名人物 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2 md:mb-3 flex items-center">
+            <span className="mr-1.5 md:mr-2 text-lg md:text-xl">⭐</span> 知名{zodiacData.name}
+          </h3>
+          <div className="flex flex-wrap gap-2 md:gap-2.5">
+            {getFamousExamples(zodiacData.name).map((name, index) => (
+              <div
+                key={index}
+                className="px-3 md:px-3.5 py-1.5 md:py-2 bg-gray-50 dark:bg-gray-700 text-sm md:text-base text-gray-700 dark:text-gray-200 rounded-lg flex items-center"
+              >
+                <span className="text-base md:text-lg mr-1.5 md:mr-2">👤</span>
+                {name}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 其他星座入口 */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5">
+          <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2 md:mb-3 flex items-center">
+            <span className="mr-1.5 md:mr-2 text-lg md:text-xl">🔮</span> 查看其他星座
+          </h3>
+          <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-3">
             {HOROSCOPE_DATA_ENHANCED.map((zodiac) => (
               <button
                 key={zodiac.name}
                 onClick={() => setCurrentHoroscope(zodiac.name)}
-                className={`p-3 rounded-lg transition-all ${
+                className={`p-2 md:p-3 rounded-lg transition-all ${
                   currentHoroscope === zodiac.name
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900/20'
                 }`}
               >
-                <div className="text-2xl mb-1">{zodiac.icon}</div>
-                <div className="text-xs font-bold">{zodiac.name.replace('座', '')}</div>
+                <div className="text-xl md:text-2xl mb-1">{zodiac.icon}</div>
+                <div className="text-xs md:text-sm font-bold">{zodiac.name.replace('座', '')}</div>
               </button>
             ))}
           </div>

@@ -58,9 +58,48 @@
   border-color: var(--text-accent);
 }
 
+.tab-count {
+  margin-left: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+}
+
+.active .tab-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* 条文列表 */
+.clauses-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (min-width: 1024px) {
+  .clauses-container {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .clause-list-section {
+    flex: 1;
+    max-height: 800px;
+    overflow-y: auto;
+  }
+
+  .clause-detail {
+    flex: 1;
+    position: sticky;
+    top: 20px;
+    margin-top: 0;
+  }
+}
+
 .clause-list {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 15px;
 }
 
@@ -127,6 +166,17 @@
   font-size: 0.95rem;
   color: var(--text-secondary);
   line-height: 1.5;
+  margin-top: 8px;
+}
+
+.random-match-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  background: var(--border-color);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  margin-top: 8px;
 }
 
 /* 选中条文的详细解读 */
@@ -209,8 +259,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 空状态 */
@@ -230,23 +285,23 @@
   .search-box {
     flex-direction: column;
   }
-  
+
   .clause-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .tab-navigation {
     justify-content: center;
   }
-  
+
   .detail-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .detail-meta {
     flex-direction: column;
     gap: 5px;
@@ -257,15 +312,15 @@
   .clause-item {
     padding: 15px;
   }
-  
+
   .clause-detail {
     padding: 15px;
   }
-  
+
   .clause-title {
     font-size: 1.1rem;
   }
-  
+
   .clause-content {
     font-size: 1rem;
   }
@@ -273,28 +328,28 @@
 
 /* 移动端优化 */
 @media (max-width: 768px) {
-  .clause-card {
+  .clause-item {
     padding: 15px;
-    min-height: 120px;
   }
-  
-  .clause-number, .clause-category {
+
+  .clause-number,
+  .clause-category {
     font-size: 0.8rem;
   }
-  
+
   .clause-title {
     font-size: 1rem;
   }
-  
-  .clause-preview {
+
+  .clause-content {
     font-size: 0.9rem;
   }
-  
+
   .search-box input {
     padding: 12px 15px;
     min-height: 44px;
   }
-  
+
   .tab-btn {
     padding: 10px 15px;
     min-height: 44px;

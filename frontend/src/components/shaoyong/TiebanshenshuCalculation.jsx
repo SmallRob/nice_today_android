@@ -39,7 +39,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
     setProgress(0);
 
     const steps = [];
-    
+
     // 第一步：八字转数
     setTimeout(() => {
       steps.push({
@@ -64,7 +64,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
       const dayNum = stemToNumber(baziData.day.stem) + branchToNumber(baziData.day.branch);
       const hourNum = stemToNumber(baziData.hour.stem) + branchToNumber(baziData.hour.branch);
       const total = yearNum + monthNum + dayNum + hourNum;
-      
+
       steps.push({
         step: 2,
         title: '计算四柱总数',
@@ -86,7 +86,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
       const baseNumber = 10000; // 万条文库基础
       const genderFactor = baziData.gender === 'male' ? 1 : 2;
       const leapFactor = baziData.isLeapMonth ? 1.5 : 1;
-      
+
       // 模拟复杂计算
       const calculation = [
         { operation: '总数 × 八卦基数', value: '× 64' },
@@ -94,7 +94,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
         { operation: '闰月调整', value: leapFactor === 1.5 ? '× 1.5' : '不变' },
         { operation: '归藏数转换', value: '→ 归藏卦数' }
       ];
-      
+
       steps.push({
         step: 3,
         title: '皇极起数法',
@@ -114,10 +114,10 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
       for (let i = 0; i < clauseCount; i++) {
         clauseNumbers.push(Math.floor(Math.random() * 12000) + 1);
       }
-      
+
       // 排序并去重
       const uniqueClauses = [...new Set(clauseNumbers)].sort((a, b) => a - b);
-      
+
       steps.push({
         step: 4,
         title: '生成条文编号',
@@ -130,10 +130,10 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
         ],
         clauseNumbers: uniqueClauses
       });
-      
+
       setCalculationSteps([...steps]);
       setProgress(100);
-      
+
       // 生成最终结果
       const finalResult = {
         baziData,
@@ -142,10 +142,10 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
         calculationId: Date.now().toString(36).toUpperCase(),
         calculationTime: new Date().toLocaleTimeString()
       };
-      
+
       setFinalResult(finalResult);
       setIsCalculating(false);
-      
+
       // 通知父组件
       setTimeout(() => {
         onCalculationComplete(finalResult);
@@ -168,14 +168,14 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
       '戊': '土', '己': '土', '庚': '金', '辛': '金',
       '壬': '水', '癸': '水'
     };
-    
+
     const wuxingCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
-    
+
     [baziData.year.stem, baziData.month.stem, baziData.day.stem, baziData.hour.stem]
       .forEach(stem => {
         wuxingCount[stemWuxing[stem]]++;
       });
-    
+
     return wuxingCount;
   };
 
@@ -212,7 +212,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
                 {baziData.lunarDate && <p><strong>农历：</strong>{baziData.lunarDate}</p>}
               </div>
             </div>
-            
+
             <div className="wuxing-analysis">
               <h5>八字五行分析</h5>
               <div className="wuxing-bars">
@@ -220,7 +220,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
                   <div key={wuxing} className="wuxing-bar">
                     <div className="wuxing-label">{wuxing}</div>
                     <div className="bar-container">
-                      <div 
+                      <div
                         className={`bar bar-${wuxing}`}
                         style={{ width: `${count * 25}%` }}
                       >
@@ -232,7 +232,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
               </div>
             </div>
           </div>
-          
+
           <div className="calculation-instructions">
             <h4>皇极起数说明</h4>
             <ul>
@@ -243,7 +243,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
               <li>点击开始计算，体验邵雍的"数术之王"算法</li>
             </ul>
           </div>
-          
+
           <button className="btn-primary start-btn" onClick={performCalculation}>
             开始皇极起数计算
           </button>
@@ -251,28 +251,28 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
       ) : isCalculating ? (
         <div className="calculation-in-progress">
           <h4>皇极起数计算中...</h4>
-          
+
           <div className="progress-container">
             <div className="progress-bar">
-              <div 
+              <div
                 className="progress-fill"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
             <div className="progress-text">{progress}%</div>
           </div>
-          
+
           <div className="calculation-steps">
             {calculationSteps.map((step, index) => (
-              <div 
-                key={index} 
-                className={`calculation-step ${step.step <= progress/25 ? 'completed' : ''}`}
+              <div
+                key={index}
+                className={`calculation-step ${step.step <= progress / 25 ? 'completed' : ''}`}
               >
                 <div className="step-header">
                   <div className="step-number">{step.step}</div>
                   <div className="step-title">{step.title}</div>
                   <div className="step-status">
-                    {step.step <= progress/25 ? '✓' : '...'}
+                    {step.step <= progress / 25 ? '✓' : '...'}
                   </div>
                 </div>
                 <div className="step-description">{step.description}</div>
@@ -286,7 +286,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
               </div>
             ))}
           </div>
-          
+
           <div className="calculation-tip">
             <p>铁板神数计算复杂，传统推算需数小时乃至数日，此处为简化模拟</p>
           </div>
@@ -299,7 +299,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
               计算ID: {finalResult.calculationId}
             </div>
           </div>
-          
+
           <div className="result-summary">
             <div className="summary-card">
               <div className="summary-icon">📜</div>
@@ -308,7 +308,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
                 <p>在万条文库中定位到 {finalResult.clauseNumbers?.length || 0} 条相关神数</p>
               </div>
             </div>
-            
+
             <div className="clause-preview">
               <h5>条文编号预览</h5>
               <div className="clause-numbers">
@@ -321,7 +321,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
               </div>
             </div>
           </div>
-          
+
           <div className="calculation-review">
             <h5>计算过程回顾</h5>
             <div className="steps-review">
@@ -336,9 +336,17 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
               ))}
             </div>
           </div>
-          
+
           <div className="calculation-actions">
-            <button className="btn-primary" onClick={() => window.location.reload()}>
+            <button
+              className="btn-primary"
+              onClick={() => {
+                const element = document.getElementById('clause-display-section');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
               抽取条文解读
             </button>
             <button className="btn-secondary" onClick={handleRecalculate}>

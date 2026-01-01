@@ -6,7 +6,7 @@ const BaziInput = ({ onSubmit }) => {
   const [method, setMethod] = useState('manual');
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('12:00');
-  
+
   // 八字各柱
   const [yearStem, setYearStem] = useState('甲');
   const [yearBranch, setYearBranch] = useState('子');
@@ -16,7 +16,7 @@ const BaziInput = ({ onSubmit }) => {
   const [dayBranch, setDayBranch] = useState('子');
   const [hourStem, setHourStem] = useState('甲');
   const [hourBranch, setHourBranch] = useState('子');
-  
+
   const [gender, setGender] = useState('male');
   const [isLeapMonth, setIsLeapMonth] = useState(false);
 
@@ -33,30 +33,30 @@ const BaziInput = ({ onSubmit }) => {
 
     try {
       const lunar = Lunar.fromDate(new Date(birthDate + ' ' + birthTime));
-      
+
       // 年柱
       const yearGanzhi = lunar.getYearInGanZhi();
       setYearStem(yearGanzhi.charAt(0));
       setYearBranch(yearGanzhi.charAt(1));
-      
+
       // 月柱
       const monthGanzhi = lunar.getMonthInGanZhi();
       setMonthStem(monthGanzhi.charAt(0));
       setMonthBranch(monthGanzhi.charAt(1));
-      
+
       // 日柱
       const dayGanzhi = lunar.getDayInGanZhi();
       setDayStem(dayGanzhi.charAt(0));
       setDayBranch(dayGanzhi.charAt(1));
-      
+
       // 时柱
       const hourGanzhi = lunar.getTimeInGanZhi();
       setHourStem(hourGanzhi.charAt(0));
       setHourBranch(hourGanzhi.charAt(1));
-      
+
       // 检查是否闰月
       setIsLeapMonth(lunar.getMonth() > 12);
-      
+
     } catch (error) {
       console.error('排盘错误:', error);
       alert('排盘失败，请检查日期格式');
@@ -67,7 +67,7 @@ const BaziInput = ({ onSubmit }) => {
   const handleRandomBazi = () => {
     const randomStem = () => heavenlyStems[Math.floor(Math.random() * 10)];
     const randomBranch = () => earthlyBranches[Math.floor(Math.random() * 12)];
-    
+
     setYearStem(randomStem());
     setYearBranch(randomBranch());
     setMonthStem(randomStem());
@@ -77,13 +77,13 @@ const BaziInput = ({ onSubmit }) => {
     setHourStem(randomStem());
     setHourBranch(randomBranch());
     setGender(Math.random() > 0.5 ? 'male' : 'female');
-    
+
     // 生成随机日期（1900-2023）
     const randomYear = Math.floor(Math.random() * 124) + 1900;
     const randomMonth = Math.floor(Math.random() * 12) + 1;
     const randomDay = Math.floor(Math.random() * 28) + 1;
     const randomDate = `${randomYear}-${randomMonth.toString().padStart(2, '0')}-${randomDay.toString().padStart(2, '0')}`;
-    
+
     setBirthDate(randomDate);
     setBirthTime(`${Math.floor(Math.random() * 24).toString().padStart(2, '0')}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`);
   };
@@ -101,7 +101,7 @@ const BaziInput = ({ onSubmit }) => {
       lunarDate: birthDate ? Lunar.fromDate(new Date(birthDate)).toString() : '',
       birthTime
     };
-    
+
     onSubmit(baziData);
   };
 
@@ -137,13 +137,13 @@ const BaziInput = ({ onSubmit }) => {
   return (
     <div className="bazi-input">
       <div className="method-selector">
-        <button 
+        <button
           className={`method-btn ${method === 'manual' ? 'active' : ''}`}
           onClick={() => setMethod('manual')}
         >
           手动输入八字
         </button>
-        <button 
+        <button
           className={`method-btn ${method === 'auto' ? 'active' : ''}`}
           onClick={() => setMethod('auto')}
         >
@@ -155,7 +155,7 @@ const BaziInput = ({ onSubmit }) => {
         <div className="auto-input">
           <div className="form-row">
             <div className="form-group">
-              <label className="whitespace-nowrap">出生日期</label>
+              <label>出生日期</label>
               <input
                 type="date"
                 value={birthDate}
@@ -164,7 +164,7 @@ const BaziInput = ({ onSubmit }) => {
               />
             </div>
             <div className="form-group">
-              <label className="whitespace-nowrap">出生时间</label>
+              <label>出生时间</label>
               <input
                 type="time"
                 value={birthTime}
@@ -175,24 +175,24 @@ const BaziInput = ({ onSubmit }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="whitespace-nowrap">性别</label>
+              <label>性别</label>
               <div className="gender-selector">
                 <button
                   className={`gender-btn ${gender === 'male' ? 'active' : ''}`}
                   onClick={() => setGender('male')}
                 >
-                  <span className="whitespace-nowrap">男</span>
+                  <span>男</span>
                 </button>
                 <button
                   className={`gender-btn ${gender === 'female' ? 'active' : ''}`}
                   onClick={() => setGender('female')}
                 >
-                  <span className="whitespace-nowrap">女</span>
+                  <span>女</span>
                 </button>
               </div>
             </div>
             <div className="form-group">
-              <label className="whitespace-nowrap">闰月</label>
+              <label>闰月</label>
               <div className="checkbox-group">
                 <input
                   type="checkbox"
@@ -200,16 +200,16 @@ const BaziInput = ({ onSubmit }) => {
                   onChange={(e) => setIsLeapMonth(e.target.checked)}
                   id="leap-month"
                 />
-                <label htmlFor="leap-month" className="whitespace-nowrap">是否闰月出生</label>
+                <label htmlFor="leap-month">是否闰月出生</label>
               </div>
             </div>
           </div>
 
           <div className="form-actions">
-            <button className="btn-secondary whitespace-nowrap" onClick={handleAutoCalculate}>
+            <button className="btn-secondary" onClick={handleAutoCalculate}>
               自动排盘
             </button>
-            <button className="btn-secondary whitespace-nowrap" onClick={handleRandomBazi}>
+            <button className="btn-secondary" onClick={handleRandomBazi}>
               随机八字
             </button>
           </div>
@@ -217,10 +217,10 @@ const BaziInput = ({ onSubmit }) => {
       )}
 
       <div className="bazi-display-input">
-        <h4 className="whitespace-nowrap">四柱八字</h4>
+        <h4>四柱八字</h4>
         <div className="bazi-grid">
           <div className="bazi-column">
-            <div className="bazi-label whitespace-nowrap">年柱</div>
+            <div className="bazi-label">年柱</div>
             <div className="bazi-selectors">
               <select value={yearStem} onChange={(e) => setYearStem(e.target.value)}>
                 {heavenlyStems.map(stem => (
@@ -286,7 +286,7 @@ const BaziInput = ({ onSubmit }) => {
           </div>
 
           <div className="bazi-column">
-            <div className="bazi-label whitespace-nowrap">时柱</div>
+            <div className="bazi-label">时柱</div>
             <div className="bazi-selectors">
               <select value={hourStem} onChange={(e) => setHourStem(e.target.value)}>
                 {heavenlyStems.map(stem => (
@@ -306,33 +306,33 @@ const BaziInput = ({ onSubmit }) => {
         </div>
 
         <div className="gender-selection">
-          <label className="whitespace-nowrap">性别：</label>
+          <label>性别：</label>
           <div className="gender-buttons">
             <button
               className={`gender-option ${gender === 'male' ? 'active' : ''}`}
               onClick={() => setGender('male')}
             >
-              <span className="whitespace-nowrap">男命</span>
+              <span>男命</span>
             </button>
             <button
               className={`gender-option ${gender === 'female' ? 'active' : ''}`}
               onClick={() => setGender('female')}
             >
-              <span className="whitespace-nowrap">女命</span>
+              <span>女命</span>
             </button>
           </div>
           <div className="gender-note">
-            <span className="whitespace-nowrap">{gender === 'male' ? '男命顺行，大运顺排' : '女命逆行，大运逆排'}</span>
+            <span>{gender === 'male' ? '男命顺行，大运顺排' : '女命逆行，大运逆排'}</span>
           </div>
         </div>
 
         <div className="bazi-summary">
-          <h4 className="whitespace-nowrap">八字摘要</h4>
+          <h4>八字摘要</h4>
           <div className="summary-content">
-            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
+            <p>
               {yearStem}{yearBranch}年 {monthStem}{monthBranch}月 {dayStem}{dayBranch}日 {hourStem}{hourBranch}时
             </p>
-            <p className="whitespace-nowrap overflow-hidden text-ellipsis">
+            <p>
               {gender === 'male' ? '男' : '女'}命，日主{dayStem}{stemBranchInfo[dayStem].wuxing}
               ，生于{branchInfo[yearBranch].zodiac}年{branchInfo[monthBranch].season}季
             </p>
@@ -340,23 +340,23 @@ const BaziInput = ({ onSubmit }) => {
         </div>
 
         <div className="submit-section">
-          <button className="btn-primary whitespace-nowrap" onClick={handleSubmit}>
+          <button className="btn-primary" onClick={handleSubmit}>
             确认八字，开始皇极起数
           </button>
-          <button className="btn-secondary whitespace-nowrap" onClick={handleRandomBazi}>
+          <button className="btn-secondary" onClick={handleRandomBazi}>
             随机生成八字
           </button>
         </div>
       </div>
 
       <div className="bazi-guide">
-        <h4 className="whitespace-nowrap">八字输入指南</h4>
+        <h4>八字输入指南</h4>
         <div className="guide-content">
-          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>年柱：</strong>出生年份的天干地支，代表祖上、父母</p>
-          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>月柱：</strong>出生月份的天干地支，代表兄弟、事业</p>
-          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>日柱：</strong>出生日的天干地支，日干代表自己，日支代表配偶</p>
-          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>时柱：</strong>出生时辰的天干地支，代表子女、晚年</p>
-          <p className="whitespace-nowrap overflow-hidden text-ellipsis"><strong>性别：</strong>铁板神数男女命推算方法不同，必须准确选择</p>
+          <p><strong>年柱：</strong>出生年份的天干地支，代表祖上、父母</p>
+          <p><strong>月柱：</strong>出生月份的天干地支，代表兄弟、事业</p>
+          <p><strong>日柱：</strong>出生日的天干地支，日干代表自己，日支代表配偶</p>
+          <p><strong>时柱：</strong>出生时辰的天干地支，代表子女、晚年</p>
+          <p><strong>性别：</strong>铁板神数男女命推算方法不同，必须准确选择</p>
         </div>
       </div>
     </div>
