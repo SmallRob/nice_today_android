@@ -41,21 +41,21 @@ const AppBanner = () => {
       </svg>
 
       {/* Banner内容 */}
-      <div className="container mx-auto relative z-10">
-        <div className="flex items-center justify-center space-x-3 md:space-x-4 py-2 md:py-3">
+      <div className="container mx-auto relative z-10 px-4">
+        <div className="flex items-center justify-start sm:justify-center space-x-2 md:space-x-4 py-2 md:py-3">
           {/* 应用图标 */}
           <img
             src={niceDayImage}
             alt="Nice Today"
-            className="w-12 h-12 md:w-14 md:h-14 rounded-lg shadow-md"
+            className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg shadow-md flex-shrink-0"
           />
 
           {/* 应用名称 */}
-          <div className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-black mb-0.5 text-shadow-xl tracking-tight leading-tight">
+          <div className="text-left">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black mb-0.5 text-shadow-xl tracking-tight leading-tight truncate max-w-[150px] sm:max-w-none">
               Nice Today
             </h1>
-            <p className="text-xs md:text-sm opacity-95 font-medium leading-tight">
+            <p className="text-[10px] sm:text-xs md:text-sm opacity-95 font-medium leading-tight truncate max-w-[180px] sm:max-w-none">
               探索运势·了解自己·精彩每一天
             </p>
           </div>
@@ -64,9 +64,8 @@ const AppBanner = () => {
         {/* 回到旧版主页链接 - 右上角 */}
         <button
           onClick={handleSwitchToOldVersion}
-          className="absolute top-3 right-3 text-xs md:text-sm text-white hover:scale-105 active:scale-95 transition-all duration-200 flex items-center space-x-1 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full border border-white/30 z-20 font-bold"
+          className="absolute top-2 right-2 text-[10px] sm:top-3 sm:right-3 sm:text-xs md:text-sm text-gray-700 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center space-x-1 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 hover:from-gray-300 hover:to-gray-300 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full z-20 font-bold"
           title="回到旧版炫彩版主页"
-          style={{ backdropFilter: 'blur(4px)' }}
         >
           <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />

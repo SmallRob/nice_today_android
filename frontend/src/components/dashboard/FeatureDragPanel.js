@@ -59,7 +59,8 @@ const FeatureDragPanel = ({ children, maxHeight = '1000px', minHeight = '320px',
             className={`features-drag-panel ${isExpanded ? 'expanded' : ''} ${isDragging ? 'dragging' : ''}`}
             style={{
                 maxHeight: isExpanded ? maxHeight : minHeight,
-                transform: isDragging ? `translateY(${currentY}px)` : 'none'
+                transform: isDragging ? `translateY(${currentY}px)` : 'none',
+                willChange: isDragging ? 'transform' : 'auto'
             }}
         >
             <div

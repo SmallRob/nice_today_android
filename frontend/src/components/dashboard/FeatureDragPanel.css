@@ -4,10 +4,10 @@
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.82);
     /* 默认半透明白 */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 24px 24px 0 0;
     z-index: 10;
@@ -15,7 +15,10 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.3s ease;
+    will-change: transform, max-height;
 }
 
 .features-drag-panel::-webkit-scrollbar {
@@ -23,8 +26,8 @@
 }
 
 .features-drag-panel.dragging {
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    /* 拖拽时取消 transform 的过渡 */
+    transition: none !important;
+    will-change: transform;
 }
 
 .drag-indicator-wrapper {
@@ -63,7 +66,7 @@
 
 /* 深色模式适配 */
 .dark .features-drag-panel {
-    background-color: rgba(15, 20, 25, 0.85);
+    background-color: rgba(15, 20, 25, 0.82);
     /* 半透明黑 */
     border-color: rgba(255, 255, 255, 0.05);
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.4);
