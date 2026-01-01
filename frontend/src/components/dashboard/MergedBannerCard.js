@@ -36,33 +36,53 @@ const MergedBannerCard = () => {
 
   // 跳转函数
   const navigateToZodiacTraits = () => {
-    const userZodiac = currentConfig?.zodiac || zodiacSign;
-    if (userZodiac) {
-      navigate(`/zodiac-traits/${encodeURIComponent(userZodiac)}`, {
-        state: { from: 'dashboard', userZodiac, timestamp: Date.now() }
-      });
-    } else {
+    try {
+      const userZodiac = currentConfig?.zodiac || zodiacSign;
+      if (userZodiac) {
+        const encodedZodiac = encodeURIComponent(String(userZodiac));
+        navigate(`/horoscope-traits/${encodedZodiac}`, {
+          state: { from: 'dashboard', userZodiac, timestamp: Date.now() }
+        });
+      } else {
+        navigate('/horoscope');
+      }
+    } catch (error) {
+      console.error('导航到星座特质页面时出错:', error);
       navigate('/horoscope');
     }
   };
 
-  const navigateToChineseZodiac = () => {
-    navigate('/chinese-zodiac', {
-      state: { from: 'dashboard', timestamp: Date.now() }
-    });
-  };
+  // const navigateToChineseZodiac = () => {
+  //   try {
+  //     navigate('/zodiac', {
+  //       state: { from: 'dashboard', timestamp: Date.now() }
+  //     });
+  //   } catch (error) {
+  //     console.error('导航到生肖运势页面时出错:', error);
+  //     // 可以添加备用导航或错误提示
+  //     navigate('/ZodiacEnergySimple');
+  //   }
+  // };
 
   const navigateToMBTI = () => {
-    const userMBTI = currentConfig?.mbti;
-    if (userMBTI) {
-      navigate(`/mbti-detail?mbti=${encodeURIComponent(userMBTI)}`, {
-        state: {
-          from: 'dashboard',
-          mbtiType: userMBTI,
-          timestamp: Date.now()
-        }
-      });
-    } else {
+    try {
+      const userMBTI = currentConfig?.mbti;
+      if (userMBTI) {
+        const encodedMBTI = encodeURIComponent(String(userMBTI));
+        navigate(`/mbti-detail?mbti=${encodedMBTI}`, {
+          state: {
+            from: 'dashboard',
+            mbtiType: userMBTI,
+            timestamp: Date.now()
+          }
+        });
+      } else {
+        navigate('/mbti-test', {
+          state: { from: 'dashboard', timestamp: Date.now() }
+        });
+      }
+    } catch (error) {
+      console.error('导航到MBTI详情页面时出错:', error);
       navigate('/mbti-test', {
         state: { from: 'dashboard', timestamp: Date.now() }
       });
@@ -70,13 +90,18 @@ const MergedBannerCard = () => {
   };
 
   const navigateToAgeAnalysis = () => {
-    navigate('/age-analysis', {
-      state: {
-        from: 'dashboard',
-        userAge: age,
-        timestamp: Date.now()
-      }
-    });
+    try {
+      navigate('/age-analysis', {
+        state: {
+          from: 'dashboard',
+          userAge: age,
+          timestamp: Date.now()
+        }
+      });
+    } catch (error) {
+      console.error('导航到年龄分析页面时出错:', error);
+      // 可以添加备用导航或错误提示
+    }
   };
 
   if (isLoading) {
@@ -157,7 +182,7 @@ const MergedBannerCard = () => {
                       {age}岁
                     </button>
                   )}
-                  {/* {zodiacSign && (
+                  {zodiacSign && (
                     <button
                       className="user-tag-inline zodiac"
                       onClick={navigateToZodiacTraits}
@@ -166,7 +191,7 @@ const MergedBannerCard = () => {
                       {zodiacSign.endsWith('座') ? zodiacSign : `${zodiacSign}座`}
                     </button>
                   )}
-                  {chineseZodiac && (
+                  {/* {chineseZodiac && (
                     <button
                       className="user-tag-inline chinese-zodiac"
                       onClick={navigateToChineseZodiac}

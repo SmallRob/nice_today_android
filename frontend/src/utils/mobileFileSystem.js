@@ -5,6 +5,7 @@
  */
 
 import { Capacitor } from '@capacitor/core';
+import JSZip from 'jszip';
 
 // Capacitor Filesystem插件引用（延迟导入）
 let Filesystem = null;
@@ -642,25 +643,121 @@ export const checkAndRequestStoragePermission = async () => {
  * 创建ZIP压缩包（如果需要支持备份多个文件）
  */
 export const createBackupZip = async (files, filename) => {
-  // TODO: 实现ZIP压缩功能
-  // 可以使用JSZip库
-  console.log('Creating backup ZIP for', files.length, 'files');
-  return {
-    success: false,
-    error: 'ZIP压缩功能待实现'
-  };
+  try {
+    console.log('Creating backup ZIP for', files.length, 'files');
+    
+    // 创建新的ZIP实例
+    const zip = new JSZip();
+    
+    // 添加每个文件到ZIP
+    files.forEach(file => {
+      if (file.name && file.content !== undefined) {
+        zip.file(file.name, file.content);
+      } else {
+        console.warn('跳过无效文件:', file);
+      }
+    });
+    
+    // 生成ZIP Blob
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    
+    // 保存ZIP文件
+    const saveResult = await saveFile(filename, zipBlob, 'application/zip');
+    
+    return {
+      success: true,
+      ...saveResult,
+      fileCount: files.length,
+      zipSize: zipBlob.size
+    };
+  } catch (error) {
+    console.error('创建ZIP备份失败:', error);
+    return {
+      success: false,
+      error: error.message || 'ZIP压缩失败'
+    };
+  }
 };
 
 /**
  * 解压ZIP备份包
  */
 export const extractBackupZip = async (zipFile) => {
-  // TODO: 实现ZIP解压功能
-  console.log('Extracting backup ZIP');
-  return {
-    success: false,
-    error: 'ZIP解压功能待实现'
-  };
+  try {
+    console.log('Extracting backup ZIP');
+    
+    // 根据输入类型获取ZIP数据
+    let zipData;
+    if (zipFile instanceof Blob || zipFile instanceof File) {
+      // 如果是Blob或File对象，直接使用
+      zipData = await zipFile.arrayBuffer();
+    } else if (typeof zipFile === 'string') {
+      // 如果是文件路径，尝试读取文件
+      // 注意：这里假设是Web环境，需要根据实际情况调整
+      const response = await fetch(zipFile);
+      if (!response.ok) {
+        throw new Error(`无法读取ZIP文件: ${response.statusText}`);
+      }
+      zipData = await response.arrayBuffer();
+    } else if (zipFile instanceof ArrayBuffer) {
+      zipData = zipFile;
+    } else {
+      throw new Error('不支持的ZIP文件格式');
+    }
+    
+    // 加载ZIP文件
+    const zip = new JSZip();
+    const loadedZip = await zip.loadAsync(zipData);
+    
+    // 提取所有文件
+    const extractedFiles = [];
+    const filePromises = [];
+    
+    loadedZip.forEach((relativePath, zipEntry) => {
+      if (!zipEntry.dir) {
+        // 对于每个文件，异步提取内容
+        const filePromise = zipEntry.async('text').then(content => {
+          extractedFiles.push({
+            name: zipEntry.name,
+            path: relativePath,
+            content: content,
+            size: zipEntry._data.uncompressedSize
+          });
+        }).catch(async (error) => {
+          // 如果文本提取失败，尝试作为二进制数据
+          try {
+            const binaryContent = await zipEntry.async('uint8array');
+            extractedFiles.push({
+              name: zipEntry.name,
+              path: relativePath,
+              content: binaryContent,
+              size: zipEntry._data.uncompressedSize,
+              binary: true
+            });
+          } catch (binaryError) {
+            console.warn(`无法提取文件 ${zipEntry.name}:`, binaryError);
+          }
+        });
+        filePromises.push(filePromise);
+      }
+    });
+    
+    // 等待所有文件提取完成
+    await Promise.all(filePromises);
+    
+    return {
+      success: true,
+      files: extractedFiles,
+      fileCount: extractedFiles.length,
+      message: `成功解压 ${extractedFiles.length} 个文件`
+    };
+  } catch (error) {
+    console.error('解压ZIP备份失败:', error);
+    return {
+      success: false,
+      error: error.message || 'ZIP解压失败'
+    };
+  }
 };
 
 // 导出工具类对象

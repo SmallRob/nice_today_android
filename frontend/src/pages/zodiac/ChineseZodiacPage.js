@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import { useUserConfig } from '../contexts/UserConfigContext';
-import { generateDailyHoroscope } from '../utils/horoscopeAlgorithm';
+import { useTheme } from '../../context/ThemeContext';
+import { useUserConfig } from '../../contexts/UserConfigContext';
+import { generateDailyHoroscope } from '../../utils/horoscopeAlgorithm';
 import { Line } from 'react-chartjs-2';
-import { ensureChartRegistered } from '../utils/chartConfig';
+import { ensureChartRegistered } from '../../utils/chartConfig';
 
 /**
  * 十二生肖数据
@@ -341,6 +341,41 @@ const ChineseZodiacPage = () => {
     };
   }, [userZodiac]);
 
+  // 颜色名称到十六进制值的映射
+  const getColorHex = (colorName) => {
+    const colorMap = {
+      '蓝色': '#4A90E2',
+      '金色': '#FFD700',
+      '黄色': '#FFC107',
+      '绿色': '#4CAF50',
+      '橙色': '#FF9800',
+      '粉色': '#E91E63',
+      '紫色': '#9C27B0',
+      '红色': '#FF5252',
+      '黑色': '#212121',
+      '白色': '#FFFFFF',
+      '灰色': '#9E9E9E',
+      '青绿': '#26A69A',
+      '浅蓝': '#64B3F4',
+      '浅绿': '#81C784',
+      '淡黄': '#FFEAA7',
+      '兰紫': '#DA70D6',
+      '深紫': '#8A2BE2',
+      '品红': '#FF00FF',
+      '青色': '#00FFFF',
+      '正红色': '#FF0000',
+      '魅力红': '#FF6B6B'
+    };
+    return colorMap[colorName] || '#4A90E2'; // 默认返回蓝色
+  };
+
+  // 解析幸运颜色字符串，返回颜色名称数组
+  const parseLuckyColors = (colorString) => {
+    if (!colorString) return ['蓝色', '金色'];
+    // 处理中文分隔符：、和，
+    return colorString.split(/[、，]/).map(color => color.trim()).filter(color => color);
+  };
+
   // 日期状态（用于趋势图）
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -592,8 +627,8 @@ const ChineseZodiacPage = () => {
     };
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
           <svg className="w-5 h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
           </svg>
@@ -646,14 +681,14 @@ const ChineseZodiacPage = () => {
     const textColor = theme === 'dark' ? '#ffffff' : '#1f2937';
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
           <svg className="w-5 h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
           </svg>
           能量匹配度
         </h3>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4">
           <div className="relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0">
             <svg className="w-full h-full" viewBox="0 0 36 36">
               <path
@@ -820,10 +855,25 @@ const ChineseZodiacPage = () => {
             <span className="mr-2">🍀</span> 幸运信息
           </h3>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">幸运色</div>
-              <div className="text-sm font-semibold text-gray-900 dark:text-gray-200">
-                {zodiacData.luckyColor}
+            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
+              <div className="text-gray-600 dark:text-gray-400 text-xs mb-1.5">幸运色</div>
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {parseLuckyColors(zodiacData.luckyColor).map((colorName, index) => {
+                  const colorHex = getColorHex(colorName);
+                  return (
+                    <div key={index} className="flex flex-col items-center">
+                      <div 
+                        className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-gray-300 dark:border-gray-600 mb-0.5"
+                        style={{ backgroundColor: colorHex }}
+                        title={colorName}
+                        aria-label={`幸运色: ${colorName}`}
+                      />
+                      <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate max-w-[50px] sm:max-w-[60px]">
+                        {colorName}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
@@ -905,7 +955,46 @@ const ChineseZodiacPage = () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-green-200">幸运色：</span>
-                  <span>{horoscopeData.recommendations?.luckyColorNames?.join('、') || '蓝色、绿色'}</span>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                    {Array.isArray(horoscopeData.recommendations?.luckyColors) 
+                      ? horoscopeData.recommendations.luckyColors.map((colorHex, index) => {
+                          const colorName = Array.isArray(horoscopeData.recommendations?.luckyColorNames) 
+                            ? horoscopeData.recommendations.luckyColorNames[index] 
+                            : colorHex;
+                          return (
+                            <div key={index} className="flex flex-col items-center">
+                              <div 
+                                className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-green-300 dark:border-green-700"
+                                style={{ backgroundColor: colorHex }}
+                                title={colorName}
+                                aria-label={`幸运色: ${colorName}`}
+                              />
+                              <div className="text-[9px] sm:text-[10px] text-green-100 truncate max-w-[40px] sm:max-w-[50px]">
+                                {colorName}
+                              </div>
+                            </div>
+                          );
+                        })
+                      : (() => {
+                          const colorNames = ['蓝色', '绿色'];
+                          return colorNames.map((colorName, index) => {
+                            const colorHex = getColorHex(colorName);
+                            return (
+                              <div key={index} className="flex flex-col items-center">
+                                <div 
+                                  className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-green-300 dark:border-green-700"
+                                  style={{ backgroundColor: colorHex }}
+                                  title={colorName}
+                                  aria-label={`幸运色: ${colorName}`}
+                                />
+                                <div className="text-[9px] sm:text-[10px] text-green-100 truncate max-w-[40px] sm:max-w-[50px]">
+                                  {colorName}
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
+                  </div>
                 </div>
                 <div>
                   <span className="text-green-200">幸运数字：</span>

@@ -6,7 +6,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import IconLibrary from '../components/IconLibrary';
-import { fetchDressInfoRange, fetchSpecificDateDressInfo, formatDateString } from '../services/apiServiceRefactored';
+import { getDressInfoRange, getSpecificDateDressInfo, formatDateString } from '../services/localDataService';
 
 // 五行能量趋势组件
 const WuxingEnergyTrend = ({ dailyElement, theme }) => {
@@ -113,42 +113,47 @@ const DressGuidePage = () => {
   }, [currentSeason]);
 
   const luckyColors = useMemo(() => {
-    return selectedDressInfo?.color_suggestions?.filter(cs => cs.吉凶 === "吉") || [];
+    return selectedDressInfo?.color_suggestions?.filter(cs => cs.吉凶 === "吉" || cs.吉凶 === "大吉") || [];
   }, [selectedDressInfo]);
 
   const unluckyColors = useMemo(() => {
-    return selectedDressInfo?.color_suggestions?.filter(cs => cs.吉凶 === "不吉") || [];
+    return selectedDressInfo?.color_suggestions?.filter(cs => cs.吉凶 === "不吉" || cs.吉凶 === "凶") || [];
   }, [selectedDressInfo]);
 
   const loadDressInfoRange = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await fetchDressInfoRange(null);
+      // 这里的 getDressInfoRange 是本地计算，不再需要联网
+      const result = await getDressInfoRange(2, 5); // 加载前后几天的数据
       if (result.success) {
         setDressInfoList(result.dressInfoList);
-        // 默认显示列表中的第一个日期（现在默认是今天）
-        setSelectedDressInfo(result.dressInfoList[0]);
-        setSelectedDate(new Date(result.dressInfoList[0].date));
+        // 寻找今天的日期信息
+        const todayStr = formatDateString(new Date());
+        const todayInfo = result.dressInfoList.find(info => info.date === todayStr) || result.dressInfoList[0];
+        setSelectedDressInfo(todayInfo);
+        setSelectedDate(new Date(todayInfo.date));
       } else {
         setError(result.error);
       }
     } catch (err) {
-      setError('加载穿衣指南数据失败');
+      setError('计算穿衣指南数据失败');
     } finally {
       setLoading(false);
     }
   }, []);
 
   const handleDateChange = useCallback(async (date) => {
-    setSelectedDate(date);
     const dateStr = formatDateString(date);
+    setSelectedDate(date);
+
     const dateInfo = dressInfoList.find(info => info.date === dateStr);
     if (dateInfo) {
       setSelectedDressInfo(dateInfo);
     } else {
       try {
-        const result = await fetchSpecificDateDressInfo(null, dateStr);
+        // 本地服务获取特定日期信息
+        const result = await getSpecificDateDressInfo(dateStr);
         if (result.success) {
           setSelectedDressInfo(result.dressInfo);
           setDressInfoList(prev => [...prev.filter(i => i.date !== dateStr), result.dressInfo].sort((a, b) => a.date.localeCompare(b.date)));

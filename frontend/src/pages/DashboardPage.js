@@ -227,7 +227,7 @@ const Dashboard = () => {
             </button>
             <button
               className="quick-action-btn"
-              onClick={() => navigate('/bazi-analysis')}
+              onClick={() => navigate('/bazi/analysis')}
             >
               <span>☯️</span>
               <span className="quick-action-label">八字命格</span>

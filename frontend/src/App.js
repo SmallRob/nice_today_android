@@ -10,6 +10,7 @@ import { safeInitAndroidWebViewCompat } from './utils/androidWebViewCompat';
 import { useChunkErrorRecovery, ChunkLoadErrorBoundary } from './utils/chunkLoadErrorHandler';
 import { useVersionManager, VersionUpdateNotification } from './utils/versionManager';
 import { UserParamsProvider } from './context/UserParamsContext';
+import { ensureChartRegistered } from './utils/chartConfig';
 import './index.css';
 
 // 为移动设备兼容性安全导入Suspense
@@ -86,14 +87,14 @@ const UserConfigPage = lazyLoadWithErrorHandling(() => import('./pages/UserConfi
 const TarotPage = lazyLoadWithErrorHandling(() => import('./pages/TarotPage'));
 const NumerologyPage = lazyLoadWithErrorHandling(() => import('./pages/NumerologyPage'));
 const BiorhythmPage = lazyLoadWithErrorHandling(() => import('./pages/BiorhythmPage'));
-const HoroscopePage = lazyLoadWithErrorHandling(() => import('./pages/HoroscopePage_optimized'));
-const BaziPage = lazyLoadWithErrorHandling(() => import('./pages/BaziPage'));
+const HoroscopePage = lazyLoadWithErrorHandling(() => import('./pages/horoscope/HoroscopePage'));
+const BaziPage = lazyLoadWithErrorHandling(() => import('./pages/bazi/BaziPage'));
 const MBTITestPage = lazyLoadWithErrorHandling(() => import('./pages/MBTITestPage'));
 const MBTIDetailPage = lazyLoadWithErrorHandling(() => import('./components/MBTIPersonalityTabHome'));
 const EnergyBoostPage = lazyLoadWithErrorHandling(() => import('./pages/EnergyBoostPage'));
 const PeriodTrackerPage = lazyLoadWithErrorHandling(() => import('./pages/PeriodTrackerPage'));
-const ZodiacTraitsPage = lazyLoadWithErrorHandling(() => import('./pages/ZodiacTraitsPage'));
-const ChineseZodiacPage = lazyLoadWithErrorHandling(() => import('./pages/ChineseZodiacPage'));
+const HoroscopeTraitsPage = lazyLoadWithErrorHandling(() => import('./pages/horoscope/HoroscopeTraitsPage'));
+const ChineseZodiacPage = lazyLoadWithErrorHandling(() => import('./pages/zodiac/ChineseZodiacPage'));
 const AgeAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/AgeAnalysisPage'));
 const ZiWeiPage = lazyLoadWithErrorHandling(() => import('./pages/ZiWeiPage'));
 const TodoListPage = lazyLoadWithErrorHandling(() => import('./pages/TodoListPage'));
@@ -102,7 +103,7 @@ const TakashimaAdvicePage = lazyLoadWithErrorHandling(() => import('./pages/Taka
 const LifestyleGuidePage = lazyLoadWithErrorHandling(() => import('./pages/LifestyleGuide'));
 const DailyCardPage = lazyLoadWithErrorHandling(() => import('./pages/DailyCardPage'));
 const CulturalCupPage = lazyLoadWithErrorHandling(() => import('./pages/CulturalCapPage'));
-const BaziAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/BaziAnalysisPage'));
+const BaziAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/bazi/BaziAnalysisPage'));
 const WuxingHealthPage = lazyLoadWithErrorHandling(() => import('./pages/WuxingHealthPage'));
 const OrganRhythmPage = lazyLoadWithErrorHandling(() => import('./pages/OrganRhythmPage'));
 const ShaoyongYixuePage = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
@@ -174,9 +175,9 @@ const AppLayout = () => {
             <Route path="/mbti-detail" element={<MBTIDetailPage />} />
             <Route path="/energy" element={<EnergyBoostPage />} />
             <Route path="/period-tracker" element={<PeriodTrackerPage />} />
-            <Route path="/zodiac-traits" element={<ZodiacTraitsPage />} />
-            <Route path="/zodiac-traits/:zodiacName" element={<ZodiacTraitsPage />} />
-            <Route path="/chinese-zodiac" element={<ChineseZodiacPage />} />
+            <Route path="/horoscope-traits" element={<HoroscopeTraitsPage />} />
+            <Route path="/horoscope-traits/:zodiacName" element={<HoroscopeTraitsPage />} />
+            <Route path="/zodiac" element={<ChineseZodiacPage />} />
             <Route path="/age-analysis" element={<AgeAnalysisPage />} />
             <Route path="/ziwei" element={<ZiWeiPage />} />
             <Route path="/todo-list" element={<TodoListPage />} />
@@ -185,7 +186,7 @@ const AppLayout = () => {
             <Route path="/lifestyle-guide" element={<LifestyleGuidePage />} />
             <Route path="/daily-cards" element={<DailyCardPage />} />
             <Route path="/cultural-cup" element={<CulturalCupPage />} />
-            <Route path="/bazi-analysis" element={<BaziAnalysisPage />} />
+            <Route path="/bazi/analysis" element={<BaziAnalysisPage />} />
             <Route path="/wuxing-health" element={<WuxingHealthPage />} />
             <Route path="/organ-rhythm" element={<OrganRhythmPage />} />
             <Route path="/fishing-game" element={<FishingGamePage />} />
@@ -330,6 +331,9 @@ function App() {
         }
       }
 
+      // 确保图表组件已注册
+      ensureChartRegistered();
+      
       // 记录应用启动（使用普通日志，不是错误）
       console.log('Application initialization started');
 

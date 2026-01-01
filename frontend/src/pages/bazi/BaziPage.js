@@ -4,14 +4,14 @@
  * 专门展示八字相关月运内容
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { useUserConfig } from '../contexts/UserConfigContext';
+import { useTheme } from '../../context/ThemeContext';
+import { useUserConfig } from '../../contexts/UserConfigContext';
 import { useSearchParams } from 'react-router-dom';
-import { normalizeBirthInfo } from '../utils/baziDataManager';
-import { calculateLiuNianDaYun, getMonthlyBaziFortune, getDailyBaziFortune, getYearlyBaziFortune, calculateDailyEnergy } from '../utils/baziHelper';
-import BaziCalculator from '../utils/baziCalculator';
-import FortuneTrendChart from '../components/bazi/FortuneTrendChart';
-import '../styles/bazi-page.css';
+import { normalizeBirthInfo } from '../../utils/baziDataManager';
+import { calculateLiuNianDaYun, getMonthlyBaziFortune, getDailyBaziFortune, getYearlyBaziFortune, calculateDailyEnergy } from '../../utils/baziHelper';
+import BaziCalculator from '../../utils/baziCalculator';
+import FortuneTrendChart from '../../components/bazi/FortuneTrendChart';
+import '../../styles/bazi-page.css';
 
 const BaziPage = () => {
   const { theme } = useTheme();

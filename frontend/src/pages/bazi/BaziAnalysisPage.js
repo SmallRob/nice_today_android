@@ -4,12 +4,12 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import { useUserConfig } from '../contexts/UserConfigContext';
-import { baziCacheManager } from '../utils/BaziCacheManager';
-import { getDisplayBaziInfo } from '../utils/baziSchema';
-import { calculateDetailedBazi } from '../utils/baziHelper';
-import { DEFAULT_REGION } from '../data/ChinaLocationData';
+import { useTheme } from '../../context/ThemeContext';
+import { useUserConfig } from '../../contexts/UserConfigContext';
+import { baziCacheManager } from '../../utils/BaziCacheManager';
+import { getDisplayBaziInfo } from '../../utils/baziSchema';
+import { calculateDetailedBazi } from '../../utils/baziHelper';
+import { DEFAULT_REGION } from '../../data/ChinaLocationData';
 
 // 八字命格展示组件
 const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname }) => {

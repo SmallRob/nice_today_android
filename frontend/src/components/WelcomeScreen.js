@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../styles/animations.css';
 
 const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
-  const [loadingText, setLoadingText] = useState('正在启动...');
+  const [loadingText, setLoadingText] = useState('正在初始化...');
   const [progress, setProgress] = useState(0);
   const [canSkip, setCanSkip] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -10,15 +10,15 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
   const stepsTimeoutRef = useRef(null);
 
   useEffect(() => {
-    if (completed) return; // 已完成，跳过
+    if (completed) return;
 
     const versionName = version === 'lite' ? '轻量版' : '炫彩版';
     const loadingSteps = [
-      { text: `正在启动${versionName}...`, duration: 600 },
-      { text: '加载用户配置...', duration: 500 },
-      { text: '准备数据缓存...', duration: 600 },
-      { text: '优化性能设置...', duration: 500 },
-      { text: '完成初始化...', duration: 400 }
+      { text: `正在开启${versionName}...`, duration: 700 },
+      { text: '同步宇宙能量...', duration: 600 },
+      { text: '加载星图数据...', duration: 700 },
+      { text: '调优系统性能...', duration: 500 },
+      { text: '美好即将开始...', duration: 400 }
     ];
 
     let currentStep = 0;
@@ -32,7 +32,7 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
         const stepProgress = (100 / loadingSteps.length);
         const targetProgress = Math.min(accumulatedProgress + stepProgress, 95);
 
-        setProgress(targetProgress); // 直接设置目标进度，避免累加错误
+        setProgress(targetProgress);
 
         stepsTimeoutRef.current = setTimeout(() => {
           currentStep++;
@@ -58,27 +58,18 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
           if (typeof onComplete === 'function') {
             onComplete();
           }
-        }, 500);
+        }, 800);
       }
     };
 
-    // 开始执行步骤
     executeNextStep();
 
-    // 清理函数
     return () => {
-      if (stepsTimeoutRef.current) {
-        clearTimeout(stepsTimeoutRef.current);
-        stepsTimeoutRef.current = null;
-      }
-      if (readyTimerRef.current) {
-        clearTimeout(readyTimerRef.current);
-        readyTimerRef.current = null;
-      }
+      if (stepsTimeoutRef.current) clearTimeout(stepsTimeoutRef.current);
+      if (readyTimerRef.current) clearTimeout(readyTimerRef.current);
     };
-  }, [version]); // 只在 version 变化时重新执行
+  }, [version, appReady]);
 
-  // 监听 appReady 状态变化
   useEffect(() => {
     if (appReady && canSkip && !completed) {
       setProgress(100);
@@ -87,11 +78,10 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
         if (typeof onComplete === 'function') {
           onComplete();
         }
-      }, 300);
+      }, 500);
     }
-  }, [appReady, canSkip]); // 移除 progress 依赖
+  }, [appReady, canSkip, completed, onComplete]);
 
-  // 跳过功能
   const handleSkip = () => {
     if (canSkip || appReady || completed) {
       setCompleted(true);
@@ -103,128 +93,142 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex flex-col items-center justify-center z-50 animate-fade-in">
-      {/* 主要内容 */}
-      <div className="max-w-md w-full mx-auto px-4 sm:px-6 text-center">
-        {/* 应用图标 - 增强动画效果 */}
-        <div className="mb-6 sm:mb-8 relative">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-xl relative overflow-hidden transform transition-transform duration-300 hover:scale-105">
-            {/* 动画背景 */}
-            <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
-            {/* 主图标 */}
-            <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white relative z-10 animate-bounce" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-          </div>
-          
-          {/* 装饰圆圈 - 增强动画 */}
-          <div className="absolute -top-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-          <div className="absolute -bottom-2 -left-2 w-5 h-5 sm:w-6 sm:h-6 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-0 -left-4 w-4 h-4 sm:w-5 sm:h-5 bg-pink-400 rounded-full animate-ping opacity-60"></div>
-        </div>
-        
-        {/* 应用名称 */}
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-2 tracking-tight">Nice Today</h1>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-3">每一天都是美好的开始</p>
-        
-        {/* 版本指示 */}
-        <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs sm:text-sm font-medium mb-6 sm:mb-8 shadow-md backdrop-blur-sm">
-          <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          {version === 'lite' ? '轻量版' : '炫彩版'}
-        </div>
+    <div className="fixed inset-0 overflow-hidden bg-[#0a0a1a] flex flex-col items-center justify-center z-[9999]">
+      {/* 动态背景装饰 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '8s' }}></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '1s' }}></div>
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-indigo-600/10 rounded-full blur-[80px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
       </div>
-      
-      {/* 加载进度条 - 优化响应式 */}
-      <div className="w-full max-w-xs sm:max-w-sm mx-auto mb-6 px-4">
-        <div className="text-sm text-gray-600 dark:text-gray-400 mb-3 text-center animate-fade-in font-medium">
-          {loadingText}
-        </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5 overflow-hidden shadow-inner">
-          <div 
-            className="bg-gradient-to-r from-blue-500 to-purple-600 h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-            style={{ width: `${progress}%` }}
-          >
-            {/* 进度条动画效果 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-pulse"></div>
-            <div className="absolute right-0 top-0 h-full w-2 bg-white opacity-40 animate-pulse"></div>
+
+      {/* 粒子装饰感 */}
+      <div className="absolute inset-0 opacity-30 pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-white animate-pulse"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 3 + 1}px`,
+              height: `${Math.random() * 3 + 1}px`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${Math.random() * 3 + 2}s`
+            }}
+          ></div>
+        ))}
+      </div>
+
+      {/* 主要内容卡片 */}
+      <div className="relative z-10 flex flex-col items-center max-w-lg w-full px-6">
+        {/* Logo 容器 */}
+        <div className="relative mb-12 group">
+          <div className="absolute inset-0 bg-blue-500/30 rounded-[32px] blur-2xl group-hover:bg-blue-500/50 transition-all duration-700 animate-pulse"></div>
+          <div className="relative w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-600 rounded-[32px] flex items-center justify-center shadow-[0_20px_50px_rgba(31,38,135,0.37)] border border-white/20 backdrop-blur-sm overflow-hidden transform hover:scale-105 transition-transform duration-500">
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
+            <svg className="w-14 h-14 sm:w-16 sm:h-16 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <div className="absolute -inset-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-45deg] animate-[shimmer_3s_infinite]"></div>
           </div>
         </div>
-        <div className="flex justify-between items-center mt-2">
-          <span className="text-xs text-gray-500 dark:text-gray-500">
-            {Math.round(progress)}% 完成
-          </span>
-          {/* 跳过按钮 */}
-          {(canSkip || appReady) && (
-            <button
-              onClick={handleSkip}
-              className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors underline"
+
+        {/* 标题 & 语录 */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl sm:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-purple-200 mb-4 tracking-wider drop-shadow-sm">
+            NICE TODAY
+          </h1>
+          <div className="flex items-center justify-center space-x-3 mb-2">
+            <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-white/30"></div>
+            <p className="text-blue-100/70 text-sm sm:text-base font-light tracking-[0.2em] uppercase">
+              Healing & Guidance
+            </p>
+            <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-white/30"></div>
+          </div>
+        </div>
+
+        {/* 进度控制区 */}
+        <div className="w-full max-w-xs sm:max-w-sm mb-12">
+          <div className="flex justify-between items-end mb-3 px-1">
+            <span className="text-blue-200/80 text-xs font-medium tracking-wide animate-pulse">
+              {loadingText}
+            </span>
+            <span className="text-white/40 text-[10px] font-mono">
+              {Math.round(progress)}%
+            </span>
+          </div>
+
+          <div className="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 backdrop-blur-md">
+            <div
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 transition-all duration-700 ease-out"
+              style={{ width: `${progress}%` }}
             >
-              跳过
-            </button>
+              <div className="absolute inset-0 bg-[length:20px_20px] bg-gradient-to-r from-white/20 to-transparent animate-[scroll_2s_linear_infinite]"></div>
+            </div>
+          </div>
+
+          {(canSkip || appReady) && (
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={handleSkip}
+                className="px-6 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/40 hover:text-white/60 text-xs transition-all duration-300 backdrop-blur-sm"
+              >
+                跳过启动
+              </button>
+            </div>
           )}
         </div>
-      </div>
-      
-      {/* 功能预览 - 增强响应式设计 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-6 sm:mt-8 max-w-xs sm:max-w-md mx-auto px-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow-md border border-gray-100 dark:border-gray-700 animate-fade-in transform transition-all duration-300 hover:scale-105 hover:shadow-lg" style={{ animationDelay: '0.3s' }}>
-          <div className="text-purple-500 mb-2 sm:mb-3">
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-          </div>
-          <div className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 text-center">星座运势</div>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow-md border border-gray-100 dark:border-gray-700 animate-fade-in transform transition-all duration-300 hover:scale-105 hover:shadow-lg" style={{ animationDelay: '0.5s' }}>
-          <div className="text-blue-500 mb-2 sm:mb-3">
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 text-center">玛雅历法</div>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow-md border border-gray-100 dark:border-gray-700 animate-fade-in transform transition-all duration-300 hover:scale-105 hover:shadow-lg" style={{ animationDelay: '0.7s' }}>
-          <div className="text-green-500 mb-2 sm:mb-3">
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <div className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 text-center">生物节律</div>
-        </div>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-4 shadow-md border border-gray-100 dark:border-gray-700 animate-fade-in transform transition-all duration-300 hover:scale-105 hover:shadow-lg" style={{ animationDelay: '0.9s' }}>
-          <div className="text-pink-500 mb-2 sm:mb-3">
-            <svg className="w-5 h-5 sm:w-6 sm:h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-          <div className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 text-center">人格魅力</div>
+
+        {/* 功能预览微卡片 - Staggered entrance */}
+        <div className="grid grid-cols-4 gap-4 w-full opacity-0 animate-[fadeIn_1s_ease-out_forwards_0.5s]">
+          {[
+            { name: '运势', icon: 'M11 3a1 1 0 10-2 0 1 1 0 002 0zM4.586 7L3.172 5.586a2 2 0 112.828-2.828L7.414 4.172a1 1 0 00-1.414 1.414L4.586 7zm14.828 0l-1.414-1.414a1 1 0 00-1.414 1.414l1.414 1.414a2 2 0 11-2.828 2.828L15.172 9.586a1 1 0 001.414-1.414L18 9.586l1.414-1.414z', color: 'text-yellow-400' },
+            { name: '玛雅', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', color: 'text-blue-400' },
+            { name: '节律', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: 'text-emerald-400' },
+            { name: '魅力', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', color: 'text-pink-400' }
+          ].map((item, idx) => (
+            <div key={idx} className="flex flex-col items-center space-y-2 group">
+              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-md group-hover:bg-white/10 group-hover:border-white/20 transition-all duration-300">
+                <svg className={`w-5 h-5 ${item.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                </svg>
+              </div>
+              <span className="text-[10px] text-white/40 font-medium tracking-tighter uppercase whitespace-nowrap">{item.name}</span>
+            </div>
+          ))}
         </div>
       </div>
-      
-      {/* 底部提示 - 增强响应式 */}
-      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center animate-fade-in px-4" style={{ animationDelay: '1.5s' }}>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-light">
-          为您提供个性化的生活指导
-        </p>
-        {/* 额外的状态信息 */}
-        <div className="mt-2 flex justify-center items-center space-x-4">
-          <div className="flex items-center space-x-1">
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-xs text-gray-400">系统正常</span>
+
+      {/* 底部信息 */}
+      <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center space-y-3 px-6 animate-[fadeIn_1s_ease-out_forwards_1s] opacity-0">
+        <div className="px-4 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm">
+          <p className="text-[10px] sm:text-xs text-blue-200/60 font-medium tracking-widest uppercase">
+            {version === 'lite' ? 'Lite Version' : 'Premium Experience'} • Build 2026
+          </p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1.5">
+            <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span className="text-[9px] text-white/20 font-medium">SYSTEM SECURE</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <span className="text-xs text-gray-400">安全连接</span>
-          </div>
+          <div className="w-px h-2 bg-white/10"></div>
+          <span className="text-[9px] text-white/20 font-medium uppercase tracking-widest">Powered by AI Cosmos</span>
         </div>
       </div>
+
+      <style>
+        {`
+        @keyframes shimmer {
+          0% { transform: translateX(-150%) skew-x(-45deg); }
+          50% { transform: translateX(150%) skew-x(-45deg); }
+          100% { transform: translateX(150%) skew-x(-45deg); }
+        }
+        @keyframes scroll {
+          from { background-position: 0 0; }
+          to { background-position: 40px 0; }
+        }
+        `}
+      </style>
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { useUserConfig } from '../contexts/UserConfigContext';
-import { useUserSummary } from '../hooks/useUserInfo';
-import { generateDailyHoroscope, generateWeeklyHoroscope, generateMonthlyHoroscope } from '../utils/horoscopeAlgorithm';
+import { useTheme } from '../../context/ThemeContext';
+import { useUserConfig } from '../../contexts/UserConfigContext';
+import { useUserSummary } from '../../hooks/useUserInfo';
+import { generateDailyHoroscope, generateWeeklyHoroscope, generateMonthlyHoroscope } from '../../utils/horoscopeAlgorithm';
 
 const HoroscopePage = () => {
   const { theme } = useTheme();
@@ -101,12 +101,23 @@ const HoroscopePage = () => {
     </div>
   );
 
+  // 渲染颜色显示
+  const ColorDisplay = ({ colorHex, colorName }) => (
+    <div className="flex items-center justify-center gap-2">
+      <div 
+        className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600"
+        style={{ backgroundColor: colorHex }}
+      />
+      <div className="font-medium text-gray-700 dark:text-gray-300">{colorName}</div>
+    </div>
+  );
+
   return (
     <div className={`min-h-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} pb-6`}>
       {/* 头部 */}
-      <div className={`px-4 pt-6 pb-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <div className="text-center mb-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
+      <div className={`px-4 pt-4 pb-3 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className="text-center mb-3">
+          <div className="flex items-center justify-center gap-2 mb-1">
             <span className="text-2xl">✨</span>
             <h1 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               星座运势
@@ -120,10 +131,10 @@ const HoroscopePage = () => {
 
       {/* 视图切换 */}
       <div className={`px-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <div className="flex overflow-x-auto space-x-4 py-3">
+        <div className="flex overflow-x-auto space-x-3 py-2">
           <button
             onClick={() => setViewMode('daily')}
-            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'daily'
+            className={`flex-shrink-0 px-4 py-1.5 rounded-full font-medium transition-all ${viewMode === 'daily'
                 ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
                 : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
@@ -132,7 +143,7 @@ const HoroscopePage = () => {
           </button>
           <button
             onClick={() => setViewMode('weekly')}
-            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'weekly'
+            className={`flex-shrink-0 px-4 py-1.5 rounded-full font-medium transition-all ${viewMode === 'weekly'
                 ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
                 : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
@@ -141,7 +152,7 @@ const HoroscopePage = () => {
           </button>
           <button
             onClick={() => setViewMode('monthly')}
-            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'monthly'
+            className={`flex-shrink-0 px-4 py-1.5 rounded-full font-medium transition-all ${viewMode === 'monthly'
                 ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
                 : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
@@ -152,10 +163,10 @@ const HoroscopePage = () => {
       </div>
 
       {/* 主内容 */}
-      <div className="px-4 py-6 max-w-4xl mx-auto">
+      <div className="px-4 py-4 max-w-4xl mx-auto">
         {/* 星座选择器 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">选择星座</h2>
             {currentConfig?.zodiac && (
               <span className="text-sm text-purple-600 dark:text-purple-400">
@@ -163,12 +174,12 @@ const HoroscopePage = () => {
               </span>
             )}
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
             {zodiacList.map(zodiac => (
               <button
                 key={zodiac}
                 onClick={() => setSelectedZodiac(zodiac)}
-                className={`p-2 rounded-lg text-sm font-medium transition-all ${
+                className={`p-1.5 rounded-lg text-sm font-medium transition-all ${
                   selectedZodiac === zodiac
                     ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-md'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -182,9 +193,9 @@ const HoroscopePage = () => {
 
         {/* 加载状态 */}
         {loading && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center mb-6">
-            <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-300">正在加载运势数据...</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 text-center mb-4">
+            <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">正在加载运势数据...</p>
           </div>
         )}
 
@@ -197,10 +208,10 @@ const HoroscopePage = () => {
 
         {/* 运势内容 */}
         {!loading && !error && horoscopeData && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* 运势概览 */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+              <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                   {selectedZodiac} {viewMode === 'daily' ? '今日' : viewMode === 'weekly' ? '本周' : '本月'}运势
                 </h2>
@@ -209,12 +220,12 @@ const HoroscopePage = () => {
                 </span>
               </div>
 
-              <div className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+              <div className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
                 {horoscopeData.overallDescription || horoscopeData.description}
               </div>
 
               {/* 运势分数 */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {renderScore(horoscopeData.dailyForecast?.love?.score || 75, '爱情')}
                 {renderScore(horoscopeData.dailyForecast?.wealth?.score || 70, '财富')}
                 {renderScore(horoscopeData.dailyForecast?.career?.score || 65, '事业')}
@@ -223,11 +234,11 @@ const HoroscopePage = () => {
 
               {/* 每日概览（仅周运显示） */}
               {viewMode === 'weekly' && horoscopeData.dailyOverview && (
-                <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
                   <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3">
                     本周每日运势概览
                   </h3>
-                  <div className="grid grid-cols-7 gap-2">
+                  <div className="grid grid-cols-7 gap-1.5">
                     {horoscopeData.dailyOverview.map((day, index) => (
                       <div key={index} className="text-center">
                         <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">{day.day}</div>
@@ -252,11 +263,11 @@ const HoroscopePage = () => {
 
               {/* 每周概览（仅月运显示） */}
               {viewMode === 'monthly' && horoscopeData.weeklyOverview && (
-                <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
                   <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3">
                     本月每周运势概览
                   </h3>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {horoscopeData.weeklyOverview.map((week, index) => (
                       <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
                         <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -280,7 +291,7 @@ const HoroscopePage = () => {
             </div>
 
             {/* 运势详情 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* 宜忌 */}
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
                 <h3 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-3 flex items-center">
@@ -303,32 +314,61 @@ const HoroscopePage = () => {
               </div>
             </div>
 
-            {/* 幸运物品 */}
+            {/* 幸运指南 */}
             {horoscopeData.recommendations?.luckyColors && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">幸运指南</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">幸运指南</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="text-center">
                     <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">幸运颜色</div>
-                    <div className="font-medium text-purple-600 dark:text-purple-400">
-                      {horoscopeData.recommendations.luckyColors}
+                    <div className="flex items-center justify-center gap-2">
+                      {Array.isArray(horoscopeData.recommendations.luckyColors) ? (
+                        horoscopeData.recommendations.luckyColors.map((colorHex, index) => {
+                          const colorName = Array.isArray(horoscopeData.recommendations.luckyColorNames) 
+                            ? horoscopeData.recommendations.luckyColorNames[index] 
+                            : colorHex;
+                          return (
+                            <div key={index} className="flex flex-col items-center">
+                              <div 
+                                className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 mb-1"
+                                style={{ backgroundColor: colorHex }}
+                                title={colorName}
+                              />
+                              <div className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[60px]">
+                                {colorName}
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <div 
+                            className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 mb-1"
+                            style={{ backgroundColor: horoscopeData.recommendations.luckyColors }}
+                            title={horoscopeData.recommendations.luckyColorNames || horoscopeData.recommendations.luckyColors}
+                          />
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            {horoscopeData.recommendations.luckyColorNames || horoscopeData.recommendations.luckyColors}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">幸运数字</div>
-                    <div className="font-medium text-purple-600 dark:text-purple-400">
+                    <div className="font-medium text-purple-600 dark:text-purple-400 text-sm">
                       {horoscopeData.recommendations.luckyNumbers || '7, 14, 21'}
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">幸运方位</div>
-                    <div className="font-medium text-purple-600 dark:text-purple-400">
+                    <div className="font-medium text-purple-600 dark:text-purple-400 text-sm">
                       {horoscopeData.recommendations.luckyDirection || '东方'}
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">相合星座</div>
-                    <div className="font-medium text-purple-600 dark:text-purple-400">
+                    <div className="font-medium text-purple-600 dark:text-purple-400 text-sm">
                       {Array.isArray(horoscopeData.recommendations.compatibleSigns) 
                         ? horoscopeData.recommendations.compatibleSigns.join('、')
                         : horoscopeData.recommendations.compatibleSigns || '水瓶座、双子座'
@@ -340,7 +380,7 @@ const HoroscopePage = () => {
             )}
 
             {/* 感性提醒 */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
               <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-3 flex items-center">
                 <span className="mr-2">💖</span>
                 {viewMode === 'daily' ? '今日提醒' : viewMode === 'weekly' ? '本周提醒' : '本月提醒'}
@@ -357,7 +397,7 @@ const HoroscopePage = () => {
         {/* 运势说明 */}
         <div className="text-center text-gray-600 dark:text-gray-300 text-xs">
           <p>数据更新时间：{new Date().toLocaleString('zh-CN')}</p>
-          <p className="mt-1">星座运势仅供参考，请理性看待，结合实际情况做出决策</p>
+          <p className="mt-0.5">星座运势仅供参考，请理性看待，结合实际情况做出决策</p>
         </div>
       </div>
     </div>

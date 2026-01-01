@@ -13,7 +13,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
 
   // 跳转到详细页面
   const handleViewDetails = () => {
-    navigate('/zodiac-traits/' + encodeURIComponent(currentHoroscope), {
+    navigate('/horoscope-traits/' + encodeURIComponent(currentHoroscope), {
       state: { zodiac: currentHoroscope }
     });
   };

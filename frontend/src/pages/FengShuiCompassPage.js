@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 import './FengShuiCompassPage.css';
 
 // Feng Shui Data Constants
@@ -75,23 +77,87 @@ const FengShuiCompassPage = () => {
     const [permissionGranted, setPermissionGranted] = useState(false);
     const [calibrationMode, setCalibrationMode] = useState(false);
     const [theme, setTheme] = useState('dark');
+    const [geolocationWatchId, setGeolocationWatchId] = useState(null);
 
     // Initialize sensors
     useEffect(() => {
-        // Geolocation for Altitude
-        if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(
-                (position) => {
-                    setLocation({
-                        lat: position.coords.latitude.toFixed(4),
-                        lng: position.coords.longitude.toFixed(4),
-                        alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
-                    });
-                },
-                (error) => console.warn('Geolocation error:', error),
-                { enableHighAccuracy: true }
-            );
-        }
+        let localGeolocationWatchId = null;
+        
+        // Geolocation for Altitude using Capacitor
+        const initGeolocation = async () => {
+            try {
+                // Request permission first
+                const permission = await Geolocation.requestPermissions();
+                if (permission.location === 'granted') {
+                    setPermissionGranted(true);
+                    
+                    // Get current position and watch for changes
+                    localGeolocationWatchId = await Geolocation.watchPosition(
+                        { enableHighAccuracy: true, timeout: 10000 },
+                        (position) => {
+                            if (position) {
+                                setLocation({
+                                    lat: position.coords.latitude.toFixed(4),
+                                    lng: position.coords.longitude.toFixed(4),
+                                    alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
+                                });
+                            }
+                        },
+                        (error) => {
+                            console.warn('Geolocation error:', error);
+                            // Fallback to web API if Capacitor fails
+                            if (navigator.geolocation && !Capacitor.isNativePlatform()) {
+                                navigator.geolocation.watchPosition(
+                                    (position) => {
+                                        setLocation({
+                                            lat: position.coords.latitude.toFixed(4),
+                                            lng: position.coords.longitude.toFixed(4),
+                                            alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
+                                        });
+                                    },
+                                    (error) => console.warn('Web geolocation error:', error),
+                                    { enableHighAccuracy: true }
+                                );
+                            }
+                        }
+                    );
+                } else {
+                    console.warn('Geolocation permission not granted');
+                    // Fallback to web API if Capacitor permission denied
+                    if (navigator.geolocation && !Capacitor.isNativePlatform()) {
+                        navigator.geolocation.watchPosition(
+                            (position) => {
+                                setLocation({
+                                    lat: position.coords.latitude.toFixed(4),
+                                    lng: position.coords.longitude.toFixed(4),
+                                    alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
+                                });
+                            },
+                            (error) => console.warn('Web geolocation error:', error),
+                            { enableHighAccuracy: true }
+                        );
+                    }
+                }
+            } catch (error) {
+                console.warn('Capacitor Geolocation not available, falling back to web API:', error);
+                // Fallback to web API
+                if (navigator.geolocation) {
+                    navigator.geolocation.watchPosition(
+                        (position) => {
+                            setLocation({
+                                lat: position.coords.latitude.toFixed(4),
+                                lng: position.coords.longitude.toFixed(4),
+                                alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
+                            });
+                        },
+                        (error) => console.warn('Web geolocation error:', error),
+                        { enableHighAccuracy: true }
+                    );
+                }
+            }
+        };
+        
+        initGeolocation();
 
         // Device Orientation
         const handleOrientation = (event) => {
@@ -129,6 +195,14 @@ const FengShuiCompassPage = () => {
 
         return () => {
             window.removeEventListener(eventType, handleOrientation, true);
+            // Clear local geolocation watch if it exists
+            if (localGeolocationWatchId !== null) {
+                Geolocation.clearWatch({ id: localGeolocationWatchId });
+            }
+            // Clear state geolocation watch if it exists
+            if (geolocationWatchId) {
+                Geolocation.clearWatch({ id: geolocationWatchId });
+            }
         };
     }, []);
 
@@ -141,7 +215,8 @@ const FengShuiCompassPage = () => {
         setTheme(prev => prev === 'dark' ? 'light' : 'dark');
     };
 
-    const requestAccess = () => {
+    const requestCompassAccess = async () => {
+        // Request device orientation permission
         if (typeof DeviceOrientationEvent !== 'undefined' &&
             typeof DeviceOrientationEvent.requestPermission === 'function') {
             DeviceOrientationEvent.requestPermission()
@@ -168,7 +243,66 @@ const FengShuiCompassPage = () => {
                     }
                 })
                 .catch(console.error);
+        } else {
+            setPermissionGranted(true);
         }
+    };
+    
+    const requestLocationAccess = async () => {
+        try {
+            const permission = await Geolocation.requestPermissions();
+            if (permission.location === 'granted') {
+                console.log('Geolocation permission granted');
+                setPermissionGranted(true);
+                
+                // Get current position to initialize location
+                try {
+                    const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+                    if (position) {
+                        setLocation({
+                            lat: position.coords.latitude.toFixed(4),
+                            lng: position.coords.longitude.toFixed(4),
+                            alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
+                        });
+                    }
+                    
+                    // Start watching location for updates
+                    if (geolocationWatchId) {
+                        await Geolocation.clearWatch({ id: geolocationWatchId });
+                    }
+                    const newWatchId = await Geolocation.watchPosition(
+                        { enableHighAccuracy: true, timeout: 10000 },
+                        (position) => {
+                            if (position) {
+                                setLocation({
+                                    lat: position.coords.latitude.toFixed(4),
+                                    lng: position.coords.longitude.toFixed(4),
+                                    alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
+                                });
+                            }
+                        },
+                        (error) => {
+                            console.warn('Geolocation watch error:', error);
+                        }
+                    );
+                    setGeolocationWatchId(newWatchId);
+                } catch (getPositionError) {
+                    console.warn('Error getting current position:', getPositionError);
+                }
+            } else {
+                console.warn('Geolocation permission not granted');
+                alert('位置权限未被授予，无法获取精确位置信息');
+            }
+        } catch (error) {
+            console.warn('Error requesting geolocation permission:', error);
+            alert('请求位置权限时发生错误: ' + error.message);
+        }
+    };
+    
+    const requestAccess = async () => {
+        // Request both compass and location permissions
+        await requestCompassAccess();
+        await requestLocationAccess();
     };
 
     // Helper to get current direction text
@@ -226,15 +360,15 @@ const FengShuiCompassPage = () => {
                 <button className="back-button" onClick={() => navigate(-1)}>
                     ‹
                 </button>
-                <div className="header-title">风水罗盘</div>
                 <div className="header-buttons">
                     <button className="theme-toggle" onClick={toggleTheme}>
                         {theme === 'dark' ? '☀' : '☾'}
                     </button>
                     <button className="calibration-btn" onClick={requestAccess}>
-                        {permissionGranted ? '罗盘校正' : '开启罗盘'}
+                        {permissionGranted ? '位置权限' : '开启定位'}
                     </button>
                 </div>
+                <div className="header-title">风水罗盘</div>
             </header>
 
             <div className="compass-info-panel">

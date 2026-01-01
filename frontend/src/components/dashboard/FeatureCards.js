@@ -25,7 +25,7 @@ const ChineseZodiacCard = () => {
       title="生肖运势"
       icon="chinese-zodiac"
       category="fortune"
-      route="/chinese-zodiac"
+      route="/zodiac"
     />
   );
 };
@@ -86,7 +86,7 @@ const PersonalityTraitCard = () => {
     if (userZodiac) {
       console.log('从功能卡片跳转到星座特质页面:', userZodiac);
       // 优化：直接跳转到用户的星座特质页面，传递URL参数
-      navigate(`/zodiac-traits/${encodeURIComponent(userZodiac)}`, {
+      navigate(`/horoscope-traits/${encodeURIComponent(userZodiac)}`, {
         state: {
           from: 'feature-card',
           userZodiac: userZodiac,

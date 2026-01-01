@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import { useUserConfig } from '../contexts/UserConfigContext';
-import { HOROSCOPE_DATA_ENHANCED, generateDailyHoroscope } from '../utils/horoscopeAlgorithm';
+import { useTheme } from '../../context/ThemeContext';
+import { useUserConfig } from '../../contexts/UserConfigContext';
+import { HOROSCOPE_DATA_ENHANCED, generateDailyHoroscope } from '../../utils/horoscopeAlgorithm';
 import { memo } from 'react';
 import { Line } from 'react-chartjs-2';
-import { ensureChartRegistered } from '../utils/chartConfig';
+import { ensureChartRegistered } from '../../utils/chartConfig';
 
-const ZodiacTraitsPage = () => {
+const HoroscopeTraitsPage = () => {
   const navigate = useNavigate();
   const { zodiacName } = useParams();
   const { theme } = useTheme();
@@ -795,4 +795,4 @@ const getFamousExamples = (zodiacName) => {
 };
 
 // 使用React.memo优化组件性能，避免不必要的重新渲染
-export default memo(ZodiacTraitsPage);
+export default memo(HoroscopeTraitsPage);

@@ -42,7 +42,7 @@ const MergedUserCard = () => {
   const navigateToZodiacTraits = () => {
     const userZodiac = currentConfig?.zodiac || zodiacSign;
     if (userZodiac) {
-      navigate(`/zodiac-traits/${encodeURIComponent(userZodiac)}`, {
+      navigate(`/horoscope-traits/${encodeURIComponent(userZodiac)}`, {
         state: { from: 'dashboard', userZodiac, timestamp: Date.now() }
       });
     } else {
@@ -51,7 +51,7 @@ const MergedUserCard = () => {
   };
 
   const navigateToChineseZodiac = () => {
-    navigate('/chinese-zodiac', {
+    navigate('/zodiac', {
       state: { from: 'dashboard', timestamp: Date.now() }
     });
   };

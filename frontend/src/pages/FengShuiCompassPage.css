@@ -65,6 +65,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1;
+    order: 0;
 }
 
 .header-title {
@@ -73,12 +75,32 @@
     color: var(--text-primary);
     flex: 1;
     text-align: center;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0 12px;
+    order: 1;
 }
 
 .header-buttons {
     display: flex;
     align-items: center;
     gap: 8px;
+    z-index: 1;
+    order: 2;
+}
+
+/* Responsive adjustments for header */
+@media (max-width: 480px) {
+    .header-title {
+        font-size: 16px;
+        margin: 0 8px;
+    }
+    
+    .compass-header {
+        gap: 8px;
+    }
 }
 
 .calibration-btn,
