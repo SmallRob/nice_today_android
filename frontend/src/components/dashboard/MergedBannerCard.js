@@ -157,7 +157,7 @@ const MergedBannerCard = () => {
                       {age}岁
                     </button>
                   )}
-                  {zodiacSign && (
+                  {/* {zodiacSign && (
                     <button
                       className="user-tag-inline zodiac"
                       onClick={navigateToZodiacTraits}
@@ -174,7 +174,7 @@ const MergedBannerCard = () => {
                     >
                       {chineseZodiac}
                     </button>
-                  )}
+                  )} */}
                   {currentConfig?.mbti && (
                     <button
                       className="user-tag-inline mbti"

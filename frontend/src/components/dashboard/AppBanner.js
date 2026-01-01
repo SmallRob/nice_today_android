@@ -14,7 +14,12 @@ const AppBanner = () => {
   };
 
   return (
-    <div className="app-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0">
+    <div className="app-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0 safe-area-top" style={{
+      paddingTop: 'env(safe-area-inset-top, 0px)',
+      transform: 'translateZ(0)',
+      WebkitTransform: 'translateZ(0)',
+      willChange: 'transform'
+    }}>
       {/* 背景渐变装饰 */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30" />
 
@@ -51,11 +56,11 @@ const AppBanner = () => {
           />
 
           {/* 应用名称 */}
-          <div className="text-left">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-black mb-0.5 text-shadow-xl tracking-tight leading-tight truncate max-w-[150px] sm:max-w-none">
+          <div className="text-left min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black mb-0.5 text-shadow-xl tracking-tight leading-tight truncate max-w-[120px] xs:max-w-[130px] sm:max-w-none">
               Nice Today
             </h1>
-            <p className="text-[10px] sm:text-xs md:text-sm opacity-95 font-medium leading-tight truncate max-w-[180px] sm:max-w-none">
+            <p className="text-[10px] xs:text-[11px] sm:text-xs md:text-sm opacity-95 font-medium leading-tight truncate max-w-[120px] xs:max-w-[140px] sm:max-w-none">
               探索运势·了解自己·精彩每一天
             </p>
           </div>
@@ -64,7 +69,7 @@ const AppBanner = () => {
         {/* 回到旧版主页链接 - 右上角 */}
         <button
           onClick={handleSwitchToOldVersion}
-          className="absolute top-2 right-2 text-[10px] sm:top-3 sm:right-3 sm:text-xs md:text-sm text-gray-700 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center space-x-1 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 hover:from-gray-300 hover:to-gray-300 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full z-20 font-bold"
+          className="absolute top-2 right-2 text-[10px] xs:top-2 xs:right-2 xs:text-[11px] sm:top-3 sm:right-3 sm:text-xs md:text-sm text-gray-700 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center space-x-1 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 hover:from-gray-300 hover:to-gray-300 px-2.5 py-1 xs:px-2 xs:py-1 sm:px-3 sm:py-1.5 rounded-full z-20 font-bold"
           title="回到旧版炫彩版主页"
         >
           <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
