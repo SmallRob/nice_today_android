@@ -26,6 +26,7 @@ import {
   FishingGameCard,
   FengShuiCompassCard
 } from '../components/dashboard/FeatureCards';
+import FeatureDragPanel from '../components/dashboard/FeatureDragPanel';
 import {
   loadFeatureSortOrder,
   saveFeatureSortOrder,
@@ -65,6 +66,16 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
   const [features, setFeatures] = useState(ALL_FEATURES);
+  const [isFeaturesExpanded, setIsFeaturesExpanded] = useState(() => {
+    const saved = localStorage.getItem('features-expand-state');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+
+  // 保存展开状态
+  useEffect(() => {
+    localStorage.setItem('features-expand-state', JSON.stringify(isFeaturesExpanded));
+  }, [isFeaturesExpanded]);
+
   // 页面挂载时清理可能残留的拖拽样式
   useEffect(() => {
     // 清理DOM样式类，防止其他页面的样式污染
@@ -192,68 +203,72 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="app-container dashboard-page-wrapper">
+    <div className={`app-container dashboard-page-wrapper ${isFeaturesExpanded ? 'features-expanded' : ''}`}>
       {/* 固定头部区域 */}
-      <div className="fixed-height-container">
-        {/* 合并的Banner和用户信息卡片 */}
-        <MergedBannerCard />
+      <div className={`fixed-height-container ${isFeaturesExpanded ? 'collapsed' : ''}`}>
+        <div className="collapsible-header-content">
+          {/* 合并的Banner和用户信息卡片 */}
+          <MergedBannerCard />
 
-        {/* 每日运势能量卡片 */}
-        <DailyFortuneCard />
+          {/* 每日运势能量卡片 */}
+          <DailyFortuneCard />
 
-        {/* 节日节气提醒 */}
-        <FestivalCard />
+          {/* 节日节气提醒 */}
+          <FestivalCard />
 
-        {/* 快速操作 - 置顶的功能 */}
-        <div className="quick-actions">
-          <button
-            className="quick-action-btn"
-            onClick={() => navigate('/horoscope')}
-          >
-            <span>📅</span>
-            <span className="quick-action-label">今日运势</span>
-          </button>
-          <button
-            className="quick-action-btn"
-            onClick={() => navigate('/bazi-analysis')}
-          >
-            <span>☯️</span>
-            <span className="quick-action-label">八字命格</span>
-          </button>
-          <button
-            className="quick-action-btn"
-            onClick={() => navigate('/dress')}
-          >
-            <span>👕</span>
-            <span className="quick-action-label">穿衣指南</span>
-          </button>
-          <button
-            className="quick-action-btn"
-            onClick={() => navigate('/biorhythm')}
-          >
-            <span>⚡</span>
-            <span className="quick-action-label">今日节律</span>
-          </button>
-          <button
-            className="quick-action-btn"
-            onClick={() => navigate('/tarot')}
-          >
-            <span>🎴</span>
-            <span className="quick-action-label">塔罗抽卡</span>
-          </button>
+          {/* 快速操作 - 置顶的功能 */}
+          <div className="quick-actions">
+            <button
+              className="quick-action-btn"
+              onClick={() => navigate('/horoscope')}
+            >
+              <span>📅</span>
+              <span className="quick-action-label">今日运势</span>
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => navigate('/bazi-analysis')}
+            >
+              <span>☯️</span>
+              <span className="quick-action-label">八字命格</span>
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => navigate('/dress')}
+            >
+              <span>👕</span>
+              <span className="quick-action-label">穿衣指南</span>
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => navigate('/biorhythm')}
+            >
+              <span>⚡</span>
+              <span className="quick-action-label">今日节律</span>
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => navigate('/tarot')}
+            >
+              <span>🎴</span>
+              <span className="quick-action-label">塔罗抽卡</span>
+            </button>
+          </div>
         </div>
 
-        {/* 全部功能标题 */}
+        {/* 全部功能标题 - 始终显示或在展开时作为标题栏 */}
         <div className="features-header">
           <h2 className="features-title">
-            所有功能
-            <button
-              className={`dashboard-edit-icon-btn edit-icon-btn ${isEditMode ? 'edit-mode-active' : ''}`}
-              onClick={toggleEditMode}
-              title={isEditMode ? '完成排序' : '编辑排序'}
-            >
-              {isEditMode ? '✅' : '✏️'}
-            </button>
+            {isFeaturesExpanded ? '全部功能入口' : '所有功能'}
+            {isFeaturesExpanded && (
+              <button
+                className={`dashboard-edit-icon-btn edit-icon-btn ${isEditMode ? 'edit-mode-active' : ''}`}
+                onClick={toggleEditMode}
+                title={isEditMode ? '完成排序' : '编辑排序'}
+              >
+                {isEditMode ? '✅' : '✏️'}
+              </button>
+            )}
           </h2>
         </div>
 
@@ -273,13 +288,16 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* 可滚动内容区域 */}
-      <div className="content-area hide-scrollbar">
-        <div className="page-container">
+      {/* 内容区域 - 锁定滚动，由 Panel 内部处理 */}
+      <div className="content-area hide-scrollbar" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <FeatureDragPanel
+          maxHeight="100%"
+          minHeight="100%"
+          externalIsExpanded={isFeaturesExpanded}
+          onToggle={setIsFeaturesExpanded}
+        >
           {/* 全部功能 - 5列网格布局 */}
-          <div
-            className="features-grid"
-          >
+          <div className="features-grid">
             {features.map((feature, index) => {
               const FeatureComponent = feature.component;
               const featureId = getFeatureId(feature.name);
@@ -300,7 +318,7 @@ const Dashboard = () => {
               );
             })}
           </div>
-        </div>
+        </FeatureDragPanel>
       </div>
     </div>
   );

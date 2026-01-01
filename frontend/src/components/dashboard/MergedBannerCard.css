@@ -15,6 +15,24 @@
   min-height: 140px;
 }
 
+.banner-menu-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-left: 2px;
+  position: relative;
+  z-index: 10;
+}
+
+.menu-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
 .dark .merged-banner-card {
   background: linear-gradient(135deg, #4c51bf 0%, #553c9a 100%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
@@ -558,8 +576,8 @@
 /* 移动端适配 */
 @media (max-width: 576px) {
   .merged-banner-card {
-    padding: 16px 14px;
-    min-height: 120px;
+    padding: 38px 14px 16px 14px;
+    min-height: 130px;
     gap: 16px;
   }
 

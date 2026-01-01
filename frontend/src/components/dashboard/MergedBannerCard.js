@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserSummary } from '../../hooks/useUserInfo';
 import { useUserConfig } from '../../contexts/UserConfigContext';
 import niceDayImage from '../../images/nice_day.png';
+import BreadCrumbMenu from './BreadCrumbMenu';
 import './MergedBannerCard.css';
 
 const MergedBannerCard = () => {
@@ -97,19 +98,19 @@ const MergedBannerCard = () => {
     <div className="merged-banner-card">
       {/* 五行装饰背景 */}
       <div className="wuxing-bg"></div>
-      
+
       {/* 五行装饰符号 */}
       <div className="wuxing-symbol wuxing-symbol-1">木</div>
       <div className="wuxing-symbol wuxing-symbol-2">火</div>
       <div className="wuxing-symbol wuxing-symbol-3">土</div>
       <div className="wuxing-symbol wuxing-symbol-4">金</div>
       <div className="wuxing-symbol wuxing-symbol-5">水</div>
-      
+
       {/* 五行装饰圆圈 */}
       <div className="wuxing-circle wuxing-circle-1"></div>
       <div className="wuxing-circle wuxing-circle-2"></div>
       <div className="wuxing-circle wuxing-circle-3"></div>
-      
+
       {/* 左侧：应用图标和名称 + 日期信息 */}
       <div className="banner-left">
         <div className="app-section">
@@ -123,6 +124,11 @@ const MergedBannerCard = () => {
             <p className="app-subtitle">探索运势·了解自己·精彩每一天</p>
             <p className="current-date">{getCurrentDate()}</p>
           </div>
+        </div>
+
+        {/* 新增面包屑菜单 - 移动到图标下方 */}
+        <div className="banner-menu-container">
+          <BreadCrumbMenu />
         </div>
       </div>
 
@@ -139,7 +145,7 @@ const MergedBannerCard = () => {
                   <h2 className="user-nickname">{nickname}</h2>
                 )}
               </div>
-              
+
               {hasUserInfo && (
                 <div className="user-tags-inline">
                   {age && (

@@ -7,21 +7,49 @@
 .dashboard-page-wrapper .fixed-height-container {
   flex-shrink: 0;
   background-color: var(--color-background);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: none;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 快速操作按钮区域 */
+.collapsible-header-content {
+  max-height: 1000px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, transform 0.5s ease;
+  transform-origin: top;
+}
+
+.fixed-height-container.collapsed .collapsible-header-content {
+  max-height: 0;
+  opacity: 0;
+  transform: scaleY(0.9);
+  pointer-events: none;
+}
+
+/* 扩展时调整标题栏样式 */
+.features-expanded .features-header {
+  margin-top: 0;
+  padding-top: 20px;
+  background: var(--color-background);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
 /* 快速操作按钮区域 */
 .dashboard-page-wrapper .quick-actions {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: clamp(4px, 1vw, 8px);
-  padding: var(--spacing-md);
+  gap: 4px;
+  padding: 6px 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: var(--spacing-xl);
-  margin: var(--spacing-md);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.25);
+  border-radius: var(--spacing-lg);
+  margin: 6px 10px;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
   border: none;
+  /* 固定最大高度，防止缩放变形 */
+  max-height: 64px;
+  min-height: 56px;
 }
 
 .quick-action-btn {
@@ -29,42 +57,65 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
-  height: auto;
-  min-height: 60px;
-  padding: var(--spacing-xs) 0;
+  height: 100%;
+  min-height: 48px;
+  max-height: 56px;
+  padding: 3px 4px;
   background-color: transparent;
   border: none;
-  border-radius: var(--spacing-md);
+  border-radius: var(--spacing-sm);
   font-size: var(--font-size-xs);
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   box-shadow: none;
+  /* 使用 aspect-ratio 确保比例一致 */
+  aspect-ratio: 1 / 1.15;
+  /* 防止内容溢出 */
+  overflow: hidden;
+  /* 强制盒模型 */
+  box-sizing: border-box;
+  /* 防止字体缩放 */
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  text-size-adjust: none;
 }
 
 .quick-action-btn span:first-child {
-  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
   line-height: 1;
+  /* 固定图标高度，防止缩放变形 */
+  height: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .quick-action-btn .quick-action-label {
-  font-size: clamp(0.65rem, 1.8vw, 0.75rem);
-  font-weight: 600;
-  line-height: 1.1;
+  font-size: clamp(0.55rem, 1.3vw, 0.65rem);
+  font-weight: 500;
+  line-height: 1;
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  /* 限制文字行数和溢出处理 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  /* 固定文字高度 */
+  height: 1.1em;
 }
 
 .quick-action-btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .quick-action-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 /* 功能标题区域 - 分割线样式 */
@@ -143,6 +194,10 @@
   transform: translateY(-50%) scale(1.15);
   color: #667eea;
   box-shadow: none;
+}
+
+.features-expanded .content-area {
+  overflow: hidden;
 }
 
 /* 功能控制按钮区域 */
@@ -492,24 +547,28 @@
 
 @media (max-width: 768px) {
   .quick-actions {
-    padding: clamp(5px, 1.2vw, 8px);
-    margin: var(--spacing-sm);
-    gap: clamp(5px, 1.2vw, 8px);
+    padding: 5px 8px;
+    margin: 5px 8px;
+    gap: 3px;
     border-radius: var(--spacing-md);
+    max-height: 60px;
+    min-height: 52px;
   }
 
   .quick-action-btn {
-    padding: clamp(3px, 1.5vw, 6px);
+    padding: 2px 3px;
     border-radius: var(--spacing-sm);
-    height: 55px;
+    min-height: 44px;
+    max-height: 52px;
+    aspect-ratio: 1 / 1.15;
   }
 
   .quick-action-btn span:first-child {
-    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-size: clamp(0.95rem, 2.3vw, 1.2rem);
   }
 
   .quick-action-btn .quick-action-label {
-    font-size: clamp(0.55rem, 1.8vw, 0.68rem);
+    font-size: clamp(0.5rem, 1.2vw, 0.6rem);
   }
 
   .features-header {
@@ -574,21 +633,26 @@
 /* 超小屏幕优化 */
 @media (max-width: 480px) {
   .quick-actions {
-    gap: clamp(4px, 1vw, 6px);
-    padding: clamp(4px, 1vw, 6px);
+    padding: 4px 6px;
+    margin: 4px 6px;
+    gap: 2px;
+    max-height: 58px;
+    min-height: 50px;
   }
 
   .quick-action-btn {
-    padding: clamp(2px, 1.2vw, 5px);
-    height: 50px;
+    padding: 1px 2px;
+    min-height: 42px;
+    max-height: 50px;
+    aspect-ratio: 1 / 1.15;
   }
 
   .quick-action-btn span:first-child {
-    font-size: clamp(1rem, 3vw, 1.4rem);
+    font-size: clamp(0.9rem, 2.2vw, 1.15rem);
   }
 
   .quick-action-btn .quick-action-label {
-    font-size: clamp(0.52rem, 1.8vw, 0.65rem);
+    font-size: clamp(0.48rem, 1.1vw, 0.58rem);
   }
 
   .features-grid {
@@ -655,21 +719,26 @@
 /* 375px屏幕优化 */
 @media (max-width: 375px) {
   .quick-actions {
-    gap: clamp(3px, 1vw, 5px);
-    padding: clamp(3px, 1vw, 5px);
+    padding: 3px 5px;
+    margin: 3px 5px;
+    gap: 2px;
+    max-height: 56px;
+    min-height: 48px;
   }
 
   .quick-action-btn {
-    height: 48px;
-    padding: clamp(2px, 1vw, 4px);
+    padding: 1px 2px;
+    min-height: 40px;
+    max-height: 48px;
+    aspect-ratio: 1 / 1.15;
   }
 
   .quick-action-btn span:first-child {
-    font-size: clamp(0.95rem, 3vw, 1.3rem);
+    font-size: clamp(0.85rem, 2.1vw, 1.1rem);
   }
 
   .quick-action-btn .quick-action-label {
-    font-size: clamp(0.5rem, 1.8vw, 0.62rem);
+    font-size: clamp(0.46rem, 1.05vw, 0.56rem);
   }
 
   .features-grid {
@@ -725,21 +794,26 @@
 /* 320px屏幕优化 */
 @media (max-width: 320px) {
   .quick-actions {
-    padding: clamp(2px, 0.8vw, 4px);
-    gap: clamp(2px, 0.8vw, 4px);
+    padding: 2px 4px;
+    margin: 2px 4px;
+    gap: 1px;
+    max-height: 54px;
+    min-height: 46px;
   }
 
   .quick-action-btn {
-    height: 45px;
-    padding: clamp(2px, 1vw, 4px);
+    padding: 1px 1px;
+    min-height: 38px;
+    max-height: 46px;
+    aspect-ratio: 1 / 1.15;
   }
 
   .quick-action-btn span:first-child {
-    font-size: clamp(0.9rem, 3vw, 1.2rem);
+    font-size: clamp(0.8rem, 2vw, 1.05rem);
   }
 
   .quick-action-btn .quick-action-label {
-    font-size: clamp(0.48rem, 1.8vw, 0.6rem);
+    font-size: clamp(0.44rem, 1vw, 0.54rem);
   }
 
   .features-header {

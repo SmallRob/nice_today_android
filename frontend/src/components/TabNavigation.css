@@ -206,6 +206,7 @@
     opacity: 0;
     transform: translateX(-50%) translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -213,9 +214,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.6;
   }
+
   50% {
     opacity: 1;
   }
@@ -225,9 +229,11 @@
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.15);
   }
+
   100% {
     transform: scale(1);
   }
@@ -489,6 +495,7 @@
 .tab-label {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: keep-all;
@@ -498,6 +505,7 @@
 @media (max-width: 360px) {
   .tab-label {
     -webkit-line-clamp: 1;
+    line-clamp: 1;
   }
 }
 
@@ -544,15 +552,15 @@
 }
 
 .tab-icon svg {
-  /* 强制稳定的SVG尺寸 */
-  flex-shrink: 0 !important;
-  width: 24px !important;
-  height: 24px !important;
+  /* 强制稳定的SVG尺寸，移除 !important 以允许媒体查询覆盖 */
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
   transform: translateZ(0);
   will-change: transform;
   /* 禁用不必要的动画过渡 */
-  transition: none !important;
-  animation: none !important;
+  transition: none;
+  animation: none;
 }
 
 .tab-label {
@@ -581,8 +589,9 @@
 
 /* 防止其他页面样式污染 */
 .tab-navigation {
-  /* 强制固定定位和尺寸 */
-  height: 63px !important;
+  /* 移除强制固定高度，允许安全区域 padding 撑开 */
+  min-height: 63px;
+  height: auto;
   contain: layout style;
   /* 防止被其他页面样式影响 */
   isolation: isolate;
@@ -591,45 +600,45 @@
 /* 确保响应式断点下的稳定性 */
 @media (max-width: 360px) {
   .tab-navigation {
-    height: 58px !important;
+    height: 58px;
   }
-  
+
   .tab-icon svg {
-    width: 22px !important;
-    height: 22px !important;
+    width: 22px;
+    height: 22px;
   }
 }
 
 @media (max-width: 320px) {
   .tab-navigation {
-    height: 56px !important;
+    height: 56px;
   }
-  
+
   .tab-icon svg {
-    width: 22px !important;
-    height: 22px !important;
+    width: 22px;
+    height: 22px;
   }
 }
 
 @media (max-height: 600px) {
   .tab-navigation-container {
-    height: 55px !important;
+    height: 55px;
   }
-  
+
   .tab-icon svg {
-    width: 20px !important;
-    height: 20px !important;
+    width: 20px;
+    height: 20px;
   }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
   .tab-navigation-container {
-    height: 50px !important;
+    height: 50px;
   }
-  
+
   .tab-icon svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 18px;
+    height: 18px;
   }
 }
 

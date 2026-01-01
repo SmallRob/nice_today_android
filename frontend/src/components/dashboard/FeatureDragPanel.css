@@ -1,0 +1,99 @@
+.features-drag-panel {
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    transition: transform 0.1s ease-out;
+    background-color: var(--color-background);
+    border-radius: 20px 20px 0 0;
+    z-index: 10;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.features-drag-panel::-webkit-scrollbar {
+    display: none;
+}
+
+.features-drag-panel.dragging {
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 拖拽时取消 transform 的过渡 */
+}
+
+.drag-indicator-wrapper {
+    padding: 12px 0 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+
+.drag-indicator-wrapper:active {
+    cursor: grabbing;
+}
+
+.drag-indicator {
+    width: 36px;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+    margin-bottom: 4px;
+}
+
+.drag-hint {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+    font-weight: 500;
+}
+
+.features-panel-content {
+    padding: 10px 12px 100px;
+    flex: 1;
+}
+
+/* 深色模式适配 */
+.dark .features-drag-panel {
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .drag-indicator {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 展开状态样式 */
+.features-drag-panel.expanded {
+    overflow-y: auto;
+    border-radius: 0;
+    margin-top: 0;
+    height: 100vh;
+}
+
+.features-expanded .features-drag-panel {
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.features-drag-panel.expanded .drag-indicator-wrapper {
+    position: sticky;
+    top: 0;
+    background: var(--color-background);
+    z-index: 11;
+    padding-top: 12px;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+/* 优化滚动条 */
+.features-drag-panel.expanded::-webkit-scrollbar {
+    width: 4px;
+}
+
+.features-drag-panel.expanded::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 2px;
+}
