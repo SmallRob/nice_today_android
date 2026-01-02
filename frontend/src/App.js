@@ -31,7 +31,10 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
         console.error('组件加载失败:', error);
         
         // 如果是ChunkLoadError，尝试恢复
-        if (error.name === 'ChunkLoadError' || error.message?.includes('Loading chunk')) {
+        if (error.name === 'ChunkLoadError' || 
+            error.message?.includes('Loading chunk') ||
+            error.message?.includes('chunk') ||
+            error.message?.includes('failed')) {
           console.error(`检测到ChunkLoadError (重试 ${retryCount + 1}/${maxRetries})，尝试恢复...`);
           
           // 记录错误信息
@@ -43,6 +46,7 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
                 stack: error.stack,
                 timestamp: new Date().toISOString(),
                 url: window.location.href,
+                userAgent: navigator.userAgent,
                 retryCount
               };
               
@@ -54,23 +58,56 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
             }
           }
           
-          // 检查错误URL是否包含多余的路由前缀
+          // 检查错误URL并尝试修正
           const urlMatch = error.message.match(/(https?:\/\/[^\s]+\.js)/);
           if (urlMatch) {
             const failedUrl = urlMatch[1];
             console.log('失败URL:', failedUrl);
             
-            // 如果URL包含类似/horoscope-traits/的前缀，尝试从根目录加载
-            const pathMatch = failedUrl.match(/\/horoscope-traits(\/static\/js\/[^\/]+\.js)/);
-            if (pathMatch) {
-              const correctedPath = pathMatch[1];
-              const correctedUrl = `${window.location.origin}${correctedPath}`;
-              console.log('尝试修正URL:', correctedUrl);
+            // 尝试从根目录重新加载资源
+            try {
+              // 获取当前页面的基础URL
+              const baseUrl = window.location.origin;
               
-              // 尝试从修正的URL加载
-              try {
+              // 尝试从根目录加载资源
+              const resourcePath = new URL(failedUrl).pathname;
+              const correctedUrl = `${baseUrl}${resourcePath}`;
+              
+              console.log('尝试从根目录加载资源:', correctedUrl);
+              
+              // 尝试动态加载脚本
+              const script = document.createElement('script');
+              script.src = correctedUrl;
+              script.type = 'application/javascript';
+              
+              await new Promise((resolve, reject) => {
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+              });
+              
+              // 如果脚本加载成功，重新尝试导入
+              console.log('资源加载成功，重新尝试导入');
+              return importFunc();
+            } catch (scriptError) {
+              console.warn('从根目录加载资源失败:', scriptError);
+            }
+            
+            // 检查URL是否包含特定路径前缀，如/horoscope-traits，尝试从根路径加载
+            try {
+              const urlPath = new URL(failedUrl);
+              const pathSegments = urlPath.pathname.split('/');
+              
+              // 检查路径中是否包含应用特定的路径段
+              if (pathSegments.includes('horoscope-traits')) {
+                // 从路径中提取文件名部分，尝试从根目录加载
+                const fileName = pathSegments[pathSegments.length - 1];
+                const directLoadUrl = `${window.location.origin}/${fileName}`;
+                
+                console.log('检测到horoscope-traits路径，尝试直接加载:', directLoadUrl);
+                
                 const script = document.createElement('script');
-                script.src = correctedUrl;
+                script.src = directLoadUrl;
                 script.type = 'application/javascript';
                 
                 await new Promise((resolve, reject) => {
@@ -79,12 +116,11 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
                   document.head.appendChild(script);
                 });
                 
-                // 如果脚本加载成功，重新尝试导入
-                console.log('修正URL加载成功，重新尝试导入');
+                console.log('直接加载成功，重新尝试导入');
                 return importFunc();
-              } catch (e) {
-                console.warn('修正URL加载失败:', e);
               }
+            } catch (pathError) {
+              console.warn('路径修正尝试失败:', pathError);
             }
           }
           
@@ -92,8 +128,37 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
           if (retryCount < maxRetries - 1) {
             retryCount++;
             console.log(`延迟后重试 (${retryCount}/${maxRetries})...`);
-            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+            
+            // 延迟后重试，增加等待时间
+            await new Promise(resolve => setTimeout(resolve, 1500 * retryCount));
             return attemptImport();
+          } else {
+            // 如果重试次数用尽，尝试清除缓存并刷新页面
+            console.log('重试次数用尽，尝试清除缓存并刷新页面...');
+            
+            try {
+              // 清除浏览器缓存
+              if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                  cacheNames.map(cacheName => caches.delete(cacheName))
+                );
+              }
+              
+              // 清除localStorage中的错误记录
+              window.localStorage.removeItem('chunkLoadErrors');
+              
+              // 延迟后刷新页面
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            } catch (clearError) {
+              console.warn('清除缓存失败:', clearError);
+              // 如果清除缓存失败，直接刷新
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            }
           }
         }
         

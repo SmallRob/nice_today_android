@@ -19,6 +19,20 @@
   line-height: 1.5;
 }
 
+/* 暗黑主题支持 */
+.dark .divination-info {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+.dark .divination-info h3 {
+  color: #e2e8f0;
+}
+
+.dark .divination-info p {
+  color: #cbd5e0;
+}
+
 .hexagrams-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -63,6 +77,22 @@
   font-size: 1.2rem;
 }
 
+/* 暗黑主题支持 */
+.dark .hexagram-card {
+  background: #2d3748;
+  border-color: #4a5568;
+  color: #e2e8f0;
+}
+
+.dark .hexagram-card.changing {
+  border-color: #e53e3e;
+  background: linear-gradient(135deg, #4a2828 0%, #2d3748 100%);
+}
+
+.dark .hexagram-card h4 {
+  color: #e2e8f0;
+}
+
 .changing-badge {
   background: #e74c3c;
   color: white;
@@ -101,6 +131,20 @@
 .hexagram-line.changing .line-yin {
   background: #e74c3c;
   animation: pulse 2s infinite;
+}
+
+/* 暗黑主题支持 */
+.dark .line-yang {
+  background: #cbd5e0;
+}
+
+.dark .line-yin {
+  background: #cbd5e0;
+}
+
+.dark .hexagram-line.changing .line-yang,
+.dark .hexagram-line.changing .line-yin {
+  background: #e53e3e;
 }
 
 @keyframes pulse {
@@ -151,6 +195,24 @@
   display: inline-block;
 }
 
+/* 暗黑主题支持 */
+.dark .hexagram-name {
+  color: #e2e8f0;
+}
+
+.dark .hexagram-enname {
+  color: #a0aec0;
+}
+
+.dark .hexagram-desc {
+  color: #cbd5e0;
+}
+
+.dark .hexagram-composition {
+  color: #a0aec0;
+  background: #4a5568;
+}
+
 .trigram-explanation {
   background: #f8f9fa;
   padding: 20px;
@@ -160,6 +222,81 @@
 .trigram-explanation h4 {
   margin-bottom: 20px;
   color: #2c3e50;
+}
+
+/* 暗黑主题支持 */
+.dark .trigram-explanation {
+  background: #2d3748;
+}
+
+.dark .trigram-explanation h4 {
+  color: #e2e8f0;
+}
+
+/* 解读部分的暗黑主题样式 */
+.interpretation-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.interpretation-section h4 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.interpretation-content p {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.fortune {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.fortune.positive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.fortune.negative {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.fortune.neutral {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.dark .interpretation-section {
+  background: #2d3748;
+}
+
+.dark .interpretation-section h4 {
+  color: #e2e8f0;
+}
+
+.dark .interpretation-content p {
+  color: #cbd5e0;
+}
+
+.dark .fortune.positive {
+  background: #4a7a4a;
+  color: #c3e6c3;
+}
+
+.dark .fortune.negative {
+  background: #7a4a4a;
+  color: #e6c3c3;
+}
+
+.dark .fortune.neutral {
+  background: #7a7a4a;
+  color: #e6e6c3;
 }
 
 .trigrams-grid {
@@ -232,4 +369,19 @@
   font-size: 0.85rem;
   color: #7f8c8d;
   margin: 0 4px;
+}
+
+/* 暗黑主题支持 */
+.dark .trigram-item {
+  background: #2d3748;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dark .trigram-name {
+  color: #e2e8f0;
+}
+
+.dark .trigram-nature,
+.dark .trigram-attribute {
+  color: #a0aec0;
 }

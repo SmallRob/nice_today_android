@@ -36,6 +36,14 @@
   background: var(--text-accent);
   color: var(--bg-primary);
   border-color: var(--text-accent);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 0 0 2px var(--text-accent);
+  font-weight: 600;
+  transform: translateY(-2px);
+}
+
+/* 暗黑主题下选中状态的优化 */
+.dark .method-btn.active {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 0 2px var(--text-accent);
 }
 
 .method-btn.random {

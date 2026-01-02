@@ -20,6 +20,21 @@ function LifestyleGuideContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   
   const { theme, toggleTheme } = useTheme();
+  
+  // Ensure system theme is detected when the page loads
+  useEffect(() => {
+    // Check system preference for dark mode
+    const systemPrefersDark = window.matchMedia && 
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Only apply system theme if no user preference is saved
+    const savedTheme = localStorage.getItem('lifestyle-guide-theme');
+    if (!savedTheme && systemPrefersDark) {
+      // The theme context should already handle this, but we ensure it's applied
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(systemPrefersDark ? 'dark' : 'light');
+    }
+  }, []);
 
   // Check if onboarding should be shown
   useEffect(() => {
