@@ -385,6 +385,19 @@ const MoodCalendarPage = () => {
           ...existingMood,
           description: description || moodDescription
         };
+      } else if (currentSelectedMood) {
+        // 如果没有传入 mood 但有当前选中的心情类型，使用当前选中的心情
+        const selectedMood = getAllMoodEmojis().find(m => m.value === currentSelectedMood);
+        if (selectedMood) {
+          moodToSave = {
+            type: selectedMood.value,
+            emoji: selectedMood.emoji,
+            label: selectedMood.label,
+            description: description || moodDescription
+          };
+        } else {
+          return; // 无法找到对应的心情类型
+        }
       } else {
         // 没有表情也没有现有记录，无法保存
         return;
@@ -408,12 +421,31 @@ const MoodCalendarPage = () => {
     handleMoodSelect(mood, moodDescription);
   };
   
-  // 保存仅描述
-  const handleSaveDescriptionOnly = () => {
-    if (moodDescription.trim() !== '') {
-      handleMoodSelect(null, moodDescription);
+  // 保存当前选择的心情和描述
+  const handleSaveMoodAndDescription = () => {
+    if (moodDescription.trim() !== '' || currentSelectedMood) {
+      // 如果有选择的心情类型，则使用该类型
+      if (currentSelectedMood) {
+        const selectedMood = getAllMoodEmojis().find(m => m.value === currentSelectedMood);
+        if (selectedMood) {
+          handleMoodSelect({
+            type: selectedMood.value,
+            emoji: selectedMood.emoji,
+            label: selectedMood.label
+          }, moodDescription);
+        } else {
+          // 如果找不到对应的心情，尝试使用现有的
+          const existingMood = moodStorage.getMoodForDate(selectedMoodDate);
+          if (existingMood) {
+            handleMoodSelect(existingMood, moodDescription);
+          }
+        }
+      } else {
+        // 如果没有选择心情类型但有描述，只更新描述
+        handleMoodSelect(null, moodDescription);
+      }
     } else {
-      // 如果描述为空，直接关闭
+      // 如果描述为空且没有选择心情，直接关闭
       setShowMoodSelector(false);
       setSelectedMoodDate(null);
       setCurrentSelectedMood(null); // 清空当前选择的状态
@@ -583,11 +615,8 @@ const MoodCalendarPage = () => {
                   key={mood.value}
                   onClick={() => {
                     setCurrentSelectedMood(mood.value); // Update the selected mood state
-                    handleMoodWithDescription({
-                      type: mood.value,
-                      emoji: mood.emoji,
-                      label: mood.label
-                    });
+                    // Don't save immediately, just set the selected mood
+                    // User can add description and click save button
                   }}
                   className={`p-2 rounded-lg border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-colors flex flex-col items-center ${
                     currentSelectedMood === mood.value || (selectedMoodDate && !currentSelectedMood && moodStorage.getMoodForDate(selectedMoodDate)?.type === mood.value)
@@ -609,7 +638,7 @@ const MoodCalendarPage = () => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     if (moodDescription.trim() !== '') {
-                      handleSaveDescriptionOnly();
+                      handleSaveMoodAndDescription();
                     }
                   }
                 }}
@@ -625,15 +654,15 @@ const MoodCalendarPage = () => {
                   取消
                 </button>
                 <button
-                  onClick={handleSaveDescriptionOnly}
-                  disabled={!moodDescription.trim()}
+                  onClick={handleSaveMoodAndDescription}
+                  disabled={!moodDescription.trim() && !currentSelectedMood}
                   className={`px-3 py-1 text-sm rounded transition-colors ${
-                    moodDescription.trim() 
+                    moodDescription.trim() || currentSelectedMood
                       ? 'bg-blue-500 text-white hover:bg-blue-600' 
                       : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  保存
+                  保存心情
                 </button>
               </div>
             </div>

@@ -123,20 +123,22 @@ const MergedBannerCard = () => {
 
   return (
     <div className="merged-banner-card">
-      {/* 五行装饰背景 */}
-      <div className="wuxing-bg"></div>
+      {/* 星辰装饰背景 */}
+      <div className="stars-bg"></div>
 
-      {/* 五行装饰符号 */}
-      <div className="wuxing-symbol wuxing-symbol-1">木</div>
-      <div className="wuxing-symbol wuxing-symbol-2">火</div>
-      <div className="wuxing-symbol wuxing-symbol-3">土</div>
-      <div className="wuxing-symbol wuxing-symbol-4">金</div>
-      <div className="wuxing-symbol wuxing-symbol-5">水</div>
+      {/* 星辰装饰 */}
+      <div className="star star-1">★</div>
+      <div className="star star-2">★</div>
+      <div className="star star-3">★</div>
+      <div className="star star-4">★</div>
+      <div className="star star-5">★</div>
+      <div className="star star-6">★</div>
+      <div className="star star-7">★</div>
 
-      {/* 五行装饰圆圈 */}
-      <div className="wuxing-circle wuxing-circle-1"></div>
-      <div className="wuxing-circle wuxing-circle-2"></div>
-      <div className="wuxing-circle wuxing-circle-3"></div>
+      {/* 流星装饰 */}
+      <div className="shooting-star shooting-star-1"></div>
+      <div className="shooting-star shooting-star-2"></div>
+      <div className="shooting-star shooting-star-3"></div>
 
       {/* 左侧：应用图标和名称 + 日期信息 */}
       <div className="banner-left">

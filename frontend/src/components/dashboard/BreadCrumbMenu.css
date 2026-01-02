@@ -32,6 +32,49 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 响应式调整 - 确保移动端和平板显示一致 */
+@media (max-width: 768px) {
+    .breadcrumb-trigger-btn.pill-style {
+        min-width: 85px;
+        height: 28px;
+        padding: 0 10px;
+    }
+    
+    .trigger-text {
+        font-size: 10px;
+    }
+    
+    .trigger-icon {
+        width: 12px;
+        height: 8px;
+    }
+    
+    .trigger-icon span {
+        height: 1.2px;
+    }
+}
+
+@media (max-width: 576px) {
+    .breadcrumb-trigger-btn.pill-style {
+        min-width: 80px;
+        height: 26px;
+        padding: 0 8px;
+    }
+    
+    .trigger-text {
+        font-size: 9px;
+    }
+    
+    .trigger-icon {
+        width: 10px;
+        height: 6px;
+    }
+    
+    .trigger-icon span {
+        height: 1px;
+    }
+}
+
 .breadcrumb-trigger-btn.pill-style:hover {
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-1px);

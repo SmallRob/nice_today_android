@@ -15,14 +15,14 @@ const AppBanner = () => {
   };
 
   return (
-    <div className="app-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0 safe-area-top" style={{
+    <div className="app-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-[#806d9e] via-[#8a7aa8] to-[#9488b2] flex-shrink-0 safe-area-top" style={{
       paddingTop: 'env(safe-area-inset-top, 0px)',
       transform: 'translateZ(0)',
       WebkitTransform: 'translateZ(0)',
       willChange: 'transform'
     }}>
       {/* 背景渐变装饰 */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#806d9e]/30 via-[#8a7aa8]/30 to-[#9488b2]/30" />
 
       {/* 装饰性SVG */}
       <svg
@@ -70,18 +70,18 @@ const AppBanner = () => {
           </div>
 
           {/* 用户信息展示区 - 带阳光洒下光照特效 */}
-          <div className="hidden md:flex items-center ml-4 mr-16 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 relative overflow-hidden">
+          <div className="hidden md:flex items-center ml-4 mr-16 px-4 py-2 rounded-full bg-[#806d9e]/20 backdrop-blur-sm border border-[#806d9e]/40 relative overflow-hidden">
             {/* 阳光洒下光照特效 */}
             <div className="absolute inset-0 animate-sunlight-shower"></div>
             
             {/* 用户信息内容 */}
             <div className="flex items-center space-x-2 relative z-10">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#9e8dbf] to-[#b4a6d3] flex items-center justify-center text-white font-bold text-sm">
                 U
               </div>
               <div className="text-left">
                 <p className="text-sm font-semibold text-white truncate max-w-[100px]">用户昵称</p>
-                <p className="text-xs text-yellow-200 hidden sm:block">今天运势不错</p>
+                <p className="text-xs text-[#d4cae8] hidden sm:block">今天运势不错</p>
               </div>
             </div>
           </div>

@@ -67,7 +67,7 @@
 
 .animate-sunlight-shower {
   animation: sunlight-shower 6s ease-in-out infinite;
-  background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 200, 0.4) 50%, transparent 60%);
+  background: linear-gradient(120deg, transparent 40%, rgba(200, 180, 230, 0.4) 50%, transparent 60%);
   background-size: 300px 100%;
   background-repeat: no-repeat;
 }

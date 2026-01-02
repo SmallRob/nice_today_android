@@ -10,15 +10,14 @@ const ENTERTAINMENT_FEATURES = [
     { id: 'daily-card', icon: '🃏', name: '每日抽卡', route: '/daily-cards', category: 'main' },
     { id: 'cultural-cup', icon: '🏵️', name: '文化抽签', route: '/cultural-cup', category: 'main' },
     { id: 'fishing', icon: '🎣', name: '垂钓游戏', route: '/fishing-game', category: 'main' },
-    { id: 'profile', icon: '👤', name: '用户配置', route: '/user-config', category: 'main' },
 ];
 
 const COMMON_FEATURES = [
     { id: 'finance', icon: '💰', name: '财务管理', route: '/finance' },
     { id: 'todo', icon: '📝', name: '日程清单', route: '/todo-list' },
-     { id: 'mood-calendar', icon: '😊', name: '心情日历', route: '/mood-calendar' },
+    { id: 'mood-calendar', icon: '😊', name: '心情日历', route: '/mood-calendar' },
+    { id: 'habit-tracker', icon: '🎯', name: '习惯追踪', route: '/habit-tracker' },
     { id: 'dress', icon: '👕', name: '穿衣指南', route: '/dress' },
-    { id: 'bazi', icon: '☯️', name: '八字命理', route: '/bazi-analysis' },
     { id: 'horoscope', icon: '📅', name: '星座运势', route: '/horoscope' }
 ];
 
@@ -128,6 +127,13 @@ const BreadCrumbMenu = () => {
                         <span>系统设置</span>
                     </div>
                     <ul className="menu-list">
+                        <li className="menu-item">
+                            <button onClick={() => handleNavigate('/user-config')}>
+                                <div className="item-icon-box">👤</div>
+                                <span className="item-name">用户配置</span>
+                                {isActive('/user-config') && <div className="active-dot"></div>}
+                            </button>
+                        </li>
                         <li className="menu-item">
                             <button onClick={() => handleNavigate('/settings')}>
                                 <div className="item-icon-box">⚙️</div>

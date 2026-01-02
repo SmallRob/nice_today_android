@@ -29,7 +29,8 @@ import {
   LiuyaoCard,
   PlumBlossomCard,
   HuangliCard,
-  MoodCalendarCard
+  MoodCalendarCard,
+  HabitTrackerCard
 } from '../components/dashboard/FeatureCards.js';
 import FeatureDragPanel from '../components/dashboard/FeatureDragPanel.js';
 import {
@@ -43,13 +44,13 @@ import {
 const ALL_FEATURES = [
   { component: TodoCard, name: 'TodoCard', category: '日常管理类', type: 'daily' },
   { component: FinanceCard, name: 'FinanceCard', category: '日常管理类', type: 'daily' },
+  { component: HabitTrackerCard, name: 'HabitTrackerCard', category: '日常管理类', type: 'daily' },
   { component: FengShuiCompassCard, name: 'FengShuiCompassCard', category: '日常管理类', type: 'tool' },
   { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类', type: 'fortune' },
   { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类', type: 'fortune' },
   { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类', type: 'fortune' },
-  { component: BaziFateCard, name: 'BaziFateCard', category: '运势分析类', type: 'fortune' },
-  { component: BaziCard, name: 'BaziCard', category: '运势分析类', type: 'fortune' },
   { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类', type: 'fortune' },
+  { component: BaziCard, name: 'BaziCard', category: '运势分析类', type: 'fortune' },
   { component: MBTICard, name: 'MBTICard', category: '个人成长类', type: 'growth' },
   { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类', type: 'growth' },
   { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类', type: 'growth' },

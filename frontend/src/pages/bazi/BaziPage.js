@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserConfig } from '../../contexts/UserConfigContext';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { normalizeBirthInfo } from '../../utils/baziDataManager';
 import { calculateLiuNianDaYun, getMonthlyBaziFortune, getDailyBaziFortune, getYearlyBaziFortune, calculateDailyEnergy } from '../../utils/baziHelper';
 import BaziCalculator from '../../utils/baziCalculator';
@@ -17,6 +17,7 @@ const BaziPage = () => {
   const { theme } = useTheme();
   const { currentConfig } = useUserConfig();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // 状态管理
   const [loading, setLoading] = useState(true);
@@ -345,28 +346,40 @@ const BaziPage = () => {
   }
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* 头部 */}
       <div className={`px-4 pt-6 pb-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <div className="text-center mb-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="text-2xl">☯️</span>
-            <h1 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              八字运势
-            </h1>
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-center flex-1">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-2xl">☯️</span>
+              <h1 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                八字运势
+              </h1>
+            </div>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              八字月运分析 · 每日能量预测
+            </p>
           </div>
-          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-            八字月运分析 · 每日能量预测
-          </p>
+          <div className="ml-4">
+            <button 
+              onClick={() => navigate('/bazi/analysis')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${theme === 'dark' 
+                ? 'bg-purple-700 text-white hover:bg-purple-600' 
+                : 'bg-purple-600 text-white hover:bg-purple-700'}`}
+            >
+              命格分析
+            </button>
+          </div>
         </div>
       </div>
 
       {/* 视图切换 */}
       <div className={`px-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <div className="flex overflow-x-auto space-x-4 py-3">
+        <div className="flex justify-center space-x-2 md:space-x-4 py-3">
           <button
             onClick={() => handleViewModeChange('monthly')}
-            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'monthly'
+            className={`flex-1 min-w-[70px] max-w-[120px] px-4 py-2 rounded-full font-medium transition-all text-sm ${viewMode === 'monthly'
                 ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
                 : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
                 }`}
@@ -375,7 +388,7 @@ const BaziPage = () => {
           </button>
           <button
             onClick={() => handleViewModeChange('weekly')}
-            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'weekly'
+            className={`flex-1 min-w-[70px] max-w-[120px] px-4 py-2 rounded-full font-medium transition-all text-sm ${viewMode === 'weekly'
                 ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
                 : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
                 }`}
@@ -384,7 +397,7 @@ const BaziPage = () => {
           </button>
           <button
             onClick={() => handleViewModeChange('yearly')}
-            className={`flex-shrink-0 px-6 py-2 rounded-full font-medium transition-all ${viewMode === 'yearly'
+            className={`flex-1 min-w-[70px] max-w-[120px] px-4 py-2 rounded-full font-medium transition-all text-sm ${viewMode === 'yearly'
                 ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
                 : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
                 }`}
@@ -395,7 +408,7 @@ const BaziPage = () => {
       </div>
 
       {/* 主内容区 */}
-      <div className="px-4 py-6 max-w-4xl mx-auto">
+      <div className="px-4 py-6 max-w-4xl mx-auto flex-1 overflow-y-auto">
         {/* 错误提示 */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
@@ -628,17 +641,17 @@ const BaziPage = () => {
               流年运势趋势
             </h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs sm:text-sm">
                 <thead>
                   <tr className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className={`py-3 px-2 text-left ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>年份</th>
-                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>总运势</th>
-                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>爱情</th>
-                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>事业</th>
-                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>学习</th>
-                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>健康</th>
-                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>财运</th>
-                    <th className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>人际</th>
+                    <th className={`py-2 px-1 sm:py-3 sm:px-2 text-left ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>年份</th>
+                    <th className={`py-2 px-1 sm:py-3 sm:px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>总运势</th>
+                    <th className={`py-2 px-1 sm:py-3 sm:px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>爱情</th>
+                    <th className={`py-2 px-1 sm:py-3 sm:px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>事业</th>
+                    <th className={`py-2 px-1 sm:py-3 sm:px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>学习</th>
+                    <th className={`py-2 px-1 sm:py-3 sm:px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>健康</th>
+                    <th className={`py-2 px-1 sm:py-3 sm:px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>财运</th>
+                    <th className={`py-2 px-1 sm:py-3 sm:px-2 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>人际</th>
                   </tr>
                 </thead>
                 <tbody>

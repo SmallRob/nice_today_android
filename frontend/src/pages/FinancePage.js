@@ -50,6 +50,9 @@ const FinancePage = () => {
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [tempIncome, setTempIncome] = useState('');
 
+  // 添加支出弹窗
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+
   // 首次使用引导
   const [showWelcomeModal, setShowWelcomeModal] = useState(() => {
     return !localStorage.getItem('financeOnboarded');
@@ -133,7 +136,7 @@ const FinancePage = () => {
 
   // 添加支出
   const addExpense = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!newExpense.amount || parseFloat(newExpense.amount) <= 0) return;
 
     const expense = {
@@ -154,6 +157,7 @@ const FinancePage = () => {
       description: '',
       date: new Date().toISOString().split('T')[0]
     });
+    setShowExpenseModal(false);
   };
 
   // 删除支出
@@ -218,15 +222,15 @@ const FinancePage = () => {
 
     return (
       <div className="daily-balance-chart-container">
-        <h3>本月余额变化（斩杀线）</h3>
+        <h3 className="text-lg md:text-xl font-bold">本月余额变化（斩杀线）</h3>
         <div className="chart-legend">
           <div className="legend-item">
             <div className="legend-color line-chart-danger-line"></div>
-            <span className="legend-text">警示线 ¥3,000</span>
+            <span className="legend-text text-xs md:text-sm">警示线 ¥3,000</span>
           </div>
           <div className="legend-item">
             <div className="legend-color line-chart-remaining-line"></div>
-            <span className="legend-text">余额</span>
+            <span className="legend-text text-xs md:text-sm">余额</span>
           </div>
         </div>
         {dailyData.length > 0 ? (
@@ -305,20 +309,32 @@ const FinancePage = () => {
       const canvas = chartRef.current;
       const dpr = window.devicePixelRatio || 1;
 
-      // 设置Canvas尺寸
-      const width = canvas.offsetWidth * dpr;
+      // 设置Canvas尺寸 - 自适应宽度
+      const width = Math.max(canvas.offsetWidth * dpr, 300 * dpr); // 最小宽度300px
       const height = canvas.offsetHeight * dpr;
       canvas.width = width;
       canvas.height = height;
-      canvas.style.width = width / dpr + 'px';
+      canvas.style.width = '100%';
       canvas.style.height = height / dpr + 'px';
 
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
 
-      const padding = viewMode === 'monthly' ? 30 : 40;
-      const chartWidth = width - padding * 2;
-      const chartHeight = height - padding * 2;
+      // 自适应内边距，确保坐标轴可见
+      const padding = viewMode === 'monthly' ? {
+        left: 40,
+        right: 20,
+        top: 20,
+        bottom: 40  // 增加底部内边距确保日期标签可见
+      } : {
+        left: 40,
+        right: 20,
+        top: 20,
+        bottom: 40
+      };
+      
+      const chartWidth = width / dpr - padding.left - padding.right;
+      const chartHeight = height / dpr - padding.top - padding.bottom;
       const income = monthlyIncome > 0 ? monthlyIncome : 10000;
 
       if (viewMode === 'monthly') {
@@ -332,39 +348,71 @@ const FinancePage = () => {
           // 计算斩杀线位置
           const warningLineY = chartHeight - ((3000 / maxRemaining) * chartHeight);
 
-          // 绘制斩杀线
+          // 绘制斩杀线 - 确保完全横跨图表
           ctx.beginPath();
           ctx.strokeStyle = isDarkTheme() ? '#ef4444' : '#ef4444';
           ctx.lineWidth = 2;
           ctx.setLineDash([5, 5]);
-          ctx.moveTo(padding, warningLineY);
-          ctx.lineTo(chartWidth - padding, warningLineY);
+          ctx.moveTo(padding.left, padding.top + warningLineY);
+          ctx.lineTo(padding.left + chartWidth, padding.top + warningLineY);
           ctx.stroke();
           ctx.setLineDash([]);
 
-          // 绘制余额曲线
+          // 添加斩杀线标签
+          ctx.fillStyle = isDarkTheme() ? '#ef4444' : '#ef4444';
+          ctx.font = `10px sans-serif`;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('斩杀线 ¥3,000', padding.left + 5, padding.top + warningLineY - 10);
+
+          // 绘制余额曲线 - 使用贝塞尔曲线增加随机曲度
           ctx.beginPath();
           ctx.strokeStyle = isDarkTheme() ? '#10b981' : '#10b981';
           ctx.lineWidth = 2.5;
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
 
-          dailyData.forEach((day, index) => {
-            const x = padding + (index / (dailyData.length - 1)) * chartWidth;
-            const y = chartHeight - (day.remaining / maxRemaining) * chartHeight;
+          if (dailyData.length > 1) {
+            // 生成控制点，增加曲线自然度
+            const points = dailyData.map((day, index) => {
+              const x = padding.left + (index / (dailyData.length - 1)) * chartWidth;
+              const y = padding.top + chartHeight - (day.remaining / maxRemaining) * chartHeight;
+              return { x, y };
+            });
 
-            if (index === 0) {
-              ctx.moveTo(x, y);
-            } else {
-              ctx.lineTo(x, y);
+            // 使用贝塞尔曲线绘制更自然的曲线
+            ctx.moveTo(points[0].x, points[0].y);
+
+            for (let i = 0; i < points.length - 1; i++) {
+              const current = points[i];
+              const next = points[i + 1];
+              
+              // 计算控制点（增加随机曲度）
+              const controlX = (current.x + next.x) / 2;
+              const controlY = (current.y + next.y) / 2;
+              
+              // 添加随机曲度因子（±5像素）
+              const randomCurve = (Math.random() - 0.5) * 10;
+              const adjustedControlY = controlY + randomCurve;
+              
+              // 使用二次贝塞尔曲线
+              ctx.quadraticCurveTo(controlX, adjustedControlY, next.x, next.y);
             }
-          });
+          } else {
+            // 只有一个数据点时直接绘制点
+            const day = dailyData[0];
+            const x = padding.left;
+            const y = padding.top + chartHeight - (day.remaining / maxRemaining) * chartHeight;
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + 1, y);
+          }
+          
           ctx.stroke();
 
           // 绘制数据点
           dailyData.forEach((day, index) => {
-            const x = padding + (index / (dailyData.length - 1)) * chartWidth;
-            const y = chartHeight - (day.remaining / maxRemaining) * chartHeight;
+            const x = padding.left + (index / (dailyData.length - 1)) * chartWidth;
+            const y = padding.top + chartHeight - (day.remaining / maxRemaining) * chartHeight;
 
             ctx.beginPath();
             ctx.arc(x, y, 4, 0, Math.PI * 2, false);
@@ -374,17 +422,45 @@ const FinancePage = () => {
             ctx.strokeStyle = isDarkTheme() ? '#ffffff' : '#ffffff';
             ctx.lineWidth = 2;
             ctx.stroke();
+
+            // 在数据点上方显示余额值
+            if (index === 0 || index === dailyData.length - 1 || day.remaining < 3000) {
+              ctx.fillStyle = isDarkTheme() ? '#d1d5db' : '#374151';
+              ctx.font = `9px sans-serif`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+              ctx.fillText(`¥${day.remaining.toFixed(0)}`, x, y - 10);
+            }
           });
 
-          // 绘制日期标签（每隔几天显示一个）
+          // 绘制日期标签（每隔几天显示一个，确保可见）
           ctx.fillStyle = isDarkTheme() ? '#6b7280' : '#374151';
-          ctx.font = `${10 * dpr}px sans-serif`;
+          ctx.font = `10px sans-serif`;
           ctx.textAlign = 'center';
-          const labelInterval = Math.ceil(dailyData.length / 5);
+          ctx.textBaseline = 'top';
+          
+          const labelInterval = Math.max(Math.ceil(dailyData.length / 6), 1); // 最多显示6个标签
           dailyData.forEach((day, index) => {
             if (index % labelInterval === 0 || index === dailyData.length - 1) {
-              const x = padding + (index / (dailyData.length - 1)) * chartWidth;
-              ctx.fillText(`${day.day}日`, x, chartHeight + 15);
+              const x = padding.left + (index / (dailyData.length - 1)) * chartWidth;
+              ctx.fillText(`${day.day}日`, x, padding.top + chartHeight + 5);
+            }
+          });
+
+          // 绘制Y轴数值标签
+          ctx.fillStyle = isDarkTheme() ? '#6b7280' : '#374151';
+          ctx.font = `9px sans-serif`;
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'middle';
+          
+          // 显示几个关键数值
+          const yValues = [maxRemaining, maxRemaining * 0.5, 3000];
+          yValues.forEach((value, idx) => {
+            if (value > 0) {
+              const y = padding.top + chartHeight - (value / maxRemaining) * chartHeight;
+              if (y >= padding.top && y <= padding.top + chartHeight) {
+                ctx.fillText(`¥${value.toFixed(0)}`, padding.left - 5, y);
+              }
             }
           });
         }
@@ -405,18 +481,27 @@ const FinancePage = () => {
         // 计算斩杀线位置
         const warningLineY = chartHeight - ((3000 / income) * chartHeight);
 
-        // 绘制斩杀线
+        // 绘制斩杀线 - 确保完全横跨图表
         ctx.beginPath();
         ctx.strokeStyle = isDarkTheme() ? '#ef4444' : '#ef4444';
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]);
-        ctx.moveTo(padding, warningLineY);
-        ctx.lineTo(chartWidth - padding, warningLineY);
+        ctx.moveTo(padding.left, padding.top + warningLineY);
+        ctx.lineTo(padding.left + chartWidth, padding.top + warningLineY);
         ctx.stroke();
         ctx.setLineDash([]);
 
+        // 添加斩杀线标签
+        ctx.fillStyle = isDarkTheme() ? '#ef4444' : '#ef4444';
+        ctx.font = `10px sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('斩杀线 ¥3,000', padding.left + 5, padding.top + warningLineY - 10);
+
         // 绘制余额曲线
         if (dataPoints.length > 0) {
+          const maxYValue = Math.max(...dataPoints.map(d => d.y), income);
+          
           ctx.beginPath();
           ctx.strokeStyle = isDarkTheme() ? '#10b981' : '#10b981';
           ctx.lineWidth = 2;
@@ -424,8 +509,8 @@ const FinancePage = () => {
           ctx.lineJoin = 'round';
 
           dataPoints.forEach((point, index) => {
-            const x = padding + (index / (dataPoints.length - 1)) * chartWidth;
-            const y = chartHeight - (point.y / Math.max(...dataPoints.map(d => d.y), 1)) * chartHeight;
+            const x = padding.left + (index / (dataPoints.length - 1)) * chartWidth;
+            const y = padding.top + chartHeight - (point.y / maxYValue) * chartHeight;
 
             if (index === 0) {
               ctx.moveTo(x, y);
@@ -437,8 +522,8 @@ const FinancePage = () => {
 
           // 绘制数据点
           dataPoints.forEach((point, index) => {
-            const x = padding + (index / (dataPoints.length - 1)) * chartWidth;
-            const y = chartHeight - (point.y / Math.max(...dataPoints.map(d => d.y), 1)) * chartHeight;
+            const x = padding.left + (index / (dataPoints.length - 1)) * chartWidth;
+            const y = padding.top + chartHeight - (point.y / maxYValue) * chartHeight;
 
             ctx.beginPath();
             ctx.arc(x, y, 4, 0, Math.PI * 2, false);
@@ -448,16 +533,42 @@ const FinancePage = () => {
             ctx.strokeStyle = isDarkTheme() ? '#ffffff' : '#ffffff';
             ctx.lineWidth = 2;
             ctx.stroke();
+
+            // 在数据点上方显示余额值
+            if (index === 0 || index === dataPoints.length - 1 || point.y < 3000) {
+              ctx.fillStyle = isDarkTheme() ? '#d1d5db' : '#374151';
+              ctx.font = `9px sans-serif`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+              ctx.fillText(`¥${point.y.toFixed(0)}`, x, y - 10);
+            }
           });
 
-          // 绘制标签
+          // 绘制月份标签
           ctx.fillStyle = isDarkTheme() ? '#6b7280' : '#374151';
-          ctx.font = `${12 * dpr}px sans-serif`;
+          ctx.font = `10px sans-serif`;
           ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
           labels.forEach((label, index) => {
-            const x = padding + (index / (labels.length - 1)) * chartWidth;
-            ctx.textBaseline = 'middle';
-            ctx.fillText(label, x, chartHeight + 10);
+            const x = padding.left + (index / (labels.length - 1)) * chartWidth;
+            ctx.fillText(label, x, padding.top + chartHeight + 5);
+          });
+
+          // 绘制Y轴数值标签
+          ctx.fillStyle = isDarkTheme() ? '#6b7280' : '#374151';
+          ctx.font = `9px sans-serif`;
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'middle';
+          
+          // 显示几个关键数值
+          const yValues = [maxYValue, maxYValue * 0.5, 3000];
+          yValues.forEach((value, idx) => {
+            if (value > 0) {
+              const y = padding.top + chartHeight - (value / maxYValue) * chartHeight;
+              if (y >= padding.top && y <= padding.top + chartHeight) {
+                ctx.fillText(`¥${value.toFixed(0)}`, padding.left - 5, y);
+              }
+            }
           });
         }
       }
@@ -482,28 +593,36 @@ const FinancePage = () => {
     return (
       <div className="year-chart-container">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {Object.keys(yearlyData).sort().map((year) => {
-            const yearDataItem = yearlyData[year];
-            const remaining = monthlyIncome * 12 - yearDataItem.total;
-            const isBelowWarningLine = remaining < 3000;
+          {Object.keys(yearlyData).length > 0 ? (
+            Object.keys(yearlyData).sort().map((year) => {
+              const yearDataItem = yearlyData[year];
+              const remaining = monthlyIncome * 12 - yearDataItem.total;
+              const isBelowWarningLine = remaining < 3000;
 
-            return (
-              <div key={year} className="year-stat-card">
-                <div className="year-stat-year text-base font-semibold text-gray-800 dark:text-gray-100">
-                  {year}
-                </div>
-                <div className="year-stat-values flex items-center justify-between gap-2">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <div>总支出</div>
-                    <div className="year-stat-amount font-bold text-lg">{yearDataItem.total.toFixed(2)}</div>
+              return (
+                <div key={year} className="year-stat-card flex flex-col items-center justify-center text-center">
+                  <div className="year-stat-year font-semibold text-gray-800 dark:text-gray-100">
+                    {year}
                   </div>
-                  <div className={`text-sm px-2 py-1 rounded-full ${isBelowWarningLine ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
-                    {isBelowWarningLine ? '⚠️' : ''} 余额: {remaining.toFixed(2)}
+                  <div className="year-stat-values flex flex-col items-center gap-2 mt-2">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                      <div className="font-medium">总支出</div>
+                      <div className="year-stat-amount font-bold text-lg mt-1">{yearDataItem.total.toFixed(2)}</div>
+                    </div>
+                    <div className={`text-sm px-3 py-1.5 rounded-full mt-1 ${isBelowWarningLine ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
+                      <span className="flex items-center justify-center gap-1">
+                        {isBelowWarningLine ? '⚠️' : ''} 余额: {remaining.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+              <p>暂无年度数据，添加支出记录后将显示年度统计</p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -516,7 +635,7 @@ const FinancePage = () => {
   const temporaryTotal = getTemporaryExpenses().reduce((sum, e) => sum + e.amount, 0);
 
   return (
-    <div className={`finance-page min-h-screen pb-32 px-4 md:px-6 ${isDarkTheme() ? 'dark' : ''}`}>
+    <div className={`finance-page min-h-screen pb-[120px] px-4 md:px-6 ${isDarkTheme() ? 'dark' : ''}`}>
       {/* 新用户引导弹窗 */}
       {showWelcomeModal && (
         <div className="welcome-modal-overlay" onClick={() => {
@@ -736,86 +855,119 @@ const FinancePage = () => {
         </div>
       </div>
 
-      {/* 添加支出表单 */}
-      <div className="add-expense-card">
-        <h3>添加支出</h3>
-        <form onSubmit={addExpense}>
-          <div className="expense-type-selector">
-            <button
-              type="button"
-              className={`type-btn ${newExpense.type === 'fixed' ? 'active' : ''}`}
-              onClick={() => setNewExpense({
-                ...newExpense,
-                type: 'fixed',
-                category: '房贷'
-              })}
-            >
-              固定支出
-            </button>
-            <button
-              type="button"
-              className={`type-btn ${newExpense.type === 'temporary' ? 'active' : ''}`}
-              onClick={() => setNewExpense({
-                ...newExpense,
-                type: 'temporary',
-                category: '餐饮'
-              })}
-            >
-              临时消费
-            </button>
-          </div>
+      {/* 添加支出弹窗 */}
+      {showExpenseModal && (
+        <div className="expense-modal-overlay" onClick={() => setShowExpenseModal(false)}>
+          <div className="expense-modal" onClick={e => e.stopPropagation()}>
+            <div className="expense-modal-header">
+              <h3>添加支出</h3>
+              <button 
+                className="expense-modal-close"
+                onClick={() => setShowExpenseModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <form className="expense-modal-form" onSubmit={addExpense}>
+              <div className="expense-type-selector">
+                <button
+                  type="button"
+                  className={`type-btn ${newExpense.type === 'fixed' ? 'active' : ''}`}
+                  onClick={() => setNewExpense({
+                    ...newExpense,
+                    type: 'fixed',
+                    category: '房贷'
+                  })}
+                >
+                  固定支出
+                </button>
+                <button
+                  type="button"
+                  className={`type-btn ${newExpense.type === 'temporary' ? 'active' : ''}`}
+                  onClick={() => setNewExpense({
+                    ...newExpense,
+                    type: 'temporary',
+                    category: '餐饮'
+                  })}
+                >
+                  临时消费
+                </button>
+              </div>
 
-          <div className="form-row">
-            <select
-              className="form-select"
-              value={newExpense.category}
-              onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })}
-            >
-              {newExpense.type === 'fixed' ? (
-                fixedCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))
-              ) : (
-                temporaryCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))
-              )}
-            </select>
-          </div>
+              <select
+                className="expense-form-select"
+                value={newExpense.category}
+                onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })}
+              >
+                {newExpense.type === 'fixed' ? (
+                  fixedCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))
+                ) : (
+                  temporaryCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))
+                )}
+              </select>
 
-          <div className="form-row">
-            <input
-              type="number"
-              className="form-input amount-input"
-              placeholder="金额"
-              value={newExpense.amount}
-              onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-              step="0.01"
-              min="0"
-            />
-            <input
-              type="date"
-              className="form-input date-input"
-              value={newExpense.date}
-              onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
-            />
-          </div>
+              <div className="expense-form-row">
+                <input
+                  type="number"
+                  className="expense-form-input expense-amount-input"
+                  placeholder="金额"
+                  value={newExpense.amount}
+                  onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                  step="0.01"
+                  min="0"
+                  required
+                />
+                <input
+                  type="date"
+                  className="expense-form-input expense-date-input"
+                  value={newExpense.date}
+                  onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
+                  required
+                />
+              </div>
 
-          <div className="form-row">
-            <input
-              type="text"
-              className="form-input"
-              placeholder="备注说明（可选）"
-              value={newExpense.description}
-              onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-            />
-          </div>
+              <input
+                type="text"
+                className="expense-form-input"
+                placeholder="备注说明（可选）"
+                value={newExpense.description}
+                onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+              />
 
-          <button type="submit" className="submit-btn">
-            + 添加支出
-          </button>
-        </form>
-      </div>
+              <div className="expense-modal-actions">
+                <button 
+                  type="button" 
+                  className="expense-modal-cancel"
+                  onClick={() => setShowExpenseModal(false)}
+                >
+                  取消
+                </button>
+                <button 
+                  type="submit" 
+                  className="expense-modal-submit"
+                >
+                  添加支出
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 添加支出悬浮按钮 */}
+      <button 
+        className="add-expense-fab"
+        onClick={() => setShowExpenseModal(true)}
+        title="添加支出"
+      >
+        <span className="fab-icon">+</span>
+        <span className="fab-text">添加</span>
+      </button>
 
       {/* 支出记录列表 */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">

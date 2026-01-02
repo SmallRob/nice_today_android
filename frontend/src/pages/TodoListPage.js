@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './TodoListPage.css';
+import './styles/TodoListPage.css';
 
 /**
  * 待办事项页面
@@ -23,6 +23,7 @@ const TodoListPage = () => {
   });
   const [filter, setFilter] = useState('all');
   const [editingTodo, setEditingTodo] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // 从本地存储加载数据
   useEffect(() => {
@@ -53,6 +54,23 @@ const TodoListPage = () => {
     };
 
     setTodos([todo, ...todos]);
+    setNewTodo({
+      description: '',
+      category: '工作',
+      tags: '',
+      dueDate: ''
+    });
+    setShowAddModal(false); // 关闭弹窗
+  };
+
+  // 打开添加弹窗
+  const openAddModal = () => {
+    setShowAddModal(true);
+  };
+
+  // 关闭添加弹窗
+  const closeAddModal = () => {
+    setShowAddModal(false);
     setNewTodo({
       description: '',
       category: '工作',
@@ -136,53 +154,6 @@ const TodoListPage = () => {
         <h1 className="page-title">📋 待办事项</h1>
       </div>
 
-      {/* 添加待办事项表单 */}
-      <div className="todo-form-card">
-        <form onSubmit={addTodo}>
-          <input
-            type="text"
-            className="todo-input"
-            placeholder="输入待办事项..."
-            value={newTodo.description}
-            onChange={(e) => setNewTodo({ ...newTodo, description: e.target.value })}
-            maxLength={200}
-          />
-
-          <div className="todo-form-row">
-            <select
-              className="todo-select"
-              value={newTodo.category}
-              onChange={(e) => setNewTodo({ ...newTodo, category: e.target.value })}
-            >
-              <option value="工作">工作</option>
-              <option value="生活">生活</option>
-              <option value="学习">学习</option>
-              <option value="健康">健康</option>
-              <option value="其他">其他</option>
-            </select>
-
-            <input
-              type="date"
-              className="todo-date-input"
-              value={newTodo.dueDate}
-              onChange={(e) => setNewTodo({ ...newTodo, dueDate: e.target.value })}
-            />
-          </div>
-
-          <input
-            type="text"
-            className="todo-input"
-            placeholder="标签 (用逗号分隔，如：重要,紧急)"
-            value={newTodo.tags}
-            onChange={(e) => setNewTodo({ ...newTodo, tags: e.target.value })}
-          />
-
-          <button type="submit" className="todo-add-btn">
-            + 添加待办
-          </button>
-        </form>
-      </div>
-
       {/* 统计信息 */}
       <div className="todo-stats">
         <div className="stat-item">
@@ -213,6 +184,74 @@ const TodoListPage = () => {
                 {category}: {count}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* 添加待办按钮 */}
+      <button className="todo-add-fab" onClick={openAddModal}>
+        <span className="fab-icon">+</span>
+        <span className="fab-text">添加待办</span>
+      </button>
+
+      {/* 添加待办弹窗 */}
+      {showAddModal && (
+        <div className="modal-overlay" onClick={closeAddModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>添加待办事项</h3>
+              <button className="modal-close" onClick={closeAddModal}>×</button>
+            </div>
+            
+            <form onSubmit={addTodo}>
+              <input
+                type="text"
+                className="todo-input modal-input"
+                placeholder="输入待办事项..."
+                value={newTodo.description}
+                onChange={(e) => setNewTodo({ ...newTodo, description: e.target.value })}
+                maxLength={200}
+                autoFocus
+              />
+
+              <div className="todo-form-row">
+                <select
+                  className="todo-select modal-input"
+                  value={newTodo.category}
+                  onChange={(e) => setNewTodo({ ...newTodo, category: e.target.value })}
+                >
+                  <option value="工作">工作</option>
+                  <option value="生活">生活</option>
+                  <option value="学习">学习</option>
+                  <option value="健康">健康</option>
+                  <option value="其他">其他</option>
+                </select>
+
+                <input
+                  type="date"
+                  className="todo-date-input modal-input"
+                  value={newTodo.dueDate}
+                  onChange={(e) => setNewTodo({ ...newTodo, dueDate: e.target.value })}
+                />
+              </div>
+
+              <input
+                type="text"
+                className="todo-input modal-input"
+                placeholder="标签 (用逗号分隔，如：重要,紧急)"
+                value={newTodo.tags}
+                onChange={(e) => setNewTodo({ ...newTodo, tags: e.target.value })}
+              />
+
+              <div className="modal-actions">
+                <button type="button" className="modal-cancel-btn" onClick={closeAddModal}>
+                  取消
+                </button>
+                <button type="submit" className="modal-submit-btn">
+                  添加
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

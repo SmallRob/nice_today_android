@@ -211,6 +211,8 @@ const PlumBlossomPage = lazyLoadWithErrorHandling(() => import('./pages/PlumBlos
 const HuangliPage = lazyLoadWithErrorHandling(() => import('./pages/HuangliPage'));
 const MoodCalendarPage = lazyLoadWithErrorHandling(() => import('./pages/MoodCalendarPage'));
 const EnergyTreePage = lazyLoadWithErrorHandling(() => import('./pages/EnergyTreePage'));
+const HabitTrackerPage = lazyLoadWithErrorHandling(() => import('./pages/HabitTrackerPage'));
+const HabitStatsPage = lazyLoadWithErrorHandling(() => import('./pages/HabitStatsPage'));
 // const AncientCardGamePage = lazyLoadWithErrorHandling(() => import('./pages/AncientCardGamePage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
@@ -301,6 +303,8 @@ const AppLayout = () => {
             <Route path="/huangli" element={<HuangliPage />} />
             <Route path="/mood-calendar" element={<MoodCalendarPage />} />
             <Route path="/energy-tree" element={<EnergyTreePage />} />
+            <Route path="/habit-tracker" element={<HabitTrackerPage />} />
+            <Route path="/habit-stats" element={<HabitStatsPage />} />
             {/* <Route path="/ancient-card-game" element={<AncientCardGamePage />} /> */}
           </Routes>
         </SafeSuspense>

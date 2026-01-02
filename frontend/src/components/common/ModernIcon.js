@@ -23,6 +23,7 @@ import FengShuiCompassIcon from '../icons/FengShuiCompassIcon';
 import LiuyaoIcon from '../icons/LiuyaoIcon';
 import PlumBlossomIcon from '../icons/PlumBlossomIcon';
 import HuangliIcon from '../icons/HuangliIcon';
+import HabitTrackerIcon from '../icons/HabitTrackerIcon';
 
 /**
  * 图标映射表 - 稳定的React组件渲染
@@ -53,6 +54,7 @@ const iconMap = {
   'liuyao': LiuyaoIcon,
   'plum-blossom': PlumBlossomIcon,
   'huangli': HuangliIcon,
+  'habit-tracker': HabitTrackerIcon,
 
   // 默认图标（用于category）
   'daily': TodoIcon,

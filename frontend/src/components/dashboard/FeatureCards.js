@@ -418,6 +418,20 @@ const MoodCalendarCard = () => {
   );
 };
 
+/**
+ * 习惯打卡组件
+ */
+const HabitTrackerCard = () => {
+  return (
+    <FeatureCard
+      title="习惯打卡"
+      icon="habit-tracker"
+      category="daily"
+      route="/habit-tracker"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -445,5 +459,6 @@ export {
   PlumBlossomCard,
   AncientCardGameCard,
   HuangliCard,
-  MoodCalendarCard
+  MoodCalendarCard,
+  HabitTrackerCard
 };
