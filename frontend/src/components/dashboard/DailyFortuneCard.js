@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUserConfig } from '../../contexts/UserConfigContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useEnergy } from '../../contexts/EnergyContext';
 import LunarCalendar from '../../utils/lunarCalendar';
 import './DailyFortuneCard.css';
 
@@ -29,8 +31,10 @@ const generateDailyTaboo = (lunarDay) => {
 };
 
 const DailyFortuneCard = () => {
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const { currentConfig } = useUserConfig();
+  const { addDailyEnergyScore } = useEnergy();
   const [fortuneData, setFortuneData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userZodiac, setUserZodiac] = useState('羊');
@@ -94,6 +98,9 @@ const DailyFortuneCard = () => {
     const data = generateFortuneData();
     setFortuneData(data);
 
+    // 添加首页能量球的能量到能量树
+    addDailyEnergyScore(data.totalScore);
+
     // 计算农历数据
     const today = new Date();
     const lunarInfo = LunarCalendar.solarToLunar(
@@ -108,7 +115,7 @@ const DailyFortuneCard = () => {
     setDailyTaboo(taboo);
 
     setLoading(false);
-  }, [generateFortuneData]);
+  }, [generateFortuneData, addDailyEnergyScore]);
 
   // 能量球展示效果
   const WaterFlask = ({ score }) => {
@@ -334,7 +341,12 @@ const DailyFortuneCard = () => {
         </div>
 
         {/* 右侧：水罐能量 */}
-        <div className="fortune-right">
+        <div
+          className="fortune-right"
+          onClick={() => navigate('/energy-tree')}
+          style={{ cursor: 'pointer' }}
+          title="点击查看能量树"
+        >
           <WaterFlask
             score={fortuneData.totalScore}
           />

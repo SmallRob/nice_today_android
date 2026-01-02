@@ -1,0 +1,199 @@
+/* 能量历史记录样式 - 简化版 */
+.energy-history-section {
+  margin: 12px 16px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.dark .energy-history-section {
+  background: rgba(30, 41, 59, 0.95);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* 紧凑列表 */
+.history-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-compact-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* 昨天记录的特殊样式 */
+.history-compact-item:nth-child(2) {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  transform: scale(1.02);
+}
+
+.history-compact-item:nth-child(2):hover {
+  background: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+.history-compact-item:nth-child(2)::before {
+  content: "昨天";
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  background: #667eea;
+  color: white;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.dark .history-compact-item {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.history-compact-item:hover {
+  background: rgba(102, 126, 234, 0.08);
+  transform: translateX(2px);
+}
+
+/* 左侧：日期和进度条 */
+.history-compact-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.date-label-compact {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dark .date-label-compact {
+  color: #94a3b8;
+}
+
+.progress-bar-compact {
+  height: 6px;
+  border-radius: 3px;
+  flex: 1;
+  min-width: 0;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 4px rgba(102, 126, 234, 0.2);
+  position: relative;
+}
+
+/* 0能量时的特殊样式 */
+.progress-bar-compact[style*="width: 0%"] {
+  background: #ef4444 !important; /* 红色背景 */
+  width: 20px !important; /* 最小宽度 */
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+
+.progress-bar-compact[style*="width: 0%"]::after {
+  content: "0";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 右侧：能量值 */
+.history-compact-right {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.value-number-compact {
+  font-size: 15px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+/* 0能量数值的特殊样式 */
+.value-number-compact[data-value="0"] {
+  color: #ef4444 !important; /* 红色 */
+  text-shadow: 0 0 4px rgba(239, 68, 68, 0.3);
+  position: relative;
+}
+
+.value-number-compact[data-value="0"]::after {
+  content: "⚠️";
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  font-size: 8px;
+  opacity: 0.8;
+}
+
+.value-unit-compact {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.dark .value-unit-compact {
+  color: #6b7280;
+}
+
+/* 响应式 - 手机端优化 */
+@media (max-width: 480px) {
+  .energy-history-section {
+    margin: 10px 12px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .history-compact-list {
+    gap: 6px;
+  }
+
+  .history-compact-item {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .date-label-compact {
+    font-size: 11px;
+  }
+
+  .progress-bar-compact {
+    height: 5px;
+  }
+
+  .value-number-compact {
+    font-size: 14px;
+  }
+
+  .value-unit-compact {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .energy-history-section {
+    margin: 10px 14px;
+  }
+
+  .history-compact-item {
+    padding: 7px 11px;
+  }
+}

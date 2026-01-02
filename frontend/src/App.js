@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { UserConfigProvider } from './contexts/UserConfigContext';
+import { EnergyProvider } from './contexts/EnergyContext';
 import { useThemeColor } from './hooks/useThemeColor';
 import EnhancedErrorBoundary from './components/EnhancedErrorBoundary.js';
 import ErrorDisplayPanel from './components/ErrorDisplayPanel.js';
@@ -144,6 +145,7 @@ const LiuyaoPage = lazyLoadWithErrorHandling(() => import('./pages/SixYaoDivinat
 const PlumBlossomPage = lazyLoadWithErrorHandling(() => import('./pages/PlumBlossomDivination'));
 const HuangliPage = lazyLoadWithErrorHandling(() => import('./pages/HuangliPage'));
 const MoodCalendarPage = lazyLoadWithErrorHandling(() => import('./pages/MoodCalendarPage'));
+const EnergyTreePage = lazyLoadWithErrorHandling(() => import('./pages/EnergyTreePage'));
 // const AncientCardGamePage = lazyLoadWithErrorHandling(() => import('./pages/AncientCardGamePage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
@@ -233,6 +235,7 @@ const AppLayout = () => {
             <Route path="/plum-blossom" element={<PlumBlossomPage />} />
             <Route path="/huangli" element={<HuangliPage />} />
             <Route path="/mood-calendar" element={<MoodCalendarPage />} />
+            <Route path="/energy-tree" element={<EnergyTreePage />} />
             {/* <Route path="/ancient-card-game" element={<AncientCardGamePage />} /> */}
           </Routes>
         </SafeSuspense>
@@ -525,14 +528,16 @@ function App() {
 
         <ChunkLoadErrorBoundary maxRetries={3}>
           <EnhancedErrorBoundary componentName="App">
-            <ThemeProvider>
-              <UserConfigProvider>
-                <UserParamsProvider>
-                  <AppLayout />
-                  <ErrorDisplayPanel />
-                </UserParamsProvider>
-              </UserConfigProvider>
-            </ThemeProvider>
+            <EnergyProvider>
+              <ThemeProvider>
+                <UserConfigProvider>
+                  <UserParamsProvider>
+                    <AppLayout />
+                    <ErrorDisplayPanel />
+                  </UserParamsProvider>
+                </UserConfigProvider>
+              </ThemeProvider>
+            </EnergyProvider>
           </EnhancedErrorBoundary>
         </ChunkLoadErrorBoundary>
       </Router>

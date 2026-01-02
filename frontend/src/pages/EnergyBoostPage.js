@@ -5,6 +5,8 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import MindfulnessActivities from '../components/biorhythm/MindfulnessActivities.js';
+import { useEnergy } from '../contexts/EnergyContext';
+import { DAILY_CONFIG } from '../constants/energyLevels';
 
 // 能量活动数据
 const ENERGY_ACTIVITIES = [
@@ -13,56 +15,64 @@ const ENERGY_ACTIVITIES = [
     title: '晨间冥想',
     description: '花10分钟进行冥想，开启充满活力的一天',
     icon: '🧘',
-    category: 'mindfulness'
+    category: 'mindfulness',
+    upReward: 150,
   },
   {
     id: 2,
     title: '户外散步',
     description: '在自然中散步20分钟，吸收阳光和新鲜空气',
     icon: '🌳',
-    category: 'physical'
+    category: 'physical',
+    upReward: 200,
   },
   {
     id: 3,
     title: '深呼吸练习',
     description: '进行5分钟深呼吸，放松身心，提升专注力',
     icon: '🌬️',
-    category: 'mindfulness'
+    category: 'mindfulness',
+    upReward: 100,
   },
   {
     id: 4,
     title: '健康早餐',
     description: '享用营养均衡的早餐，为身体提供充足能量',
     icon: '🥗',
-    category: 'diet'
+    category: 'diet',
+    upReward: 150,
   },
   {
     id: 5,
     title: '拉伸运动',
     description: '做一套简单的拉伸动作，缓解肌肉紧张',
     icon: '🤸',
-    category: 'physical'
+    category: 'physical',
+    upReward: 150,
   },
   {
     id: 6,
     title: '感恩练习',
     description: '写下三件感恩的事，培养积极心态',
     icon: '🙏',
-    category: 'mindfulness'
+    category: 'mindfulness',
+    upReward: 100,
   },
   {
     id: 7,
     title: '保持水分',
     description: '喝一杯温水，促进新陈代谢',
     icon: '💧',
-    category: 'diet'
+    category: 'diet',
+    upReward: 50,
   },
   {
     id: 8,
     title: '积极思考',
     description: '阅读励志文字或听一首励志歌曲',
     icon: '✨',
-    category: 'mindfulness'
+    category: 'mindfulness',
+    upReward: 100,
   }
 ];
 
@@ -79,6 +89,12 @@ const ENERGY_GUIDANCE = [
 ];
 
 const EnergyBoostPage = () => {
+  // 能量树状态
+  const {
+    energyData,
+    visitEnergyBoostPage,
+    addEnergyBoostUP,
+  } = useEnergy();
 
   // 状态管理
   const [loading, setLoading] = useState(true);
@@ -87,6 +103,7 @@ const EnergyBoostPage = () => {
   const [energyGuidance, setEnergyGuidance] = useState('');
   const [energyLevel, setEnergyLevel] = useState(50);
   const [energyHistory, setEnergyHistory] = useState([]);
+  const [pageVisited, setPageVisited] = useState(false);
 
   // 生成随机活动
   const generateRandomActivities = useCallback(() => {
@@ -100,6 +117,14 @@ const EnergyBoostPage = () => {
     return ENERGY_GUIDANCE[index];
   }, []);
 
+  // 访问能量提升页面奖励
+  useEffect(() => {
+    if (!pageVisited && energyData) {
+      visitEnergyBoostPage();
+      setPageVisited(true);
+    }
+  }, [pageVisited, energyData, visitEnergyBoostPage]);
+
   // 初始化
   useEffect(() => {
     // 从本地存储加载完成状态
@@ -107,10 +132,33 @@ const EnergyBoostPage = () => {
       try {
         const stored = localStorage.getItem('energyBoost_completedTasks');
         if (stored) {
-          setCompletedTasks(JSON.parse(stored));
+          const loadedTasks = JSON.parse(stored);
+          setCompletedTasks(loadedTasks);
         }
       } catch (error) {
         console.error('加载完成任务失败:', error);
+      }
+    };
+
+    // 加载能量等级
+    const loadEnergyLevel = () => {
+      try {
+        const storedLevel = localStorage.getItem('energyBoost_currentLevel');
+        if (storedLevel) {
+          // 如果存在保存的能量等级，优先使用
+          const savedLevel = JSON.parse(storedLevel);
+          setEnergyLevel(Math.min(savedLevel, 100));
+        } else {
+          // 如果没有保存的能量等级，基于已完成任务数量计算
+          const storedTasks = localStorage.getItem('energyBoost_completedTasks');
+          if (storedTasks) {
+            const loadedTasks = JSON.parse(storedTasks);
+            const newEnergyLevel = 50 + loadedTasks.length * 12.5;
+            setEnergyLevel(Math.min(newEnergyLevel, 100));
+          }
+        }
+      } catch (error) {
+        console.error('加载能量等级失败:', error);
       }
     };
 
@@ -127,6 +175,7 @@ const EnergyBoostPage = () => {
     };
 
     loadCompletedTasks();
+    loadEnergyLevel();
     loadEnergyHistory();
 
     //生成活动
@@ -135,7 +184,7 @@ const EnergyBoostPage = () => {
     setEnergyGuidance(getRandomGuidance());
 
     setLoading(false);
-  }, [generateRandomActivities, getRandomGuidance]);
+  }, [generateRandomActivities, getRandomGuidance, visitEnergyBoostPage, pageVisited, energyData]);
 
   // 切换任务完成状态
   const handleToggleTask = (taskId) => {
@@ -152,9 +201,19 @@ const EnergyBoostPage = () => {
     // 更新能量等级
     const newEnergyLevel = 50 + newCompletedTasks.length * 12.5;
     setEnergyLevel(Math.min(newEnergyLevel, 100));
+    
+    // 保存当前能量等级到本地存储
+    localStorage.setItem('energyBoost_currentLevel', JSON.stringify(newEnergyLevel));
+
+    // 获取任务的UP奖励
+    const activity = ENERGY_ACTIVITIES.find(a => a.id === taskId);
+    const upReward = activity ? activity.upReward : 0;
 
     // 记录到历史
     if (!completedTasks.includes(taskId)) {
+      // 添加UP能量到能量树
+      addEnergyBoostUP(taskId, upReward);
+
       const today = new Date().toISOString().split('T')[0];
       const newHistory = [
         ...energyHistory,
@@ -182,6 +241,7 @@ const EnergyBoostPage = () => {
       setCompletedTasks([]);
       setEnergyLevel(50);
       localStorage.removeItem('energyBoost_completedTasks');
+      localStorage.removeItem('energyBoost_currentLevel');
       handleRefreshActivities();
     }
   };
@@ -221,14 +281,14 @@ const EnergyBoostPage = () => {
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="relative">
             {/* 能量球主体 */}
-            <div 
+            <div
               className="w-40 h-40 sm:w-48 sm:h-48 rounded-full flex items-center justify-center shadow-2xl relative overflow-hidden transition-all duration-500"
               style={{
                 background: `conic-gradient(
-                  from 0deg at 50% 50%, 
-                  #f97316 0deg, 
-                  #f59e0b ${energyLevel * 3.6}deg, 
-                  #fef3c7 ${energyLevel * 3.6}deg, 
+                  from 0deg at 50% 50%,
+                  #f97316 0deg,
+                  #f59e0b ${energyLevel * 3.6}deg,
+                  #fef3c7 ${energyLevel * 3.6}deg,
                   #fef3c7 360deg
                 )`
               }}
@@ -241,8 +301,19 @@ const EnergyBoostPage = () => {
             {/* 能量球装饰光效 */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-orange-300/20 to-transparent animate-pulse"></div>
           </div>
+
+          {/* UP能量显示 */}
+          <div className="mt-4 text-center">
+            <div className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg shadow-lg">
+              <span className="text-sm font-semibold">今日UP能量</span>
+              <span className="text-lg font-bold ml-2">
+                {energyData?.energyBoostUP || 0} / {DAILY_CONFIG.ENERGY_BOOST_UP_LIMIT}
+              </span>
+            </div>
+          </div>
+
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 text-center px-2">
-            完成任务可以提升能量等级
+            完成任务可以提升能量等级，并额外获得UP能量
           </p>
         </div>
 

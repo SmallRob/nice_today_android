@@ -164,7 +164,21 @@
   flex-shrink: 0;
   width: 140px;
   min-width: 120px;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  position: relative;
 }
+
+.fortune-right:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.fortune-right:active {
+  transform: scale(0.95);
+}
+
+/* 能量球点击提示 - 已隐藏，让用户自行探索 */
 
 /* 能量进度条列表 */
 .energy-progress-list {
