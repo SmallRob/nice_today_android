@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import IconLibrary from '../components/IconLibrary';
+import IconLibrary from '../components/IconLibrary.js';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { calculateDetailedBazi } from '../utils/baziHelper';
 import { getDisplayBaziInfo } from '../utils/baziSchema';

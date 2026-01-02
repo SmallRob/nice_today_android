@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import MindfulnessActivities from '../components/biorhythm/MindfulnessActivities';
+import MindfulnessActivities from '../components/biorhythm/MindfulnessActivities.js';
 
 // 能量活动数据
 const ENERGY_ACTIVITIES = [

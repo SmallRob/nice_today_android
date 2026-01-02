@@ -5,7 +5,7 @@ import VersionRouter from './VersionRouter';
 import { ThemeProvider } from './context/ThemeContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { initializeApp } from './utils/capacitorInit-simulated';
-import WelcomeScreen from './components/WelcomeScreen';
+import WelcomeScreen from './components/WelcomeScreen.js';
 import timeCacheManager from './utils/timeCache';
 
 // #region agent log

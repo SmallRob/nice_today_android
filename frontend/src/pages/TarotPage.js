@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import PageLayout, { Card, Button } from '../components/PageLayout';
+import PageLayout, { Card, Button } from '../components/PageLayout.js';
 import { userConfigManager } from '../utils/userConfigManager';
 import tarotCardImage from '../images/tarot-card.png';
 import '../index.css';

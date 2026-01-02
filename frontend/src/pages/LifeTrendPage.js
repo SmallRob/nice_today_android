@@ -8,9 +8,9 @@ import {
   getValidShichen,
   normalizeBirthInfo
 } from '../utils/baziDataManager';
-import KlineChart from '../components/KlineChart';
-import RadarChart from '../components/RadarChart';
-import DatePickerModal from '../components/DatePickerModal';
+import KlineChart from '../components/KlineChart.js';
+import RadarChart from '../components/RadarChart.js';
+import DatePickerModal from '../components/DatePickerModal.js';
 import { storageManager } from '../utils/storageManager';
 import { calculateLiuNianDaYun, calculateDailyEnergy } from '../utils/baziHelper';
 import { Solar } from 'lunar-javascript';

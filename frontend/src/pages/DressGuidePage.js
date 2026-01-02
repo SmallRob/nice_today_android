@@ -5,7 +5,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
-import IconLibrary from '../components/IconLibrary';
+import IconLibrary from '../components/IconLibrary.js';
 import { getDressInfoRange, getSpecificDateDressInfo, formatDateString } from '../services/localDataService';
 
 // 五行能量趋势组件

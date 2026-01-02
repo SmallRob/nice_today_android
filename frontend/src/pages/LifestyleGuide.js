@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
-import ArchiveManager from '../components/lifeStyleGride/ArchiveManager';
-import MatrixGrid from '../components/lifeStyleGride/MatrixGrid';
-import DimensionInfo from '../components/lifeStyleGride/DimensionInfo';
-import TotalScore from '../components/lifeStyleGride/TotalScore';
-import RitualGuide from '../components/lifeStyleGride/RitualGuide';
-import OnboardingModal from '../components/lifeStyleGride/OnboardingModal';
+import ArchiveManager from '../components/lifeStyleGride/ArchiveManager.jsx';
+import MatrixGrid from '../components/lifeStyleGride/MatrixGrid.jsx';
+import DimensionInfo from '../components/lifeStyleGride/DimensionInfo.jsx';
+import TotalScore from '../components/lifeStyleGride/TotalScore.jsx';
+import RitualGuide from '../components/lifeStyleGride/RitualGuide.jsx';
+import OnboardingModal from '../components/lifeStyleGride/OnboardingModal.jsx';
 import { initializeStorage, getArchives, getCurrentArchive } from '../utils/lifeGridStorage';
 import { DIMENSIONS_3x3, DIMENSIONS_7x7, IMPRINT_TYPES, getDimensionColor } from '../utils/matrixData';
 

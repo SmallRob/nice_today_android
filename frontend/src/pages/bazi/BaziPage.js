@@ -10,7 +10,7 @@ import { useSearchParams } from 'react-router-dom';
 import { normalizeBirthInfo } from '../../utils/baziDataManager';
 import { calculateLiuNianDaYun, getMonthlyBaziFortune, getDailyBaziFortune, getYearlyBaziFortune, calculateDailyEnergy } from '../../utils/baziHelper';
 import BaziCalculator from '../../utils/baziCalculator';
-import FortuneTrendChart from '../../components/bazi/FortuneTrendChart';
+import FortuneTrendChart from '../../components/bazi/FortuneTrendChart.js';
 import '../../styles/bazi-page.css';
 
 const BaziPage = () => {

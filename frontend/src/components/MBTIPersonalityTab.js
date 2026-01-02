@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
-import { Card } from './PageLayout';
+import { Card } from './PageLayout.js';
 import { useTheme } from '../context/ThemeContext';
 
 // MBTI配置管理器 - 仅用于读取默认配置

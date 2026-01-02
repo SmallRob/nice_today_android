@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './DashboardPage.css';
-import MergedBannerCard from '../components/dashboard/MergedBannerCard';
-import DailyFortuneCard from '../components/dashboard/DailyFortuneCard';
-import FestivalCard from '../components/dashboard/FestivalCard';
+import MergedBannerCard from '../components/dashboard/MergedBannerCard.js';
+import DailyFortuneCard from '../components/dashboard/DailyFortuneCard.js';
+import FestivalCard from '../components/dashboard/FestivalCard.js';
 import {
   MBTICard,
   ChineseZodiacCard,
@@ -28,8 +28,8 @@ import {
   LiuyaoCard,
   PlumBlossomCard,
   AncientCardGameCard
-} from '../components/dashboard/FeatureCards';
-import FeatureDragPanel from '../components/dashboard/FeatureDragPanel';
+} from '../components/dashboard/FeatureCards.js';
+import FeatureDragPanel from '../components/dashboard/FeatureDragPanel.js';
 import {
   loadFeatureSortOrder,
   saveFeatureSortOrder,

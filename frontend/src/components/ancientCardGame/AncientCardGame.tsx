@@ -147,14 +147,22 @@ export default function AncientCardGame() {
             <div className={`rounded-2xl p-6 shadow-xl ${
               theme === 'dark' ? 'bg-gradient-to-br from-amber-900/20 to-amber-800/30 border border-amber-800/50' : 'bg-gradient-to-br from-amber-100/50 to-amber-200/30 border border-amber-200'
             }`}>
-              <PlayerArea
-                player={state.players[0]}
-                isCurrent={state.currentPlayer === 0}
-                onPlayCard={handlePlayCard}
-                selectedCard={selectedCard}
-                isHuman={true}
-                theme={theme}
-              />
+              {state.players && state.players[0] ? (
+                <PlayerArea
+                  player={state.players[0]}
+                  isCurrent={state.currentPlayer === 0}
+                  onPlayCard={handlePlayCard}
+                  selectedCard={selectedCard}
+                  isHuman={true}
+                  theme={theme}
+                />
+              ) : (
+                <div className="rounded-xl p-6">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    正在初始化游戏...
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

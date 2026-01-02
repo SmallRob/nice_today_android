@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import { Card } from './PageLayout';
+import { Card } from './PageLayout.js';
 import { useTheme } from '../context/ThemeContext';
 import '../styles/dashboard-layout.css';
 

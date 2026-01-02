@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import PageLayout, { Card, Button } from './PageLayout';
+import PageLayout, { Card, Button } from './PageLayout.js';
 import { useCurrentConfig, useUserConfig } from '../contexts/UserConfigContext';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import asyncOperationQueue from '../utils/AsyncOperationQueue';

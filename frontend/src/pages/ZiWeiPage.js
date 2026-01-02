@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import ZiWeiPalaceDisplay from '../components/ZiWeiPalaceDisplay';
+import ZiWeiPalaceDisplay from '../components/ZiWeiPalaceDisplay.js';
 import { getZiWeiDisplayData } from '../utils/ziweiHelper';
 import '../styles/ziwei.css';
 

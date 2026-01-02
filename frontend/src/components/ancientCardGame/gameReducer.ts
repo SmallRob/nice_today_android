@@ -1,8 +1,13 @@
 // gameReducer.ts
-import { Card, GameState, ActionType } from './cardtype';
+import { Card, Player, GameState, ActionType } from './cardtype.ts';
 
 export const initialState: GameState = {
-  players: [],
+  players: [
+    { id: 0, name: '玩家', hand: [], score: 0, isHuman: true },
+    { id: 1, name: '东家', hand: [], score: 0, isHuman: false },
+    { id: 2, name: '南家', hand: [], score: 0, isHuman: false },
+    { id: 3, name: '西家', hand: [], score: 0, isHuman: false }
+  ],
   deck: [],
   discardPile: [],
   currentPlayer: 0,
@@ -47,25 +52,29 @@ export function gameReducer(state: GameState, action: any): GameState {
   switch (action.type) {
     case ActionType.INIT_GAME: {
       const deck = createDeck();
-      const players = [
-        { id: 0, name: '玩家', hand: [], score: 0, isHuman: true },
-        { id: 1, name: '东家', hand: [], score: 0, isHuman: false },
-        { id: 2, name: '南家', hand: [], score: 0, isHuman: false },
-        { id: 3, name: '西家', hand: [], score: 0, isHuman: false }
+      
+      // 创建玩家副本
+      const newPlayers = [
+        { ...state.players[0], hand: [] },
+        { ...state.players[1], hand: [] }, 
+        { ...state.players[2], hand: [] },
+        { ...state.players[3], hand: [] }
       ];
       
       // 发牌
+      const typedPlayers: Player[] = newPlayers;
       for (let i = 0; i < 13; i++) {
-        players.forEach(player => {
+        for (let j = 0; j < typedPlayers.length; j++) {
           if (deck.length > 0) {
-            player.hand.push(deck.pop()!);
+            const card = deck.pop()!;
+            typedPlayers[j].hand.push(card);
           }
-        });
+        }
       }
       
       return {
         ...state,
-        players,
+        players: newPlayers,
         deck: deck,
         discardPile: [],
         currentPlayer: 0,

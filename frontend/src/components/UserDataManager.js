@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import Card from './PageLayout';
+import Card from './PageLayout.js';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import { baziCacheManager } from '../utils/BaziCacheManager';
 import mobileFileSystem, { checkAndRequestStoragePermission } from '../utils/mobileFileSystem';

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { getAppVersion } from '../utils/capacitor';
 import { Capacitor } from '@capacitor/core';
-import { Card, Button } from '../components/PageLayout';
+import { Card, Button } from '../components/PageLayout.js';
 import updateCheckService from '../utils/updateCheckService';
 import { useNotification } from '../context/NotificationContext';
 import versionDetector from '../utils/versionDetector';
