@@ -13,12 +13,12 @@ const MindfulnessActivityCard = ({
     <div
       onClick={() => onToggle(activity.id)}
       className={`
-        bg-white dark:bg-gray-800/60 rounded-lg p-2 md:p-3 cursor-pointer
+        bg-white dark:bg-gray-800/70 rounded-lg p-2.5 md:p-3 cursor-pointer
         border-2 transition-all duration-300 hover:shadow-md
         touch-manipulation active:scale-98
         ${isCompleted
-          ? 'border-green-400 dark:border-green-500/70 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/20'
-          : 'border-gray-100 dark:border-gray-700/50 hover:border-indigo-200 dark:hover:border-indigo-700'
+          ? 'border-green-400 dark:border-green-500/80 bg-gradient-to-r from-green-50/60 to-emerald-50/60 dark:from-green-900/25 dark:to-emerald-900/25'
+          : 'border-gray-200 dark:border-gray-700/60 hover:border-indigo-300 dark:hover:border-indigo-600'
         }
         w-full max-w-full
       `}
@@ -78,7 +78,7 @@ const ActivityIcon = ({ icon, isCompleted }) => {
       flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg
       flex items-center justify-center mr-1.5
       text-sm sm:text-base
-      ${isCompleted ? 'opacity-50' : ''}
+      ${isCompleted ? 'opacity-60' : ''}
     `}>
       {icon}
     </div>
@@ -91,25 +91,25 @@ const ActivityInfo = ({ activity, isCompleted }) => {
     <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
       <div className="flex items-center gap-1.5 mb-0.5">
         <h4 className={`
-          text-[11px] sm:text-xs font-semibold truncate
+          text-xs sm:text-sm font-semibold truncate
           ${isCompleted
-            ? 'text-gray-500 dark:text-gray-100 line-through'
-            : 'text-gray-900 dark:text-gray-100'
+            ? 'text-gray-500 dark:text-gray-400 line-through'
+            : 'text-gray-900 dark:text-gray-200'
           }
         `}>
           {activity.title}
         </h4>
         {!isCompleted && (
-          <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 whitespace-nowrap flex-shrink-0">
+          <span className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 whitespace-nowrap flex-shrink-0">
             {activity.duration}
           </span>
         )}
       </div>
       <p className={`
-        text-[9px] sm:text-[10px] leading-snug truncate
+        text-[10px] sm:text-xs leading-snug truncate
         ${isCompleted
-          ? 'text-gray-400 dark:text-gray-100'
-          : 'text-gray-600 dark:text-gray-100'
+          ? 'text-gray-400 dark:text-gray-500'
+          : 'text-gray-600 dark:text-gray-400'
         }
       `}>
         {activity.description}

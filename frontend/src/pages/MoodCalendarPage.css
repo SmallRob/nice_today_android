@@ -1,0 +1,268 @@
+/* 心情日历页面样式 */
+
+.mood-calendar-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 移动设备适配 */
+@media (max-width: 768px) {
+  .mood-calendar-page {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  
+  .mood-calendar-page .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  /* 调整日历网格在小屏幕上的大小 */
+  .mood-calendar-page .min-h-20 {
+    min-height: 3rem;
+    padding: 0.25rem;
+  }
+  
+  .mood-calendar-page .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .mood-calendar-page .text-lg {
+    font-size: 1.125rem;
+  }
+  
+  .mood-calendar-page .text-xl {
+    font-size: 1.25rem;
+  }
+  
+  .mood-calendar-page .text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  /* 调整心情选择器在小屏幕上的显示 */
+  .mood-calendar-page .max-w-md {
+    max-width: 95%;
+  }
+}
+
+/* 暗黑主题适配 */
+.dark .mood-calendar-page {
+  background-color: #111827; /* gray-900 */
+}
+
+.dark .mood-calendar-page .bg-white {
+  background-color: #1f2937; /* gray-800 */
+}
+
+.dark .mood-calendar-page .bg-gray-50 {
+  background-color: #111827; /* gray-900 */
+}
+
+.dark .mood-calendar-page .bg-gray-100 {
+  background-color: #374151; /* gray-700 */
+}
+
+.dark .mood-calendar-page .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.1); /* blue-900 with opacity */
+}
+
+.dark .mood-calendar-page .bg-gray-500 {
+  background-color: #6b7280; /* gray-500 */
+}
+
+.dark .mood-calendar-page .bg-gray-600 {
+  background-color: #4b5563; /* gray-600 */
+}
+
+.dark .mood-calendar-page .bg-gray-700 {
+  background-color: #374151; /* gray-700 */
+}
+
+.dark .mood-calendar-page .bg-gray-800 {
+  background-color: #1f2937; /* gray-800 */
+}
+
+.dark .mood-calendar-page .bg-gray-900 {
+  background-color: #111827; /* gray-900 */
+}
+
+.dark .mood-calendar-page .text-gray-900 {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .mood-calendar-page .text-gray-600 {
+  color: #9ca3af; /* gray-400 */
+}
+
+.dark .mood-calendar-page .text-gray-500 {
+  color: #a3a3a3;
+}
+
+.dark .mood-calendar-page .text-gray-400 {
+  color: #9ca3af; /* gray-400 */
+}
+
+.dark .mood-calendar-page .text-gray-300 {
+  color: #d1d5db; /* gray-300 */
+}
+
+.dark .mood-calendar-page .text-white {
+  color: #ffffff;
+}
+
+.dark .mood-calendar-page .border-gray-200 {
+  border-color: #374151; /* gray-700 */
+}
+
+.dark .mood-calendar-page .border-gray-700 {
+  border-color: #374151; /* gray-700 */
+}
+
+.dark .mood-calendar-page .hover\:bg-gray-100:hover {
+  background-color: #374151; /* gray-700 */
+}
+
+.dark .mood-calendar-page .hover\:bg-gray-700:hover {
+  background-color: #374151; /* gray-700 */
+}
+
+/* 颜色主题适配 */
+.mood-calendar-page .bg-yellow-400 {
+  background-color: #fbbf24;
+}
+
+.mood-calendar-page .bg-green-400 {
+  background-color: #4ade80;
+}
+
+.mood-calendar-page .bg-gray-400 {
+  background-color: #9ca3af;
+}
+
+.mood-calendar-page .bg-blue-400 {
+  background-color: #60a5fa;
+}
+
+.mood-calendar-page .bg-indigo-400 {
+  background-color: #818cf8;
+}
+
+.mood-calendar-page .bg-red-400 {
+  background-color: #f87171;
+}
+
+.mood-calendar-page .bg-orange-400 {
+  background-color: #fb923c;
+}
+
+.mood-calendar-page .bg-teal-400 {
+  background-color: #2dd4bf;
+}
+
+.dark .mood-calendar-page .bg-yellow-400 {
+  background-color: #f59e0b;
+}
+
+.dark .mood-calendar-page .bg-green-400 {
+  background-color: #22c55e;
+}
+
+.dark .mood-calendar-page .bg-gray-400 {
+  background-color: #9ca3af;
+}
+
+.dark .mood-calendar-page .bg-blue-400 {
+  background-color: #3b82f6;
+}
+
+.dark .mood-calendar-page .bg-indigo-400 {
+  background-color: #6366f1;
+}
+
+.dark .mood-calendar-page .bg-red-400 {
+  background-color: #ef4444;
+}
+
+.dark .mood-calendar-page .bg-orange-400 {
+  background-color: #f97316;
+}
+
+.dark .mood-calendar-page .bg-teal-400 {
+  background-color: #14b8a6;
+}
+
+/* 透明度适配暗黑模式 */
+.dark .mood-calendar-page .bg-opacity-20 {
+  background-color: rgba(31, 41, 55, 0.2);
+}
+
+.dark .mood-calendar-page .dark\:bg-opacity-30 {
+  background-color: rgba(31, 41, 55, 0.3);
+}
+
+/* 心情选择器弹窗样式 */
+.mood-calendar-page .fixed.inset-0 {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* 滚动条样式优化 */
+.mood-calendar-page .hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mood-calendar-page .hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 按钮悬停效果 */
+.mood-calendar-page .transition-colors {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 响应式网格 */
+.mood-calendar-page .grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 640px) {
+  .mood-calendar-page .grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .mood-calendar-page .grid-cols-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 触摸优化 */
+.mood-calendar-page .touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px;
+}
+
+/* 暗黑模式下的特殊颜色 */
+.dark .mood-calendar-page .ring-blue-500 {
+  --tw-ring-color: #3b82f6;
+}
+
+.dark .mood-calendar-page .ring-blue-400 {
+  --tw-ring-color: #60a5fa;
+}
+
+/* 滚动容器样式 */
+.mood-calendar-page .max-h-96 {
+  max-height: 24rem;
+}
+
+/* 移动端安全区域适配 */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}

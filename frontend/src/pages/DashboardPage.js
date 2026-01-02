@@ -27,7 +27,8 @@ import {
   FengShuiCompassCard,
   LiuyaoCard,
   PlumBlossomCard,
-  AncientCardGameCard
+  HuangliCard,
+  MoodCalendarCard
 } from '../components/dashboard/FeatureCards.js';
 import FeatureDragPanel from '../components/dashboard/FeatureDragPanel.js';
 import {
@@ -57,11 +58,13 @@ const ALL_FEATURES = [
   { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类', type: 'entertainment' },
   { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类', type: 'entertainment' },
   { component: FishingGameCard, name: 'FishingGameCard', category: '娱乐休闲类', type: 'entertainment' },
-  { component: AncientCardGameCard, name: 'AncientCardGameCard', category: '娱乐休闲类', type: 'entertainment' },
+  // { component: AncientCardGameCard, name: 'AncientCardGameCard', category: '娱乐休闲类', type: 'entertainment' },
   { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类', type: 'health' },
   { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类', type: 'health' },
   { component: LiuyaoCard, name: 'LiuyaoCard', category: '运势分析类', type: 'fortune' },
-  { component: PlumBlossomCard, name: 'PlumBlossomCard', category: '运势分析类', type: 'fortune' }
+  { component: PlumBlossomCard, name: 'PlumBlossomCard', category: '运势分析类', type: 'fortune' },
+  { component: HuangliCard, name: 'HuangliCard', category: '运势分析类', type: 'fortune' },
+  { component: MoodCalendarCard, name: 'MoodCalendarCard', category: '健康管理类', type: 'health' }
 ];
 
 /**

@@ -376,6 +376,34 @@ const AncientCardGameCard = () => {
   );
 };
 
+/**
+ * 黄历择吉组件
+ */
+const HuangliCard = () => {
+  return (
+    <FeatureCard
+      title="黄历择吉"
+      icon="huangli"
+      category="fortune"
+      route="/huangli"
+    />
+  );
+};
+
+/**
+ * 心情日历组件
+ */
+const MoodCalendarCard = () => {
+  return (
+    <FeatureCard
+      title="心情日历"
+      icon="mood-calendar"
+      category="health"
+      route="/mood-calendar"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -400,5 +428,7 @@ export {
   FengShuiCompassCard,
   LiuyaoCard,
   PlumBlossomCard,
-  AncientCardGameCard
+  AncientCardGameCard,
+  HuangliCard,
+  MoodCalendarCard
 };
