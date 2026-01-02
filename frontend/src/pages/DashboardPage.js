@@ -267,11 +267,11 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* 全部功能标题 - 始终显示或在展开时作为标题栏 */}
-        <div className="features-header">
-          <h2 className="features-title">
-            {isFeaturesExpanded ? '全部功能入口' : '所有功能'}
-            {isFeaturesExpanded && (
+        {/* 全部功能标题 - 仅在展开时显示 */}
+        {isFeaturesExpanded && (
+          <div className="features-header">
+            <h2 className="features-title">
+              全部功能入口
               <button
                 className={`dashboard-edit-icon-btn edit-icon-btn ${isEditMode ? 'edit-mode-active' : ''}`}
                 onClick={toggleEditMode}
@@ -279,9 +279,9 @@ const Dashboard = () => {
               >
                 {isEditMode ? '✅' : '✏️'}
               </button>
-            )}
-          </h2>
-        </div>
+            </h2>
+          </div>
+        )}
 
         {/* 编辑模式控制按钮 */}
         {isEditMode && (
