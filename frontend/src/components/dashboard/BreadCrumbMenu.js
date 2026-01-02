@@ -16,9 +16,10 @@ const ENTERTAINMENT_FEATURES = [
 const COMMON_FEATURES = [
     { id: 'finance', icon: '💰', name: '财务管理', route: '/finance' },
     { id: 'todo', icon: '📝', name: '日程清单', route: '/todo-list' },
+     { id: 'mood-calendar', icon: '😊', name: '心情日历', route: '/mood-calendar' },
     { id: 'dress', icon: '👕', name: '穿衣指南', route: '/dress' },
     { id: 'bazi', icon: '☯️', name: '八字命理', route: '/bazi-analysis' },
-    { id: 'horoscope', icon: '📅', name: '星座运势', route: '/horoscope' },
+    { id: 'horoscope', icon: '📅', name: '星座运势', route: '/horoscope' }
 ];
 
 const BreadCrumbMenu = () => {

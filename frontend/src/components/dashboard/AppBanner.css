@@ -1,0 +1,89 @@
+/* 阳光光照特效动画 */
+@keyframes sunshine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-sunshine {
+  animation: sunshine 3s linear infinite;
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+}
+
+/* Alternative animation for a more natural sunlight effect */
+@keyframes gentle-sunshine {
+  0% {
+    transform: translateX(-100vw) skewX(-20deg);
+    opacity: 0.4;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  40% {
+    transform: translateX(100vw) skewX(20deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(100vw) skewX(20deg);
+    opacity: 0;
+  }
+}
+
+.animate-gentle-sunshine {
+  animation: gentle-sunshine 5s ease-in-out infinite;
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+}
+
+/* New sunlight shower effect */
+@keyframes sunlight-shower {
+  0% {
+    transform: translateY(-100vh) rotate(25deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  20% {
+    transform: translateY(100px) rotate(25deg);
+    opacity: 0.8;
+  }
+  30% {
+    opacity: 0.6;
+  }
+  40% {
+    transform: translateY(200px) rotate(25deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(300px) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+.animate-sunlight-shower {
+  animation: sunlight-shower 6s ease-in-out infinite;
+  background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 200, 0.4) 50%, transparent 60%);
+  background-size: 300px 100%;
+  background-repeat: no-repeat;
+}
+
+/* For a pulsating sunlight effect */
+@keyframes pulsating-sunshine {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1) translateX(-50%);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1) translateX(-50%);
+  }
+}
+
+.animate-pulsating-sunshine {
+  animation: pulsating-sunshine 3s ease-in-out infinite;
+}

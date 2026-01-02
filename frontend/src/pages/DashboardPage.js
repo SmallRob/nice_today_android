@@ -8,6 +8,7 @@ import {
   MBTICard,
   ChineseZodiacCard,
   HoroscopeCard,
+  BaziFateCard,
   BaziCard,
   BiorhythmCard,
   EnergyBoostCard,
@@ -46,6 +47,7 @@ const ALL_FEATURES = [
   { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类', type: 'fortune' },
   { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类', type: 'fortune' },
   { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类', type: 'fortune' },
+  { component: BaziFateCard, name: 'BaziFateCard', category: '运势分析类', type: 'fortune' },
   { component: BaziCard, name: 'BaziCard', category: '运势分析类', type: 'fortune' },
   { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类', type: 'fortune' },
   { component: MBTICard, name: 'MBTICard', category: '个人成长类', type: 'growth' },
@@ -236,10 +238,10 @@ const Dashboard = () => {
             </button>
             <button
               className="quick-action-btn"
-              onClick={() => navigate('/bazi/analysis')}
+              onClick={() => navigate('/huangli')}
             >
               <span>☯️</span>
-              <span className="quick-action-label">八字命格</span>
+              <span className="quick-action-label">黄历择吉</span>
             </button>
             <button
               className="quick-action-btn"

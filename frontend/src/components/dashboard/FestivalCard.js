@@ -35,6 +35,7 @@ const FestivalCard = () => {
 
     // 国际节日
     "元旦节": { emoji: "🎉", color: "from-red-500 to-red-700", date: "1月1日", desc: "元启新程，旦旦有福", advice: "总结过去，展望未来，设定新一年的目标", action: "焕然一新，迎接新年第一缕阳光" },
+    "元旦前夜": { emoji: "🎆", color: "from-red-500 to-yellow-500", date: "12月31日", desc: "辞旧迎新，展望未来", advice: "整理旧年回忆，规划新年目标", action: "准备跨年庆祝，迎接新年开始" },
     "情人节": { emoji: "💖", color: "from-pink-400 to-red-500", date: "2月14日" },
     "植树节": { emoji: "🌳", color: "from-green-400 to-emerald-600", date: "3月12日" },
     "愚人节": { emoji: "🤪", color: "from-yellow-400 to-orange-400", date: "4月1日" },
@@ -42,6 +43,7 @@ const FestivalCard = () => {
     "儿童节": { emoji: "🧒", color: "from-yellow-300 to-pink-400", date: "6月1日" },
     "国庆节": { emoji: "🇨🇳", color: "from-red-500 to-yellow-500", date: "10月1日" },
     "圣诞节": { emoji: "🎄", color: "from-green-500 to-red-500", date: "12月25日" },
+    "圣诞前夜": { emoji: "🎅", color: "from-green-500 to-red-500", date: "12月24日", desc: "平安夜快乐，温暖祥和", advice: "与亲友共度温馨时光，传递爱与祝福", action: "准备圣诞礼物，装饰圣诞树" },
 
     // 新增节日
     "母亲节": { emoji: "👩", color: "from-pink-300 to-purple-400", date: "5月第二个星期日" },
@@ -50,11 +52,31 @@ const FestivalCard = () => {
     "感恩节": { emoji: "🦃", color: "from-brown-500 to-orange-500", date: "11月第四个星期四" },
   };
 
+  // 计算节日倒计时
+  const calculateFestivalCountdown = (festivalDate) => {
+    const now = currentTime;
+    const festivalDateTime = new Date(festivalDate);
+    const diffMs = festivalDateTime - now;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return {
+      diffMs,
+      diffHours,
+      diffMinutes,
+      isWithin3Hours: diffMs > 0 && diffMs <= 3 * 60 * 60 * 1000, // 3小时内
+      isToday: festivalDateTime.toDateString() === now.toDateString()
+    };
+  };
+
   // 获取节日状态
   const getFestivalState = useMemo(() => {
+    const now = currentTime;
     const solarYear = currentTime.getFullYear();
     const solarMonth = currentTime.getMonth() + 1;
     const solarDay = currentTime.getDate();
+    const solarHour = currentTime.getHours();
+    const solarMinute = currentTime.getMinutes();
 
     // 检查公历节日
     const solarFestivals = {
@@ -65,7 +87,9 @@ const FestivalCard = () => {
       "5-1": "劳动节",
       "6-1": "儿童节",
       "10-1": "国庆节",
+      "12-24": "圣诞前夜",
       "12-25": "圣诞节",
+      "12-31": "元旦前夜",
       "10-31": "万圣节",
     };
 
@@ -79,12 +103,16 @@ const FestivalCard = () => {
     // 检查特殊节日
     for (const [festivalName, festivalDate] of Object.entries(specialFestivals)) {
       if (festivalDate.getMonth() + 1 === solarMonth && festivalDate.getDate() === solarDay) {
+        const countdown = calculateFestivalCountdown(festivalDate);
         return {
           name: festivalName,
           active: true,
-          diff: 0,
+          diff: countdown.diffHours * 60 + countdown.diffMinutes,
           date: `${solarMonth}月${solarDay}日`,
           isFestival: true,
+          isCountdown: countdown.isWithin3Hours,
+          countdownHours: countdown.diffHours,
+          countdownMinutes: countdown.diffMinutes,
           festivalData: extendedFestivals[festivalName]
         };
       }
@@ -94,14 +122,89 @@ const FestivalCard = () => {
     const dateKey = `${solarMonth}-${solarDay}`;
     const festivalName = solarFestivals[dateKey];
     if (festivalName) {
+      // 创建节日的完整日期对象
+      const festivalDate = new Date(solarYear, solarMonth - 1, solarDay, 0, 0, 0);
+      const countdown = calculateFestivalCountdown(festivalDate);
+      
       return {
         name: festivalName,
         active: true,
-        diff: 0,
+        diff: countdown.diffHours * 60 + countdown.diffMinutes,
         date: `${solarMonth}月${solarDay}日`,
         isFestival: true,
+        isCountdown: countdown.isWithin3Hours,
+        countdownHours: countdown.diffHours,
+        countdownMinutes: countdown.diffMinutes,
         festivalData: extendedFestivals[festivalName]
       };
+    }
+
+    // 检查未来3小时内即将到来的节日
+    for (const [dateKey, festivalName] of Object.entries(solarFestivals)) {
+      const [month, day] = dateKey.split('-').map(Number);
+      let festivalDate = new Date(solarYear, month - 1, day, 0, 0, 0);
+      
+      // 如果节日已经过了 this year, check next year
+      if (festivalDate < now) {
+        festivalDate = new Date(solarYear + 1, month - 1, day, 0, 0, 0);
+      }
+      
+      const countdown = calculateFestivalCountdown(festivalDate);
+      if (countdown.isWithin3Hours) {
+        return {
+          name: festivalName,
+          active: true,
+          diff: countdown.diffHours * 60 + countdown.diffMinutes,
+          date: `${festivalDate.getMonth() + 1}月${festivalDate.getDate()}日`,
+          isFestival: true,
+          isCountdown: true,
+          countdownHours: countdown.diffHours,
+          countdownMinutes: countdown.diffMinutes,
+          festivalData: extendedFestivals[festivalName]
+        };
+      }
+    }
+
+    // 检查特殊节日（未来3小时内）
+    for (const [festivalName, originalFestivalDate] of Object.entries(specialFestivals)) {
+      let festivalDate = new Date(originalFestivalDate);
+      festivalDate.setHours(0, 0, 0, 0); // 重置时间为午夜
+      
+      // 如果节日已经过了 this year, check next year
+      if (festivalDate < now) {
+        const nextYear = solarYear + 1;
+        let nextFestivalDate;
+        switch(festivalName) {
+          case "母亲节":
+            nextFestivalDate = getMotherDay(nextYear);
+            break;
+          case "父亲节":
+            nextFestivalDate = getFatherDay(nextYear);
+            break;
+          case "感恩节":
+            nextFestivalDate = getThanksgivingDay(nextYear);
+            break;
+          default:
+            nextFestivalDate = originalFestivalDate;
+        }
+        festivalDate = new Date(nextFestivalDate);
+        festivalDate.setHours(0, 0, 0, 0);
+      }
+      
+      const countdown = calculateFestivalCountdown(festivalDate);
+      if (countdown.isWithin3Hours) {
+        return {
+          name: festivalName,
+          active: true,
+          diff: countdown.diffHours * 60 + countdown.diffMinutes,
+          date: `${festivalDate.getMonth() + 1}月${festivalDate.getDate()}日`,
+          isFestival: true,
+          isCountdown: true,
+          countdownHours: countdown.diffHours,
+          countdownMinutes: countdown.diffMinutes,
+          festivalData: extendedFestivals[festivalName]
+        };
+      }
     }
 
     // 转换为农历日期
@@ -122,12 +225,19 @@ const FestivalCard = () => {
 
     // 除夕特殊处理
     if (lunarMonth === 12 && lunarDay >= 29) {
+      const lunarDate = LunarCalendar.lunarToSolar(solarYear, lunarMonth, lunarDay);
+      const festivalDate = new Date(lunarDate.solarYear, lunarDate.solarMonth - 1, lunarDate.solarDay, 0, 0, 0);
+      const countdown = calculateFestivalCountdown(festivalDate);
+      
       return {
         name: "除夕",
         active: true,
-        diff: 0,
+        diff: countdown.diffHours * 60 + countdown.diffMinutes,
         date: "农历腊月最后一天",
         isFestival: true,
+        isCountdown: countdown.isWithin3Hours,
+        countdownHours: countdown.diffHours,
+        countdownMinutes: countdown.diffMinutes,
         festivalData: extendedFestivals["除夕"],
         lunarDate: `农历${lunarData.lunarMonthStr}${lunarData.lunarDayStr}`
       };
@@ -137,12 +247,19 @@ const FestivalCard = () => {
     const lunarKey = `${lunarMonth}-${lunarDay}`;
     const lunarFestival = lunarFestivalMap[lunarKey];
     if (lunarFestival) {
+      const lunarDate = LunarCalendar.lunarToSolar(solarYear, lunarMonth, lunarDay);
+      const festivalDate = new Date(lunarDate.solarYear, lunarDate.solarMonth - 1, lunarDate.solarDay, 0, 0, 0);
+      const countdown = calculateFestivalCountdown(festivalDate);
+      
       return {
         name: lunarFestival,
         active: true,
-        diff: 0,
+        diff: countdown.diffHours * 60 + countdown.diffMinutes,
         date: extendedFestivals[lunarFestival]?.date || "",
         isFestival: true,
+        isCountdown: countdown.isWithin3Hours,
+        countdownHours: countdown.diffHours,
+        countdownMinutes: countdown.diffMinutes,
         festivalData: extendedFestivals[lunarFestival],
         lunarDate: `农历${lunarData.lunarMonthStr}${lunarData.lunarDayStr}`
       };
@@ -159,19 +276,19 @@ const FestivalCard = () => {
   // 获取当前事件状态（优先显示节日）
   const currentEvent = getFestivalState || solarTermState;
 
-  // 是否是新年类节日（元旦、春节、除夕）
+  // 是否是新年类节日（元旦、春节、除夕、元旦前夜）
   const isNewYear = useMemo(() => {
-    return currentEvent && ["元旦节", "春节", "除夕"].includes(currentEvent.name);
+    return currentEvent && ["元旦节", "春节", "除夕", "元旦前夜"].includes(currentEvent.name);
   }, [currentEvent]);
 
-  if (!currentEvent || currentEvent.diff !== 0) {
+  if (!currentEvent || (currentEvent.diff !== 0 && !currentEvent.isCountdown)) {
     return null;
   }
 
   const isFestival = currentEvent.isFestival;
   const festivalData = currentEvent.festivalData;
 
-  const tip = isFestival && festivalData
+  const tip = isFestival && festivalData && !currentEvent.isCountdown
     ? {
       ... (extendedFestivals[currentEvent.name] || { emoji: "🎉", desc: "节日快乐", advice: "享受节日时光", action: "与家人朋友团聚" }),
       ...festivalData // 优先使用 festivalData 中的动态数据
@@ -213,34 +330,69 @@ const FestivalCard = () => {
           <div className="flex items-center space-x-2">
             <span className="text-xl">{isFestival ? (festivalData?.emoji || "🎉") : "📅"}</span>
             <div>
-              <span className={`font-bold text-sm ${isNewYear ? 'new-year-glow-text' : ''}`}>{currentEvent.name}</span>
+              <span className={`font-bold text-sm ${isNewYear ? 'new-year-glow-text' : ''}`}>
+                {currentEvent.name === "圣诞前夜" ? "平安夜" : 
+                 currentEvent.name === "元旦前夜" ? "跨年夜" : currentEvent.name}
+              </span>
               {currentEvent.lunarDate && (
                 <span className="text-xs opacity-90 block">{currentEvent.lunarDate}</span>
+              )}
+              {/* 显示倒计时信息 */}
+              {currentEvent.isCountdown && (
+                <span className="text-xs opacity-90 block">
+                  距离节日还有 {currentEvent.countdownHours}小时{currentEvent.countdownMinutes}分钟
+                </span>
               )}
             </div>
           </div>
           {isFestival && (
-            <span className={`text-xs ${isNewYear ? 'bg-yellow-400/30 text-yellow-100' : 'bg-white/20 text-white'} px-2 py-1 rounded-full backdrop-blur-sm`}>节日</span>
+            <span className={`text-xs ${isNewYear ? 'bg-yellow-400/30 text-yellow-100' : 'bg-white/20 text-white'} px-2 py-1 rounded-full backdrop-blur-sm`}>
+              {currentEvent.isCountdown ? '倒计时' : '节日'}
+            </span>
           )}
         </div>
       </div>
 
       <div className={`${isNewYear ? 'bg-red-800/20 dark:bg-black/40' : 'bg-white dark:bg-gray-800'} p-3 relative z-10`}>
         <div className="text-center mb-2">
-          <h3 className={`text-sm font-bold ${isNewYear ? 'text-yellow-100' : 'text-gray-800 dark:text-white'}`}>{tip.desc}</h3>
+          <h3 className={`text-sm font-bold ${isNewYear ? 'text-yellow-100' : 'text-gray-800 dark:text-white'}`}>
+            {currentEvent.isCountdown 
+              ? currentEvent.name === "圣诞前夜" 
+                ? "平安夜快乐！" 
+                : currentEvent.name === "元旦前夜" 
+                  ? `迎${currentTime.getFullYear() + 1}新年！` 
+                  : `即将迎来${currentEvent.name}！`
+              : tip.desc}
+          </h3>
         </div>
         <div className="text-xs space-y-1">
           <div className={`p-2 rounded-lg ${isNewYear
             ? 'bg-red-900/40 text-yellow-100/90 border border-yellow-500/30'
             : (isFestival ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400')
             }`}>
-            <span className={`font-bold ${isNewYear ? 'text-yellow-400' : ''}`}>宜:</span> {tip.advice}
+            <span className={`font-bold ${isNewYear ? 'text-yellow-400' : ''}`}>宜:</span> {
+              currentEvent.isCountdown 
+                ? currentEvent.name === "圣诞前夜" 
+                  ? "与亲友共度温馨时光，传递爱与祝福" 
+                  : currentEvent.name === "元旦前夜" 
+                    ? "整理旧年回忆，规划新年目标" 
+                    : '准备庆祝，期待节日到来'
+                : tip.advice
+            }
           </div>
           <div className={`p-2 rounded-lg ${isNewYear
             ? 'bg-orange-900/40 text-yellow-100/90 border border-yellow-500/30'
             : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
             }`}>
-            <span className={`font-bold ${isNewYear ? 'text-yellow-400' : ''}`}>行:</span> {tip.action}
+            <span className={`font-bold ${isNewYear ? 'text-yellow-400' : ''}`}>行:</span> {
+              currentEvent.isCountdown 
+                ? currentEvent.name === "圣诞前夜" 
+                  ? "准备圣诞礼物，装饰圣诞树" 
+                  : currentEvent.name === "元旦前夜" 
+                    ? "准备跨年庆祝，迎接新年开始" 
+                    : '提前准备节日用品，安排庆祝活动'
+                : tip.action
+            }
           </div>
         </div>
       </div>

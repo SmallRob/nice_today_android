@@ -181,7 +181,7 @@ const HuangliComponent = () => {
   const calendarDays = getCalendarDays();
 
   return (
-    <div className={`rounded-xl shadow-lg overflow-hidden ${
+    <div className={`rounded-xl shadow-lg ${
       theme === 'dark' 
         ? 'bg-gray-800/90 backdrop-blur-sm border border-gray-700' 
         : 'bg-white/90 backdrop-blur-sm border border-gray-200'
@@ -301,10 +301,10 @@ const HuangliComponent = () => {
                     ? 'text-gray-500 hover:bg-gray-800'
                     : 'text-gray-400 hover:bg-gray-50'
               }`}
-              style={{ minHeight: '2rem' }}
+              style={{ minHeight: '2.2rem' }}
             >
-              <div className="font-medium">{day.date.getDate()}</div>
-              <div className="text-[0.6rem] opacity-70">
+              <div className="font-medium text-center">{day.date.getDate()}</div>
+              <div className="text-[0.6rem] opacity-70 text-center">
                 {day.huangli?.lunarDate?.substring(0, 2) || ''}
               </div>
               

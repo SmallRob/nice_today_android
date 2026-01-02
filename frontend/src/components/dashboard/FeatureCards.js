@@ -46,6 +46,20 @@ const HoroscopeCard = () => {
 };
 
 /**
+ * 八字命格组件
+ */
+const BaziFateCard = () => {
+  return (
+    <FeatureCard
+      title="八字命格"
+      icon="bazi"
+      category="fortune"
+      route="/bazi/analysis"
+    />
+  );
+};
+
+/**
  * 八字月运组件
  */
 const BaziCard = () => {
@@ -408,6 +422,7 @@ export {
   MBTICard,
   ChineseZodiacCard,
   HoroscopeCard,
+  BaziFateCard,
   BaziCard,
   BiorhythmCard,
   PersonalityTraitCard,
