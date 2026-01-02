@@ -20,6 +20,8 @@ import WuxingHealthIcon from '../icons/WuxingHealthIcon';
 import OrganRhythmIcon from '../icons/OrganRhythmIcon';
 import FishingGameIcon from '../icons/FishingGameIcon';
 import FengShuiCompassIcon from '../icons/FengShuiCompassIcon';
+import LiuyaoIcon from '../icons/LiuyaoIcon';
+import PlumBlossomIcon from '../icons/PlumBlossomIcon';
 
 /**
  * 图标映射表 - 稳定的React组件渲染
@@ -47,6 +49,8 @@ const iconMap = {
   'organ-rhythm': OrganRhythmIcon,
   'fishing-game': FishingGameIcon,
   'feng-shui-compass': FengShuiCompassIcon,
+  'liuyao': LiuyaoIcon,
+  'plum-blossom': PlumBlossomIcon,
 
   // 默认图标（用于category）
   'daily': TodoIcon,

@@ -7,6 +7,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
   const [isCalculating, setIsCalculating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [finalResult, setFinalResult] = useState(null);
+  const [expandedSteps, setExpandedSteps] = useState({});
 
   // 如果已有结果，直接显示
   useEffect(() => {
@@ -52,6 +53,28 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
   };
 
   const wuxingCount = analyzeWuXing(baziData);
+
+  // 切换步骤展开/收起
+  const toggleStepExpand = (index) => {
+    setExpandedSteps(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  // 切换所有步骤展开/收起
+  const toggleAllSteps = () => {
+    const allExpanded = Object.values(expandedSteps).every(v => v === true);
+    if (allExpanded) {
+      setExpandedSteps({});
+    } else {
+      const newExpanded = {};
+      finalResult.steps?.forEach((_, index) => {
+        newExpanded[index] = true;
+      });
+      setExpandedSteps(newExpanded);
+    }
+  };
 
   return (
     <div className="tiebanshenshu-calculation">
@@ -117,7 +140,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
           </div>
 
           <button className="btn-primary start-btn" onClick={performCalculation}>
-            开始皇极起数计算
+            皇极起数计算
           </button>
         </div>
       ) : isCalculating ? (
@@ -165,53 +188,148 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
         </div>
       ) : (
         <div className="calculation-complete">
+          {/* 结果头部 */}
           <div className="result-header">
-            <h4>皇极起数完成</h4>
-            <div className="result-id">
-              计算ID: {finalResult.calculationId}
+            <div className="result-title-group">
+              <div className="success-icon">✓</div>
+              <div className="title-content">
+                <h4>皇极起数完成</h4>
+                <p className="result-subtitle">铁板神数推算已完成</p>
+              </div>
+            </div>
+            <div className="result-meta">
+              <span className="meta-item">
+                <span className="meta-icon">🆔</span>
+                {finalResult.calculationId?.slice(0, 8)}...
+              </span>
+              <span className="meta-item">
+                <span className="meta-icon">⏱️</span>
+                {finalResult.calculationTime}
+              </span>
             </div>
           </div>
 
+          {/* 结果摘要卡片 */}
           <div className="result-summary">
-            <div className="summary-card">
+            <div className="summary-card primary">
               <div className="summary-icon">📜</div>
               <div className="summary-content">
-                <h5>条文定位成功</h5>
-                <p>在万条文库中定位到 {finalResult.clauseNumbers?.length || 0} 条相关神数</p>
+                <h5>条文定位</h5>
+                <p className="value">{finalResult.clauseNumbers?.length || 0}</p>
+                <p className="label">条神数</p>
               </div>
             </div>
 
-            <div className="clause-preview">
-              <h5>条文编号预览</h5>
-              <div className="clause-numbers">
-                {finalResult.clauseNumbers?.slice(0, 10).map((num, index) => (
-                  <span key={index} className="clause-number">{num}</span>
+            <div className="summary-card secondary">
+              <div className="summary-icon">🔢</div>
+              <div className="summary-content">
+                <h5>计算步骤</h5>
+                <p className="value">{finalResult.steps?.length || 0}</p>
+                <p className="label">个阶段</p>
+              </div>
+            </div>
+
+            <div className="summary-card tertiary">
+              <div className="summary-icon">🎯</div>
+              <div className="summary-content">
+                <h5>准确度</h5>
+                <p className="value">高</p>
+                <p className="label">可信</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 详细结果 */}
+          <div className="detailed-results">
+            {/* 八字五行分析 */}
+            <div className="detail-card">
+              <div className="detail-card-header">
+                <h5>八字五行分析</h5>
+                <span className="detail-badge">基于八字</span>
+              </div>
+              <div className="wuxing-bars-result">
+                {Object.entries(finalResult.wuxingAnalysis || wuxingCount).map(([element, count]) => (
+                  <div key={element} className="wuxing-bar-result">
+                    <div className="bar-label">{element}</div>
+                    <div className="bar-container-result">
+                      <div
+                        className={`bar-result bar-${element}`}
+                        style={{ width: `${Math.min(count * 25, 100)}%` }}
+                      >
+                        <span className="bar-count-result">{count}</span>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-                {finalResult.clauseNumbers?.length > 10 && (
-                  <span className="clause-more">...等{finalResult.clauseNumbers.length}条</span>
+              </div>
+            </div>
+
+            {/* 条文编号 */}
+            <div className="detail-card">
+              <div className="detail-card-header">
+                <h5>条文编号详情</h5>
+                <span className="detail-badge">{finalResult.clauseNumbers?.length || 0}条</span>
+              </div>
+              <div className="clause-numbers-result">
+                {finalResult.clauseNumbers?.slice(0, 12).map((num, index) => (
+                  <span key={index} className="clause-number-result">
+                    {num}
+                  </span>
+                ))}
+                {finalResult.clauseNumbers?.length > 12 && (
+                  <span className="clause-more-result">
+                    +{finalResult.clauseNumbers.length - 12}条
+                  </span>
                 )}
               </div>
             </div>
-          </div>
 
-          <div className="calculation-review">
-            <h5>计算过程回顾</h5>
-            <div className="steps-review">
-              {finalResult.steps?.map((step, index) => (
-                <div key={index} className="review-step">
-                  <div className="review-step-header">
-                    <span className="step-index">第{step.step}步</span>
-                    <span className="step-title">{step.title}</span>
+            {/* 计算过程详解 */}
+            <div className="detail-card">
+              <div className="detail-card-header">
+                <h5>计算过程详解</h5>
+                <button className="expand-all-btn" onClick={toggleAllSteps}>
+                  {Object.values(expandedSteps).every(v => v === true) ? '全部收起' : '全部展开'}
+                </button>
+              </div>
+              <div className="steps-result">
+                {finalResult.steps?.map((step, index) => (
+                  <div key={index} className={`step-result ${expandedSteps[index] ? 'expanded' : ''}`}>
+                    <div
+                      className="step-result-header"
+                      onClick={() => toggleStepExpand(index)}
+                    >
+                      <div className="step-indicator">{step.step}</div>
+                      <div className="step-result-title">{step.title}</div>
+                      <div className={`step-toggle-icon ${expandedSteps[index] ? 'expanded' : ''}`}>
+                        ▼
+                      </div>
+                    </div>
+                    {expandedSteps[index] && (
+                      <div className="step-result-content">
+                        <p className="step-result-description">{step.description}</p>
+                        {step.details && step.details.length > 0 && (
+                          <div className="step-result-details">
+                            <h6>详细信息:</h6>
+                            <ul>
+                              {step.details.map((detail, i) => (
+                                <li key={i}>{detail}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="review-step-desc">{step.description}</div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
+          {/* 操作按钮 */}
           <div className="calculation-actions">
             <button
-              className="btn-primary"
+              className="btn-primary btn-large primary-action"
               onClick={() => {
                 const element = document.getElementById('clause-display-section');
                 if (element) {
@@ -219,11 +337,19 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
                 }
               }}
             >
-              抽取条文解读
+              <span className="action-icon">📖</span>
+              查看条文解读
             </button>
-            <button className="btn-secondary" onClick={handleRecalculate}>
-              重新计算
-            </button>
+            <div className="secondary-actions">
+              <button className="btn-secondary" onClick={handleRecalculate}>
+                <span className="action-icon">🔄</span>
+                重新计算
+              </button>
+              <button className="btn-secondary">
+                <span className="action-icon">💾</span>
+                保存结果
+              </button>
+            </div>
           </div>
         </div>
       )}

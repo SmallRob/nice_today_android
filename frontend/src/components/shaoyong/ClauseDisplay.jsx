@@ -184,36 +184,71 @@ const ClauseDisplay = ({ calculationResult, onClauseSelect, selectedClause }) =>
         </div>
       ) : (
         <>
-          <div className="clause-controls">
-            <div className="tab-navigation">
-              {categories.map(category => (
-                <button
-                  key={category}
-                  className={`tab-btn ${activeTab === category ? 'active' : ''}`}
-                  onClick={() => setActiveTab(category)}
-                >
-                  {category === 'all' ? '全部' : category}
-                  {categoryStats[category] && (
-                    <span className="tab-count">{categoryStats[category]}</span>
-                  )}
-                </button>
-              ))}
+          <div className="clause-header-section">
+            <div className="clause-summary">
+              <h3>神数条文抽取结果</h3>
+              <div className="summary-stats">
+                <div className="stat-item">
+                  <span className="stat-value">{filteredClauses.length}</span>
+                  <span className="stat-label">条文数量</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-value">{Object.keys(categoryStats).length}</span>
+                  <span className="stat-label">分类数</span>
+                </div>
+              </div>
             </div>
 
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="搜索条文内容..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <span className="search-icon">🔍</span>
+            <div className="clause-controls">
+              <div className="tab-navigation">
+                {categories.map(category => (
+                  <button
+                    key={category}
+                    className={`tab-btn ${activeTab === category ? 'active' : ''}`}
+                    onClick={() => setActiveTab(category)}
+                  >
+                    {category === 'all' ? '全部' : category}
+                    {categoryStats[category] && (
+                      <span className="tab-count">{categoryStats[category]}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="search-and-filter">
+                <div className="search-box">
+                  <input
+                    type="text"
+                    placeholder="搜索条文内容..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <span className="search-icon">🔍</span>
+                </div>
+                
+                <div className="clause-confidence">
+                  <label>置信度</label>
+                  <select>
+                    <option value="all">全部</option>
+                    <option value="high">高</option>
+                    <option value="medium">中</option>
+                    <option value="low">低</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="clauses-container">
             <div className="clause-list-section">
-              <h5>铁板神数条文 ({filteredClauses.length}条)</h5>
+              <div className="clause-filters">
+                <div className="filter-controls">
+                  <button className="filter-btn active">最新</button>
+                  <button className="filter-btn">相关性</button>
+                  <button className="filter-btn">分类</button>
+                </div>
+              </div>
+              
               <div className="clause-list">
                 {filteredClauses.map((clause, index) => (
                   <div
@@ -222,12 +257,20 @@ const ClauseDisplay = ({ calculationResult, onClauseSelect, selectedClause }) =>
                     onClick={() => onClauseSelect(clause)}
                   >
                     <div className="clause-header">
-                      <span className="clause-number">第{clause.number}条</span>
-                      <span className="clause-category">{clause.category}</span>
+                      <div className="clause-id-info">
+                        <span className="clause-number">第{clause.number}条</span>
+                        <span className="clause-category">{clause.category}</span>
+                      </div>
+                      <div className="clause-confidence-indicator high">高信度</div>
                     </div>
                     <div className="clause-title">{clause.title}</div>
                     <div className="clause-content">{clause.content}</div>
                     <div className="clause-interpretation">{clause.interpretation}</div>
+                    <div className="clause-actions">
+                      <button className="action-btn">关联</button>
+                      <button className="action-btn">收藏</button>
+                      <button className="action-btn">分享</button>
+                    </div>
                     {clause.isRandomMatch && (
                       <div className="random-match-tag">模拟匹配</div>
                     )}
@@ -236,60 +279,104 @@ const ClauseDisplay = ({ calculationResult, onClauseSelect, selectedClause }) =>
               </div>
             </div>
 
-            <div className="clause-detail">
+            <div className="clause-detail-panel">
               {selectedClause ? (
                 <div className="detail-container">
                   <div className="detail-header">
                     <div className="detail-title">{selectedClause.title}</div>
                     <div className="detail-meta">
-                      <span>编号: {selectedClause.number}</span>
-                      <span>分类: {selectedClause.category}</span>
+                      <span className="meta-item">编号: {selectedClause.number}</span>
+                      <span className="meta-item">分类: {selectedClause.category}</span>
+                      <span className="meta-item confidence high">高信度</span>
                     </div>
                   </div>
 
                   <div className="detail-content">
                     <div className="detail-section">
                       <h5>神数原文</h5>
-                      <p>{selectedClause.content}</p>
+                      <p className="original-text">{selectedClause.content}</p>
                     </div>
 
                     <div className="detail-section">
                       <h5>条文解读</h5>
-                      <p>{selectedClause.interpretation}</p>
+                      <p className="interpretation-text">{selectedClause.interpretation}</p>
                     </div>
 
                     <div className="detail-section">
                       <h5>详细解析</h5>
-                      <p>{selectedClause.details}</p>
+                      <p className="detailed-text">{selectedClause.details}</p>
                     </div>
+
+                    <div className="detail-section related-clauses">
+                      <h5>相关条文</h5>
+                      <div className="related-list">
+                        {clauses
+                          .filter(c => c.category === selectedClause.category && c.id !== selectedClause.id)
+                          .slice(0, 3)
+                          .map(related => (
+                            <div 
+                              key={related.id} 
+                              className="related-item"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onClauseSelect(related);
+                              }}
+                            >
+                              <span className="related-number">{related.number}</span>
+                              <span className="related-title">{related.title}</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    </div>
+
+                    <div className="detail-section interpretation-context">
+                      <h5>八字关联分析</h5>
+                      <div className="context-analysis">
+                        <p>根据您的八字信息，此条文与您的命局具有较高相关性，特别是在{selectedClause.category}方面有显著体现。</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="detail-actions">
+                    <button className="action-btn primary">深度解读</button>
+                    <button className="action-btn secondary">添加笔记</button>
+                    <button className="action-btn secondary">分享结果</button>
                   </div>
                 </div>
               ) : (
                 <div className="no-clause-selected">
-                  <div className="icon">👈</div>
+                  <div className="icon">📖</div>
                   <h4>选择条文查看详情</h4>
-                  <p>点击上方或左侧条文卡片查看详细解读</p>
+                  <p>点击左侧条文卡片查看详细解读和分析</p>
+                  <div className="selection-tips">
+                    <p>💡 提示：可按分类筛选或使用搜索功能快速定位相关条文</p>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="clause-insights">
-            <h5>铁板神数使用心得</h5>
+          <div className="clause-insights-section">
+            <h4>铁板神数解读指南</h4>
             <div className="insights-grid">
               <div className="insight-card">
+                <div className="card-icon">🔍</div>
                 <h6>条文特点</h6>
                 <p>铁板神数条文语言精炼，信息量大，往往一句包含多层含义。</p>
               </div>
               <div className="insight-card">
+                <div className="card-icon">📋</div>
                 <h6>查条方法</h6>
                 <p>传统查条需用算盘计算，现代可用计算机辅助，但原理不变。</p>
               </div>
               <div className="insight-card">
+                <div className="card-icon">✅</div>
                 <h6>验证方法</h6>
                 <p>可通过已知事实验证前几条条文，确认计算准确后再看未来。</p>
               </div>
               <div className="insight-card">
+                <div className="card-icon">🌟</div>
                 <h6>应用原则</h6>
                 <p>知命而不认命，了解命运是为了更好地把握和改善人生。</p>
               </div>

@@ -140,6 +140,8 @@ const OrganRhythmPage = lazyLoadWithErrorHandling(() => import('./pages/OrganRhy
 const ShaoyongYixuePage = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
 const FishingGamePage = lazyLoadWithErrorHandling(() => import('./pages/FishingGamePage'));
 const FengShuiCompassPage = lazyLoadWithErrorHandling(() => import('./pages/FengShuiCompassPage'));
+const LiuyaoPage = lazyLoadWithErrorHandling(() => import('./pages/SixYaoDivination'));
+const PlumBlossomPage = lazyLoadWithErrorHandling(() => import('./pages/PlumBlossomDivination'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -224,6 +226,8 @@ const AppLayout = () => {
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/shaoyong-yixue" element={<ShaoyongYixuePage />} />
             <Route path="/feng-shui-compass" element={<FengShuiCompassPage />} />
+            <Route path="/liuyao" element={<LiuyaoPage />} />
+            <Route path="/plum-blossom" element={<PlumBlossomPage />} />
           </Routes>
         </SafeSuspense>
       </div>

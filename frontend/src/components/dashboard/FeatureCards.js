@@ -334,6 +334,34 @@ const FengShuiCompassCard = () => {
   );
 };
 
+/**
+ * 六爻占卜组件
+ */
+const LiuyaoCard = () => {
+  return (
+    <FeatureCard
+      title="六爻占卜"
+      icon="liuyao"
+      category="fortune"
+      route="/liuyao"
+    />
+  );
+};
+
+/**
+ * 梅花易数组件
+ */
+const PlumBlossomCard = () => {
+  return (
+    <FeatureCard
+      title="梅花易数"
+      icon="plum-blossom"
+      category="fortune"
+      route="/plum-blossom"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -355,5 +383,7 @@ export {
   WuxingHealthCard,
   OrganRhythmCard,
   FishingGameCard,
-  FengShuiCompassCard
+  FengShuiCompassCard,
+  LiuyaoCard,
+  PlumBlossomCard
 };

@@ -24,7 +24,9 @@ import {
   WuxingHealthCard,
   OrganRhythmCard,
   FishingGameCard,
-  FengShuiCompassCard
+  FengShuiCompassCard,
+  LiuyaoCard,
+  PlumBlossomCard
 } from '../components/dashboard/FeatureCards';
 import FeatureDragPanel from '../components/dashboard/FeatureDragPanel';
 import {
@@ -55,7 +57,9 @@ const ALL_FEATURES = [
   { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类', type: 'entertainment' },
   { component: FishingGameCard, name: 'FishingGameCard', category: '娱乐休闲类', type: 'entertainment' },
   { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类', type: 'health' },
-  { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类', type: 'health' }
+  { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类', type: 'health' },
+  { component: LiuyaoCard, name: 'LiuyaoCard', category: '运势分析类', type: 'fortune' },
+  { component: PlumBlossomCard, name: 'PlumBlossomCard', category: '运势分析类', type: 'fortune' }
 ];
 
 /**

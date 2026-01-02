@@ -341,7 +341,7 @@ const BaziInput = ({ onSubmit }) => {
 
         <div className="submit-section">
           <button className="btn-primary" onClick={handleSubmit}>
-            确认八字，开始皇极起数
+            确认八字
           </button>
           <button className="btn-secondary" onClick={handleRandomBazi}>
             随机生成八字
@@ -349,7 +349,7 @@ const BaziInput = ({ onSubmit }) => {
         </div>
       </div>
 
-      <div className="bazi-guide">
+      {/* <div className="bazi-guide">
         <h4>八字输入指南</h4>
         <div className="guide-content">
           <p><strong>年柱：</strong>出生年份的天干地支，代表祖上、父母</p>
@@ -358,7 +358,7 @@ const BaziInput = ({ onSubmit }) => {
           <p><strong>时柱：</strong>出生时辰的天干地支，代表子女、晚年</p>
           <p><strong>性别：</strong>铁板神数男女命推算方法不同，必须准确选择</p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
