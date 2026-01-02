@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { performTiebanshenshuCalculation, analyzeWuXing } from '../../utils/shaoyong-algorithm';
 import './TiebanshenshuCalculation.css';
 
 const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) => {
@@ -15,142 +16,31 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
     }
   }, [result]);
 
-  // 天干地支转数字（简化版）
-  const stemToNumber = (stem) => {
-    const stemMap = {
-      '甲': 1, '乙': 2, '丙': 3, '丁': 4, '戊': 5,
-      '己': 6, '庚': 7, '辛': 8, '壬': 9, '癸': 10
-    };
-    return stemMap[stem] || 1;
-  };
-
-  const branchToNumber = (branch) => {
-    const branchMap = {
-      '子': 1, '丑': 2, '寅': 3, '卯': 4, '辰': 5, '巳': 6,
-      '午': 7, '未': 8, '申': 9, '酉': 10, '戌': 11, '亥': 12
-    };
-    return branchMap[branch] || 1;
-  };
-
   // 模拟皇极起数算法
-  const performCalculation = () => {
+  const performCalculation = async () => {
     setIsCalculating(true);
     setCalculationSteps([]);
     setProgress(0);
 
-    const steps = [];
+    try {
+      // 使用新的算法模块进行计算
+      const calculationResult = await performTiebanshenshuCalculation(baziData);
 
-    // 第一步：八字转数
-    setTimeout(() => {
-      steps.push({
-        step: 1,
-        title: '八字转先天数',
-        description: `将八字天干地支转化为先天八卦数`,
-        details: [
-          `年柱 ${baziData.year.stem}${baziData.year.branch} → ${stemToNumber(baziData.year.stem)}/${branchToNumber(baziData.year.branch)}`,
-          `月柱 ${baziData.month.stem}${baziData.month.branch} → ${stemToNumber(baziData.month.stem)}/${branchToNumber(baziData.month.branch)}`,
-          `日柱 ${baziData.day.stem}${baziData.day.branch} → ${stemToNumber(baziData.day.stem)}/${branchToNumber(baziData.day.branch)}`,
-          `时柱 ${baziData.hour.stem}${baziData.hour.branch} → ${stemToNumber(baziData.hour.stem)}/${branchToNumber(baziData.hour.branch)}`
-        ]
-      });
-      setCalculationSteps([...steps]);
-      setProgress(25);
-    }, 1000);
-
-    // 第二步：计算四柱总数
-    setTimeout(() => {
-      const yearNum = stemToNumber(baziData.year.stem) + branchToNumber(baziData.year.branch);
-      const monthNum = stemToNumber(baziData.month.stem) + branchToNumber(baziData.month.branch);
-      const dayNum = stemToNumber(baziData.day.stem) + branchToNumber(baziData.day.branch);
-      const hourNum = stemToNumber(baziData.hour.stem) + branchToNumber(baziData.hour.branch);
-      const total = yearNum + monthNum + dayNum + hourNum;
-
-      steps.push({
-        step: 2,
-        title: '计算四柱总数',
-        description: `四柱数相加，得先天总数`,
-        details: [
-          `年柱数: ${yearNum}`,
-          `月柱数: ${monthNum}`,
-          `日柱数: ${dayNum}`,
-          `时柱数: ${hourNum}`,
-          `总数: ${total}`
-        ]
-      });
-      setCalculationSteps([...steps]);
-      setProgress(50);
-    }, 2000);
-
-    // 第三步：皇极起数
-    setTimeout(() => {
-      const baseNumber = 10000; // 万条文库基础
-      const genderFactor = baziData.gender === 'male' ? 1 : 2;
-      const leapFactor = baziData.isLeapMonth ? 1.5 : 1;
-
-      // 模拟复杂计算
-      const calculation = [
-        { operation: '总数 × 八卦基数', value: '× 64' },
-        { operation: '加性别因子', value: genderFactor === 1 ? '+ 乾数' : '+ 坤数' },
-        { operation: '闰月调整', value: leapFactor === 1.5 ? '× 1.5' : '不变' },
-        { operation: '归藏数转换', value: '→ 归藏卦数' }
-      ];
-
-      steps.push({
-        step: 3,
-        title: '皇极起数法',
-        description: '应用皇极经世起数规则',
-        details: calculation.map(item => `${item.operation}: ${item.value}`),
-        calculation
-      });
-      setCalculationSteps([...steps]);
-      setProgress(75);
-    }, 3000);
-
-    // 第四步：生成条文编号
-    setTimeout(() => {
-      // 生成一组随机条文编号 (1-12000)
-      const clauseCount = Math.floor(Math.random() * 6) + 5; // 5-10条
-      const clauseNumbers = [];
-      for (let i = 0; i < clauseCount; i++) {
-        clauseNumbers.push(Math.floor(Math.random() * 12000) + 1);
-      }
-
-      // 排序并去重
-      const uniqueClauses = [...new Set(clauseNumbers)].sort((a, b) => a - b);
-
-      steps.push({
-        step: 4,
-        title: '生成条文编号',
-        description: `在万条文库中定位 ${uniqueClauses.length} 条神数`,
-        details: [
-          `库中定位: 第 ${uniqueClauses[0]} 条`,
-          `关联条文: ${uniqueClauses.slice(1).join(', ')}`,
-          `总条文数: 12000 条`,
-          `命中率: ${((uniqueClauses.length / 12000) * 100).toFixed(4)}%`
-        ],
-        clauseNumbers: uniqueClauses
-      });
-
-      setCalculationSteps([...steps]);
+      // 更新进度和结果显示
+      setCalculationSteps(calculationResult.steps);
       setProgress(100);
-
-      // 生成最终结果
-      const finalResult = {
-        baziData,
-        steps: [...steps],
-        clauseNumbers: uniqueClauses,
-        calculationId: Date.now().toString(36).toUpperCase(),
-        calculationTime: new Date().toLocaleTimeString()
-      };
-
-      setFinalResult(finalResult);
+      
+      setFinalResult(calculationResult);
       setIsCalculating(false);
 
       // 通知父组件
       setTimeout(() => {
-        onCalculationComplete(finalResult);
+        onCalculationComplete(calculationResult);
       }, 500);
-    }, 4000);
+    } catch (error) {
+      console.error('Calculation failed:', error);
+      setIsCalculating(false);
+    }
   };
 
   // 重新计算
@@ -161,25 +51,7 @@ const TiebanshenshuCalculation = ({ baziData, onCalculationComplete, result }) =
     performCalculation();
   };
 
-  // 八字五行分析
-  const analyzeWuXing = () => {
-    const stemWuxing = {
-      '甲': '木', '乙': '木', '丙': '火', '丁': '火',
-      '戊': '土', '己': '土', '庚': '金', '辛': '金',
-      '壬': '水', '癸': '水'
-    };
-
-    const wuxingCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
-
-    [baziData.year.stem, baziData.month.stem, baziData.day.stem, baziData.hour.stem]
-      .forEach(stem => {
-        wuxingCount[stemWuxing[stem]]++;
-      });
-
-    return wuxingCount;
-  };
-
-  const wuxingCount = analyzeWuXing();
+  const wuxingCount = analyzeWuXing(baziData);
 
   return (
     <div className="tiebanshenshu-calculation">

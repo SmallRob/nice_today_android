@@ -2,11 +2,82 @@ import React from 'react';
 import './InterpretationPanel.css';
 
 const InterpretationPanel = ({ result }) => {
-  const { 
-    originalHexagram, 
-    changingLine,
-    method
-  } = result;
+  // Handle both old and new result formats
+  if (result.interpretation) {
+    // New format from algorithm module
+    const { 
+      method,
+      question,
+      hexagram,
+      interpretation 
+    } = result;
+
+    // 梅花易数解读原则
+    const principles = [
+      '体用生克：本卦中无动爻的卦为体卦，有动爻的卦为用卦。体克用吉，用克体凶。',
+      '卦气旺衰：根据起卦时节判断五行旺衰，春季木旺，夏季火旺等。',
+      '互卦参详：互卦揭示事情发展过程中的隐藏因素。',
+      '变卦定果：变卦预示事情最终的发展结果。',
+      '外应参考：起卦时的周围环境、声音、现象等可作为参考。'
+    ];
+
+    return (
+      <div className="interpretation-panel">
+        <div className="interpretation-summary">
+          <h3>卦象总解</h3>
+          <div className="summary-card">
+            <h4>{hexagram.name}</h4>
+            <p>{interpretation.description}</p>
+            <div className="summary-tags">
+              <span className="tag fortune-tag">{interpretation.fortune}</span>
+              <span className="tag">五行关系：{interpretation.elementInteraction}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="practical-advice">
+          <h3>实践建议</h3>
+          <div className="advice-card">
+            <p>{interpretation.advice}</p>
+          </div>
+        </div>
+
+        <div className="meihua-principles">
+          <h3>梅花易数解读原则</h3>
+          <div className="principles-list">
+            {principles.map((principle, index) => (
+              <div key={index} className="principle-item">
+                <span className="principle-number">{index + 1}</span>
+                <p>{principle}</p>
+              </div>
+            ))}
+          </div>
+          <div className="note">
+            <p><strong>注：</strong>梅花易数强调"心易"，即用心体会卦象，不执着于固定解释。同一卦象在不同情境、不同问卦者心中，解读应有不同。</p>
+          </div>
+        </div>
+
+        <div className="method-note">
+          <h4>关于{method}的说明</h4>
+          <p>
+            {method === '数字起卦' 
+              ? '您选择了数字起卦法，这体现了邵雍"万物皆数"的思想。数字中蕴含天地之理，通过简单数字即可窥探事物规律。'
+              : method === '时间起卦'
+              ? '您选择了时间起卦法，时间流转中蕴含天地节律。此时此地的时空信息与卦象相应，揭示当下时运。'
+              : '您选择了随机起卦法，随机之中蕴含必然。心念一动，卦象即生，反映内心潜意识的提示。'
+            }
+          </p>
+          <p><strong>占卜问题：</strong>{question || '未提供问题'}</p>
+        </div>
+      </div>
+    );
+  } else {
+    // Fallback to the old format for backward compatibility
+    const { 
+      originalHexagram, 
+      changingLine,
+      method
+    } = result;
 
   // 卦象解读数据 (简化版)
   const interpretations = {
@@ -162,6 +233,7 @@ const InterpretationPanel = ({ result }) => {
       </div>
     </div>
   );
+  }
 };
 
 export default InterpretationPanel;

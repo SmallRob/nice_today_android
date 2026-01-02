@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { calculateMeihuaDivination, generateHexagramFromNumbers } from '../../utils/shaoyong-algorithm';
 import './DivinationForm.css';
 
 const DivinationForm = ({ onDivination }) => {
@@ -7,6 +8,7 @@ const DivinationForm = ({ onDivination }) => {
   const [number2, setNumber2] = useState('');
   const [number3, setNumber3] = useState('');
   const [customTime, setCustomTime] = useState('');
+  const [question, setQuestion] = useState('');
 
   const handleNumberDivination = () => {
     // 数字起卦法：前两数除以8取余数得上卦和下卦，第三数除以6取余数得动爻
@@ -14,20 +16,16 @@ const DivinationForm = ({ onDivination }) => {
     const num2 = parseInt(number2) || Math.floor(Math.random() * 100) + 1;
     const num3 = parseInt(number3) || Math.floor(Math.random() * 6) + 1;
     
-    const upperTrigram = (num1 % 8) || 8;
-    const lowerTrigram = (num2 % 8) || 8;
-    const changingLine = (num3 % 6) || 6;
-    
-    const result = {
-      method: '数字起卦',
-      numbers: [num1, num2, num3],
-      upperTrigram,
-      lowerTrigram,
-      changingLine,
-      originalHexagram: calculateHexagram(upperTrigram, lowerTrigram),
-      interchangingHexagram: calculateInterchangingHexagram(upperTrigram, lowerTrigram),
-      changingHexagram: calculateChangingHexagram(upperTrigram, lowerTrigram, changingLine),
+    const divinationData = {
+      method: 'number',
+      upperNumber: (num1 % 8) || 8,
+      lowerNumber: (num2 % 8) || 8,
+      changingYao: (num3 % 6) || 6,
+      question: question || '未提供问题',
+      numbers: [num1, num2, num3]
     };
+    
+    const result = calculateMeihuaDivination(divinationData);
     
     onDivination(result);
   };
@@ -46,16 +44,17 @@ const DivinationForm = ({ onDivination }) => {
     const lowerNum = (hour + minute) % 8 || 8;
     const changingNum = (year + month + day + hour + minute) % 6 || 6;
     
-    const result = {
-      method: customTime ? '指定时间起卦' : '当前时间起卦',
-      time: timeToUse.toLocaleString(),
-      upperTrigram: upperNum,
-      lowerTrigram: lowerNum,
-      changingLine: changingNum,
-      originalHexagram: calculateHexagram(upperNum, lowerNum),
-      interchangingHexagram: calculateInterchangingHexagram(upperNum, lowerNum),
-      changingHexagram: calculateChangingHexagram(upperNum, lowerNum, changingNum),
+    const divinationData = {
+      method: customTime ? 'time' : 'time',
+      upperNumber: upperNum,
+      lowerNumber: lowerNum,
+      changingYao: changingNum,
+      question: question || '未提供问题',
+      time: timeToUse.toLocaleString()
     };
+    
+    const result = calculateMeihuaDivination(divinationData);
+    result.method = customTime ? '指定时间起卦' : '当前时间起卦';
     
     onDivination(result);
   };
@@ -66,46 +65,18 @@ const DivinationForm = ({ onDivination }) => {
     const randomLower = Math.floor(Math.random() * 8) + 1;
     const randomChanging = Math.floor(Math.random() * 6) + 1;
     
-    const result = {
-      method: '随机起卦',
-      upperTrigram: randomUpper,
-      lowerTrigram: randomLower,
-      changingLine: randomChanging,
-      originalHexagram: calculateHexagram(randomUpper, randomLower),
-      interchangingHexagram: calculateInterchangingHexagram(randomUpper, randomLower),
-      changingHexagram: calculateChangingHexagram(randomUpper, randomLower, randomChanging),
+    const divinationData = {
+      method: 'random',
+      upperNumber: randomUpper,
+      lowerNumber: randomLower,
+      changingYao: randomChanging,
+      question: question || '未提供问题'
     };
     
+    const result = calculateMeihuaDivination(divinationData);
+    result.method = '随机起卦';
+    
     onDivination(result);
-  };
-
-  // 计算本卦
-  const calculateHexagram = (upper, lower) => {
-    // 简化版：返回卦象编号 (1-64)
-    return (upper - 1) * 8 + lower;
-  };
-
-  // 计算互卦
-  const calculateInterchangingHexagram = (upper, lower) => {
-    // 互卦取本卦中间四爻，二三四爻为下卦，三四五爻为上卦
-    // 简化处理：返回一个随机的互卦
-    return Math.floor(Math.random() * 64) + 1;
-  };
-
-  // 计算变卦
-  const calculateChangingHexagram = (upper, lower, changingLine) => {
-    // 变卦：动爻变化后得到的新卦
-    // 简化处理：返回一个基于动爻变化的卦
-    const changeFactor = changingLine % 2 === 0 ? 1 : -1;
-    let newUpper = upper + changeFactor;
-    let newLower = lower - changeFactor;
-    
-    if (newUpper > 8) newUpper = 1;
-    if (newUpper < 1) newUpper = 8;
-    if (newLower > 8) newLower = 1;
-    if (newLower < 1) newLower = 8;
-    
-    return (newUpper - 1) * 8 + newLower;
   };
 
   const resetForm = () => {
@@ -113,6 +84,7 @@ const DivinationForm = ({ onDivination }) => {
     setNumber2('');
     setNumber3('');
     setCustomTime('');
+    setQuestion('');
   };
 
   return (
@@ -136,6 +108,17 @@ const DivinationForm = ({ onDivination }) => {
         >
           随机起卦
         </button>
+      </div>
+
+      {/* 问题输入框 - 适用于所有起卦方法 */}
+      <div className="form-group">
+        <label>占卜问题（可选）</label>
+        <input
+          type="text"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="请输入您想占卜的问题"
+        />
       </div>
 
       {method === 'number' && (

@@ -1,17 +1,16 @@
 import React from 'react';
+import { generateHexagramFromNumbers } from '../../utils/shaoyong-algorithm';
 import './HexagramDisplay.css';
 
 const HexagramDisplay = ({ result }) => {
+  // Handle both old and new result formats
   const { 
     method, 
     numbers, 
     time, 
-    upperTrigram, 
-    lowerTrigram, 
-    changingLine,
-    originalHexagram,
-    interchangingHexagram,
-    changingHexagram
+    question,
+    hexagram,
+    interpretation
   } = result;
 
   // 八卦名称和符号
@@ -79,80 +78,153 @@ const HexagramDisplay = ({ result }) => {
     return lines;
   };
 
-  const originalName = getHexagramName(originalHexagram);
-  const interchangingName = getHexagramName(interchangingHexagram);
-  const changingName = getHexagramName(changingHexagram);
-
-  return (
-    <div className="hexagram-display">
-      <div className="divination-info">
-        <h3>起卦信息</h3>
-        <p><strong>起卦方式：</strong>{method}</p>
-        {numbers && <p><strong>所用数字：</strong>{numbers.join(', ')}</p>}
-        {time && <p><strong>起卦时间：</strong>{time}</p>}
-        <p><strong>上卦：</strong>{trigramNames[upperTrigram].name} ({trigramNames[upperTrigram].nature})</p>
-        <p><strong>下卦：</strong>{trigramNames[lowerTrigram].name} ({trigramNames[lowerTrigram].nature})</p>
-        <p><strong>动爻：</strong>第{changingLine}爻</p>
-      </div>
-
-      <div className="hexagrams-container">
-        <div className="hexagram-card">
-          <h4>本卦</h4>
-          <div className="hexagram-symbol">
-            {renderHexagram(upperTrigram, lowerTrigram)}
-          </div>
-          <div className="hexagram-info">
-            <p className="hexagram-name">{originalName.name}</p>
-            <p className="hexagram-enname">{originalName.enName}</p>
-            <p className="hexagram-desc">{originalName.description}</p>
-            <p className="hexagram-composition">
-              {trigramNames[upperTrigram].nature} + {trigramNames[lowerTrigram].nature}
-            </p>
-          </div>
+  // If the result has the new format (from the algorithm module), use it
+  if (hexagram) {
+    const originalName = getHexagramName(hexagram.number);
+    
+    return (
+      <div className="hexagram-display">
+        <div className="divination-info">
+          <h3>起卦信息</h3>
+          <p><strong>占卜问题：</strong>{question || '未提供问题'}</p>
+          <p><strong>起卦方式：</strong>{method}</p>
+          {numbers && <p><strong>所用数字：</strong>{numbers.join(', ')}</p>}
+          {time && <p><strong>起卦时间：</strong>{time}</p>}
+          <p><strong>上卦：</strong>{hexagram.upper.name} ({hexagram.upper.element})</p>
+          <p><strong>下卦：</strong>{hexagram.lower.name} ({hexagram.lower.element})</p>
+          <p><strong>卦数：</strong>{hexagram.number}</p>
         </div>
 
-        <div className="hexagram-card">
-          <h4>互卦</h4>
-          <div className="hexagram-symbol">
-            {renderHexagram(upperTrigram, lowerTrigram)}
-          </div>
-          <div className="hexagram-info">
-            <p className="hexagram-name">{interchangingName.name}</p>
-            <p className="hexagram-enname">{interchangingName.enName}</p>
-            <p className="hexagram-desc">{interchangingName.description}</p>
-            <p className="hexagram-composition">卦中藏卦，事中藏事</p>
-          </div>
-        </div>
-
-        <div className="hexagram-card changing">
-          <h4>变卦 <span className="changing-badge">动爻变化</span></h4>
-          <div className="hexagram-symbol">
-            {renderHexagram(upperTrigram, lowerTrigram, changingLine)}
-          </div>
-          <div className="hexagram-info">
-            <p className="hexagram-name">{changingName.name}</p>
-            <p className="hexagram-enname">{changingName.enName}</p>
-            <p className="hexagram-desc">{changingName.description}</p>
-            <p className="hexagram-composition">动爻在第{changingLine}爻</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="trigram-explanation">
-        <h4>八卦属性</h4>
-        <div className="trigrams-grid">
-          {Object.values(trigramNames).map((trigram, index) => (
-            <div key={index} className="trigram-item">
-              <span className="trigram-symbol">{trigram.symbol}</span>
-              <span className="trigram-name">{trigram.name}</span>
-              <span className="trigram-nature">{trigram.nature}</span>
-              <span className="trigram-attribute">{trigram.attribute}</span>
+        <div className="hexagrams-container">
+          <div className="hexagram-card">
+            <h4>本卦</h4>
+            <div className="hexagram-symbol">
+              {renderHexagram(hexagram.upper.number || 1, hexagram.lower.number || 1, hexagram.changingYao)}
             </div>
-          ))}
+            <div className="hexagram-info">
+              <p className="hexagram-name">{hexagram.name}</p>
+              <p className="hexagram-enname">{originalName.enName}</p>
+              <p className="hexagram-desc">{originalName.description}</p>
+              <p className="hexagram-composition">
+                {hexagram.upper.element} + {hexagram.lower.element}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {interpretation && (
+          <div className="interpretation-section">
+            <h4>卦象解读</h4>
+            <div className="interpretation-content">
+              <p><strong>运势：</strong><span className={`fortune ${interpretation.fortune}`}>{interpretation.fortune}</span></p>
+              <p><strong>描述：</strong>{interpretation.description}</p>
+              <p><strong>建议：</strong>{interpretation.advice}</p>
+              <p><strong>五行关系：</strong>{interpretation.elementInteraction}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="trigram-explanation">
+          <h4>八卦属性</h4>
+          <div className="trigrams-grid">
+            {Object.values(trigramNames).map((trigram, index) => (
+              <div key={index} className="trigram-item">
+                <span className="trigram-symbol">{trigram.symbol}</span>
+                <span className="trigram-name">{trigram.name}</span>
+                <span className="trigram-nature">{trigram.nature}</span>
+                <span className="trigram-attribute">{trigram.attribute}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    // Fallback to the old format for backward compatibility
+    const { 
+      upperTrigram, 
+      lowerTrigram, 
+      changingLine,
+      originalHexagram,
+      interchangingHexagram,
+      changingHexagram
+    } = result;
+
+    const originalName = getHexagramName(originalHexagram);
+    const interchangingName = getHexagramName(interchangingHexagram);
+    const changingName = getHexagramName(changingHexagram);
+
+    return (
+      <div className="hexagram-display">
+        <div className="divination-info">
+          <h3>起卦信息</h3>
+          <p><strong>起卦方式：</strong>{method}</p>
+          {numbers && <p><strong>所用数字：</strong>{numbers.join(', ')}</p>}
+          {time && <p><strong>起卦时间：</strong>{time}</p>}
+          <p><strong>上卦：</strong>{trigramNames[upperTrigram].name} ({trigramNames[upperTrigram].nature})</p>
+          <p><strong>下卦：</strong>{trigramNames[lowerTrigram].name} ({trigramNames[lowerTrigram].nature})</p>
+          <p><strong>动爻：</strong>第{changingLine}爻</p>
+        </div>
+
+        <div className="hexagrams-container">
+          <div className="hexagram-card">
+            <h4>本卦</h4>
+            <div className="hexagram-symbol">
+              {renderHexagram(upperTrigram, lowerTrigram)}
+            </div>
+            <div className="hexagram-info">
+              <p className="hexagram-name">{originalName.name}</p>
+              <p className="hexagram-enname">{originalName.enName}</p>
+              <p className="hexagram-desc">{originalName.description}</p>
+              <p className="hexagram-composition">
+                {trigramNames[upperTrigram].nature} + {trigramNames[lowerTrigram].nature}
+              </p>
+            </div>
+          </div>
+
+          <div className="hexagram-card">
+            <h4>互卦</h4>
+            <div className="hexagram-symbol">
+              {renderHexagram(upperTrigram, lowerTrigram)}
+            </div>
+            <div className="hexagram-info">
+              <p className="hexagram-name">{interchangingName.name}</p>
+              <p className="hexagram-enname">{interchangingName.enName}</p>
+              <p className="hexagram-desc">{interchangingName.description}</p>
+              <p className="hexagram-composition">卦中藏卦，事中藏事</p>
+            </div>
+          </div>
+
+          <div className="hexagram-card changing">
+            <h4>变卦 <span className="changing-badge">动爻变化</span></h4>
+            <div className="hexagram-symbol">
+              {renderHexagram(upperTrigram, lowerTrigram, changingLine)}
+            </div>
+            <div className="hexagram-info">
+              <p className="hexagram-name">{changingName.name}</p>
+              <p className="hexagram-enname">{changingName.enName}</p>
+              <p className="hexagram-desc">{changingName.description}</p>
+              <p className="hexagram-composition">动爻在第{changingLine}爻</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="trigram-explanation">
+          <h4>八卦属性</h4>
+          <div className="trigrams-grid">
+            {Object.values(trigramNames).map((trigram, index) => (
+              <div key={index} className="trigram-item">
+                <span className="trigram-symbol">{trigram.symbol}</span>
+                <span className="trigram-name">{trigram.name}</span>
+                <span className="trigram-nature">{trigram.nature}</span>
+                <span className="trigram-attribute">{trigram.attribute}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default HexagramDisplay;
