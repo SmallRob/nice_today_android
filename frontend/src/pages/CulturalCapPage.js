@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import './styles/culturalcap.css';
+import './styles/culturalcap-tailwind.css';
 
 function CulturalCup() {
   const { theme } = useTheme();
@@ -132,16 +132,35 @@ function CulturalCup() {
 
   // 渲染卦杯
   const renderCup = (type, index) => {
-    let cupClass = "cup";
-    
-    if (type === 0) cupClass += " flat";
-    if (type === 1) cupClass += " convex";
-    if (type === 2) cupClass += " standing";
-    if (isShaking) cupClass += " shaking";
-    
+    let cupStyle = "w-16 h-20 md:w-20 md:h-24 relative transition-all duration-500 flex items-center justify-center ";
+
+    if (type === 0) { // 平
+      cupStyle += theme === 'dark'
+        ? "bg-amber-200 text-amber-900 border-2 border-amber-300"
+        : "bg-amber-100 text-amber-800 border-2 border-amber-200";
+    } else if (type === 1) { // 凸
+      cupStyle += theme === 'dark'
+        ? "bg-amber-800 text-amber-100 border-2 border-amber-700"
+        : "bg-amber-800 text-amber-100 border-2 border-amber-900";
+    } else { // 立 (2)
+      cupStyle += theme === 'dark'
+        ? "bg-green-700 text-green-100 border-2 border-green-600 transform rotate-90"
+        : "bg-green-600 text-green-50 border-2 border-green-700 transform rotate-90";
+    }
+
+    if (isShaking) {
+      cupStyle += " animate-shake";
+    }
+
     return (
-      <div key={index} className={cupClass}>
-        <div className="cup-inner">
+      <div
+        key={index}
+        className={cupStyle + " rounded-xl shadow-lg flex items-center justify-center font-bold text-lg md:text-xl"}
+        aria-label={"卦杯 " + (index + 1) + ": " + (type === 0 ? '平' : type === 1 ? '凸' : '立')}
+        role="img"
+        aria-hidden="false"
+      >
+        <div className="text-center">
           {type === 0 ? "平" : type === 1 ? "凸" : "立"}
         </div>
       </div>
@@ -149,118 +168,156 @@ function CulturalCup() {
   };
 
   return (
-    <div className={`app ${theme}`}>
-      <header className="header">
-        <h1><span className="taiji">☯</span> 摔杯请卦 <span className="taiji">☯</span></h1>
-        <p className="subtitle">在线卜卦 · 传统智慧 · 心诚则灵</p>
-      </header>
-      
-      <main className="main-content">
-        <div className="instructions">
-          <p>点击"摔杯请卦"按钮，三个卦杯将随机落下，根据卦杯的组合显示卦象结果。</p>
-          <p className="note">心诚则灵，请在心中默念所求之事后再进行占卜。</p>
-        </div>
-        
-        <div className="divination-area">
-          <div className="cups-container">
-            {cups.map((cup, index) => renderCup(cup, index))}
+    <div className={"min-h-screen w-full " + (theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gradient-to-br from-amber-50 to-orange-100 text-gray-800')}>
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <header className={"mb-8 p-6 rounded-3xl shadow-lg " + (theme === 'dark' ? 'bg-gradient-to-r from-amber-900 via-orange-900 to-red-900' : 'bg-gradient-to-r from-amber-400 via-orange-400 to-red-400') + " text-white"}>
+          <div className="flex flex-col items-center">
+            <div className="text-4xl mb-3 animate-spin-slow" aria-hidden="true">☯</div>
+            <h1 className="text-3xl md:text-4xl font-bold text-center mb-2">摔杯请卦</h1>
+            <p className="text-lg opacity-90 text-center">在线卜卦 · 传统智慧 · 心诚则灵</p>
           </div>
-          
-          <div className="controls">
-            <button 
-              className={`throw-button ${isShaking ? 'shaking' : ''}`}
-              onClick={throwCups}
-              disabled={isShaking}
-            >
-              {isShaking ? '卦杯摇动中...' : '摔杯请卦'}
-            </button>
-            <button className="reset-button" onClick={resetCups}>
-              重置卦杯
-            </button>
+        </header>
+
+        <main className="space-y-6">
+          <div className={"p-5 rounded-2xl " + (theme === 'dark' ? 'bg-gray-800/90' : 'bg-white/90') + " backdrop-blur-sm shadow-md"}>
+            <p className="text-center mb-3">点击"摔杯请卦"按钮，三个卦杯将随机落下，根据卦杯的组合显示卦象结果。</p>
+            <p className={"text-center font-medium " + (theme === 'dark' ? 'text-amber-300' : 'text-amber-700')}>心诚则灵，请在心中默念所求之事后再进行占卜。</p>
           </div>
-        </div>
-        
-        {result && (
-          <div className="result-container">
-            <div className="result-header">
-              <h2>卦象结果</h2>
-              <div className="result-symbol">
-                <span className="symbol-large">{result.interpretation.symbol}</span>
-                <span className="result-name">{result.result}</span>
+
+          <div className={"p-6 rounded-2xl " + (theme === 'dark' ? 'bg-gray-800/90' : 'bg-white/90') + " backdrop-blur-sm shadow-lg"}>
+            <div className="flex flex-col items-center">
+              <div className="flex justify-center gap-4 md:gap-8 mb-8 flex-wrap">
+                {cups.map((cup, index) => renderCup(cup, index))}
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-4 w-full max-w-xs">
+                <button
+                  className={"px-6 py-3 rounded-full font-bold text-white shadow-lg transition-all duration-300 transform hover:scale-105 " + (isShaking ? 'bg-gray-400 cursor-not-allowed' : (theme === 'dark' ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700' : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'))}
+                  onClick={throwCups}
+                  disabled={isShaking}
+                  aria-label={isShaking ? '卦杯摇动中...' : '摔杯请卦'}
+                  aria-describedby="instructions"
+                >
+                  {isShaking ? '卦杯摇动中...' : '摔杯请卦'}
+                </button>
+                <button
+                  className={"px-6 py-3 rounded-full font-medium " + (theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800') + " shadow transition-colors"}
+                  onClick={resetCups}
+                  aria-label="重置卦杯"
+                >
+                  重置卦杯
+                </button>
               </div>
             </div>
-            
-            <div className="interpretation">
-              <h3>解卦：{result.interpretation.meaning}</h3>
-              <p>{result.interpretation.description}</p>
-              <div className="advice">
-                <strong>建议：</strong> {result.interpretation.advice}
+          </div>
+
+          {result && (
+            <div className={"p-6 rounded-2xl " + (theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200') + " shadow-xl"} role="region" aria-labelledby="result-heading">
+              <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h2 id="result-heading" className="text-2xl font-bold">卦象结果</h2>
+                <div className="flex items-center gap-4">
+                  <span className="text-5xl" aria-hidden="true">{result.interpretation.symbol}</span>
+                  <span className={"text-2xl md:text-3xl font-bold " + (
+                    result.result === '圣杯' ? (theme === 'dark' ? 'text-green-400' : 'text-green-600') :
+                      result.result === '笑杯' ? (theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600') :
+                        result.result === '阴杯' ? (theme === 'dark' ? 'text-red-400' : 'text-red-600') :
+                          (theme === 'dark' ? 'text-purple-400' : 'text-purple-600')
+                  )}>
+                    {result.result}
+                  </span>
+                </div>
               </div>
-              
-              <button 
-                className="explanation-toggle"
-                onClick={() => setShowExplanation(!showExplanation)}
-              >
-                {showExplanation ? '隐藏卦象说明' : '显示卦象说明'}
-              </button>
-              
-              {showExplanation && (
-                <div className="explanation">
-                  <h4>卦象说明：</h4>
-                  <ul>
-                    <li><strong>圣杯（一平一凸）</strong>：表示神明认同，所问之事可行，是吉兆。</li>
-                    <li><strong>笑杯（双平）</strong>：表示神明未决，需重新思考或等待时机。</li>
-                    <li><strong>阴杯（双凸）</strong>：表示神明不赞同，宜暂缓行动。</li>
-                    <li><strong>立杯（直立）</strong>：特殊指示，需特别注意或静心思考。</li>
-                  </ul>
-                  <p className="cultural-note">
-                    * 摔杯请卦是传统占卜方式，卦象结果仅供参考。卦由心生，心诚则灵。
-                  </p>
+
+              <div className="space-y-4">
+                <div className={"p-4 rounded-lg " + (theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-100')}>
+                  <h3 className="text-lg font-bold mb-2">解卦：{result.interpretation.meaning}</h3>
+                  <p className="mb-3">{result.interpretation.description}</p>
+                  <div className={"p-3 rounded " + (theme === 'dark' ? 'bg-blue-900/30 border border-blue-800' : 'bg-blue-100 border border-blue-200')}>
+                    <strong>建议：</strong> {result.interpretation.advice}
+                  </div>
                 </div>
-              )}
+
+                <button
+                  className={"w-full py-3 rounded-lg font-medium " + (theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-800') + " transition-colors"}
+                  onClick={() => setShowExplanation(!showExplanation)}
+                  aria-expanded={showExplanation}
+                  aria-controls="explanation-content"
+                >
+                  {showExplanation ? '隐藏卦象说明' : '显示卦象说明'}
+                </button>
+
+                {showExplanation && (
+                  <div id="explanation-content" className={"p-5 rounded-xl " + (theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-gray-50 border border-gray-200')}>
+                    <h4 className="text-lg font-bold mb-3">卦象说明：</h4>
+                    <ul className="space-y-2 mb-4">
+                      <li><strong>圣杯（一平一凸）</strong>：表示神明认同，所问之事可行，是吉兆。</li>
+                      <li><strong>笑杯（双平）</strong>：表示神明未决，需重新思考或等待时机。</li>
+                      <li><strong>阴杯（双凸）</strong>：表示神明不赞同，宜暂缓行动。</li>
+                      <li><strong>立杯（直立）</strong>：特殊指示，需特别注意或静心思考。</li>
+                    </ul>
+                    <p className={"text-sm italic " + (theme === 'dark' ? 'text-gray-400' : 'text-gray-600')}>
+                      * 摔杯请卦是传统占卜方式，卦象结果仅供参考。卦由心生，心诚则灵。
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {history.length > 0 && (
+            <div className={"p-6 rounded-2xl " + (theme === 'dark' ? 'bg-gray-800/90' : 'bg-white/90') + " backdrop-blur-sm shadow-lg"} role="region" aria-labelledby="history-heading">
+              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+                <h3 id="history-heading" className="text-xl font-bold">最近占卜记录</h3>
+                <button
+                  className={"px-4 py-2 rounded-lg font-medium " + (theme === 'dark' ? 'bg-red-700 hover:bg-red-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white') + " transition-colors"}
+                  onClick={clearHistory}
+                  aria-label="清除所有占卜记录"
+                >
+                  清除记录
+                </button>
+              </div>
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-2" role="list">
+                {history.map(item => (
+                  <div
+                    key={item.id}
+                    className={"p-4 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-3 " + (theme === 'dark' ? 'bg-gray-700/50 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200') + " transition-colors"}
+                    role="listitem"
+                  >
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="text-center min-w-[60px]">
+                        <div className="font-bold">{item.date}</div>
+                        <div className={"text-xs " + (theme === 'dark' ? 'text-gray-400' : 'text-gray-600')}>{item.time}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl" aria-hidden="true">{item.interpretation.symbol}</span>
+                        <span className="font-medium">{item.result}</span>
+                      </div>
+                    </div>
+                    <div className={"text-sm text-center sm:text-right flex-1 " + (theme === 'dark' ? 'text-gray-300' : 'text-gray-700')}>
+                      {item.interpretation.meaning}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={"p-6 rounded-2xl " + (theme === 'dark' ? 'bg-gray-800/90' : 'bg-white/90') + " backdrop-blur-sm shadow-lg"}>
+            <h3 className="text-xl font-bold mb-4 text-center">传统文化背景</h3>
+            <div className="space-y-3">
+              <p>摔杯请卦，又称掷筊、掷杯，是道教与民间信仰中向神明请示的传统占卜方式。使用一对半月形木制卦杯，通过掷出后卦杯的阴阳组合来解读神明的指示。</p>
+              <p>卦杯一面平坦（阳）、一面隆起（阴），分别代表太极中的阴阳两极。占卜时需心怀敬意，默念所求之事后掷出卦杯，根据落地后的组合判断吉凶。</p>
             </div>
           </div>
-        )}
-        
-        {history.length > 0 && (
-          <div className="history">
-            <div className="history-header">
-              <h3>最近占卜记录</h3>
-              <button className="clear-history-button" onClick={clearHistory}>
-                清除记录
-              </button>
-            </div>
-            <div className="history-list">
-              {history.map(item => (
-                <div key={item.id} className="history-item">
-                  <div className="history-time">
-                    <span className="history-date">{item.date}</span>
-                    <span className="history-clock">{item.time}</span>
-                  </div>
-                  <div className="history-result">
-                    <span className="history-symbol">{item.interpretation.symbol}</span>
-                    <span>{item.result}</span>
-                  </div>
-                  <div className="history-meaning">{item.interpretation.meaning}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        <div className="cultural-info">
-          <h3>传统文化背景</h3>
-          <p>摔杯请卦，又称掷筊、掷杯，是道教与民间信仰中向神明请示的传统占卜方式。使用一对半月形木制卦杯，通过掷出后卦杯的阴阳组合来解读神明的指示。</p>
-          <p>卦杯一面平坦（阳）、一面隆起（阴），分别代表太极中的阴阳两极。占卜时需心怀敬意，默念所求之事后掷出卦杯，根据落地后的组合判断吉凶。</p>
-        </div>
-      </main>
-      
-      <footer className="footer">
-        <p>本应用仅供娱乐与文化学习使用，卦象结果仅供参考。</p>
-        <p>传统文化 · 智慧传承 · 心诚则灵</p>
-      </footer>
+        </main>
+
+        <footer className={"mt-8 py-6 text-center text-sm " + (theme === 'dark' ? 'text-gray-400' : 'text-gray-600')}>
+          <p>本应用仅供娱乐与文化学习使用，卦象结果仅供参考。</p>
+          <p>传统文化 · 智慧传承 · 心诚则灵</p>
+        </footer>
+      </div>
     </div>
   );
-}
+};
 
 export default CulturalCup;

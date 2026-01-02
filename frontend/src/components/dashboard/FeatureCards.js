@@ -362,6 +362,20 @@ const PlumBlossomCard = () => {
   );
 };
 
+/**
+ * 古风马吊组件
+ */
+const AncientCardGameCard = () => {
+  return (
+    <FeatureCard
+      title="古风马吊"
+      icon="ancient-card-game"
+      category="entertainment"
+      route="/ancient-card-game"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -385,5 +399,6 @@ export {
   FishingGameCard,
   FengShuiCompassCard,
   LiuyaoCard,
-  PlumBlossomCard
+  PlumBlossomCard,
+  AncientCardGameCard
 };

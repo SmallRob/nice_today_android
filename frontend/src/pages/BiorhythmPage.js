@@ -6,8 +6,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
-import BiorhythmChart from '../components/biorhythm/BiorhythmChart';
-import BiorhythmBanner from '../components/biorhythm/BiorhythmBanner';
+import BiorhythmChart from '../components/biorhythm/BiorhythmChart.js';
+import BiorhythmBanner from '../components/biorhythm/BiorhythmBanner.js';
 import { getBiorhythmRange } from '../services/localDataService';
 
 const BiorhythmPage = () => {

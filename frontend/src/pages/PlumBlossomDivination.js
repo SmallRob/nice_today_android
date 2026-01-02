@@ -1,98 +1,22 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import toast from '../utils/toast';
+import {
+  calculateTrigramNumber,
+  calculateMovingYao,
+  getTrigramByNumber,
+  determineTiYong,
+  getWuxingRelation,
+  interpretResult,
+  getHexagramByNumbers,
+  EIGHT_TRIGRAMS,
+  HEXAGRAMS,
+  WUXING_SHENGKE
+} from '../utils/hexagramUtils';
 
 // 常量定义
 const STORAGE_KEY = 'plumHistory';
 const MAX_HISTORY_LENGTH = 20;
 const CALCULATION_DELAY = 800;
-
-// 八卦数据
-const EIGHT_TRIGRAMS = {
-  1: { name: '乾', nature: '天', image: '☰', wuxing: '金', number: 1, family: '父' },
-  2: { name: '兑', nature: '泽', image: '☱', wuxing: '金', number: 2, family: '少女' },
-  3: { name: '离', nature: '火', image: '☲', wuxing: '火', number: 3, family: '中女' },
-  4: { name: '震', nature: '雷', image: '☳', wuxing: '木', number: 4, family: '长男' },
-  5: { name: '巽', nature: '风', image: '☴', wuxing: '木', number: 5, family: '长女' },
-  6: { name: '坎', nature: '水', image: '☵', wuxing: '水', number: 6, family: '中男' },
-  7: { name: '艮', nature: '山', image: '☶', wuxing: '土', number: 7, family: '少男' },
-  8: { name: '坤', nature: '地', image: '☷', wuxing: '土', number: 8, family: '母' }
-};
-
-// 六十四卦数据
-const HEXAGRAMS = {
-  '11': { name: '乾为天', desc: '刚健中正，自强不息' },
-  '12': { name: '天泽履', desc: '脚踏实地，谨慎行事' },
-  '13': { name: '天火同人', desc: '志同道合，人际关系和谐' },
-  '14': { name: '天雷无妄', desc: '真实无虚，顺其自然' },
-  '15': { name: '天风姤', desc: '不期而遇，机缘巧合' },
-  '16': { name: '天水讼', desc: '争议诉讼，宜和解不宜争' },
-  '17': { name: '天山遁', desc: '退避隐遁，待时而动' },
-  '18': { name: '天地否', desc: '闭塞不通，等待转机' },
-  '21': { name: '泽天夬', desc: '决断明快，当断则断' },
-  '22': { name: '兑为泽', desc: '喜悦和顺，沟通顺畅' },
-  '23': { name: '泽火革', desc: '变革革新，破旧立新' },
-  '24': { name: '泽雷随', desc: '随从顺从，随机应变' },
-  '25': { name: '泽风大过', desc: '过度非常，谨慎行事' },
-  '26': { name: '泽水困', desc: '困境束缚，耐心等待' },
-  '27': { name: '泽山咸', desc: '感应相应，情感交流' },
-  '28': { name: '泽地萃', desc: '荟萃聚集，人才汇集' },
-  '31': { name: '火天大有', desc: '大有收获，光明昌隆' },
-  '32': { name: '火泽睽', desc: '意见相左，求同存异' },
-  '33': { name: '离为火', desc: '光明美丽，依附依靠' },
-  '34': { name: '火雷噬嗑', desc: '咬合咀嚼，解决阻碍' },
-  '35': { name: '火风鼎', desc: '鼎新变革，稳中求进' },
-  '36': { name: '火水未济', desc: '事未完成，坚持到底' },
-  '37': { name: '火山旅', desc: '旅行不定，暂时安顿' },
-  '38': { name: '火地晋', desc: '晋升前进，光明在望' },
-  '41': { name: '雷天大壮', desc: '强壮盛大，适可而止' },
-  '42': { name: '雷泽归妹', desc: '婚嫁归宿，名正言顺' },
-  '43': { name: '雷火丰', desc: '丰盛盛大，持盈保泰' },
-  '44': { name: '震为雷', desc: '震动奋发，积极行动' },
-  '45': { name: '雷风恒', desc: '恒久持续，持之以恒' },
-  '46': { name: '雷水解', desc: '解除困境，舒缓解放' },
-  '47': { name: '雷山小过', desc: '小有过错，谨慎谦逊' },
-  '48': { name: '雷地豫', desc: '愉悦安乐，预做准备' },
-  '51': { name: '风天小畜', desc: '小有积蓄，蓄势待发' },
-  '52': { name: '风泽中孚', desc: '诚信中道，内心诚实' },
-  '53': { name: '风火家人', desc: '家庭和谐，内外有序' },
-  '54': { name: '风雷益', desc: '增益有利，损上益下' },
-  '55': { name: '巽为风', desc: '顺从进入，无孔不入' },
-  '56': { name: '风水涣', desc: '涣散离散，重聚人心' },
-  '57': { name: '风山渐', desc: '渐进发展，循序渐进' },
-  '58': { name: '风地观', desc: '观察审时，展示示范' },
-  '61': { name: '水天需', desc: '需要等待，耐心守时' },
-  '62': { name: '水泽节', desc: '节制约束，适可而止' },
-  '63': { name: '水火既济', desc: '事已完成，慎终如始' },
-  '64': { name: '水雷屯', desc: '初生艰难，积蓄力量' },
-  '65': { name: '水风井', desc: '水井养人，修身养性' },
-  '66': { name: '坎为水', desc: '险陷艰难，诚信突破' },
-  '67': { name: '水山蹇', desc: '艰难险阻，见险能止' },
-  '68': { name: '水地比', desc: '亲附比和，择善而从' },
-  '71': { name: '山天大畜', desc: '大有积蓄，厚积薄发' },
-  '72': { name: '山泽损', desc: '减损损失，损下益上' },
-  '73': { name: '山火贲', desc: '装饰美化，文饰有礼' },
-  '74': { name: '山雷颐', desc: '颐养养生，自求口实' },
-  '75': { name: '山风蛊', desc: '腐败革新，整治混乱' },
-  '76': { name: '山水蒙', desc: '启蒙教育，启发智慧' },
-  '77': { name: '艮为山', desc: '静止稳重，适可而止' },
-  '78': { name: '山地剥', desc: '剥落侵蚀，顺势而止' },
-  '81': { name: '地天泰', desc: '通泰安泰，小往大来' },
-  '82': { name: '地泽临', desc: '临下视察，教思无穷' },
-  '83': { name: '地火明夷', desc: '光明负伤，晦而转明' },
-  '84': { name: '地雷复', desc: '复归回复，周而复始' },
-  '85': { name: '地风升', desc: '上升发展，积小成高' },
-  '86': { name: '地水师', desc: '统师率众，用险而顺' },
-  '87': { name: '地山谦', desc: '谦逊退让，卑以自牧' },
-  '88': { name: '坤为地', desc: '柔顺包容，厚德载物' }
-};
-
-// 五行生克关系
-const WUXING_SHENGKE = {
-  '金': { 生: '水', 克: '木', 被生: '土', 被克: '火' },
-  '木': { 生: '火', 克: '土', 被生: '水', 被克: '金' },
-  '水': { 生: '木', 克: '火', 被生: '金', 被克: '土' },
-  '火': { 生: '土', 克: '金', 被生: '木', 被克: '水' },
-  '土': { 生: '金', 克: '水', 被生: '火', 被克: '木' }
-};
 
 const PlumBlossomDivination = () => {
   // 状态管理
@@ -132,29 +56,12 @@ const PlumBlossomDivination = () => {
     }
   }, [history]);
 
-  // 计算八卦数字
-  const calculateTrigramNumber = (num) => {
-    let remainder = num % 8;
-    if (remainder === 0) remainder = 8;
-    return remainder;
-  };
 
-  // 计算动爻
-  const calculateMovingYao = (num) => {
-    let remainder = num % 6;
-    if (remainder === 0) remainder = 6;
-    return remainder;
-  };
-
-  // 根据数字获取八卦
-  const getTrigramByNumber = (num) => {
-    return EIGHT_TRIGRAMS[num] || EIGHT_TRIGRAMS[1];
-  };
 
   // 数字起卦 - 使用useCallback优化
   const divineByNumbers = useCallback(() => {
     if (numbers.some(n => n === '')) {
-      alert('请先输入三个数字');
+      toast.warning('请先输入三个数字');
       return;
     }
 
@@ -264,7 +171,7 @@ const PlumBlossomDivination = () => {
   // 外应起卦 - 使用useCallback优化
   const divineByExternal = useCallback(() => {
     if (!externalSign.trim()) {
-      alert('请输入外应描述');
+      toast.warning('请输入外应描述');
       return;
     }
 
@@ -310,61 +217,12 @@ const PlumBlossomDivination = () => {
     }, CALCULATION_DELAY);
   }, [externalSign]);
 
-  // 确定体用关系 - 使用useCallback优化
-  const determineTiYong = useCallback((lowerTrigram, upperTrigram, movingYao) => {
-    // 简单判断：有动爻的卦为用卦，无动爻的为体卦
-    // 这里简化处理，假设下卦为体卦，上卦为用卦
-    return {
-      ti: lowerTrigram,  // 体卦
-      yong: upperTrigram, // 用卦
-      relation: getWuxingRelation(lowerTrigram.wuxing, upperTrigram.wuxing)
-    };
-  }, []);
 
-  // 获取五行关系 - 使用useCallback优化
-  const getWuxingRelation = useCallback((tiWuxing, yongWuxing) => {
-    const tiRelation = WUXING_SHENGKE[tiWuxing] || {};
-    const yongRelation = WUXING_SHENGKE[yongWuxing] || {};
-
-    if (tiWuxing === yongWuxing) {
-      return { type: '比和', meaning: '吉，和谐相助' };
-    } else if (tiRelation.生 === yongWuxing) {
-      return { type: '体生用', meaning: '小凶，泄体之气' };
-    } else if (tiRelation.克 === yongWuxing) {
-      return { type: '体克用', meaning: '吉，我能胜事' };
-    } else if (tiRelation.被生 === yongWuxing) {
-      return { type: '用生体', meaning: '大吉，得助成功' };
-    } else if (tiRelation.被克 === yongWuxing) {
-      return { type: '用克体', meaning: '大凶，事来克我' };
-    }
-
-    return { type: '关系不明', meaning: '需结合具体分析' };
-  }, []);
-
-  // 解读结果 - 使用useCallback优化
-  const interpretResult = useCallback((lowerTrigram, upperTrigram, tiYong, movingYao, externalSign = '') => {
-    const tiName = lowerTrigram.nature;
-    const yongName = upperTrigram.nature;
-    const relation = tiYong.relation;
-
-    let interpretation = `本卦为${lowerTrigram.name}${upperTrigram.name}，${lowerTrigram.nature}${upperTrigram.nature}相叠。`;
-    interpretation += `体卦为${tiName}（${lowerTrigram.wuxing}），用卦为${yongName}（${upperTrigram.wuxing}）。`;
-    interpretation += `体用关系：${relation.type}，主${relation.meaning}。`;
-
-    if (movingYao) {
-      interpretation += `动爻在第${movingYao}爻，主事态变化的关键所在。`;
-    }
-
-    if (externalSign) {
-      interpretation += `外应"${externalSign}"提示需结合具体情境综合判断。`;
-    }
-
-    return interpretation;
-  }, []);
 
   // 清除历史记录 - 使用useCallback优化
-  const clearHistory = useCallback(() => {
-    if (window.confirm('确定要清除所有历史记录吗？')) {
+  const clearHistory = useCallback(async () => {
+    const confirmed = await toast.confirm('确定要清除所有历史记录吗？');
+    if (confirmed) {
       setHistory([]);
     }
   }, []);
@@ -434,7 +292,7 @@ const PlumBlossomDivination = () => {
                           newNumbers[index] = e.target.value;
                           setNumbers(newNumbers);
                         }}
-                        className="w-full p-3 border border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-900 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-gray-800 dark:text-gray-100"
+                        className="w-full p-3 border border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-900 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                         placeholder={`如: ${[7, 8, 9][index]}`}
                       />
                     </div>
@@ -465,7 +323,7 @@ const PlumBlossomDivination = () => {
           {method === 'time' && (
             <div className="space-y-4">
               <div className="mb-4">
-                <h3 className="text-purple-700 font-medium mb-3">选择起卦时间</h3>
+                <h3 className="text-purple-700 dark:text-purple-300 font-medium mb-3">选择起卦时间</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     { id: 'year', label: '年', value: dateTime.year, min: 1900, max: 2100 },
@@ -474,7 +332,7 @@ const PlumBlossomDivination = () => {
                     { id: 'hour', label: '时', value: dateTime.hour, min: 0, max: 23 },
                   ].map(item => (
                     <div key={item.id}>
-                      <label className="block text-sm text-gray-600 mb-1">{item.label}</label>
+                      <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">{item.label}</label>
                       <input
                         type="number"
                         min={item.min}
@@ -484,7 +342,7 @@ const PlumBlossomDivination = () => {
                           ...dateTime,
                           [item.id]: parseInt(e.target.value) || item.min
                         })}
-                        className="w-full p-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-300"
+                        className="w-full p-3 border border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-900 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                       />
                     </div>
                   ))}
@@ -514,11 +372,11 @@ const PlumBlossomDivination = () => {
           {method === 'external' && (
             <div className="space-y-4">
               <div className="mb-4">
-                <h3 className="text-purple-700 font-medium mb-3">输入外应（所见所闻所想）</h3>
+                <h3 className="text-purple-700 dark:text-purple-300 font-medium mb-3">输入外应（所见所闻所想）</h3>
                 <textarea
                   value={externalSign}
                   onChange={(e) => setExternalSign(e.target.value)}
-                  className="w-full h-32 p-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent"
+                  className="w-full h-32 p-3 border border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-900 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-transparent text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder="如：见喜鹊鸣叫、心中突然想到某事、听到特定声音等..."
                 />
                 <p className="text-sm text-gray-500 mt-2">外应即起卦时观察到的特殊现象或心中所想</p>

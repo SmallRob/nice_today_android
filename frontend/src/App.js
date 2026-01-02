@@ -142,6 +142,7 @@ const FishingGamePage = lazyLoadWithErrorHandling(() => import('./pages/FishingG
 const FengShuiCompassPage = lazyLoadWithErrorHandling(() => import('./pages/FengShuiCompassPage'));
 const LiuyaoPage = lazyLoadWithErrorHandling(() => import('./pages/SixYaoDivination'));
 const PlumBlossomPage = lazyLoadWithErrorHandling(() => import('./pages/PlumBlossomDivination'));
+const AncientCardGamePage = lazyLoadWithErrorHandling(() => import('./pages/AncientCardGamePage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
 // 加载屏幕组件
@@ -228,6 +229,7 @@ const AppLayout = () => {
             <Route path="/feng-shui-compass" element={<FengShuiCompassPage />} />
             <Route path="/liuyao" element={<LiuyaoPage />} />
             <Route path="/plum-blossom" element={<PlumBlossomPage />} />
+            <Route path="/ancient-card-game" element={<AncientCardGamePage />} />
           </Routes>
         </SafeSuspense>
       </div>

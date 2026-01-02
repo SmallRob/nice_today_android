@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import './styles/lifegrid-styles.css';
+import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
 import ArchiveManager from '../components/lifeStyleGride/ArchiveManager';
 import MatrixGrid from '../components/lifeStyleGride/MatrixGrid';
 import DimensionInfo from '../components/lifeStyleGride/DimensionInfo';
 import TotalScore from '../components/lifeStyleGride/TotalScore';
 import RitualGuide from '../components/lifeStyleGride/RitualGuide';
+import OnboardingModal from '../components/lifeStyleGride/OnboardingModal';
 import { initializeStorage, getArchives, getCurrentArchive } from '../utils/lifeGridStorage';
-import { DIMENSIONS_3x3, DIMENSIONS_7x7, IMPRINT_TYPES } from '../utils/matrixData';
+import { DIMENSIONS_3x3, DIMENSIONS_7x7, IMPRINT_TYPES, getDimensionColor } from '../utils/matrixData';
 
-function LifestyleGuide() {
+function LifestyleGuideContent() {
   const [currentArchive, setCurrentArchive] = useState(null);
   const [matrixSize, setMatrixSize] = useState(3); // 3x3 或 7x7
   const [matrixData, setMatrixData] = useState([]);
@@ -16,6 +17,17 @@ function LifestyleGuide() {
   const [selectedCell, setSelectedCell] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
   const [showRitual, setShowRitual] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  
+  const { theme, toggleTheme } = useTheme();
+
+  // Check if onboarding should be shown
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem('lifestyle-guide-onboarding-shown');
+    if (!hasSeenOnboarding && archives.length === 0) {
+      setShowOnboarding(true);
+    }
+  }, [archives.length]);
 
   // 初始化应用
   useEffect(() => {
@@ -267,15 +279,31 @@ function LifestyleGuide() {
     }
   };
 
+  // 处理完成引导
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('lifestyle-guide-onboarding-shown', 'true');
+  };
+
   return (
-    <div className="lifestyle-guide-page">
-      <div className="app">
-        <header className="app-header">
-          <h1>生命矩阵</h1>
-          <p className="subtitle">构建你的意义能量图谱</p>
+    <div className={`min-h-screen w-full ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800'}`}>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <header className={`mb-6 p-6 rounded-2xl shadow-lg ${theme === 'dark' ? 'bg-gradient-to-r from-purple-900 via-indigo-900 to-blue-900' : 'bg-gradient-to-r from-blue-500 to-purple-600'} text-white`}>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">生命矩阵</h1>
+              <p className="text-lg opacity-90">构建你的意义能量图谱</p>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+              aria-label={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+          </div>
         </header>
 
-        <main className="app-main">
+        <main className="flex-grow">
           {!currentArchive ? (
             <ArchiveManager
               archives={archives}
@@ -284,99 +312,127 @@ function LifestyleGuide() {
               onDeleteArchive={deleteArchive}
             />
           ) : (
-            <>
-              <div className="game-controls">
+            <div className="space-y-6">
+              <div className="flex flex-wrap gap-3 p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-md">
                 <button
-                  className="btn-secondary"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors min-h-12"
                   onClick={() => setCurrentArchive(null)}
                 >
                   返回存档选择
                 </button>
 
                 <button
-                  className="btn-secondary"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors min-h-12"
                   onClick={toggleMatrixSize}
                 >
                   切换矩阵: {matrixSize}x{matrixSize}
                 </button>
 
                 <button
-                  className="btn-warning"
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors min-h-12"
                   onClick={resetCurrentArchive}
                 >
                   重置当前存档
                 </button>
 
                 <button
-                  className="btn-ritual"
+                  className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-colors min-h-12"
                   onClick={() => setShowRitual(!showRitual)}
                 >
                   {showRitual ? '隐藏仪式指南' : '显示仪式指南'}
                 </button>
               </div>
 
-              <div className="game-area">
-                <div className="matrix-section">
-                  <TotalScore
-                    score={totalScore}
-                    matrixSize={matrixSize}
-                    archiveName={archives.find(a => a.id === currentArchive)?.name || '未命名存档'}
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                  <div className={`p-6 rounded-2xl shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                    <TotalScore
+                      score={totalScore}
+                      matrixSize={matrixSize}
+                      archiveName={archives.find(a => a.id === currentArchive)?.name || '未命名存档'}
+                    />
 
-                  <MatrixGrid
-                    matrixData={matrixData}
-                    matrixSize={matrixSize}
-                    onCellClick={setSelectedCell}
-                    selectedCell={selectedCell}
-                    onAddImprint={addImprintToCell}
-                  />
+                    <div className="mt-6">
+                      <MatrixGrid
+                        matrixData={matrixData}
+                        matrixSize={matrixSize}
+                        onCellClick={setSelectedCell}
+                        selectedCell={selectedCell}
+                        onAddImprint={addImprintToCell}
+                        theme={theme}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="info-section">
-                  {selectedCell ? (
-                    <DimensionInfo
-                      cell={selectedCell}
-                      matrixData={matrixData}
-                      onAddImprint={addImprintToCell}
-                    />
-                  ) : (
-                    <div className="dimension-placeholder">
-                      <h3>点击矩阵中的单元格查看详细信息</h3>
-                      <p>每个单元格代表你生命的一个维度</p>
-                      <p>添加能量印记来增强该维度的能量</p>
-                      <div className="imprint-types-preview">
-                        <h4>能量印记类型</h4>
-                        <ul>
-                          {IMPRINT_TYPES.slice(0, 5).map(type => (
-                            <li key={type.id}>
-                              <span className={`imprint-badge ${type.category}`}>{type.name}</span>
-                              <span> - {type.description}</span>
-                            </li>
-                          ))}
-                        </ul>
+                <div className="space-y-6">
+                  <div className={`p-6 rounded-2xl shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                    {selectedCell ? (
+                      <DimensionInfo
+                        cell={selectedCell}
+                        matrixData={matrixData}
+                        onAddImprint={addImprintToCell}
+                        theme={theme}
+                      />
+                    ) : (
+                      <div className="text-center py-8">
+                        <h3 className="text-xl font-semibold mb-3">点击矩阵中的单元格查看详细信息</h3>
+                        <p className="mb-2">每个单元格代表你生命的一个维度</p>
+                        <p className="mb-6">添加能量印记来增强该维度的能量</p>
+                        <div className="text-left">
+                          <h4 className="font-medium mb-2">能量印记类型</h4>
+                          <ul className="space-y-1">
+                            {IMPRINT_TYPES.slice(0, 5).map(type => (
+                              <li key={type.id} className="flex items-start">
+                                <span className={`inline-block w-3 h-3 rounded-full mt-1.5 mr-2 ${type.category === 'material' ? 'bg-blue-500' : type.category === 'spiritual' ? 'bg-purple-500' : type.category === 'relational' ? 'bg-pink-500' : 'bg-green-500'}`}></span>
+                                <span>
+                                  <span className="font-medium">{type.name}</span>
+                                  <span className="text-gray-500 dark:text-gray-400"> - {type.description}</span>
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {showRitual && (
-                    <RitualGuide
-                      matrixData={matrixData}
-                      totalScore={totalScore}
-                      matrixSize={matrixSize}
-                    />
-                  )}
+                    {showRitual && (
+                      <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <RitualGuide
+                          matrixData={matrixData}
+                          totalScore={totalScore}
+                          matrixSize={matrixSize}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </main>
 
-        <footer className="app-footer">
+        <footer className={`mt-8 py-4 text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
           <p>生命矩阵 - 离线版本 | 数据存储在本地浏览器中</p>
           <p>所有数据仅保存在您的设备上，不会被上传到任何服务器</p>
         </footer>
+
+        <OnboardingModal
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          onComplete={handleOnboardingComplete}
+          theme={theme}
+        />
       </div>
     </div>
+  );
+}
+
+function LifestyleGuide() {
+  return (
+    <ThemeProvider>
+      <LifestyleGuideContent />
+    </ThemeProvider>
   );
 }
 

@@ -5,7 +5,7 @@ import { getDimensionColor, IMPRINT_TYPES } from '../../utils/matrixData';
  * 维度信息组件
  * 显示选中单元格的详细信息和能量印记操作
  */
-const DimensionInfo = ({ cell, onAddImprint }) => {
+const DimensionInfo = ({ cell, onAddImprint, theme = 'light' }) => {
   const [showAddImprint, setShowAddImprint] = useState(false);
   const [customImprint, setCustomImprint] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -77,24 +77,28 @@ const DimensionInfo = ({ cell, onAddImprint }) => {
   const cellColor = getDimensionColor(cell.dimension.id);
 
   return (
-    <div className="dimension-info">
-      <div className="dimension-header">
-        <h3 className="dimension-name">{cell.dimension.name}</h3>
-        <div className="dimension-energy">
-          <span className="energy-label">能量</span>
-          <span className="energy-value" style={{ color: cellColor }}>
+    <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-xl font-bold" style={{ color: cellColor }}>
+          {cell.dimension.name}
+        </h3>
+        <div className="text-right">
+          <div className="text-sm opacity-75">能量</div>
+          <div className="text-xl font-bold" style={{ color: cellColor }}>
             {cell.energy}/100
-          </span>
+          </div>
         </div>
       </div>
 
-      <div className="dimension-description">
-        <p>{cell.dimension.description}</p>
+      <div className="mb-4">
+        <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          {cell.dimension.description}
+        </p>
       </div>
 
-      <div className="energy-bar-large">
+      <div className={`w-full h-4 rounded-full mb-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
         <div
-          className="energy-bar-fill"
+          className="h-full rounded-full"
           style={{
             width: `${cell.energy}%`,
             backgroundColor: cellColor
@@ -103,11 +107,11 @@ const DimensionInfo = ({ cell, onAddImprint }) => {
       </div>
 
       {/* 能量印记列表 */}
-      <div className="imprints-section">
-        <div className="section-header">
-          <h4>能量印记 ({cell.imprints.length})</h4>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h4 className="font-bold">能量印记 ({cell.imprints.length})</h4>
           <button
-            className="btn-add-imprint"
+            className={`px-4 py-2 rounded-lg font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
             onClick={() => setShowAddImprint(true)}
           >
             + 添加印记
@@ -115,43 +119,43 @@ const DimensionInfo = ({ cell, onAddImprint }) => {
         </div>
 
         {cell.imprints.length === 0 ? (
-          <div className="no-imprints">
-            <p>还没有添加能量印记</p>
-            <p className="hint">点击"添加印记"开始构建此维度</p>
+          <div className={`p-6 rounded-lg text-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
+            <p className={`mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>还没有添加能量印记</p>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>点击"添加印记"开始构建此维度</p>
           </div>
         ) : (
-          <div className="imprints-list">
+          <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
             {cell.imprints.map(imprint => (
               <div
                 key={imprint.id}
-                className="imprint-item"
+                className={`p-3 rounded-lg border-l-4 flex justify-between items-start ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}
                 style={{
                   borderLeftColor: getCategoryColor(imprint.category)
                 }}
               >
-                <div className="imprint-main">
-                  <div className="imprint-header">
-                    <span className="imprint-name">{imprint.name}</span>
-                    <span className="imprint-power">
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-medium">{imprint.name}</span>
+                    <span className="font-bold" style={{ color: getCategoryColor(imprint.category) }}>
                       +{imprint.power}
                     </span>
                   </div>
                   {imprint.description && (
-                    <p className="imprint-desc">{imprint.description}</p>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {imprint.description}
+                    </p>
                   )}
-                </div>
-                <div className="imprint-meta">
-                  <span className="imprint-date">
+                  <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                     {formatDate(imprint.addedAt)}
-                  </span>
-                  <button
-                    className="btn-remove-imprint"
-                    onClick={() => handleRemoveImprint(imprint.id)}
-                    title="删除印记"
-                  >
-                    ×
-                  </button>
+                  </div>
                 </div>
+                <button
+                  className={`ml-2 w-6 h-6 rounded-full flex items-center justify-center ${theme === 'dark' ? 'hover:bg-gray-600' : 'hover:bg-gray-200'}`}
+                  onClick={() => handleRemoveImprint(imprint.id)}
+                  title="删除印记"
+                >
+                  ×
+                </button>
               </div>
             ))}
           </div>
@@ -160,12 +164,12 @@ const DimensionInfo = ({ cell, onAddImprint }) => {
 
       {/* 添加印记模态框 */}
       {showAddImprint && (
-        <div className="modal-overlay" onClick={() => setShowAddImprint(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>为"{cell.dimension.name}"添加能量印记</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowAddImprint(false)}>
+          <div className={`rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`} onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="font-bold">为"{cell.dimension.name}"添加能量印记</h3>
               <button
-                className="btn-close"
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700"
                 onClick={() => setShowAddImprint(false)}
               >
                 ×
@@ -173,58 +177,48 @@ const DimensionInfo = ({ cell, onAddImprint }) => {
             </div>
 
             {/* 类别筛选 */}
-            <div className="category-filter">
-              <button
-                className={`category-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('all')}
-              >
-                全部
-              </button>
-              <button
-                className={`category-btn ${selectedCategory === 'material' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('material')}
-              >
-                物质
-              </button>
-              <button
-                className={`category-btn ${selectedCategory === 'spiritual' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('spiritual')}
-              >
-                精神
-              </button>
-              <button
-                className={`category-btn ${selectedCategory === 'relational' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('relational')}
-              >
-                关系
-              </button>
-              <button
-                className={`category-btn ${selectedCategory === 'creative' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('creative')}
-              >
-                创造
-              </button>
+            <div className="p-4 border-b flex flex-wrap gap-2">
+              {['all', 'material', 'spiritual', 'relational', 'creative'].map(category => (
+                <button
+                  key={category}
+                  className={`px-3 py-1.5 rounded-full text-sm capitalize ${
+                    selectedCategory === category
+                      ? `${theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'}`
+                      : `${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`
+                  }`}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category === 'all' ? '全部' : 
+                   category === 'material' ? '物质' : 
+                   category === 'spiritual' ? '精神' : 
+                   category === 'relational' ? '关系' : '创造'}
+                </button>
+              ))}
             </div>
 
             {/* 印记列表 */}
-            <div className="imprint-types-grid">
+            <div className="p-4 grid grid-cols-1 gap-3 max-h-60 overflow-y-auto">
               {filteredImprintTypes.map(type => (
                 <button
                   key={type.id}
-                  className="imprint-type-card"
+                  className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+                    theme === 'dark' ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-100'
+                  }`}
                   onClick={() => handleAddImprint(type)}
                   style={{
-                    borderColor: getCategoryColor(type.category)
+                    borderLeftColor: getCategoryColor(type.category)
                   }}
                 >
-                  <div className="imprint-type-icon">
-                    {getImprintIcon(type.category)}
+                  <div className="flex items-center gap-3">
+                    <div className="text-xl">{getImprintIcon(type.category)}</div>
+                    <div className="text-left">
+                      <div className="font-medium">{type.name}</div>
+                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {type.description}
+                      </div>
+                    </div>
                   </div>
-                  <div className="imprint-type-info">
-                    <h5 className="imprint-type-name">{type.name}</h5>
-                    <p className="imprint-type-desc">{type.description}</p>
-                  </div>
-                  <div className="imprint-type-power">
+                  <div className="font-bold" style={{ color: getCategoryColor(type.category) }}>
                     +{type.power}
                   </div>
                 </button>
@@ -232,18 +226,27 @@ const DimensionInfo = ({ cell, onAddImprint }) => {
             </div>
 
             {/* 自定义印记 */}
-            <div className="custom-imprint-section">
-              <h5>自定义印记</h5>
-              <div className="custom-input-group">
+            <div className="p-4 border-t">
+              <h5 className="font-medium mb-3">自定义印记</h5>
+              <div className="flex gap-2">
                 <input
                   type="text"
                   value={customImprint}
                   onChange={(e) => setCustomImprint(e.target.value)}
                   placeholder="输入自定义印记描述..."
                   maxLength={50}
+                  className={`flex-1 p-2 rounded border ${
+                    theme === 'dark' 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'bg-white border-gray-300'
+                  }`}
                 />
                 <button
-                  className="btn-primary"
+                  className={`px-4 py-2 rounded-lg font-medium ${
+                    customImprint.trim()
+                      ? `${theme === 'dark' ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'} text-white`
+                      : `${theme === 'dark' ? 'bg-gray-700 text-gray-500' : 'bg-gray-300 text-gray-500'}`
+                  }`}
                   onClick={handleCustomImprint}
                   disabled={!customImprint.trim()}
                 >

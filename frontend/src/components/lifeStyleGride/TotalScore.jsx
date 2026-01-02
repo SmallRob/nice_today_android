@@ -4,7 +4,7 @@ import { useMemo } from 'react';
  * 总分显示组件
  * 显示当前矩阵的总能量分数和统计信息
  */
-const TotalScore = ({ score, matrixSize, archiveName }) => {
+const TotalScore = ({ score, matrixSize, archiveName, theme = 'light' }) => {
   // 计算最大可能分数
   const maxScore = useMemo(() => {
     const totalCells = matrixSize * matrixSize;
@@ -57,26 +57,28 @@ const TotalScore = ({ score, matrixSize, archiveName }) => {
   };
 
   return (
-    <div className="total-score-container">
+    <div className={`p-6 rounded-xl ${theme === 'dark' ? 'bg-gradient-to-r from-gray-800 to-gray-900' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}`}>
       {/* 存档名称 */}
-      <div className="archive-name-display">
-        <h3>{archiveName || '未命名存档'}</h3>
-        <span className="matrix-size-badge">{matrixSize}×{matrixSize}</span>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-bold truncate max-w-[70%]">{archiveName || '未命名存档'}</h3>
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-white text-gray-700'} shadow`}>
+          {matrixSize}×{matrixSize}
+        </span>
       </div>
 
       {/* 总分显示 */}
-      <div className="score-display">
-        <div className="score-main">
-          <div className="score-icon">{energyLevel.icon}</div>
-          <div className="score-value">
-            <span className="score-number">{score}</span>
-            <span className="score-label">总能量</span>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <div className="text-4xl">{energyLevel.icon}</div>
+          <div>
+            <div className="text-3xl font-bold">{score}</div>
+            <div className="text-sm opacity-75">总能量</div>
           </div>
         </div>
 
-        <div className="score-level">
+        <div>
           <span
-            className="level-badge"
+            className="px-4 py-2 rounded-full text-white font-bold text-lg shadow-lg"
             style={{ backgroundColor: energyLevel.color }}
           >
             {energyLevel.level}
@@ -85,62 +87,64 @@ const TotalScore = ({ score, matrixSize, archiveName }) => {
       </div>
 
       {/* 进度条 */}
-      <div className="progress-section">
-        <div className="progress-bar-container">
-          <div className="progress-labels">
-            <span>0</span>
-            <span>{maxScore}</span>
-          </div>
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{
-                width: `${percentage}%`,
-                backgroundColor: energyLevel.color
-              }}
-            ></div>
-          </div>
-          <div className="progress-percentage">
-            {percentage}%
-          </div>
+      <div className="mb-6">
+        <div className="flex justify-between text-sm mb-2">
+          <span>0</span>
+          <span>{maxScore}</span>
+        </div>
+        <div className={`w-full h-4 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
+          <div
+            className="h-full transition-all duration-500 ease-out"
+            style={{
+              width: `${percentage}%`,
+              backgroundColor: energyLevel.color
+            }}
+          ></div>
+        </div>
+        <div className="text-center text-lg font-bold mt-2" style={{ color: energyLevel.color }}>
+          {percentage}%
         </div>
       </div>
 
       {/* 等级描述 */}
-      <div className="level-description">
-        <p>{getLevelDescription()}</p>
+      <div className={`p-4 rounded-lg mb-6 ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-white/50'} backdrop-blur-sm`}>
+        <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+          {getLevelDescription()}
+        </p>
       </div>
 
       {/* 统计信息 */}
-      <div className="matrix-stats">
-        <h4>矩阵统计</h4>
-        <div className="stats-grid">
-          <div className="stat-item">
-            <span className="stat-label">总单元格</span>
-            <span className="stat-value">{stats.totalCells}</span>
+      <div className="mb-6">
+        <h4 className="font-bold mb-3">矩阵统计</h4>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className={`p-3 rounded-lg text-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} shadow`}>
+            <div className="text-2xl font-bold">{stats.totalCells}</div>
+            <div className="text-sm opacity-75">总单元格</div>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">已激活</span>
-            <span className="stat-value" style={{ color: energyLevel.color }}>
+          <div className={`p-3 rounded-lg text-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} shadow`}>
+            <div className="text-2xl font-bold" style={{ color: energyLevel.color }}>
               {stats.filledCells}
-            </span>
+            </div>
+            <div className="text-sm opacity-75">已激活</div>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">未激活</span>
-            <span className="stat-value">{stats.emptyCells}</span>
+          <div className={`p-3 rounded-lg text-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} shadow`}>
+            <div className="text-2xl font-bold">{stats.emptyCells}</div>
+            <div className="text-sm opacity-75">未激活</div>
           </div>
-          <div className="stat-item">
-            <span className="stat-label">平均能量</span>
-            <span className="stat-value">{stats.avgEnergy}</span>
+          <div className={`p-3 rounded-lg text-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} shadow`}>
+            <div className="text-2xl font-bold">{stats.avgEnergy}</div>
+            <div className="text-sm opacity-75">平均能量</div>
           </div>
         </div>
       </div>
 
       {/* 发展建议 */}
       {percentage < 50 && (
-        <div className="development-tips">
-          <h5>💡 发展建议</h5>
-          <ul>
+        <div className={`p-4 rounded-lg mb-6 ${theme === 'dark' ? 'bg-yellow-900/30 border border-yellow-800' : 'bg-yellow-100 border border-yellow-200'}`}>
+          <h5 className="font-bold mb-2 flex items-center gap-2">
+            <span>💡</span> 发展建议
+          </h5>
+          <ul className="space-y-1 text-sm">
             {stats.emptyCells > 0 && (
               <li>还有 {stats.emptyCells} 个维度待探索，尝试添加不同类别的印记</li>
             )}
@@ -155,21 +159,23 @@ const TotalScore = ({ score, matrixSize, archiveName }) => {
 
       {/* 成就展示 */}
       {percentage >= 80 && (
-        <div className="achievements">
-          <h5>🏆 已达成成就</h5>
-          <div className="achievements-list">
-            <div className="achievement-item">
-              <span className="achievement-icon">⭐</span>
-              <span className="achievement-name">卓越发展</span>
+        <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-800' : 'bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200'}`}>
+          <h5 className="font-bold mb-3 flex items-center gap-2">
+            <span>🏆</span> 已达成成就
+          </h5>
+          <div className="flex flex-wrap gap-3">
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} shadow`}>
+              <span className="text-xl">⭐</span>
+              <span>卓越发展</span>
             </div>
-            <div className="achievement-item">
-              <span className="achievement-icon">🌈</span>
-              <span className="achievement-name">全面整合</span>
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} shadow`}>
+              <span className="text-xl">🌈</span>
+              <span>全面整合</span>
             </div>
             {matrixSize === 7 && (
-              <div className="achievement-item">
-                <span className="achievement-icon">🎯</span>
-                <span className="achievement-name">深度探索者</span>
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} shadow`}>
+                <span className="text-xl">🎯</span>
+                <span>深度探索者</span>
               </div>
             )}
           </div>
