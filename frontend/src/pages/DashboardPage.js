@@ -262,10 +262,10 @@ const Dashboard = () => {
             </button>
             <button
               className="quick-action-btn"
-              onClick={() => navigate('/tiebanshenshu')}
+              onClick={() => navigate('/tarot')}
             >
-              <span>🧮</span>
-              <span className="quick-action-label">铁板神数</span>
+              <span>🃏</span>
+              <span className="quick-action-label">塔罗抽卡</span>
             </button>
           </div>
         </div>

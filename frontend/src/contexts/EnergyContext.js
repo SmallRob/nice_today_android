@@ -47,11 +47,39 @@ export const EnergyProvider = ({ children }) => {
           data.totalEnergy += DAILY_CONFIG.SIGN_IN_REWARD;
           data.lastOpenDate = today;
 
-          // 添加历史记录
-          const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
-          if (!data.history.find(h => h.date === yesterday)) {
+          // 确保历史记录的连续性，添加缺失的日期记录
+          const currentDate = new Date();
+          const lastOpenDate = data.lastOpenDate ? new Date(data.lastOpenDate) : null;
+          
+          // 如果之前有打开记录，补充中间缺失的日期
+          if (lastOpenDate) {
+            const timeDiff = currentDate.getTime() - lastOpenDate.getTime();
+            const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+            
+            // 补充缺失的日期记录（不包括今天）
+            for (let i = 1; i < daysDiff; i++) {
+              const missingDate = new Date(lastOpenDate);
+              missingDate.setDate(lastOpenDate.getDate() + i);
+              const missingDateStr = missingDate.toDateString();
+              
+              // 如果该日期还没有历史记录，则添加
+              if (!data.history.find(h => h.date === missingDateStr)) {
+                data.history.unshift({
+                  date: missingDateStr,
+                  collected: 0,
+                });
+              }
+            }
+          }
+          
+          // 添加昨天的记录（如果不存在）
+          const yesterday = new Date(currentDate);
+          yesterday.setDate(currentDate.getDate() - 1);
+          const yesterdayStr = yesterday.toDateString();
+          
+          if (!data.history.find(h => h.date === yesterdayStr)) {
             data.history.unshift({
-              date: yesterday,
+              date: yesterdayStr,
               collected: 0,
             });
           }
