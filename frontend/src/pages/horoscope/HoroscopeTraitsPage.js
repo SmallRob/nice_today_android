@@ -6,6 +6,7 @@ import { HOROSCOPE_DATA_ENHANCED, generateDailyHoroscope, normalizeZodiacParam }
 import { memo } from 'react';
 import { Line } from 'react-chartjs-2';
 import { ensureChartRegistered } from '../../utils/chartConfig';
+import '../../styles/horoscope-traits-page.css';
 
 const HoroscopeTraitsPage = () => {
   const navigate = useNavigate();
@@ -485,9 +486,9 @@ const getFamousExamples = (zodiacName) => {
   }
 
   return (
-    <div className={`min-h-screen ${theme}`} style={{ minHeight: '100vh', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className={`horoscope-traits-page-container min-h-screen ${theme}`} style={{ minHeight: '100vh', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* 顶部标题栏 */}
-      <div className={`bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`}>
+      <div className={`horoscope-traits-header bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`}>
         <div className="container mx-auto px-3 md:px-4 py-2 md:py-3">
           <div className="flex items-center justify-between">
             <button
@@ -511,7 +512,7 @@ const getFamousExamples = (zodiacName) => {
           </div>
         </div>
       </div>
-
+      
       {/* 主内容区 */}
       <div className="container mx-auto px-3 md:px-4 py-3 md:py-6 pb-20 md:pb-24 max-w-4xl">
         {/* 星座卡片 */}

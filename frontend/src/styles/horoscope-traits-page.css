@@ -1,0 +1,158 @@
+/* HoroscopeTraitsPage 专用样式文件 */
+/* 使用 CSS 变量确保主题一致性，提供容器作用域 */
+
+/* ============================================
+   HoroscopeTraitsPage 容器
+   ============================================ */
+
+.horoscope-traits-page-container {
+  width: 100%;
+  min-width: 0;
+  max-width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: linear-gradient(to bottom right, #fdf2f8, #fce7f3, #f3e8ff);
+}
+
+.horoscope-traits-page-container.dark {
+  background: linear-gradient(to bottom right, #111827, #831843, #581c87);
+}
+
+/* ============================================
+   HoroscopeTraitsPage 头部样式
+   ============================================ */
+
+.horoscope-traits-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: linear-gradient(to right, #ec4899, #9333ea);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* ============================================
+   响应式优化
+   ============================================ */
+
+/* 平板和桌面 */
+@media (min-width: 768px) {
+  .horoscope-traits-page-container {
+    padding: var(--spacing-lg, 12px);
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 767px) {
+  .horoscope-traits-page-container {
+    padding: var(--spacing-md, 8px);
+  }
+}
+
+/* 超小屏幕 */
+@media (max-width: 576px) {
+  .horoscope-traits-page-container {
+    padding: var(--spacing-sm, 4px);
+  }
+}
+
+/* ============================================
+   性能优化
+   ============================================ */
+
+.horoscope-traits-page {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: background-color;
+}
+
+/* ============================================
+   内容区域
+   ============================================ */
+
+.horoscope-traits-content {
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .horoscope-traits-content {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .horoscope-traits-content {
+    padding: 12px 8px;
+  }
+}
+
+/* ============================================
+   避免样式污染
+   ============================================ */
+
+/* 确保样式只影响本页面 */
+.horoscope-traits-page-container .bg-gradient-to-r,
+.horoscope-traits-page .bg-gradient-to-br,
+.horoscope-traits-page .bg-white,
+.horoscope-traits-page .bg-purple-500,
+.horoscope-traits-page .bg-blue-50,
+.horoscope-traits-page .bg-amber-50,
+.horoscope-traits-page .bg-green-50,
+.horoscope-traits-page .bg-red-50 {
+  background-origin: border-box;
+  background-clip: border-box;
+}
+
+.horoscope-traits-page .rounded-xl,
+.horoscope-traits-page .rounded-lg,
+.horoscope-traits-page .rounded-full {
+  border-radius: inherit;
+}
+
+.horoscope-traits-page .shadow-lg,
+.horoscope-traits-page .shadow {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.horoscope-traits-page .text-white,
+.horoscope-traits-page .text-gray-900,
+.horoscope-traits-page .text-gray-700,
+.horoscope-traits-page .text-gray-600 {
+  color: inherit;
+}
+
+/* 暗色主题适配 */
+.horoscope-traits-page-container.dark .dark\:bg-gray-800 {
+  background-color: #1f2937;
+}
+
+.horoscope-traits-page.dark .dark\:bg-gray-700 {
+  background-color: #374151;
+}
+
+.horoscope-traits-page.dark .dark\:text-white {
+  color: #ffffff;
+}
+
+.horoscope-traits-page.dark .dark\:text-gray-200 {
+  color: #e5e7eb;
+}
+
+.horoscope-traits-page.dark .dark\:text-gray-400 {
+  color: #9ca3af;
+}
+
+.horoscope-traits-page.dark .dark\:bg-blue-900\/20 {
+  background-color: rgba(30, 58, 138, 0.2);
+}
+
+.horoscope-traits-page.dark .dark\:border-blue-900\/30 {
+  border-color: rgba(30, 58, 138, 0.3);
+}

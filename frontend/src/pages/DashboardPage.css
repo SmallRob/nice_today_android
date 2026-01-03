@@ -1154,7 +1154,7 @@
   flex-grow: 0 !important;
 }
 
-/* 重新定义卡片基本样式 */
+/* 重新定义卡片基本样式 - 限制在dashboard页面内 */
 .dashboard-page-wrapper .feature-card {
   width: 100%;
   aspect-ratio: 1;
@@ -1184,6 +1184,13 @@
   opacity: 1 !important;
 }
 
+/* 限制全局样式影响 */
+.dashboard-page-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* 隐藏滚动条 */
 .quick-actions,
 .features-controls {
@@ -1202,6 +1209,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* 内容区域 - 只有这个区域允许滚动 */
@@ -1212,6 +1221,8 @@
   scrollbar-width: none;
   padding-bottom: clamp(60px, 15vh, 80px);
   box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Allow scrolling in content area when features are collapsed */

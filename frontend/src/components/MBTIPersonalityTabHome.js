@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { Card } from './PageLayout.js';
 import { useTheme } from '../context/ThemeContext';
-import '../styles/dashboard-layout.css';
+import '../styles/mbti-personality-tab.css';
 
 // MBTI配置管理器 - 仅用于读取默认配置
 class MBTIConfigManager {
@@ -611,7 +611,7 @@ const MBTIPersonalityTabHome = () => {
     const { type, name, nickname, tags, motto, summary, icon, color } = personalityAnalysis.basicInfo;
 
     return (
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-800 dark:to-purple-950 rounded-2xl p-6 text-white shadow-lg mb-4 transition-all duration-300">
+      <div className="mbti-basic-info-card">
         <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-400/20 rounded-full blur-3xl"></div>
 
@@ -673,7 +673,7 @@ const MBTIPersonalityTabHome = () => {
     ];
 
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-6 border border-gray-200 dark:text-white mb-4 overflow-hidden relative">
+      <div className="mbti-traits-coordinate-card">
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
           <svg width="120" height="120" viewBox="0 0 100 100">
             <path d="M 10 50 L 90 50 M 50 10 L 50 90" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -681,7 +681,7 @@ const MBTIPersonalityTabHome = () => {
           </svg>
         </div>
 
-        <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+        <h3 className="mbti-analysis-header flex items-center">
           <span className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-3 text-indigo-600 dark:text-indigo-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -748,17 +748,17 @@ const MBTIPersonalityTabHome = () => {
     const { strengths, weaknesses } = personalityAnalysis.traits;
 
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+      <div className="mbti-traits-card">
+        <h3 className="mbti-analysis-header flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
           </svg>
           特质潜力分析
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mbti-traits-grid">
           {/* 优势 */}
-          <div className="bg-emerald-50/40 dark:bg-emerald-950/20 p-4 rounded-xl border border-emerald-100/50 dark:border-emerald-800/30 transition-all hover:shadow-md">
-            <h3 className="text-[13px] font-bold text-emerald-800 dark:text-emerald-400 mb-3 flex items-center tracking-wide">
+          <div className="mbti-traits-section">
+            <h3 className="mbti-traits-section-title">
               <span className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mr-2 text-xs">💎</span>
               核心优势
             </h3>
@@ -773,8 +773,8 @@ const MBTIPersonalityTabHome = () => {
           </div>
 
           {/* 需要注意 */}
-          <div className="bg-rose-50/40 dark:bg-rose-950/20 p-4 rounded-xl border border-rose-100/50 dark:border-rose-800/30 transition-all hover:shadow-md">
-            <h3 className="text-[13px] font-bold text-rose-800 dark:text-rose-400 mb-3 flex items-center tracking-wide">
+          <div className="mbti-traits-section">
+            <h3 className="mbti-traits-section-title">
               <span className="w-6 h-6 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center mr-2 text-xs">⚖️</span>
               注意与挑战
             </h3>
@@ -921,8 +921,8 @@ const MBTIPersonalityTabHome = () => {
   // 渲染MBTI选择器
   const renderMBTISelector = () => {
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+      <div className="mbti-selector-card">
+        <h3 className="mbti-analysis-header flex items-center">
           <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
           </svg>
@@ -955,7 +955,7 @@ const MBTIPersonalityTabHome = () => {
 
             {/* MBTI类型网格 */}
             <div className="mb-4">
-              <div className="grid grid-cols-4 gap-2">
+              <div className="mbti-selector-grid">
                 {allMBTIs.map((mbti) => {
                   const typeData = mbtiTypes.find(t => t.type === mbti);
                   const isSelected = userMBTI === mbti;
@@ -965,21 +965,17 @@ const MBTIPersonalityTabHome = () => {
                     <button
                       key={mbti}
                       onClick={() => handleMBTIChange(mbti)}
-                      className={`group relative py-3 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center overflow-hidden border ${isSelected
-                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-transparent shadow-lg scale-[1.02]'
-                        : 'bg-white dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-800 hover:shadow-md'
-                        }`}
+                      className={`mbti-type-button ${isSelected ? 'mbti-type-button selected' : ''}`}
                     >
                       {/* 选中光晕效果 */}
                       {isSelected && (
                         <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
                       )}
 
-                      <span className={`text-lg mb-0.5 transition-transform group-hover:scale-125 ${isSelected ? 'scale-110' : ''}`}>
+                      <span className="mbti-type-icon">
                         {typeData?.icon}
                       </span>
-                      <span className={`text-[11px] font-black tracking-tighter ${isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-200'
-                        }`}>
+                      <span className="mbti-type-text">
                         {mbti}
                       </span>
 
@@ -1016,13 +1012,13 @@ const MBTIPersonalityTabHome = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
+    <div className="mbti-personality-tab-container">
       {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
-      <div className="flex-1 overflow-y-auto hide-scrollbar scroll-performance-optimized bg-white dark:bg-black -webkit-overflow-scrolling-touch">
+      <div className="mbti-personality-tab-scroll-container hide-scrollbar scroll-performance-optimized -webkit-overflow-scrolling-touch">
         {/* Banner区域 - 随页面滚动 */}
-        <div className="nature-harmony-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-green-800 via-emerald-700 to-teal-900 flex-shrink-0">
+        <div className="mbti-personality-tab-banner shadow-lg relative overflow-hidden flex-shrink-0">
           {/* 自然渐变背景 */}
-          <div className="absolute inset-0 nature-gradient z-0 bg-gradient-to-r from-green-600/20 via-emerald-500/20 to-teal-700/20"></div>
+          <div className="absolute inset-0 nature-gradient z-0"></div>
 
           {/* 自然元素装饰 */}
           <div className="absolute top-2 left-2 w-12 h-12 opacity-20">
@@ -1088,95 +1084,93 @@ const MBTIPersonalityTabHome = () => {
           </div>
         </div>
 
-        {/* 内容展示区域 - 使用DressHealthTab的边距样式 */}
-        <div className="container mx-auto px-4 py-4 md:px-4 md:py-6 bg-white dark:bg-black flex-1">
-          <div className="mb-4 h-full dashboard-content">
-            <div className="space-y-3 h-full">
-              {/* MBTI选择器 */}
-              {renderMBTISelector()}
+        {/* 内容展示区域 */}
+        <div className="mbti-personality-tab-content flex-1">
+          <div className="space-y-3 h-full">
+            {/* MBTI选择器 */}
+            {renderMBTISelector()}
 
-              {/* 加载状态 */}
-              {loading && (
-                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-                  <div className="text-center py-6">
-                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto mb-2"></div>
-                    <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载人格分析数据...</p>
-                  </div>
+            {/* 加载状态 */}
+            {loading && (
+              <div className="mbti-loading-card">
+                <div className="mbti-loading-content">
+                  <div className="mbti-loading-spinner"></div>
+                  <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载人格分析数据...</p>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* 错误显示 */}
-              {error && (
-                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-                  <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-3">
-                    <p className="text-red-700 dark:text-red-300 text-xs">{error}</p>
-                    <button
-                      onClick={() => {
-                        setError(null);
-                        setDataLoaded(false);
-                      }}
-                      className="mt-2 text-xs bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 px-2 py-1 rounded hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
-                    >
-                      重试
-                    </button>
-                  </div>
+            {/* 错误显示 */}
+            {error && (
+              <div className="mbti-error-card">
+                <div className="mbti-error-content">
+                  <p className="mbti-error-text">{error}</p>
+                  <button
+                    onClick={() => {
+                      setError(null);
+                      setDataLoaded(false);
+                    }}
+                    className="mbti-error-retry-btn"
+                  >
+                    重试
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* 人格分析内容 */}
-              {!loading && !error && personalityAnalysis && userMBTI && (
-                <div className="space-y-3">
-                  {/* 基本信息卡片 */}
-                  {renderBasicInfoCard()}
+            {/* 人格分析内容 */}
+            {!loading && !error && personalityAnalysis && userMBTI && (
+              <div className="space-y-3">
+                {/* 基本信息卡片 */}
+                {renderBasicInfoCard()}
 
-                  {/* 特质维度分布图 */}
-                  {renderTraitsCoordinateMap()}
+                {/* 特质维度分布图 */}
+                {renderTraitsCoordinateMap()}
 
-                  {/* 特质分析卡片 */}
-                  {renderTraitsCard()}
+                {/* 特质分析卡片 */}
+                {renderTraitsCard()}
 
-                  {/* 人际关系卡片 */}
-                  {renderRelationshipsCard()}
+                {/* 人际关系卡片 */}
+                {renderRelationshipsCard()}
 
-                  {/* 职业发展卡片 */}
-                  {renderCareerCard()}
+                {/* 职业发展卡片 */}
+                {renderCareerCard()}
 
-                  {/* 个人成长卡片 */}
-                  {renderPersonalGrowthCard()}
-                </div>
-              )}
+                {/* 个人成长卡片 */}
+                {renderPersonalGrowthCard()}
+              </div>
+            )}
 
-              {/* 未选择MBTI时的提示 */}
-              {!loading && !error && !userMBTI && (
-                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700">
-                  <div className="text-center py-6">
-                    <div className="text-3xl mb-2">🧩</div>
-                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">请选择MBTI类型</h3>
-                    <p className="text-gray-500 dark:text-gray-300 text-xs max-w-xs mx-auto mb-3">
-                      选择一种MBTI类型，探索人格特质与发展建议
+            {/* 未选择MBTI时的提示 */}
+            {!loading && !error && !userMBTI && (
+              <div className="mbti-no-selection-card">
+                <div className="mbti-no-selection-content">
+                  <div className="text-3xl mb-2">🧩</div>
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">请选择MBTI类型</h3>
+                  <p className="text-gray-500 dark:text-gray-300 text-xs max-w-xs mx-auto mb-3">
+                    选择一种MBTI类型，探索人格特质与发展建议
                     </p>
-                    <div className="inline-flex flex-wrap gap-1 justify-center">
-                      {mbtiList.slice(0, 4).map(mbti => {
-                        const typeData = mbtiTypes.find(t => t.type === mbti);
-                        return (
-                          <button
-                            key={mbti}
-                            onClick={() => handleMBTIChange(mbti)}
-                            className="px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 hover:shadow"
-                            style={{
-                              backgroundColor: typeData?.color,
-                              color: 'white'
-                            }}
-                          >
-                            {mbti}
-                          </button>
-                        );
-                      })}
-                    </div>
+                  <div className="mbti-no-selection-button-grid">
+                    {mbtiList.slice(0, 4).map(mbti => {
+                      const typeData = mbtiTypes.find(t => t.type === mbti);
+                      return (
+                        <button
+                          key={mbti}
+                          onClick={() => handleMBTIChange(mbti)}
+                          className="px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 hover:shadow"
+                          style={{
+                            backgroundColor: typeData?.color,
+                            color: 'white'
+                          }}
+                        >
+                          {mbti}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
