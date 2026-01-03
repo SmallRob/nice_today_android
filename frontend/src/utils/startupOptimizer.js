@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import performanceMonitor from './performanceMonitor';
 import appOptimizer from './appOptimizer';
 import { isAppInitialized, initializeApp } from './appInitializer';
+import { preloadOnIdle } from './horoscopeTraitsPreloader';
 
 // 启动优化器类
 class StartupOptimizer {
@@ -83,6 +84,9 @@ class StartupOptimizer {
     try {
       // 阶段1: 预加载关键资源
       await this.preloadCriticalResources();
+      
+      // 额外预加载：horoscope-traits 相关资源（非阻塞）
+      preloadOnIdle();
       
       // 阶段2: 并行初始化核心模块
       await this.parallelInitializeCoreModules();

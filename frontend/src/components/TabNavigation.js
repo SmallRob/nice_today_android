@@ -80,8 +80,8 @@ const TabNavigation = () => {
       )
     },
     {
-      id: 'shaoyong',
-      label: '邵雍易学',
+      id: 'simple-iching',
+      label: '简单易学',
       path: '/shaoyong-yixue',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -139,7 +139,7 @@ const TabNavigation = () => {
       // 清除生命灵数页面相关缓存
       storageManager.removeGlobalCache('numerology_data');
     } else if (path === '/shaoyong-yixue') {
-      // 清除邵雍易学页面相关缓存
+      // 清除简单易学页面相关缓存
       storageManager.removeGlobalCache('shaoyong_data');
     }
 

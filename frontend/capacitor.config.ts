@@ -15,7 +15,23 @@ const config: CapacitorConfig = {
     captureInput: true,
     webContentsDebuggingEnabled: false,
     backgroundColor: '#ffffffff',
-    logLevel: 'ERROR'
+    logLevel: 'ERROR',
+    minWebViewVersion: 65,
+    allowFileAccess: true,
+    hardwareAcceleration: true,
+    useLegacyBridge: false,
+    overrideUserAgent: 'NiceTodayApp/1.0',
+    appendUserAgent: 'NiceTodayApp/1.0',
+    allowFileAccessFromFileURLs: true,
+    allowUniversalAccessFromFileURLs: false
+  },
+  ios: {
+    contentInset: 'automatic',
+    backgroundColor: '#ffffff',
+    handleOpenURL: true,
+    scrollEnabled: true,
+    allowFileAccess: true,
+    webContentsDebuggingEnabled: false
   },
   plugins: {
     LocalNotifications: {
@@ -33,7 +49,23 @@ const config: CapacitorConfig = {
       splashFullScreen: true,
       splashImmersive: true,
       layoutName: 'launch_screen',
-      useDialog: true
+      useDialog: true,
+      splashFadeOutDuration: 500,
+      launchFadeInDuration: 500
+    },
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#ffffff'
+    },
+    App: {
+      appendUserAgent: 'NiceTodayApp/1.0'
+    },
+    Keyboard: {
+      resize: 'body'
+    },
+    Network: {},
+    Permissions: {
+      requestStatus: true
     }
   }
 };

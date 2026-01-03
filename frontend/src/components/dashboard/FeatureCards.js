@@ -321,6 +321,20 @@ const OrganRhythmCard = () => {
 };
 
 /**
+ * 身体指标组件
+ */
+const BodyMetricsCard = () => {
+  return (
+    <FeatureCard
+      title="身体指标"
+      icon="body-metrics"
+      category="health"
+      route="/body-metrics"
+    />
+  );
+};
+
+/**
  * 钓了么钓鱼游戏组件
  */
 const FishingGameCard = () => {
@@ -358,6 +372,20 @@ const LiuyaoCard = () => {
       icon="liuyao"
       category="fortune"
       route="/liuyao"
+    />
+  );
+};
+
+/**
+ * 铁板神数组件
+ */
+const TiebanshenshuCard = () => {
+  return (
+    <FeatureCard
+      title="铁板神数"
+      icon="tiebanshenshu"
+      category="fortune"
+      route="/tiebanshenshu"
     />
   );
 };
@@ -456,9 +484,11 @@ export {
   FishingGameCard,
   FengShuiCompassCard,
   LiuyaoCard,
+  TiebanshenshuCard,
   PlumBlossomCard,
   AncientCardGameCard,
   HuangliCard,
   MoodCalendarCard,
-  HabitTrackerCard
+  HabitTrackerCard,
+  BodyMetricsCard
 };

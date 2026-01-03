@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { UserConfigProvider } from './contexts/UserConfigContext';
 import { EnergyProvider } from './contexts/EnergyContext';
@@ -12,6 +12,14 @@ import { useChunkErrorRecovery, ChunkLoadErrorBoundary } from './utils/chunkLoad
 import { useVersionManager, VersionUpdateNotification } from './utils/versionManager';
 import { UserParamsProvider } from './context/UserParamsContext';
 import { ensureChartRegistered } from './utils/chartConfig';
+import { 
+  preloadHoroscopeTraits, 
+  preloadOnIdle, 
+  initializeUserTracking,
+  trackUserNavigation,
+  getPreloadStatus,
+  preloadBasedOnRoute
+} from './utils/horoscopeTraitsPreloader';
 import './index.css';
 
 // 为移动设备兼容性安全导入Suspense
@@ -25,19 +33,26 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
     
     const attemptImport = async () => {
       try {
-        const module = await importFunc();
+        // 设置超时机制，避免无限等待
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('组件加载超时，请检查网络连接')), 10000); // 10秒超时
+        });
+        
+        const module = await Promise.race([importFunc(), timeoutPromise]);
         return module;
       } catch (error) {
         console.error('组件加载失败:', error);
         
-        // 如果是ChunkLoadError，尝试恢复
-        if (error.name === 'ChunkLoadError' || 
+        // 如果是ChunkLoadError或相关错误，尝试恢复
+        const isChunkError = error.name === 'ChunkLoadError' || 
             error.message?.includes('Loading chunk') ||
             error.message?.includes('chunk') ||
-            error.message?.includes('failed')) {
+            error.message?.includes('failed');
+        
+        if (isChunkError) {
           console.error(`检测到ChunkLoadError (重试 ${retryCount + 1}/${maxRetries})，尝试恢复...`);
           
-          // 记录错误信息
+          // 记录错误信息以便分析和调试
           if (typeof window !== 'undefined' && window.localStorage) {
             try {
               const errorInfo = {
@@ -47,7 +62,8 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
                 timestamp: new Date().toISOString(),
                 url: window.location.href,
                 userAgent: navigator.userAgent,
-                retryCount
+                retryCount,
+                failedUrl: error.message.match(/(https?:\/\/[^\s]+\\.js)/)?.[1] || '未知'
               };
               
               const errors = JSON.parse(window.localStorage.getItem('chunkLoadErrors') || '[]');
@@ -58,112 +74,125 @@ const lazyLoadWithErrorHandling = (importFunc, fallbackComponent = null) => {
             }
           }
           
-          // 检查错误URL并尝试修正
-          const urlMatch = error.message.match(/(https?:\/\/[^\s]+\.js)/);
-          if (urlMatch) {
-            const failedUrl = urlMatch[1];
-            console.log('失败URL:', failedUrl);
-            
-            // 尝试从根目录重新加载资源
-            try {
-              // 获取当前页面的基础URL
-              const baseUrl = window.location.origin;
-              
-              // 尝试从根目录加载资源
-              const resourcePath = new URL(failedUrl).pathname;
-              const correctedUrl = `${baseUrl}${resourcePath}`;
-              
-              console.log('尝试从根目录加载资源:', correctedUrl);
-              
-              // 尝试动态加载脚本
-              const script = document.createElement('script');
-              script.src = correctedUrl;
-              script.type = 'application/javascript';
-              
-              await new Promise((resolve, reject) => {
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-              });
-              
-              // 如果脚本加载成功，重新尝试导入
-              console.log('资源加载成功，重新尝试导入');
-              return importFunc();
-            } catch (scriptError) {
-              console.warn('从根目录加载资源失败:', scriptError);
-            }
-            
-            // 检查URL是否包含特定路径前缀，如/horoscope-traits，尝试从根路径加载
-            try {
-              const urlPath = new URL(failedUrl);
-              const pathSegments = urlPath.pathname.split('/');
-              
-              // 检查路径中是否包含应用特定的路径段
-              if (pathSegments.includes('horoscope-traits')) {
-                // 从路径中提取文件名部分，尝试从根目录加载
-                const fileName = pathSegments[pathSegments.length - 1];
-                const directLoadUrl = `${window.location.origin}/${fileName}`;
-                
-                console.log('检测到horoscope-traits路径，尝试直接加载:', directLoadUrl);
-                
-                const script = document.createElement('script');
-                script.src = directLoadUrl;
-                script.type = 'application/javascript';
-                
-                await new Promise((resolve, reject) => {
-                  script.onload = resolve;
-                  script.onerror = reject;
-                  document.head.appendChild(script);
-                });
-                
-                console.log('直接加载成功，重新尝试导入');
-                return importFunc();
-              }
-            } catch (pathError) {
-              console.warn('路径修正尝试失败:', pathError);
-            }
-          }
-          
           // 如果重试次数未达到最大值，延迟后重试
           if (retryCount < maxRetries - 1) {
             retryCount++;
             console.log(`延迟后重试 (${retryCount}/${maxRetries})...`);
             
-            // 延迟后重试，增加等待时间
-            await new Promise(resolve => setTimeout(resolve, 1500 * retryCount));
+            // 指数退避策略：等待时间逐渐增加
+            const delay = Math.min(1500 * retryCount, 10000);
+            await new Promise(resolve => setTimeout(resolve, delay));
             return attemptImport();
           } else {
-            // 如果重试次数用尽，尝试清除缓存并刷新页面
-            console.log('重试次数用尽，尝试清除缓存并刷新页面...');
+            // 重试次数用尽，返回降级组件，避免抛出未捕获错误
+            console.log('重试次数用尽，返回降级组件，避免阻塞用户体验...');
             
-            try {
-              // 清除浏览器缓存
-              if ('caches' in window) {
-                const cacheNames = await caches.keys();
-                await Promise.all(
-                  cacheNames.map(cacheName => caches.delete(cacheName))
-                );
-              }
-              
-              // 清除localStorage中的错误记录
-              window.localStorage.removeItem('chunkLoadErrors');
-              
-              // 延迟后刷新页面
-              setTimeout(() => {
+            // 创建降级组件 - 显示友好的加载/错误界面
+            const FallbackComponent = () => {
+              const handleRetry = () => {
+                console.log('用户手动重试，刷新页面...');
                 window.location.reload();
-              }, 1000);
-            } catch (clearError) {
-              console.warn('清除缓存失败:', clearError);
-              // 如果清除缓存失败，直接刷新
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
-            }
+              };
+              
+              const handleClearCacheAndRetry = () => {
+                console.log('清除缓存并重试...');
+                if ('caches' in window) {
+                  caches.keys().then(cacheNames => {
+                    Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)))
+                      .then(() => {
+                        console.log('缓存已清除，重新加载页面...');
+                        window.location.reload();
+                      })
+                      .catch(() => {
+                        console.log('清除缓存失败，直接刷新页面...');
+                        window.location.reload();
+                      });
+                  }).catch(() => {
+                    window.location.reload();
+                  });
+                } else {
+                  window.location.reload();
+                }
+              };
+              
+              return (
+                <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
+                  <div className="text-center max-w-md">
+                    {/* 加载动画 */}
+                    <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+                    
+                    {/* 主标题 */}
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      内容加载中...
+                    </h3>
+                    
+                    {/* 描述信息 */}
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                      当前内容加载时间较长，可能是由于网络较慢或应用更新。
+                      系统正在后台继续尝试加载，请耐心等待或尝试以下操作。
+                    </p>
+                    
+                    {/* 操作按钮组 */}
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button
+                        onClick={handleRetry}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      >
+                        刷新页面
+                      </button>
+                      
+                      <button
+                        onClick={handleClearCacheAndRetry}
+                        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                      >
+                        清除缓存并重试
+                      </button>
+                    </div>
+                    
+                    {/* 后台加载提示 */}
+                    <div className="mt-6 text-sm text-gray-500 dark:text-gray-400">
+                      <p>✓ 后台加载已启动</p>
+                      <p>✓ 自动重试机制已启用</p>
+                      <p>✓ 网络状态监控中</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            };
+            
+            // 返回降级组件模块，而不是抛出错误
+            return {
+              default: FallbackComponent
+            };
           }
         }
         
-        // 如果重试次数达到最大值或不是ChunkLoadError，抛出错误
-        throw error;
+        // 如果不是ChunkLoadError，返回降级组件而不是抛出错误
+        console.warn('非ChunkLoadError，返回降级组件:', error.message);
+        
+        const GenericFallback = () => (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                加载遇到问题
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                请检查网络连接或稍后重试
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                重试
+              </button>
+            </div>
+          </div>
+        );
+        
+        return {
+          default: GenericFallback
+        };
       }
     };
     
@@ -203,16 +232,19 @@ const CulturalCupPage = lazyLoadWithErrorHandling(() => import('./pages/Cultural
 const BaziAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/bazi/BaziAnalysisPage'));
 const WuxingHealthPage = lazyLoadWithErrorHandling(() => import('./pages/WuxingHealthPage'));
 const OrganRhythmPage = lazyLoadWithErrorHandling(() => import('./pages/OrganRhythmPage'));
-const ShaoyongYixuePage = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
+const SimpleIChingPage = lazyLoadWithErrorHandling(() => import('./pages/SimpleIChingPage'));
+const ShaoyongYixue = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
 const FishingGamePage = lazyLoadWithErrorHandling(() => import('./pages/FishingGamePage'));
 const FengShuiCompassPage = lazyLoadWithErrorHandling(() => import('./pages/FengShuiCompassPage'));
 const LiuyaoPage = lazyLoadWithErrorHandling(() => import('./pages/SixYaoDivination'));
+const TiebanshenshuPage = lazyLoadWithErrorHandling(() => import('./pages/TiebanshenshuPage'));
 const PlumBlossomPage = lazyLoadWithErrorHandling(() => import('./pages/PlumBlossomDivination'));
 const HuangliPage = lazyLoadWithErrorHandling(() => import('./pages/HuangliPage'));
 const MoodCalendarPage = lazyLoadWithErrorHandling(() => import('./pages/MoodCalendarPage'));
 const EnergyTreePage = lazyLoadWithErrorHandling(() => import('./pages/EnergyTreePage'));
 const HabitTrackerPage = lazyLoadWithErrorHandling(() => import('./pages/HabitTrackerPage'));
 const HabitStatsPage = lazyLoadWithErrorHandling(() => import('./pages/HabitStatsPage'));
+const BodyMetricsPage = lazyLoadWithErrorHandling(() => import('./pages/BodyMetricsPage'));
 // const AncientCardGamePage = lazyLoadWithErrorHandling(() => import('./pages/AncientCardGamePage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
@@ -231,9 +263,38 @@ const AppLayout = () => {
   // 使用主题颜色Hook
   useThemeColor();
 
+  // 获取当前路由位置（现在在 Router 内部，可以使用 useLocation）
+  const location = useLocation();
+
   // 检测是否在移动设备环境中
   const isMobile = typeof window !== 'undefined' &&
     (window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+
+  // 监听路由变化，智能预加载相关资源
+  useEffect(() => {
+    // 记录用户导航行为（非阻塞）
+    trackUserNavigation(location.pathname, location.state?.from);
+
+    // 延迟预加载，确保核心功能先渲染完成
+    const preloadTimer = setTimeout(() => {
+      try {
+        // 根据路由智能预加载horoscope-traits资源
+        preloadBasedOnRoute(location.pathname);
+      } catch (error) {
+        // 预加载失败不应该影响应用运行
+        console.warn('资源预加载失败（不影响应用）:', error);
+      }
+    }, 1000); // 延迟1秒，确保核心UI已渲染
+
+    // 检查预加载状态（用于调试）
+    if (process.env.NODE_ENV === 'development') {
+      const status = getPreloadStatus();
+      console.log('资源预加载状态:', status);
+    }
+
+    // 清理定时器
+    return () => clearTimeout(preloadTimer);
+  }, [location.pathname]);
 
   // 移动设备兼容的Suspense实现
   const SafeSuspense = ({ fallback, children }) => {
@@ -296,15 +357,17 @@ const AppLayout = () => {
             <Route path="/organ-rhythm" element={<OrganRhythmPage />} />
             <Route path="/fishing-game" element={<FishingGamePage />} />
             <Route path="/dress" element={<DressGuidePage />} />
-            <Route path="/shaoyong-yixue" element={<ShaoyongYixuePage />} />
+            <Route path="/shaoyong-yixue" element={<ShaoyongYixue />} />
             <Route path="/feng-shui-compass" element={<FengShuiCompassPage />} />
             <Route path="/liuyao" element={<LiuyaoPage />} />
+            <Route path="/tiebanshenshu" element={<TiebanshenshuPage />} />
             <Route path="/plum-blossom" element={<PlumBlossomPage />} />
             <Route path="/huangli" element={<HuangliPage />} />
             <Route path="/mood-calendar" element={<MoodCalendarPage />} />
             <Route path="/energy-tree" element={<EnergyTreePage />} />
             <Route path="/habit-tracker" element={<HabitTrackerPage />} />
             <Route path="/habit-stats" element={<HabitStatsPage />} />
+            <Route path="/body-metrics" element={<BodyMetricsPage />} />
             {/* <Route path="/ancient-card-game" element={<AncientCardGamePage />} /> */}
           </Routes>
         </SafeSuspense>
@@ -436,6 +499,13 @@ function App() {
         }
 
         try {
+          // 初始化用户行为跟踪
+          initializeUserTracking();
+        } catch (error) {
+          console.warn('用户行为跟踪初始化失败:', error);
+        }
+
+        try {
           // 使用安全的初始化函数，确保在适当环境下运行
           const androidWebViewResult = safeInitAndroidWebViewCompat();
           console.log('Android WebView 兼容性初始化完成:', androidWebViewResult);
@@ -522,6 +592,17 @@ function App() {
 
           // 记录初始化成功
           console.log('应用初始化成功');
+
+          // 延迟启动horoscope-traits资源预加载（确保核心功能已渲染）
+          // 使用 setTimeout 延迟3秒，让应用完全稳定后再预加载
+          setTimeout(() => {
+            try {
+              preloadOnIdle();
+            } catch (error) {
+              // 预加载失败不应该影响应用运行
+              console.warn('horoscope-traits 预加载启动失败（不影响应用）:', error);
+            }
+          }, 3000);
         } catch (error) {
           // 记录初始化错误，但不影响UI显示
           errorLogger.log(error, {

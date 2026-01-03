@@ -22,6 +22,8 @@ const BaziPage = () => {
   // 状态管理
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [preloading, setPreloading] = useState(false);
   const [error, setError] = useState(null);
   const [baziData, setBaziData] = useState(null);
   const [liuNianData, setLiuNianData] = useState(null);
@@ -33,6 +35,106 @@ const BaziPage = () => {
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly', 'weekly', 'yearly'
 
+  // 预加载八字命格资源
+  const preloadBaziAnalysisData = useCallback(async () => {
+    if (!currentConfig?.birthDate || preloading) return; // 避免重复预加载
+    
+    try {
+      setPreloading(true);
+      console.log('🔄 开始预加载八字命格分析数据');
+      
+      // 规范化出生信息
+      const birthInfo = normalizeBirthInfo(currentConfig);
+      
+      // 从字符串格式解析日期和时间
+      let year, month, day, hour, minute;
+      
+      try {
+        // 解析出生日期 (格式: YYYY-MM-DD)
+        const dateParts = birthInfo.birthDate.split('-');
+        year = parseInt(dateParts[0]);
+        month = parseInt(dateParts[1]);
+        day = parseInt(dateParts[2]);
+        
+        // 解析出生时间 (格式: HH:mm)，默认使用 12:00
+        const timeParts = birthInfo.birthTime.split(':');
+        hour = timeParts.length >= 1 ? parseInt(timeParts[0]) : 12;
+        minute = timeParts.length >= 2 ? parseInt(timeParts[1]) : 0;
+      } catch (parseError) {
+        // 如果解析失败，使用默认值
+        console.warn('日期时间解析失败，使用默认值:', parseError);
+        year = 1990;
+        month = 1;
+        day = 1;
+        hour = 12;
+        minute = 0;
+      }
+      
+      // 验证解析结果
+      if (!year || !month || !day) {
+        throw new Error('出生日期解析失败');
+      }
+      
+      if (!hour || isNaN(hour)) {
+        hour = 12; // 默认使用 12:00
+        console.log('使用默认出生时间: 12:00');
+      }
+      
+      // 使用 BaziCalculator 预计算八字（不设置状态，仅用于预热缓存）
+      const precalculatedBazi = BaziCalculator.calculateBazi(year, month, day, hour, minute, 110);
+      
+      // 预计算其他相关数据（使用setTimeout分割任务，避免阻塞UI）
+      setTimeout(() => calculateLiuNianDaYun(precalculatedBazi), 0);
+      
+      // 预加载月运数据
+      const currentMonthDate = new Date();
+      setTimeout(() => getMonthlyBaziFortune([
+        precalculatedBazi.year,
+        precalculatedBazi.month,
+        precalculatedBazi.day,
+        precalculatedBazi.hour
+      ], currentMonthDate), 0);
+      
+      // 预加载日运数据
+      setTimeout(() => getDailyBaziFortune([
+        precalculatedBazi.year,
+        precalculatedBazi.month,
+        precalculatedBazi.day,
+        precalculatedBazi.hour
+      ], new Date()), 0);
+      
+      // 预加载年运数据
+      setTimeout(() => getYearlyBaziFortune([
+        precalculatedBazi.year,
+        precalculatedBazi.month,
+        precalculatedBazi.day,
+        precalculatedBazi.hour
+      ], currentMonthDate.getFullYear()), 0);
+      
+      // 预计算每日能量
+      const baziDataForDaily = {
+        bazi: {
+          year: precalculatedBazi.year,
+          month: precalculatedBazi.month,
+          day: precalculatedBazi.day,
+          hour: precalculatedBazi.hour
+        },
+        day: precalculatedBazi.day
+      };
+      setTimeout(() => calculateDailyEnergy(baziDataForDaily), 0);
+      
+      // 预分析八字
+      setTimeout(() => BaziCalculator.analyzeBazi(precalculatedBazi), 0);
+      
+      console.log('✅ 八字命格分析数据预加载启动');
+      
+    } catch (err) {
+      console.error('❌ 八字命格分析数据预加载失败:', err);
+    } finally {
+      setPreloading(false);
+    }
+  }, [currentConfig, preloading]);
+  
   // 监听URL参数变化，自动设置视图模式
   useEffect(() => {
     const modeParam = searchParams.get('mode');
@@ -48,6 +150,16 @@ const BaziPage = () => {
     }
   }, [searchParams.toString()]); // 使用 searchParams.toString() 作为依赖，确保URL变化时触发
 
+  // 页面加载时预加载八字命格分析所需资源（非阻塞方式）
+  useEffect(() => {
+    const preloadTimeout = setTimeout(() => {
+      preloadBaziAnalysisData();
+    }, 100); // 延迟100ms执行，确保主页面渲染不受影响
+    
+    return () => {
+      clearTimeout(preloadTimeout);
+    };
+  }, [preloadBaziAnalysisData]);
 
 
   // 处理视图模式切换
@@ -363,12 +475,30 @@ const BaziPage = () => {
           </div>
           <div className="ml-4">
             <button 
-              onClick={() => navigate('/bazi/analysis')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${theme === 'dark' 
-                ? 'bg-purple-700 text-white hover:bg-purple-600' 
-                : 'bg-purple-600 text-white hover:bg-purple-700'}`}
+              onClick={async () => {
+                try {
+                  setAnalyzing(true);
+                  navigate('/bazi/analysis');
+                } catch (error) {
+                  console.error('导航到命格分析页面失败:', error);
+                  setError('导航到命格分析页面失败，请稍后重试');
+                } finally {
+                  setAnalyzing(false);
+                }
+              }}
+              disabled={analyzing}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${analyzing 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : theme === 'dark' 
+                  ? 'bg-purple-700 text-white hover:bg-purple-600' 
+                  : 'bg-purple-600 text-white hover:bg-purple-700'}`}
             >
-              命格分析
+              {analyzing ? (
+                <span className="flex items-center justify-center">
+                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                  加载中...
+                </span>
+              ) : '命格分析'}
             </button>
           </div>
         </div>

@@ -495,8 +495,8 @@
 }
 
 .feature-card.category-health::before {
-  background: linear-gradient(135deg, #00BCD4 0%, #8BC34A 100%) !important;
-  box-shadow: 0 4px 20px rgba(0, 188, 212, 0.4) !important;
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%) !important;
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4) !important;
 }
 
 .feature-card.category-entertainment::before {
@@ -1046,8 +1046,8 @@
 }
 
 .dark .feature-card.category-health::before {
-  background: linear-gradient(135deg, #00BCD4 0%, #8BC34A 100%);
-  box-shadow: 0 4px 20px rgba(0, 188, 212, 0.5);
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.5);
 }
 
 .dark .feature-card.category-entertainment::before {

@@ -2,7 +2,7 @@
  * 八字命格分析页面
  * 展示完整的八字命格分析结果，包括四柱、五行、纳音、大运等信息
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserConfig } from '../../contexts/UserConfigContext';
@@ -11,10 +11,52 @@ import { getDisplayBaziInfo } from '../../utils/baziSchema';
 import { calculateDetailedBazi } from '../../utils/baziHelper';
 import { DEFAULT_REGION } from '../../data/ChinaLocationData';
 
+// 错误边界组件
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('BaziAnalysisPage 错误边界捕获到错误:', error, errorInfo);
+    this.setState({
+      error: error,
+      errorInfo: errorInfo
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
+          <div className="text-red-600 dark:text-red-400 text-center">
+            <div className="font-bold text-lg mb-2">页面加载出错</div>
+            <p className="mb-4">八字分析页面遇到问题，请尝试刷新页面或检查出生信息设置</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              重新加载
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 // 八字命格展示组件
 const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname }) => {
   const [baziInfo, setBaziInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // 计算八字信息
   useEffect(() => {
@@ -23,12 +65,24 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
       console.log('出生日期未设置，显示默认信息');
       setBaziInfo(getFallbackBaziData(birthDate, birthTime));
       setLoading(false);
+      setError(null);
       return;
     }
+
+    // 设置超时控制，防止长时间加载
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn('八字加载超时，使用默认数据');
+        setBaziInfo(getFallbackBaziData(birthDate, birthTime));
+        setLoading(false);
+        setError('加载超时，请稍后重试');
+      }
+    }, 10000); // 10秒超时
 
     const loadBazi = async () => {
       try {
         setLoading(true);
+        setError(null); // 重置错误状态
         let finalBaziData = null;
 
         // 1. 优先从缓存获取八字信息
@@ -127,19 +181,44 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
       } catch (e) {
         console.error('八字加载失败:', e);
+        setError('加载失败: ' + e.message);
         setBaziInfo(getFallbackBaziData(birthDate, birthTime));
       } finally {
         setLoading(false);
+        clearTimeout(timeoutId); // 清除超时定时器
       }
     };
 
     loadBazi();
+
+    // 清理函数
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname]);
+
+  if (error) {
+    return (
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
+        <div className="text-red-600 dark:text-red-400 text-center">
+          <div className="font-bold text-lg mb-2">加载出错</div>
+          <p className="mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            重新加载
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500"></div>
+        <p className="ml-4 text-gray-600 dark:text-gray-300">正在加载八字信息，请稍候...</p>
       </div>
     );
   }
@@ -961,6 +1040,7 @@ const BaziAnalysisPage = () => {
   const { theme } = useTheme();
   const { currentConfig } = useUserConfig();
   const navigate = useNavigate();
+  const [error, setError] = useState(null);
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-gray-900 dark:via-amber-900/20 dark:to-orange-900/20 ${theme}`}>
@@ -1012,15 +1092,17 @@ const BaziAnalysisPage = () => {
         </div>
 
         {/* 八字命格展示 */}
-        <BaziFortuneDisplay
-          birthDate={currentConfig?.birthDate}
-          birthTime={currentConfig?.birthTime}
-          birthLocation={currentConfig?.birthLocation}
-          lunarBirthDate={currentConfig?.lunarBirthDate}
-          trueSolarTime={currentConfig?.trueSolarTime}
-          savedBaziInfo={currentConfig?.baziInfo}
-          nickname={currentConfig?.nickname}
-        />
+        <ErrorBoundary>
+          <BaziFortuneDisplay
+            birthDate={currentConfig?.birthDate}
+            birthTime={currentConfig?.birthTime}
+            birthLocation={currentConfig?.birthLocation}
+            lunarBirthDate={currentConfig?.lunarBirthDate}
+            trueSolarTime={currentConfig?.trueSolarTime}
+            savedBaziInfo={currentConfig?.baziInfo}
+            nickname={currentConfig?.nickname}
+          />
+        </ErrorBoundary>
       </div>
     </div>
   );
