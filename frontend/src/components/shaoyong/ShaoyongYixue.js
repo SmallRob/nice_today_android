@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 
 const ShaoyongYixue = () => {
-  const [activeTab, setActiveTab] = useState('meihua'); // 梅花易数 | 铁板神数
   const [theme, setTheme] = useState('dark'); // light | dark
 
   // 主题切换 - update Tailwind theme
@@ -27,7 +26,8 @@ const ShaoyongYixue = () => {
       description: '以数观象，简易直观的占卜方法',
       icon: '🌸',
       color: 'bg-gradient-to-r from-pink-500 to-purple-500',
-      link: '/shaoyong/meihua'
+      link: '/plum-blossom',
+      isImplemented: true
     },
     {
       id: 'tieban',
@@ -35,7 +35,8 @@ const ShaoyongYixue = () => {
       description: '精微数术，条文详解',
       icon: '🧮',
       color: 'bg-gradient-to-r from-blue-500 to-indigo-500',
-      link: '/shaoyong/tieban'
+      link: '/tiebanshenshu',
+      isImplemented: true
     },
     {
       id: 'liuyao',
@@ -43,7 +44,8 @@ const ShaoyongYixue = () => {
       description: '传统占卜，灵活多变',
       icon: '筮',
       color: 'bg-gradient-to-r from-green-500 to-teal-500',
-      link: '/liuyao'
+      link: '/liuyao',
+      isImplemented: true
     },
     {
       id: 'qimen',
@@ -51,7 +53,8 @@ const ShaoyongYixue = () => {
       description: '帝王之学，时空预测',
       icon: '☰',
       color: 'bg-gradient-to-r from-yellow-500 to-orange-500',
-      link: '/qimen'
+      link: '/qimen',
+      isImplemented: false
     },
     {
       id: 'liuren',
@@ -59,7 +62,8 @@ const ShaoyongYixue = () => {
       description: '最高预测术之一',
       icon: '☯',
       color: 'bg-gradient-to-r from-red-500 to-pink-500',
-      link: '/liuren'
+      link: '/liuren',
+      isImplemented: false
     },
     {
       id: 'ziwei',
@@ -67,7 +71,8 @@ const ShaoyongYixue = () => {
       description: '帝王之星，命理精要',
       icon: '⭐',
       color: 'bg-gradient-to-r from-indigo-500 to-purple-500',
-      link: '/ziwei'
+      link: '/ziwei',
+      isImplemented: false
     }
   ];
 
@@ -92,29 +97,7 @@ const ShaoyongYixue = () => {
           </div>
         </div>
 
-        {/* 标签页导航 */}
-        <nav className="max-w-6xl mx-auto px-4 mt-6">
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {easyLearnLinks.map((item) => (
-              <button
-                key={item.id}
-                className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 min-w-[120px] ${
-                  activeTab === item.id 
-                    ? (theme === 'dark' 
-                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
-                        : 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20') 
-                    : (theme === 'dark' 
-                        ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' 
-                        : 'bg-white text-gray-700 hover:bg-gray-100')
-                }`}
-                onClick={() => setActiveTab(item.id)}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span className="whitespace-nowrap">{item.title}</span>
-              </button>
-            ))}
-          </div>
-        </nav>
+
       </header>
 
       {/* 主要内容区域 */}
@@ -138,7 +121,14 @@ const ShaoyongYixue = () => {
                     ? 'bg-white text-gray-900 hover:bg-gray-200' 
                     : 'bg-gray-900 text-white hover:bg-gray-800'
                 }`}
-                onClick={() => window.location.href = item.link}
+                onClick={() => {
+                  if (item.isImplemented) {
+                    window.location.href = item.link;
+                  } else {
+                    // 对于暂未实现的功能，跳转到功能开发中页面
+                    window.location.href = `/feature-development?feature=${encodeURIComponent(item.title)}&link=${encodeURIComponent(item.link)}`;
+                  }
+                }}
               >
                 立即学习
               </button>

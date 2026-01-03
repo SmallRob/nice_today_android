@@ -21,7 +21,7 @@ const COMMON_FEATURES = [
     { id: 'horoscope', icon: '📅', name: '星座运势', route: '/horoscope' }
 ];
 
-const BreadCrumbMenu = () => {
+const BreadCrumbMenu = ({ hideText = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef(null);
     const navigate = useNavigate();
@@ -154,7 +154,7 @@ const BreadCrumbMenu = () => {
     return (
         <div className="breadcrumb-menu-wrapper" ref={menuRef}>
             <button
-                className={`breadcrumb-trigger-btn pill-style ${isOpen ? 'active' : ''}`}
+                className={`breadcrumb-trigger-btn pill-style ${isOpen ? 'active' : ''} ${hideText ? 'no-text' : ''}`}
                 onClick={toggleMenu}
                 aria-label="快捷入口菜单"
             >
@@ -163,7 +163,7 @@ const BreadCrumbMenu = () => {
                     <span></span>
                     <span></span>
                 </div>
-                <span className="trigger-text">快捷入口</span>
+                {!hideText && <span className="trigger-text">快捷入口</span>}
             </button>
 
             {createPortal(menuContent, document.body)}

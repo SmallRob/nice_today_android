@@ -31,7 +31,8 @@ import {
   PlumBlossomCard,
   HuangliCard,
   MoodCalendarCard,
-  HabitTrackerCard
+  HabitTrackerCard,
+  TiebanshenshuCard
 } from '../components/dashboard/FeatureCards.js';
 import FeatureDragPanel from '../components/dashboard/FeatureDragPanel.js';
 import {
@@ -59,7 +60,7 @@ const ALL_FEATURES = [
   { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类', type: 'health' },
   { component: BodyMetricsCard, name: 'BodyMetricsCard', category: '健康管理类', type: 'health' },
   { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类', type: 'entertainment' },
-  { component: TarotGardenCard, name: 'TarotGardenCard', category: '娱乐休闲类', type: 'entertainment' },
+  { component: TiebanshenshuCard, name: 'TiebanshenshuCard', category: '运势分析类', type: 'fortune' },
   { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类', type: 'entertainment' },
   { component: FishingGameCard, name: 'FishingGameCard', category: '娱乐休闲类', type: 'entertainment' },
   // { component: AncientCardGameCard, name: 'AncientCardGameCard', category: '娱乐休闲类', type: 'entertainment' },
@@ -261,10 +262,10 @@ const Dashboard = () => {
             </button>
             <button
               className="quick-action-btn"
-              onClick={() => navigate('/tarot')}
+              onClick={() => navigate('/tiebanshenshu')}
             >
-              <span>🎴</span>
-              <span className="quick-action-label">塔罗抽卡</span>
+              <span>🧮</span>
+              <span className="quick-action-label">铁板神数</span>
             </button>
           </div>
         </div>

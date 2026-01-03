@@ -17,12 +17,22 @@
 
 .banner-menu-container {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 10px;
   padding-left: 2px;
   position: relative;
   z-index: 10;
+}
+
+/* 隐藏文字的面包屑菜单样式，与应用图标对齐 */
+.breadcrumb-trigger-btn.pill-style.no-text {
+  width: 46px;
+  height: 38px;
+  min-width: 46px;
+  padding: 0;
+  border-radius: 10px;
+  justify-content: center;
 }
 
 .menu-label {
@@ -374,7 +384,7 @@
 }
 
 .user-nickname {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.5px;
@@ -622,8 +632,8 @@
 /* 移动端适配 */
 @media (max-width: 576px) {
   .merged-banner-card {
-    padding: 38px 14px 16px 14px;
-    min-height: 130px;
+    padding: 36px 14px 16px 14px;
+    min-height: 120px;
     gap: 16px;
   }
 
@@ -642,8 +652,8 @@
   }
 
   .user-avatar-small {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     font-size: 12px;
     border-radius: 50%;
     -webkit-border-radius: 50%;
@@ -656,7 +666,7 @@
   }
 
   .user-tag-inline {
-    padding: 0 8px;
+    padding: 0 6px;
     font-size: 10px;
     height: 22px;
     border-radius: 20px;
@@ -705,7 +715,7 @@
 /* 超小屏幕适配 */
 @media (max-width: 375px) {
   .merged-banner-card {
-    padding: 14px 12px;
+    padding: 12px 12px;
     min-height: 110px;
     gap: 12px;
   }
@@ -724,7 +734,7 @@
   }
 
   .greeting {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .user-tag-inline {

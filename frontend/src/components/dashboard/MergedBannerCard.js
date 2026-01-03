@@ -157,7 +157,7 @@ const MergedBannerCard = () => {
 
         {/* 新增面包屑菜单 - 移动到图标下方 */}
         <div className="banner-menu-container">
-          <BreadCrumbMenu />
+          <BreadCrumbMenu hideText={true} />
         </div>
       </div>
 

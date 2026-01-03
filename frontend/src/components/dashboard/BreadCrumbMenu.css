@@ -13,18 +13,18 @@
 
 /* 触发按钮 - 细长的面包屑样式 */
 .breadcrumb-trigger-btn.pill-style {
-    width: auto;
-    min-width: 90px;
-    height: 30px;
-    padding: 0 12px;
-    border-radius: 15px;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    padding: 0;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 8px;
     color: white;
     cursor: pointer;

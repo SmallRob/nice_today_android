@@ -242,10 +242,10 @@ const DressGuidePage = () => {
             </button>
             <h1 className="text-xl font-bold">穿衣指南</h1>
             <button
-              onClick={() => navigate('/wuxing-health')}
+              onClick={() => navigate('/body-metrics')}
               className="text-white hover:text-white/80 text-sm"
             >
-              五行养生
+              身体指标
             </button>
           </div>
         </div>
