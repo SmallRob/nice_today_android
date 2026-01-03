@@ -249,9 +249,10 @@
   overflow: hidden;
 }
 
-/* 确保非展开状态下内容区域不滚动 */
+/* 允许非展开状态下内容区域滚动 when needed */
 .dashboard-page-wrapper:not(.features-expanded) .features-drag-panel {
-  overflow: hidden !important;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
 }
 
 /* 确保展开状态下功能面板可以滚动 */
@@ -1206,11 +1207,17 @@
 /* 内容区域 - 只有这个区域允许滚动 */
 .content-area {
   flex: 1;
-  overflow: hidden;
+  overflow: hidden; /* Keep hidden when features expanded */
   -ms-overflow-style: none;
   scrollbar-width: none;
   padding-bottom: clamp(60px, 15vh, 80px);
   box-sizing: border-box;
+}
+
+/* Allow scrolling in content area when features are collapsed */
+.dashboard-page-wrapper:not(.features-expanded) .content-area {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
 }
 
 .content-area::-webkit-scrollbar {
