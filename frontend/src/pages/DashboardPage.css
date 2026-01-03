@@ -2,38 +2,14 @@
    Dashboard页面样式 - 移动端优先，扁平化设计
    ============================================ */
 
-/* 防止页面出现黑边和滚动条溢出 */
-.dashboard-page-wrapper {
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-  box-sizing: border-box;
-  background-color: var(--color-background);
-  /* 确保不会出现边距导致的黑边 */
-  border: 0;
-  outline: none;
-}
-
-.dashboard-page-wrapper * {
-  box-sizing: border-box;
-  /* 防止子元素产生溢出 */
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* 固定头部容器 */
-/* 固定头部容器 */
+/* 固定头部容器 - 禁止滚动 */
 .dashboard-page-wrapper .fixed-height-container {
   flex-shrink: 0;
   background-color: var(--color-background);
   border-bottom: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: height, opacity;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .collapsible-header-content {
@@ -64,6 +40,7 @@
   top: 0;
   z-index: 20;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .dark.features-expanded .features-header {
@@ -272,7 +249,17 @@
   overflow: hidden;
 }
 
-/* 功能控制按钮区域 */
+/* 确保非展开状态下内容区域不滚动 */
+.dashboard-page-wrapper:not(.features-expanded) .features-drag-panel {
+  overflow: hidden !important;
+}
+
+/* 确保展开状态下功能面板可以滚动 */
+.features-expanded .features-drag-panel {
+  overflow-y: auto;
+}
+
+/* 功能控制按钮区域 - 禁止滚动 */
 .dashboard-page-wrapper .features-controls {
   padding: 8px 16px;
   background-color: var(--color-surface);
@@ -281,9 +268,8 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
-  overflow-x: auto;
+  overflow: hidden;
   white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
   width: 100%;
   box-sizing: border-box;
 }
@@ -337,6 +323,7 @@
   box-sizing: border-box;
   /* 确保布局稳定 */
   contain: layout;
+  overflow: hidden;
 }
 
 /* 功能卡片 - 安卓现代化风格 */
@@ -1140,10 +1127,10 @@
    性能优化和布局稳定
    ============================================ */
 
-.dashboard-page-wrapper .quick-action-btn,
-.dashboard-page-wrapper .features-header .edit-icon-btn,
+.quick-action-btn,
+.features-header .edit-icon-btn,
 .dashboard-page-wrapper .control-btn,
-.dashboard-page-wrapper .feature-card {
+.feature-card {
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
@@ -1154,13 +1141,13 @@
 }
 
 /* 强制重置可能被其他页面污染的样式 */
-.dashboard-page-wrapper .features-grid {
+.features-grid {
   /* 确保网格布局不会被外部样式影响 */
   grid-auto-flow: dense !important;
   align-items: stretch !important;
 }
 
-.dashboard-page-wrapper .feature-card {
+.feature-card {
   /* 确保卡片尺寸稳定 */
   flex-shrink: 0 !important;
   flex-grow: 0 !important;
@@ -1197,21 +1184,35 @@
 }
 
 /* 隐藏滚动条 */
-.dashboard-page-wrapper .quick-actions,
-.dashboard-page-wrapper .content-area,
-.dashboard-page-wrapper .features-controls {
+.quick-actions,
+.features-controls {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-.dashboard-page-wrapper .quick-actions::-webkit-scrollbar,
-.dashboard-page-wrapper .content-area::-webkit-scrollbar,
-.dashboard-page-wrapper .features-controls::-webkit-scrollbar {
+.quick-actions::-webkit-scrollbar,
+.features-controls::-webkit-scrollbar {
   display: none;
 }
 
-/* 内容区域底部间距 - 防止被底部导航栏遮挡 */
-.dashboard-page-wrapper .content-area {
+/* 主页面容器滚动控制 - 只有内容区域可滚动 */
+.dashboard-page-wrapper {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 内容区域 - 只有这个区域允许滚动 */
+.content-area {
+  flex: 1;
+  overflow: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   padding-bottom: clamp(60px, 15vh, 80px);
   box-sizing: border-box;
+}
+
+.content-area::-webkit-scrollbar {
+  display: none;
 }

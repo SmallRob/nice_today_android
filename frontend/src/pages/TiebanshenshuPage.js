@@ -101,9 +101,9 @@ const TiebanshenshuPageContent = () => {
   };
 
   return (
-    <div className="tiebanshenshu-page-container min-h-screen pb-24 safe-area-bottom">
-      <div className={`${theme === 'dark' ? 'bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950' : 'bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50'}`}>
-        <div className="max-w-3xl mx-auto px-4 py-6">
+    <div className="tiebanshenshu-page-container">
+      <div className="tiebanshenshu-content-wrapper">
+        <div className={`${theme === 'dark' ? 'tiebanshenshu-bg-gradient-dark' : 'tiebanshenshu-bg-gradient-light'} max-w-3xl mx-auto px-4 py-6`}>
         {/* 页面标题 */}
         <header className="text-center mb-6">
           <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-900'}`}>
