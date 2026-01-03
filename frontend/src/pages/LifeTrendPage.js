@@ -16,6 +16,7 @@ import { calculateLiuNianDaYun, calculateDailyEnergy } from '../utils/baziHelper
 import { Solar } from 'lunar-javascript';
 import { generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 import { getShichenSimple } from '../utils/astronomy';
+import './LifeTrendPage.css';
 
 const LifeTrendPage = () => {
   const { theme } = useTheme();
@@ -982,7 +983,7 @@ const LifeTrendPage = () => {
           </div>
 
           {/* 获取八字数据用于显示 */}
-          <div className="grid grid-cols-4 gap-2 mt-4">
+          <div className="bazi-display-container">
             {(() => {
               const displayBazi = getDisplayBazi();
               const baziItems = [
@@ -991,14 +992,18 @@ const LifeTrendPage = () => {
                 { label: '日柱', value: displayBazi.bazi ? displayBazi.bazi.day : displayBazi.day },
                 { label: '时柱', value: displayBazi.bazi ? displayBazi.bazi.hour : displayBazi.hour },
               ];
-              return baziItems.map((item, index) => (
-                <div key={index} className="text-center">
-                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</div>
-                  <div className={`text-base font-semibold mt-1 py-1.5 rounded-lg ${theme === 'dark' ? 'text-yellow-400 bg-yellow-900/20' : 'text-yellow-600 bg-yellow-50'}`}>
-                    {item.value}
-                  </div>
+              return (
+                <div className="bazi-grid-container">
+                  {baziItems.map((item, index) => (
+                    <div key={index} className="bazi-item">
+                      <div className={`bazi-label ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</div>
+                      <div className={`bazi-value ${theme === 'dark' ? 'text-yellow-400 bg-yellow-900/20' : 'text-yellow-600 bg-yellow-50'}`}>
+                        {item.value}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ));
+              );
             })()}
           </div>
 
