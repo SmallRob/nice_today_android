@@ -5,7 +5,7 @@ import { useUserSummary } from '../../hooks/useUserInfo';
 import './BreadCrumbMenu.css';
 
 const ENTERTAINMENT_FEATURES = [
-    { id: 'home', icon: '🏠', name: '首页面板', route: '/' },
+    // { id: 'home', icon: '🏠', name: '首页面板', route: '/' },
     { id: 'tarot', icon: '🎴', name: '塔罗抽卡', route: '/tarot', category: 'main' },
     { id: 'daily-card', icon: '🃏', name: '每日抽卡', route: '/daily-cards', category: 'main' },
     { id: 'cultural-cup', icon: '🏵️', name: '文化抽签', route: '/cultural-cup', category: 'main' },
@@ -16,9 +16,9 @@ const COMMON_FEATURES = [
     { id: 'finance', icon: '💰', name: '财务管理', route: '/finance' },
     { id: 'todo', icon: '📝', name: '日程清单', route: '/todo-list' },
     { id: 'mood-calendar', icon: '😊', name: '心情日历', route: '/mood-calendar' },
-    { id: 'habit-tracker', icon: '🎯', name: '习惯追踪', route: '/habit-tracker' },
-    { id: 'dress', icon: '👕', name: '穿衣指南', route: '/dress' },
-    { id: 'horoscope', icon: '📅', name: '星座运势', route: '/horoscope' }
+    { id: 'habit-tracker', icon: '🎯', name: '习惯追踪', route: '/habit-tracker' }
+    // { id: 'dress', icon: '👕', name: '穿衣指南', route: '/dress' }
+    // { id: 'horoscope', icon: '📅', name: '星座运势', route: '/horoscope' }
 ];
 
 const BreadCrumbMenu = ({ hideText = false }) => {
@@ -88,6 +88,11 @@ const BreadCrumbMenu = ({ hideText = false }) => {
                 </div>
 
                 <div className="menu-content hide-scrollbar">
+
+                    <div className="menu-separator">
+                        <span>娱乐功能</span>
+                    </div>
+
                     <div className="menu-section">
                         <ul className="menu-list">
                             {ENTERTAINMENT_FEATURES.map(item => (
@@ -103,7 +108,7 @@ const BreadCrumbMenu = ({ hideText = false }) => {
                     </div>
 
                     <div className="menu-separator">
-                        <span>常用功能</span>
+                        <span>常用工具</span>
                     </div>
 
                     <div className="menu-section">

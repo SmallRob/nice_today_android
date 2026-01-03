@@ -22,7 +22,7 @@ import {
   TarotGardenCard,
   CulturalCupCard,
   DressGuideCard,
-  WuxingHealthCard,
+  HealthDashboardCard,
   BodyMetricsCard,
   OrganRhythmCard,
   FishingGameCard,
@@ -32,7 +32,8 @@ import {
   HuangliCard,
   MoodCalendarCard,
   HabitTrackerCard,
-  TiebanshenshuCard
+  TiebanshenshuCard,
+  PersonalityTestCard
 } from '../components/dashboard/FeatureCards.js';
 import FeatureDragPanel from '../components/dashboard/FeatureDragPanel.js';
 import {
@@ -48,28 +49,35 @@ const ALL_FEATURES = [
   { component: FinanceCard, name: 'FinanceCard', category: '日常管理类', type: 'daily' },
   { component: HabitTrackerCard, name: 'HabitTrackerCard', category: '日常管理类', type: 'daily' },
   { component: FengShuiCompassCard, name: 'FengShuiCompassCard', category: '日常管理类', type: 'tool' },
+
   { component: TakashimaDivinationCard, name: 'TakashimaDivinationCard', category: '运势分析类', type: 'fortune' },
   { component: ChineseZodiacCard, name: 'ChineseZodiacCard', category: '运势分析类', type: 'fortune' },
   { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类', type: 'fortune' },
   { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类', type: 'fortune' },
   { component: BaziCard, name: 'BaziCard', category: '运势分析类', type: 'fortune' },
-  { component: MBTICard, name: 'MBTICard', category: '个人成长类', type: 'growth' },
+    // { component: LiuyaoCard, name: 'LiuyaoCard', category: '运势分析类', type: 'fortune' },
+  // { component: PlumBlossomCard, name: 'PlumBlossomCard', category: '运势分析类', type: 'fortune' },
+  { component: HuangliCard, name: 'HuangliCard', category: '运势分析类', type: 'fortune' },
+  
+  // { component: MBTICard, name: 'MBTICard', category: '个人成长类', type: 'growth' },
+  { component: PersonalityTestCard, name: 'PersonalityTestCard', category: '个人成长类', type: 'growth' },
   { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类', type: 'growth' },
   { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类', type: 'growth' },
-  { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类', type: 'growth' },
-  { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类', type: 'health' },
-  { component: BodyMetricsCard, name: 'BodyMetricsCard', category: '健康管理类', type: 'health' },
+  // { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类', type: 'growth' },
+ 
   { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类', type: 'entertainment' },
-  { component: TiebanshenshuCard, name: 'TiebanshenshuCard', category: '运势分析类', type: 'fortune' },
+  // { component: TiebanshenshuCard, name: 'TiebanshenshuCard', category: '运势分析类', type: 'fortune' },
   { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类', type: 'entertainment' },
   { component: FishingGameCard, name: 'FishingGameCard', category: '娱乐休闲类', type: 'entertainment' },
   // { component: AncientCardGameCard, name: 'AncientCardGameCard', category: '娱乐休闲类', type: 'entertainment' },
+
   { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类', type: 'health' },
   { component: PeriodTrackerCard, name: 'PeriodTrackerCard', category: '健康管理类', type: 'health' },
-  { component: LiuyaoCard, name: 'LiuyaoCard', category: '运势分析类', type: 'fortune' },
-  { component: PlumBlossomCard, name: 'PlumBlossomCard', category: '运势分析类', type: 'fortune' },
-  { component: HuangliCard, name: 'HuangliCard', category: '运势分析类', type: 'fortune' },
+  // { component: HealthDashboardCard, name: 'HealthDashboardCard', category: '健康管理类', type: 'health' },
+  { component: BodyMetricsCard, name: 'BodyMetricsCard', category: '健康管理类', type: 'health' },
   { component: MoodCalendarCard, name: 'MoodCalendarCard', category: '健康管理类', type: 'health' }
+  // { component: WuxingHealthCard, name: 'WuxingHealthCard', category: '健康管理类', type: 'health' }
+  // { component: OrganRhythmCard, name: 'OrganRhythmCard', category: '健康管理类', type: 'health' }
 ];
 
 /**

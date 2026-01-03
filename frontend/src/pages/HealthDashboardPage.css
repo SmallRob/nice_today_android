@@ -1,0 +1,187 @@
+/* 健康身心仪表板样式 */
+.health-dashboard-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  padding: 16px;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.dark .health-dashboard-page {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.health-dashboard-header {
+  margin-bottom: 24px;
+}
+
+.health-dashboard-title h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.health-dashboard-title p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dark .health-dashboard-title h1 {
+  color: #f9fafb;
+}
+
+.dark .health-dashboard-title p {
+  color: #9ca3af;
+}
+
+.health-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 健康卡片基础样式 */
+.health-card {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  overflow: hidden;
+  min-height: 140px;
+  position: relative;
+}
+
+.health-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.health-card:active {
+  transform: translateY(-2px) scale(1.01);
+  transition-duration: 0.1s;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .health-dashboard-page {
+    padding: 12px;
+  }
+  
+  .health-dashboard-title h1 {
+    font-size: 24px;
+  }
+  
+  .health-dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .health-card {
+    min-height: 120px;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+  .health-dashboard-page {
+    padding: 8px;
+  }
+  
+  .health-dashboard-title h1 {
+    font-size: 22px;
+  }
+  
+  .health-dashboard-grid {
+    gap: 10px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.health-card {
+  animation: fadeInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.health-card:nth-child(1) { animation-delay: 0.1s; }
+.health-card:nth-child(2) { animation-delay: 0.15s; }
+.health-card:nth-child(3) { animation-delay: 0.2s; }
+.health-card:nth-child(4) { animation-delay: 0.25s; }
+.health-card:nth-child(5) { animation-delay: 0.3s; }
+.health-card:nth-child(6) { animation-delay: 0.35s; }
+
+/* 深色模式优化 */
+@media (prefers-color-scheme: dark) {
+  .dark .health-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* 响应式图片和内容 */
+.health-card img,
+.health-card video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* 防止文本溢出 */
+.health-card h3,
+.health-card p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 卡片内部内容样式 */
+.health-card .content {
+  padding: 16px;
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .health-card {
+    transition: transform 0.2s ease;
+  }
+  
+  .health-card:active {
+    transform: scale(0.98);
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .health-card {
+    border: 2px solid;
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  .health-card,
+  .health-card:hover,
+  .health-card:active {
+    transition: none;
+    transform: none;
+  }
+  
+  .health-card {
+    animation: none;
+  }
+}

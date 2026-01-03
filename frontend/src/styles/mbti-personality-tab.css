@@ -14,7 +14,7 @@
 }
 
 .mbti-personality-tab-container.dark {
-  background: linear-gradient(to bottom right, #000000, #111827, #1f2937);
+  background: linear-gradient(to bottom right, #0f172a, #1e293b, #334155);
 }
 
 /* ============================================
@@ -28,7 +28,7 @@
 }
 
 .mbti-personality-tab-scroll-container.dark {
-  background: #000000;
+  background: #0f172a;
 }
 
 /* 隐藏滚动条但保留滚动功能 */
@@ -80,7 +80,7 @@
 }
 
 .mbti-personality-tab-content.dark {
-  background: #000000;
+  background: #0f172a;
 }
 
 /* 响应式优化：移动端适配 */
@@ -326,7 +326,7 @@
 }
 
 .mbti-analysis-header.dark {
-  color: #f9fafb;
+  color: #f3f4f6;
 }
 
 /* 基本信息卡片 */
@@ -667,11 +667,34 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   will-change: background-color;
+  transition: background-color 0.3s ease;
 }
 
 .mbti-personality-tab-scroll-container {
   -webkit-overflow-scrolling: touch;
   will-change: scroll-position;
+  transition: background-color 0.3s ease;
+}
+
+.mbti-personality-tab-content {
+  transition: background-color 0.3s ease;
+}
+
+.mbti-analysis-header,
+.mbti-selector-card-header {
+  transition: color 0.3s ease;
+}
+
+.mbti-selector-card,
+.mbti-traits-coordinate-card,
+.mbti-traits-card,
+.mbti-relationships-card,
+.mbti-career-card,
+.mbti-growth-card,
+.mbti-loading-card,
+.mbti-error-card,
+.mbti-no-selection-card {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* ============================================
@@ -711,6 +734,23 @@
   color: inherit;
 }
 
+/* 文本颜色增强，确保在暗色模式下有良好对比度 */
+.mbti-personality-tab-container .text-gray-700 {
+  color: #374151;
+}
+
+.mbti-personality-tab-container .text-gray-600 {
+  color: #4b5563;
+}
+
+.mbti-personality-tab-container.dark .text-gray-700 {
+  color: #d1d5db;
+}
+
+.mbti-personality-tab-container.dark .text-gray-600 {
+  color: #9ca3af;
+}
+
 /* 暗色主题适配 */
 .mbti-personality-tab-container.dark .dark\:bg-gray-900 {
   background-color: #111827;
@@ -725,19 +765,19 @@
 }
 
 .mbti-personality-tab-container.dark .dark\:text-white {
-  color: #ffffff;
+  color: #f8fafc;
 }
 
 .mbti-personality-tab-container.dark .dark\:text-gray-200 {
-  color: #e5e7eb;
+  color: #e2e8f0;
 }
 
 .mbti-personality-tab-container.dark .dark\:text-gray-300 {
-  color: #d1d5db;
+  color: #cbd5e1;
 }
 
 .mbti-personality-tab-container.dark .dark\:text-gray-400 {
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 .mbti-personality-tab-container.dark .dark\:border-gray-700 {

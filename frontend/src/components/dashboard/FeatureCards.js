@@ -295,13 +295,13 @@ const DressGuideCard = () => {
 /**
  * 五行养生组件
  */
-const WuxingHealthCard = () => {
+const HealthDashboardCard = () => {
   return (
     <FeatureCard
-      title="五行养生"
-      icon="wuxing-health"
+      title="健康身心"
+      icon="health-dashboard"
       category="health"
-      route="/wuxing-health"
+      route="/health-dashboard"
     />
   );
 };
@@ -460,6 +460,20 @@ const HabitTrackerCard = () => {
   );
 };
 
+/**
+ * 性格测试组件
+ */
+const PersonalityTestCard = () => {
+  return (
+    <FeatureCard
+      title="性格测试"
+      icon="personality-test"
+      category="growth"
+      route="/personality-test"
+    />
+  );
+};
+
 export {
   MBTICard,
   ChineseZodiacCard,
@@ -479,7 +493,7 @@ export {
   TarotGardenCard,
   CulturalCupCard,
   DressGuideCard,
-  WuxingHealthCard,
+  HealthDashboardCard,
   OrganRhythmCard,
   FishingGameCard,
   FengShuiCompassCard,
@@ -490,5 +504,6 @@ export {
   HuangliCard,
   MoodCalendarCard,
   HabitTrackerCard,
-  BodyMetricsCard
+  BodyMetricsCard,
+  PersonalityTestCard
 };

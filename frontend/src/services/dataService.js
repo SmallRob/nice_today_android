@@ -1,3 +1,9 @@
+import { testApiConnection, fetchHistoryDates, fetchBiorhythmData, fetchDressInfoRange, 
+         fetchSpecificDateDressInfo, fetchMayaCalendarRange, fetchSpecificDateMayaInfo, 
+         fetchMayaHistory, fetchMayaBirthInfo } from './apiServiceRefactored';
+import { getDressInfoRange, getSpecificDateDressInfo, getTodayDressInfo, 
+         calculateBiorhythmData, getBiorhythmRange } from './localDataService';
+
 // 解析CSV内容的辅助函数（保留用于兼容性）
 export const parseCSV = (csvText) => {
   // 参数验证
@@ -46,12 +52,7 @@ export const parseCSV = (csvText) => {
   }
 };
 
-// API服务导入 - 统一管理API调用
-import { testApiConnection, fetchHistoryDates, fetchBiorhythmData, fetchDressInfoRange, 
-         fetchSpecificDateDressInfo, fetchMayaCalendarRange, fetchSpecificDateMayaInfo, 
-         fetchMayaHistory, fetchMayaBirthInfo } from './apiServiceRefactored';
-import { getDressInfoRange, getSpecificDateDressInfo, getTodayDressInfo, 
-         calculateBiorhythmData, getBiorhythmRange } from './localDataService';
+// 解析CSV内容的辅助函数（保留用于兼容性）
 
 /**
  * 器官节律数据缓存管理

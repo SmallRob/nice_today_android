@@ -1,0 +1,587 @@
+/* 敏捷养生页面样式 */
+.agile-health-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  padding: 16px;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.dark .agile-health-page {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.agile-health-header {
+  margin-bottom: 24px;
+}
+
+.agile-health-title h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.agile-health-title p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dark .agile-health-title h1 {
+  color: #f9fafb;
+}
+
+.dark .agile-health-title p {
+  color: #9ca3af;
+}
+
+.agile-health-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.daily-recommendation-section,
+.task-library-section {
+  margin-bottom: 32px;
+}
+
+.daily-recommendation-section h2,
+.task-library-section h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.dark .daily-recommendation-section h2,
+.dark .task-library-section h2 {
+  color: #e5e7eb;
+}
+
+.daily-recommendation-section p,
+.task-library-section p {
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.task-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.task-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dark .task-card {
+  background: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.task-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.task-icon {
+  font-size: 24px;
+  margin-right: 12px;
+}
+
+.task-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.dark .task-card h3 {
+  color: #f9fafb;
+}
+
+.task-description {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  flex-grow: 1;
+}
+
+.dark .task-description {
+  color: #9ca3af;
+}
+
+.task-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.task-duration,
+.task-category {
+  font-size: 12px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.start-task-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  margin-top: auto;
+}
+
+.start-task-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.start-task-btn:active {
+  transform: scale(0.98);
+}
+
+.task-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.category-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dark .category-card {
+  background: #1f2937;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.category-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 0;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.dark .category-card h3 {
+  color: #e5e7eb;
+  border-bottom-color: #374151;
+}
+
+.category-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.category-card li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dark .category-card li {
+  border-bottom-color: #374151;
+}
+
+.category-card li:last-child {
+  border-bottom: none;
+}
+
+.task-icon-small {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.task-title {
+  flex-grow: 1;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.dark .task-title {
+  color: #d1d5db;
+}
+
+.task-duration-small {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* 7天敏捷养生打卡表样式 */
+.seven-day-checklist-section {
+  margin-bottom: 32px;
+}
+
+.seven-day-checklist-section h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.dark .seven-day-checklist-section h2 {
+  color: #e5e7eb;
+}
+
+.seven-day-checklist-section p {
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.checklist-table {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.dark .checklist-table {
+  background: #1f2937;
+}
+
+.checklist-header {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1fr 1fr 1.2fr 1.5fr;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.header-cell {
+  padding: 12px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-cell:last-child {
+  border-right: none;
+}
+
+.checklist-body {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.checklist-row {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1fr 1fr 1.2fr 1.5fr;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dark .checklist-row {
+  border-bottom-color: #374151;
+}
+
+.checklist-row:last-child {
+  border-bottom: none;
+}
+
+.cell {
+  padding: 12px;
+  border-right: 1px solid #f3f4f6;
+}
+
+.dark .cell {
+  border-right-color: #374151;
+}
+
+.cell:last-child {
+  border-right: none;
+}
+
+.day-cell {
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+  background-color: #f9fafb;
+}
+
+.dark .day-cell {
+  color: #e5e7eb;
+  background-color: #374151;
+}
+
+.task-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.dark .task-name {
+  color: #f9fafb;
+}
+
+.task-time {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dark .task-time {
+  color: #9ca3af;
+}
+
+.feeling-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.feeling-score-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.score-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dark .score-btn {
+  background: #374151;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.score-btn:hover {
+  transform: scale(1.1);
+  background: #f3f4f6;
+}
+
+.dark .score-btn:hover {
+  background: #4b5563;
+}
+
+.score-btn.selected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.current-score {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dark .current-score {
+  color: #9ca3af;
+}
+
+.review-cell {
+  padding: 8px;
+}
+
+.review-textarea {
+  width: 100%;
+  height: 80px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  resize: vertical;
+  background: white;
+  color: #374151;
+}
+
+.dark .review-textarea {
+  background: #1f2937;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.review-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.checklist-tips {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 4px solid #667eea;
+}
+
+.dark .checklist-tips {
+  background: #374151;
+  border-left-color: #764ba2;
+}
+
+.checklist-tips h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.dark .checklist-tips h3 {
+  color: #e5e7eb;
+}
+
+.checklist-tips ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.checklist-tips li {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.dark .checklist-tips li {
+  color: #9ca3af;
+}
+
+.checklist-tips li:last-child {
+  margin-bottom: 0;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .agile-health-page {
+    padding: 12px;
+  }
+  
+  .agile-health-title h1 {
+    font-size: 24px;
+  }
+  
+  .task-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-category-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* 7天打卡表移动端适配 */
+  .checklist-header {
+    grid-template-columns: 1fr;
+    display: none; /* 在小屏幕上隐藏表头 */
+  }
+  
+  .checklist-row {
+    grid-template-columns: 1fr;
+    border-bottom: 2px solid #e5e7eb;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  
+  .dark .checklist-row {
+    background: #1f2937;
+    border-bottom-color: #374151;
+  }
+  
+  .cell {
+    border-right: none;
+    border-bottom: 1px solid #f3f4f6;
+    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .dark .cell {
+    border-bottom-color: #374151;
+  }
+  
+  .cell:last-child {
+    border-bottom: none;
+  }
+  
+  .day-cell {
+    font-size: 18px;
+    font-weight: 700;
+    background: none;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #667eea;
+    margin-bottom: 12px;
+  }
+  
+  .dark .day-cell {
+    border-bottom-color: #764ba2;
+  }
+  
+  .task-cell {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .task-name {
+    font-weight: 600;
+  }
+  
+  .feeling-cell {
+    align-items: stretch;
+  }
+  
+  .feeling-score-selector {
+    justify-content: space-between;
+  }
+  
+  .score-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .review-textarea {
+    height: 60px;
+  }
+}

@@ -274,10 +274,12 @@ class ConfigMigrationTool {
    */
   async validateMigration() {
     try {
+      // 动态导入以避免循环依赖
+      const { enhancedUserConfigManager } = await import('./EnhancedUserConfigManager.js');
       await enhancedUserConfigManager.initialize();
       
       const newConfigs = enhancedUserConfigManager.getAllConfigs();
-      const newActiveIndex = enhancedUserConfigManager.activeConfigIndex;
+      const newActiveIndex = enhancedUserConfigManager.getActiveConfigIndex();
       
       const backupData = localStorage.getItem('nice_today_migration_backup');
       const backup = backupData ? JSON.parse(backupData) : null;

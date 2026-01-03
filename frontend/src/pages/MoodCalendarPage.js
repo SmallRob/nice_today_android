@@ -495,7 +495,7 @@ const MoodCalendarPage = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="container mx-auto px-1 py-6 max-w-4xl">
         {/* 选中日期信息 */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between">

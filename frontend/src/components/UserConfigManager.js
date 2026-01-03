@@ -803,7 +803,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
               </span>
             )}
             <h3 className="font-medium text-gray-900 dark:text-white">
-              {safeConfig.nickname || `配置 ${index + 1}`}
+              {safeConfig?.nickname || `配置 ${index + 1}`}
             </h3>
             {safeConfig.realName && (
               <div className="flex items-center ml-2 space-x-2">
@@ -849,7 +849,7 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
             <div>
               <span className="text-gray-500 dark:text-white">昵称：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.nickname || '-'}</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig?.nickname || '-'}</span>
             </div>
             <div>
               <span className="text-gray-500 dark:text-white">星座：</span>
@@ -994,6 +994,9 @@ const UserConfigManagerComponent = () => {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  // 八字同步相关状态
+  const [isBaziSyncing, setIsBaziSyncing] = useState(false); // 八字同步状态
+  const [baziSyncConfigIndex, setBaziSyncConfigIndex] = useState(null); // 需要同步八字的配置索引
 
   // 导入/导出操作并发控制
   const isProcessingRef = useRef(false);
@@ -1311,6 +1314,30 @@ const UserConfigManagerComponent = () => {
         setMessage(null);
       }, 2000);
 
+      // 异步后台计算八字信息并保存到缓存
+      try {
+        const birthInfo = {
+          birthDate: finalConfigData.birthDate,
+          birthTime: finalConfigData.birthTime,
+          longitude: finalConfigData.birthLocation.lng
+        };
+
+        // 后台异步计算八字信息
+        enhancedUserConfigManager.calculateAndSyncBaziInfo(finalConfigData?.nickname, birthInfo)
+          .then(success => {
+            if (success) {
+              console.log('八字信息后台计算并保存成功:', finalConfigData?.nickname);
+            } else {
+              console.warn('八字信息后台计算失败:', finalConfigData?.nickname);
+            }
+          })
+          .catch(calcError => {
+            console.error('八字信息后台计算出错:', calcError);
+          });
+      } catch (calcError) {
+        console.error('启动八字后台计算失败:', calcError);
+      }
+
       return true; // 返回成功状态
     } catch (error) {
       console.error('========== 保存配置失败 ==========');
@@ -1349,6 +1376,57 @@ const UserConfigManagerComponent = () => {
       }
     }
   }, [showMessage]);
+
+  // 处理八字信息手动同步
+  const handleBaziSync = useCallback(async (index) => {
+    if (isBaziSyncing) {
+      showMessage('八字同步正在进行中，请稍候...', 'info');
+      return;
+    }
+
+    const config = configs[index];
+    if (!config) {
+      console.error('无效的配置索引:', index);
+      showMessage('配置不存在，无法同步八字信息', 'error');
+      return;
+    }
+
+    if (!config.birthDate || !config.birthTime) {
+      console.error('出生信息不完整:', { birthDate: config.birthDate, birthTime: config.birthTime });
+      showMessage('出生信息不完整，无法计算八字', 'error');
+      return;
+    }
+
+    try {
+      setIsBaziSyncing(true);
+      setBaziSyncConfigIndex(index);
+      showMessage('正在同步八字信息...', 'info');
+
+      // 获取出生信息
+      const birthInfo = {
+        birthDate: config.birthDate,
+        birthTime: config.birthTime,
+        longitude: config.birthLocation?.lng || DEFAULT_REGION.lng
+      };
+
+      // 调用后台计算并同步八字信息
+      const success = await enhancedUserConfigManager.calculateAndSyncBaziInfo(config?.nickname, birthInfo);
+
+      if (success) {
+        showMessage('✅ 八字信息同步成功', 'success');
+        console.log('八字信息同步成功:', config?.nickname);
+      } else {
+        showMessage('❌ 八字信息同步异常', 'error');
+        console.error('八字信息同步失败:', config?.nickname);
+      }
+    } catch (error) {
+      console.error('八字信息同步出错:', error);
+      showMessage(`❌ 八字信息同步失败: ${error.message}`, 'error');
+    } finally {
+      setIsBaziSyncing(false);
+      setBaziSyncConfigIndex(null);
+    }
+  }, [configs, isBaziSyncing, showMessage]);
 
   // 处理添加新配置 - 只创建临时配置，不直接保存
   const handleAddConfig = useCallback(() => {
@@ -1902,8 +1980,8 @@ const UserConfigManagerComponent = () => {
     if (!config) return null;
 
     // 获取显示姓名（优先使用真实姓名，否则使用昵称或"匿名者"）
-    const displayName = config.realName || config.nickname || '匿名者';
-    const nickName = config.nickname || '未设置昵称';
+    const displayName = config?.realName || config?.nickname || '匿名者';
+    const nickName = config?.nickname || '未设置昵称';
 
     // 获取姓名首字用于头像
     const avatarText = displayName ? displayName.charAt(0) : '?';
@@ -1953,7 +2031,7 @@ const UserConfigManagerComponent = () => {
             </div>
 
             {/* 昵称标签 */}
-            <p className="user-tag">@{nickName}</p>
+            <p className="user-tag">@{nickName || '未设置'}</p>
           </div>
         </div>
 
@@ -2032,6 +2110,22 @@ const UserConfigManagerComponent = () => {
                   }}
                 >
                   ✏️ 填写姓名并评分
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 八字信息同步按钮 */}
+          {(config.birthDate && config.birthTime) && (
+            <div className="detail-row" style={{ border: 'none', marginBottom: 0, paddingBottom: 0 }}>
+              <span className="detail-label"></span>
+              <div style={{ flex: 1 }}>
+                <button
+                  className={`score-btn ${isBaziSyncing && baziSyncConfigIndex === activeConfigIndex ? 'syncing' : ''}`}
+                  onClick={() => handleBaziSync(activeConfigIndex)}
+                  disabled={isBaziSyncing}
+                >
+                  {isBaziSyncing && baziSyncConfigIndex === activeConfigIndex ? '🔄 同步中...' : '八字命格同步'}
                 </button>
               </div>
             </div>

@@ -623,7 +623,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
               <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">基本信息</h4>
               <p class="text-sm text-blue-700 dark:text-blue-400">
-                <strong>昵称：</strong>${configData.nickname || '未设置'}<br>
+                <strong>昵称：</strong>${configData?.nickname || '未设置'}<br>
                 <strong>性别：</strong>${GENDER_OPTIONS.find(opt => opt.value === configData.gender)?.label || '男'}<br>
                 <strong>出生日期：</strong>${configData.birthDate || '未设置'}<br>
                 <strong>出生时间：</strong>${configData.birthTime || '未设置'}<br>
@@ -653,7 +653,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
             <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-2">出生时间标识</h4>
               <p class="text-sm text-yellow-700 dark:text-yellow-400">
-                <strong>唯一标识：</strong><span class="font-bold">${generateBirthTimeKey(configData.nickname, configData.birthDate, configData.birthTime)}</span>
+                <strong>唯一标识：</strong><span class="font-bold">${generateBirthTimeKey(configData?.nickname || '', configData?.birthDate || '', configData?.birthTime || '')}</span>
               </p>
             </div>
             

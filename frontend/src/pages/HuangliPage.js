@@ -16,7 +16,7 @@ const HuangliPage = () => {
           ? 'bg-gray-800/90 backdrop-blur-md border-b border-gray-700' 
           : 'bg-white/90 backdrop-blur-md border-b border-gray-200'
       }`}>
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-1 py-3">
           <div className="flex items-center justify-between">
             <h1 className={`text-xl font-bold ${
               theme === 'dark' ? 'text-white' : 'text-gray-800'
@@ -31,7 +31,7 @@ const HuangliPage = () => {
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="container mx-auto px-1 py-6 max-w-4xl">
         {/* <div className="mb-6">
           <h2 className={`text-2xl font-bold mb-2 ${
             theme === 'dark' ? 'text-white' : 'text-gray-800'

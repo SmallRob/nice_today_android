@@ -589,7 +589,7 @@ const PeriodTrackerPage = () => {
     <div className={`min-h-screen pb-32 px-4 md:px-6 bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-red-900/30 ${theme}`}>
       {/* 导航标题栏 - 优化版 */}
       <div className="bg-gradient-to-r from-pink-500/90 to-rose-600/90 text-white shadow-lg sticky top-0 z-40 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-3 md:py-4">
+        <div className="container mx-auto px-1 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm">
@@ -618,7 +618,7 @@ const PeriodTrackerPage = () => {
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
+      <div className="container mx-auto px-1 py-6 max-w-4xl space-y-6">
         {/* 当前周期阶段卡片 */}
         {currentPhase && (
           <div className="bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-2xl shadow-2xl p-4 md:p-6">

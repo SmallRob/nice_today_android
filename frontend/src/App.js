@@ -12,6 +12,7 @@ import { useChunkErrorRecovery, ChunkLoadErrorBoundary } from './utils/chunkLoad
 import { useVersionManager, VersionUpdateNotification } from './utils/versionManager';
 import { UserParamsProvider } from './context/UserParamsContext';
 import { ensureChartRegistered } from './utils/chartConfig';
+
 import { 
   preloadHoroscopeTraits, 
   preloadOnIdle, 
@@ -217,6 +218,9 @@ const HoroscopePage = lazyLoadWithErrorHandling(() => import('./pages/horoscope/
 const BaziPage = lazyLoadWithErrorHandling(() => import('./pages/bazi/BaziPage'));
 const MBTITestPage = lazyLoadWithErrorHandling(() => import('./pages/MBTITestPage'));
 const MBTIDetailPage = lazyLoadWithErrorHandling(() => import('./components/MBTIPersonalityTabHome'));
+const ChenTemperamentTestPage = lazyLoadWithErrorHandling(() => import('./pages/ChenTemperamentTestPage'));
+const PersonalityTestPage = lazyLoadWithErrorHandling(() => import('./pages/PersonalityTestPage'));
+const TemperamentDetailPage = lazyLoadWithErrorHandling(() => import('./pages/TemperamentDetailPage'));
 const EnergyBoostPage = lazyLoadWithErrorHandling(() => import('./pages/EnergyBoostPage'));
 const PeriodTrackerPage = lazyLoadWithErrorHandling(() => import('./pages/PeriodTrackerPage'));
 const HoroscopeTraitsPage = lazyLoadWithErrorHandling(() => import('./pages/horoscope/HoroscopeTraitsPage'));
@@ -231,7 +235,10 @@ const DailyCardPage = lazyLoadWithErrorHandling(() => import('./pages/DailyCardP
 const CulturalCupPage = lazyLoadWithErrorHandling(() => import('./pages/CulturalCapPage'));
 const BaziAnalysisPage = lazyLoadWithErrorHandling(() => import('./pages/bazi/BaziAnalysisPage'));
 const WuxingHealthPage = lazyLoadWithErrorHandling(() => import('./pages/WuxingHealthPage'));
+const HealthDashboardPage = lazyLoadWithErrorHandling(() => import('./pages/HealthDashboardPage'));
 const OrganRhythmPage = lazyLoadWithErrorHandling(() => import('./pages/OrganRhythmPage'));
+const StageHealthPage = lazyLoadWithErrorHandling(() => import('./pages/StageHealthPage'));
+const AgileHealthPage = lazyLoadWithErrorHandling(() => import('./pages/AgileHealthPage'));
 const SimpleIChingPage = lazyLoadWithErrorHandling(() => import('./pages/SimpleIChingPage'));
 const ShaoyongYixue = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
 const FishingGamePage = lazyLoadWithErrorHandling(() => import('./pages/FishingGamePage'));
@@ -340,6 +347,9 @@ const AppLayout = () => {
             <Route path="/bazi" element={<BaziPage />} />
             <Route path="/mbti-test" element={<MBTITestPage />} />
             <Route path="/mbti-detail" element={<MBTIDetailPage />} />
+            <Route path="/temperament-test" element={<ChenTemperamentTestPage />} />
+            <Route path="/temperament-detail" element={<TemperamentDetailPage />} />
+                        <Route path="/personality-test" element={<PersonalityTestPage />} />
             <Route path="/energy" element={<EnergyBoostPage />} />
             <Route path="/period-tracker" element={<PeriodTrackerPage />} />
             <Route path="/horoscope-traits" element={<HoroscopeTraitsPage />} />
@@ -355,7 +365,10 @@ const AppLayout = () => {
             <Route path="/cultural-cup" element={<CulturalCupPage />} />
             <Route path="/bazi/analysis" element={<BaziAnalysisPage />} />
             <Route path="/wuxing-health" element={<WuxingHealthPage />} />
+            <Route path="/health-dashboard" element={<HealthDashboardPage />} />
             <Route path="/organ-rhythm" element={<OrganRhythmPage />} />
+            <Route path="/stage-health" element={<StageHealthPage />} />
+            <Route path="/agile-health" element={<AgileHealthPage />} />
             <Route path="/fishing-game" element={<FishingGamePage />} />
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/shaoyong-yixue" element={<ShaoyongYixue />} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserParamsContext } from '../context/UserParamsContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
@@ -13,6 +13,9 @@ const BodyMetricsPage = () => {
   const navigate = useNavigate();
   const { getAge, getNickname, getBirthDate, getBirthDateString } = useUserParamsContext();
   const { currentConfig } = useUserConfig();
+
+  // 本地存储键名
+  const BODY_METRICS_STORAGE_KEY = 'bodyMetricsData';
   
   // 获取出生日期字符串（用于显示）
   const getBirthDateDisplay = () => {
@@ -49,10 +52,37 @@ const BodyMetricsPage = () => {
   const [showAllMetrics, setShowAllMetrics] = useState(false);
   const [userInputs, setUserInputs] = useState({});
   const [activeCategory, setActiveCategory] = useState('bodyMetabolism');
+  const isInitialLoadRef = useRef(true);
 
-  // 初始化用户参数
+
+  // 初始化用户参数：加载保存的数据或使用默认值
   useEffect(() => {
-    // 自动计算默认BMI
+    // 从本地存储加载保存的数据
+    const savedData = localStorage.getItem(BODY_METRICS_STORAGE_KEY);
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        // 设置BMI数据
+        if (parsed.bmiData) {
+          setBmiData(prev => ({
+            ...prev,
+            weight: parsed.bmiData.weight || '65',
+            height: parsed.bmiData.height || '170',
+            bmi: parsed.bmiData.bmi,
+            category: parsed.bmiData.category
+          }));
+        }
+        // 设置用户输入的指标数据
+        if (parsed.userInputs) {
+          setUserInputs(parsed.userInputs);
+        }
+        return; // 使用保存的数据，跳过默认计算
+      } catch (error) {
+        console.error('Failed to parse saved body metrics data:', error);
+      }
+    }
+
+    // 如果没有保存的数据，计算默认BMI
     const bmi = calculateBMI(65, 170);
     const category = getBMICategory(parseFloat(bmi));
     
@@ -62,6 +92,32 @@ const BodyMetricsPage = () => {
       category
     }));
   }, []);
+
+  // 保存数据到本地存储
+  useEffect(() => {
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      return;
+    }
+    
+    const dataToSave = {
+      bmiData: {
+        weight: bmiData.weight,
+        height: bmiData.height,
+        bmi: bmiData.bmi,
+        category: bmiData.category
+      },
+      userInputs
+    };
+    
+    try {
+      localStorage.setItem(BODY_METRICS_STORAGE_KEY, JSON.stringify(dataToSave));
+    } catch (error) {
+      console.error('Failed to save body metrics data:', error);
+    }
+  }, [bmiData, userInputs]);
+
+
 
   // 计算BMI
   const handleBMICalculation = () => {
@@ -95,6 +151,26 @@ const BodyMetricsPage = () => {
       ...userInputs,
       [name]: value
     });
+  };
+
+  // 处理键盘事件 - 空格键提交
+  const handleKeyDown = (e, metricId) => {
+    if (e.key === ' ') {
+      e.preventDefault(); // 防止输入空格
+      const value = e.target.value;
+      if (value) {
+        // 触发评估显示
+        const numericValue = parseFloat(value);
+        if (!isNaN(numericValue)) {
+          // 状态已经通过userInputs更新，这里可以添加视觉反馈
+          const evaluation = evaluateMetric(metricId, numericValue, getUserGender());
+          if (evaluation) {
+            // 可以添加短暂的高亮效果
+            console.log(`提交${metricId}: ${value}, 评估: ${evaluation.level}`);
+          }
+        }
+      }
+    }
   };
 
   // 获取当前用户性别
@@ -294,8 +370,9 @@ const BodyMetricsPage = () => {
                       name={metric.id}
                       value={userInputs[metric.id] || ''}
                       onChange={handleInputChange}
+                      onKeyDown={(e) => handleKeyDown(e, metric.id)}
                       className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      placeholder={`请输入${metric.name}`}
+                      placeholder={`请输入${metric.name}（空格键提交）`}
                     />
                     <button
                       onClick={() => {

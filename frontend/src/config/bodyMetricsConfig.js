@@ -408,18 +408,39 @@ export const getBMICategory = (bmi) => {
   return { category: 'unknown', label: '未知', color: 'gray' };
 };
 
-// 指标评估函数
+// 指标评估函数 - 四级评估体系：正常、轻度、中度、严重
 export const evaluateMetric = (metricId, value, gender = 'male') => {
   const metric = allBodyMetrics.find(m => m.id === metricId);
   if (!metric) return null;
 
-  // 特殊处理性别相关的指标
-  let normalRange = metric.normalRange;
-  if (typeof metric.normalRange === 'object' && metric.normalRange.male && metric.normalRange.female) {
-    normalRange = metric.normalRange[gender] || metric.normalRange.male;
+  // 特殊处理BMI指标 - 使用详细的分类
+  if (metricId === 'bmi') {
+    const category = getBMICategory(value);
+    switch (category.category) {
+      case 'underweight':
+        return { level: 'caution', message: '体重偏轻' };
+      case 'normal':
+        return { level: 'normal', message: '体重正常' };
+      case 'overweight':
+        return { level: 'warning', message: '体重超重' };
+      case 'obese':
+        return { level: 'danger', message: '体重肥胖' };
+      default:
+        return { level: 'normal', message: '正常' };
+    }
   }
 
-  // 检查是否在危险范围内
+  // 特殊处理性别相关的指标
+  let normalRange = metric.normalRange;
+  let idealRange = metric.idealRange;
+  if (typeof metric.normalRange === 'object' && metric.normalRange.male && metric.normalRange.female) {
+    normalRange = metric.normalRange[gender] || metric.normalRange.male;
+    if (metric.idealRange && metric.idealRange.male && metric.idealRange.female) {
+      idealRange = metric.idealRange[gender] || metric.idealRange.male;
+    }
+  }
+
+  // 1. 检查是否在危险范围内（严重）
   if (metric.criticalRange) {
     let isCritical = false;
     if (typeof metric.criticalRange === 'object') {
@@ -434,23 +455,70 @@ export const evaluateMetric = (metricId, value, gender = 'male') => {
     }
     
     if (isCritical) {
-      return { level: 'danger', message: '超出危险范围' };
+      return { level: 'danger', message: '严重超标' };
     }
   }
 
-  // 检查是否在正常范围内
+  // 2. 检查是否超出正常范围（中度）
+  let isOutOfNormal = false;
+  let outOfNormalMessage = '';
   if (typeof normalRange === 'object') {
     if (normalRange.min !== null && value < normalRange.min) {
-      return { level: 'warning', message: '低于正常范围' };
+      isOutOfNormal = true;
+      outOfNormalMessage = '低于正常范围';
     }
     if (normalRange.max !== null && value > normalRange.max) {
-      return { level: 'warning', message: '高于正常范围' };
+      isOutOfNormal = true;
+      outOfNormalMessage = '高于正常范围';
     }
   } else if (normalRange && value !== normalRange.value) {
-    return { level: 'warning', message: '不在正常范围' };
+    isOutOfNormal = true;
+    outOfNormalMessage = '不在正常范围';
   }
 
-  return { level: 'normal', message: '正常' };
+  if (isOutOfNormal) {
+    // 计算偏离程度（如果可能）
+    let deviation = 0;
+    if (typeof normalRange === 'object' && normalRange.min !== null && normalRange.max !== null) {
+      const rangeWidth = normalRange.max - normalRange.min;
+      if (rangeWidth > 0) {
+        if (value < normalRange.min) {
+          deviation = (normalRange.min - value) / rangeWidth;
+        } else {
+          deviation = (value - normalRange.max) / rangeWidth;
+        }
+      }
+    }
+    
+    // 根据偏离程度分级：轻度偏离(<0.3)、中度偏离(0.3-0.6)、重度偏离(>0.6但未到危险)
+    if (deviation < 0.3) {
+      return { level: 'caution', message: '轻度异常' };
+    } else if (deviation < 0.6) {
+      return { level: 'warning', message: '中度异常' };
+    } else {
+      return { level: 'warning', message: '重度异常' };
+    }
+  }
+
+  // 3. 检查是否在理想范围内（正常）
+  if (idealRange) {
+    let isIdeal = false;
+    if (typeof idealRange === 'object') {
+      if ((idealRange.min === null || value >= idealRange.min) &&
+          (idealRange.max === null || value <= idealRange.max)) {
+        isIdeal = true;
+      }
+    } else if (idealRange.value && value === idealRange.value) {
+      isIdeal = true;
+    }
+    
+    if (isIdeal) {
+      return { level: 'normal', message: '理想状态' };
+    }
+  }
+
+  // 4. 在正常范围内但不在理想范围内（轻度）
+  return { level: 'caution', message: '正常范围内' };
 };
 
 export default bodyMetricsConfig;

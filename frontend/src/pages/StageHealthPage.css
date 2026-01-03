@@ -1,0 +1,135 @@
+/* 阶段养生页面样式 */
+.stage-health-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+  padding: 16px;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.dark .stage-health-page {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.stage-health-header {
+  margin-bottom: 24px;
+}
+
+.stage-health-title h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.stage-health-title p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dark .stage-health-title h1 {
+  color: #f9fafb;
+}
+
+.dark .stage-health-title p {
+  color: #9ca3af;
+}
+
+.stage-health-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.age-group-section {
+  margin-bottom: 32px;
+}
+
+.age-group-section h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.dark .age-group-section h2 {
+  color: #e5e7eb;
+}
+
+.age-group-section p {
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.health-advice-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark .health-advice-card {
+  background: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.health-advice-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.health-advice-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.dark .health-advice-card h3 {
+  color: #f9fafb;
+}
+
+.health-advice-card ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.health-advice-card li {
+  margin-bottom: 6px;
+  color: #4b5563;
+}
+
+.dark .health-advice-card li {
+  color: #d1d5db;
+}
+
+.health-advice-card strong {
+  color: #1f2937;
+}
+
+.dark .health-advice-card strong {
+  color: #f9fafb;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .stage-health-page {
+    padding: 12px;
+  }
+  
+  .stage-health-title h1 {
+    font-size: 24px;
+  }
+  
+  .health-advice-card {
+    padding: 16px;
+  }
+  
+  .age-group-section h2 {
+    font-size: 20px;
+  }
+}

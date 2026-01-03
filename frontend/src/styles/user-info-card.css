@@ -239,6 +239,13 @@
   box-shadow: 0 0 8px rgba(102, 192, 244, 0.3);
 }
 
+.score-btn.syncing {
+  background: #5c7e10;
+  border-color: #a4d007;
+  color: #a4d007;
+  cursor: wait;
+}
+
 /* 卡片底部 */
 .card-footer {
   padding: 12px 20px;

@@ -3,11 +3,13 @@
  * 新建MBTI性格测试页面
  * 测试完成后跳转至现有MBTI人格魅力页
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { useCurrentConfig } from '../contexts/UserConfigContext';
+import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 
-// MBTI测试题目
+// MBTI测试题目 - 30题增强版
 const MBTI_QUESTIONS = [
   {
     id: 1,
@@ -104,6 +106,151 @@ const MBTI_QUESTIONS = [
       { text: '制定详细计划', value: 'J' },
       { text: '边做边调整', value: 'P' }
     ]
+  },
+  // 新增题目 (13-30)
+  {
+    id: 13,
+    question: '参加派对时，你通常？',
+    options: [
+      { text: '和很多人聊天，认识新朋友', value: 'E' },
+      { text: '和熟悉的朋友待在一起', value: 'I' }
+    ]
+  },
+  {
+    id: 14,
+    question: '在争论中，你更看重？',
+    options: [
+      { text: '事实和证据', value: 'T' },
+      { text: '情感和关系', value: 'F' }
+    ]
+  },
+  {
+    id: 15,
+    question: '计划旅行时，你更倾向于？',
+    options: [
+      { text: '详细安排每天的行程', value: 'J' },
+      { text: '大概规划，随机应变', value: 'P' }
+    ]
+  },
+  {
+    id: 16,
+    question: '当朋友向你倾诉时，你更可能？',
+    options: [
+      { text: '分析问题给出建议', value: 'T' },
+      { text: '倾听并提供情感支持', value: 'F' }
+    ]
+  },
+  {
+    id: 17,
+    question: '处理工作时，你更喜欢？',
+    options: [
+      { text: '一次专注于一个任务', value: 'S' },
+      { text: '同时处理多个任务', value: 'N' }
+    ]
+  },
+  {
+    id: 18,
+    question: '空闲时间，你更愿意？',
+    options: [
+      { text: '安排活动与人相处', value: 'E' },
+      { text: '享受独处时光', value: 'I' }
+    ]
+  },
+  {
+    id: 19,
+    question: '对于未来，你更关注？',
+    options: [
+      { text: '具体的可实现目标', value: 'S' },
+      { text: '宏大的可能性', value: 'N' }
+    ]
+  },
+  {
+    id: 20,
+    question: '在团队合作中，你更重视？',
+    options: [
+      { text: '任务的完成效率', value: 'T' },
+      { text: '团队的和谐氛围', value: 'F' }
+    ]
+  },
+  {
+    id: 21,
+    question: '面对决策，你更可能？',
+    options: [
+      { text: '仔细权衡利弊', value: 'T' },
+      { text: '凭直觉和感觉', value: 'F' }
+    ]
+  },
+  {
+    id: 22,
+    question: '你的工作风格更接近？',
+    options: [
+      { text: '按计划稳步推进', value: 'J' },
+      { text: '灵活调整适应变化', value: 'P' }
+    ]
+  },
+  {
+    id: 23,
+    question: '学习新技能时，你更倾向于？',
+    options: [
+      { text: '跟随步骤实践', value: 'S' },
+      { text: '理解原理再应用', value: 'N' }
+    ]
+  },
+  {
+    id: 24,
+    question: '在社交中，你更享受？',
+    options: [
+      { text: '与许多人互动', value: 'E' },
+      { text: '深入的个别交流', value: 'I' }
+    ]
+  },
+  {
+    id: 25,
+    question: '处理复杂问题时，你更可能？',
+    options: [
+      { text: '分解成小步骤解决', value: 'S' },
+      { text: '寻找创新解决方案', value: 'N' }
+    ]
+  },
+  {
+    id: 26,
+    question: '你更倾向于认为？',
+    options: [
+      { text: '规则有助于秩序', value: 'J' },
+      { text: '灵活性带来机会', value: 'P' }
+    ]
+  },
+  {
+    id: 27,
+    question: '在人际关系中，你更看重？',
+    options: [
+      { text: '真诚和深度连接', value: 'I' },
+      { text: '广泛的社交网络', value: 'E' }
+    ]
+  },
+  {
+    id: 28,
+    question: '你更相信？',
+    options: [
+      { text: '理性和逻辑', value: 'T' },
+      { text: '情感和同理心', value: 'F' }
+    ]
+  },
+  {
+    id: 29,
+    question: '面对新环境，你更可能？',
+    options: [
+      { text: '观察适应后再行动', value: 'S' },
+      { text: '大胆尝试新方法', value: 'N' }
+    ]
+  },
+  {
+    id: 30,
+    question: '你更偏好哪种生活方式？',
+    options: [
+      { text: '有计划有组织的', value: 'J' },
+      { text: '开放自由的', value: 'P' }
+    ]
   }
 ];
 
@@ -112,10 +259,28 @@ const MBTITestPage = () => {
   const { theme } = useTheme();
 
   // 状态管理
+  const currentConfig = useCurrentConfig();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [saveStatus, setSaveStatus] = useState({ loading: false, success: false, error: null });
+  const [existingMBTI, setExistingMBTI] = useState(null);
+  const [checkingExisting, setCheckingExisting] = useState(true);
+
+  // 检查现有MBTI类型
+  useEffect(() => {
+    if (currentConfig && currentConfig.mbti) {
+      const mbtiType = currentConfig.mbti.trim().toUpperCase();
+      // 验证是否为有效的MBTI类型（4个字符，每个字符是有效的维度）
+      const validTypes = ['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 
+                          'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'];
+      if (validTypes.includes(mbtiType)) {
+        setExistingMBTI(mbtiType);
+      }
+    }
+    setCheckingExisting(false);
+  }, [currentConfig]);
 
   // 当前题目
   const currentQuestion = MBTI_QUESTIONS[currentQuestionIndex];
@@ -184,11 +349,35 @@ const MBTITestPage = () => {
   const handleShowResult = () => {
     setLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const type = calculateMBTI();
       const description = getTypeDescription(type);
       setResult({ type, description });
       setLoading(false);
+
+      // 保存MBTI类型到用户配置
+      try {
+        setSaveStatus({ loading: true, success: false, error: null });
+        
+        // 获取当前配置索引
+        const activeIndex = enhancedUserConfigManager.getActiveConfigIndex();
+        
+        // 更新配置中的MBTI字段
+        const updateResult = await enhancedUserConfigManager.updateConfigWithNodeUpdate(
+          activeIndex,
+          { mbti: type }
+        );
+        
+        if (updateResult && updateResult.success) {
+          setSaveStatus({ loading: false, success: true, error: null });
+          console.log('MBTI类型保存成功:', type);
+        } else {
+          throw new Error('更新配置失败');
+        }
+      } catch (error) {
+        console.error('保存MBTI类型失败:', error);
+        setSaveStatus({ loading: false, success: false, error: error.message });
+      }
     }, 1000);
   };
 
@@ -200,13 +389,13 @@ const MBTITestPage = () => {
   };
 
   // 查看详细分析
-  const handleViewDetail = () => {
+  const handleViewDetail = (mbtiType = null) => {
     navigate('/mbti-detail', {
-      state: { mbtiType: result?.type }
+      state: { mbtiType: mbtiType || result?.type }
     });
   };
 
-  if (loading && !result) {
+  if (checkingExisting || (loading && !result)) {
     return (
       <div className="flex items-center justify-center h-screen bg-white dark:bg-gray-900">
         <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
@@ -251,6 +440,36 @@ const MBTITestPage = () => {
               <p className="text-xl text-gray-600 dark:text-gray-400 mt-4">
                 {result.description}
               </p>
+              
+              {/* 保存状态提示 */}
+              {saveStatus.loading && (
+                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <span className="text-blue-700 dark:text-blue-300">正在保存测试结果...</span>
+                  </div>
+                </div>
+              )}
+              {saveStatus.success && (
+                <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-green-700 dark:text-green-300">测试结果已成功保存到您的个人配置中</span>
+                  </div>
+                </div>
+              )}
+              {saveStatus.error && (
+                <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-red-700 dark:text-red-300">保存失败: {saveStatus.error}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col space-y-3">
@@ -266,6 +485,47 @@ const MBTITestPage = () => {
               >
                 重新测试
               </button>
+            </div>
+          </div>
+        ) : existingMBTI ? (
+          /* 现有MBTI提示界面 */
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-4">📊</div>
+              <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                您已有MBTI测试结果
+              </h2>
+              <div className="inline-block bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl shadow-lg mb-4">
+                <span className="text-4xl font-bold">{existingMBTI}</span>
+              </div>
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                您的MBTI类型为 <span className="font-bold">{existingMBTI}</span>，上次测试结果已保存。
+              </p>
+              
+              <div className="space-y-4">
+                <button
+                  onClick={() => handleViewDetail(existingMBTI)}
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-4 rounded-xl shadow-lg hover:shadow-xl transition-all text-lg font-semibold"
+                >
+                  查看详细分析
+                </button>
+                <button
+                  onClick={() => {
+                    setExistingMBTI(null);
+                    setCurrentQuestionIndex(0);
+                    setAnswers({});
+                  }}
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 rounded-xl shadow-lg hover:shadow-xl transition-all text-lg font-semibold"
+                >
+                  重新测试
+                </button>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="w-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-4 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                >
+                  返回首页
+                </button>
+              </div>
             </div>
           </div>
         ) : (

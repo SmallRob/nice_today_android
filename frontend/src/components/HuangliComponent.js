@@ -62,7 +62,7 @@ const getHuangliForDate = (date) => {
   
   return {
     date: dateStr,
-    lunarDate: lunarInfo ? `${lunarInfo.monthInChinese}${lunarInfo.dayInChinese}` : '未知',
+    lunarDate: lunarInfo ? (lunarInfo.dayInChinese === '初一' ? lunarInfo.monthInChinese : lunarInfo.dayInChinese) : '未知',
     ganzhi: lunarInfo?.dayGanZhi || '未知',
     wuxing: lunarInfo?.lunarObject?.getDayWuXing?.() || '未知',
     zhiri: lunarInfo?.lunarObject?.getZhiRi?.() || '未知',
@@ -72,6 +72,9 @@ const getHuangliForDate = (date) => {
     ji: shuffledJi.slice(0, 3), // 随机选择几个忌事项
     suitable: shuffledYi[0] || '祈福',
     avoid: shuffledJi[0] || '动土',
+    lunarDateShort: lunarInfo ? (lunarInfo.dayInChinese === '初一' ? 
+      (lunarInfo.monthInChinese.length > 2 ? lunarInfo.monthInChinese.substring(0, 2) : lunarInfo.monthInChinese.charAt(0)) : 
+      lunarInfo.dayInChinese) : '',
     auspiciousness: auspiciousness
   };
 };
@@ -304,8 +307,8 @@ const HuangliComponent = () => {
               style={{ minHeight: '2.2rem' }}
             >
               <div className="font-medium text-center">{day.date.getDate()}</div>
-              <div className="text-[0.6rem] opacity-70 text-center">
-                {day.huangli?.lunarDate?.substring(0, 2) || ''}
+              <div className="text-[0.6rem] opacity-70 text-center truncate whitespace-nowrap">
+                {day.huangli?.lunarDateShort || ''}
               </div>
               
               {/* 吉凶指示器 */}

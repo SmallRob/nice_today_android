@@ -5,10 +5,11 @@
 import React, { useState, useEffect, Component } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
-import { useUserConfig } from '../../contexts/UserConfigContext';
+import { useUserConfig, useCurrentConfig } from '../../contexts/UserConfigContext';
 import { baziCacheManager } from '../../utils/BaziCacheManager';
 import { getDisplayBaziInfo } from '../../utils/baziSchema';
 import { calculateDetailedBazi } from '../../utils/baziHelper';
+import { calculateLunarDate, calculateTrueSolarTime } from '../../utils/LunarCalendarHelper';
 import { DEFAULT_REGION } from '../../data/ChinaLocationData';
 
 // 错误边界组件
@@ -57,143 +58,199 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
   const [baziInfo, setBaziInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  // 计算八字信息
-  useEffect(() => {
+  // 从缓存加载八字信息
+  const loadBazi = async () => {
     // 添加参数验证
     if (!birthDate) {
-      console.log('出生日期未设置，显示默认信息');
-      setBaziInfo(getFallbackBaziData(birthDate, birthTime));
+      console.log('出生日期未设置，显示提示信息');
+      setError('请先设置出生日期和时间');
+      setBaziInfo(null);
       setLoading(false);
-      setError(null);
       return;
     }
 
-    // 设置超时控制，防止长时间加载
-    const timeoutId = setTimeout(() => {
-      if (loading) {
-        console.warn('八字加载超时，使用默认数据');
-        setBaziInfo(getFallbackBaziData(birthDate, birthTime));
-        setLoading(false);
-        setError('加载超时，请稍后重试');
+    // 验证出生日期是否为有效字符串格式
+    if (typeof birthDate !== 'string' || !birthDate.includes('-')) {
+      console.warn('出生日期格式无效:', birthDate);
+      setError('出生日期格式不正确');
+      setBaziInfo(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null); // 重置错误状态
+      let finalBaziData = null;
+
+      // 1. 优先从配置中获取八字信息 (新版本数据)
+      if (savedBaziInfo) {
+        try {
+          console.log('使用配置中保存的八字信息');
+
+          // 首先验证是否有基本的八字信息
+          if (!hasBasicBaziInfo(savedBaziInfo)) {
+            console.log('配置数据缺少基本八字信息，跳过使用');
+          } else {
+            // 直接使用保存的八字信息，无需额外处理
+            finalBaziData = savedBaziInfo;
+
+            // 验证数据结构完整性
+            if (validateBaziInfoStructure(finalBaziData)) {
+              console.log('配置数据验证通过');
+            } else {
+              console.log('配置数据结构不完整，尝试标准化处理');
+              finalBaziData = normalizeBaziData(finalBaziData);
+
+              // 再次验证标准化后的数据
+              if (!validateBaziInfoStructure(finalBaziData)) {
+                console.log('标准化后数据仍不完整');
+                finalBaziData = null;
+              }
+            }
+          }
+        } catch (configError) {
+          console.error('配置数据处理失败:', configError);
+          setError('配置数据处理失败，请检查配置信息');
+        }
       }
-    }, 10000); // 10秒超时
 
-    const loadBazi = async () => {
-      try {
-        setLoading(true);
-        setError(null); // 重置错误状态
-        let finalBaziData = null;
+      // 2. 如果配置数据无效，尝试从缓存获取八字信息
+      if (!finalBaziData && nickname && typeof nickname === 'string' && nickname.trim() !== '') {
+        try {
+          const cachedBazi = baziCacheManager.getBaziByNickname(nickname, {
+            format: 'legacy',
+            validate: true,
+            fallbackToLegacy: true
+          });
 
-        // 1. 优先从缓存获取八字信息
-        if (nickname) {
-          try {
-            const cachedBazi = baziCacheManager.getBaziByNickname(nickname, {
-              format: 'legacy',
-              validate: true,
-              fallbackToLegacy: true
-            });
+          if (cachedBazi && (cachedBazi.bazi || cachedBazi.dualFormatBazi)) {
+            console.log('使用缓存中的八字信息:', nickname);
 
-            if (cachedBazi && (cachedBazi.bazi || cachedBazi.dualFormatBazi)) {
-              console.log('使用缓存中的八字信息:', nickname);
+            const displayBazi = getDisplayBaziInfo(cachedBazi.bazi || cachedBazi.dualFormatBazi);
 
-              const displayBazi = getDisplayBaziInfo(cachedBazi.bazi || cachedBazi.dualFormatBazi);
-
+            // 验证是否有基本八字信息
+            if (!hasBasicBaziInfo(displayBazi)) {
+              console.log('缓存数据缺少基本八字信息，跳过使用');
+            } else {
               // 验证缓存数据是否与当前配置一致
               if (validateBaziDataConsistency(displayBazi, birthDate, birthTime, birthLocation)) {
                 finalBaziData = displayBazi;
                 console.log('缓存数据验证通过');
               } else {
-                console.log('缓存数据与当前配置不一致，重新计算');
-                baziCacheManager.clearCache(nickname);
+                console.log('缓存数据与当前配置不一致，需要重新计算');
               }
             }
-          } catch (cacheError) {
-            console.warn('缓存读取失败:', cacheError);
           }
+        } catch (cacheError) {
+          console.error('缓存读取失败:', cacheError);
+          setError('缓存数据读取失败');
         }
+      }
 
-        // 2. 如果缓存无效，尝试使用保存的八字信息
-        if (!finalBaziData && savedBaziInfo) {
-          try {
-            console.log('使用配置中保存的八字信息');
-            const displayBazi = getDisplayBaziInfo(savedBaziInfo);
+      // 3. 如果缓存和保存数据都无效，使用降级数据
+      if (!finalBaziData) {
+        console.log('八字信息未找到，使用降级数据');
+        finalBaziData = getFallbackBaziData(birthDate, birthTime);
+        // Don't set error for fallback case, just show the fallback data
+        console.log('使用降级数据展示八字信息');
+      }
 
-            if (validateBaziDataConsistency(displayBazi, birthDate, birthTime, birthLocation)) {
-              finalBaziData = displayBazi;
-              console.log('配置数据验证通过');
-            } else {
-              console.log('配置数据与当前信息不一致，重新计算');
-            }
-          } catch (configError) {
-            console.warn('配置数据处理失败:', configError);
-          }
-        }
+      // 4. 设置最终数据
+      if (finalBaziData) {
+        finalBaziData = normalizeBaziData(finalBaziData);
 
-        // 3. 如果缓存和保存数据都无效，则实时计算
-        if (!finalBaziData) {
-          console.log('开始实时计算八字信息');
-          try {
-            const lng = birthLocation?.lng || DEFAULT_REGION.lng;
-
-            const useTrueSolarTime = trueSolarTime || birthTime || '12:30';
-
-            const info = calculateDetailedBazi(birthDate, useTrueSolarTime, lng);
-
-            finalBaziData = getDisplayBaziInfo(info);
-
-            if (lunarBirthDate && finalBaziData) {
-              finalBaziData.lunar = {
-                ...finalBaziData.lunar,
-                text: lunarBirthDate
+        // 确保农历信息存在，如果不存在则使用LunarCalendarHelper计算
+        if (!finalBaziData.lunar || !finalBaziData.lunar.text || finalBaziData.lunar.text.includes('请设置') || finalBaziData.lunar.text.includes('未知')) {
+          if (birthDate && birthTime) {
+            try {
+              const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
+              const lunarInfo = calculateLunarDate(birthDate, birthTime, longitude);
+              if (lunarInfo) {
+                finalBaziData = {
+                  ...finalBaziData,
+                  lunar: {
+                    text: lunarInfo.fullText || lunarInfo.shortText || `${birthDate} 农历信息`,
+                    monthStr: lunarInfo.monthInChinese || '未知月份',
+                    dayStr: lunarInfo.dayInChinese || '未知日期'
+                  }
+                };
+              }
+            } catch (lunarError) {
+              console.warn('加载时计算农历信息失败:', lunarError);
+              // 使用默认农历信息
+              finalBaziData = {
+                ...finalBaziData,
+                lunar: {
+                  text: `${birthDate} 农历信息`,
+                  monthStr: '未知月份',
+                  dayStr: '未知日期'
+                }
               };
             }
-
-            // 计算完成后缓存八字信息
-            if (finalBaziData && nickname) {
-              try {
-                const cacheSuccess = baziCacheManager.cacheBazi(nickname, {
-                  birthDate,
-                  birthTime: useTrueSolarTime,
-                  longitude: lng
-                }, finalBaziData);
-
-                if (cacheSuccess) {
-                  console.log('八字信息已缓存:', nickname);
-                }
-              } catch (cacheError) {
-                console.warn('缓存存储失败:', cacheError);
-              }
-            }
-          } catch (calcError) {
-            console.error('八字计算失败:', calcError);
-            finalBaziData = getFallbackBaziData(birthDate, birthTime);
           }
         }
 
-        // 4. 确保最终数据格式正确
-        if (finalBaziData) {
-          finalBaziData = normalizeBaziData(finalBaziData);
-          setBaziInfo(finalBaziData);
-        } else {
-          setBaziInfo(getFallbackBaziData(birthDate, birthTime));
+        // 确保真太阳时信息存在
+        if (!finalBaziData.trueSolarTime && birthDate && birthTime) {
+          try {
+            const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
+            const trueSolarTime = calculateTrueSolarTime(birthDate, birthTime, longitude);
+            finalBaziData = {
+              ...finalBaziData,
+              trueSolarTime: trueSolarTime
+            };
+          } catch (solarError) {
+            console.warn('加载时计算真太阳时失败:', solarError);
+            finalBaziData = {
+              ...finalBaziData,
+              trueSolarTime: birthTime
+            };
+          }
         }
 
-      } catch (e) {
-        console.error('八字加载失败:', e);
-        setError('加载失败: ' + e.message);
-        setBaziInfo(getFallbackBaziData(birthDate, birthTime));
-      } finally {
-        setLoading(false);
-        clearTimeout(timeoutId); // 清除超时定时器
+        setBaziInfo(finalBaziData);
       }
-    };
 
-    loadBazi();
+    } catch (e) {
+      console.error('八字加载失败:', e);
+      setError('加载失败: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // 清理函数
+  // 辅助函数：检查是否有基本的八字信息
+  const hasBasicBaziInfo = (baziData) => {
+    if (!baziData) return false;
+
+    // 检查是否有基本的八字字段（年月日时）
+    const hasBazi = baziData.bazi &&
+                   baziData.bazi.year &&
+                   baziData.bazi.month &&
+                   baziData.bazi.day &&
+                   baziData.bazi.hour;
+
+    // 或者检查顶层字段
+    const hasTopLevel = baziData.year &&
+                       baziData.month &&
+                       baziData.day &&
+                       baziData.hour;
+
+    return hasBazi || hasTopLevel;
+  };
+
+  useEffect(() => {
+    // 防止在组件卸载后设置状态
+    let isCancelled = false;
+    loadBazi().then(() => {
+      if (isCancelled) return;
+    });
+
     return () => {
-      clearTimeout(timeoutId);
+      isCancelled = true;
     };
   }, [birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname]);
 
@@ -201,14 +258,34 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
         <div className="text-red-600 dark:text-red-400 text-center">
-          <div className="font-bold text-lg mb-2">加载出错</div>
+          <div className="font-bold text-lg mb-2">八字信息加载错误</div>
           <p className="mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-          >
-            重新加载
-          </button>
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
+            <button
+              onClick={() => {
+                // 重新尝试加载八字信息
+                setError(null);
+                setBaziInfo(null);
+                // Force re-run of the useEffect by updating a state that affects the dependencies
+                loadBazi(); // Call the function directly
+              }}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors mb-2 sm:mb-0"
+            >
+              重试加载
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors mb-2 sm:mb-0"
+            >
+              刷新页面
+            </button>
+            <button
+              onClick={() => navigate('/user-config')}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              前往配置页面
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -216,9 +293,10 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
+      <div className="flex flex-col items-center justify-center py-12">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500"></div>
-        <p className="ml-4 text-gray-600 dark:text-gray-300">正在加载八字信息，请稍候...</p>
+        <p className="mt-4 text-gray-600 dark:text-gray-300">正在加载八字信息，请稍候...</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">系统正在后台计算您的八字命格信息</p>
       </div>
     );
   }
@@ -226,9 +304,86 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
   if (!baziInfo) {
     return (
       <div className="text-center py-12 text-gray-500 dark:text-white">
-        请先设置出生日期
+        <p className="mb-4">八字信息未找到或正在计算中</p>
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
+          <button
+            onClick={() => {
+              // Try to reload the data
+              setError(null);
+              setBaziInfo(null);
+              loadBazi();
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors mb-2 sm:mb-0"
+          >
+            重新加载
+          </button>
+          <button
+            onClick={() => navigate('/user-config')}
+            className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+          >
+            前往配置页面
+          </button>
+        </div>
       </div>
     );
+  }
+
+  // 验證八字信息是否包含基本數據
+  if (!hasBasicBaziInfo(baziInfo)) {
+    console.warn('八字信息缺少基本数据，使用降级处理');
+    // 使用降级数据确保页面可以正常显示
+    const fallbackBaziInfo = getFallbackBaziData(birthDate, birthTime);
+    baziInfo = { ...fallbackBaziInfo, ...baziInfo };
+  }
+
+  // 确保农历信息存在，如果不存在则使用LunarCalendarHelper计算
+  if (!baziInfo.lunar || !baziInfo.lunar.text || baziInfo.lunar.text.includes('请设置') || baziInfo.lunar.text.includes('未知')) {
+    if (birthDate && birthTime) {
+      try {
+        const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
+        const lunarInfo = calculateLunarDate(birthDate, birthTime, longitude);
+        if (lunarInfo) {
+          // 更新baziInfo中的农历信息
+          baziInfo = {
+            ...baziInfo,
+            lunar: {
+              text: lunarInfo.fullText || lunarInfo.shortText || `${birthDate} 农历信息`,
+              monthStr: lunarInfo.monthInChinese || '未知月份',
+              dayStr: lunarInfo.dayInChinese || '未知日期'
+            }
+          };
+        }
+      } catch (error) {
+        console.warn('计算农历信息失败，使用默认值:', error);
+        // 使用默认农历信息
+        baziInfo = {
+          ...baziInfo,
+          lunar: {
+            text: `${birthDate} 农历信息`,
+            monthStr: '未知月份',
+            dayStr: '未知日期'
+          }
+        };
+      }
+    }
+  }
+
+  // 确保真太阳时信息存在
+  if (!baziInfo.trueSolarTime && birthDate && birthTime) {
+    try {
+      const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
+      const trueSolarTime = calculateTrueSolarTime(birthDate, birthTime, longitude);
+      baziInfo = {
+        ...baziInfo,
+        trueSolarTime: trueSolarTime
+      };
+    } catch (error) {
+      console.warn('计算真太阳时失败，使用原始时间:', error);
+      baziInfo = {
+        ...baziInfo,
+        trueSolarTime: birthTime
+      };
+    }
   }
 
   // 验证 baziInfo 数据结构完整性
@@ -470,7 +625,33 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
         <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-4">大运</h4>
         <div className="text-sm sm:text-base text-gray-800 dark:text-white">
           {(() => {
-              const birthYear = birthDate ? parseInt(birthDate.split('-')[0]) : new Date().getFullYear();
+              // 安全地获取出生年份，确保birthDate是字符串
+              let birthYear = new Date().getFullYear(); // 默认值
+              if (birthDate) {
+                // 确保birthDate是字符串类型
+                let safeBirthDate = birthDate;
+                if (typeof safeBirthDate !== 'string') {
+                  if (safeBirthDate && typeof safeBirthDate.toString === 'function') {
+                    safeBirthDate = safeBirthDate.toString();
+                  } else {
+                    console.warn('出生日期格式无效:', birthDate);
+                    safeBirthDate = null;
+                  }
+                }
+                
+                if (safeBirthDate && typeof safeBirthDate === 'string' && safeBirthDate.includes('-')) {
+                  try {
+                    birthYear = parseInt(safeBirthDate.split('-')[0]);
+                    if (isNaN(birthYear)) {
+                      birthYear = new Date().getFullYear(); // 如果解析失败，使用默认值
+                    }
+                  } catch (error) {
+                    console.warn('解析出生年份失败:', error);
+                    birthYear = new Date().getFullYear(); // 解析出错时使用默认值
+                  }
+                }
+              }
+
               const dayun = calculateDaYun(baziInfo, birthYear);
               if (!dayun) return null;
 
@@ -503,9 +684,17 @@ const validateBaziDataConsistency = (baziData, birthDate, birthTime, birthLocati
 
   if (!hasValidStructure) return false;
 
-  // 验证出生日期是否匹配
-  if (birthDate && baziData.birth && baziData.birth.solar && baziData.birth.solar.date !== birthDate) {
-    return false;
+  // 验证出生日期是否匹配（支持多种数据格式）
+  if (birthDate) {
+    // 检查新版格式
+    if (baziData.meta?.calculatedForDate && baziData.meta.calculatedForDate !== birthDate) {
+      return false;
+    }
+
+    // 检查旧版格式
+    if (baziData.birth?.solar?.date && baziData.birth.solar.date !== birthDate) {
+      return false;
+    }
   }
 
   return true;
@@ -517,45 +706,102 @@ const normalizeBaziData = (baziData) => {
 
   const normalized = { ...baziData };
 
+  // 标准化八字字段
   if (!normalized.bazi) {
+    // 如果没有bazi字段，尝试从顶层字段构建
     normalized.bazi = {
-      year: normalized.year || '甲子',
-      month: normalized.month || '乙丑',
-      day: normalized.day || '丙寅',
-      hour: normalized.hour || '丁卯'
+      year: normalized.year || (normalized.bazi?.year) || '甲子',
+      month: normalized.month || (normalized.bazi?.month) || '乙丑',
+      day: normalized.day || (normalized.bazi?.day) || '丙寅',
+      hour: normalized.hour || (normalized.bazi?.hour) || '丁卯'
+    };
+  } else {
+    // 如果有bazi字段，确保所有子字段都存在
+    normalized.bazi = {
+      year: normalized.bazi.year || normalized.year || '甲子',
+      month: normalized.bazi.month || normalized.month || '乙丑',
+      day: normalized.bazi.day || normalized.day || '丙寅',
+      hour: normalized.bazi.hour || normalized.hour || '丁卯'
     };
   }
 
+  // 标准化五行字段
   if (!normalized.wuxing) {
-    normalized.wuxing = {
-      text: normalized.wuXing?.text || '木火 火火 土水',
-      year: normalized.wuXing?.year || '木',
-      month: normalized.wuXing?.month || '火',
-      day: normalized.wuXing?.day || '火',
-      hour: normalized.wuXing?.hour || '土'
-    };
+    // 检查是否有旧格式的五行数据
+    if (normalized.wuXing) {
+      normalized.wuxing = {
+        text: normalized.wuXing.text || normalized.wuxing?.text || '木火 火火 土水',
+        year: normalized.wuXing.year || normalized.wuxing?.year || '木',
+        month: normalized.wuXing.month || normalized.wuxing?.month || '火',
+        day: normalized.wuXing.day || normalized.wuxing?.day || '火',
+        hour: normalized.wuXing.hour || normalized.wuxing?.hour || '土'
+      };
+    } else {
+      normalized.wuxing = {
+        text: normalized.wuxing?.text || '木火 火火 土水',
+        year: normalized.wuxing?.year || '木',
+        month: normalized.wuxing?.month || '火',
+        day: normalized.wuxing?.day || '火',
+        hour: normalized.wuxing?.hour || '土'
+      };
+    }
   }
 
+  // 标准化农历字段
   if (!normalized.lunar) {
-    normalized.lunar = {
-      text: normalized.birth?.lunar?.text || '请设置出生信息',
-      monthStr: normalized.birth?.lunar?.monthInChinese || '请设置',
-      dayStr: normalized.birth?.lunar?.dayInChinese || '请设置'
-    };
+    if (normalized.birth?.lunar) {
+      normalized.lunar = {
+        text: normalized.birth.lunar.text || '请设置出生信息',
+        monthStr: normalized.birth.lunar.monthInChinese || normalized.birth.lunar.monthStr || '请设置',
+        dayStr: normalized.birth.lunar.dayInChinese || normalized.birth.lunar.dayStr || '请设置'
+      };
+    } else {
+      normalized.lunar = {
+        text: normalized.lunar?.text || normalized.birth?.lunar?.text || '请设置出生信息',
+        monthStr: normalized.lunar?.monthStr || normalized.birth?.lunar?.monthInChinese || '请设置',
+        dayStr: normalized.lunar?.dayStr || normalized.birth?.lunar?.dayInChinese || '请设置'
+      };
+    }
   }
 
+  // 标准化时辰字段
   if (!normalized.shichen) {
-    normalized.shichen = {
-      ganzhi: normalized.birth?.time?.shichenGanZhi || '丁卯'
-    };
+    if (normalized.birth?.time) {
+      normalized.shichen = {
+        ganzhi: normalized.birth.time.shichenGanZhi || normalized.birth.time.ganzhi || '丁卯'
+      };
+    } else {
+      normalized.shichen = {
+        ganzhi: normalized.shichen?.ganzhi || normalized.birth?.time?.shichenGanZhi || '丁卯'
+      };
+    }
   }
 
+  // 标准化纳音字段
   if (!normalized.nayin) {
-    normalized.nayin = {
-      year: normalized.naYin?.year || '甲子',
-      month: normalized.naYin?.month || '乙丑',
-      day: normalized.naYin?.day || '丙寅',
-      hour: normalized.naYin?.hour || '丁卯'
+    if (normalized.naYin) {
+      normalized.nayin = {
+        year: normalized.naYin.year || normalized.nayin?.year || '甲子',
+        month: normalized.naYin.month || normalized.nayin?.month || '乙丑',
+        day: normalized.naYin.day || normalized.nayin?.day || '丙寅',
+        hour: normalized.naYin.hour || normalized.nayin?.hour || '丁卯'
+      };
+    } else {
+      normalized.nayin = {
+        year: normalized.nayin?.year || '甲子',
+        month: normalized.nayin?.month || '乙丑',
+        day: normalized.nayin?.day || '丙寅',
+        hour: normalized.nayin?.hour || '丁卯'
+      };
+    }
+  }
+
+  // 确保meta字段存在
+  if (!normalized.meta) {
+    normalized.meta = {
+      version: '1.0.0',
+      calculatedAt: new Date().toISOString(),
+      dataSource: 'normalized'
     };
   }
 
@@ -564,6 +810,27 @@ const normalizeBaziData = (baziData) => {
 
 // 辅助函数：获取降级八字数据
 const getFallbackBaziData = (birthDate, birthTime) => {
+  // 安全处理出生日期，确保是字符串格式
+  const safeBirthDate = typeof birthDate === 'string' ? birthDate : '未知日期';
+  const safeBirthTime = typeof birthTime === 'string' ? birthTime : '00:00';
+
+  // 计算农历信息
+  let lunarInfo = null;
+  if (safeBirthDate && safeBirthDate !== '未知日期') {
+    try {
+      const lunarCalculated = calculateLunarDate(safeBirthDate, safeBirthTime, DEFAULT_REGION.lng);
+      if (lunarCalculated) {
+        lunarInfo = {
+          text: lunarCalculated.fullText || lunarCalculated.shortText || `${safeBirthDate} 农历信息`,
+          monthStr: lunarCalculated.monthInChinese || '未知月份',
+          dayStr: lunarCalculated.dayInChinese || '未知日期'
+        };
+      }
+    } catch (error) {
+      console.warn('降级数据农历计算失败:', error);
+    }
+  }
+
   const defaultBaziData = {
     bazi: {
       year: '甲子',
@@ -578,13 +845,13 @@ const getFallbackBaziData = (birthDate, birthTime) => {
       day: '火',
       hour: '土'
     },
-    lunar: {
-      text: birthDate ? `${birthDate} 农历信息计算中...` : '请设置出生信息',
+    lunar: lunarInfo || {
+      text: safeBirthDate ? `${safeBirthDate} 农历信息计算中...` : '请设置出生信息',
       monthStr: '请设置',
       dayStr: '请设置'
     },
     shichen: {
-      ganzhi: birthTime ? `${birthTime} 时辰` : '丁卯'
+      ganzhi: safeBirthTime ? `${safeBirthTime} 时辰` : '丁卯'
     },
     nayin: {
       year: '甲子',
@@ -592,6 +859,7 @@ const getFallbackBaziData = (birthDate, birthTime) => {
       day: '丙寅',
       hour: '丁卯'
     },
+    trueSolarTime: safeBirthTime,
     meta: {
       version: '1.0.0',
       calculatedAt: new Date().toISOString(),
@@ -610,45 +878,46 @@ const validateBaziInfoStructure = (baziInfo) => {
     return false;
   }
 
-  if (!baziInfo.bazi) {
-    console.warn('baziInfo.bazi 为 null 或 undefined');
+  // 检查是否有基本的八字字段（支持多种数据格式）
+  let hasValidBazi = false;
+  if (baziInfo.bazi && baziInfo.bazi.year && baziInfo.bazi.month && baziInfo.bazi.day && baziInfo.bazi.hour) {
+    hasValidBazi = typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 &&
+                   typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
+                   typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
+                   typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
+  } else if (baziInfo.year && baziInfo.month && baziInfo.day && baziInfo.hour) {
+    hasValidBazi = typeof baziInfo.year === 'string' && baziInfo.year.length > 0 &&
+                   typeof baziInfo.month === 'string' && baziInfo.month.length > 0 &&
+                   typeof baziInfo.day === 'string' && baziInfo.day.length > 0 &&
+                   typeof baziInfo.hour === 'string' && baziInfo.hour.length > 0;
+  }
+
+  if (!hasValidBazi) {
+    console.warn('baziInfo 缺少有效的八字字段');
     return false;
   }
 
-  const requiredBaziFields = ['year', 'month', 'day', 'hour'];
-  for (const field of requiredBaziFields) {
-    if (!baziInfo.bazi[field]) {
-      console.warn(`baziInfo.bazi.${field} 为 null 或 undefined 或空字符串`);
-      return false;
-    }
-
-    if (typeof baziInfo.bazi[field] !== 'string') {
-      console.warn(`baziInfo.bazi.${field} 不是字符串类型，实际类型为: ${typeof baziInfo.bazi[field]}`);
-      return false;
-    }
-
-    if (baziInfo.bazi[field].length < 1) {
-      console.warn(`baziInfo.bazi.${field} 字符串长度不足`);
-      return false;
-    }
+  // 检查五行字段（支持多种数据格式）
+  let hasValidWuxing = false;
+  if (baziInfo.wuxing && baziInfo.wuxing.year && baziInfo.wuxing.month &&
+      baziInfo.wuxing.day && baziInfo.wuxing.hour && baziInfo.wuxing.text) {
+    hasValidWuxing = typeof baziInfo.wuxing.year === 'string' && baziInfo.wuxing.year.length > 0 &&
+                     typeof baziInfo.wuxing.month === 'string' && baziInfo.wuxing.month.length > 0 &&
+                     typeof baziInfo.wuxing.day === 'string' && baziInfo.wuxing.day.length > 0 &&
+                     typeof baziInfo.wuxing.hour === 'string' && baziInfo.wuxing.hour.length > 0 &&
+                     typeof baziInfo.wuxing.text === 'string' && baziInfo.wuxing.text.length > 0;
+  } else if (baziInfo.wuXing && baziInfo.wuXing.year && baziInfo.wuXing.month &&
+             baziInfo.wuXing.day && baziInfo.wuXing.hour && baziInfo.wuXing.text) {
+    hasValidWuxing = typeof baziInfo.wuXing.year === 'string' && baziInfo.wuXing.year.length > 0 &&
+                     typeof baziInfo.wuXing.month === 'string' && baziInfo.wuXing.month.length > 0 &&
+                     typeof baziInfo.wuXing.day === 'string' && baziInfo.wuXing.day.length > 0 &&
+                     typeof baziInfo.wuXing.hour === 'string' && baziInfo.wuXing.hour.length > 0 &&
+                     typeof baziInfo.wuXing.text === 'string' && baziInfo.wuXing.text.length > 0;
   }
 
-  if (!baziInfo.wuxing) {
-    console.warn('baziInfo.wuxing 为 null 或 undefined');
+  if (!hasValidWuxing) {
+    console.warn('baziInfo 缺少有效的五行字段');
     return false;
-  }
-
-  const requiredWuxingFields = ['year', 'month', 'day', 'hour', 'text'];
-  for (const field of requiredWuxingFields) {
-    if (!baziInfo.wuxing[field]) {
-      console.warn(`baziInfo.wuxing.${field} 为 null 或 undefined 或空字符串`);
-      return false;
-    }
-
-    if (typeof baziInfo.wuxing[field] !== 'string') {
-      console.warn(`baziInfo.wuxing.${field} 不是字符串类型，实际类型为: ${typeof baziInfo.wuxing[field]}`);
-      return false;
-    }
   }
 
   return true;
@@ -656,7 +925,7 @@ const validateBaziInfoStructure = (baziInfo) => {
 
 // 计算五行统计
 const calculateFiveElementStats = (baziInfo) => {
-  if (!baziInfo || !baziInfo.bazi || !baziInfo.wuxing) {
+  if (!baziInfo) {
     return {
       elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
       wuxingElements: ['木', '火', '土', '金', '水'],
@@ -668,18 +937,47 @@ const calculateFiveElementStats = (baziInfo) => {
     };
   }
 
-  const hasValidBaziFields = baziInfo.bazi &&
-    typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 &&
-    typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
-    typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
-    typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
+  // 获取八字信息（支持多种格式）
+  const bazi = baziInfo.bazi || {
+    year: baziInfo.year,
+    month: baziInfo.month,
+    day: baziInfo.day,
+    hour: baziInfo.hour
+  };
 
-  const hasValidWuxingFields = baziInfo.wuxing &&
-    typeof baziInfo.wuxing.text === 'string' &&
-    typeof baziInfo.wuxing.year === 'string' && baziInfo.wuxing.year.length > 0 &&
-    typeof baziInfo.wuxing.month === 'string' && baziInfo.wuxing.month.length > 0 &&
-    typeof baziInfo.wuxing.day === 'string' && baziInfo.wuxing.day.length > 0 &&
-    typeof baziInfo.wuxing.hour === 'string' && baziInfo.wuxing.hour.length > 0;
+  // 获取五行信息（支持多种格式）
+  const wuxing = baziInfo.wuxing || baziInfo.wuXing || {
+    text: baziInfo.wuxing?.text || baziInfo.wuXing?.text,
+    year: baziInfo.wuxing?.year || baziInfo.wuXing?.year,
+    month: baziInfo.wuxing?.month || baziInfo.wuXing?.month,
+    day: baziInfo.wuxing?.day || baziInfo.wuXing?.day,
+    hour: baziInfo.wuxing?.hour || baziInfo.wuXing?.hour
+  };
+
+  if (!bazi || !wuxing) {
+    return {
+      elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
+      wuxingElements: ['木', '火', '土', '金', '水'],
+      dayMaster: '未知',
+      fortuneType: '数据不可用',
+      luckyElement: '无',
+      masterElement: '未知',
+      totalScore: 0
+    };
+  }
+
+  const hasValidBaziFields = bazi &&
+    typeof bazi.year === 'string' && bazi.year.length > 0 &&
+    typeof bazi.month === 'string' && bazi.month.length > 0 &&
+    typeof bazi.day === 'string' && bazi.day.length > 0 &&
+    typeof bazi.hour === 'string' && bazi.hour.length > 0;
+
+  const hasValidWuxingFields = wuxing &&
+    typeof wuxing.text === 'string' &&
+    typeof wuxing.year === 'string' && wuxing.year.length > 0 &&
+    typeof wuxing.month === 'string' && wuxing.month.length > 0 &&
+    typeof wuxing.day === 'string' && wuxing.day.length > 0 &&
+    typeof wuxing.hour === 'string' && wuxing.hour.length > 0;
 
   if (!hasValidBaziFields || !hasValidWuxingFields) {
     return {
@@ -697,8 +995,8 @@ const calculateFiveElementStats = (baziInfo) => {
   const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
 
   try {
-    const wuxingStr = baziInfo.wuxing.text || '';
-    const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
+    const wuxingStr = (baziInfo.wuxing && baziInfo.wuxing.text) ? baziInfo.wuxing.text : '';
+    const wuxingList = typeof wuxingStr === 'string' ? wuxingStr.split('').filter(c => wuxingElements.includes(c)) : [];
     wuxingList.forEach(element => {
       elementCounts[element]++;
     });
@@ -749,28 +1047,49 @@ const calculateFiveElementStats = (baziInfo) => {
 
 // 计算五行喜忌功能
 const calculateWuxingPreferences = (baziInfo) => {
-  if (!baziInfo || !baziInfo.bazi || !baziInfo.wuxing) {
+  if (!baziInfo) {
     return null;
   }
 
-  const hasValidBaziFields = baziInfo.bazi &&
-    typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 &&
-    typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
-    typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
-    typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
+  // 获取八字信息（支持多种格式）
+  const bazi = baziInfo.bazi || {
+    year: baziInfo.year,
+    month: baziInfo.month,
+    day: baziInfo.day,
+    hour: baziInfo.hour
+  };
 
-  const hasValidWuxingFields = baziInfo.wuxing &&
-    typeof baziInfo.wuxing.text === 'string' &&
-    typeof baziInfo.wuxing.year === 'string' && baziInfo.wuxing.year.length > 0 &&
-    typeof baziInfo.wuxing.month === 'string' && baziInfo.wuxing.month.length > 0 &&
-    typeof baziInfo.wuxing.day === 'string' && baziInfo.wuxing.day.length > 0 &&
-    typeof baziInfo.wuxing.hour === 'string' && baziInfo.wuxing.hour.length > 0;
+  // 获取五行信息（支持多种格式）
+  const wuxing = baziInfo.wuxing || baziInfo.wuXing || {
+    text: baziInfo.wuxing?.text || baziInfo.wuXing?.text,
+    year: baziInfo.wuxing?.year || baziInfo.wuXing?.year,
+    month: baziInfo.wuxing?.month || baziInfo.wuXing?.month,
+    day: baziInfo.wuxing?.day || baziInfo.wuXing?.day,
+    hour: baziInfo.wuxing?.hour || baziInfo.wuXing?.hour
+  };
+
+  if (!bazi || !wuxing) {
+    return null;
+  }
+
+  const hasValidBaziFields = bazi &&
+    typeof bazi.year === 'string' && bazi.year.length > 0 &&
+    typeof bazi.month === 'string' && bazi.month.length > 0 &&
+    typeof bazi.day === 'string' && bazi.day.length > 0 &&
+    typeof bazi.hour === 'string' && bazi.hour.length > 0;
+
+  const hasValidWuxingFields = wuxing &&
+    typeof wuxing.text === 'string' &&
+    typeof wuxing.year === 'string' && wuxing.year.length > 0 &&
+    typeof wuxing.month === 'string' && wuxing.month.length > 0 &&
+    typeof wuxing.day === 'string' && wuxing.day.length > 0 &&
+    typeof wuxing.hour === 'string' && wuxing.hour.length > 0;
 
   if (!hasValidBaziFields || !hasValidWuxingFields) {
     return null;
   }
 
-  const dayMaster = baziInfo.bazi.day && typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 ? baziInfo.bazi.day.charAt(0) : '未知';
+  const dayMaster = bazi.day && typeof bazi.day === 'string' && bazi.day.length > 0 ? bazi.day.charAt(0) : '未知';
 
   const wuxingMap = {
     '甲': '木', '乙': '木', '寅': '木', '卯': '木',
@@ -793,8 +1112,8 @@ const calculateWuxingPreferences = (baziInfo) => {
   const wuxingElements = ['木', '火', '土', '金', '水'];
   const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
 
-  const wuxingStr = (baziInfo.wuxing && baziInfo.wuxing.text) || '';
-  const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
+  const wuxingStr = (baziInfo.wuxing && baziInfo.wuxing.text) ? (baziInfo.wuxing.text || '') : '';
+  const wuxingList = typeof wuxingStr === 'string' ? wuxingStr.split('').filter(c => wuxingElements.includes(c)) : [];
   wuxingList.forEach(element => {
     elementCounts[element]++;
   });
@@ -965,28 +1284,40 @@ const calculateWuxingPreferences = (baziInfo) => {
 
 // 计算十年大运
 const calculateDaYun = (baziInfo, birthYear) => {
-  if (!baziInfo || !baziInfo.bazi) {
+  if (!baziInfo) {
     return null;
   }
 
-  const hasValidBaziFields = baziInfo.bazi &&
-    typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 &&
-    typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
-    typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
-    typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
+  // 获取八字信息（支持多种格式）
+  const bazi = baziInfo.bazi || {
+    year: baziInfo.year,
+    month: baziInfo.month,
+    day: baziInfo.day,
+    hour: baziInfo.hour
+  };
+
+  if (!bazi) {
+    return null;
+  }
+
+  const hasValidBaziFields = bazi &&
+    typeof bazi.year === 'string' && bazi.year.length > 0 &&
+    typeof bazi.month === 'string' && bazi.month.length > 0 &&
+    typeof bazi.day === 'string' && bazi.day.length > 0 &&
+    typeof bazi.hour === 'string' && bazi.hour.length > 0;
 
   if (!hasValidBaziFields) {
     return null;
   }
 
-  const dayMaster = baziInfo.bazi.day && typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 ? baziInfo.bazi.day.charAt(0) : '未知';
+  const dayMaster = bazi.day && typeof bazi.day === 'string' && bazi.day.length > 0 ? bazi.day.charAt(0) : '未知';
 
   const gan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
   const zhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 
   const dayMasterIndex = gan.indexOf(dayMaster);
 
-  const yearGan = baziInfo.bazi.year && typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 ? baziInfo.bazi.year.charAt(0) : '甲';
+  const yearGan = bazi.year && typeof bazi.year === 'string' && bazi.year.length > 0 ? bazi.year.charAt(0) : '甲';
   const yearGanIndex = gan.indexOf(yearGan);
   const isYangYear = yearGanIndex % 2 === 0;
 
@@ -996,8 +1327,8 @@ const calculateDaYun = (baziInfo, birthYear) => {
 
   const isForward = (isMale && isYangYear) || (!isMale && !isYangYear);
 
-  const monthGan = baziInfo.bazi.month && typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 ? baziInfo.bazi.month.charAt(0) : '子';
-  const monthZhi = baziInfo.bazi.month && typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 1 ? baziInfo.bazi.month.charAt(1) : '子';
+  const monthGan = bazi.month && typeof bazi.month === 'string' && bazi.month.length > 0 ? bazi.month.charAt(0) : '子';
+  const monthZhi = bazi.month && typeof bazi.month === 'string' && bazi.month.length > 1 ? bazi.month.charAt(1) : '子';
 
   const monthGanIndex = gan.indexOf(monthGan);
   const monthZhiIndex = zhi.indexOf(monthZhi);
@@ -1038,9 +1369,322 @@ const calculateDaYun = (baziInfo, birthYear) => {
 // 主页面组件
 const BaziAnalysisPage = () => {
   const { theme } = useTheme();
-  const { currentConfig } = useUserConfig();
+  const { updateConfig } = useUserConfig();
+  const currentConfig = useCurrentConfig();
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+
+  // 当用户配置发生变化时，异步后台计算八字信息
+  useEffect(() => {
+    const calculateBaziInBackground = async () => {
+      if (!currentConfig?.birthDate) {
+        console.log('出生日期未设置，跳过八字计算');
+        return;
+      }
+
+      try {
+        // 验证出生日期是否为有效字符串
+        let birthDateStr = currentConfig.birthDate;
+        if (typeof birthDateStr !== 'string') {
+          if (birthDateStr && typeof birthDateStr.toString === 'function') {
+            birthDateStr = birthDateStr.toString();
+          } else {
+            console.warn('出生日期格式无效，跳过八字计算:', currentConfig.birthDate);
+            return;
+          }
+        }
+
+        if (!birthDateStr.includes('-')) {
+          console.warn('出生日期格式无效，跳过八字计算:', birthDateStr);
+          return;
+        }
+
+        // 验证并获取昵称
+        const nickname = currentConfig.nickname || 'default_user';
+        if (!nickname || typeof nickname !== 'string' || nickname.trim() === '') {
+          console.warn('用户昵称无效，使用默认值:', nickname);
+        }
+
+        // 检查是否已有计算好的八字信息且与当前配置一致
+        if (currentConfig?.baziInfo && currentConfig?.baziInfo?.meta?.calculatedForDate === currentConfig.birthDate) {
+          console.log('八字信息已存在且与当前配置一致，无需重新计算');
+
+          // 同步八字信息到缓存，按昵称存储
+          try {
+            await baziCacheManager.cacheBazi(
+              nickname,
+              {
+                birthDate: currentConfig.birthDate,
+                birthTime: currentConfig.birthTime || '00:00',
+                longitude: currentConfig.birthLocation?.lng || DEFAULT_REGION.lng
+              },
+              currentConfig.baziInfo,
+              null // configIndex
+            );
+            console.log('八字信息已同步到缓存，按昵称存储:', nickname);
+          } catch (cacheError) {
+            console.warn('八字信息缓存失败:', cacheError);
+          }
+
+          return;
+        }
+
+        console.log('开始后台计算八字信息...');
+
+        const birthDate = birthDateStr;
+        const birthTime = currentConfig.birthTime || '00:00';
+        const birthLocation = currentConfig.birthLocation || DEFAULT_REGION;
+
+        // 执行八字计算 - 使用正确的参数格式
+        const detailedBazi = await calculateDetailedBazi(
+          birthDate,
+          birthTime,
+          birthLocation?.lng || DEFAULT_REGION.lng
+        );
+
+        if (detailedBazi) {
+          // 确保农历信息存在，如果不存在则使用LunarCalendarHelper计算
+          let enhancedBaziInfo = { ...detailedBazi };
+
+          if (!enhancedBaziInfo.lunar || !enhancedBaziInfo.lunar.text) {
+            try {
+              const longitude = currentConfig.birthLocation?.lng || DEFAULT_REGION.lng;
+              const lunarInfo = calculateLunarDate(birthDate, birthTime, longitude);
+              if (lunarInfo) {
+                enhancedBaziInfo = {
+                  ...enhancedBaziInfo,
+                  lunar: {
+                    text: lunarInfo.fullText || lunarInfo.shortText || `${birthDate} 农历信息`,
+                    monthStr: lunarInfo.monthInChinese || '未知月份',
+                    dayStr: lunarInfo.dayInChinese || '未知日期'
+                  }
+                };
+              }
+            } catch (lunarError) {
+              console.warn('计算农历信息失败:', lunarError);
+              // 使用默认农历信息
+              enhancedBaziInfo = {
+                ...enhancedBaziInfo,
+                lunar: {
+                  text: `${birthDate} 农历信息`,
+                  monthStr: '未知月份',
+                  dayStr: '未知日期'
+                }
+              };
+            }
+          }
+
+          // 确保真太阳时信息存在
+          if (!enhancedBaziInfo.trueSolarTime) {
+            try {
+              const longitude = currentConfig.birthLocation?.lng || DEFAULT_REGION.lng;
+              const trueSolarTime = calculateTrueSolarTime(birthDate, birthTime, longitude);
+              enhancedBaziInfo = {
+                ...enhancedBaziInfo,
+                trueSolarTime: trueSolarTime
+              };
+            } catch (solarError) {
+              console.warn('计算真太阳时失败:', solarError);
+              enhancedBaziInfo = {
+                ...enhancedBaziInfo,
+                trueSolarTime: birthTime
+              };
+            }
+          }
+
+          // 更新配置，保存八字信息，确保保留所有原始配置字段
+          const updatedConfig = {
+            ...currentConfig, // 确保所有原始字段都被保留
+            baziInfo: {
+              ...enhancedBaziInfo,
+              meta: {
+                ...enhancedBaziInfo.meta,
+                calculatedForDate: birthDate,
+                calculatedAt: new Date().toISOString(),
+                dataSource: 'calculated'
+              }
+            }
+          };
+
+          await updateConfig(updatedConfig);
+
+          // 同步八字信息到缓存，按昵称存储
+          try {
+            await baziCacheManager.cacheBazi(
+              nickname,
+              {
+                birthDate: currentConfig.birthDate,
+                birthTime: currentConfig.birthTime || '00:00',
+                longitude: currentConfig.birthLocation?.lng || DEFAULT_REGION.lng
+              },
+              enhancedBaziInfo,
+              null // configIndex
+            );
+            console.log('八字信息计算完成并已保存到配置和缓存中，按昵称存储:', nickname);
+          } catch (cacheError) {
+            console.warn('八字信息缓存失败:', cacheError);
+          }
+
+          // Clear any previous error after successful calculation
+          setError(null);
+        } else {
+          console.warn('八字计算结果为空');
+        }
+      } catch (calculationError) {
+        console.error('后台八字计算失败:', calculationError);
+        // Don't set error here as it would block the UI
+        // Instead, log the error and let the UI continue to function
+        console.warn('八字计算失败，但页面继续运行:', calculationError.message);
+      }
+    };
+
+    // 延迟执行，避免阻塞页面渲染
+    const timer = setTimeout(() => {
+      // Run in background without blocking UI
+      calculateBaziInBackground().catch(error => {
+        console.error('后台计算过程中发生错误:', error);
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentConfig, updateConfig]);
+
+  // Function to trigger background recalculation
+  const triggerBackgroundRecalculation = async () => {
+    if (!currentConfig?.birthDate) {
+      console.log('出生日期未设置，跳过八字计算');
+      return;
+    }
+
+    try {
+      // 驗证出生日期是否为有效字符串
+      let birthDateStr = currentConfig.birthDate;
+      if (typeof birthDateStr !== 'string') {
+        if (birthDateStr && typeof birthDateStr.toString === 'function') {
+          birthDateStr = birthDateStr.toString();
+        } else {
+          console.warn('出生日期格式无效，跳过八字计算:', currentConfig.birthDate);
+          return;
+        }
+      }
+
+      if (!birthDateStr.includes('-')) {
+        console.warn('出生日期格式无效，跳过八字计算:', birthDateStr);
+        return;
+      }
+
+      // 验证并获取昵称
+      const nickname = currentConfig.nickname || 'default_user';
+      if (!nickname || typeof nickname !== 'string' || nickname.trim() === '') {
+        console.warn('用户昵称无效，使用默认值:', nickname);
+      }
+
+      console.log('手动触发后台八字计算...');
+
+      const birthDate = birthDateStr;
+      const birthTime = currentConfig.birthTime || '00:00';
+      const birthLocation = currentConfig.birthLocation || DEFAULT_REGION;
+
+      // 执行八字计算 - 使用正确的参数格式
+      const detailedBazi = await calculateDetailedBazi(
+        birthDate,
+        birthTime,
+        birthLocation?.lng || DEFAULT_REGION.lng
+      );
+
+      if (detailedBazi) {
+        // 确保农历信息存在，如果不存在则使用LunarCalendarHelper计算
+        let enhancedBaziInfo = { ...detailedBazi };
+
+        if (!enhancedBaziInfo.lunar || !enhancedBaziInfo.lunar.text) {
+          try {
+            const longitude = currentConfig.birthLocation?.lng || DEFAULT_REGION.lng;
+            const lunarInfo = calculateLunarDate(birthDate, birthTime, longitude);
+            if (lunarInfo) {
+              enhancedBaziInfo = {
+                ...enhancedBaziInfo,
+                lunar: {
+                  text: lunarInfo.fullText || lunarInfo.shortText || `${birthDate} 农历信息`,
+                  monthStr: lunarInfo.monthInChinese || '未知月份',
+                  dayStr: lunarInfo.dayInChinese || '未知日期'
+                }
+              };
+            }
+          } catch (lunarError) {
+            console.warn('计算农历信息失败:', lunarError);
+            // 使用默认农历信息
+            enhancedBaziInfo = {
+              ...enhancedBaziInfo,
+              lunar: {
+                text: `${birthDate} 农历信息`,
+                monthStr: '未知月份',
+                dayStr: '未知日期'
+              }
+            };
+          }
+        }
+
+        // 确保真太阳时信息存在
+        if (!enhancedBaziInfo.trueSolarTime) {
+          try {
+            const longitude = currentConfig.birthLocation?.lng || DEFAULT_REGION.lng;
+            const trueSolarTime = calculateTrueSolarTime(birthDate, birthTime, longitude);
+            enhancedBaziInfo = {
+              ...enhancedBaziInfo,
+              trueSolarTime: trueSolarTime
+            };
+          } catch (solarError) {
+            console.warn('计算真太阳时失败:', solarError);
+            enhancedBaziInfo = {
+              ...enhancedBaziInfo,
+              trueSolarTime: birthTime
+            };
+          }
+        }
+
+        // 更新配置，保存八字信息，确保保留所有原始配置字段
+        const updatedConfig = {
+          ...currentConfig, // 确保所有原始字段都被保留
+          baziInfo: {
+            ...enhancedBaziInfo,
+            meta: {
+              ...enhancedBaziInfo.meta,
+              calculatedForDate: birthDate,
+              calculatedAt: new Date().toISOString(),
+              dataSource: 'calculated'
+            }
+          }
+        };
+
+        await updateConfig(updatedConfig);
+
+        // 同步八字信息到缓存，按昵称存储
+        try {
+          await baziCacheManager.cacheBazi(
+            nickname,
+            {
+              birthDate: currentConfig.birthDate,
+              birthTime: currentConfig.birthTime || '00:00',
+              longitude: currentConfig.birthLocation?.lng || DEFAULT_REGION.lng
+            },
+            enhancedBaziInfo,
+            null // configIndex
+          );
+          console.log('八字信息计算完成并已保存到配置和缓存中，按昵称存储:', nickname);
+        } catch (cacheError) {
+          console.warn('八字信息缓存失败:', cacheError);
+        }
+
+        // Clear any previous error after successful calculation
+        setError(null);
+      } else {
+        console.warn('八字计算结果为空');
+      }
+    } catch (calculationError) {
+      console.error('手动触发八字计算失败:', calculationError);
+      setError('手动计算失败: ' + calculationError.message);
+    }
+  };
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-gray-900 dark:via-amber-900/20 dark:to-orange-900/20 ${theme}`}>
@@ -1090,6 +1734,30 @@ const BaziAnalysisPage = () => {
             </div>
           </div>
         </div>
+
+        {/* 错误提示 */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
+            <div className="text-red-600 dark:text-red-400 text-center">
+              <div className="font-bold text-lg mb-2">系统错误</div>
+              <p className="mb-4">{error}</p>
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <button
+                  onClick={triggerBackgroundRecalculation}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors mb-2 sm:mb-0"
+                >
+                  后台重算
+                </button>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  刷新页面
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 八字命格展示 */}
         <ErrorBoundary>

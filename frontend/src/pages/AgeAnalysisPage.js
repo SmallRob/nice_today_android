@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useUserConfig } from '../contexts/UserConfigContext';
+import { getAgeGroupByAge, getAllAgeGroups } from '../constants/ageGroups';
 
 /**
  * 年龄分析页面
@@ -29,18 +30,8 @@ const AgeAnalysisPage = () => {
     return stateAge || 25;
   });
 
-  // 生命周期阶段定义
-  const lifeStages = useMemo(() => [
-    { range: '0-5岁', stage: '婴幼儿期', description: '快速成长和学习基础能力', color: '#FF6B6B' },
-    { range: '6-12岁', stage: '儿童期', description: '认知能力迅速发展，性格形成', color: '#FF8E53' },
-    { range: '13-17岁', stage: '青少年期', description: '青春期，自我认同形成', color: '#FFD700' },
-    { range: '18-25岁', stage: '青年早期', description: '探索自我，建立独立性', color: '#4ECDC4' },
-    { range: '26-35岁', stage: '青年中期', description: '事业和家庭发展的关键期', color: '#44A08D' },
-    { range: '36-45岁', stage: '中年早期', description: '事业稳定，家庭责任增加', color: '#64B3F4' },
-    { range: '46-55岁', stage: '中年中期', description: '经验丰富，人生智慧积累', color: '#4A90E2' },
-    { range: '56-65岁', stage: '中年晚期', description: '准备退休，享受生活', color: '#9370DB' },
-    { range: '66岁+', stage: '老年期', description: '智慧传承，安享晚年', color: '#8A2BE2' }
-  ], []);
+  // 生命周期阶段定义 - 使用统一的年龄组枚举
+  const lifeStages = useMemo(() => getAllAgeGroups(), []);
 
   // 获取当前生命周期阶段
   const currentLifeStage = useMemo(() => {

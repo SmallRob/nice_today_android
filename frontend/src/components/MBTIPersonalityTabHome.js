@@ -65,6 +65,7 @@ const MBTIPersonalityTabHome = () => {
   const [tempMBTI, setTempMBTI] = useState(''); // 用于临时切换MBTI查看
   const [globalUserConfig, setGlobalUserConfig] = useState(null);
   const [showMBTIModal, setShowMBTIModal] = useState(false);
+  const [comparisonType, setComparisonType] = useState(''); // 用于比较的类型
 
   // MBTI人格类型数据 - 使用useMemo缓存
   const mbtiTypes = useMemo(() => [
@@ -608,56 +609,51 @@ const MBTIPersonalityTabHome = () => {
   const renderBasicInfoCard = () => {
     if (!personalityAnalysis?.basicInfo) return null;
 
-    const { type, name, nickname, tags, motto, summary, icon, color } = personalityAnalysis.basicInfo;
+    const { type, name, description, icon, color } = personalityAnalysis.basicInfo;
+    const typeData = mbtiTypes.find(t => t.type === type);
 
     return (
-      <div className="mbti-basic-info-card">
-        <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-400/20 rounded-full blur-3xl"></div>
-
-        <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
-          {/* 图标和类型 */}
-          <div className="flex flex-col items-center gap-2">
-            <div
-              className="flex-shrink-0 w-24 h-24 rounded-3xl flex flex-col items-center justify-center text-5xl shadow-xl backdrop-blur-md bg-white/20 border border-white/30 ring-1 ring-white/20 transform hover:rotate-3 transition-transform duration-500"
+      <Card className="mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            {/* 图标和类型 */}
+            <div 
+              className="flex-shrink-0 w-24 h-24 rounded-full flex items-center justify-center text-4xl shadow-lg"
+              style={{ background: typeData?.bgGradient || color }}
             >
-              <span className="mb-1">{icon}</span>
+              {icon}
             </div>
-            <div className="px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm text-[10px] text-gray-900 dark:text-white uppercase tracking-widest border border-white/10">
-              {type}
-            </div>
-          </div>
-
-          {/* 基本信息 */}
-          <div className="flex-1 text-center md:text-left">
-            <div className="mb-4">
-              <div className="flex flex-col md:flex-row md:items-center md:gap-3 mb-2 justify-center md:justify-start">
-                <h1 className="text-3xl font-black dark:text-white tracking-tight">{nickname}</h1>
-                <div className="h-6 w-[2px] bg-white/30 hidden md:block"></div>
-                <span className="text-lg font-bold opacity-90 text-indigo-50 dark:text-indigo-200">{name}</span>
+            
+            {/* 基本信息 */}
+            <div className="flex-1 text-center md:text-left">
+              <div className="mb-4">
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                  {type} - {name}
+                </h1>
+                <p className="text-lg text-gray-600 dark:text-white">{description}</p>
               </div>
-              <p className="text-sm text-indigo-100 dark:text-indigo-200 font-bold mb-3 tracking-wide bg-black/10 inline-block px-3 py-1 rounded-lg backdrop-blur-sm">
-                {motto}
-              </p>
-              <p className="text-xs text-indigo-50 dark:text-indigo-200 font-medium leading-relaxed max-w-lg mx-auto md:mx-0">
-                {summary}
-              </p>
-            </div>
-
-            {/* 核心特质标签 */}
-            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-              {tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-4 py-1.5 bg-white/15 dark:bg-black/40 border border-white/20 rounded-full text-[11px] text-gray-900 dark:text-white font-black tracking-wider text-white shadow-inner"
-                >
-                  #{tag}
-                </span>
-              ))}
+              
+              {/* 核心特质标签 */}
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-white mb-2">
+                  核心特质
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {personalityAnalysis.traits.coreTraits.map((trait, index) => (
+                    <span 
+                      key={index}
+                      className="px-3 py-1.5 rounded-full text-sm font-medium text-white"
+                      style={{ backgroundColor: color }}
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -673,23 +669,7 @@ const MBTIPersonalityTabHome = () => {
     ];
 
     return (
-      <div className="mbti-traits-coordinate-card">
-        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-          <svg width="120" height="120" viewBox="0 0 100 100">
-            <path d="M 10 50 L 90 50 M 50 10 L 50 90" stroke="currentColor" strokeWidth="2" fill="none" />
-            <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="1" fill="none" />
-          </svg>
-        </div>
-
-        <h3 className="mbti-analysis-header flex items-center">
-          <span className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-3 text-indigo-600 dark:text-indigo-400">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </span>
-          核心倾向坐标维度
-        </h3>
-
+      <Card title="核心倾向坐标维度" className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 px-2">
           {dimensions.map((dim, index) => {
             const isRight = userMBTI.includes(dim.rightCode);
@@ -737,7 +717,7 @@ const MBTIPersonalityTabHome = () => {
             基于人格维度的动态平衡，呈现出独一无二的性格能量分布
           </p>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -748,47 +728,54 @@ const MBTIPersonalityTabHome = () => {
     const { strengths, weaknesses } = personalityAnalysis.traits;
 
     return (
-      <div className="mbti-traits-card">
-        <h3 className="mbti-analysis-header flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-          </svg>
-          特质潜力分析
-        </h3>
-        <div className="mbti-traits-grid">
+      <Card title="特质分析" className="mb-6">
+        <div className="grid md:grid-cols-3 gap-6">
           {/* 优势 */}
-          <div className="mbti-traits-section">
-            <h3 className="mbti-traits-section-title">
-              <span className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mr-2 text-xs">💎</span>
-              核心优势
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 p-5 rounded-xl border border-green-100 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-4 flex items-center">
+              <span className="mr-2">✅</span> 优势
             </h3>
-            <ul className="space-y-2.5">
-              {strengths.slice(0, 4).map((strength, index) => (
+            <ul className="space-y-3">
+              {strengths.map((strength, index) => (
                 <li key={index} className="flex items-start">
-                  <div className="mt-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2.5 flex-shrink-0"></div>
-                  <span className="text-[12px] text-gray-700 dark:text-gray-200 font-medium leading-tight">{strength}</span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="text-gray-700 dark:text-white">{strength}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* 成长建议 */}
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-900 p-5 rounded-xl border border-blue-100 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-4 flex items-center">
+              <span className="mr-2">📈</span> 成长建议
+            </h3>
+            <ul className="space-y-3">
+              {personalityAnalysis.traits.growthAreas.map((tip, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="text-gray-700 dark:text-white">{tip}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* 需要注意 */}
-          <div className="mbti-traits-section">
-            <h3 className="mbti-traits-section-title">
-              <span className="w-6 h-6 bg-rose-100 dark:bg-rose-900/50 rounded-full flex items-center justify-center mr-2 text-xs">⚖️</span>
-              注意与挑战
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 p-5 rounded-xl border border-amber-100 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-300 mb-4 flex items-center">
+              <span className="mr-2">⚠️</span> 需要注意
             </h3>
-            <ul className="space-y-2.5">
-              {weaknesses.slice(0, 4).map((weakness, index) => (
+            <ul className="space-y-3">
+              {weaknesses.map((weakness, index) => (
                 <li key={index} className="flex items-start">
-                  <div className="mt-1.5 w-1.5 h-1.5 bg-rose-400 rounded-full mr-2.5 flex-shrink-0"></div>
-                  <span className="text-[12px] text-gray-700 dark:text-gray-200 font-medium leading-tight">{weakness}</span>
+                  <span className="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="text-gray-700 dark:text-white">{weakness}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -797,49 +784,85 @@ const MBTIPersonalityTabHome = () => {
   const renderRelationshipsCard = () => {
     if (!personalityAnalysis?.relationships) return null;
 
-    const { compatibleTypes, advice } = personalityAnalysis.relationships;
+    const { style, communication, compatibleTypes, incompatibleTypes, advice } = personalityAnalysis.relationships;
 
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-pink-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-          </svg>
-          社交与情感共鸣
-        </h3>
-        <div className="space-y-4">
-          {/* 兼容类型 */}
+      <Card title="人际关系" className="mb-6">
+        <div className="space-y-6">
+          {/* 关系风格 */}
           <div>
-            <h3 className="text-[13px] font-bold text-gray-700 dark:text-white mb-2.5 flex items-center">
-              <span className="w-6 h-6 bg-pink-50 dark:bg-pink-900/40 rounded-full flex items-center justify-center mr-2 text-xs">💖</span>
-              灵魂共鸣类型
+            <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-3 flex items-center">
+              <span className="mr-2">💞</span> 关系风格
             </h3>
-            <div className="flex flex-wrap gap-2">
-              {compatibleTypes.slice(0, 4).map((type, index) => {
-                const compatTypeData = mbtiTypes.find(t => t.type === type);
-                return (
-                  <div
-                    key={index}
-                    className="group px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-sm flex items-center transition-all hover:border-pink-200 dark:hover:border-pink-900/50 hover:shadow-md"
-                  >
-                    <span className="text-sm mr-2 group-hover:scale-125 transition-transform">{compatTypeData?.icon}</span>
-                    <span className="text-xs font-bold text-gray-700 dark:text-white">{type}</span>
-                  </div>
-                );
-              })}
+            <p className="text-gray-700 dark:text-white bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 p-4 rounded-lg">
+              {style}
+            </p>
+          </div>
+
+          {/* 沟通方式 */}
+          <div>
+            <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-300 mb-3 flex items-center">
+              <span className="mr-2">💬</span> 沟通方式
+            </h3>
+            <p className="text-gray-700 dark:text-white bg-indigo-50 dark:bg-indigo-900 dark:bg-opacity-20 p-4 rounded-lg">
+              {communication}
+            </p>
+          </div>
+
+          {/* 类型兼容性 */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-3 flex items-center">
+                <span className="mr-2">🤝</span> 兼容类型
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {compatibleTypes.map((type, index) => {
+                  const typeData = mbtiTypes.find(t => t.type === type);
+                  return (
+                    <span 
+                      key={index}
+                      className="px-4 py-2 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-white border border-green-200 dark:border-green-700 flex items-center"
+                    >
+                      <span className="mr-1">{typeData?.icon}</span>
+                      {type}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-3 flex items-center">
+                <span className="mr-2">⚠️</span> 需要磨合的类型
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {incompatibleTypes.map((type, index) => {
+                  const typeData = mbtiTypes.find(t => t.type === type);
+                  return (
+                    <span 
+                      key={index}
+                      className="px-4 py-2 bg-red-100 dark:bg-red-900 rounded-full text-sm text-gray-700 dark:text-white border border-red-200 dark:border-red-700 flex items-center"
+                    >
+                      <span className="mr-1">{typeData?.icon}</span>
+                      {type}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
           {/* 关系建议 */}
-          <div className="relative p-4 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-xl border border-pink-100/50 dark:border-pink-900/30">
-            <div className="absolute top-3 right-4 opacity-10 text-3xl">💬</div>
-            <h3 className="text-[11px] font-black text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1.5">沟通建议</h3>
-            <p className="text-[12px] text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+          <div>
+            <h3 className="text-lg font-semibold text-pink-700 dark:text-pink-300 mb-3 flex items-center">
+              <span className="mr-2">💡</span> 关系建议
+            </h3>
+            <p className="text-gray-700 dark:text-white bg-pink-50 dark:bg-pink-900 dark:bg-opacity-20 p-4 rounded-lg">
               {advice}
             </p>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -847,33 +870,82 @@ const MBTIPersonalityTabHome = () => {
   const renderCareerCard = () => {
     if (!personalityAnalysis?.career) return null;
 
-    const { suggestions } = personalityAnalysis.career;
+    const { suggestions, idealEnvironments, workStyle, avoidCareers, advice } = personalityAnalysis.career;
 
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1h2V3a1 1 0 011-1h1a1 1 0 011 1v1h2a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 001-1z" clipRule="evenodd" />
-          </svg>
-          天赋使命与职业
-        </h3>
-        <div className="p-1">
-          <h3 className="text-[13px] font-bold text-gray-700 dark:text-white mb-3 flex items-center">
-            <span className="w-6 h-6 bg-blue-50 dark:bg-blue-900/40 rounded-full flex items-center justify-center mr-2 text-xs">💼</span>
-            高匹配度职业
-          </h3>
-          <div className="grid grid-cols-2 gap-2">
-            {suggestions.slice(0, 6).map((career, index) => (
-              <div
-                key={index}
-                className="px-3 py-2.5 bg-blue-50/30 dark:bg-blue-950/20 border border-blue-100/50 dark:border-blue-900/20 rounded-xl text-[12px] text-blue-800 dark:text-blue-300 font-bold text-center tracking-wide"
-              >
-                {career}
-              </div>
-            ))}
+      <Card title="职业发展" className="mb-6">
+        <div className="space-y-6">
+          {/* 职业建议 */}
+          <div>
+            <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3 flex items-center">
+              <span className="mr-2">💼</span> 适合职业
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((career, index) => (
+                <span 
+                  key={index}
+                  className="px-4 py-2 bg-blue-100 dark:bg-blue-900 rounded-full text-sm text-gray-700 dark:text-white border border-blue-200 dark:border-blue-700"
+                >
+                  {career}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* 工作环境和风格 */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-semibold text-teal-700 dark:text-teal-300 mb-3 flex items-center">
+                <span className="mr-2">🏢</span> 理想工作环境
+              </h3>
+              <ul className="space-y-2">
+                {idealEnvironments.map((env, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="w-2 h-2 bg-teal-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                    <span className="text-gray-700 dark:text-white">{env}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-cyan-700 dark:text-cyan-300 mb-3 flex items-center">
+                <span className="mr-2">⚡</span> 工作风格
+              </h3>
+              <p className="text-gray-700 dark:text-white bg-cyan-50 dark:bg-cyan-900 dark:bg-opacity-20 p-4 rounded-lg">
+                {workStyle}
+              </p>
+            </div>
+          </div>
+
+          {/* 需要避免的职业 */}
+          <div>
+            <h3 className="text-lg font-semibold text-amber-700 dark:text-amber-300 mb-3 flex items-center">
+              <span className="mr-2">🚫</span> 需要谨慎的职业
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {avoidCareers.map((career, index) => (
+                <span 
+                  key={index}
+                  className="px-4 py-2 bg-amber-100 dark:bg-amber-900 rounded-full text-sm text-gray-700 dark:text-white border border-amber-200 dark:border-amber-700"
+                >
+                  {career}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* 职业建议 */}
+          <div>
+            <h3 className="text-lg font-semibold text-violet-700 dark:text-violet-300 mb-3 flex items-center">
+              <span className="mr-2">🎯</span> 职业发展建议
+            </h3>
+            <p className="text-gray-700 dark:text-white bg-violet-50 dark:bg-violet-900 dark:bg-opacity-20 p-4 rounded-lg">
+              {advice}
+            </p>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -881,301 +953,434 @@ const MBTIPersonalityTabHome = () => {
   const renderPersonalGrowthCard = () => {
     if (!personalityAnalysis?.personalGrowth) return null;
 
-    const { tips, potential } = personalityAnalysis.personalGrowth;
+    const { tips, developmentAreas, potential, mindfulness } = personalityAnalysis.personalGrowth;
 
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-3 md:p-4 border border-gray-200 dark:border-gray-700 mb-4">
-        <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-indigo-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-          </svg>
-          成长与进化指南
-        </h3>
-        <div className="space-y-4">
+      <Card title="个人成长" className="mb-6">
+        <div className="space-y-6">
           {/* 成长潜力 */}
-          <div className="p-4 bg-indigo-50/30 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30">
-            <h3 className="text-[11px] font-black text-indigo-700 dark:text-indigo-400 uppercase tracking-widest mb-2 flex items-center">
-              <span className="mr-2">✨</span> Potential Analysis
+          <div>
+            <h3 className="text-lg font-semibold text-emerald-700 dark:text-emerald-300 mb-3 flex items-center">
+              <span className="mr-2">🚀</span> 成长潜力
             </h3>
-            <p className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-relaxed tracking-wide">
+            <p className="text-gray-700 dark:text-white bg-emerald-50 dark:bg-emerald-900 dark:bg-opacity-20 p-4 rounded-lg">
               {potential}
             </p>
           </div>
 
           {/* 成长建议 */}
-          <div className="grid grid-cols-1 gap-3">
-            {tips.slice(0, 3).map((tip, index) => (
-              <div key={index} className="flex items-center p-3.5 bg-white dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-transform duration-200">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 flex items-center justify-center mr-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-                  <span className="text-sm font-bold">{index + 1}</span>
+          <div>
+            <h3 className="text-lg font-semibold text-lime-700 dark:text-lime-300 mb-3 flex items-center">
+              <span className="mr-2">🌱</span> 具体成长建议
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {tips.map((tip, index) => (
+                <div key={index} className="flex items-start bg-lime-50 dark:bg-lime-900 dark:bg-opacity-20 p-3 rounded-lg">
+                  <span className="text-lime-600 dark:text-lime-400 mr-2">✓</span>
+                  <span className="text-gray-700 dark:text-white">{tip}</span>
                 </div>
-                <span className="text-[12px] text-gray-700 dark:text-gray-300 font-medium leading-tight">{tip}</span>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* 需要注意的领域 */}
+          <div>
+            <h3 className="text-lg font-semibold text-rose-700 dark:text-rose-300 mb-3 flex items-center">
+              <span className="mr-2">🧘</span> 自我觉察
+            </h3>
+            <p className="text-gray-700 dark:text-white bg-rose-50 dark:bg-rose-900 dark:bg-opacity-20 p-4 rounded-lg">
+              {mindfulness}
+            </p>
           </div>
         </div>
-      </div>
+      </Card>
     );
   };
 
   // 渲染MBTI选择器
   const renderMBTISelector = () => {
     return (
-      <div className="mbti-selector-card">
-        <h3 className="mbti-analysis-header flex items-center">
-          <svg className="w-4 h-4 md:w-5 md:h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-          </svg>
-          深度人格探索
-        </h3>
-        <div className="space-y-4">
+      <Card title="MBTI类型选择" className="mb-6">
+        <div className="space-y-6">
           <div>
+            <p className="text-sm text-gray-600 dark:text-white mb-4">
+              您可以从用户配置中读取MBTI类型，也可以临时选择其他类型进行查询。临时选择不会保存到配置中。
+            </p>
+            
             {/* 当前用户信息 */}
             {userInfo.mbti && (
-              <div className="mb-4 p-3 bg-indigo-50/50 dark:bg-indigo-900/30 rounded-2xl border border-indigo-100/50 dark:border-indigo-800/50 flex items-center justify-between">
-                <div className="flex items-center">
-                  <span className="mr-2 text-lg">💡</span>
-                  <div>
-                    <p className="text-indigo-800 dark:text-indigo-300 text-[11px] font-bold uppercase tracking-widest leading-none">Your Configuration</p>
-                    <p className="text-gray-800 dark:text-white text-xs font-black mt-1">{userInfo.mbti}</p>
-                  </div>
-                </div>
-                {tempMBTI && tempMBTI !== userInfo.mbti && (
-                  <div className="px-2.5 py-1 bg-orange-100 dark:bg-orange-900/40 rounded-full">
-                    <p className="text-orange-700 dark:text-orange-300 text-[10px] font-bold">查看中: {tempMBTI}</p>
-                  </div>
-                )}
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded-lg border border-blue-200 dark:border-blue-700">
+                <p className="text-blue-700 dark:text-blue-300 text-sm">
+                  您的用户配置中设置的MBTI类型是：<span className="font-bold">{userInfo.mbti}</span>
+                </p>
+                <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">
+                  💡 如需永久修改MBTI类型，请在用户设置页面进行配置
+                </p>
               </div>
             )}
-
-            {/* 提示文本 */}
-            <p className="mb-3 text-[11px] text-gray-400 dark:text-gray-300 font-medium px-1 flex items-center">
-              <span className="mr-1.5 opacity-50">✦</span> 点击下方任意类型探索深度分析
-            </p>
-
+            
             {/* MBTI类型网格 */}
             <div className="mb-4">
-              <div className="mbti-selector-grid">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">
+                选择要分析的MBTI类型：
+              </h3>
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                 {allMBTIs.map((mbti) => {
                   const typeData = mbtiTypes.find(t => t.type === mbti);
-                  const isSelected = userMBTI === mbti;
-                  const isUserConfig = userInfo.mbti === mbti;
-
                   return (
                     <button
                       key={mbti}
                       onClick={() => handleMBTIChange(mbti)}
-                      className={`mbti-type-button ${isSelected ? 'mbti-type-button selected' : ''}`}
+                      className={`p-2 rounded-lg text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center ${
+                        userMBTI === mbti
+                          ? 'ring-2 ring-offset-1'
+                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                      style={{
+                        backgroundColor: userMBTI === mbti ? typeData?.color : undefined,
+                        color: userMBTI === mbti ? 'white' : undefined,
+                        borderColor: typeData?.color
+                      }}
                     >
-                      {/* 选中光晕效果 */}
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
-                      )}
-
-                      <span className="mbti-type-icon">
-                        {typeData?.icon}
-                      </span>
-                      <span className="mbti-type-text">
-                        {mbti}
-                      </span>
-
-                      {/* 状态标记 */}
-                      {isUserConfig && (
-                        <div className={`absolute top-1.5 right-1.5 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-indigo-500'} shadow-sm`}></div>
-                      )}
+                      <span className="text-base mb-1">{typeData?.icon}</span>
+                      <span>{mbti}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
-
-            {/* 重置按钮 */}
-            {tempMBTI && tempMBTI !== userInfo.mbti && (
-              <div className="flex justify-center mt-2">
-                <button
-                  onClick={() => {
-                    setUserMBTI(userInfo.mbti);
-                    setTempMBTI('');
-                    setDataLoaded(false);
-                  }}
-                  className="flex items-center space-x-1.5 px-4 py-1.5 bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 text-[11px] font-bold rounded-full border border-indigo-100 dark:border-indigo-900 shadow-sm transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
-                >
-                  <span>↩</span>
-                  <span>回归我的配置: {userInfo.mbti}</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="mbti-personality-tab-container">
-      {/* 核心滚动容器：包含 Banner 和 内容，确保进入时看到顶部 */}
-      <div className="mbti-personality-tab-scroll-container hide-scrollbar scroll-performance-optimized -webkit-overflow-scrolling-touch">
-        {/* Banner区域 - 随页面滚动 */}
-        <div className="mbti-personality-tab-banner shadow-lg relative overflow-hidden flex-shrink-0">
-          {/* 自然渐变背景 */}
-          <div className="absolute inset-0 nature-gradient z-0"></div>
-
-          {/* 自然元素装饰 */}
-          <div className="absolute top-2 left-2 w-12 h-12 opacity-20">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <path d="M30,40 Q50,20 70,40" fill="none" stroke="currentColor" strokeWidth="1" strokeOpacity="0.6" />
-              <circle cx="30" cy="40" r="2" fill="currentColor" className="animate-pulse" />
-              <circle cx="50" cy="20" r="1.5" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0.5s' }} />
-              <circle cx="70" cy="40" r="1.8" fill="currentColor" className="animate-pulse" style={{ animationDelay: '1s' }} />
-              <path d="M40,60 Q50,80 60,60" fill="none" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.5" />
-              <circle cx="40" cy="60" r="2.2" fill="currentColor" className="animate-pulse" style={{ animationDelay: '1.5s' }} />
-              <circle cx="60" cy="60" r="1.6" fill="currentColor" className="animate-pulse" style={{ animationDelay: '2s' }} />
-            </svg>
-          </div>
-          <div className="absolute bottom-2 right-2 w-14 h-14 opacity-20">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <path d="M20,30 Q40,10 60,30" fill="none" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
-              <circle cx="20" cy="30" r="1.8" fill="currentColor" className="animate-pulse" />
-              <circle cx="40" cy="10" r="2" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0.3s' }} />
-              <circle cx="60" cy="30" r="1.5" fill="currentColor" className="animate-pulse" style={{ animationDelay: '0.6s' }} />
-              <path d="M80,40 Q70,60 60,50" fill="none" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.4" />
-            </svg>
-          </div>
-
-          {/* 动态自然元素效果 */}
-          <div className="absolute inset-0 overflow-hidden">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-2 h-2 bg-white/30 rounded-full animate-pulse"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 4}s`,
-                  opacity: Math.random() * 0.4 + 0.1
-                }}
-              />
-            ))}
-          </div>
-
-          <div className="container mx-auto px-4 py-3 md:py-6 relative z-10 text-center">
-            <h1 className="text-xl md:text-2xl font-bold mb-1 text-shadow-lg nature-title">
-              <span className="inline-block transform hover:scale-105 transition-transform duration-300">
-                MBTI人格分析
-              </span>
-            </h1>
-            <p className="text-white text-xs md:text-base opacity-95 font-medium nature-subtitle mb-2">
-              性格探索·天赋发现·成长指南
-            </p>
-            <div className="flex items-center justify-center space-x-1 md:space-x-2">
-              <span className="text-[10px] md:text-xs bg-green-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌿</span>
-              <span className="text-[10px] md:text-xs bg-emerald-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌱</span>
-              <span className="text-[10px] md:text-xs bg-teal-500/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🍃</span>
-              <span className="text-[10px] md:text-xs bg-green-400/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌳</span>
-              <span className="text-[10px] md:text-xs bg-emerald-400/60 text-white px-2 py-0.5 rounded-full border border-white/20 shadow-sm">🌲</span>
-            </div>
-            {/* 用户设置按钮 */}
-            {/*             <button
-              onClick={() => setShowMBTIModal(true)}
-              className="text-[10px] md:text-xs bg-white/20 dark:bg-gray-700/40 hover:bg-white/30 dark:hover:bg-gray-600/30 text-gray-700 dark:text-gray-200 px-3 py-1.5 rounded-full border border-white/20 dark:border-gray-600 transition-all"
-            >
-              ⚙️
-            </button> */}
-          </div>
-        </div>
-
-        {/* 内容展示区域 */}
-        <div className="mbti-personality-tab-content flex-1">
-          <div className="space-y-3 h-full">
-            {/* MBTI选择器 */}
-            {renderMBTISelector()}
-
-            {/* 加载状态 */}
-            {loading && (
-              <div className="mbti-loading-card">
-                <div className="mbti-loading-content">
-                  <div className="mbti-loading-spinner"></div>
-                  <p className="text-gray-600 dark:text-gray-300 text-xs">正在加载人格分析数据...</p>
-                </div>
-              </div>
-            )}
-
-            {/* 错误显示 */}
-            {error && (
-              <div className="mbti-error-card">
-                <div className="mbti-error-content">
-                  <p className="mbti-error-text">{error}</p>
-                  <button
-                    onClick={() => {
-                      setError(null);
-                      setDataLoaded(false);
-                    }}
-                    className="mbti-error-retry-btn"
-                  >
-                    重试
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* 人格分析内容 */}
-            {!loading && !error && personalityAnalysis && userMBTI && (
-              <div className="space-y-3">
-                {/* 基本信息卡片 */}
-                {renderBasicInfoCard()}
-
-                {/* 特质维度分布图 */}
-                {renderTraitsCoordinateMap()}
-
-                {/* 特质分析卡片 */}
-                {renderTraitsCard()}
-
-                {/* 人际关系卡片 */}
-                {renderRelationshipsCard()}
-
-                {/* 职业发展卡片 */}
-                {renderCareerCard()}
-
-                {/* 个人成长卡片 */}
-                {renderPersonalGrowthCard()}
-              </div>
-            )}
-
-            {/* 未选择MBTI时的提示 */}
-            {!loading && !error && !userMBTI && (
-              <div className="mbti-no-selection-card">
-                <div className="mbti-no-selection-content">
-                  <div className="text-3xl mb-2">🧩</div>
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">请选择MBTI类型</h3>
-                  <p className="text-gray-500 dark:text-gray-300 text-xs max-w-xs mx-auto mb-3">
-                    选择一种MBTI类型，探索人格特质与发展建议
+            
+            {/* 当前选择显示 */}
+            {userMBTI && (
+              <div className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-700 dark:text-purple-300 text-sm">
+                      当前分析类型：<span className="font-bold">{userMBTI}</span>
+                      {userMBTI === userInfo.mbti && (
+                        <span className="ml-2 text-green-600 dark:text-green-400">（来自用户配置）</span>
+                      )}
                     </p>
-                  <div className="mbti-no-selection-button-grid">
-                    {mbtiList.slice(0, 4).map(mbti => {
-                      const typeData = mbtiTypes.find(t => t.type === mbti);
-                      return (
-                        <button
-                          key={mbti}
-                          onClick={() => handleMBTIChange(mbti)}
-                          className="px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 hover:shadow"
-                          style={{
-                            backgroundColor: typeData?.color,
-                            color: 'white'
-                          }}
-                        >
-                          {mbti}
-                        </button>
-                      );
-                    })}
+                    <p className="text-purple-600 dark:text-purple-400 text-xs mt-1">
+                      💡 临时选择仅用于本次查询，不会保存配置
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    {userMBTI !== userInfo.mbti && userInfo.mbti && (
+                      <button
+                        onClick={() => handleMBTIChange(userInfo.mbti)}
+                        className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
+                      >
+                        恢复用户配置
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             )}
           </div>
+          
+          {/* 类型比较选择器 */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">
+              选择要比较的MBTI类型（可选）：
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {allMBTIs
+                .filter(mbti => mbti !== userMBTI)
+                .slice(0, 8)
+                .map((mbti) => {
+                  const typeData = mbtiTypes.find(t => t.type === mbti);
+                  return (
+                    <button
+                      key={mbti}
+                      onClick={() => setComparisonType(comparisonType === mbti ? '' : mbti)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                        comparisonType === mbti
+                          ? 'ring-2 ring-offset-1'
+                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                      style={{
+                        backgroundColor: comparisonType === mbti ? typeData?.color : undefined,
+                        color: comparisonType === mbti ? 'white' : undefined
+                      }}
+                    >
+                      <span className="mr-1">{typeData?.icon}</span>
+                      {mbti}
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
         </div>
-      </div>
+      </Card>
+    );
+  };
 
-      {/* MBTI设置模态框 */}
+
+
+
+
+
+  // 渲染名人示例卡片
+  const renderFamousExamplesCard = () => {
+    if (!personalityAnalysis?.famousExamples) return null;
+
+    const { examples, inspiration } = personalityAnalysis.famousExamples;
+    const typeData = mbtiTypes.find(t => t.type === userMBTI);
+
+    return (
+      <Card title="知名人物" className="mb-6">
+        <div className="space-y-6">
+          {/* 名人列表 */}
+          <div>
+            <h3 className="text-lg font-semibold text-amber-700 dark:text-amber-300 mb-4 flex items-center">
+              <span className="mr-2">⭐</span> {typeData?.name}类型的知名人物
+            </h3>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {examples.map((person, index) => (
+                <div key={index} className="bg-amber-50 dark:bg-amber-900 dark:bg-opacity-20 p-4 rounded-lg border border-amber-100 dark:border-amber-800">
+                  <div className="font-medium text-amber-800 dark:text-amber-300 mb-1">{person}</div>
+                  <div className="text-sm text-gray-600 dark:text-white">代表性{typeData?.name}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 启发 */}
+          <div>
+            <h3 className="text-lg font-semibold text-yellow-700 dark:text-yellow-300 mb-3 flex items-center">
+              <span className="mr-2">💫</span> 启发
+            </h3>
+            <p className="text-gray-700 dark:text-white bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 p-4 rounded-lg">
+              {inspiration}
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
+  // 渲染类型比较卡片
+  const renderComparisonCard = () => {
+    if (!comparisonType || !personalityAnalysis) return null;
+    
+    const currentTypeData = mbtiTypes.find(t => t.type === userMBTI);
+    const compareTypeData = mbtiTypes.find(t => t.type === comparisonType);
+    
+    if (!currentTypeData || !compareTypeData) return null;
+    
+    // 找到共同优势和差异
+    const commonStrengths = currentTypeData.strengths.filter(strength => 
+      compareTypeData.strengths.includes(strength)
+    ).slice(0, 3);
+    
+    const uniqueStrengths = currentTypeData.strengths.filter(strength => 
+      !compareTypeData.strengths.includes(strength)
+    ).slice(0, 3);
+    
+    const compareUniqueStrengths = compareTypeData.strengths.filter(strength => 
+      !currentTypeData.strengths.includes(strength)
+    ).slice(0, 3);
+    
+    return (
+      <Card title={`类型比较：${userMBTI} vs ${comparisonType}`} className="mb-6">
+        <div className="space-y-6">
+          {/* 类型基本信息比较 */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="text-center p-4 rounded-xl" style={{ backgroundColor: `${currentTypeData.color}20`, border: `1px solid ${currentTypeData.color}` }}>
+              <div className="text-3xl mb-2">{currentTypeData.icon}</div>
+              <h3 className="text-xl font-bold mb-1" style={{ color: currentTypeData.color }}>{currentTypeData.type}</h3>
+              <p className="text-sm text-gray-600 dark:text-white">{currentTypeData.name}</p>
+              <p className="text-xs text-gray-500 dark:text-white mt-2">{currentTypeData.description}</p>
+            </div>
+            
+            <div className="text-center p-4 rounded-xl" style={{ backgroundColor: `${compareTypeData.color}20`, border: `1px solid ${compareTypeData.color}` }}>
+              <div className="text-3xl mb-2">{compareTypeData.icon}</div>
+              <h3 className="text-xl font-bold mb-1" style={{ color: compareTypeData.color }}>{compareTypeData.type}</h3>
+              <p className="text-sm text-gray-600 dark:text-white">{compareTypeData.name}</p>
+              <p className="text-xs text-gray-500 dark:text-white mt-2">{compareTypeData.description}</p>
+            </div>
+          </div>
+          
+          {/* 共同优势 */}
+          {commonStrengths.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-3">
+                🤝 共同优势
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {commonStrengths.map((strength, index) => (
+                  <span 
+                    key={index}
+                    className="px-3 py-1.5 bg-green-100 dark:bg-green-900 rounded-full text-sm text-gray-700 dark:text-white"
+                  >
+                    {strength}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* 独特优势比较 */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-3" style={{ color: currentTypeData.color }}>
+                {currentTypeData.type} 的独特优势
+              </h3>
+              <ul className="space-y-2">
+                {uniqueStrengths.map((strength, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0" style={{ backgroundColor: currentTypeData.color }}></span>
+                    <span className="text-gray-700 dark:text-white">{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-3" style={{ color: compareTypeData.color }}>
+                {compareTypeData.type} 的独特优势
+              </h3>
+              <ul className="space-y-2">
+                {compareUniqueStrengths.map((strength, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0" style={{ backgroundColor: compareTypeData.color }}></span>
+                    <span className="text-gray-700 dark:text-white">{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          {/* 比较建议 */}
+          <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-lg">
+            <p className="text-sm text-gray-700 dark:text-white">
+              <span className="font-semibold" style={{ color: currentTypeData.color }}>{currentTypeData.type}</span> 和 
+              <span className="font-semibold" style={{ color: compareTypeData.color }}> {compareTypeData.type}</span> 
+              在沟通和合作时可以相互学习。{currentTypeData.type}可以向{compareTypeData.type}学习{compareUniqueStrengths[0] || '不同的优势'}，而{compareTypeData.type}则可以借鉴{currentTypeData.type}的{uniqueStrengths[0] || '独特优势'}。
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
+
+  return (
+    <div className={`space-y-6 ${theme === 'dark' ? 'dark' : ''}`}>
+      {/* 标题区域 */}
+      <Card>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+            🧠 MBTI 16型人格解析
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-white max-w-2xl mx-auto">
+            深入了解16种人格类型的特质、优势、职业发展和人际关系建议。
+            人格类型不是限制，而是了解自我和他人、促进个人成长的工具。
+          </p>
+        </div>
+      </Card>
+
+      {/* MBTI选择器 */}
+      {renderMBTISelector()}
+
+      {/* 加载状态 */}
+      {loading && (
+        <Card>
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-white text-sm">正在加载人格分析数据...</p>
+          </div>
+        </Card>
+      )}
+
+      {/* 错误显示 */}
+      {error && (
+        <Card>
+          <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-4">
+            <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                setDataLoaded(false);
+              }}
+              className="mt-2 text-xs bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 px-3 py-1 rounded hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
+            >
+              重试
+            </button>
+          </div>
+        </Card>
+      )}
+
+      {/* 人格分析内容 */}
+      {!loading && !error && personalityAnalysis && userMBTI && (
+        <div className="space-y-6">
+          {/* 类型比较卡片 */}
+          {comparisonType && renderComparisonCard()}
+                    
+          {/* 基本信息卡片 */}
+          {renderBasicInfoCard()}
+                    
+          {/* 特质维度分布图 */}
+          {renderTraitsCoordinateMap()}
+                    
+          {/* 特质分析卡片 */}
+          {renderTraitsCard()}
+                    
+          {/* 人际关系卡片 */}
+          {renderRelationshipsCard()}
+                    
+          {/* 职业发展卡片 */}
+          {renderCareerCard()}
+                    
+          {/* 个人成长卡片 */}
+          {renderPersonalGrowthCard()}
+                    
+          {/* 名人示例卡片 */}
+          {renderFamousExamplesCard()}
+                    
+          {/* 底部信息 */}
+          <Card>
+            <div className="text-center text-gray-500 dark:text-white text-xs">
+              <p className="mb-2">MBTI®是Myers-Briggs Type Indicator的注册商标，本页面内容仅供学习和参考使用。</p>
+              <p>人格类型理论帮助我们理解个体差异，但每个人都是独特且不断发展变化的。</p>
+              <p className="mt-2">数据更新时间：{new Date().toLocaleString()}</p>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 未选择MBTI时的提示 */}
+      {!loading && !error && !userMBTI && (
+        <Card>
+          <div className="text-center py-12">
+            <div className="text-5xl mb-4">🧩</div>
+            <h3 className="text-xl font-semibold text-gray-700 dark:text-white mb-3">请选择MBTI类型</h3>
+            <p className="text-gray-500 dark:text-white text-sm max-w-md mx-auto mb-6">
+              从上方选择一种MBTI类型，开始探索人格特质、优势和发展建议
+            </p>
+            <div className="inline-flex flex-wrap gap-2 justify-center">
+              {mbtiList.slice(0, 4).map(mbti => {
+                const typeData = mbtiTypes.find(t => t.type === mbti);
+                return (
+                  <button
+                    key={mbti}
+                    onClick={() => handleMBTIChange(mbti)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow"
+                    style={{ 
+                      backgroundColor: typeData?.color,
+                      color: 'white'
+                    }}
+                  >
+                    {mbti}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

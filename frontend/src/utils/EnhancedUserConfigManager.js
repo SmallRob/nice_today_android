@@ -35,6 +35,8 @@ const DEFAULT_CONFIG = Object.freeze({
   mbti: 'INFP',
   nameScore: null,
   bazi: null,
+  temperament: null,  // 气质类型
+  temperamentScores: null, // 气质得分详情
   isused: false,
   // 新增字段：农历日期和真太阳时
   lunarBirthDate: null, // 农历出生日期，格式："辛丑年 八月 初四"
@@ -605,6 +607,21 @@ class EnhancedUserConfigManager {
         this.notifyListeners();
         console.log('监听器已通知');
 
+        // 如果更新了出生相关字段，同步到缓存
+        const birthRelatedUpdates = [
+          'birthDate', 'birthTime', 'birthLocation',
+          'lunarBirthDate', 'trueSolarTime', 'bazi'
+        ].some(field => updates.hasOwnProperty(field));
+
+        if (birthRelatedUpdates) {
+          try {
+            baziCacheManager.syncConfigBaziToCache(updatedConfig);
+            console.log('配置更新后八字信息已同步到缓存', updatedConfig.nickname);
+          } catch (cacheError) {
+            console.warn('配置更新后八字信息同步到缓存失败:', cacheError);
+          }
+        }
+
         operationLogger.log('success', 'UPDATE_SUCCESS', {
           operationId,
           index,
@@ -649,6 +666,22 @@ class EnhancedUserConfigManager {
             // 恢复成功，保存并通知
             await this.saveConfigsToStorage();
             this.notifyListeners();
+
+            // 如果恢复后有出生相关字段更新，同步到缓存
+            const recoveryConfig = recoveryResult.node;
+            const birthRelatedUpdates = [
+              'birthDate', 'birthTime', 'birthLocation',
+              'lunarBirthDate', 'trueSolarTime', 'bazi'
+            ].some(field => recoveryConfig.hasOwnProperty(field));
+
+            if (birthRelatedUpdates) {
+              try {
+                baziCacheManager.syncConfigBaziToCache(recoveryConfig);
+                console.log('恢复后八字信息已同步到缓存', recoveryConfig.nickname);
+              } catch (cacheError) {
+                console.warn('恢复后八字信息同步到缓存失败:', cacheError);
+              }
+            }
 
             operationLogger.log('success', 'RECOVERY_SUCCESS', {
               operationId,
@@ -809,6 +842,17 @@ class EnhancedUserConfigManager {
 
       // 通知监听器
       this.notifyListeners();
+
+      // 同步八字信息到缓存
+      const updatedConfig = this.configs[configIndex];
+      if (updatedConfig) {
+        try {
+          baziCacheManager.syncConfigBaziToCache(updatedConfig);
+          console.log('八字信息已同步到缓存', nickname);
+        } catch (cacheError) {
+          console.warn('八字信息同步到缓存失败:', cacheError);
+        }
+      }
 
       console.log('八字信息更新成功', nickname);
       return true;
