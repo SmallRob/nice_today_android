@@ -217,7 +217,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className={`app-container dashboard-page-wrapper ${isFeaturesExpanded ? 'features-expanded' : ''}`}>
+    <div className={`dashboard-page-wrapper ${isFeaturesExpanded ? 'features-expanded' : ''}`}>
       {/* 固定头部区域 */}
       <div className={`fixed-height-container ${isFeaturesExpanded ? 'collapsed' : ''}`}>
         <div className="collapsible-header-content">
