@@ -611,15 +611,15 @@ const BaziPage = () => {
             </h3>
 
             {/* 八字展示 */}
-            <div className="grid grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-4 gap-2 mb-0">
               {['年柱', '月柱', '日柱', '时柱'].map((title, i) => (
-                <div key={i} className="flex flex-col items-center">
-                  <span className={`text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{title}</span>
+                <div key={i} className="flex flex-col items-center p-1">
+                  <span className={`text-xs mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{title}</span>
                   <div className={`w-full aspect-[4/5] flex flex-col items-center justify-center rounded-lg border-2 transition-all ${
                     i === 2 ? 'bg-amber-500 border-amber-400 text-white shadow-lg scale-105' : 
                     theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-100 text-gray-800'
                   }`}>
-                    <span className="text-xl md:text-2xl font-bold tracking-widest flex flex-col items-center leading-tight">
+                    <span className="text-lg md:text-xl font-bold tracking-widest flex flex-col items-center leading-tight">
                       <span>{baziData.pillars[i].charAt(0)}</span>
                       <span>{baziData.pillars[i].charAt(1)}</span>
                     </span>

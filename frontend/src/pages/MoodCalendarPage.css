@@ -12,34 +12,50 @@
 @media (max-width: 768px) {
   .mood-calendar-page {
     padding-bottom: env(safe-area-inset-bottom, 20px);
+    overflow-x: hidden;
+    width: 100vw;
   }
   
   .mood-calendar-page .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-bottom: 1rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    padding-bottom: 0.5rem;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
   
   /* 调整日历网格在小屏幕上的大小 */
   .mood-calendar-page .min-h-20 {
-    min-height: 3rem;
-    padding: 0.25rem;
+    min-height: 2rem;
+    padding: 0.05rem;
+    font-size: 0.65rem;
+    overflow: hidden;
+    flex: 0 0 14.2857%; /* 确保7列网格不换行 */
+    max-width: 14.2857%;
+  }
+  
+  .mood-calendar-page .text-xs {
+    font-size: 0.75rem;
   }
   
   .mood-calendar-page .text-sm {
+    font-size: 0.8rem;
+  }
+  
+  .mood-calendar-page .text-base {
     font-size: 0.875rem;
   }
   
   .mood-calendar-page .text-lg {
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
   
   .mood-calendar-page .text-xl {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
   
   .mood-calendar-page .text-2xl {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
   
   /* 调整心情选择器在小屏幕上的显示 */

@@ -178,18 +178,18 @@ const BiorhythmStatusCard = ({ onClick }) => {
 
         {/* 三个节律值 */}
         {biorhythmData && (
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="text-center p-1 bg-white bg-opacity-10 rounded">
-              <div className="text-green-300 font-bold">{Math.round(biorhythmData.physical)}</div>
-              <div>体力</div>
+          <div className="grid grid-cols-3 gap-1 text-xs">
+            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
+              <div className="text-green-300 font-bold truncate">{Math.round(biorhythmData.physical)}</div>
+              <div className="truncate">体力</div>
             </div>
-            <div className="text-center p-1 bg-white bg-opacity-10 rounded">
-              <div className="text-blue-300 font-bold">{Math.round(biorhythmData.emotional)}</div>
-              <div>情绪</div>
+            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
+              <div className="text-blue-300 font-bold truncate">{Math.round(biorhythmData.emotional)}</div>
+              <div className="truncate">情绪</div>
             </div>
-            <div className="text-center p-1 bg-white bg-opacity-10 rounded">
-              <div className="text-purple-300 font-bold">{Math.round(biorhythmData.intellectual)}</div>
-              <div>智力</div>
+            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
+              <div className="text-purple-300 font-bold truncate">{Math.round(biorhythmData.intellectual)}</div>
+              <div className="truncate">智力</div>
             </div>
           </div>
         )}

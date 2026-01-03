@@ -5,7 +5,7 @@ const HuangliPage = () => {
   const { theme } = useTheme();
 
   return (
-    <div className={`min-h-screen ${
+    <div className={`min-h-screen pb-safe-bottom ${
       theme === 'dark' 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50'
@@ -31,7 +31,7 @@ const HuangliPage = () => {
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-1 py-6 max-w-4xl">
+      <div className="container mx-auto px-1 py-6 max-w-4xl pb-safe-bottom">
         {/* <div className="mb-6">
           <h2 className={`text-2xl font-bold mb-2 ${
             theme === 'dark' ? 'text-white' : 'text-gray-800'

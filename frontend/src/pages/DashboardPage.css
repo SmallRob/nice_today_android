@@ -4,8 +4,8 @@
 
 /* 主页面容器 - 统一边距设置 */
 .dashboard-page-wrapper {
-  padding-left: 5px;
-  padding-right: 5px;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 /* 固定头部容器 - 禁止滚动 */

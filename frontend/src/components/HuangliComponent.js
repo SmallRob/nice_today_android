@@ -184,7 +184,7 @@ const HuangliComponent = () => {
   const calendarDays = getCalendarDays();
 
   return (
-    <div className={`rounded-xl shadow-lg ${
+    <div className={`rounded-xl shadow-lg overflow-hidden ${
       theme === 'dark' 
         ? 'bg-gray-800/90 backdrop-blur-sm border border-gray-700' 
         : 'bg-white/90 backdrop-blur-sm border border-gray-200'
@@ -233,46 +233,46 @@ const HuangliComponent = () => {
       </div>
 
       {/* 月历视图 - 默认显示 */}
-      <div className="p-3">
+      <div className="p-3 overflow-hidden">
         {/* 月份导航 */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <button
             onClick={() => changeMonth(-1)}
-            className={`p-1.5 rounded-lg ${
+            className={`p-1 rounded-lg ${
               theme === 'dark'
                 ? 'text-gray-300 hover:bg-gray-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className={`text-sm font-semibold ${
+          <div className={`text-xs sm:text-sm font-semibold ${
             theme === 'dark' ? 'text-white' : 'text-gray-800'
           }`}>
             {formatMonth(currentMonth)}
           </div>
           <button
             onClick={() => changeMonth(1)}
-            className={`p-1.5 rounded-lg ${
+            className={`p-1 rounded-lg ${
               theme === 'dark'
                 ? 'text-gray-300 hover:bg-gray-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
 
         {/* 星期标题 */}
-        <div className="grid grid-cols-7 gap-0.5 mb-1">
+        <div className="grid grid-cols-7 gap-0.5 mb-1 overflow-hidden">
           {['日', '一', '二', '三', '四', '五', '六'].map((day, index) => (
             <div
               key={index}
-              className={`text-center text-[0.7rem] font-medium py-1 ${
+              className={`text-center text-[0.6rem] font-medium py-0.5 ${
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
               }`}
             >
@@ -282,12 +282,12 @@ const HuangliComponent = () => {
         </div>
 
         {/* 日期网格 - 紧凑版 */}
-        <div className="grid grid-cols-7 gap-0.5">
+        <div className="grid grid-cols-7 gap-0.5 w-full overflow-hidden">
           {calendarDays.map((day, index) => (
             <div
               key={index}
               onClick={() => selectDate(day.date)}
-              className={`relative p-1 text-[0.7rem] rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center ${
+              className={`relative p-0.5 text-[0.6rem] rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 ${
                 day.isToday
                   ? theme === 'dark'
                     ? 'bg-blue-600 text-white'
@@ -304,18 +304,18 @@ const HuangliComponent = () => {
                     ? 'text-gray-500 hover:bg-gray-800'
                     : 'text-gray-400 hover:bg-gray-50'
               }`}
-              style={{ minHeight: '2.2rem' }}
+              style={{ minHeight: '1.8rem' }}
             >
-              <div className="font-medium text-center">{day.date.getDate()}</div>
-              <div className="text-[0.6rem] opacity-70 text-center truncate whitespace-nowrap">
+              <div className="font-medium text-center truncate w-full">{day.date.getDate()}</div>
+              <div className="text-[0.5rem] opacity-70 text-center truncate w-full whitespace-nowrap">
                 {day.huangli?.lunarDateShort || ''}
               </div>
               
               {/* 吉凶指示器 */}
               {day.huangli && day.huangli.auspiciousness && (
-                <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full">
+                <div className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full">
                   <div 
-                    className={`w-1.5 h-1.5 rounded-full ${
+                    className={`w-1 h-1 rounded-full ${
                       day.huangli.auspiciousness.level === '大吉' ? 'bg-red-500'
                       : day.huangli.auspiciousness.level === '吉' ? 'bg-green-500'
                       : day.huangli.auspiciousness.level === '平' ? 'bg-gray-400'
@@ -333,7 +333,7 @@ const HuangliComponent = () => {
 
       {/* 黄历详情 - 重点展示禁忌 */}
       {huangliData && (
-        <div className="p-3">
+        <div className="p-3 overflow-hidden">
           {/* 忌做之事 - 重点突出 */}
           <div className="mb-3">
             <h3 className={`text-sm sm:text-base font-semibold mb-2 flex items-center ${
@@ -341,11 +341,11 @@ const HuangliComponent = () => {
             }`}>
               <span className="mr-2">❌</span> 今日禁忌
             </h3>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 min-w-0">
               {huangliData.ji.map((item, index) => (
                 <span
                   key={index}
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  className={`px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
                     theme === 'dark'
                       ? 'bg-red-900/30 text-red-300 border border-red-800'
                       : 'bg-red-100 text-red-700 border border-red-200'
@@ -364,11 +364,11 @@ const HuangliComponent = () => {
             }`}>
               <span className="mr-2">✅</span> 宜做之事
             </h3>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 min-w-0">
               {huangliData.yi.map((item, index) => (
                 <span
                   key={index}
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  className={`px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
                     theme === 'dark'
                       ? 'bg-green-900/30 text-green-300 border border-green-800'
                       : 'bg-green-100 text-green-700 border border-green-200'
@@ -381,7 +381,7 @@ const HuangliComponent = () => {
           </div>
 
           {/* 详细信息 */}
-          <div className={`p-3 rounded-lg ${
+          <div className={`p-3 rounded-lg overflow-hidden ${
             theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'
           }`}>
             <h3 className={`text-sm sm:text-base font-semibold mb-2 ${
@@ -389,36 +389,36 @@ const HuangliComponent = () => {
             }`}>
               📊 详细信息
             </h3>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
+            <div className="grid grid-cols-2 gap-2 text-xs min-w-0">
+              <div className="min-w-0">
                 <span className={`font-medium ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                 }`}>五行:</span>
-                <span className={`ml-1 ${
+                <span className={`ml-1 truncate ${
                   theme === 'dark' ? 'text-amber-300' : 'text-amber-600'
                 }`}>{huangliData.wuxing}</span>
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className={`font-medium ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                 }`}>值日:</span>
-                <span className={`ml-1 ${
+                <span className={`ml-1 truncate ${
                   theme === 'dark' ? 'text-amber-300' : 'text-amber-600'
                 }`}>{huangliData.zhiri}</span>
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className={`font-medium ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                 }`}>冲煞:</span>
-                <span className={`ml-1 ${
+                <span className={`ml-1 truncate ${
                   theme === 'dark' ? 'text-amber-300' : 'text-amber-600'
                 }`}>{huangliData.chongsha}</span>
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className={`font-medium ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                 }`}>彭祖:</span>
-                <span className={`ml-1 ${
+                <span className={`ml-1 truncate ${
                   theme === 'dark' ? 'text-amber-300' : 'text-amber-600'
                 }`}>{huangliData.pengzu}</span>
               </div>
@@ -426,12 +426,12 @@ const HuangliComponent = () => {
             
             {/* 吉凶等级 */}
             <div className="mt-2 pt-2 border-t border-gray-300/30">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between min-w-0">
                 <span className={`font-medium text-xs ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                 }`}>吉凶等级:</span>
-                <div className="flex items-center">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                <div className="flex items-center min-w-0">
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold flex-shrink-0 ${
                     huangliData.auspiciousness.level === '大吉' 
                       ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
                       : huangliData.auspiciousness.level === '吉'
@@ -444,7 +444,7 @@ const HuangliComponent = () => {
                   }`}>
                     {huangliData.auspiciousness.level}
                   </span>
-                  <span className={`ml-1 text-xs ${
+                  <span className={`ml-1 text-xs flex-shrink-0 ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                   }`}>
                     ({huangliData.auspiciousness.score})
@@ -469,7 +469,7 @@ const HuangliComponent = () => {
           </div>
 
           {/* 择吉建议 */}
-          <div className={`mt-3 p-3 rounded-lg ${
+          <div className={`mt-3 p-3 rounded-lg overflow-hidden ${
             theme === 'dark' ? 'bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-800/50' : 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200'
           }`}>
             <h3 className={`text-sm sm:text-base font-semibold mb-1 flex items-center ${
@@ -477,7 +477,7 @@ const HuangliComponent = () => {
             }`}>
               <span className="mr-2">💡</span> 择吉建议
             </h3>
-            <p className={`text-xs ${
+            <p className={`text-xs truncate ${
               theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
             }`}>
               今日{huangliData.suitable}为佳，{huangliData.avoid}为忌。建议在吉时进行重要活动，避开凶时。

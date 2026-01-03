@@ -613,12 +613,12 @@ const MBTIPersonalityTabHome = () => {
     const typeData = mbtiTypes.find(t => t.type === type);
 
     return (
-      <Card className="mb-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+      <Card className="mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
             {/* 图标和类型 */}
             <div 
-              className="flex-shrink-0 w-24 h-24 rounded-full flex items-center justify-center text-4xl shadow-lg"
+              className="flex-shrink-0 w-20 h-20 rounded-full flex items-center justify-center text-3xl shadow-lg"
               style={{ background: typeData?.bgGradient || color }}
             >
               {icon}
