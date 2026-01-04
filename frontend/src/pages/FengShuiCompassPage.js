@@ -97,8 +97,8 @@ const FengShuiCompassPage = () => {
                         (position) => {
                             if (position) {
                                 setLocation({
-                                    lat: position.coords.latitude.toFixed(4),
-                                    lng: position.coords.longitude.toFixed(4),
+                                    lat: position.coords.latitude ? position.coords.latitude.toFixed(4) : null,
+                                    lng: position.coords.longitude ? position.coords.longitude.toFixed(4) : null,
                                     alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
                                 });
                             }
@@ -110,8 +110,8 @@ const FengShuiCompassPage = () => {
                                 navigator.geolocation.watchPosition(
                                     (position) => {
                                         setLocation({
-                                            lat: position.coords.latitude.toFixed(4),
-                                            lng: position.coords.longitude.toFixed(4),
+                                            lat: position.coords.latitude ? position.coords.latitude.toFixed(4) : null,
+                                            lng: position.coords.longitude ? position.coords.longitude.toFixed(4) : null,
                                             alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
                                         });
                                     },
@@ -128,8 +128,8 @@ const FengShuiCompassPage = () => {
                         navigator.geolocation.watchPosition(
                             (position) => {
                                 setLocation({
-                                    lat: position.coords.latitude.toFixed(4),
-                                    lng: position.coords.longitude.toFixed(4),
+                                    lat: position.coords.latitude ? position.coords.latitude.toFixed(4) : null,
+                                    lng: position.coords.longitude ? position.coords.longitude.toFixed(4) : null,
                                     alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
                                 });
                             },
@@ -145,8 +145,8 @@ const FengShuiCompassPage = () => {
                     navigator.geolocation.watchPosition(
                         (position) => {
                             setLocation({
-                                lat: position.coords.latitude.toFixed(4),
-                                lng: position.coords.longitude.toFixed(4),
+                                lat: position.coords.latitude ? position.coords.latitude.toFixed(4) : null,
+                                lng: position.coords.longitude ? position.coords.longitude.toFixed(4) : null,
                                 alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
                             });
                         },
@@ -157,41 +157,50 @@ const FengShuiCompassPage = () => {
             }
         };
         
-        initGeolocation();
-
-        // Device Orientation
+        // Device Orientation (Compass)
         const handleOrientation = (event) => {
             let compass = null;
 
             if (event.webkitCompassHeading) {
                 // iOS
                 compass = event.webkitCompassHeading;
-            } else if (event.absolute || event.alpha !== null) {
-                // Android/Standard
-                // Some devices report alpha as 0-360 starting from North, some are relative.
-                // We prefer absolute if available.
-                compass = (360 - event.alpha) % 360;
+            } else if (event.absolute || (event.alpha !== null && event.alpha !== undefined)) {
+                // Android/Standard - use alpha which represents compass direction
+                // alpha is the compass direction in degrees (0-359)
+                compass = event.alpha;
             }
 
             if (compass !== null && compass !== undefined) {
-                // Smoothing
+                // Normalize compass heading to 0-360 range
+                const normalizedCompass = (compass + 360) % 360;
+                
+                // Apply smoothing to reduce jitter
                 setHeading(prev => {
-                    const diff = ((compass - prev + 180 + 360) % 360) - 180;
-                    return (prev + diff * 0.2 + 360) % 360;
+                    // Calculate the shortest angular distance
+                    let diff = normalizedCompass - prev;
+                    if (diff > 180) diff -= 360;
+                    if (diff < -180) diff += 360;
+                    
+                    // Apply smoothing factor (0.3 for balance between responsiveness and smoothness)
+                    const smoothed = (prev + diff * 0.3 + 360) % 360;
+                    return smoothed;
                 });
             }
         };
 
         const eventType = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
-
-        // Check request permission (iOS 13+)
+        
+        // Check request permission (iOS 13+ and some Android browsers)
         if (typeof DeviceOrientationEvent !== 'undefined' &&
             typeof DeviceOrientationEvent.requestPermission === 'function') {
-            // Must be triggered by user interaction
+            // Permission must be requested via user gesture
+            // We'll handle this in the requestCompassAccess function
         } else {
-            setPermissionGranted(true);
+            // Add event listener directly if no permission required
             window.addEventListener(eventType, handleOrientation, true);
         }
+
+        initGeolocation();
 
         return () => {
             window.removeEventListener(eventType, handleOrientation, true);
@@ -219,31 +228,52 @@ const FengShuiCompassPage = () => {
         // Request device orientation permission
         if (typeof DeviceOrientationEvent !== 'undefined' &&
             typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission()
-                .then((response) => {
-                    if (response === 'granted') {
-                        setPermissionGranted(true);
-                        const eventType = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
-                        window.addEventListener(eventType, (e) => {
-                            let compass = null;
-                            if (e.webkitCompassHeading) {
-                                compass = e.webkitCompassHeading;
-                            } else if (e.absolute || e.alpha !== null) {
-                                compass = (360 - e.alpha) % 360;
-                            }
-                            if (compass !== null) {
-                                setHeading(prev => {
-                                    const diff = ((compass - prev + 180 + 360) % 360) - 180;
-                                    return (prev + diff * 0.2 + 360) % 360;
-                                });
-                            }
-                        }, true);
-                    } else {
-                        alert('需要罗盘权限才能正常工作');
-                    }
-                })
-                .catch(console.error);
+            try {
+                const permissionResponse = await DeviceOrientationEvent.requestPermission();
+                if (permissionResponse === 'granted') {
+                    setPermissionGranted(true);
+                    
+                    // Add event listener after permission is granted
+                    const handleOrientation = (event) => {
+                        let compass = null;
+
+                        if (event.webkitCompassHeading) {
+                            // iOS
+                            compass = event.webkitCompassHeading;
+                        } else if (event.absolute || (event.alpha !== null && event.alpha !== undefined)) {
+                            // Android/Standard - use alpha which represents compass direction
+                            compass = event.alpha;
+                        }
+
+                        if (compass !== null && compass !== undefined) {
+                            // Normalize compass heading to 0-360 range
+                            const normalizedCompass = (compass + 360) % 360;
+                            
+                            // Apply smoothing to reduce jitter
+                            setHeading(prev => {
+                                // Calculate the shortest angular distance
+                                let diff = normalizedCompass - prev;
+                                if (diff > 180) diff -= 360;
+                                if (diff < -180) diff += 360;
+                                
+                                // Apply smoothing factor (0.3 for balance between responsiveness and smoothness)
+                                const smoothed = (prev + diff * 0.3 + 360) % 360;
+                                return smoothed;
+                            });
+                        }
+                    };
+
+                    const eventType = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
+                    window.addEventListener(eventType, handleOrientation, true);
+                } else {
+                    alert('需要罗盘权限才能正常工作');
+                }
+            } catch (error) {
+                console.error('Error requesting device orientation permission:', error);
+                alert('请求罗盘权限时发生错误: ' + error.message);
+            }
         } else {
+            // Device orientation doesn't require permission, just set the flag
             setPermissionGranted(true);
         }
     };
@@ -260,8 +290,8 @@ const FengShuiCompassPage = () => {
                     const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
                     if (position) {
                         setLocation({
-                            lat: position.coords.latitude.toFixed(4),
-                            lng: position.coords.longitude.toFixed(4),
+                            lat: position.coords.latitude ? position.coords.latitude.toFixed(4) : null,
+                            lng: position.coords.longitude ? position.coords.longitude.toFixed(4) : null,
                             alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
                         });
                     }
@@ -275,8 +305,8 @@ const FengShuiCompassPage = () => {
                         (position) => {
                             if (position) {
                                 setLocation({
-                                    lat: position.coords.latitude.toFixed(4),
-                                    lng: position.coords.longitude.toFixed(4),
+                                    lat: position.coords.latitude ? position.coords.latitude.toFixed(4) : null,
+                                    lng: position.coords.longitude ? position.coords.longitude.toFixed(4) : null,
                                     alt: position.coords.altitude ? Math.round(position.coords.altitude) : 'N/A'
                                 });
                             }
@@ -307,9 +337,34 @@ const FengShuiCompassPage = () => {
 
     // Helper to get current direction text
     const getDirectionText = (angle) => {
-        const directions = ['正北', '东北', '正东', '东南', '正南', '西南', '正西', '西北'];
-        const index = Math.round(angle / 45) % 8;
-        return directions[index];
+        // More precise direction detection for feng shui applications
+        const directions = [
+            { name: '正北', start: 337.5, end: 22.5 },  // 0° (covers -22.5° to +22.5°)
+            { name: '东北', start: 22.5, end: 67.5 },   // 45°
+            { name: '正东', start: 67.5, end: 112.5 },  // 90°
+            { name: '东南', start: 112.5, end: 157.5 }, // 135°
+            { name: '正南', start: 157.5, end: 202.5 }, // 180°
+            { name: '西南', start: 202.5, end: 247.5 }, // 225°
+            { name: '正西', start: 247.5, end: 292.5 }, // 270°
+            { name: '西北', start: 292.5, end: 337.5 }  // 315°
+        ];
+        
+        // Normalize angle to 0-360
+        const normalizedAngle = (angle + 360) % 360;
+        
+        for (const dir of directions) {
+            if (dir.start <= normalizedAngle || normalizedAngle < dir.end) {
+                if (dir.start <= normalizedAngle && normalizedAngle < dir.end) {
+                    return dir.name;
+                } else if (dir.start > dir.end && (normalizedAngle >= dir.start || normalizedAngle < dir.end)) {
+                    // Handles the wrap-around case (e.g., 337.5 to 22.5 for North)
+                    return dir.name;
+                }
+            }
+        }
+        
+        // Fallback to North
+        return '正北';
     };
 
     // Helper to get current Earthly Branch (time)
@@ -321,6 +376,13 @@ const FengShuiCompassPage = () => {
         // 23:00-01:00: 子, 01:00-03:00: 丑, etc.
         let branchIndex = Math.floor((hour + 1) / 2) % 12;
         return branches[branchIndex];
+    };
+
+    // Helper to get precise direction for display
+    const getDetailedDirection = (angle) => {
+        const directions = ['北', '北东北', '东东北', '东', '东东南', '南东南', '南', '南西南', '西西南', '西', '西西北', '北西北'];
+        const sector = Math.round((angle % 360) / 30) % 12; // 360/12 = 30 degrees per sector
+        return directions[sector] || '北';
     };
 
     // Helper to render ring items
@@ -365,7 +427,7 @@ const FengShuiCompassPage = () => {
                         {theme === 'dark' ? '☀' : '☾'}
                     </button>
                     <button className="calibration-btn" onClick={requestAccess}>
-                        {permissionGranted ? '位置权限' : '开启定位'}
+                        {permissionGranted ? '权限已获取' : '开启定位'}
                     </button>
                 </div>
                 <div className="header-title">风水罗盘</div>
@@ -374,10 +436,11 @@ const FengShuiCompassPage = () => {
             <div className="compass-info-panel">
                 <div className="direction-display">
                     <span className="direction-text">{getDirectionText(heading)}</span>
+                    <span className="detailed-direction-text">{getDetailedDirection(heading)}</span>
                     <span className="degree-text">{Math.round(heading)}°</span>
                 </div>
                 <div className="location-info">
-                    <span>海拔: {location.alt !== 'N/A' ? `${location.alt}m` : '--'}</span>
+                    <span>海拔: {location.alt !== 'N/A' && location.alt !== null ? `${location.alt}m` : '--'}</span>
                     <span>经度: {location.lng || '--'}</span>
                     <span>纬度: {location.lat || '--'}</span>
                 </div>

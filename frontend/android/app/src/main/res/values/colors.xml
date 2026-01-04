@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 启动屏幕背景色 -->
+    <color name="splash_background">#FFFFFF</color>
+    
+    <!-- 应用主色调 -->
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    
+    <!-- 白色和黑色 -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>
