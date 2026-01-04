@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserConfig } from '../contexts/UserConfigContext.js';
+import LazyHealthCard from '../components/health/LazyHealthCard.js';
 import StageHealthCard from '../components/health/StageHealthCard.js';
 import BiorhythmStatusCard from '../components/health/BiorhythmStatusCard.js';
 import AgileHealthCard from '../components/health/AgileHealthCard.js';
@@ -14,6 +15,52 @@ const HealthDashboardPage = () => {
   const navigate = useNavigate();
   const { userConfig } = useUserConfig();
   
+  // 预定义卡片配置
+  const cardConfigs = useMemo(() => [
+    {
+      id: 'stage-health',
+      component: StageHealthCard,
+      priority: 1, // 高优先级，首屏加载
+      cacheKey: 'stage-health',
+      title: '阶段养生提醒卡片'
+    },
+    {
+      id: 'biorhythm-status',
+      component: BiorhythmStatusCard,
+      priority: 1, // 高优先级，首屏加载
+      cacheKey: 'biorhythm-status',
+      title: '每日生物节律状态卡片'
+    },
+    {
+      id: 'agile-health',
+      component: AgileHealthCard,
+      priority: 2, // 中优先级，快速加载
+      cacheKey: 'agile-health',
+      title: '敏捷养生卡片'
+    },
+    {
+      id: 'seasonal-health',
+      component: SeasonalHealthCard,
+      priority: 3, // 中优先级
+      cacheKey: 'seasonal-health',
+      title: '当季养生健康提醒卡片'
+    },
+    {
+      id: 'body-metrics',
+      component: BodyMetricsRhythmCard,
+      priority: 3, // 中优先级
+      cacheKey: 'body-metrics',
+      title: '身体指标与器官节律卡片'
+    },
+    {
+      id: 'dress-diet',
+      component: DressDietCard,
+      priority: 2, // 高计算复杂度，中优先级
+      cacheKey: 'dress-diet',
+      title: '每日穿搭与饮食建议卡片'
+    }
+  ], []);
+  
   return (
     <div className="health-dashboard-page">
       {/* 页面头部 */}
@@ -26,23 +73,24 @@ const HealthDashboardPage = () => {
 
       {/* 健康身心仪表板卡片网格 */}
       <div className="health-dashboard-grid">
-        {/* 1. 阶段养生提醒卡片 */}
-        <StageHealthCard />
-
-        {/* 2. 每日生物节律状态卡片 */}
-        <BiorhythmStatusCard />
-
-        {/* 3. 敏捷养生卡片 */}
-        <AgileHealthCard />
-
-        {/* 4. 当季养生健康提醒卡片 */}
-        <SeasonalHealthCard />
-
-        {/* 5. 身体指标与器官节律卡片 */}
-        <BodyMetricsRhythmCard />
-
-        {/* 6. 每日穿搭与饮食建议卡片 */}
-        <DressDietCard />
+        {cardConfigs.map((cardConfig, index) => (
+          <LazyHealthCard
+            key={cardConfig.id}
+            component={cardConfig.component}
+            cacheKey={cardConfig.cacheKey}
+            priority={cardConfig.priority}
+            loadingComponent={
+              <div className="health-card">
+                <div className="bg-gradient-to-r from-gray-300 to-gray-400 p-4 rounded-2xl text-white shadow-lg h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                    <p className="text-sm">加载中...</p>
+                  </div>
+                </div>
+              </div>
+            }
+          />
+        ))}
       </div>
     </div>
   );

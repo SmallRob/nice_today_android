@@ -18,6 +18,7 @@
     max-width: 100%;
     min-width: 0;
     box-sizing: border-box;
+    overflow-x: hidden;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
 }
@@ -216,16 +217,34 @@
    ============================================ */
 
 .responsive-text {
-    font-size: clamp(14px, 4vw, 16px);
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
 }
 
 .responsive-heading {
-    font-size: clamp(18px, 5vw, 24px);
+    font-size: clamp(1rem, 3vw, 1.5rem);
 }
 
 .responsive-title {
-    font-size: clamp(24px, 6vw, 32px);
+    font-size: clamp(1.2rem, 4vw, 2rem);
 }
+
+/* 紧凑型响应式字体 - 优化垂直空间使用 */
+.compact-text-xs { font-size: clamp(0.6rem, 2vw, 0.75rem); }
+.compact-text-sm { font-size: clamp(0.7rem, 2.2vw, 0.875rem); }
+.compact-text-base { font-size: clamp(0.8rem, 2.5vw, 1rem); }
+.compact-text-lg { font-size: clamp(0.9rem, 2.8vw, 1.125rem); }
+.compact-text-xl { font-size: clamp(1rem, 3vw, 1.25rem); }
+
+/* 紧凑型响应式间距 - 优化垂直空间 */
+.compact-padding-xs { padding: clamp(0.1rem, 0.8vw, 0.2rem); }
+.compact-padding-sm { padding: clamp(0.15rem, 1vw, 0.3rem); }
+.compact-padding-md { padding: clamp(0.25rem, 1.5vw, 0.4rem); }
+.compact-padding-lg { padding: clamp(0.35rem, 2vw, 0.5rem); }
+
+.compact-margin-xs { margin: clamp(0.1rem, 0.8vw, 0.2rem); }
+.compact-margin-sm { margin: clamp(0.15rem, 1vw, 0.3rem); }
+.compact-margin-md { margin: clamp(0.25rem, 1.5vw, 0.4rem); }
+.compact-margin-lg { margin: clamp(0.35rem, 2vw, 0.5rem); }
 
 /* ============================================
    容器最大宽度约束

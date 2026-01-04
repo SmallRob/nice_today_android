@@ -9,6 +9,9 @@
   right: 0;
   z-index: 1000;
   width: 100%;
+  box-sizing: border-box;
+  /* 确保适配安全区域 */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* 暗黑模式 */
@@ -197,7 +200,7 @@
 
 /* iOS 安全区域适配 */
 .pb-safe-bottom {
-  padding-bottom: max(var(--safe-area-inset-bottom, 0px), env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* 动画定义 */

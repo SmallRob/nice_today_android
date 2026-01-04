@@ -52,6 +52,9 @@
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* 确保页脚适配安全区域 */
+  padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
 }
 
 .fixed-footer .footer-copyright {
@@ -135,11 +138,11 @@
 
 /* 确保底部内容不被遮挡 */
 .fixed-footer {
-  padding-bottom: calc(var(--spacing-lg) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
+  padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
 }
 
 @media (max-width: 768px) {
   .fixed-footer {
-    padding-bottom: calc(var(--spacing-md) + max(var(--safe-area-inset-bottom), env(safe-area-inset-bottom)));
+    padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 0px));
   }
 }

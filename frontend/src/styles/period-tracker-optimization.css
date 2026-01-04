@@ -1,0 +1,164 @@
+/* 经期追踪器页面优化样式 */
+
+/* 针对日历组件的优化 */
+.period-tracker-page .calendar-view {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.period-tracker-page .calendar-view .grid {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.period-tracker-page .calendar-view .grid-cols-7 {
+  grid-template-columns: repeat(7, 1fr);
+  gap: clamp(1px, 0.5vw, 3px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.period-tracker-page .calendar-view .min-h-20 {
+  min-height: clamp(2rem, 5vw, 3rem);
+  padding: clamp(0.1rem, 0.5vw, 0.25rem);
+  font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+  overflow: hidden;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.period-tracker-page .calendar-view .text-center {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.period-tracker-page .calendar-view .relative {
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+/* 针对小屏幕的优化 */
+@media (max-width: 480px) {
+  .period-tracker-page .calendar-view .grid-cols-7 {
+    gap: 1px;
+  }
+  
+  .period-tracker-page .calendar-view .min-h-20 {
+    min-height: clamp(1.5rem, 4vw, 2.5rem);
+    padding: clamp(0.05rem, 0.3vw, 0.15rem);
+    font-size: clamp(0.5rem, 1.5vw, 0.7rem);
+  }
+  
+  .period-tracker-page .calendar-view .text-sm {
+    font-size: clamp(0.5rem, 1.5vw, 0.7rem);
+  }
+  
+  .period-tracker-page .calendar-view .text-xs {
+    font-size: clamp(0.4rem, 1.2vw, 0.6rem);
+  }
+}
+
+/* 针对平板设备的优化 */
+@media (min-width: 481px) and (max-width: 768px) {
+  .period-tracker-page .calendar-view .min-h-20 {
+    min-height: clamp(1.8rem, 4.5vw, 2.8rem);
+    font-size: clamp(0.6rem, 1.6vw, 0.75rem);
+  }
+}
+
+/* 针对趋势图的优化 */
+.period-tracker-page .trend-chart {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.period-tracker-page .trend-chart svg {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* 针对卡片组件的优化 */
+.period-tracker-page .bg-white,
+.period-tracker-page .dark\\:bg-gray-800 {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* 针对网格布局的优化 */
+.period-tracker-page .grid-cols-2,
+.period-tracker-page .md\\:grid-cols-4 {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* 小屏幕下调整网格为单列 */
+@media (max-width: 640px) {
+  .period-tracker-page .md\\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .period-tracker-page .md\\:grid-cols-4 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+/* 针对按钮和交互元素的优化 */
+.period-tracker-page .p-2,
+.period-tracker-page .px-4,
+.period-tracker-page .py-2 {
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* 针对安全区域的适配 */
+.period-tracker-page .safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+.period-tracker-page .safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* 防止文本溢出 */
+.period-tracker-page .truncate,
+.period-tracker-page .whitespace-nowrap {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.period-tracker-page .break-words {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 优化弹窗组件 */
+.period-tracker-page .fixed.inset-0 {
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.period-tracker-page .max-w-md {
+  max-width: 95vw;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}

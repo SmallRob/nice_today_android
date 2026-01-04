@@ -248,7 +248,7 @@ const MoodCalendarPage = () => {
     };
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6 w-full max-w-full overflow-hidden">
         {/* 日历头部 - 月份导航 */}
         <div className="flex items-center justify-between mb-4">
           <button
@@ -322,7 +322,7 @@ const MoodCalendarPage = () => {
                 key={index}
                 onClick={() => handleDayClick(day)}
                 className={`
-                  relative min-h-20 p-1 rounded-lg transition-colors
+                  relative min-h-20 p-1 rounded-lg transition-colors w-full max-w-full overflow-hidden
                   ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900' : ''}
                   ${day.isToday ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}
                   ${day.isWeekend && !bgClass ? 'bg-gray-50 dark:bg-gray-900' : ''}
@@ -478,7 +478,7 @@ const MoodCalendarPage = () => {
   };
   
   return (
-    <div className="mood-calendar-page bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="mood-calendar-page bg-gray-50 dark:bg-gray-900 min-h-screen w-full max-w-full">
       {/* 顶部导航栏 */}
       <div className="bg-white dark:bg-gray-800 shadow-sm p-4">
         <div className="flex items-center justify-between">

@@ -8,6 +8,65 @@ const SeasonalHealthCard = ({ onClick }) => {
   const { userConfig } = useUserConfig();
   const [seasonData, setSeasonData] = useState(null);
 
+  // 从本地存储获取用户设置的缓存超时时间
+  const getUserCacheTimeout = () => {
+    const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+    return savedCacheTimeout ? parseInt(savedCacheTimeout) : 10800000; // 默认3小时
+  };
+
+  // 生成缓存键
+  const getCacheKey = () => {
+    const today = new Date().toDateString();
+    return `seasonal-health-${today}`;
+  };
+
+  // 检查缓存
+  const getCachedData = () => {
+    try {
+      const cacheKey = getCacheKey();
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { data, timestamp, date: cacheDate } = JSON.parse(cached);
+        const now = Date.now();
+        const currentDate = new Date().toDateString();
+        
+        // 检查是否跨天（隔天重新计算策略）
+        if (cacheDate !== currentDate) {
+          localStorage.removeItem(cacheKey);
+          return null;
+        }
+        
+        // 检查缓存是否超时
+        const cacheTimeout = getUserCacheTimeout();
+        if (now - timestamp < cacheTimeout) {
+          return data;
+        } else {
+          // 清除过期缓存
+          localStorage.removeItem(cacheKey);
+        }
+      }
+    } catch (e) {
+      console.warn('读取缓存失败:', e);
+    }
+    return null;
+  };
+
+  // 设置缓存
+  const setCachedData = (data) => {
+    try {
+      const cacheKey = getCacheKey();
+      const currentDate = new Date().toDateString();
+      const cacheData = {
+        data,
+        timestamp: Date.now(),
+        date: currentDate  // 添加日期信息用于隔天检查
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (e) {
+      console.warn('设置缓存失败:', e);
+    }
+  };
+
   // 获取当前季节信息
   const getCurrentSeason = () => {
     const month = new Date().getMonth() + 1;
@@ -109,7 +168,16 @@ const SeasonalHealthCard = ({ onClick }) => {
   };
 
   useEffect(() => {
-    setSeasonData(getCurrentSeason());
+    // 检查缓存
+    const cachedData = getCachedData();
+    if (cachedData) {
+      setSeasonData(cachedData);
+    } else {
+      const data = getCurrentSeason();
+      setSeasonData(data);
+      // 设置缓存
+      setCachedData(data);
+    }
   }, []);
 
   const handleClick = () => {

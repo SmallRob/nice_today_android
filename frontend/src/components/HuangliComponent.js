@@ -184,7 +184,7 @@ const HuangliComponent = () => {
   const calendarDays = getCalendarDays();
 
   return (
-    <div className={`rounded-xl shadow-lg overflow-hidden ${
+    <div className={`huangli-component rounded-xl shadow-lg overflow-hidden ${
       theme === 'dark' 
         ? 'bg-gray-800/90 backdrop-blur-sm border border-gray-700' 
         : 'bg-white/90 backdrop-blur-sm border border-gray-200'
@@ -282,12 +282,12 @@ const HuangliComponent = () => {
         </div>
 
         {/* 日期网格 - 紧凑版 */}
-        <div className="grid grid-cols-7 gap-0.5 w-full overflow-hidden">
+        <div className="grid grid-cols-7 gap-0.5 w-full max-w-full overflow-hidden">
           {calendarDays.map((day, index) => (
             <div
               key={index}
               onClick={() => selectDate(day.date)}
-              className={`relative p-0.5 text-[0.6rem] rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 ${
+              className={`relative p-0.5 text-[0.6rem] rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden ${
                 day.isToday
                   ? theme === 'dark'
                     ? 'bg-blue-600 text-white'

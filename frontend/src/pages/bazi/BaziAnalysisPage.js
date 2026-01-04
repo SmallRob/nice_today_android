@@ -146,7 +146,8 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
           }
         } catch (cacheError) {
           console.error('缓存读取失败:', cacheError);
-          setError('缓存数据读取失败');
+          // 不设置错误，继续使用其他数据源
+          console.warn('使用备用数据源加载八字信息');
         }
       }
 
@@ -245,9 +246,16 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
   useEffect(() => {
     // 防止在组件卸载后设置状态
     let isCancelled = false;
-    loadBazi().then(() => {
-      if (isCancelled) return;
-    });
+    
+    // 验证必要参数是否存在
+    if (birthDate && typeof birthDate === 'string' && birthDate.includes('-')) {
+      loadBazi().then(() => {
+        if (isCancelled) return;
+      });
+    } else {
+      // 如果缺少必要参数，设置降级数据
+      setBaziInfo(getFallbackBaziData(birthDate, birthTime));
+    }
 
     return () => {
       isCancelled = true;
@@ -693,6 +701,11 @@ const validateBaziDataConsistency = (baziData, birthDate, birthTime, birthLocati
 
     // 检查旧版格式
     if (baziData.birth?.solar?.date && baziData.birth.solar.date !== birthDate) {
+      return false;
+    }
+      
+    // 检查顶层日期字段
+    if (baziData.calculatedForDate && baziData.calculatedForDate !== birthDate) {
       return false;
     }
   }
@@ -1374,8 +1387,40 @@ const BaziAnalysisPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
+  // 确保页面加载时检查并处理八字信息
+  useEffect(() => {
+    const initializeBaziData = async () => {
+      try {
+        if (currentConfig?.birthDate) {
+          // 验证出生日期格式
+          if (typeof currentConfig.birthDate === 'string' && currentConfig.birthDate.includes('-')) {
+            console.log('验证当前配置中的八字信息');
+              
+            // 如果有现有的八字信息，验证其有效性
+            if (currentConfig.baziInfo) {
+              const isValid = validateBaziInfoStructure(currentConfig.baziInfo);
+              if (!isValid) {
+                console.log('现有八字信息无效，清除并重新计算');
+                // 清除无效的八字信息
+                const updatedConfig = { ...currentConfig };
+                delete updatedConfig.baziInfo;
+                await updateConfig(updatedConfig);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('初始化八字数据时出错:', err);
+      }
+    };
+      
+    initializeBaziData();
+  }, [currentConfig, updateConfig]);
+
   // 当用户配置发生变化时，异步后台计算八字信息
   useEffect(() => {
+    let isCancelled = false; // 防止在组件卸载后设置状态
+
     const calculateBaziInBackground = async () => {
       if (!currentConfig?.birthDate) {
         console.log('出生日期未设置，跳过八字计算');
@@ -1403,6 +1448,7 @@ const BaziAnalysisPage = () => {
         const nickname = currentConfig.nickname || 'default_user';
         if (!nickname || typeof nickname !== 'string' || nickname.trim() === '') {
           console.warn('用户昵称无效，使用默认值:', nickname);
+          return; // 如果昵称无效，直接返回，不进行计算
         }
 
         // 检查是否已有计算好的八字信息且与当前配置一致
@@ -1441,6 +1487,8 @@ const BaziAnalysisPage = () => {
           birthTime,
           birthLocation?.lng || DEFAULT_REGION.lng
         );
+
+        if (isCancelled) return; // 检查组件是否已卸载
 
         if (detailedBazi) {
           // 确保农历信息存在，如果不存在则使用LunarCalendarHelper计算
@@ -1506,6 +1554,8 @@ const BaziAnalysisPage = () => {
             }
           };
 
+          if (isCancelled) return; // 检查组件是否已卸载
+
           await updateConfig(updatedConfig);
 
           // 同步八字信息到缓存，按昵称存储
@@ -1526,11 +1576,15 @@ const BaziAnalysisPage = () => {
           }
 
           // Clear any previous error after successful calculation
-          setError(null);
+          if (!isCancelled && !error) {
+            setError(null);
+          }
         } else {
           console.warn('八字计算结果为空');
         }
       } catch (calculationError) {
+        if (isCancelled) return; // 检查组件是否已卸载
+
         console.error('后台八字计算失败:', calculationError);
         // Don't set error here as it would block the UI
         // Instead, log the error and let the UI continue to function
@@ -1542,11 +1596,15 @@ const BaziAnalysisPage = () => {
     const timer = setTimeout(() => {
       // Run in background without blocking UI
       calculateBaziInBackground().catch(error => {
+        if (isCancelled) return;
         console.error('后台计算过程中发生错误:', error);
       });
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
   }, [currentConfig, updateConfig]);
 
   // Function to trigger background recalculation

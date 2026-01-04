@@ -179,7 +179,7 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod }) =
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6 w-full max-w-full overflow-hidden">
       {/* 日历头部 - 月份导航 */}
       <div className="flex items-center justify-between mb-4">
         <button
@@ -258,7 +258,7 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod }) =
               key={index}
               onClick={() => handleDayClick(day)}
               className={`
-                relative min-h-20 p-1 rounded-lg cursor-pointer transition-colors
+                relative min-h-20 p-1 rounded-lg cursor-pointer transition-colors w-full max-w-full overflow-hidden
                 ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900' : ''}
                 ${day.isToday ? 'bg-pink-200 dark:bg-pink-900/50' : ''}
                 ${day.isWeekend && !bgClass ? 'bg-gray-50 dark:bg-gray-900' : ''}
@@ -586,7 +586,7 @@ const PeriodTrackerPage = () => {
     today >= cyclePrediction.fertileWindowStart && today <= cyclePrediction.fertileWindowEnd;
 
   return (
-    <div className={`min-h-screen pb-32 px-4 md:px-6 bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-red-900/30 ${theme}`}>
+    <div className={`period-tracker-page min-h-screen pb-32 px-4 md:px-6 bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-red-900/30 ${theme}`}>
       {/* 导航标题栏 - 优化版 */}
       <div className="bg-gradient-to-r from-pink-500/90 to-rose-600/90 text-white shadow-lg sticky top-0 z-40 backdrop-blur-md">
         <div className="container mx-auto px-1 py-3 md:py-4">

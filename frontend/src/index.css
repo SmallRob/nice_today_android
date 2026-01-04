@@ -5,6 +5,18 @@
 /* 导入全局响应式配置 */
 @import './styles/global-responsive.css';
 
+/* 导入WebView优化样式 */
+@import './styles/webview-optimization.css';
+
+/* 导入移动端布局优化样式 */
+@import './styles/mobile-layout-optimization.css';
+
+/* 导入经期追踪器优化样式 */
+@import './styles/period-tracker-optimization.css';
+
+/* 导入黄历组件优化样式 */
+@import './styles/huangli-optimization.css';
+
 @layer base {
   :root {
     /* 核心颜色系统 - 扁平化设计 */
@@ -170,6 +182,7 @@ body {
   text-size-adjust: 100%;
   /* 确保内容不被安全区域遮挡 */
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
 }
 
 /* 内容区域 - 自适应高度 */
@@ -189,6 +202,7 @@ body {
   -moz-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  box-sizing: border-box;
 }
 
 .content-area::-webkit-scrollbar {
@@ -225,6 +239,8 @@ body {
   max-width: 100vw;
   /* 确保内容不被底部安全区域遮挡 */
   padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
+  /* 确保内容区域不会被固定页脚遮挡 */
+  margin-bottom: 0;
 }
 
 /* 卡片容器 - 扁平化 */
@@ -659,6 +675,34 @@ body {
 .flex {
   display: flex;
 }
+
+/* 紧凑型响应式字体工具类 - 优化垂直空间 */
+.text-compact-xs { font-size: clamp(0.6rem, 2vw, 0.75rem); line-height: 1.2; }
+.text-compact-sm { font-size: clamp(0.7rem, 2.2vw, 0.875rem); line-height: 1.25; }
+.text-compact-base { font-size: clamp(0.8rem, 2.5vw, 1rem); line-height: 1.3; }
+.text-compact-lg { font-size: clamp(0.9rem, 2.8vw, 1.125rem); line-height: 1.35; }
+.text-compact-xl { font-size: clamp(1rem, 3vw, 1.25rem); line-height: 1.4; }
+
+/* 紧凑型响应式间距工具类 - 优化垂直空间 */
+.p-compact-xs { padding: clamp(0.1rem, 0.8vw, 0.2rem); }
+.p-compact-sm { padding: clamp(0.15rem, 1vw, 0.3rem); }
+.p-compact-md { padding: clamp(0.25rem, 1.5vw, 0.4rem); }
+.p-compact-lg { padding: clamp(0.35rem, 2vw, 0.5rem); }
+
+.m-compact-xs { margin: clamp(0.1rem, 0.8vw, 0.2rem); }
+.m-compact-sm { margin: clamp(0.15rem, 1vw, 0.3rem); }
+.m-compact-md { margin: clamp(0.25rem, 1.5vw, 0.4rem); }
+.m-compact-lg { margin: clamp(0.35rem, 2vw, 0.5rem); }
+
+.pt-compact-xs { padding-top: clamp(0.1rem, 0.8vw, 0.2rem); }
+.pb-compact-xs { padding-bottom: clamp(0.1rem, 0.8vw, 0.2rem); }
+.pl-compact-xs { padding-left: clamp(0.1rem, 0.8vw, 0.2rem); }
+.pr-compact-xs { padding-right: clamp(0.1rem, 0.8vw, 0.2rem); }
+
+.mt-compact-xs { margin-top: clamp(0.1rem, 0.8vw, 0.2rem); }
+.mb-compact-xs { margin-bottom: clamp(0.1rem, 0.8vw, 0.2rem); }
+.ml-compact-xs { margin-left: clamp(0.1rem, 0.8vw, 0.2rem); }
+.mr-compact-xs { margin-right: clamp(0.1rem, 0.8vw, 0.2rem); }
 
 .flex-row {
   flex-direction: row;

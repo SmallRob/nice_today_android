@@ -58,6 +58,22 @@
   .app-banner .container {
     padding: 12px 16px;
   }
+  
+  /* 紧凑型字体和间距优化 */
+  .dashboard-title { font-size: clamp(1.2rem, 3.5vw, 1.5rem); }
+  .dashboard-subtitle { font-size: clamp(0.7rem, 2vw, 0.85rem); }
+  .welcome-title { font-size: clamp(1.1rem, 3vw, 1.25rem); }
+  .welcome-text { font-size: clamp(0.65rem, 1.8vw, 0.8rem); }
+  .section-title { font-size: clamp(0.9rem, 2.5vw, 1.1rem); }
+  .feature-card-title { font-size: clamp(0.7rem, 2vw, 0.85rem); }
+  .feature-card-description { font-size: clamp(0.6rem, 1.7vw, 0.75rem); }
+  
+  /* 紧凑型间距优化 */
+  .dashboard-header { margin-top: 16px; margin-bottom: 16px; padding: 0 10px; }
+  .welcome-card { padding: clamp(16px, 4vw, 20px); margin-bottom: 16px; }
+  .features-header { margin: 8px 0 6px 0; padding: 0 6px; }
+  .section-title { margin: 16px 0 10px 0; }
+  .quick-actions { margin-top: 12px; margin-bottom: 12px; }
 }
 
 /* 隐藏滚动条样式 - 增强版，兼容所有主流浏览器 */

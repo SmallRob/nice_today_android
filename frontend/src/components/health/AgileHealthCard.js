@@ -19,7 +19,66 @@ const AgileHealthCard = ({ onClick }) => {
     { id: 10, title: '转腰运动', description: '疏通带脉', duration: '5分钟', category: '运动', icon: '💪', type: 'exercise' }
   ];
 
-  // 从本地存储获取任务状态
+  // 从本地存储获取用户设置的缓存超时时间
+  const getUserCacheTimeout = () => {
+    const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+    return savedCacheTimeout ? parseInt(savedCacheTimeout) : 10800000; // 默认3小时
+  };
+
+  // 生成缓存键
+  const getCacheKey = () => {
+    const today = new Date().toDateString();
+    return `agile-health-tasks-${today}`;
+  };
+
+  // 检查缓存
+  const getCachedData = () => {
+    try {
+      const cacheKey = getCacheKey();
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { tasks, timestamp, date: cacheDate } = JSON.parse(cached);
+        const now = Date.now();
+        const currentDate = new Date().toDateString();
+        
+        // 检查是否跨天（隔天重新计算策略）
+        if (cacheDate !== currentDate) {
+          localStorage.removeItem(cacheKey);
+          return null;
+        }
+        
+        // 检查缓存是否超时
+        const cacheTimeout = getUserCacheTimeout();
+        if (now - timestamp < cacheTimeout) {
+          return tasks;
+        } else {
+          // 清除过期缓存
+          localStorage.removeItem(cacheKey);
+        }
+      }
+    } catch (e) {
+      console.warn('读取缓存失败:', e);
+    }
+    return null;
+  };
+
+  // 设置缓存
+  const setCachedData = (tasks) => {
+    try {
+      const cacheKey = getCacheKey();
+      const currentDate = new Date().toDateString();
+      const cacheData = {
+        tasks,
+        timestamp: Date.now(),
+        date: currentDate  // 添加日期信息用于隔天检查
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (e) {
+      console.warn('设置缓存失败:', e);
+    }
+  };
+
+  // 从本地存储获取任务状态（带用户自定义缓存时间）
   const getStoredTasks = () => {
     try {
       const stored = localStorage.getItem('agileHealthTasks');
@@ -29,21 +88,33 @@ const AgileHealthCard = ({ onClick }) => {
     }
   };
 
-  // 从本地存储获取今日任务
+  // 从本地存储获取今日任务（带用户自定义缓存时间）
   const getStoredDailyTasks = () => {
     try {
-      const stored = localStorage.getItem('agileHealthDailyTasks');
-      const today = new Date().toDateString();
-      if (stored) {
-        const data = JSON.parse(stored);
-        // 如果不是今天的数据，则生成新任务
-        if (data.date !== today) {
+      const cacheKey = getCacheKey();
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { tasks, timestamp, date: cacheDate } = JSON.parse(cached);
+        const now = Date.now();
+        const currentDate = new Date().toDateString();
+        
+        // 检查是否跨天（隔天重新计算策略）
+        if (cacheDate !== currentDate) {
+          localStorage.removeItem(cacheKey);
           return null;
         }
-        return data.tasks;
+        
+        // 检查缓存是否超时
+        const cacheTimeout = getUserCacheTimeout();
+        if (now - timestamp < cacheTimeout) {
+          return tasks;
+        } else {
+          // 清除过期缓存
+          localStorage.removeItem(cacheKey);
+        }
       }
-    } catch {
-      return null;
+    } catch (e) {
+      console.warn('读取缓存失败:', e);
     }
     return null;
   };
@@ -57,15 +128,23 @@ const AgileHealthCard = ({ onClick }) => {
     }
   };
 
-  // 保存今日任务到本地存储
+  // 保存今日任务到本地存储（带用户自定义缓存时间）
   const saveDailyTasks = (tasks) => {
     try {
-      const today = new Date().toDateString();
-      localStorage.setItem('agileHealthDailyTasks', JSON.stringify({ date: today, tasks }));
+      const cacheKey = getCacheKey();
+      const currentDate = new Date().toDateString();
+      const cacheData = {
+        tasks,
+        timestamp: Date.now(),
+        date: currentDate  // 添加日期信息用于隔天检查
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
     } catch (e) {
       console.error('保存今日任务失败:', e);
     }
   };
+
+
 
   const [dailyTasks, setDailyTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -73,7 +152,8 @@ const AgileHealthCard = ({ onClick }) => {
 
   // 初始化任务
   useEffect(() => {
-    const initTasks = () => {
+    const initTasks = async () => {
+      // 检查缓存中的任务
       let storedDailyTasks = getStoredDailyTasks();
       let storedCompletedTasks = getStoredTasks();
 
@@ -214,23 +294,23 @@ const AgileHealthCard = ({ onClick }) => {
               }}
             >
               <div className="flex items-center">
-                <span className="mr-2 text-sm">{task.icon}</span>
-                <div>
-                  <div className="font-medium">{task.title}</div>
-                  <div className="opacity-75">{task.duration}</div>
-                </div>
-              </div>
-              <div className="flex items-center">
                 <input
                   type="checkbox"
                   checked={completedTasks.includes(task.id)}
                   onChange={() => toggleTaskCompletion(task.id)}
-                  className="w-4 h-4 rounded bg-white bg-opacity-20 border-white border-opacity-30 text-green-500 focus:ring-green-500"
+                  className="w-4 h-4 rounded bg-white bg-opacity-20 border-white border-opacity-30 text-green-500 focus:ring-green-500 mr-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleTaskCompletion(task.id);
                   }}
                 />
+                <div>
+                  <div className="font-medium flex items-center">
+                    <span className="mr-2">{task.icon}</span>
+                    {task.title}
+                  </div>
+                  <div className="opacity-75">{task.duration}</div>
+                </div>
               </div>
             </div>
           ))}

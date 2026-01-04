@@ -34,7 +34,7 @@ function SettingsPage() {
   });
   const [apiBaseUrl, setApiBaseUrl] = useState('https://nice-mcp.leansoftx.com/api');
   const [useLocalCalculation, setUseLocalCalculation] = useState(true);
-  const [cacheTimeout, setCacheTimeout] = useState(180000); // 默认3分钟
+  const [cacheTimeout, setCacheTimeout] = useState(10800000); // 默认3小时
   const [dataSyncEnabled, setDataSyncEnabled] = useState(true); // 数据同步状态
   const [isLoaded, setIsLoaded] = useState(false);
   const { showNotification } = useNotification();
@@ -564,12 +564,13 @@ function SettingsPage() {
                         onChange={handleCacheTimeoutChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       >
-                        <option value="60000">1分钟</option>
-                        <option value="120000">2分钟</option>
-                        <option value="180000">3分钟</option>
-                        <option value="300000">5分钟</option>
-                        <option value="600000">10分钟</option>
-                        <option value="1800000">30分钟</option>
+                        <option value="3600000">1小时</option>
+                        <option value="7200000">2小时</option>
+                        <option value="10800000">3小时</option>
+                        <option value="14400000">4小时</option>
+                        <option value="28800000">8小时</option>
+                        <option value="43200000">12小时</option>
+                        <option value="86400000">1天</option>
                       </select>
                     </div>
                   </div>

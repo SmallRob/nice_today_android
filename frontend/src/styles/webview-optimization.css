@@ -1,0 +1,220 @@
+/* WebView优化样式 - 防止布局异常和横向滚动 */
+
+/* 全局重置和优化 */
+* {
+  box-sizing: border-box;
+}
+
+/* 针对WebView的特殊优化 */
+body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 防止内容溢出容器 */
+html,
+body,
+#root,
+.app-container {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* 确保所有容器和子元素不超出视口宽度 */
+.container,
+.page-container,
+.content-wrapper,
+.card,
+.grid,
+.flex,
+.main-content,
+.page-root,
+.content-area {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* 针对Flexbox容器的优化 */
+.flex,
+.flex-row,
+.flex-col {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+/* 针对Grid容器的优化 */
+.grid {
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+
+/* 防止图片和媒体元素溢出 */
+img,
+video,
+iframe,
+svg {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 防止文本溢出 */
+.text-ellipsis,
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 针对移动端的响应式字体 */
+.text-xs { font-size: clamp(0.75rem, 2vw, 0.875rem); }
+.text-sm { font-size: clamp(0.875rem, 2.2vw, 1rem); }
+.text-base { font-size: clamp(1rem, 2.5vw, 1.125rem); }
+.text-lg { font-size: clamp(1.125rem, 2.8vw, 1.25rem); }
+.text-xl { font-size: clamp(1.25rem, 3vw, 1.5rem); }
+
+/* 针对移动端的响应式间距 */
+.p-1 { padding: clamp(0.25rem, 1vw, 0.3rem); }
+.p-2 { padding: clamp(0.5rem, 1.5vw, 0.6rem); }
+.p-3 { padding: clamp(0.75rem, 2vw, 0.8rem); }
+.p-4 { padding: clamp(1rem, 2.5vw, 1rem); }
+
+.m-1 { margin: clamp(0.25rem, 1vw, 0.3rem); }
+.m-2 { margin: clamp(0.5rem, 1.5vw, 0.6rem); }
+.m-3 { margin: clamp(0.75rem, 2vw, 0.8rem); }
+.m-4 { margin: clamp(1rem, 2.5vw, 1rem); }
+
+/* 移动端安全区域适配 */
+.safe-area-top { padding-top: env(safe-area-inset-top, 0); }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+.safe-area-left { padding-left: env(safe-area-inset-left, 0); }
+.safe-area-right { padding-right: env(safe-area-inset-right, 0); }
+
+/* 移动端触摸优化 */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* 针对WebView的滚动优化 */
+.scroll-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+/* 防止横向滚动的关键样式 */
+.no-overflow {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+/* 针对不同屏幕尺寸的响应式优化 */
+@media (max-width: 480px) {
+  .grid-cols-1,
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .flex-row {
+    flex-direction: column;
+  }
+  
+  .gap-4 { gap: 0.5rem; }
+  .gap-6 { gap: 0.75rem; }
+  .gap-8 { gap: 1rem; }
+  
+  .p-4 { padding: 0.5rem; }
+  .p-6 { padding: 0.75rem; }
+  .p-8 { padding: 1rem; }
+}
+
+/* 针对平板设备的优化 */
+@media (min-width: 481px) and (max-width: 768px) {
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 针对大屏手机的优化 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 防止特定组件溢出 */
+.table,
+.table-responsive,
+.overflow-auto,
+.overflow-x-auto {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* 确保按钮和输入框在移动端表现良好 */
+button,
+input,
+select,
+textarea {
+  font-size: 16px; /* 防止iOS缩放 */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 针对特殊组件的优化 */
+.tab-container,
+.tab-content,
+.carousel,
+.swiper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* 防止动画导致的溢出问题 */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+  transform-origin: center;
+}
+
+/* 确保所有定位元素不超出容器 */
+.absolute,
+.fixed,
+.relative {
+  max-width: 100vw;
+  left: auto;
+  right: auto;
+}
+
+/* 针对WebView的特殊字体渲染优化 */
+.font-rendering-optimized {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}

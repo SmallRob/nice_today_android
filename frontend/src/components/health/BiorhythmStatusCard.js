@@ -11,10 +11,77 @@ const BiorhythmStatusCard = ({ onClick }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 从本地存储获取用户设置的缓存超时时间
+  const getUserCacheTimeout = () => {
+    const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+    return savedCacheTimeout ? parseInt(savedCacheTimeout) : 10800000; // 默认3小时
+  };
+
+  // 生成缓存键
+  const getCacheKey = () => {
+    const today = new Date().toDateString();
+    return `biorhythm-${today}`;
+  };
+
+  // 检查缓存
+  const getCachedData = () => {
+    try {
+      const cacheKey = getCacheKey();
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { data, timestamp, date: cacheDate } = JSON.parse(cached);
+        const now = Date.now();
+        const currentDate = new Date().toDateString();
+        
+        // 检查是否跨天（隔天重新计算策略）
+        if (cacheDate !== currentDate) {
+          localStorage.removeItem(cacheKey);
+          return null;
+        }
+        
+        // 检查缓存是否超时
+        const cacheTimeout = getUserCacheTimeout();
+        if (now - timestamp < cacheTimeout) {
+          return data;
+        } else {
+          // 清除过期缓存
+          localStorage.removeItem(cacheKey);
+        }
+      }
+    } catch (e) {
+      console.warn('读取缓存失败:', e);
+    }
+    return null;
+  };
+
+  // 设置缓存
+  const setCachedData = (data) => {
+    try {
+      const cacheKey = getCacheKey();
+      const currentDate = new Date().toDateString();
+      const cacheData = {
+        data,
+        timestamp: Date.now(),
+        date: currentDate  // 添加日期信息用于隔天检查
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (e) {
+      console.warn('设置缓存失败:', e);
+    }
+  };
+
   // 获取今日生物节律数据
   const fetchBiorhythmData = async () => {
     try {
       setLoading(true);
+      
+      // 检查缓存
+      const cachedData = getCachedData();
+      if (cachedData) {
+        setBiorhythmData(cachedData);
+        setError(null);
+        return;
+      }
       
       // 检查是否有出生日期
       if (!userConfig?.birthDate) {
@@ -36,10 +103,15 @@ const BiorhythmStatusCard = ({ onClick }) => {
         if (todayData) {
           setBiorhythmData(todayData);
           setError(null); // 成功时清除错误
+          // 设置缓存
+          setCachedData(todayData);
         } else {
           // 如果没有今天的数据，使用数组中最后一个数据
-          setBiorhythmData(result.rhythmData[result.rhythmData.length - 1]);
+          const lastData = result.rhythmData[result.rhythmData.length - 1];
+          setBiorhythmData(lastData);
           setError(null); // 成功时清除错误
+          // 设置缓存
+          setCachedData(lastData);
         }
       } else {
         setError('获取生物节律数据失败，请稍后重试');

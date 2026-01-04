@@ -11,6 +11,65 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 从本地存储获取用户设置的缓存超时时间
+  const getUserCacheTimeout = () => {
+    const savedCacheTimeout = localStorage.getItem('cacheTimeout');
+    return savedCacheTimeout ? parseInt(savedCacheTimeout) : 10800000; // 默认3小时
+  };
+
+  // 生成缓存键
+  const getCacheKey = () => {
+    const today = new Date().toDateString();
+    return `body-metrics-${today}`;
+  };
+
+  // 检查缓存
+  const getCachedData = () => {
+    try {
+      const cacheKey = getCacheKey();
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { data, timestamp, date: cacheDate } = JSON.parse(cached);
+        const now = Date.now();
+        const currentDate = new Date().toDateString();
+        
+        // 检查是否跨天（隔天重新计算策略）
+        if (cacheDate !== currentDate) {
+          localStorage.removeItem(cacheKey);
+          return null;
+        }
+        
+        // 检查缓存是否超时
+        const cacheTimeout = getUserCacheTimeout();
+        if (now - timestamp < cacheTimeout) {
+          return data;
+        } else {
+          // 清除过期缓存
+          localStorage.removeItem(cacheKey);
+        }
+      }
+    } catch (e) {
+      console.warn('读取缓存失败:', e);
+    }
+    return null;
+  };
+
+  // 设置缓存
+  const setCachedData = (data) => {
+    try {
+      const cacheKey = getCacheKey();
+      const currentDate = new Date().toDateString();
+      const cacheData = {
+        data,
+        timestamp: Date.now(),
+        date: currentDate  // 添加日期信息用于隔天检查
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (e) {
+      console.warn('设置缓存失败:', e);
+    }
+  };
+
   // 获取当前时段器官节律
   const getCurrentOrganRhythm = async () => {
     try {
@@ -23,11 +82,12 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
           return currentHour >= startHour && currentHour < endHour;
         }) || data[0]; // 如果没找到匹配的，使用第一个
         
-        setOrganRhythm(currentRhythm);
+        return currentRhythm;
       }
     } catch (err) {
       console.error('获取器官节律数据失败:', err);
       setError(err.message);
+      throw err;
     }
   };
 
@@ -35,20 +95,46 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
   const getBodyMetricsStatusData = async () => {
     try {
       const status = await getBodyMetricsStatus();
-      setBodyMetricsStatus(status);
+      return status;
     } catch (err) {
       console.error('获取身体指标状态失败:', err);
+      throw err;
     }
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      await Promise.all([
-        getCurrentOrganRhythm(),
-        getBodyMetricsStatusData()
-      ]);
-      setLoading(false);
+      try {
+        setLoading(true);
+        
+        // 检查缓存
+        const cachedData = getCachedData();
+        if (cachedData) {
+          setOrganRhythm(cachedData.organRhythm);
+          setBodyMetricsStatus(cachedData.bodyMetricsStatus);
+          setError(null);
+        } else {
+          // 并行获取数据
+          const [organRhythmData, bodyMetricsData] = await Promise.all([
+            getCurrentOrganRhythm(),
+            getBodyMetricsStatusData()
+          ]);
+          
+          setOrganRhythm(organRhythmData);
+          setBodyMetricsStatus(bodyMetricsData);
+          setError(null);
+          
+          // 设置缓存
+          setCachedData({
+            organRhythm: organRhythmData,
+            bodyMetricsStatus: bodyMetricsData
+          });
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
