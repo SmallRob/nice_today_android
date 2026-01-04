@@ -93,3 +93,37 @@
     min-height: 180px;
   }
 }
+
+/* 解决底部被遮挡问题 */
+.health-dashboard-grid {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+@media (max-width: 768px) {
+  .health-dashboard-grid {
+    padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
+  }
+}
+
+/* 优化饮食健康卡片与敏捷养生卡片间距 */
+/* 针对紧邻的两个卡片 */
+.health-dashboard-grid .health-card:nth-child(4) {
+  /* 饮食健康卡片 - 底部间距调整 */
+  margin-bottom: var(--spacing-xs);
+}
+
+.health-dashboard-grid .health-card:nth-child(5) {
+  /* 敏捷养生卡片 - 顶部间距调整 */
+  margin-top: var(--spacing-xs);
+}
+
+/* 确保相邻卡片间距的一致性 */
+@media (max-width: 768px) {
+  .health-dashboard-grid .health-card:nth-child(4) {
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .health-dashboard-grid .health-card:nth-child(5) {
+    margin-top: var(--spacing-xs);
+  }
+}

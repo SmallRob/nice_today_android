@@ -8,6 +8,7 @@ import AgileHealthCard from '../components/health/AgileHealthCard.js';
 import SeasonalHealthCard from '../components/health/SeasonalHealthCard.js';
 import BodyMetricsRhythmCard from '../components/health/BodyMetricsRhythmCard.js';
 import DressDietCard from '../components/health/DressDietCard.js';
+import DietHealthCard from '../components/health/DietHealthCard.js';
 import './HealthDashboardPage.css';
 
 // 健康身心仪表板 - 主页面
@@ -32,6 +33,20 @@ const HealthDashboardPage = () => {
       title: '每日生物节律状态卡片'
     },
     {
+      id: 'dress-diet',
+      component: DressDietCard,
+      priority: 2, // 高计算复杂度，中优先级
+      cacheKey: 'dress-diet',
+      title: '每日穿搭与饮食建议卡片'
+    },
+    {
+      id: 'diet-health',
+      component: DietHealthCard,
+      priority: 2, // 中优先级
+      cacheKey: 'diet-health',
+      title: '饮食健康卡片'
+    },
+    {
       id: 'agile-health',
       component: AgileHealthCard,
       priority: 2, // 中优先级，快速加载
@@ -51,13 +66,6 @@ const HealthDashboardPage = () => {
       priority: 3, // 中优先级
       cacheKey: 'body-metrics',
       title: '身体指标与器官节律卡片'
-    },
-    {
-      id: 'dress-diet',
-      component: DressDietCard,
-      priority: 2, // 高计算复杂度，中优先级
-      cacheKey: 'dress-diet',
-      title: '每日穿搭与饮食建议卡片'
     }
   ], []);
   
