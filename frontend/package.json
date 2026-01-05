@@ -31,8 +31,10 @@
     "react-chartjs-2": "^5.2.0",
     "react-datepicker": "^9.0.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.10.1",
     "react-scripts": "5.0.1",
+    "remark-gfm": "^4.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

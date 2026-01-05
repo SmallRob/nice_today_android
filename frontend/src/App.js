@@ -254,6 +254,8 @@ const HabitStatsPage = lazyLoadWithErrorHandling(() => import('./pages/HabitStat
 const BodyMetricsPage = lazyLoadWithErrorHandling(() => import('./pages/BodyMetricsPage'));
 const DietHealthDetail = lazyLoadWithErrorHandling(() => import('./components/health/DietHealthDetail.js'));
 const FeatureDevelopmentPage = lazyLoadWithErrorHandling(() => import('./pages/FeatureDevelopmentPage'));
+const DocumentViewerPage = lazyLoadWithErrorHandling(() => import('./pages/DocumentViewerPage'));
+const DocumentHistoryPage = lazyLoadWithErrorHandling(() => import('./pages/DocumentHistoryPage'));
 // const AncientCardGamePage = lazyLoadWithErrorHandling(() => import('./pages/AncientCardGamePage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
@@ -385,6 +387,8 @@ const AppLayout = () => {
             <Route path="/body-metrics" element={<BodyMetricsPage />} />
             <Route path="/diet-health-detail" element={<DietHealthDetail />} />
             <Route path="/feature-development" element={<FeatureDevelopmentPage />} />
+            <Route path="/document-viewer" element={<DocumentViewerPage />} />
+            <Route path="/document-history" element={<DocumentHistoryPage />} />
             {/* <Route path="/ancient-card-game" element={<AncientCardGamePage />} /> */}
           </Routes>
         </SafeSuspense>

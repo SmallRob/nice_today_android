@@ -1,0 +1,47 @@
+.document-history-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color, #ffffff);
+  color: var(--text-color, #333333);
+}
+
+.document-history-page.dark {
+  --bg-color: #1a1a1a;
+  --text-color: #e0e0e0;
+}
+
+.document-history-page.light {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+}
+
+.document-history-header {
+  padding: 16px;
+  background-color: var(--header-bg, #f5f5f5);
+  border-bottom: 1px solid var(--border-color, #ddd);
+}
+
+.document-history-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.document-history-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 适配移动端 */
+@media (max-width: 768px) {
+  .document-history-header {
+    padding: 12px;
+  }
+  
+  .document-history-header h1 {
+    font-size: 18px;
+  }
+}

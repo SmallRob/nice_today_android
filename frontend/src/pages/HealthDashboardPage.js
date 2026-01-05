@@ -40,13 +40,6 @@ const HealthDashboardPage = () => {
       title: '每日穿搭与饮食建议卡片'
     },
     {
-      id: 'diet-health',
-      component: DietHealthCard,
-      priority: 2, // 中优先级
-      cacheKey: 'diet-health',
-      title: '饮食健康卡片'
-    },
-    {
       id: 'agile-health',
       component: AgileHealthCard,
       priority: 2, // 中优先级，快速加载
@@ -66,6 +59,13 @@ const HealthDashboardPage = () => {
       priority: 3, // 中优先级
       cacheKey: 'body-metrics',
       title: '身体指标与器官节律卡片'
+    },
+    {
+      id: 'diet-health',
+      component: DietHealthCard,
+      priority: 4, // 最低优先级，最后加载
+      cacheKey: 'diet-health',
+      title: '饮食健康卡片'
     }
   ], []);
   

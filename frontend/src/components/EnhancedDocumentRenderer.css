@@ -1,0 +1,198 @@
+.enhanced-markdown-content {
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.enhanced-markdown-content .enhanced-h1,
+.enhanced-markdown-content .enhanced-h2,
+.enhanced-markdown-content .enhanced-h3,
+.enhanced-markdown-content .enhanced-h4,
+.enhanced-markdown-content .enhanced-h5,
+.enhanced-markdown-content .enhanced-h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.enhanced-markdown-content .enhanced-h1 {
+  font-size: 2em;
+  border-bottom: 2px solid var(--border-color, #ddd);
+  padding-bottom: 0.3em;
+}
+
+.enhanced-markdown-content .enhanced-h2 {
+  font-size: 1.75em;
+  border-bottom: 1px solid var(--border-color, #eee);
+  padding-bottom: 0.3em;
+}
+
+.enhanced-markdown-content .enhanced-h3 {
+  font-size: 1.5em;
+}
+
+.enhanced-markdown-content .enhanced-h4 {
+  font-size: 1.25em;
+}
+
+.enhanced-markdown-content .enhanced-h5 {
+  font-size: 1.1em;
+}
+
+.enhanced-markdown-content .enhanced-h6 {
+  font-size: 1em;
+  color: #666;
+}
+
+.enhanced-markdown-content .enhanced-p {
+  margin-bottom: 1em;
+  color: var(--text-color);
+}
+
+.enhanced-markdown-content .enhanced-ul,
+.enhanced-markdown-content .enhanced-ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+.enhanced-markdown-content .enhanced-li {
+  margin: 0.5em 0;
+  color: var(--text-color);
+}
+
+.enhanced-markdown-content .enhanced-blockquote {
+  border-left: 4px solid var(--accent-color, #007acc);
+  padding-left: 16px;
+  margin: 16px 0;
+  color: #666;
+  font-style: italic;
+  background-color: var(--blockquote-bg, rgba(0, 122, 204, 0.05));
+  padding: 12px 16px;
+  border-radius: 0 4px 4px 0;
+}
+
+.enhanced-markdown-content .enhanced-pre {
+  background-color: var(--code-bg, #f4f4f4);
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 16px 0;
+  border: 1px solid var(--border-color, #ddd);
+}
+
+.enhanced-markdown-content .enhanced-block-code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--code-text-color, #333);
+  background: none;
+  padding: 0;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.enhanced-markdown-content .enhanced-inline-code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background-color: var(--inline-code-bg, #f0f0f0);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--inline-code-text-color, #d6336c);
+  font-size: 0.95em;
+}
+
+.enhanced-markdown-content .enhanced-strong {
+  font-weight: bold;
+  color: var(--strong-color, #333);
+}
+
+.enhanced-markdown-content .enhanced-em {
+  font-style: italic;
+  color: var(--em-color, #666);
+}
+
+.enhanced-markdown-content .enhanced-a {
+  color: var(--link-color, #007acc);
+  text-decoration: underline;
+}
+
+.enhanced-markdown-content .enhanced-a:hover {
+  color: var(--link-hover-color, #005a99);
+}
+
+.enhanced-markdown-content .enhanced-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.enhanced-text-content {
+  white-space: pre-wrap;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 16px;
+  color: var(--text-color);
+  font-size: 16px;
+  tab-size: 4;
+}
+
+/* 暗黑模式适配 */
+.enhanced-markdown-content.dark,
+.enhanced-text-content.dark {
+  --text-color: #e0e0e0;
+  --code-bg: #2d2d2d;
+  --inline-code-bg: #3d3d3d;
+  --inline-code-text-color: #ff6b6b;
+  --blockquote-bg: rgba(0, 150, 255, 0.1);
+  --border-color: #444;
+  --link-color: #4da6ff;
+  --link-hover-color: #66b3ff;
+  --strong-color: #ffffff;
+  --em-color: #cccccc;
+  --accent-color: #4da6ff;
+}
+
+.enhanced-markdown-content.light,
+.enhanced-text-content.light {
+  --text-color: #333333;
+  --code-bg: #f4f4f4;
+  --inline-code-bg: #f0f0f0;
+  --inline-code-text-color: #d6336c;
+  --blockquote-bg: rgba(0, 122, 204, 0.05);
+  --border-color: #ddd;
+  --link-color: #007acc;
+  --link-hover-color: #005a99;
+  --strong-color: #333;
+  --em-color: #666;
+  --accent-color: #007acc;
+}
+
+/* 适配移动端 */
+@media (max-width: 768px) {
+  .enhanced-markdown-content {
+    padding: 0 12px;
+  }
+  
+  .enhanced-text-content {
+    padding: 0 12px;
+    font-size: 15px;
+  }
+  
+  .enhanced-markdown-content .enhanced-h1 {
+    font-size: 1.75em;
+  }
+  
+  .enhanced-markdown-content .enhanced-h2 {
+    font-size: 1.5em;
+  }
+  
+  .enhanced-markdown-content .enhanced-h3 {
+    font-size: 1.25em;
+  }
+}

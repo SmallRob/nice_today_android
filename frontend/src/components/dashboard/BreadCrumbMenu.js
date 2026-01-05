@@ -16,7 +16,9 @@ const COMMON_FEATURES = [
     { id: 'finance', icon: '💰', name: '财务管理', route: '/finance' },
     { id: 'todo', icon: '📝', name: '日程清单', route: '/todo-list' },
     { id: 'mood-calendar', icon: '😊', name: '心情日历', route: '/mood-calendar' },
-    { id: 'habit-tracker', icon: '🎯', name: '习惯追踪', route: '/habit-tracker' }
+    { id: 'habit-tracker', icon: '🎯', name: '习惯追踪', route: '/habit-tracker' },
+    { id: 'document-viewer', icon: '📄', name: '文档查看', route: '/document-viewer' },
+    { id: 'document-history', icon: '📚', name: '文档历史', route: '/document-history' }
     // { id: 'dress', icon: '👕', name: '穿衣指南', route: '/dress' }
     // { id: 'horoscope', icon: '📅', name: '星座运势', route: '/horoscope' }
 ];

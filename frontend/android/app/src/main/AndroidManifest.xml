@@ -21,6 +21,26 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
+            <!-- Intent filter for opening .txt and .md files -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                
+                <!-- MIME types for text files -->
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/markdown" />
+                
+                <!-- Schemes for content and file access -->
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+                
+                <!-- File extensions -->
+                <data android:pathPattern=".*\\.txt" />
+                <data android:pathPattern=".*\\.md" />
+            </intent-filter>
         </activity>
 
         <provider

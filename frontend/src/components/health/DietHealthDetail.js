@@ -136,13 +136,13 @@ const DietHealthDetail = () => {
           </div>
         </div>
 
-        {/* 营养速查表 - 蛋白质类 */}
+        {/* 营养速查表 - 肉类 */}
         <div className="diet-health-detail-card md:col-span-2 p-8 flex flex-col">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-orange"></div>
           <div className="relative flex-grow flex flex-col z-10">
             <div className="flex items-center space-x-3 mb-4">
               <i className="fa-solid fa-drumstick-bite text-2xl text-white"></i>
-              <h2 className="text-2xl font-bold text-white">蛋白质类营养速查</h2>
+              <h2 className="text-2xl font-bold text-white">肉类营养速查</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-white/30">
@@ -162,22 +162,22 @@ const DietHealthDetail = () => {
                     <td className="px-4 py-2 text-sm text-white/90">低脂高蛋白，易吸收</td>
                   </tr>
                   <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">瘦牛肉</td>
+                    <td className="px-4 py-2 text-sm text-white/90">26</td>
+                    <td className="px-4 py-2 text-sm text-white/90">6</td>
+                    <td className="px-4 py-2 text-sm text-white/90">富含肌酸、铁元素</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">瘦猪肉</td>
+                    <td className="px-4 py-2 text-sm text-white/90">20</td>
+                    <td className="px-4 py-2 text-sm text-white/90">7</td>
+                    <td className="px-4 py-2 text-sm text-white/90">富含B族维生素</td>
+                  </tr>
+                  <tr className="bg-white/10">
                     <td className="px-4 py-2 text-sm text-white/90">三文鱼</td>
                     <td className="px-4 py-2 text-sm text-white/90">22</td>
                     <td className="px-4 py-2 text-sm text-white/90">13</td>
                     <td className="px-4 py-2 text-sm text-white/90">富含Omega-3脂肪酸</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2 text-sm text-white/90">鸡蛋</td>
-                    <td className="px-4 py-2 text-sm text-white/90">13</td>
-                    <td className="px-4 py-2 text-sm text-white/90">9</td>
-                    <td className="px-4 py-2 text-sm text-white/90">含优质卵磷脂，性价比高</td>
-                  </tr>
-                  <tr className="bg-white/10">
-                    <td className="px-4 py-2 text-sm text-white/90">豆腐（北）</td>
-                    <td className="px-4 py-2 text-sm text-white/90">12</td>
-                    <td className="px-4 py-2 text-sm text-white/90">4.5</td>
-                    <td className="px-4 py-2 text-sm text-white/90">植物蛋白，含钙、铁</td>
                   </tr>
                 </tbody>
               </table>
@@ -247,12 +247,222 @@ const DietHealthDetail = () => {
           </div>
         </div>
 
+        {/* 营养速查表 - 蛋类 */}
+        <div className="diet-health-detail-card md:col-span-2 p-8 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-yellow"></div>
+          <div className="relative flex-grow flex flex-col z-10">
+            <div className="flex items-center space-x-3 mb-4">
+              <i className="fa-solid fa-egg text-2xl text-white"></i>
+              <h2 className="text-2xl font-bold text-white">蛋类营养速查</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/30">
+                <thead className="bg-white/20 backdrop-blur-sm">
+                  <tr>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">食物（100g）</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">蛋白质(g)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">脂肪(g)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">核心特点</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/30">
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">鸡蛋</td>
+                    <td className="px-4 py-2 text-sm text-white/90">13</td>
+                    <td className="px-4 py-2 text-sm text-white/90">9</td>
+                    <td className="px-4 py-2 text-sm text-white/90">含优质卵磷脂，性价比高</td>
+                  </tr>
+                  <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">鸭蛋</td>
+                    <td className="px-4 py-2 text-sm text-white/90">13</td>
+                    <td className="px-4 py-2 text-sm text-white/90">13</td>
+                    <td className="px-4 py-2 text-sm text-white/90">维生素E、磷脂含量更高</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">鹌鹑蛋</td>
+                    <td className="px-4 py-2 text-sm text-white/90">13</td>
+                    <td className="px-4 py-2 text-sm text-white/90">11</td>
+                    <td className="px-4 py-2 text-sm text-white/90">B族维生素含量丰富</td>
+                  </tr>
+                  <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">鹅蛋</td>
+                    <td className="px-4 py-2 text-sm text-white/90">11</td>
+                    <td className="px-4 py-2 text-sm text-white/90">16</td>
+                    <td className="px-4 py-2 text-sm text-white/90">富含卵磷脂和蛋白质</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* 营养速查表 - 奶制品 */}
+        <div className="diet-health-detail-card md:col-span-2 p-8 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-pink"></div>
+          <div className="relative flex-grow flex flex-col z-10">
+            <div className="flex items-center space-x-3 mb-4">
+              <i className="fa-solid fa-cheese text-2xl text-white"></i>
+              <h2 className="text-2xl font-bold text-white">奶制品营养速查</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/30">
+                <thead className="bg-white/20 backdrop-blur-sm">
+                  <tr>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">食物（100g）</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">蛋白质(g)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">脂肪(g)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">钙(mg)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">核心特点</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/30">
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">牛奶</td>
+                    <td className="px-4 py-2 text-sm text-white/90">3.2</td>
+                    <td className="px-4 py-2 text-sm text-white/90">3.8</td>
+                    <td className="px-4 py-2 text-sm text-white/90">104</td>
+                    <td className="px-4 py-2 text-sm text-white/90">优质蛋白，钙含量丰富</td>
+                  </tr>
+                  <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">酸奶</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.5</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.7</td>
+                    <td className="px-4 py-2 text-sm text-white/90">118</td>
+                    <td className="px-4 py-2 text-sm text-white/90">含益生菌，助消化吸收</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">奶酪</td>
+                    <td className="px-4 py-2 text-sm text-white/90">25</td>
+                    <td className="px-4 py-2 text-sm text-white/90">25</td>
+                    <td className="px-4 py-2 text-sm text-white/90">799</td>
+                    <td className="px-4 py-2 text-sm text-white/90">高钙高蛋白浓缩品</td>
+                  </tr>
+                  <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">豆浆</td>
+                    <td className="px-4 py-2 text-sm text-white/90">3.0</td>
+                    <td className="px-4 py-2 text-sm text-white/90">1.8</td>
+                    <td className="px-4 py-2 text-sm text-white/90">10</td>
+                    <td className="px-4 py-2 text-sm text-white/90">植物蛋白，含大豆异黄酮</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        {/* 营养速查表 - 水果类 */}
+        <div className="diet-health-detail-card md:col-span-2 p-8 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-red"></div>
+          <div className="relative flex-grow flex flex-col z-10">
+            <div className="flex items-center space-x-3 mb-4">
+              <i className="fa-solid fa-apple-whole text-2xl text-white"></i>
+              <h2 className="text-2xl font-bold text-white">水果类营养速查</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/30">
+                <thead className="bg-white/20 backdrop-blur-sm">
+                  <tr>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">食物（100g）</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">碳水化合物(g)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">膳食纤维(g)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">维生素C(mg)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">核心特点</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/30">
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">苹果</td>
+                    <td className="px-4 py-2 text-sm text-white/90">13.8</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.4</td>
+                    <td className="px-4 py-2 text-sm text-white/90">4.6</td>
+                    <td className="px-4 py-2 text-sm text-white/90">富含果胶，助消化</td>
+                  </tr>
+                  <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">香蕉</td>
+                    <td className="px-4 py-2 text-sm text-white/90">22.8</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.6</td>
+                    <td className="px-4 py-2 text-sm text-white/90">8.7</td>
+                    <td className="px-4 py-2 text-sm text-white/90">钾元素丰富，助能量补充</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">蓝莓</td>
+                    <td className="px-4 py-2 text-sm text-white/90">14.5</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.4</td>
+                    <td className="px-4 py-2 text-sm text-white/90">9.7</td>
+                    <td className="px-4 py-2 text-sm text-white/90">抗氧化，护眼明目</td>
+                  </tr>
+                  <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">橙子</td>
+                    <td className="px-4 py-2 text-sm text-white/90">11.8</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.4</td>
+                    <td className="px-4 py-2 text-sm text-white/90">53.2</td>
+                    <td className="px-4 py-2 text-sm text-white/90">维C丰富，提升免疫</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* 营养速查表 - 蔬菜类 */}
+        <div className="diet-health-detail-card md:col-span-2 p-8 flex flex-col">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-green"></div>
+          <div className="relative flex-grow flex flex-col z-10">
+            <div className="flex items-center space-x-3 mb-4">
+              <i className="fa-solid fa-leaf text-2xl text-white"></i>
+              <h2 className="text-2xl font-bold text-white">蔬菜类营养速查</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/30">
+                <thead className="bg-white/20 backdrop-blur-sm">
+                  <tr>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">食物（100g）</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">蛋白质(g)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">膳食纤维(g)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">维生素A(μg)</th>
+                    <th className="px-4 py-2 text-xs font-medium text-white uppercase tracking-wider">核心特点</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/30">
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">西兰花</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.8</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.6</td>
+                    <td className="px-4 py-2 text-sm text-white/90">31</td>
+                    <td className="px-4 py-2 text-sm text-white/90">维C维K丰富，抗氧化</td>
+                  </tr>
+                  <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">菠菜</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.9</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.2</td>
+                    <td className="px-4 py-2 text-sm text-white/90">469</td>
+                    <td className="px-4 py-2 text-sm text-white/90">叶酸铁元素丰富</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 text-sm text-white/90">胡萝卜</td>
+                    <td className="px-4 py-2 text-sm text-white/90">0.9</td>
+                    <td className="px-4 py-2 text-sm text-white/90">2.8</td>
+                    <td className="px-4 py-2 text-sm text-white/90">4010</td>
+                    <td className="px-4 py-2 text-sm text-white/90">胡萝卜素丰富，护视力</td>
+                  </tr>
+                  <tr className="bg-white/10">
+                    <td className="px-4 py-2 text-sm text-white/90">番茄</td>
+                    <td className="px-4 py-2 text-sm text-white/90">0.9</td>
+                    <td className="px-4 py-2 text-sm text-white/90">1.2</td>
+                    <td className="px-4 py-2 text-sm text-white/90">42</td>
+                    <td className="px-4 py-2 text-sm text-white/90">番茄红素，抗氧化</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         {/* 返回按钮 */}
         <div className="diet-health-detail-card md:col-span-4 p-8 flex flex-col items-center justify-center">
-          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-green"></div>
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-purple"></div>
           <div className="relative text-center z-10">
             <Link 
-              to="/" 
+              to="/healthdashboard" 
               className="bg-gradient-to-r from-white/30 to-white/40 text-white text-lg font-bold py-3 px-8 rounded-full hover:from-white/40 hover:to-white/50 transition-all duration-300 backdrop-blur-sm border border-white/30"
             >
               返回健康仪表板
