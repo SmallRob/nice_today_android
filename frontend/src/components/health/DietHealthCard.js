@@ -217,8 +217,8 @@ const DietHealthCard = () => {
   return (
     <div className="diet-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
       <div className="flex justify-between items-center mb-3 relative z-10">
-        <h3 className="text-lg font-bold text-white">饮食健康卡片</h3>
-        <div className="flex gap-1">
+        <h3 className="text-lg font-bold text-white" style={{ whiteSpace: 'nowrap' }}>饮食健康</h3>
+        <div className="flex gap-1" style={{ justifyContent: 'flex-end' }}>
           <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full backdrop-blur-sm">
             {getCurrentSeason() === 'spring' ? '🌸春季' : getCurrentSeason() === 'summer' ? '🌞夏季' : getCurrentSeason() === 'autumn' ? '🍂秋季' : '❄️冬季'}
           </span>

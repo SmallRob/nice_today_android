@@ -120,6 +120,36 @@ function TarotGardenPage() {
               </div>
             </Card>
 
+            {/* 文档阅读器卡片 */}
+            <Card className="group">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-green-600 dark:from-emerald-700 dark:via-teal-700 dark:to-green-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
+                {/* 装饰图案 */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-20 translate-x-20"></div>
+                  <div className="absolute bottom-0 left-0 w-28 h-28 bg-white rounded-full translate-y-14 -translate-x-14"></div>
+                </div>
+
+                <div className="relative p-4 md:p-5 text-white h-full flex flex-col">
+                  <div className="flex flex-col items-center justify-center flex-1">
+                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform group-hover:scale-110 transition-transform duration-300">📚</div>
+                    <h2 className="text-xl md:text-2xl font-bold mb-2 tracking-wide text-center">文档阅读器</h2>
+                    <p className="text-emerald-100 text-sm md:text-base font-light text-center">管理文档，支持文件夹导入，优化中文编码</p>
+                  </div>
+                  <div className="flex justify-end mt-auto">
+                    <button
+                      onClick={() => window.location.href = '/documents'}
+                      className="inline-flex items-center space-x-1.5 md:space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-sm border border-white/20"
+                    >
+                      <span>开始阅读</span>
+                      <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
             {/* 生命矩阵卡片 */}
             {/* <Card className="group"> */}
             {/* <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 dark:from-green-700 dark:via-emerald-700 dark:to-teal-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"> */}

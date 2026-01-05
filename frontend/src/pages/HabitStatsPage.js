@@ -57,33 +57,6 @@ const HabitStatsPage = () => {
     return new Date(year, month, 1).getDay();
   };
 
-  // 生成月历数据
-  const generateCalendarData = () => {
-    const daysInMonth = getDaysInMonth(year, month);
-    const firstDay = getFirstDayOfMonth(year, month);
-    const calendar = [];
-    
-    // 添加上个月的空白天数
-    for (let i = 0; i < firstDay; i++) {
-      calendar.push(null);
-    }
-    
-    // 添加当月的天数
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const isCompleted = selectedHabitId 
-        ? habitHistory.some(h => h.getDate() === day && h.getMonth() === month && h.getFullYear() === year)
-        : Object.values(stats).some(habitStats => 
-            habitStats.completionDays.includes(day)
-          );
-      calendar.push({ day, isCompleted, date });
-    }
-    
-    return calendar;
-  };
-
-  const calendarData = generateCalendarData();
-
   // 月份切换
   const goToPreviousMonth = () => {
     if (month === 0) {
@@ -194,16 +167,68 @@ const HabitStatsPage = () => {
     }
   }, [stats, selectedHabitId, year, month]);
 
-  // 星期名称
-  const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+  // 生成日历数据（完整的6行7列）
+  const generateCalendarData = () => {
+    const today = new Date();
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDay = getFirstDayOfMonth(year, month);
+    const dates = [];
+
+    // 添加上个月的日期
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const prevMonth = month === 0 ? 11 : month - 1;
+      const prevYear = month === 0 ? year - 1 : year;
+      dates.push({
+        day: prevMonthLastDay - i,
+        isCurrentMonth: false,
+        isCompleted: false,
+        date: new Date(prevYear, prevMonth, prevMonthLastDay - i)
+      });
+    }
+
+    // 添加当月日期
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const isCompleted = selectedHabitId
+        ? habitHistory.some(h => h.getDate() === day && h.getMonth() === month && h.getFullYear() === year)
+        : Object.values(stats).some(habitStats =>
+            habitStats.completionDays.includes(day)
+          );
+      const isToday = date.toDateString() === today.toDateString();
+      dates.push({
+        day,
+        isCurrentMonth: true,
+        isCompleted,
+        date,
+        isToday
+      });
+    }
+
+    // 添加下个月的日期，补齐到42天（6行7列）
+    const remainingDays = 42 - dates.length;
+    for (let i = 1; i <= remainingDays; i++) {
+      const nextMonth = month === 11 ? 0 : month + 1;
+      const nextYear = month === 11 ? year + 1 : year;
+      dates.push({
+        day: i,
+        isCurrentMonth: false,
+        isCompleted: false,
+        date: new Date(nextYear, nextMonth, i)
+      });
+    }
+
+    return dates;
+  };
+
+  const calendarData = generateCalendarData();
+  const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
 
   return (
-    <PageLayout 
-      title={selectedHabitName || "习惯统计"} 
-      subtitle={`${year}年${month + 1}月`}
+    <PageLayout
+      title={selectedHabitName || "习惯统计"}
       showBackButton={true}
       onBackPress={() => {
-        // 如果来源是习惯打卡页面，则返回到习惯打卡页面
         if (location.state?.from === '/habit-tracker') {
           navigate('/habit-tracker');
         } else {
@@ -211,158 +236,265 @@ const HabitStatsPage = () => {
         }
       }}
     >
-      {/* 统计摘要 */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className={`p-4 rounded-xl ${
-          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-        } border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div className="text-2xl font-bold text-blue-500">{statsSummary?.totalDays || 0}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">打卡天数</div>
-        </div>
-        <div className={`p-4 rounded-xl ${
-          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-        } border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div className="text-2xl font-bold text-green-500">{statsSummary?.completionRate || 0}%</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">完成率</div>
-        </div>
-        <div className={`p-4 rounded-xl ${
-          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-        } border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div className="text-2xl font-bold text-purple-500">{statsSummary?.consecutiveDays || 0}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">连续天数</div>
-        </div>
-      </div>
-
-      {/* 习惯选择器 */}
-      {!selectedHabitId && (
-        <div className="mb-6">
-          <label className={`block text-sm font-medium mb-2 ${
-            theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-          }`}>
-            选择习惯
-          </label>
-          <select
-            value={selectedHabitId}
-            onChange={(e) => {
-              setSelectedHabitId(e.target.value);
-              // 更新URL参数
-              const newParams = new URLSearchParams(searchParams);
-              if (e.target.value) {
-                newParams.set('habitId', e.target.value);
-              } else {
-                newParams.delete('habitId');
-              }
-              navigate(`?${newParams.toString()}`, { replace: true });
+      <div style={{ padding: '0' }}>
+        {/* 月份导航 */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '12px',
+          padding: '0 4px'
+        }}>
+          <button
+            onClick={goToPreviousMonth}
+            style={{
+              padding: '4px 12px',
+              border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+              borderRadius: '4px',
+              background: theme === 'dark' ? '#1f2937' : '#fff',
+              color: theme === 'dark' ? '#fff' : '#1f2937',
+              fontSize: '14px',
+              cursor: 'pointer'
             }}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              theme === 'dark'
-                ? 'bg-gray-700 border-gray-600 text-white'
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
           >
-            <option value="">查看所有习惯统计</option>
-            {allHabits.map(habit => (
-              <option key={habit.id} value={habit.id}>
-                {habit.name}
-              </option>
+            &lt;
+          </button>
+          <div style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: theme === 'dark' ? '#fff' : '#1f2937'
+          }}>
+            {year}年{month + 1}月
+          </div>
+          <button
+            onClick={goToNextMonth}
+            style={{
+              padding: '4px 12px',
+              border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+              borderRadius: '4px',
+              background: theme === 'dark' ? '#1f2937' : '#fff',
+              color: theme === 'dark' ? '#fff' : '#1f2937',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          >
+            &gt;
+          </button>
+        </div>
+
+        {/* 统计摘要 */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '8px',
+          marginBottom: '12px'
+        }}>
+          <div style={{
+            padding: '8px',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            borderRadius: '8px',
+            border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#3b82f6' }}>
+              {statsSummary?.totalDays || 0}
+            </div>
+            <div style={{ fontSize: '12px', color: theme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              打卡天数
+            </div>
+          </div>
+          <div style={{
+            padding: '8px',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            borderRadius: '8px',
+            border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#22c55e' }}>
+              {statsSummary?.completionRate || 0}%
+            </div>
+            <div style={{ fontSize: '12px', color: theme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              完成率
+            </div>
+          </div>
+          <div style={{
+            padding: '8px',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            borderRadius: '8px',
+            border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#a855f7' }}>
+              {statsSummary?.consecutiveDays || 0}
+            </div>
+            <div style={{ fontSize: '12px', color: theme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              连续天数
+            </div>
+          </div>
+        </div>
+
+        {/* 习惯选择器 */}
+        {!selectedHabitId && (
+          <div style={{ marginBottom: '12px' }}>
+            <select
+              value={selectedHabitId}
+              onChange={(e) => {
+                setSelectedHabitId(e.target.value);
+                const newParams = new URLSearchParams(searchParams);
+                if (e.target.value) {
+                  newParams.set('habitId', e.target.value);
+                } else {
+                  newParams.delete('habitId');
+                }
+                navigate(`?${newParams.toString()}`, { replace: true });
+              }}
+              style={{
+                width: '100%',
+                padding: '8px',
+                border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+                borderRadius: '6px',
+                backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#1f2937',
+                fontSize: '13px'
+              }}
+            >
+              <option value="">查看所有习惯统计</option>
+              {allHabits.map(habit => (
+                <option key={habit.id} value={habit.id}>
+                  {habit.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* 日历 */}
+        <div style={{
+          backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+          borderRadius: '8px',
+          border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+          overflow: 'hidden'
+        }}>
+          {/* 星期标题 */}
+          <ol style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '1px',
+            padding: '4px 0',
+            margin: '0',
+            listStyle: 'none',
+            backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6'
+          }}>
+            {weekdays.map((day, index) => (
+              <li key={index} style={{
+                textAlign: 'center',
+                fontSize: '10px',
+                color: index === 0 ? '#ef4444' : index === 6 ? '#3b82f6' : theme === 'dark' ? '#9ca3af' : '#6b7280',
+                padding: '4px 0'
+              }}>
+                {day}
+              </li>
             ))}
-          </select>
-        </div>
-      )}
+          </ol>
 
-      {/* 月份导航 */}
-      <div className="flex items-center justify-between mb-2">
-        <button
-          onClick={goToPreviousMonth}
-          className={`p-1 rounded-lg ${
-            theme === 'dark'
-              ? 'text-gray-300 hover:bg-gray-700'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div className={`text-xs sm:text-sm font-semibold ${
-          theme === 'dark' ? 'text-white' : 'text-gray-800'
-        }`}>
-          {year}年{month + 1}月
-        </div>
-        <button
-          onClick={goToNextMonth}
-          className={`p-1 rounded-lg ${
-            theme === 'dark'
-              ? 'text-gray-300 hover:bg-gray-700'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+          {/* 日期网格 */}
+          <ol style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gap: '1px',
+            padding: '0',
+            margin: '0',
+            listStyle: 'none',
+            backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6'
+          }}>
+            {calendarData.map((dayData, index) => {
+              const dayOfWeek = dayData.date.getDay();
+              let className = '';
+              if (!dayData.isCurrentMonth) className += 'other ';
+              if (dayData.isToday) className += 'now ';
+              if (dayOfWeek === 0) className += 'sun ';
+              if (dayOfWeek === 6) className += 'sat ';
 
-      {/* 月历 */}
-      {/* 月历 - 紧凑版 */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        {/* 星期标题 */}
-        <div className="grid grid-cols-7 gap-0.5 mb-1 overflow-hidden">
-          {weekDays.map((day, index) => (
-            <div
-              key={index}
-              className={`text-center text-[0.6rem] font-medium py-0.5 ${
-                index === 0 ? 'text-red-500 dark:text-red-400' : 
-                index === 6 ? 'text-blue-500 dark:text-blue-400' : 
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-              }`}
-            >
-              {day}
-            </div>
-          ))}
+              return (
+                <li
+                  key={index}
+                  style={{
+                    backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+                    padding: '0',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    minHeight: '36px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  onClick={() => {}}
+                >
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    padding: '4px'
+                  }}>
+                    <span style={{
+                      fontSize: '12px',
+                      fontWeight: dayData.isToday ? 'bold' : 'normal',
+                      color: !dayData.isCurrentMonth
+                        ? (theme === 'dark' ? '#4b5563' : '#9ca3af')
+                        : dayData.isToday
+                        ? (theme === 'dark' ? '#3b82f6' : '#2563eb')
+                        : (theme === 'dark' ? '#fff' : '#1f2937')
+                    }}>
+                      {dayData.day}
+                    </span>
+                    {dayData.isCurrentMonth && dayData.isCompleted && (
+                      <span style={{
+                        width: '6px',
+                        height: '6px',
+                        backgroundColor: '#22c55e',
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        bottom: '2px'
+                      }}></span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
         </div>
 
-        {/* 日期网格 - 紧凑版 */}
-        <div className="grid grid-cols-7 gap-0.5 w-full max-w-full overflow-hidden">
-          {calendarData.map((dayData, index) => (
-            <div
-              key={index}
-              className={`
-                relative p-0.5 text-[0.6rem] rounded text-center flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden
-                ${dayData
-                  ? dayData.isCompleted
-                    ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                    : theme === 'dark'
-                    ? 'text-gray-300'
-                    : 'text-gray-700'
-                  : 'bg-gray-50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500'
-                }`}
-              style={{ minHeight: '1.8rem' }}
-            >
-              {dayData && (
-                <div className="relative w-full flex flex-col items-center">
-                  <span className={dayData.isCompleted ? 'font-medium' : ''}>
-                    {dayData.day}
-                  </span>
-                  {dayData.isCompleted && (
-                    <div className="w-1 h-1 rounded-full bg-green-500 absolute top-0.5 right-0.5"></div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 说明 */}
-      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
+        {/* 说明 */}
+        <div style={{
+          marginTop: '12px',
+          fontSize: '12px',
+          color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '16px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              backgroundColor: '#22c55e',
+              borderRadius: '50%',
+              marginRight: '4px'
+            }}></div>
             <span>已打卡</span>
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 border border-gray-300 dark:border-gray-600 rounded-full mr-1"></div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+              borderRadius: '50%',
+              marginRight: '4px'
+            }}></div>
             <span>未打卡</span>
           </div>
         </div>

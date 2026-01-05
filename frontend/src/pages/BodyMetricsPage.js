@@ -213,26 +213,66 @@ const BodyMetricsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-pink-900/30 pb-20">
       {/* 导航标题栏 */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-white hover:text-blue-100 flex items-center text-lg"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">身体指标检测</h1>
-            <button
-              onClick={() => navigate('/organ-rhythm')}
-              className="text-white hover:text-blue-100 flex items-center text-sm bg-white/20 px-3 py-1 rounded-full"
-            >
-              器官节律
-            </button>
-          </div>
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        background: 'linear-gradient(to right, #2563eb, #4f46e5)',
+        color: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        height: '60px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          height: '100%'
+        }}>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: '16px'
+            }}
+          >
+            <svg style={{ width: '24px', height: '24px', marginRight: '8px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            返回
+          </button>
+          <h1 style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            身体指标检测
+          </h1>
+          <button
+            onClick={() => navigate('/organ-rhythm')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'rgba(255, 255, 255, 0.2)',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              padding: '4px 12px',
+              fontSize: '14px',
+              borderRadius: '9999px'
+            }}
+          >
+            器官节律
+          </button>
         </div>
       </div>
 

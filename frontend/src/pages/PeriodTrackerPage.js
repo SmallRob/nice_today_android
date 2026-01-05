@@ -92,7 +92,7 @@ const getHealthAdvice = (phase) => {
   return advice[phase] || [];
 };
 
-// 日历视图组件
+// 日历视图组件（优化版，参考 MayaCalendarLitePage.js）
 const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod, theme }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -109,48 +109,52 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod, the
     const firstDayOfWeek = firstDay.getDay();
 
     // 生成日历数据
-    const days = [];
+    const dates = [];
 
     // 添加上个月的最后几天
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-      const date = new Date(year, month - 1, prevMonthLastDay - i);
-      days.push({
-        date,
+      const prevMonth = month === 0 ? 11 : month - 1;
+      const prevYear = month === 0 ? year - 1 : year;
+      const d = new Date(prevYear, prevMonth, prevMonthLastDay - i);
+      dates.push({
+        date: d,
         isCurrentMonth: false,
-        isWeekend: date.getDay() === 0 || date.getDay() === 6
+        dayOfWeek: d.getDay()
       });
     }
 
     // 添加当前月的所有天
     for (let i = 1; i <= lastDay.getDate(); i++) {
-      const date = new Date(year, month, i);
-      days.push({
-        date,
+      const d = new Date(year, month, i);
+      dates.push({
+        date: d,
         isCurrentMonth: true,
-        isWeekend: date.getDay() === 0 || date.getDay() === 6,
-        isToday: date.toDateString() === new Date().toDateString(),
+        dayOfWeek: d.getDay(),
+        isToday: d.toDateString() === new Date().toDateString(),
         isPredictedPeriod: prediction && (
-          date >= prediction.nextPeriodStart && date <= prediction.nextPeriodEnd
+          d >= prediction.nextPeriodStart && d <= prediction.nextPeriodEnd
         ),
-        isOvulation: prediction && date >= prediction.ovulationStart && date <= prediction.ovulationEnd,
-        isFertile: prediction && date >= prediction.fertileWindowStart && date <= prediction.fertileWindowEnd,
-        isPMS: prediction && date >= prediction.pmsStart && date < prediction.nextPeriod
+        isOvulation: prediction && d >= prediction.ovulationStart && d <= prediction.ovulationEnd,
+        isFertile: prediction && d >= prediction.fertileWindowStart && d <= prediction.fertileWindowEnd,
+        isPMS: prediction && d >= prediction.pmsStart && d < prediction.nextPeriod
       });
     }
 
     // 添加下个月的前几天
-    const nextMonthDays = 42 - days.length; // 6行 * 7天 = 42天
-    for (let i = 1; i <= nextMonthDays; i++) {
-      const date = new Date(year, month + 1, i);
-      days.push({
-        date,
+    const remainingDays = 42 - dates.length; // 6行 * 7天 = 42天
+    for (let i = 1; i <= remainingDays; i++) {
+      const nextMonth = month === 11 ? 0 : month + 1;
+      const nextYear = month === 11 ? year + 1 : year;
+      const d = new Date(nextYear, nextMonth, i);
+      dates.push({
+        date: d,
         isCurrentMonth: false,
-        isWeekend: date.getDay() === 0 || date.getDay() === 6
+        dayOfWeek: d.getDay()
       });
     }
 
-    return days;
+    return dates;
   };
 
   const monthData = getMonthData(currentDate);
@@ -166,12 +170,6 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod, the
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  const goToToday = () => {
-    const today = new Date();
-    setCurrentDate(today);
-    if (onDateSelect) onDateSelect(today);
-  };
-
   const handleDayClick = (day) => {
     if (day.isCurrentMonth && onDateSelect) {
       onDateSelect(day.date);
@@ -179,121 +177,213 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod, the
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 mb-6 w-full max-w-full overflow-hidden">
+    <div style={{
+      backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+      borderRadius: '8px',
+      border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+      marginBottom: '16px',
+      overflow: 'hidden'
+    }}>
       {/* 月份导航 */}
-      <div className="flex items-center justify-between mb-2">
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '8px 12px',
+        marginBottom: '8px'
+      }}>
         <button
           onClick={goToPreviousMonth}
-          className={`p-1 rounded-lg ${
-            theme === 'dark'
-              ? 'text-gray-300 hover:bg-gray-700'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
+          style={{
+            padding: '4px 12px',
+            border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+            borderRadius: '4px',
+            background: theme === 'dark' ? '#1f2937' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#1f2937',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+          &lt;
         </button>
-        <div className={`text-xs sm:text-sm font-semibold ${
-          theme === 'dark' ? 'text-white' : 'text-gray-800'
-        }`}>
+        <div style={{
+          fontSize: '14px',
+          fontWeight: '600',
+          color: theme === 'dark' ? '#fff' : '#1f2937'
+        }}>
           {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </div>
         <button
           onClick={goToNextMonth}
-          className={`p-1 rounded-lg ${
-            theme === 'dark'
-              ? 'text-gray-300 hover:bg-gray-700'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
+          style={{
+            padding: '4px 12px',
+            border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+            borderRadius: '4px',
+            background: theme === 'dark' ? '#1f2937' : '#fff',
+            color: theme === 'dark' ? '#fff' : '#1f2937',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+          &gt;
         </button>
       </div>
-  
+
       {/* 星期标题 */}
-      <div className="grid grid-cols-7 gap-0.5 mb-1 overflow-hidden">
+      <ol style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(7, 1fr)',
+        gap: '1px',
+        padding: '4px 0',
+        margin: '0',
+        listStyle: 'none',
+        backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6'
+      }}>
         {dayNames.map((day, index) => (
-          <div
-            key={day}
-            className={`text-center text-[0.6rem] font-medium py-0.5 ${
-              index === 0 ? 'text-red-500 dark:text-red-400' : 
-              index === 6 ? 'text-blue-500 dark:text-blue-400' : 
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-            }`}
-          >
+          <li key={day} style={{
+            textAlign: 'center',
+            fontSize: '10px',
+            color: index === 0 ? '#ef4444' : index === 6 ? '#3b82f6' : theme === 'dark' ? '#9ca3af' : '#6b7280',
+            padding: '4px 0'
+          }}>
             {day}
-          </div>
+          </li>
         ))}
-      </div>
-  
-      {/* 日历网格 - 紧凑版 */}
-      <div className="grid grid-cols-7 gap-0.5 w-full max-w-full overflow-hidden">
+      </ol>
+
+      {/* 日历网格 */}
+      <ol style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(7, 1fr)',
+        gap: '1px',
+        padding: '0',
+        margin: '0',
+        listStyle: 'none',
+        backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6'
+      }}>
         {monthData.map((day, index) => {
-          let bgClass = '';
           let indicator = null;
-  
-          if (day.isPredictedPeriod) {
-            bgClass = 'bg-pink-100 dark:bg-pink-900/30';
-          } else if (day.isOvulation) {
-            bgClass = 'bg-yellow-100 dark:bg-yellow-900/30';
-          } else if (day.isFertile) {
-            bgClass = 'bg-purple-100 dark:bg-purple-900/30';
-          } else if (day.isPMS) {
-            bgClass = 'bg-orange-100 dark:bg-orange-900/30';
+
+          if (day.isPredictedPeriod && day.isCurrentMonth) {
+            indicator = <span style={{
+              width: '6px',
+              height: '6px',
+              backgroundColor: '#ec4899',
+              borderRadius: '50%',
+              position: 'absolute',
+              bottom: '2px'
+            }}></span>;
+          } else if (day.isOvulation && day.isCurrentMonth) {
+            indicator = <span style={{
+              width: '6px',
+              height: '6px',
+              backgroundColor: '#eab308',
+              borderRadius: '50%',
+              position: 'absolute',
+              bottom: '2px'
+            }}></span>;
+          } else if (day.isFertile && day.isCurrentMonth) {
+            indicator = <span style={{
+              width: '6px',
+              height: '6px',
+              backgroundColor: '#a855f7',
+              borderRadius: '50%',
+              position: 'absolute',
+              bottom: '2px'
+            }}></span>;
           }
-  
-          // 日期指示器
-          if (day.isPredictedPeriod) {
-            indicator = <div className="w-1 h-1 rounded-full bg-pink-500 absolute top-0.5 right-0.5" title="预测经期"></div>;
-          } else if (day.isOvulation) {
-            indicator = <div className="w-1 h-1 rounded-full bg-yellow-500 absolute top-0.5 right-0.5" title="排卵期"></div>;
-          } else if (day.isFertile) {
-            indicator = <div className="w-1 h-1 rounded-full bg-purple-500 absolute top-0.5 right-0.5" title="受孕期"></div>;
-          }
-  
+
           return (
-            <div
+            <li
               key={index}
               onClick={() => handleDayClick(day)}
-              className={`
-                relative p-0.5 text-[0.6rem] rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden
-                ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900' : ''}
-                ${day.isToday ? 'bg-pink-500 text-white' : ''}
-                ${day.isWeekend && !bgClass ? 'bg-gray-50 dark:bg-gray-900' : ''}
-                ${bgClass}
-                hover:bg-pink-100 dark:hover:bg-pink-900/40
-              `}
-              style={{ minHeight: '1.8rem' }}
+              style={{
+                backgroundColor: day.isToday
+                  ? '#ec4899'
+                  : (theme === 'dark' ? '#1f2937' : '#fff'),
+                padding: '0',
+                position: 'relative',
+                cursor: 'pointer',
+                minHeight: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
             >
-              <div className="font-medium text-center truncate w-full">{day.date.getDate()}</div>
-                
-              {/* 预测指示器 */}
-              {indicator}
-            </div>
+              <div style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                padding: '4px'
+              }}>
+                <span style={{
+                  fontSize: '12px',
+                  fontWeight: day.isToday ? 'bold' : 'normal',
+                  color: !day.isCurrentMonth
+                    ? (theme === 'dark' ? '#4b5563' : '#9ca3af')
+                    : day.isToday
+                    ? '#fff'
+                    : (theme === 'dark' ? '#fff' : '#1f2937')
+                }}>
+                  {day.date.getDate()}
+                </span>
+                {indicator}
+              </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
 
       {/* 图例 */}
-      <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded bg-pink-500"></div>
-          <span className="text-xs text-gray-600 dark:text-gray-400">经期</span>
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '12px',
+        padding: '12px',
+        borderTop: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{
+            width: '12px',
+            height: '12px',
+            backgroundColor: '#ec4899',
+            borderRadius: '50%',
+            marginRight: '4px'
+          }}></div>
+          <span style={{
+            fontSize: '11px',
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+          }}>经期</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded bg-yellow-500"></div>
-          <span className="text-xs text-gray-600 dark:text-gray-400">排卵期</span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{
+            width: '12px',
+            height: '12px',
+            backgroundColor: '#eab308',
+            borderRadius: '50%',
+            marginRight: '4px'
+          }}></div>
+          <span style={{
+            fontSize: '11px',
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+          }}>排卵期</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded bg-purple-500"></div>
-          <span className="text-xs text-gray-600 dark:text-gray-400">受孕期</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded bg-orange-500"></div>
-          <span className="text-xs text-gray-600 dark:text-gray-400">经前症状期</span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{
+            width: '12px',
+            height: '12px',
+            backgroundColor: '#a855f7',
+            borderRadius: '50%',
+            marginRight: '4px'
+          }}></div>
+          <span style={{
+            fontSize: '11px',
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+          }}>受孕期</span>
         </div>
       </div>
     </div>
@@ -584,70 +674,155 @@ const PeriodTrackerPage = () => {
     today >= cyclePrediction.fertileWindowStart && today <= cyclePrediction.fertileWindowEnd;
 
   return (
-    <div className={`period-tracker-page min-h-screen pb-32 px-4 md:px-6 bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 dark:from-gray-900 dark:via-pink-900/30 dark:to-red-900/30 ${theme}`}>
+    <div style={{
+      minHeight: '100vh',
+      paddingBottom: '128px',
+      padding: '0 16px',
+      backgroundColor: theme === 'dark' ? '#111827' : '#fdf2f8'
+    }}>
       {/* 导航标题栏 - 优化版 */}
-      <div className="bg-gradient-to-r from-pink-500/90 to-rose-600/90 text-white shadow-lg sticky top-0 z-40 backdrop-blur-md">
-        <div className="container mx-auto px-1 py-3 md:py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm">
-                <span className="text-xl md:text-2xl">🌺</span>
+      <div style={{
+        background: 'linear-gradient(to right, rgba(236, 72, 153, 0.9), rgba(225, 29, 72, 0.9))',
+        color: '#fff',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        backdropFilter: 'blur(8px)',
+        margin: '0 -16px',
+        marginBottom: '16px'
+      }}>
+        <div style={{
+          padding: '12px 16px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                padding: '6px',
+                borderRadius: '8px',
+                backdropFilter: 'blur(4px)'
+              }}>
+                <span style={{ fontSize: '20px' }}>🌺</span>
               </div>
-              <h1 className="text-lg md:text-xl font-bold whitespace-nowrap tracking-wide text-shadow-sm">
+              <h1 style={{
+                fontSize: '18px',
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+                letterSpacing: '0.5px',
+                margin: 0
+              }}>
                 经期助手
               </h1>
             </div>
 
             <button
               onClick={() => setSelectedDate(new Date())}
-              className="group relative flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 active:bg-white/30 
-                border border-white/20 rounded-full transition-all duration-300 shadow-sm hover:shadow-md
-                text-sm font-medium whitespace-nowrap overflow-hidden min-w-[80px] max-w-[100px]"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '9999px',
+                fontSize: '14px',
+                fontWeight: '500',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                color: '#fff',
+                cursor: 'pointer',
+                transition: 'all 0.3s'
+              }}
             >
-              <span className="relative z-10 flex items-center gap-1">
-                <span className="text-base">✏️</span>
-                <span className="hidden md:inline">记录今日</span>
-                <span className="md:hidden">今日</span>
-              </span>
-              <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+              <span>✏️ 今日</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* 主内容区 */}
-      <div className="container mx-auto px-1 py-6 max-w-4xl space-y-6">
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px'
+      }}>
         {/* 当前周期阶段卡片 */}
         {currentPhase && (
-          <div className="bg-gradient-to-br from-pink-500 to-rose-600 text-white rounded-2xl shadow-2xl p-4 md:p-6">
-            <div className="flex items-center justify-between mb-4">
+          <div style={{
+            background: 'linear-gradient(135deg, #ec4899, #e11d48)',
+            color: '#fff',
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '16px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px'
+            }}>
               <div>
-                <h2 className="text-2xl font-bold mb-2">当前阶段</h2>
-                <div className="text-4xl font-bold">{phaseNames[currentPhase]}</div>
+                <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 8px 0' }}>
+                  当前阶段
+                </h2>
+                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
+                  {phaseNames[currentPhase]}
+                </div>
               </div>
-              <div className="text-6xl md:text-8xl opacity-20">🌸</div>
+              <div style={{ fontSize: '48px', opacity: 0.2 }}>🌸</div>
             </div>
 
             {/* 周期阶段指示条 */}
-            <div className="flex justify-between items-center h-2 bg-white/30 rounded-full overflow-hidden">
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              height: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              borderRadius: '9999px',
+              overflow: 'hidden'
+            }}>
               <div
-                className={`h-full ${currentPhase === 'menstrual' ? 'bg-white' : 'bg-white/50'}`}
-                style={{ width: '18%' }}
+                style={{
+                  height: '100%',
+                  backgroundColor: currentPhase === 'menstrual' ? '#fff' : 'rgba(255, 255, 255, 0.5)',
+                  width: '18%'
+                }}
               ></div>
               <div
-                className={`h-full ${currentPhase === 'follicular' ? 'bg-white' : 'bg-white/50'}`}
-                style={{ width: '32%' }}
+                style={{
+                  height: '100%',
+                  backgroundColor: currentPhase === 'follicular' ? '#fff' : 'rgba(255, 255, 255, 0.5)',
+                  width: '32%'
+                }}
               ></div>
               <div
-                className={`h-full ${currentPhase === 'ovulation' ? 'bg-white' : 'bg-white/50'}`}
-                style={{ width: '32%' }}
+                style={{
+                  height: '100%',
+                  backgroundColor: currentPhase === 'ovulation' ? '#fff' : 'rgba(255, 255, 255, 0.5)',
+                  width: '32%'
+                }}
               ></div>
               <div
-                className={`h-full ${currentPhase === 'luteal' ? 'bg-white' : 'bg-white/50'}`}
-                style={{ width: '18%' }}
+                style={{
+                  height: '100%',
+                  backgroundColor: currentPhase === 'luteal' ? '#fff' : 'rgba(255, 255, 255, 0.5)',
+                  width: '18%'
+                }}
               ></div>
             </div>
-            <div className="flex justify-between text-xs mt-2 opacity-90">
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: '11px',
+              marginTop: '8px',
+              opacity: 0.9
+            }}>
               <span>月经期</span>
               <span>卵泡期</span>
               <span>排卵期</span>
@@ -656,40 +831,95 @@ const PeriodTrackerPage = () => {
           </div>
         )}
 
-        {/* 今日状态卡片 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 ${isTodayInPredictedPeriod ? 'border-2 border-pink-500' : 'border border-gray-200 dark:border-gray-700'}`}>
-            <div className="text-center">
-              <div className="text-3xl mb-2">📅</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">今日状态</div>
-              <div className="text-lg font-semibold text-pink-600 dark:text-pink-400">
+        {/* 今日状态卡片 - 优化为2个一行 */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* 第一行：今日状态 + 排卵期 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div style={{
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+              borderRadius: '8px',
+              padding: '16px',
+              border: isTodayInPredictedPeriod ? '2px solid #ec4899' : `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>📅</div>
+              <div style={{
+                fontSize: '12px',
+                color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                marginBottom: '4px'
+              }}>今日状态</div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#ec4899'
+              }}>
                 {isTodayInPredictedPeriod ? '经期' : '非经期'}
               </div>
             </div>
-          </div>
-          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 ${isTodayInOvulation ? 'border-2 border-yellow-500' : 'border border-gray-200 dark:border-gray-700'}`}>
-            <div className="text-center">
-              <div className="text-3xl mb-2">🌸</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">排卵期</div>
-              <div className="text-lg font-semibold text-yellow-600 dark:text-yellow-400">
+            <div style={{
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+              borderRadius: '8px',
+              padding: '16px',
+              border: isTodayInOvulation ? '2px solid #eab308' : `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>🌸</div>
+              <div style={{
+                fontSize: '12px',
+                color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                marginBottom: '4px'
+              }}>排卵期</div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#eab308'
+              }}>
                 {isTodayInOvulation ? '是' : '否'}
               </div>
             </div>
           </div>
-          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 ${isTodayInFertile ? 'border-2 border-purple-500' : 'border border-gray-200 dark:border-gray-700'}`}>
-            <div className="text-center">
-              <div className="text-3xl mb-2">💫</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">受孕期</div>
-              <div className="text-lg font-semibold text-purple-600 dark:text-purple-400">
+
+          {/* 第二行：受孕期 + 下次经期 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div style={{
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+              borderRadius: '8px',
+              padding: '16px',
+              border: isTodayInFertile ? '2px solid #a855f7' : `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>💫</div>
+              <div style={{
+                fontSize: '12px',
+                color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                marginBottom: '4px'
+              }}>受孕期</div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#a855f7'
+              }}>
                 {isTodayInFertile ? '是' : '否'}
               </div>
             </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="text-center">
-              <div className="text-3xl mb-2">⏰</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">下次经期</div>
-              <div className="text-lg font-semibold text-gray-800 dark:text-white">
+            <div style={{
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+              borderRadius: '8px',
+              padding: '16px',
+              border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>⏰</div>
+              <div style={{
+                fontSize: '12px',
+                color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                marginBottom: '4px'
+              }}>下次经期</div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: theme === 'dark' ? '#fff' : '#1f2937'
+              }}>
                 {cyclePrediction ? cyclePrediction.daysUntilNext : '-'} 天
               </div>
             </div>
@@ -713,15 +943,38 @@ const PeriodTrackerPage = () => {
 
         {/* 健康建议 */}
         {currentPhase && (
-          <div className="bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl p-4 md:p-6 border border-pink-200 dark:border-pink-800">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+          <div style={{
+            background: theme === 'dark' ? 'rgba(236, 72, 153, 0.1)' : 'rgba(252, 231, 243, 1)',
+            borderRadius: '8px',
+            padding: '16px',
+            border: `1px solid ${theme === 'dark' ? 'rgba(236, 72, 153, 0.3)' : 'rgba(251, 207, 232, 1)'}`
+          }}>
+            <h3 style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: theme === 'dark' ? '#fff' : '#1f2937',
+              margin: '0 0 12px 0'
+            }}>
               健康建议
             </h3>
-            <ul className="space-y-3">
+            <ul style={{
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
               {getHealthAdvice(currentPhase).map((advice, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-2xl mr-3">💡</span>
-                  <p className="text-gray-700 dark:text-gray-300">{advice}</p>
+                <li key={index} style={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '20px', marginRight: '8px' }}>💡</span>
+                  <p style={{
+                    margin: 0,
+                    color: theme === 'dark' ? '#d1d5db' : '#374151',
+                    fontSize: '13px'
+                  }}>
+                    {advice}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -729,41 +982,98 @@ const PeriodTrackerPage = () => {
         )}
 
         {/* 周期设置 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
-          <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+        <div style={{
+          backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+          borderRadius: '8px',
+          padding: '16px',
+          border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`
+        }}>
+          <h3 style={{
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: theme === 'dark' ? '#fff' : '#1f2937',
+            margin: '0 0 12px 0'
+          }}>
             周期设置
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '12px',
+            marginBottom: '12px'
+          }}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label style={{
+                display: 'block',
+                fontSize: '12px',
+                fontWeight: '500',
+                marginBottom: '6px',
+                color: theme === 'dark' ? '#d1d5db' : '#374151'
+              }}>
                 平均周期天数
               </label>
               <input
                 type="number"
                 value={cycleData.averageCycle}
                 onChange={(e) => setCycleData({ ...cycleData, averageCycle: parseInt(e.target.value) || 28 })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white dark:bg-gray-700"
                 min="20"
                 max="45"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme === 'dark' ? '#374151' : '#fff',
+                  color: theme === 'dark' ? '#fff' : '#1f2937',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label style={{
+                display: 'block',
+                fontSize: '12px',
+                fontWeight: '500',
+                marginBottom: '6px',
+                color: theme === 'dark' ? '#d1d5db' : '#374151'
+              }}>
                 经期持续天数
               </label>
               <input
                 type="number"
                 value={cycleData.periodLength}
                 onChange={(e) => setCycleData({ ...cycleData, periodLength: parseInt(e.target.value) || 5 })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white dark:bg-gray-700"
                 min="2"
                 max="10"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme === 'dark' ? '#374151' : '#fff',
+                  color: theme === 'dark' ? '#fff' : '#1f2937',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
               />
             </div>
           </div>
           <button
             onClick={handleUpdateSettings}
-            className="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+            style={{
+              width: '100%',
+              background: 'linear-gradient(to right, #ec4899, #e11d48)',
+              color: '#fff',
+              padding: '12px',
+              borderRadius: '6px',
+              fontWeight: '600',
+              fontSize: '14px',
+              border: 'none',
+              cursor: 'pointer'
+            }}
           >
             保存设置
           </button>
@@ -771,18 +1081,55 @@ const PeriodTrackerPage = () => {
 
         {/* 历史记录 */}
         {periodHistory.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+          <div style={{
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            borderRadius: '8px',
+            padding: '16px',
+            border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`
+          }}>
+            <h3 style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: theme === 'dark' ? '#fff' : '#1f2937',
+              margin: '0 0 12px 0'
+            }}>
               历史记录
             </h3>
-            <div className="space-y-3 max-h-60 overflow-y-auto">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              maxHeight: '240px',
+              overflowY: 'auto'
+            }}>
               {periodHistory.slice(-10).reverse().map((record, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-pink-500 mr-3"></div>
-                    <span className="text-gray-800 dark:text-white">{record.date}</span>
+                <div key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px',
+                  backgroundColor: theme === 'dark' ? 'rgba(75, 85, 99, 0.3)' : '#f9fafb',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#ec4899',
+                      borderRadius: '50%',
+                      marginRight: '12px'
+                    }}></div>
+                    <span style={{
+                      color: theme === 'dark' ? '#fff' : '#1f2937',
+                      fontSize: '13px'
+                    }}>
+                      {record.date}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <span style={{
+                    fontSize: '12px',
+                    color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+                  }}>
                     周期: {record.averageCycle}天，经期: {record.periodLength}天
                   </span>
                 </div>
@@ -794,30 +1141,89 @@ const PeriodTrackerPage = () => {
 
       {/* 记录经期弹窗 */}
       {selectedDate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedDate(null)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">记录经期</h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50
+        }} onClick={() => setSelectedDate(null)}>
+          <div style={{
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '24px',
+            maxWidth: '400px',
+            width: 'calc(100% - 32px)',
+            margin: '0 16px'
+          }} onClick={e => e.stopPropagation()}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: theme === 'dark' ? '#fff' : '#1f2937',
+              margin: '0 0 16px 0'
+            }}>
+              记录经期
+            </h3>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '13px',
+                fontWeight: '500',
+                marginBottom: '6px',
+                color: theme === 'dark' ? '#d1d5db' : '#374151'
+              }}>
                 选择日期
               </label>
               <input
                 type="date"
                 value={selectedDate.toISOString().split('T')[0]}
                 onChange={(e) => setSelectedDate(new Date(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white dark:bg-gray-700"
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme === 'dark' ? '#374151' : '#fff',
+                  color: theme === 'dark' ? '#fff' : '#1f2937',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
               />
             </div>
-            <div className="flex justify-end space-x-3">
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px'
+            }}>
               <button
                 onClick={() => setSelectedDate(null)}
-                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  color: theme === 'dark' ? '#d1d5db' : '#6b7280',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
               >
                 取消
               </button>
               <button
                 onClick={handleRecordPeriod}
-                className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600"
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  backgroundColor: '#ec4899',
+                  color: '#fff',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
               >
                 确定
               </button>

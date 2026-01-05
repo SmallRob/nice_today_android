@@ -1,0 +1,467 @@
+.unified-document-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--bg-color, #ffffff);
+  color: var(--text-color, #333333);
+}
+
+.unified-document-viewer.dark {
+  --bg-color: #1a1a1a;
+  --text-color: #e0e0e0;
+  --header-bg: #2d2d2d;
+  --button-bg: #444444;
+  --button-hover-bg: #555555;
+  --button-text: #ffffff;
+  --item-bg: #2d2d2d;
+  --item-hover-bg: #3d3d3d;
+  --border-color: #444444;
+  --tab-active: #4a90d9;
+}
+
+.unified-document-viewer.light {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --header-bg: #f5f5f5;
+  --button-bg: #e0e0e0;
+  --button-hover-bg: #d0d0d0;
+  --button-text: #333333;
+  --item-bg: #f0f0f0;
+  --item-hover-bg: #e0e0e0;
+  --border-color: #ddd;
+  --tab-active: #4a90d9;
+}
+
+/* 顶部标题栏 */
+.viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.viewer-header .back-button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.viewer-header .back-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.viewer-header .back-icon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.header-title {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 16px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.select-file-button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.select-file-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* 标签导航 */
+.tab-navigation {
+  display: flex;
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 60px;
+  z-index: 99;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button:hover {
+  background-color: var(--item-hover-bg);
+}
+
+.tab-button.active {
+  color: var(--tab-active);
+  border-bottom-color: var(--tab-active);
+}
+
+/* 内容区域 */
+.viewer-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--bg-color);
+}
+
+/* 文档阅读器内容 */
+.document-content-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: var(--bg-color);
+}
+
+/* 文档列表 */
+.document-list-container {
+  padding: 16px;
+}
+
+.list-header,
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.list-header h2,
+.history-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.clear-button {
+  background-color: #ff4757;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clear-button:hover {
+  background-color: #ff3742;
+}
+
+/* 文件夹分组 */
+.folder-section {
+  margin-bottom: 24px;
+}
+
+.folder-name {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+  padding: 8px 12px;
+  background-color: var(--header-bg);
+  border-radius: 6px;
+}
+
+/* 文档列表项 */
+.document-list,
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.document-item,
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background-color: var(--item-bg);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.document-item:hover,
+.history-item:hover {
+  background-color: var(--item-hover-bg);
+}
+
+.document-item-content,
+.history-item-content {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
+.document-item-icon,
+.history-item-icon {
+  font-size: 24px;
+  margin-right: 12px;
+}
+
+.document-item-info,
+.history-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-item-title,
+.history-item-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-item-path,
+.history-item-path {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-item-time,
+.history-item-time {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.delete-button {
+  background-color: #ff6b81;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.delete-button:hover {
+  background-color: #ff4757;
+}
+
+/* 列表底部 */
+.list-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--header-bg);
+  border-top: 1px solid var(--border-color);
+  position: sticky;
+  bottom: 0;
+}
+
+/* 按钮组 */
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.primary-button {
+  background-color: var(--tab-active);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.primary-button:hover {
+  opacity: 0.9;
+}
+
+.secondary-button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.secondary-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  color: var(--text-color);
+  padding: 24px;
+}
+
+.empty-state .empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.empty-state p {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.empty-state .empty-subtext {
+  color: #888;
+  font-size: 14px;
+}
+
+/* 适配移动端 */
+@media (max-width: 768px) {
+  .viewer-header {
+    padding: 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-title {
+    font-size: 16px;
+    padding: 0;
+  }
+
+  .tab-navigation {
+    top: auto;
+  }
+
+  .tab-button {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .document-item,
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .document-item-content,
+  .history-item-content {
+    width: 100%;
+  }
+
+  .delete-button {
+    align-self: flex-end;
+    margin-left: 0;
+  }
+
+  .list-footer {
+    flex-direction: column;
+  }
+
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+  }
+}
+
+/* Markdown 内容样式 */
+.markdown-content {
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: var(--text-color);
+}
+
+.markdown-content p {
+  margin-bottom: 1em;
+  color: var(--text-color);
+}
+
+.markdown-content pre {
+  background-color: var(--button-bg);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.markdown-content code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background-color: var(--button-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid #ddd;
+  padding-left: 16px;
+  margin: 16px 0;
+  color: #666;
+}
+
+.text-content {
+  white-space: pre-wrap;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  color: var(--text-color);
+}

@@ -60,21 +60,51 @@ const OrganRhythmPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/30 dark:to-pink-900/30">
       {/* 导航标题栏 */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => window.history.back()}
-              className="text-white hover:text-purple-100 flex items-center text-lg"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">器官节律养生</h1>
-            <div className="w-6 h-6"></div>
-          </div>
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        background: 'linear-gradient(to right, #9333ea, #4f46e5)',
+        color: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        height: '60px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          height: '100%'
+        }}>
+          <button
+            onClick={() => window.history.back()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: '16px'
+            }}
+          >
+            <svg style={{ width: '24px', height: '24px', marginRight: '8px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            返回
+          </button>
+          <h1 style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            器官节律养生
+          </h1>
+          <div style={{ width: '24px', height: '24px' }}></div>
         </div>
       </div>
 

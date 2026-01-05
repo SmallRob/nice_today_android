@@ -37,21 +37,51 @@ const PersonalityTestPage = () => {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-900/30 dark:to-pink-900/30 ${theme}`}>
       {/* 导航标题栏 */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => window.history.back()}
-              className="text-white hover:text-indigo-100 flex items-center"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">性格测试中心</h1>
-            <div className="w-12"></div>
-          </div>
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        background: 'linear-gradient(to right, #4f46e5, #9333ea)',
+        color: '#ffffff',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        height: '60px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          height: '100%'
+        }}>
+          <button
+            onClick={() => window.history.back()}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: '16px'
+            }}
+          >
+            <svg style={{ width: '24px', height: '24px', marginRight: '8px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            返回
+          </button>
+          <h1 style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            性格测试中心
+          </h1>
+          <div style={{ width: '48px' }}></div>
         </div>
       </div>
 

@@ -228,26 +228,65 @@ const DressGuidePage = () => {
         .hide-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
       {/* 导航标题栏 */}
-      <div className={`bg-gradient-to-r ${seasonalStyles.gradient} text-white shadow-lg sticky top-0 z-40`}>
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-white hover:text-white/80 flex items-center"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">穿衣指南</h1>
-            <button
-              onClick={() => navigate('/body-metrics')}
-              className="text-white hover:text-white/80 text-sm"
-            >
-              身体指标
-            </button>
-          </div>
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        background: 'linear-gradient(to right, #9333ea, #4f46e5)',
+        color: '#ffffff',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        height: '60px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          height: '100%'
+        }}>
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: '16px'
+            }}
+          >
+            <svg style={{ width: '24px', height: '24px', marginRight: '8px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            返回
+          </button>
+          <h1 style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            穿衣指南
+          </h1>
+          <button
+            onClick={() => navigate('/body-metrics')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: '14px'
+            }}
+          >
+            身体指标
+          </button>
         </div>
       </div>
 

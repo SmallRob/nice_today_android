@@ -1,155 +1,492 @@
-/* 黄历组件优化样式 */
+/* 黄历组件优化样式 - 参考 MayaCalendarLitePage.js 设计 */
 
-/* 针对黄历日历网格的优化 */
-.huangli-component {
+/* ==================== 基础容器样式 ==================== */
+.huangli-calendar {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
-}
-
-.huangli-component .grid {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
-
-.huangli-component .grid-cols-7 {
-  grid-template-columns: repeat(7, 1fr);
-  gap: clamp(1px, 0.3vw, 2px);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.huangli-component .relative {
-  min-width: 0;
-  flex-shrink: 1;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==================== 日期网格布局 ==================== */
+.huangli-calendar .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  width: 100%;
   box-sizing: border-box;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: #f3f4f6;
 }
 
-.huangli-component .p-0\\.5 {
-  padding: clamp(0.1rem, 0.5vw, 0.2rem);
+.huangli-calendar.dark .calendar-grid {
+  background-color: #374151;
+}
+
+/* ==================== 星期标题 ==================== */
+.huangli-calendar .week-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: #f3f4f6;
+  padding: 4px 0;
+}
+
+.huangli-calendar.dark .week-days {
+  background-color: #374151;
+}
+
+.huangli-calendar .week-days li {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 4px 0;
+}
+
+.huangli-calendar.dark .week-days li {
+  color: #9ca3af;
+}
+
+.huangli-calendar .week-days li:first-child {
+  color: #ef4444;
+}
+
+.huangli-calendar.dark .week-days li:first-child {
+  color: #f87171;
+}
+
+.huangli-calendar .week-days li:last-child {
+  color: #3b82f6;
+}
+
+.huangli-calendar.dark .week-days li:last-child {
+  color: #60a5fa;
+}
+
+/* ==================== 日期单元格 ==================== */
+.huangli-calendar .day-cell {
+  background-color: #ffffff;
+  padding: 0;
+  position: relative;
+  cursor: pointer;
+  min-height: 44px; /* 移动端触摸友好 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
   box-sizing: border-box;
+  aspect-ratio: 1; /* 保持正方形 */
 }
 
-.huangli-component .text-\\[0\\.6rem\\] {
-  font-size: clamp(0.5rem, 1.5vw, 0.6rem);
+.huangli-calendar.dark .day-cell {
+  background-color: #1f2937;
 }
 
-.huangli-component .text-\\[0\\.5rem\\] {
-  font-size: clamp(0.4rem, 1.2vw, 0.5rem);
+.huangli-calendar .day-cell:active {
+  transform: scale(0.95);
+  background-color: #f3f4f6;
 }
 
-.huangli-component .min-h-20 {
-  min-height: clamp(1.5rem, 4vw, 2rem);
-  box-sizing: border-box;
+.huangli-calendar.dark .day-cell:active {
+  background-color: #374151;
 }
 
-/* 针对小屏幕的优化 */
-@media (max-width: 480px) {
-  .huangli-component .grid-cols-7 {
-    gap: 1px;
-  }
-  
-  .huangli-component .text-\\[0\\.6rem\\] {
-    font-size: clamp(0.45rem, 1.4vw, 0.55rem);
-  }
-  
-  .huangli-component .text-\\[0\\.5rem\\] {
-    font-size: clamp(0.4rem, 1.1vw, 0.45rem);
-  }
-  
-  .huangli-component .min-h-20 {
-    min-height: clamp(1.2rem, 3.5vw, 1.8rem);
-  }
-  
-  .huangli-component .p-0\\.5 {
-    padding: clamp(0.05rem, 0.3vw, 0.15rem);
-  }
+/* ==================== 日期内容 ==================== */
+.huangli-calendar .day-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 4px;
 }
 
-/* 针对平板设备的优化 */
-@media (min-width: 481px) and (max-width: 768px) {
-  .huangli-component .text-\\[0\\.6rem\\] {
-    font-size: clamp(0.5rem, 1.6vw, 0.6rem);
-  }
-  
-  .huangli-component .text-\\[0\\.5rem\\] {
-    font-size: clamp(0.45rem, 1.3vw, 0.5rem);
-  }
-  
-  .huangli-component .min-h-20 {
-    min-height: clamp(1.4rem, 3.8vw, 1.9rem);
-  }
+.huangli-calendar .day-number {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
 }
 
-/* 针对农历文字的优化 */
-.huangli-component .truncate {
+.huangli-calendar.dark .day-number {
+  color: #ffffff;
+}
+
+.huangli-calendar .lunar-text {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 2px;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
 }
 
-.huangli-component .whitespace-nowrap {
-  white-space: nowrap;
+.huangli-calendar.dark .lunar-text {
+  color: #9ca3af;
+}
+
+/* ==================== 农历节日 ==================== */
+.huangli-calendar .festival {
+  font-size: 9px;
+  color: #ef4444;
+  margin-top: 2px;
+  text-align: center;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   max-width: 100%;
+  font-weight: 600;
 }
 
-/* 防止内容溢出 */
-.huangli-component .rounded-xl,
-.huangli-component .shadow-lg,
-.huangli-component .overflow-hidden {
-  width: 100%;
-  max-width: 100vw;
-  box-sizing: border-box;
-  overflow-x: hidden;
+.huangli-calendar.dark .festival {
+  color: #f87171;
 }
 
-/* 优化flex容器 */
-.huangli-component .flex,
-.huangli-component .flex-col,
-.huangli-component .flex-wrap {
-  min-width: 0;
-  flex-shrink: 1;
-  box-sizing: border-box;
+/* ==================== 选中状态 ==================== */
+.huangli-calendar .day-cell.selected {
+  background-color: #3b82f6;
 }
 
-/* 优化卡片内容 */
-.huangli-component .p-3,
-.huangli-component .p-2 {
-  box-sizing: border-box;
-  width: 100%;
+.huangli-calendar .day-cell.selected .day-number,
+.huangli-calendar .day-cell.selected .lunar-text,
+.huangli-calendar .day-cell.selected .festival {
+  color: #ffffff;
+  filter: grayscale(1) brightness(2);
+}
+
+/* ==================== 今天状态 ==================== */
+.huangli-calendar .day-cell.today {
+  background-color: #dbeafe;
+  border: 2px solid #3b82f6;
+}
+
+.huangli-calendar.dark .day-cell.today {
+  background-color: #1e40af;
+  border: 2px solid #3b82f6;
+}
+
+.huangli-calendar .day-cell.today .day-number {
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.huangli-calendar.dark .day-cell.today .day-number {
+  color: #ffffff;
+}
+
+/* ==================== 非本月日期 ==================== */
+.huangli-calendar .day-cell.other-month {
+  opacity: 0.3;
+  background-color: #f9fafb;
+}
+
+.huangli-calendar.dark .day-cell.other-month {
+  opacity: 0.3;
+  background-color: #111827;
+}
+
+.huangli-calendar .day-cell.other-month .day-number,
+.huangli-calendar .day-cell.other-month .lunar-text {
+  color: #9ca3af;
+}
+
+/* ==================== 周末样式 ==================== */
+.huangli-calendar .day-cell.weekend .day-number {
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.huangli-calendar.dark .day-cell.weekend .day-number {
+  color: #f87171;
+}
+
+/* ==================== 标记点 ==================== */
+.huangli-calendar .marker-dot {
+  position: absolute;
+  bottom: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.huangli-calendar .day-cell.selected .marker-dot {
+  filter: grayscale(1) brightness(2);
+}
+
+/* ==================== 月份导航 ==================== */
+.huangli-calendar .calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.huangli-calendar .nav-button {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+  font-size: 14px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.huangli-calendar.dark .nav-button {
+  border-color: #4b5563;
+  color: #ffffff;
+}
+
+.huangli-calendar .nav-button:active {
+  transform: scale(0.95);
+  background-color: #f3f4f6;
+}
+
+.huangli-calendar.dark .nav-button:active {
+  background-color: #374151;
+}
+
+.huangli-calendar .calendar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.huangli-calendar.dark .calendar-title {
+  color: #ffffff;
+}
+
+/* ==================== 响应式设计 - 小屏幕优化 ==================== */
+@media (max-width: 480px) {
+  .huangli-calendar .day-cell {
+    min-height: 40px;
+  }
+
+  .huangli-calendar .day-number {
+    font-size: 12px;
+  }
+
+  .huangli-calendar .lunar-text {
+    font-size: 9px;
+  }
+
+  .huangli-calendar .festival {
+    font-size: 8px;
+  }
+
+  .huangli-calendar .week-days li {
+    font-size: 10px;
+    padding: 3px 0;
+  }
+
+  .huangli-calendar .calendar-nav {
+    padding: 6px 8px;
+  }
+
+  .huangli-calendar .nav-button {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .huangli-calendar .calendar-title {
+    font-size: 14px;
+  }
+}
+
+/* ==================== 响应式设计 - 超小屏幕 ==================== */
+@media (max-width: 360px) {
+  .huangli-calendar .day-cell {
+    min-height: 36px;
+  }
+
+  .huangli-calendar .day-number {
+    font-size: 11px;
+  }
+
+  .huangli-calendar .lunar-text {
+    font-size: 8px;
+  }
+
+  .huangli-calendar .festival {
+    font-size: 7px;
+  }
+
+  .huangli-calendar .week-days li {
+    font-size: 9px;
+    padding: 2px 0;
+  }
+}
+
+/* ==================== 响应式设计 - 平板优化 ==================== */
+@media (min-width: 481px) and (max-width: 768px) {
+  .huangli-calendar .day-cell {
+    min-height: 48px;
+  }
+
+  .huangli-calendar .day-number {
+    font-size: 14px;
+  }
+
+  .huangli-calendar .lunar-text {
+    font-size: 11px;
+  }
+
+  .huangli-calendar .week-days li {
+    font-size: 12px;
+  }
+}
+
+/* ==================== 响应式设计 - 桌面端 ==================== */
+@media (min-width: 769px) {
+  .huangli-calendar .day-cell {
+    min-height: 52px;
+  }
+
+  .huangli-calendar .day-number {
+    font-size: 15px;
+  }
+
+  .huangli-calendar .lunar-text {
+    font-size: 12px;
+  }
+
+  .huangli-calendar .festival {
+    font-size: 10px;
+  }
+
+  .huangli-calendar .week-days li {
+    font-size: 13px;
+  }
+}
+
+/* ==================== 防止内容溢出 ==================== */
+.huangli-calendar .day-content,
+.huangli-calendar .lunar-text,
+.huangli-calendar .festival {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   max-width: 100%;
-}
-
-/* 针对安全区域的适配 */
-.huangli-component .safe-area-top {
-  padding-top: env(safe-area-inset-top, 0);
-}
-
-.huangli-component .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-/* 针对文本溢出的处理 */
-.huangli-component .text-xs,
-.huangli-component .text-sm {
-  font-size: clamp(0.6rem, 1.8vw, 0.8rem);
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
-.huangli-component .text-base {
-  font-size: clamp(0.8rem, 2.2vw, 1rem);
+/* ==================== 优化触摸交互 ==================== */
+.huangli-calendar .day-cell {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
-/* 优化滚动容器 */
-.huangli-component .overflow-x-auto {
-  -webkit-overflow-scrolling: touch;
-  max-width: 100%;
+/* ==================== 安全区域适配 ==================== */
+.huangli-calendar .safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.huangli-calendar .safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* ==================== 滚动容器优化 ==================== */
+.huangli-calendar .scroll-container {
   overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+/* ==================== 动画效果 ==================== */
+.huangli-calendar .day-cell {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ==================== 性能优化 ==================== */
+.huangli-calendar .calendar-grid,
+.huangli-calendar .day-cell {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* ==================== 可访问性优化 ==================== */
+.huangli-calendar .day-cell:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+  z-index: 10;
+}
+
+.huangli-calendar .day-cell:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ==================== 高对比度模式支持 ==================== */
+@media (prefers-contrast: more) {
+  .huangli-calendar .day-cell {
+    border: 1px solid #000000;
+  }
+
+  .huangli-calendar.dark .day-cell {
+    border: 1px solid #ffffff;
+  }
+
+  .huangli-calendar .day-cell.selected {
+    border: 3px solid #3b82f6;
+  }
+}
+
+/* ==================== 减少动画模式支持 ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .huangli-calendar .day-cell {
+    animation: none;
+    transition: none;
+  }
+
+  .huangli-calendar .day-cell:active {
+    transform: none;
+  }
+}
+
+/* ==================== 深色模式过渡 ==================== */
+.huangli-calendar,
+.huangli-calendar .day-cell,
+.huangli-calendar .calendar-grid,
+.huangli-calendar .week-days {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }

@@ -95,201 +95,374 @@ const HabitTrackerPage = () => {
   };
 
   return (
-    <PageLayout 
-      title="习惯打卡" 
-      subtitle="记录和追踪你的日常习惯"
-      showBackButton={true}
-      onBackPress={() => navigate(-1)}
-      headerAction={
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-          aria-label="添加习惯"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      }
-    >
-      {/* 一周日期导航 */}
-      <div className="mb-6">
-        <div className="flex overflow-x-auto pb-2 -mx-2 px-2">
-          {weekDates.map((date, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedDate(date)}
-              className={`flex-shrink-0 px-3 py-2 mx-1 rounded-lg text-sm font-medium transition-colors min-w-[70px] text-center ${
-                selectedDate.toDateString() === date.toDateString()
-                  ? 'bg-blue-500 text-white'
-                  : theme === 'dark'
-                  ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <div className="text-xs opacity-80">{formatDate(date)}</div>
-              <div className="text-xs">{date.toLocaleDateString('zh-CN', { weekday: 'narrow' })}</div>
-              {isToday(date) && (
-                <div className="text-xs mt-0.5 bg-red-500 text-white rounded-full px-1 inline-block">
-                  今
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 习惯列表 */}
-      <div className="space-y-3">
-        {habits.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 dark:text-gray-500 mb-2">暂无习惯</div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              点击右上角"+"按钮添加第一个习惯
-            </p>
+    <div style={{ minHeight: '100vh', backgroundColor: theme === 'dark' ? '#111827' : '#f9fafb' }}>
+      <PageLayout
+        title="习惯打卡"
+        subtitle="记录和追踪你的日常习惯"
+        showBackButton={true}
+        onBackPress={() => navigate(-1)}
+        headerAction={
+          <button
+            onClick={() => setShowAddModal(true)}
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            aria-label="添加习惯"
+          >
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        }
+      >
+        <div style={{ padding: '0' }}>
+          {/* 一周日期导航 */}
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{
+              display: 'flex',
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              padding: '8px 4px',
+              margin: '0 -4px',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              gap: '6px'
+            }}>
+              {weekDates.map((date, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedDate(date)}
+                  style={{
+                    flexShrink: 0,
+                    width: '64px',
+                    minHeight: '64px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    backgroundColor: selectedDate.toDateString() === date.toDateString()
+                      ? '#3b82f6'
+                      : (theme === 'dark' ? '#374151' : '#f3f4f6'),
+                    color: selectedDate.toDateString() === date.toDateString()
+                      ? '#fff'
+                      : (theme === 'dark' ? '#d1d5db' : '#374151')
+                  }}
+                >
+                  <div style={{ fontSize: '11px', opacity: 0.8, marginBottom: '2px' }}>
+                    {formatDate(date)}
+                  </div>
+                  <div style={{ fontSize: '11px', fontWeight: '600' }}>
+                    {date.toLocaleDateString('zh-CN', { weekday: 'narrow' })}
+                  </div>
+                  {isToday(date) && (
+                    <div style={{
+                      fontSize: '10px',
+                      marginTop: '4px',
+                      backgroundColor: '#ef4444',
+                      color: '#fff',
+                      borderRadius: '9999px',
+                      padding: '1px 6px',
+                      display: 'inline-block',
+                      fontWeight: '500'
+                    }}>
+                      今
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
-          habits.map((habit) => (
-            <div
-              key={habit.id}
-              className={`p-4 rounded-xl border transition-all ${
-                theme === 'dark'
-                  ? 'bg-gray-800 border-gray-700'
-                  : 'bg-white border-gray-200'
-              } shadow-sm hover:shadow-md`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => handleToggleCompletion(habit.id)}
-                      className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                        habit.isCompleted
-                          ? 'bg-green-500 border-green-500 text-white'
-                          : theme === 'dark'
-                          ? 'border-gray-500 hover:border-gray-400'
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      {habit.isCompleted && (
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+
+          {/* 习惯列表 */}
+          <div style={{ marginTop: '12px' }}>
+            {habits.length === 0 ? (
+              <div style={{
+                textAlign: 'center',
+                padding: '48px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  color: theme === 'dark' ? '#6b7280' : '#9ca3af',
+                  marginBottom: '8px',
+                  fontSize: '14px'
+                }}>
+                  暂无习惯
+                </div>
+                <p style={{
+                  fontSize: '13px',
+                  color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                  margin: 0
+                }}>
+                  点击右上角"+"按钮添加第一个习惯
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {habits.map((habit) => (
+                  <div
+                    key={habit.id}
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+                      border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                        <button
+                          onClick={() => handleToggleCompletion(habit.id)}
+                          style={{
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '50%',
+                            border: '2px solid',
+                            marginRight: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            backgroundColor: habit.isCompleted ? '#22c55e' : 'transparent',
+                            borderColor: habit.isCompleted
+                              ? '#22c55e'
+                              : (theme === 'dark' ? '#6b7280' : '#d1d5db')
+                          }}
+                        >
+                          {habit.isCompleted && (
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <h3
+                            onClick={() => navigate(`/habit-stats?habitId=${habit.id}`, { state: { from: '/habit-tracker' } })}
+                            style={{
+                              fontSize: '15px',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              margin: 0,
+                              textDecoration: habit.isCompleted ? 'line-through' : 'none',
+                              color: habit.isCompleted
+                                ? (theme === 'dark' ? '#6b7280' : '#9ca3af')
+                                : (theme === 'dark' ? '#fff' : '#111827'),
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {habit.name}
+                          </h3>
+                          {habit.description && (
+                            <p style={{
+                              fontSize: '13px',
+                              color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                              margin: '4px 0 0 0',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {habit.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteHabit(habit.id)}
+                        style={{
+                          marginLeft: '8px',
+                          padding: '4px',
+                          color: theme === 'dark' ? '#9ca3af' : '#9ca3af',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'color 0.2s'
+                        }}
+                        aria-label="删除习惯"
+                      >
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                      )}
-                    </button>
-                    <div className="flex-1">
-                      <h3 
-                        onClick={() => navigate(`/habit-stats?habitId=${habit.id}`, { state: { from: '/habit-tracker' } })}
-                        className={`font-medium cursor-pointer hover:underline ${habit.isCompleted ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-                        {habit.name}
-                      </h3>
-                      {habit.description && (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {habit.description}
-                        </p>
-                      )}
+                      </button>
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 添加习惯模态框 */}
+        {showAddModal && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+            zIndex: 50
+          }}>
+            <div style={{
+              borderRadius: '12px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '400px',
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                marginBottom: '16px',
+                color: theme === 'dark' ? '#fff' : '#111827',
+                margin: '0 0 16px 0'
+              }}>
+                添加新习惯
+              </h3>
+
+              {error && (
+                <div style={{
+                  marginBottom: '16px',
+                  padding: '8px 12px',
+                  backgroundColor: '#fecaca',
+                  color: '#b91c1c',
+                  borderRadius: '6px',
+                  fontSize: '14px'
+                }}>
+                  {error}
                 </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: theme === 'dark' ? '#d1d5db' : '#374151'
+                  }}>
+                    习惯名称 *
+                  </label>
+                  <input
+                    type="text"
+                    value={newHabit.name}
+                    onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
+                    placeholder="例如：喝水、运动、读书"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+                      borderRadius: '8px',
+                      backgroundColor: theme === 'dark' ? '#374151' : '#fff',
+                      color: theme === 'dark' ? '#fff' : '#111827',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: theme === 'dark' ? '#d1d5db' : '#374151'
+                  }}>
+                    描述（可选）
+                  </label>
+                  <textarea
+                    value={newHabit.description}
+                    onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
+                    placeholder="习惯的详细描述"
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+                      borderRadius: '8px',
+                      backgroundColor: theme === 'dark' ? '#374151' : '#fff',
+                      color: theme === 'dark' ? '#fff' : '#111827',
+                      fontSize: '14px',
+                      outline: 'none',
+                      resize: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px',
+                marginTop: '24px'
+              }}>
                 <button
-                  onClick={() => handleDeleteHabit(habit.id)}
-                  className="ml-2 p-1 text-gray-400 hover:text-red-500 transition-colors"
-                  aria-label="删除习惯"
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setNewHabit({ name: '', description: '' });
+                    setError('');
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+                    backgroundColor: 'transparent',
+                    color: theme === 'dark' ? '#d1d5db' : '#374151',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  取消
+                </button>
+                <button
+                  onClick={handleAddHabit}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    backgroundColor: '#3b82f6',
+                    color: '#fff',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
+                >
+                  添加
                 </button>
               </div>
             </div>
-          ))
-        )}
-      </div>
-
-      {/* 添加习惯模态框 */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className={`rounded-xl p-6 w-full max-w-md ${
-            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-          }`}>
-            <h3 className={`text-lg font-semibold mb-4 ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
-            }`}>
-              添加新习惯
-            </h3>
-            
-            {error && (
-              <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
-                {error}
-              </div>
-            )}
-            
-            <div className="space-y-4">
-              <div>
-                <label className={`block text-sm font-medium mb-1 ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  习惯名称 *
-                </label>
-                <input
-                  type="text"
-                  value={newHabit.name}
-                  onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
-                  placeholder="例如：喝水、运动、读书"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    theme === 'dark'
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  }`}
-                />
-              </div>
-              
-              <div>
-                <label className={`block text-sm font-medium mb-1 ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  描述（可选）
-                </label>
-                <textarea
-                  value={newHabit.description}
-                  onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
-                  placeholder="习惯的详细描述"
-                  rows={3}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    theme === 'dark'
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  }`}
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowAddModal(false);
-                  setNewHabit({ name: '', description: '' });
-                  setError('');
-                }}
-                className={`px-4 py-2 rounded-lg border transition-colors ${
-                  theme === 'dark'
-                    ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                取消
-              </button>
-              <button
-                onClick={handleAddHabit}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                添加
-              </button>
-            </div>
           </div>
-        </div>
-      )}
-    </PageLayout>
+        )}
+      </PageLayout>
+    </div>
   );
 };
 

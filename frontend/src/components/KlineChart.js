@@ -133,8 +133,11 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
         onMouseLeave={() => onHoverAge(null)}
         onTouchStart={(e) => { e.preventDefault(); onHoverAge(point.age); }}
         onTouchEnd={() => onHoverAge(null)}
-        className="bar-element cursor-pointer transition-opacity"
-        style={{ transition: 'opacity 0.2s ease-in-out' }}
+        style={{
+          cursor: 'pointer',
+          transition: 'opacity 0.2s ease-in-out',
+          touchAction: 'manipulation'
+        }}
         rx={isMobile ? 1 : 0}
       />
     );
@@ -281,26 +284,99 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
   }
 
   return (
-    <div ref={chartContainerRef} className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl ${isSmallMobile ? 'p-2.5' : isMobile ? 'p-3' : 'p-4'} shadow-sm relative overflow-hidden`}>
-      <div className={`flex justify-between items-center ${isSmallMobile ? 'mb-2' : 'mb-3'}`}>
-        <div>
-          <h3 className={`${isSmallMobile ? 'text-xs' : isMobile ? 'text-sm' : 'text-base'} font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+    <div
+      ref={chartContainerRef}
+      style={{
+        backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+        border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+        borderRadius: '16px',
+        padding: isSmallMobile ? '10px' : isMobile ? '12px' : '16px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      {/* 标题区域 */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: isSmallMobile ? '8px' : '12px',
+        flexWrap: 'nowrap',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          flex: '1',
+          minWidth: 0,
+          overflow: 'hidden'
+        }}>
+          <h3 style={{
+            fontSize: isSmallMobile ? '12px' : isMobile ? '14px' : '16px',
+            fontWeight: '600',
+            color: theme === 'dark' ? '#fff' : '#111827',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            margin: '0 0 4px 0',
+            padding: '0'
+          }}>
             人生能量走势图
           </h3>
-          <p className={`${isSmallMobile ? 'text-[9px]' : isMobile ? 'text-[10px]' : 'text-xs'} mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p style={{
+            fontSize: isSmallMobile ? '9px' : isMobile ? '10px' : '12px',
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+            margin: '0',
+            padding: '0',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
             {timeDimension === 'year' ? '10-100岁综合能量指数' :
              timeDimension === 'month' ? '月度趋势（前后12个月）' :
              '日度趋势（前后15天）'}
           </p>
         </div>
-        <div className={`flex gap-1.5 ${isSmallMobile ? 'scale-90' : ''}`}>
-          <div className="flex items-center gap-1">
-            <div className={`${isSmallMobile ? 'w-2 h-2' : isMobile ? 'w-2.5 h-2.5' : 'w-3 h-3'} rounded-sm`} style={{ backgroundColor: theme === 'dark' ? '#4ade80' : '#22c55e' }}></div>
-            <span className={`${isSmallMobile ? 'text-[9px]' : isMobile ? 'text-[10px]' : 'text-xs'} ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>高</span>
+        <div style={{
+          display: 'flex',
+          gap: '6px',
+          flexShrink: 0,
+          marginLeft: '8px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            <div style={{
+              width: isSmallMobile ? '8px' : isMobile ? '10px' : '12px',
+              height: isSmallMobile ? '8px' : isMobile ? '10px' : '12px',
+              borderRadius: '2px',
+              backgroundColor: theme === 'dark' ? '#4ade80' : '#22c55e',
+              flexShrink: 0
+            }}></div>
+            <span style={{
+              fontSize: isSmallMobile ? '9px' : isMobile ? '10px' : '12px',
+              color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+              whiteSpace: 'nowrap'
+            }}>高</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className={`${isSmallMobile ? 'w-2 h-2' : isMobile ? 'w-2.5 h-2.5' : 'w-3 h-3'} rounded-sm`} style={{ backgroundColor: theme === 'dark' ? '#f87171' : '#ef4444' }}></div>
-            <span className={`${isSmallMobile ? 'text-[9px]' : isMobile ? 'text-[10px]' : 'text-xs'} ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>低</span>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            <div style={{
+              width: isSmallMobile ? '8px' : isMobile ? '10px' : '12px',
+              height: isSmallMobile ? '8px' : isMobile ? '10px' : '12px',
+              borderRadius: '2px',
+              backgroundColor: theme === 'dark' ? '#f87171' : '#ef4444',
+              flexShrink: 0
+            }}></div>
+            <span style={{
+              fontSize: isSmallMobile ? '9px' : isMobile ? '10px' : '12px',
+              color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+              whiteSpace: 'nowrap'
+            }}>低</span>
           </div>
         </div>
       </div>
@@ -310,7 +386,10 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
         height={containerHeight}
         viewBox={`0 0 ${containerWidth} ${containerHeight}`}
         preserveAspectRatio="xMidYMid meet"
-        className="kline-svg"
+        style={{
+          display: 'block',
+          maxWidth: '100%'
+        }}
       >
         {/* 网格背景 */}
         {gridLines}
@@ -410,17 +489,36 @@ const KlineChart = ({ data, hoveredAge, onHoverAge, theme, chartType, timeDimens
 
       {/* 悬停提示 */}
       {hoveredAge !== null && (
-        <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 ${isSmallMobile ? 'px-2 py-1' : 'px-3 py-1.5'} rounded-xl shadow-lg backdrop-blur-sm ${
-          theme === 'dark' ? 'bg-gray-700/95 text-white border-gray-600' : 'bg-white/95 text-gray-900 border-gray-200'
-        } border z-10 transition-all duration-200`}
-        style={{
+        <div style={{
+          position: 'absolute',
+          bottom: '8px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: isSmallMobile ? '4px 8px' : '6px 12px',
+          borderRadius: '12px',
+          border: `1px solid ${theme === 'dark' ? '#4b5563' : '#e5e7eb'}`,
+          backgroundColor: theme === 'dark' ? 'rgba(55, 65, 81, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          color: theme === 'dark' ? '#fff' : '#111827',
+          zIndex: 10,
           boxShadow: isMobile
             ? '0 2px 8px rgba(0, 0, 0, 0.15)'
-            : '0 4px 12px rgba(0, 0, 0, 0.1)'
+            : '0 4px 12px rgba(0, 0, 0, 0.1)',
+          transition: 'all 0.2s ease',
+          backdropFilter: 'blur(4px)',
+          maxWidth: '90%',
+          whiteSpace: 'nowrap'
         }}>
-          <span className={`${isSmallMobile ? 'text-[10px]' : isMobile ? 'text-[11px]' : 'text-sm'} ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-            年龄 <b className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{hoveredAge}</b> 岁 |
-            能量指数: <b className={data.find(d => d.age === hoveredAge)?.value >= 50 ? 'text-green-500' : 'text-red-500'}>
+          <span style={{
+            fontSize: isSmallMobile ? '10px' : isMobile ? '11px' : '14px',
+            color: theme === 'dark' ? '#d1d5db' : '#4b5563'
+          }}>
+            年龄 <b style={{ color: theme === 'dark' ? '#fff' : '#111827', fontWeight: '600' }}>{hoveredAge}</b> 岁 |
+            能量指数: <b style={{
+              color: data.find(d => d.age === hoveredAge)?.value >= 50
+                ? (theme === 'dark' ? '#4ade80' : '#22c55e')
+                : (theme === 'dark' ? '#f87171' : '#ef4444'),
+              fontWeight: '600'
+            }}>
               {data.find(d => d.age === hoveredAge)?.value || 0}/100
             </b>
           </span>

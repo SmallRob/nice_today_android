@@ -65,7 +65,7 @@ const HealthDashboardPage = () => {
       component: DietHealthCard,
       priority: 4, // 最低优先级，最后加载
       cacheKey: 'diet-health',
-      title: '饮食健康卡片'
+      title: '饮食健康'
     }
   ], []);
   

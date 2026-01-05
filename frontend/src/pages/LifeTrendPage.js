@@ -1020,101 +1020,258 @@ const LifeTrendPage = () => {
       </div>
 
       {/* 视图切换 */}
-      <div className={`flex gap-2 mx-4 mb-3 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+      <div style={{
+        display: 'flex',
+        gap: '8px',
+        margin: '0 16px 12px',
+        padding: '4px',
+        borderRadius: '12px',
+        backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+        border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb'
+      }}>
         <button
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${
-            selectedView === 'kline'
-              ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-              : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
-          }`}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '8px',
+            borderRadius: '8px',
+            transition: 'all 0.2s ease',
+            border: 'none',
+            cursor: 'pointer',
+            backgroundColor: selectedView === 'kline'
+              ? '#2563eb'
+              : 'transparent',
+            color: selectedView === 'kline'
+              ? '#fff'
+              : (theme === 'dark' ? '#d1d5db' : '#4b5563'),
+            fontSize: '14px',
+            fontWeight: 500,
+            minHeight: '44px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
           onClick={() => setSelectedView('kline')}
           onTouchStart={(e) => e.stopPropagation()}
         >
-          <span>📈</span>
-          <span className="text-sm font-medium">生命K线</span>
+          <span style={{ fontSize: '18px' }}>📈</span>
+          <span>生命K线</span>
         </button>
         <button
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${
-            selectedView === 'radar'
-              ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-              : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
-          }`}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '8px',
+            borderRadius: '8px',
+            transition: 'all 0.2s ease',
+            border: 'none',
+            cursor: 'pointer',
+            backgroundColor: selectedView === 'radar'
+              ? '#2563eb'
+              : 'transparent',
+            color: selectedView === 'radar'
+              ? '#fff'
+              : (theme === 'dark' ? '#d1d5db' : '#4b5563'),
+            fontSize: '14px',
+            fontWeight: 500,
+            minHeight: '44px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
           onClick={() => setSelectedView('radar')}
           onTouchStart={(e) => e.stopPropagation()}
         >
-          <span>🎯</span>
-          <span className="text-sm font-medium">人生雷达</span>
+          <span style={{ fontSize: '18px' }}>🎯</span>
+          <span>人生雷达</span>
         </button>
       </div>
 
       {/* 当 K线视图时，显示图表类型和时间维度切换 */}
       {selectedView === 'kline' && (
-        <div className={`flex flex-col gap-2 mx-2 mb-4`}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '0 16px 16px' }}>
           {/* 图表类型切换 */}
-          <div className={`flex gap-1 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} overflow-hidden`}>
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            padding: '4px',
+            borderRadius: '12px',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb',
+            overflow: 'hidden'
+          }}>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
-                chartType === 'kline'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
-              }`}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: chartType === 'kline'
+                  ? '#2563eb'
+                  : 'transparent',
+                color: chartType === 'kline'
+                  ? '#fff'
+                  : (theme === 'dark' ? '#d1d5db' : '#4b5563'),
+                fontSize: '12px',
+                fontWeight: 500,
+                minHeight: '40px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
               onClick={() => setChartType('kline')}
               onTouchStart={(e) => e.stopPropagation()}
             >
-              <span>📊</span>
-              <span className="font-medium">K线图</span>
+              <span style={{ fontSize: '16px' }}>📊</span>
+              <span>K线图</span>
             </button>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
-                chartType === 'line'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
-              }`}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: chartType === 'line'
+                  ? '#2563eb'
+                  : 'transparent',
+                color: chartType === 'line'
+                  ? '#fff'
+                  : (theme === 'dark' ? '#d1d5db' : '#4b5563'),
+                fontSize: '12px',
+                fontWeight: 500,
+                minHeight: '40px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
               onClick={() => setChartType('line')}
               onTouchStart={(e) => e.stopPropagation()}
             >
-              <span>📈</span>
-              <span className="font-medium">曲线图</span>
+              <span style={{ fontSize: '16px' }}>📈</span>
+              <span>曲线图</span>
             </button>
           </div>
 
           {/* 时间维度切换 */}
-          <div className={`flex gap-1 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} overflow-hidden`}>
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            padding: '4px',
+            borderRadius: '12px',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb',
+            overflow: 'hidden'
+          }}>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
-                timeDimension === 'year'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
-              }`}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: timeDimension === 'year'
+                  ? '#2563eb'
+                  : 'transparent',
+                color: timeDimension === 'year'
+                  ? '#fff'
+                  : (theme === 'dark' ? '#d1d5db' : '#4b5563'),
+                fontSize: '12px',
+                fontWeight: 500,
+                minHeight: '40px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
               onClick={() => setTimeDimension('year')}
               onTouchStart={(e) => e.stopPropagation()}
             >
-              <span>📅</span>
-              <span className="font-medium">年</span>
+              <span style={{ fontSize: '16px' }}>📅</span>
+              <span>年</span>
             </button>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
-                timeDimension === 'month'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
-              }`}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: timeDimension === 'month'
+                  ? '#2563eb'
+                  : 'transparent',
+                color: timeDimension === 'month'
+                  ? '#fff'
+                  : (theme === 'dark' ? '#d1d5db' : '#4b5563'),
+                fontSize: '12px',
+                fontWeight: 500,
+                minHeight: '40px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
               onClick={() => setTimeDimension('month')}
               onTouchStart={(e) => e.stopPropagation()}
             >
-              <span>📆</span>
-              <span className="font-medium">月</span>
+              <span style={{ fontSize: '16px' }}>📆</span>
+              <span>月</span>
             </button>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
-                timeDimension === 'day'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
-              }`}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '8px',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: timeDimension === 'day'
+                  ? '#2563eb'
+                  : 'transparent',
+                color: timeDimension === 'day'
+                  ? '#fff'
+                  : (theme === 'dark' ? '#d1d5db' : '#4b5563'),
+                fontSize: '12px',
+                fontWeight: 500,
+                minHeight: '40px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
               onClick={() => setTimeDimension('day')}
               onTouchStart={(e) => e.stopPropagation()}
             >
-              <span>📋</span>
-              <span className="font-medium">日</span>
+              <span style={{ fontSize: '16px' }}>📋</span>
+              <span>日</span>
             </button>
           </div>
         </div>
@@ -1137,42 +1294,97 @@ const LifeTrendPage = () => {
         ) : (
           <>
             {/* 年份选择器 */}
-            <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border border-gray-200'}`}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">📅</span>
-                  <span className={`text-base font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <div style={{
+              marginBottom: '16px',
+              padding: '12px',
+              borderRadius: '12px',
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+              border: theme === 'dark' ? '1px solid #374151' : '1px solid #e5e7eb'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '8px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>📅</span>
+                  <span style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: theme === 'dark' ? '#fff' : '#111827'
+                  }}>
                     选择年份
                   </span>
                 </div>
-                <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                <span style={{
+                  fontSize: '12px',
+                  color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+                }}>
                   {currentYear} - {currentYear + 10}
                 </span>
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                paddingBottom: '8px',
+                WebkitOverflowScrolling: 'touch',
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none'
+              }}>
                 {yearOptions.map((year) => (
                   <button
                     key={year}
                     onClick={() => setRadarViewYear(year)}
-                    className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      radarViewYear === year
-                        ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-                        : `${theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} touch-manipulation`
-                    }`}
+                    style={{
+                      flexShrink: 0,
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      transition: 'all 0.2s ease',
+                      border: 'none',
+                      cursor: 'pointer',
+                      backgroundColor: radarViewYear === year
+                        ? '#2563eb'
+                        : (theme === 'dark' ? '#374151' : '#f3f4f6'),
+                      color: radarViewYear === year
+                        ? '#fff'
+                        : (theme === 'dark' ? '#d1d5db' : '#374151'),
+                      minHeight: '40px',
+                      whiteSpace: 'nowrap'
+                    }}
                     onTouchStart={(e) => e.stopPropagation()}
                   >
                     {year}
                   </button>
                 ))}
               </div>
-              <div className={`text-xs mt-2 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              <div style={{
+                fontSize: '12px',
+                marginTop: '8px',
+                textAlign: 'center',
+                color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+              }}>
                 当前查看：{radarViewYear}年 {radarViewAge}岁
               </div>
             </div>
             {/* 年龄超出范围提示 */}
             {(radarViewAge < 0 || radarViewAge > 100) && (
-              <div className={`mb-3 p-3 rounded-lg ${theme === 'dark' ? 'bg-amber-900/30 border-amber-700' : 'bg-amber-50 border-amber-200'} border`}>
-                <p className={`text-xs ${theme === 'dark' ? 'text-amber-300' : 'text-amber-700'}`}>
+              <div style={{
+                marginBottom: '12px',
+                padding: '12px',
+                borderRadius: '8px',
+                backgroundColor: theme === 'dark' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(254, 243, 199, 1)',
+                border: theme === 'dark' ? '1px solid #b45309' : '1px solid #fbbf24'
+              }}>
+                <p style={{
+                  fontSize: '12px',
+                  margin: 0,
+                  color: theme === 'dark' ? '#fcd34d' : '#b45309'
+                }}>
                   ⚠️ {radarViewAge < 0 ? '所选年份早于出生年份' : '所选年份超出数据范围'}，
                   将显示近似数据供参考。
                 </p>
