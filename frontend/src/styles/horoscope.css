@@ -109,6 +109,21 @@
   gap: 8px;
 }
 
+@media (max-width: 640px) {
+  .horoscope-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(64px, auto);
+  }
+}
+
+/* 确保在移动设备上每列四行的布局 */
+@media (max-width: 640px) {
+  .horoscope-grid-4 {
+    /* 12个星座按4列3行排列 */
+    grid-template-rows: repeat(3, 1fr);
+  }
+}
+
 .horoscope-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

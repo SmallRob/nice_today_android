@@ -45,7 +45,8 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
             <button
               key={horoscope.name}
               onClick={() => handleHoroscopeChange(horoscope.name)}
-              className={`horoscope-button ${isActive ? 'horoscope-button-active' : 'horoscope-button-inactive'}`}
+              onTouchStart={(e) => e.stopPropagation()}
+              className={`horoscope-button touch-manipulation ${isActive ? 'horoscope-button-active' : 'horoscope-button-inactive'}`}
               aria-label={`${horoscope.name}星座选择`}
             >
               <span className="text-2xl mb-1">{horoscope.icon}</span>

@@ -198,7 +198,7 @@ const EnergyTreePage = () => {
       </div>
 
       {/* 能量历史 */}
-      <EnergyHistory history={energyData.history} />
+      {/* <EnergyHistory history={energyData.history} /> */}
 
       {/* 气泡统计 */}
       <div className="bubbles-stats">

@@ -271,78 +271,81 @@ const HabitStatsPage = () => {
       )}
 
       {/* 月份导航 */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <button
           onClick={goToPreviousMonth}
-          className={`p-2 rounded-lg ${
-            theme === 'dark' 
-              ? 'text-gray-300 hover:bg-gray-700' 
-              : 'text-gray-700 hover:bg-gray-100'
+          className={`p-1 rounded-lg ${
+            theme === 'dark'
+              ? 'text-gray-300 hover:bg-gray-700'
+              : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        
-        <h3 className={`text-lg font-semibold ${
-          theme === 'dark' ? 'text-white' : 'text-gray-900'
+        <div className={`text-xs sm:text-sm font-semibold ${
+          theme === 'dark' ? 'text-white' : 'text-gray-800'
         }`}>
           {year}年{month + 1}月
-        </h3>
-        
+        </div>
         <button
           onClick={goToNextMonth}
-          className={`p-2 rounded-lg ${
-            theme === 'dark' 
-              ? 'text-gray-300 hover:bg-gray-700' 
-              : 'text-gray-700 hover:bg-gray-100'
+          className={`p-1 rounded-lg ${
+            theme === 'dark'
+              ? 'text-gray-300 hover:bg-gray-700'
+              : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
 
       {/* 月历 */}
+      {/* 月历 - 紧凑版 */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         {/* 星期标题 */}
-        <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700">
+        <div className="grid grid-cols-7 gap-0.5 mb-1 overflow-hidden">
           {weekDays.map((day, index) => (
             <div
               key={index}
-              className="p-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700"
+              className={`text-center text-[0.6rem] font-medium py-0.5 ${
+                index === 0 ? 'text-red-500 dark:text-red-400' : 
+                index === 6 ? 'text-blue-500 dark:text-blue-400' : 
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+              }`}
             >
               {day}
             </div>
           ))}
         </div>
 
-        {/* 日期网格 */}
-        <div className="grid grid-cols-7">
+        {/* 日期网格 - 紧凑版 */}
+        <div className="grid grid-cols-7 gap-0.5 w-full max-w-full overflow-hidden">
           {calendarData.map((dayData, index) => (
             <div
               key={index}
-              className={`p-3 h-12 flex items-center justify-center text-sm border-t border-l border-gray-100 dark:border-gray-700 ${
-                index % 7 === 0 ? 'border-l-0' : ''
-              } ${
-                dayData
+              className={`
+                relative p-0.5 text-[0.6rem] rounded text-center flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden
+                ${dayData
                   ? dayData.isCompleted
                     ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
                     : theme === 'dark'
                     ? 'text-gray-300'
                     : 'text-gray-700'
-                  : 'bg-gray-50 dark:bg-gray-900/50'
-              }`}
+                  : 'bg-gray-50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500'
+                }`}
+              style={{ minHeight: '1.8rem' }}
             >
               {dayData && (
-                <div className="relative">
+                <div className="relative w-full flex flex-col items-center">
                   <span className={dayData.isCompleted ? 'font-medium' : ''}>
                     {dayData.day}
                   </span>
                   {dayData.isCompleted && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="w-1 h-1 rounded-full bg-green-500 absolute top-0.5 right-0.5"></div>
                   )}
                 </div>
               )}

@@ -146,12 +146,14 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       style={{ touchAction: 'none' }}
       onClick={handleBackdropClick}
+      onTouchStart={(e) => e.stopPropagation()}
     >
       <div
         className={`relative w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col rounded-xl shadow-2xl ${
           theme === 'dark' ? 'bg-gray-800' : 'bg-white'
         }`}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
         style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
       >
         {/* 头部 */}
@@ -167,11 +169,11 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
           </h3>
           <button
             onClick={handleCancel}
+            onTouchStart={(e) => e.stopPropagation()}
             className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
               theme === 'dark'
                 ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-            }`}
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'} touch-manipulation`
             aria-label="关闭弹窗"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -389,29 +391,30 @@ const DatePickerModal = ({ isOpen, onClose, selectedYear, selectedMonth, selecte
             <button
               type="button"
               onClick={handleCancel}
+              onTouchStart={(e) => e.stopPropagation()}
               className={`flex-1 py-3.5 rounded-xl font-medium transition-colors ${
                 theme === 'dark'
                   ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} touch-manipulation`
             >
               取消
             </button>
             <button
               type="button"
               onClick={handleTempCalc}
+              onTouchStart={(e) => e.stopPropagation()}
               className={`flex-1 py-3.5 rounded-xl font-medium transition-colors ${
                 theme === 'dark'
                   ? 'bg-purple-600 text-white hover:bg-purple-700'
-                  : 'bg-purple-600 text-white hover:bg-purple-700'
-              }`}
+                  : 'bg-purple-600 text-white hover:bg-purple-700'} touch-manipulation`
             >
               🔮 临时计算
             </button>
             <button
               type="button"
               onClick={handleConfirm}
-              className="flex-1 py-3.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30"
+              onTouchStart={(e) => e.stopPropagation()}
+              className="flex-1 py-3.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30 touch-manipulation"
             >
               保存配置
             </button>

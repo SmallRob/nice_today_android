@@ -898,12 +898,12 @@ const LifeTrendPage = () => {
                 </p>
                 <button
                   onClick={handleRetry}
+                  onTouchStart={(e) => e.stopPropagation()}
                   disabled={retryCount >= 3}
                   className={`mt-2 px-4 py-2 rounded-lg text-sm transition-colors ${
                     retryCount >= 3
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
+                      : 'bg-blue-600 text-white hover:bg-blue-700'} touch-manipulation`
                 >
                   {retryCount >= 3 ? '已达到最大重试次数' : `重试 (${retryCount}/3)`}
                 </button>
@@ -955,8 +955,9 @@ const LifeTrendPage = () => {
           <div className="flex justify-between items-center mb-2">
             <div className="flex-1">
               <div
-                className={`text-center py-3 px-4 rounded-xl cursor-pointer transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'}`}
+                className={`text-center py-3 px-4 rounded-xl cursor-pointer transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'} touch-manipulation`}
                 onClick={handleDateCardClick}
+                onTouchStart={(e) => e.stopPropagation()}
               >
                 <div className={`text-xs mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                   {calculating ? '⏳ 计算中...' : isTempCalcMode ? '🔮 临时计算' : '生辰八字'}
@@ -1024,9 +1025,10 @@ const LifeTrendPage = () => {
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${
             selectedView === 'kline'
               ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-              : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+              : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
           }`}
           onClick={() => setSelectedView('kline')}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           <span>📈</span>
           <span className="text-sm font-medium">生命K线</span>
@@ -1035,9 +1037,10 @@ const LifeTrendPage = () => {
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${
             selectedView === 'radar'
               ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-              : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+              : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
           }`}
           onClick={() => setSelectedView('radar')}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           <span>🎯</span>
           <span className="text-sm font-medium">人生雷达</span>
@@ -1046,27 +1049,29 @@ const LifeTrendPage = () => {
 
       {/* 当 K线视图时，显示图表类型和时间维度切换 */}
       {selectedView === 'kline' && (
-        <div className={`flex flex-col gap-2 mx-4 mb-4`}>
+        <div className={`flex flex-col gap-2 mx-2 mb-4`}>
           {/* 图表类型切换 */}
-          <div className={`flex gap-2 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+          <div className={`flex gap-1 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} overflow-hidden`}>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all text-xs ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
                 chartType === 'kline'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
+                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
               }`}
               onClick={() => setChartType('kline')}
+              onTouchStart={(e) => e.stopPropagation()}
             >
               <span>📊</span>
               <span className="font-medium">K线图</span>
             </button>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all text-xs ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
                 chartType === 'line'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
+                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
               }`}
               onClick={() => setChartType('line')}
+              onTouchStart={(e) => e.stopPropagation()}
             >
               <span>📈</span>
               <span className="font-medium">曲线图</span>
@@ -1074,36 +1079,39 @@ const LifeTrendPage = () => {
           </div>
 
           {/* 时间维度切换 */}
-          <div className={`flex gap-2 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+          <div className={`flex gap-1 p-1 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} overflow-hidden`}>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all text-xs ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
                 timeDimension === 'year'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
+                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
               }`}
               onClick={() => setTimeDimension('year')}
+              onTouchStart={(e) => e.stopPropagation()}
             >
               <span>📅</span>
               <span className="font-medium">年</span>
             </button>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all text-xs ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
                 timeDimension === 'month'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
+                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
               }`}
               onClick={() => setTimeDimension('month')}
+              onTouchStart={(e) => e.stopPropagation()}
             >
               <span>📆</span>
               <span className="font-medium">月</span>
             </button>
             <button
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all text-xs ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all text-xs ${
                 timeDimension === 'day'
-                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`
+                  ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-sm`
+                  : `${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'} touch-manipulation`
               }`}
               onClick={() => setTimeDimension('day')}
+              onTouchStart={(e) => e.stopPropagation()}
             >
               <span>📋</span>
               <span className="font-medium">日</span>
@@ -1141,7 +1149,7 @@ const LifeTrendPage = () => {
                   {currentYear} - {currentYear + 10}
                 </span>
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {yearOptions.map((year) => (
                   <button
                     key={year}
@@ -1149,8 +1157,9 @@ const LifeTrendPage = () => {
                     className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       radarViewYear === year
                         ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-600'} text-white shadow-md`
-                        : `${theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                        : `${theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} touch-manipulation`
                     }`}
+                    onTouchStart={(e) => e.stopPropagation()}
                   >
                     {year}
                   </button>

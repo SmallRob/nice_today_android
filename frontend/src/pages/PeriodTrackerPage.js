@@ -179,61 +179,62 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod }) =
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6 w-full max-w-full overflow-hidden">
-      {/* 日历头部 - 月份导航 */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 mb-6 w-full max-w-full overflow-hidden">
+      {/* 月份导航 */}
+      <div className="flex items-center justify-between mb-2">
         <button
           onClick={goToPreviousMonth}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className={`p-1 rounded-lg ${
+            theme === 'dark'
+              ? 'text-gray-300 hover:bg-gray-700'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-
-        <div className="flex items-center space-x-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">
-            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-          </h2>
-          <button
-            onClick={goToToday}
-            className="px-3 py-1 text-sm bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full hover:bg-pink-200 dark:hover:bg-pink-800 transition-colors"
-          >
-            今天
-          </button>
+        <div className={`text-xs sm:text-sm font-semibold ${
+          theme === 'dark' ? 'text-white' : 'text-gray-800'
+        }`}>
+          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </div>
-
         <button
           onClick={goToNextMonth}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className={`p-1 rounded-lg ${
+            theme === 'dark'
+              ? 'text-gray-300 hover:bg-gray-700'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
-
-      {/* 星期头部 */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+  
+      {/* 星期标题 */}
+      <div className="grid grid-cols-7 gap-0.5 mb-1 overflow-hidden">
         {dayNames.map((day, index) => (
           <div
             key={day}
-            className={`text-center py-2 text-sm font-medium ${index === 0 ? 'text-red-500 dark:text-red-400' :
-              index === 6 ? 'text-blue-500 dark:text-blue-400' :
-                'text-gray-500 dark:text-gray-400'
-              }`}
+            className={`text-center text-[0.6rem] font-medium py-0.5 ${
+              index === 0 ? 'text-red-500 dark:text-red-400' : 
+              index === 6 ? 'text-blue-500 dark:text-blue-400' : 
+              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+            }`}
           >
             {day}
           </div>
         ))}
       </div>
-
-      {/* 日历网格 */}
-      <div className="grid grid-cols-7 gap-1">
+  
+      {/* 日历网格 - 紧凑版 */}
+      <div className="grid grid-cols-7 gap-0.5 w-full max-w-full overflow-hidden">
         {monthData.map((day, index) => {
           let bgClass = '';
           let indicator = null;
-
+  
           if (day.isPredictedPeriod) {
             bgClass = 'bg-pink-100 dark:bg-pink-900/30';
           } else if (day.isOvulation) {
@@ -243,35 +244,32 @@ const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod }) =
           } else if (day.isPMS) {
             bgClass = 'bg-orange-100 dark:bg-orange-900/30';
           }
-
+  
           // 日期指示器
           if (day.isPredictedPeriod) {
-            indicator = <div className="w-2 h-2 rounded-full bg-pink-500 absolute bottom-1 right-1" title="预测经期"></div>;
+            indicator = <div className="w-1 h-1 rounded-full bg-pink-500 absolute top-0.5 right-0.5" title="预测经期"></div>;
           } else if (day.isOvulation) {
-            indicator = <div className="w-2 h-2 rounded-full bg-yellow-500 absolute bottom-1 right-1" title="排卵期"></div>;
+            indicator = <div className="w-1 h-1 rounded-full bg-yellow-500 absolute top-0.5 right-0.5" title="排卵期"></div>;
           } else if (day.isFertile) {
-            indicator = <div className="w-2 h-2 rounded-full bg-purple-500 absolute bottom-1 right-1" title="受孕期"></div>;
+            indicator = <div className="w-1 h-1 rounded-full bg-purple-500 absolute top-0.5 right-0.5" title="受孕期"></div>;
           }
-
+  
           return (
             <div
               key={index}
               onClick={() => handleDayClick(day)}
               className={`
-                relative min-h-20 p-1 rounded-lg cursor-pointer transition-colors w-full max-w-full overflow-hidden
+                relative p-0.5 text-[0.6rem] rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden
                 ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900' : ''}
-                ${day.isToday ? 'bg-pink-200 dark:bg-pink-900/50' : ''}
+                ${day.isToday ? 'bg-pink-500 text-white' : ''}
                 ${day.isWeekend && !bgClass ? 'bg-gray-50 dark:bg-gray-900' : ''}
                 ${bgClass}
-                hover:bg-pink-50 dark:hover:bg-pink-900/40
+                hover:bg-pink-100 dark:hover:bg-pink-900/40
               `}
+              style={{ minHeight: '1.8rem' }}
             >
-              {/* 日期数字 */}
-              <div className={`text-center text-sm ${day.isToday ? 'font-bold text-pink-600 dark:text-pink-400' : ''
-                }`}>
-                {day.date.getDate()}
-              </div>
-
+              <div className="font-medium text-center truncate w-full">{day.date.getDate()}</div>
+                
               {/* 预测指示器 */}
               {indicator}
             </div>

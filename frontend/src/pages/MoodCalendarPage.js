@@ -248,73 +248,67 @@ const MoodCalendarPage = () => {
     };
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6 w-full max-w-full overflow-hidden">
-        {/* 日历头部 - 月份导航 */}
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 mb-6 w-full max-w-full overflow-hidden">
+        {/* 月份导航 */}
+        <div className="flex items-center justify-between mb-2">
           <button
             onClick={goToPreviousMonth}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className={`p-1 rounded-lg ${
+              theme === 'dark'
+                ? 'text-gray-300 hover:bg-gray-700'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-
-          <div className="flex items-center space-x-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">
-              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </h2>
-            <button
-              onClick={goToToday}
-              className="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-            >
-              今天
-            </button>
+          <div className={`text-xs sm:text-sm font-semibold ${
+            theme === 'dark' ? 'text-white' : 'text-gray-800'
+          }`}>
+            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </div>
-
           <button
             onClick={goToNextMonth}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className={`p-1 rounded-lg ${
+              theme === 'dark'
+                ? 'text-gray-300 hover:bg-gray-700'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
 
-        {/* 星期头部 */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        {/* 星期标题 */}
+        <div className="grid grid-cols-7 gap-0.5 mb-1 overflow-hidden">
           {dayNames.map((day, index) => (
             <div
               key={day}
-              className={`text-center py-2 text-sm font-medium ${index === 0 ? 'text-red-500 dark:text-red-400' :
-                index === 6 ? 'text-blue-500 dark:text-blue-400' :
-                  'text-gray-500 dark:text-gray-400'
-                }`}
+              className={`text-center text-[0.6rem] font-medium py-0.5 ${
+                index === 0 ? 'text-red-500 dark:text-red-400' : 
+                index === 6 ? 'text-blue-500 dark:text-blue-400' : 
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+              }`}
             >
               {day}
             </div>
           ))}
         </div>
 
-        {/* 日历网格 */}
-        <div className="grid grid-cols-7 gap-1">
+        {/* 日期网格 - 紧凑版 */}
+        <div className="grid grid-cols-7 gap-0.5 w-full max-w-full overflow-hidden">
           {monthData.map((day, index) => {
             let bgClass = '';
             let moodIndicator = null;
 
             if (day.hasMood) {
-              // 根据心情类型设置背景色
-              const allMoodEmojis = getAllMoodEmojis();
-              const mood = allMoodEmojis.find(m => m.value === day.mood?.type);
-              if (mood) {
-                bgClass = `${mood.color.replace('bg-', 'bg-')} bg-opacity-20 dark:bg-opacity-30`;
-                moodIndicator = (
-                  <div className="absolute top-0 right-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold -mt-1 -mr-1" style={{ backgroundColor: mood.color.replace('bg-', '') }}>
-                    {day.mood?.emoji}
-                  </div>
-                );
-              }
+              // 有心情记录的日期显示绿色圆点标记
+              moodIndicator = (
+                <div className="w-1 h-1 rounded-full bg-green-500 absolute top-0.5 right-0.5" title="有心情记录"></div>
+              );
             }
 
             return (
@@ -322,39 +316,25 @@ const MoodCalendarPage = () => {
                 key={index}
                 onClick={() => handleDayClick(day)}
                 className={`
-                  relative min-h-20 p-1 rounded-lg transition-colors w-full max-w-full overflow-hidden
+                  relative p-0.5 text-[0.6rem] rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden
                   ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900' : ''}
-                  ${day.isToday ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}
+                  ${day.isToday ? 'bg-blue-500 text-white' : ''}
                   ${day.isWeekend && !bgClass ? 'bg-gray-50 dark:bg-gray-900' : ''}
                   ${bgClass}
-                  ${day.isCurrentMonth && day.date <= new Date().setHours(0, 0, 0, 0) ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700' : 'cursor-default'}
-                  ${day.hasMood && day.date < new Date().setHours(0, 0, 0, 0) ? 'opacity-70' : ''}
+                  ${day.isCurrentMonth && day.date <= new Date().setHours(0, 0, 0, 0) ? 'hover:bg-gray-100 dark:hover:bg-gray-700' : 'cursor-default'}
                 `}
+                style={{ minHeight: '1.8rem' }}
               >
-                {/* 日期数字 */}
-                <div className={`text-center text-sm ${day.isToday ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}>
-                  {day.date.getDate()}
-                </div>
-                {/* 农历日期 */}
-                <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+                <div className="font-medium text-center truncate w-full">{day.date.getDate()}</div>
+                <div className="text-[0.5rem] opacity-70 text-center truncate w-full whitespace-nowrap">
                   {day.lunarDate || ' '}
                 </div>
 
-                {/* 心情指示器 */}
+                {/* 心情指示器 - 绿色圆点 */}
                 {moodIndicator}
               </div>
             );
           })}
-        </div>
-
-        {/* 图例 */}
-        <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          {getAllMoodEmojis().slice(0, 4).map((mood) => (
-            <div key={mood.value} className="flex items-center space-x-1">
-              <div className={`w-3 h-3 rounded-full ${mood.color}`}></div>
-              <span className="text-xs text-gray-600 dark:text-gray-400">{mood.label}</span>
-            </div>
-          ))}
         </div>
       </div>
     );

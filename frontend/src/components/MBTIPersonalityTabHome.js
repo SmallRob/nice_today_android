@@ -1024,14 +1024,15 @@ const MBTIPersonalityTabHome = () => {
               <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">
                 选择要分析的MBTI类型：
               </h3>
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {allMBTIs.map((mbti) => {
                   const typeData = mbtiTypes.find(t => t.type === mbti);
                   return (
                     <button
                       key={mbti}
                       onClick={() => handleMBTIChange(mbti)}
-                      className={`p-2 rounded-lg text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center ${
+                      onTouchStart={(e) => e.stopPropagation()}
+                      className={`p-2 rounded-lg text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center touch-manipulation ${
                         userMBTI === mbti
                           ? 'ring-2 ring-offset-1'
                           : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
