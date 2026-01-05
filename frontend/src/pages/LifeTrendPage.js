@@ -903,7 +903,7 @@ const LifeTrendPage = () => {
                   className={`mt-2 px-4 py-2 rounded-lg text-sm transition-colors ${
                     retryCount >= 3
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'} touch-manipulation`
+                      : 'bg-blue-600 text-white hover:bg-blue-700'} touch-manipulation`}
                 >
                   {retryCount >= 3 ? '已达到最大重试次数' : `重试 (${retryCount}/3)`}
                 </button>
