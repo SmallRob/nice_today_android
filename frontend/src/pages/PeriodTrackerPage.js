@@ -93,7 +93,7 @@ const getHealthAdvice = (phase) => {
 };
 
 // 日历视图组件
-const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod }) => {
+const CalendarView = ({ prediction, cycleData, onDateSelect, onRecordPeriod, theme }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // 获取月份数据
@@ -702,6 +702,7 @@ const PeriodTrackerPage = () => {
           cycleData={cycleData}
           onDateSelect={setSelectedDate}
           onRecordPeriod={handleRecordPeriod}
+          theme={theme}
         />
 
         {/* 趋势图 */}

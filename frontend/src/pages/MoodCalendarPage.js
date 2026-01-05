@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import { calculateLunarDate } from '../utils/LunarCalendarHelper';
 import './MoodCalendarPage.css';
 
@@ -105,6 +106,7 @@ const getAllMoodEmojis = () => {
 
 // 心情日历主页面
 const MoodCalendarPage = () => {
+  const { theme } = useTheme();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMood, setCurrentMood] = useState(null);
   const navigate = useNavigate();

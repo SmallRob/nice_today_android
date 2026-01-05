@@ -41,7 +41,7 @@ public class MainActivity extends BridgeActivity {
             ret.put("content", content);
             
             // Broadcast the file content to the web application
-            this.bridge.triggerWindowJSEvent("documentFileOpened", ret);
+            this.bridge.triggerWindowJSEvent("documentFileOpened", ret.toString());
             
         } catch (Exception e) {
             Log.e(TAG, "Error reading file: " + e.getMessage(), e);
