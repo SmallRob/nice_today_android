@@ -637,22 +637,22 @@ const ChineseZodiacPage = () => {
         <div className="h-64 md:h-72">
           <Line data={chartData} options={chartOptions} />
         </div>
-        <div className="mt-4 grid grid-cols-3 gap-1 md:gap-2 text-center">
+        <div className="mt-4 grid grid-cols-3 gap-1 text-center">
           <div className="bg-blue-50 dark:bg-blue-900/10 p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
             <div className="text-blue-600 dark:text-blue-400 text-xs font-medium">能量指数</div>
-            <div className="text-base font-medium text-blue-700 dark:text-blue-300">
+            <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
               {energyScores[energyScores.length - 1]}%
             </div>
           </div>
           <div className="bg-amber-50 dark:bg-amber-900/10 p-2 rounded-lg border border-amber-100 dark:border-amber-900/30">
             <div className="text-amber-600 dark:text-amber-400 text-xs font-medium">财运趋势</div>
-            <div className="text-base font-medium text-amber-700 dark:text-amber-300">
+            <div className="text-sm font-medium text-amber-700 dark:text-amber-300">
               {wealthScores[wealthScores.length - 1]}%
             </div>
           </div>
           <div className="bg-green-50 dark:bg-green-900/10 p-2 rounded-lg border border-green-100 dark:border-green-900/30">
             <div className="text-green-600 dark:text-green-300 text-xs font-medium">事业趋势</div>
-            <div className="text-base font-medium text-green-700 dark:text-green-300">
+            <div className="text-sm font-medium text-green-700 dark:text-green-300">
               {careerScores[careerScores.length - 1]}%
             </div>
           </div>
@@ -688,8 +688,8 @@ const ChineseZodiacPage = () => {
           </svg>
           能量匹配度
         </h3>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4">
-          <div className="relative w-32 h-32 md:w-48 md:h-48 flex-shrink-0">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <div className="relative w-28 h-28 flex-shrink-0">
             <svg className="w-full h-full" viewBox="0 0 36 36">
               <path
                 d="M18 2.0845
@@ -713,21 +713,21 @@ const ChineseZodiacPage = () => {
               </text>
             </svg>
           </div>
-
-          <div className="text-center md:text-left">
-            <div className="flex items-center mb-3">
-              <span className="text-3xl mr-3">{elementData?.icon}</span>
-              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">能量匹配度</h3>
+        
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-2">
+              <span className="text-2xl mr-2">{elementData?.icon}</span>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">能量匹配度</h3>
             </div>
-            <p className={`text-2xl font-bold ${colorClass} mb-3`}>
+            <p className={`text-xl font-bold ${colorClass} mb-2`}>
               {关系} - {匹配度}%
             </p>
-            <p className="text-gray-600 dark:text-gray-100 text-base mb-4">{描述}</p>
-            <div className="flex flex-wrap gap-2">
-              <span className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full text-sm">
+            <p className="text-gray-600 dark:text-gray-100 text-sm mb-3">{描述}</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                 用户五行: <span className="font-semibold">{用户五行}</span>
               </span>
-              <span className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full text-sm">
+              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                 当日五行: <span className="font-semibold">{当日五行}</span>
               </span>
             </div>
@@ -749,10 +749,10 @@ const ChineseZodiacPage = () => {
 
   return (
     <div className={`min-h-screen ${theme}`}>
-      {/* 顶部标题栏 */}
-      <div className={`bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`}>
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+      {/* 顶部标题栏 - 固定高度适配移动设备 */}
+      <div className={`bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`} style={{ height: '60px' }}>
+        <div className="container mx-auto px-4 h-full flex items-center">
+          <div className="flex items-center justify-between w-full">
             <button
               onClick={() => navigate(-1)}
               className="text-white hover:text-white/90 flex items-center"
@@ -762,9 +762,9 @@ const ChineseZodiacPage = () => {
               </svg>
               返回
             </button>
-            <h1 className="text-xl font-bold">生肖运势</h1>
+            <h1 className="text-lg font-bold flex-1 text-center">生肖运势</h1>
             <button
-              onClick={() => navigate('/settings')}
+              onClick={() => navigate('/user-config')}
               className="text-white hover:text-white/90"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -775,74 +775,74 @@ const ChineseZodiacPage = () => {
         </div>
       </div>
 
-      {/* 主内容区 */}
-      <div className="container mx-auto px-4 py-6 pb-20 md:pb-6 max-w-4xl">
+      {/* 主内容区 - 优化移动端间距 */}
+      <div className="container mx-auto px-2 py-4 pb-16 max-w-4xl">
         {/* 生肖卡片 */}
-        <div className={`bg-gradient-to-br ${elementColors.bg} ${elementColors.to} text-white rounded-xl shadow-lg p-6 mb-6`}>
-          <div className="text-center mb-4">
-            <div className="text-7xl mb-3">{zodiacData.icon}</div>
-            <h2 className="text-3xl font-bold mb-2">您的生肖：{zodiacData.name}</h2>
-            <div className="text-lg opacity-90">
+        <div className={`bg-gradient-to-br ${elementColors.bg} ${elementColors.to} text-white rounded-xl shadow-lg p-4 mb-4`}>
+          <div className="text-center mb-3">
+            <div className="text-6xl mb-2">{zodiacData.icon}</div>
+            <h2 className="text-2xl font-bold mb-1">您的生肖：{zodiacData.name}</h2>
+            <div className="text-base opacity-90">
               属{zodiacData.element}
             </div>
           </div>
         </div>
 
         {/* 详细描述 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
             <span className="mr-2">📖</span> 生肖概述
           </h3>
-          <p className="text-gray-700 dark:text-gray-200 leading-relaxed">
+          <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
             {zodiacData.description}
           </p>
-          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+          <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
             出生年份：{zodiacData.yearRange}
           </div>
         </div>
 
         {/* 个性特质 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
             <span className="mr-2">🌟</span> 性格特征
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-2">
             {zodiacData.traits.map((trait, index) => (
-              <div key={index} className="flex items-center p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></span>
-                <span className="text-gray-700 dark:text-gray-200">{trait}</span>
+              <div key={index} className="flex items-center p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 flex-shrink-0"></span>
+                <span className="text-gray-700 dark:text-gray-200 text-sm">{trait}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* 优点与缺点 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 gap-3 mb-4">
           {/* 优点 */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-4 flex items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+            <h3 className="text-lg font-bold text-green-600 dark:text-green-400 mb-3 flex items-center">
               <span className="mr-2">✨</span> 优点
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {zodiacData.strengths.map((strength, index) => (
                 <div key={index} className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700 dark:text-gray-200">{strength}</span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                  <span className="text-gray-700 dark:text-gray-200 text-sm">{strength}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* 需注意 */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+            <h3 className="text-lg font-bold text-orange-600 dark:text-orange-400 mb-3 flex items-center">
               <span className="mr-2">⚠️</span> 需注意
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {zodiacData.weaknesses.map((weakness, index) => (
                 <div key={index} className="flex items-start">
-                  <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700 dark:text-gray-200">{weakness}</span>
+                  <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                  <span className="text-gray-700 dark:text-gray-200 text-sm">{weakness}</span>
                 </div>
               ))}
             </div>
@@ -854,21 +854,21 @@ const ChineseZodiacPage = () => {
           <h3 className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-4 flex items-center">
             <span className="mr-2">🍀</span> 幸运信息
           </h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
               <div className="text-gray-600 dark:text-gray-400 text-xs mb-1.5">幸运色</div>
-              <div className="flex flex-wrap items-center justify-center gap-1.5">
+              <div className="flex flex-wrap items-center justify-center gap-1">
                 {parseLuckyColors(zodiacData.luckyColor).map((colorName, index) => {
                   const colorHex = getColorHex(colorName);
                   return (
                     <div key={index} className="flex flex-col items-center">
                       <div 
-                        className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-gray-300 dark:border-gray-600 mb-0.5"
+                        className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mb-0.5"
                         style={{ backgroundColor: colorHex }}
                         title={colorName}
                         aria-label={`幸运色: ${colorName}`}
                       />
-                      <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate max-w-[50px] sm:max-w-[60px]">
+                      <div className="text-[9px] text-gray-600 dark:text-gray-400 truncate max-w-[40px]">
                         {colorName}
                       </div>
                     </div>
@@ -876,21 +876,21 @@ const ChineseZodiacPage = () => {
                 })}
               </div>
             </div>
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">幸运数字</div>
-              <div className="flex flex-wrap justify-center gap-2">
+            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
+              <div className="text-gray-600 dark:text-gray-400 text-xs mb-2">幸运数字</div>
+              <div className="flex flex-wrap justify-center gap-1">
                 {zodiacData.luckyNumber.map((num, index) => (
-                  <span key={index} className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full text-xl font-bold text-purple-600 dark:text-purple-400">
+                  <span key={index} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full text-lg font-bold text-purple-600 dark:text-purple-400">
                     {num}
                   </span>
                 ))}
               </div>
             </div>
-            <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">速配生肖</div>
-              <div className="flex flex-wrap justify-center gap-2">
+            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
+              <div className="text-gray-600 dark:text-gray-400 text-xs mb-2">速配生肖</div>
+              <div className="flex flex-wrap justify-center gap-1">
                 {zodiacData.compatible.map((sign, index) => (
-                  <span key={index} className="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-200">
+                  <span key={index} className="px-2 py-1 bg-white dark:bg-gray-700 rounded-full text-xs text-gray-700 dark:text-gray-200">
                     {sign}
                   </span>
                 ))}
@@ -934,18 +934,18 @@ const ChineseZodiacPage = () => {
             <p className="mb-4 text-blue-100">{horoscopeData.overallDescription}</p>
             
             {/* 各领域运势 */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1">
               {Object.entries(horoscopeData.dailyForecast || {}).map(([key, data]) => (
-                <div key={key} className="text-center p-2 bg-white/10 rounded-lg">
-                  <div className="text-xs text-green-200 mb-1">
+                <div key={key} className="text-center p-1 bg-white/10 rounded-lg">
+                  <div className="text-[10px] text-green-200 mb-0.5">
                     {key === 'love' ? '爱情' : 
                      key === 'wealth' ? '财运' : 
                      key === 'career' ? '事业' : 
                      key === 'study' ? '学业' : 
                      key === 'social' ? '社交' : key}
                   </div>
-                  <div className="text-lg font-bold">{data.score}</div>
-                  <div className="text-xs text-green-300">{data.description}</div>
+                  <div className="text-base font-bold">{data.score}</div>
+                  <div className="text-[10px] text-green-300">{data.description}</div>
                 </div>
               ))}
             </div>
@@ -1018,19 +1018,19 @@ const ChineseZodiacPage = () => {
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
             <span className="mr-2">🔮</span> 查看其他生肖
           </h3>
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
             {CHINESE_ZODIAC_DATA.map((zodiac) => (
               <button
                 key={zodiac.name}
                 onClick={() => setUserZodiac(zodiac.name)}
-                className={`p-3 rounded-lg transition-all flex flex-col items-center justify-center ${
+                className={`aspect-square rounded-lg transition-all flex flex-col items-center justify-center p-2 ${
                   userZodiac === zodiac.name
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900/20'
                 }`}
               >
-                <div className="text-2xl mb-1">{zodiac.icon}</div>
-                <div className="text-xs font-bold">{zodiac.name}</div>
+                <div className="text-xl">{zodiac.icon}</div>
+                <div className="text-xs font-bold mt-1">{zodiac.name}</div>
               </button>
             ))}
           </div>
