@@ -15,6 +15,7 @@ import birthDataIntegrityManager from '../utils/BirthDataIntegrityManager'; // �
 import ConfigEditModal from './ConfigEditModal';
 import NameScoringModal from './NameScoringModal';
 import UserDataManager from './UserDataManager';
+import { clearUserZodiacTraitsCache } from '../utils/zodiacTraitsCache';
 
 // 八字命理展示组件（优化版：优先从缓存中读取八字信息）
 
@@ -136,6 +137,40 @@ const getFallbackBaziData = (birthDate, birthTime) => {
 
 // 验证 baziInfo 数据结构的完整性
 const validateBaziInfoStructure = (baziInfo) => {
+
+// 清理用户配置相关的缓存
+const clearUserConfigCache = (nickname) => {
+  try {
+    // 清理八字缓存
+    if (nickname) {
+      // 从八字缓存管理器中移除特定用户的缓存
+      if (typeof enhancedUserConfigManager.clearBaziCache === 'function') {
+        enhancedUserConfigManager.clearBaziCache(nickname);
+        console.log(`已清理用户 ${nickname} 的八字缓存`);
+      } else {
+        console.log(`八字缓存管理器不支持按用户清理，清理所有八字缓存`);
+        // 如果不支持按用户清理，则尝试清理所有八字缓存
+        if (typeof enhancedUserConfigManager.clearAllBaziCache === 'function') {
+          enhancedUserConfigManager.clearAllBaziCache();
+        }
+      }
+    }
+    
+    // 清理星座特质缓存
+    if (typeof clearUserZodiacTraitsCache === 'function') {
+      clearUserZodiacTraitsCache(nickname);
+      console.log(`已清理用户 ${nickname} 的星座特质缓存`);
+    }
+    
+    console.log(`用户 ${nickname} 的相关缓存已清理完成`);
+    return true;
+  } catch (error) {
+    console.error('清理用户配置缓存时出错:', error);
+    return false;
+  }
+};
+
+
   if (!baziInfo) {
     console.warn('baziInfo 为 null 或 undefined');
     return false;
@@ -1314,6 +1349,49 @@ const UserConfigManagerComponent = () => {
         setMessage(null);
       }, 2000);
 
+      // 验证配置是否已正确保存到存储
+      setTimeout(() => {
+        try {
+          const savedConfigs = enhancedUserConfigManager.getAllConfigs();
+          const savedConfig = savedConfigs[index >= 0 ? index : savedConfigs.length - 1];
+          
+          if (savedConfig) {
+            console.log('配置已正确保存到存储:', {
+              nickname: savedConfig.nickname,
+              hasBazi: !!savedConfig.bazi,
+              hasNameScore: !!savedConfig.nameScore
+            });
+            
+            // 如果配置包含八字信息，验证缓存是否同步
+            if (savedConfig.bazi) {
+              const cachedBazi = enhancedUserConfigManager.getBaziFromCache(savedConfig.nickname);
+              if (cachedBazi) {
+                console.log('八字信息已同步到缓存:', savedConfig.nickname);
+              } else {
+                console.warn('八字信息未同步到缓存，尝试重新同步:', savedConfig.nickname);
+                
+                // 尝试重新同步八字到缓存
+                enhancedUserConfigManager.syncBaziToCache(savedConfig.nickname)
+                  .then(syncSuccess => {
+                    if (syncSuccess) {
+                      console.log('八字信息已重新同步到缓存:', savedConfig.nickname);
+                    } else {
+                      console.warn('八字信息重新同步失败:', savedConfig.nickname);
+                    }
+                  })
+                  .catch(syncError => {
+                    console.error('八字信息同步错误:', syncError);
+                  });
+              }
+            }
+          } else {
+            console.warn('保存的配置在存储中未找到:', index);
+          }
+        } catch (verifyError) {
+          console.error('验证保存的配置失败:', verifyError);
+        }
+      }, 100); // 稍微延迟以确保配置已完全保存
+
       // 异步后台计算八字信息并保存到缓存
       try {
         const birthInfo = {
@@ -1322,20 +1400,50 @@ const UserConfigManagerComponent = () => {
           longitude: finalConfigData.birthLocation.lng
         };
 
-        // 后台异步计算八字信息
-        enhancedUserConfigManager.calculateAndSyncBaziInfo(finalConfigData?.nickname, birthInfo)
-          .then(success => {
-            if (success) {
-              console.log('八字信息后台计算并保存成功:', finalConfigData?.nickname);
-            } else {
-              console.warn('八字信息后台计算失败:', finalConfigData?.nickname);
+        // 验证出生信息是否完整，如果完整则后台异步计算八字信息
+        if (birthInfo.birthDate && birthInfo.birthTime && birthInfo.longitude !== undefined) {
+          // 使用setTimeout确保主流程不受影响
+          setTimeout(async () => {
+            try {
+              const calcSuccess = await enhancedUserConfigManager.calculateAndSyncBaziInfo(finalConfigData?.nickname, birthInfo);
+              
+              if (calcSuccess) {
+                console.log('八字信息后台计算并保存成功:', finalConfigData?.nickname);
+                
+                // 验证缓存数据是否正确保存
+                const cachedBazi = enhancedUserConfigManager.getBaziFromCache(finalConfigData?.nickname);
+                if (cachedBazi) {
+                  console.log('八字信息已正确缓存:', finalConfigData?.nickname);
+                } else {
+                  console.warn('八字信息未在缓存中找到:', finalConfigData?.nickname);
+                }
+              } else {
+                console.warn('八字信息后台计算失败:', finalConfigData?.nickname);
+              }
+            } catch (calcError) {
+              console.error('八字信息后台计算出错:', calcError);
+              
+              // 即使计算失败，也记录错误但不中断主流程
+              errorHandlingManager.logError('bazi-calculation', calcError, {
+                nickname: finalConfigData?.nickname,
+                birthInfo: birthInfo
+              });
             }
-          })
-          .catch(calcError => {
-            console.error('八字信息后台计算出错:', calcError);
+          }, 0); // 立即执行但在下一个事件循环中
+        } else {
+          console.log('出生信息不完整，跳过八字计算:', {
+            hasBirthDate: !!birthInfo.birthDate,
+            hasBirthTime: !!birthInfo.birthTime,
+            hasLongitude: birthInfo.longitude !== undefined
           });
+        }
       } catch (calcError) {
         console.error('启动八字后台计算失败:', calcError);
+        
+        // 记录错误但不中断主流程
+        errorHandlingManager.logError('start-bazi-calculation', calcError, {
+          nickname: finalConfigData?.nickname
+        });
       }
 
       return true; // 返回成功状态
@@ -1684,6 +1792,11 @@ const UserConfigManagerComponent = () => {
   // 处理展开/折叠
   const handleToggleExpand = useCallback((index) => {
     setExpandedIndex(prev => prev === index ? -1 : index);
+  }, []);
+
+  // 清理指定用户的缓存
+  const clearUserCache = useCallback((nickname) => {
+    return clearUserConfigCache(nickname);
   }, []);
 
   // 处理导入配置（使用移动端文件系统工具，优化版）
@@ -2130,6 +2243,28 @@ const UserConfigManagerComponent = () => {
               </div>
             </div>
           )}
+
+          {/* 清理缓存按钮 */}
+          <div className="detail-row" style={{ border: 'none', marginBottom: 0, paddingBottom: 0 }}>
+            <span className="detail-label"></span>
+            <div style={{ flex: 1 }}>
+              <button
+                className="score-btn"
+                onClick={() => {
+                  if (window.confirm('确定要清理当前用户的缓存吗？这将清除八字、星座特质等缓存数据，下次使用时会重新计算。')) {
+                    const success = clearUserCache(config.nickname);
+                    if (success) {
+                      showMessage('✅ 缓存清理成功', 'success');
+                    } else {
+                      showMessage('❌ 缓存清理失败', 'error');
+                    }
+                  }
+                }}
+              >
+                🗑️ 清理缓存
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
