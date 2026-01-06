@@ -14,12 +14,9 @@ import { UserParamsProvider } from './context/UserParamsContext';
 import { ensureChartRegistered } from './utils/chartConfig';
 
 import { 
-  preloadHoroscopeTraits, 
-  preloadOnIdle, 
   initializeUserTracking,
   trackUserNavigation,
-  getPreloadStatus,
-  preloadBasedOnRoute
+  getPreloadStatus
 } from './utils/horoscopeTraitsPreloader';
 import './index.css';
 
@@ -291,7 +288,8 @@ const AppLayout = () => {
     const preloadTimer = setTimeout(() => {
       try {
         // 根据路由智能预加载horoscope-traits资源
-        preloadBasedOnRoute(location.pathname);
+        // 注释掉后台预加载，避免首页卡顿 - 根据优化要求移除
+        // preloadBasedOnRoute(location.pathname);
       } catch (error) {
         // 预加载失败不应该影响应用运行
         console.warn('资源预加载失败（不影响应用）:', error);
@@ -618,14 +616,15 @@ function App() {
 
           // 延迟启动horoscope-traits资源预加载（确保核心功能已渲染）
           // 使用 setTimeout 延迟3秒，让应用完全稳定后再预加载
-          setTimeout(() => {
-            try {
-              preloadOnIdle();
-            } catch (error) {
-              // 预加载失败不应该影响应用运行
-              console.warn('horoscope-traits 预加载启动失败（不影响应用）:', error);
-            }
-          }, 3000);
+          // 注释掉后台预加载，避免首页卡顿 - 根据优化要求移除
+          // setTimeout(() => {
+          //   try {
+          //     preloadOnIdle();
+          //   } catch (error) {
+          //     // 预加载失败不应该影响应用运行
+          //     console.warn('horoscope-traits 预加载启动失败（不影响应用）:', error);
+          //   }
+          // }, 3000);
         } catch (error) {
           // 记录初始化错误，但不影响UI显示
           errorLogger.log(error, {
