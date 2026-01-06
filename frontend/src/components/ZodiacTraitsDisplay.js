@@ -1,6 +1,8 @@
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUserConfig } from '../contexts/UserConfigContext';
 import { HOROSCOPE_DATA_ENHANCED, getZodiacNumber } from '../utils/horoscopeAlgorithm';
+import zodiacTraitsCache from '../utils/zodiacTraitsCache';
 
 /**
  * 星座综合特质和人性特点展示组件
@@ -8,21 +10,51 @@ import { HOROSCOPE_DATA_ENHANCED, getZodiacNumber } from '../utils/horoscopeAlgo
  */
 const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
   const navigate = useNavigate();
+  const { currentConfig } = useUserConfig();
+  
+  // 优先使用传入的currentHoroscope，如果不存在则使用用户配置中的星座
+  const effectiveHoroscope = currentHoroscope || currentConfig?.zodiac;
 
-  if (!currentHoroscope) return null;
+  if (!effectiveHoroscope) return null;
 
   // 跳转到详细页面
   const handleViewDetails = () => {
     // 使用数字编码作为URL参数，避免中文编码问题
-    const zodiacNumber = getZodiacNumber(currentHoroscope);
+    const zodiacNumber = getZodiacNumber(effectiveHoroscope);
     navigate('/horoscope-traits/' + zodiacNumber, {
-      state: { userZodiac: currentHoroscope }
+      state: { userZodiac: effectiveHoroscope }
     });
   };
 
   // 获取当前星座数据
-  const zodiac = HOROSCOPE_DATA_ENHANCED.find(h => h.name === currentHoroscope);
+  const zodiac = HOROSCOPE_DATA_ENHANCED.find(h => h.name === effectiveHoroscope);
   if (!zodiac) return null;
+
+  // 获取缓存的星座特质数据，如果不存在则计算并缓存
+  const [zodiacTraitsData, setZodiacTraitsData] = useState(() => {
+    // 尝试从缓存获取数据
+    const cachedData = zodiacTraitsCache.getCachedZodiacTraitsData(effectiveHoroscope);
+    if (cachedData) {
+      return cachedData;
+    }
+    
+    // 如果缓存中没有，创建新的数据对象
+    const newData = {
+      description: getZodiacDescription(effectiveHoroscope),
+      famousExamples: getFamousExamples(effectiveHoroscope),
+      personalityTraits: zodiac.personalityTraits || zodiac.traits?.split('、'),
+      strengths: zodiac.strengths,
+      weaknesses: zodiac.weaknesses,
+      luckyColor: zodiac.luckyColor,
+      luckyNumber: zodiac.luckyNumber,
+      compatible: zodiac.compatible
+    };
+    
+    // 将新数据保存到缓存
+    zodiacTraitsCache.setCachedZodiacTraitsData(effectiveHoroscope, newData);
+    
+    return newData;
+  });
 
   // 获取元素颜色
   const getElementColor = (element) => {
@@ -117,7 +149,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
           <span className="mr-2 text-2xl">{zodiac.icon}</span>
-          {zodiac.name} 综合特质
+          {zodiac.name || effectiveHoroscope} 综合特质
         </h3>
         <span className="text-blue-600 dark:text-blue-400 text-sm font-semibold flex items-center">
           查看详情
@@ -146,7 +178,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       {/* 详细描述 */}
       <div className="mb-4">
         <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-          {getZodiacDescription(zodiac.name)}
+          {zodiacTraitsData.description}
         </div>
       </div>
 
@@ -158,17 +190,12 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
             <span className="mr-1">🌟</span> 性格特征
           </h4>
           <div className="space-y-1">
-            {zodiac.personalityTraits?.map((trait, index) => (
+            {zodiacTraitsData.personalityTraits?.map((trait, index) => (
               <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
                 <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
                 {trait}
               </div>
-            )) || zodiac.traits?.split('、').map((trait, index) => (
-              <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
-                <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
-                {trait}
-              </div>
-            ))}
+            )) || ['待补充']}
           </div>
         </div>
 
@@ -178,7 +205,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
             <span className="mr-1">✨</span> 优点
           </h4>
           <div className="space-y-1">
-            {zodiac.strengths?.map((strength, index) => (
+            {zodiacTraitsData.strengths?.map((strength, index) => (
               <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
                 <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
                 {strength}
@@ -193,7 +220,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
             <span className="mr-1">⚠️</span> 需注意
           </h4>
           <div className="space-y-1">
-            {zodiac.weaknesses?.map((weakness, index) => (
+            {zodiacTraitsData.weaknesses?.map((weakness, index) => (
               <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-center">
                 <span className="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
                 {weakness}
@@ -212,19 +239,19 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
           <div>
             <div className="text-xs text-gray-600 dark:text-gray-100">幸运色</div>
             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {zodiac.luckyColor?.map(c => getColorName(c)).join('、') || '红色'}
+              {zodiacTraitsData.luckyColor?.map(c => getColorName(c)).join('、') || '红色'}
             </div>
           </div>
           <div>
             <div className="text-xs text-gray-600 dark:text-gray-100">幸运数字</div>
             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {zodiac.luckyNumber?.join('、') || '7'}
+              {zodiacTraitsData.luckyNumber?.join('、') || '7'}
             </div>
           </div>
           <div>
             <div className="text-xs text-gray-600 dark:text-gray-100">速配星座</div>
             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {zodiac.compatible?.slice(0, 2).join('、') || '待补充'}
+              {zodiacTraitsData.compatible?.slice(0, 2).join('、') || '待补充'}
             </div>
           </div>
         </div>
@@ -233,10 +260,10 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       {/* 名人例子 */}
       <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-100 mb-2 flex items-center">
-          <span className="mr-1">⭐</span> 知名{currentHoroscope}
+          <span className="mr-1">⭐</span> 知名{effectiveHoroscope}
         </h4>
         <div className="flex flex-wrap gap-2">
-          {getFamousExamples(zodiac.name).map((name, index) => (
+          {zodiacTraitsData.famousExamples?.map((name, index) => (
             <span key={index} className="px-2 py-1 bg-white dark:bg-gray-700 text-xs text-gray-700 dark:text-gray-100 rounded">
               {name}
             </span>

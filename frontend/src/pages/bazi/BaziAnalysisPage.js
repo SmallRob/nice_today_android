@@ -1451,6 +1451,49 @@ const BaziAnalysisPage = () => {
           return; // 如果昵称无效，直接返回，不进行计算
         }
 
+        // 优先从缓存获取八字信息，避免重复计算
+        try {
+          const cachedBazi = baziCacheManager.getBaziByNickname(nickname, {
+            format: 'legacy',
+            validate: true,
+            fallbackToLegacy: true
+          });
+
+          if (cachedBazi && (cachedBazi.bazi || cachedBazi.dualFormatBazi)) {
+            console.log('从缓存获取八字信息成功:', nickname);
+            
+            const displayBazi = getDisplayBaziInfo(cachedBazi.bazi || cachedBazi.dualFormatBazi);
+            
+            // 验证缓存数据是否与当前配置一致
+            if (validateBaziDataConsistency(displayBazi, birthDateStr, currentConfig.birthTime, currentConfig.birthLocation)) {
+              // 如果缓存数据有效且一致，直接使用
+              const updatedConfig = {
+                ...currentConfig,
+                baziInfo: {
+                  ...displayBazi,
+                  meta: {
+                    ...displayBazi.meta,
+                    calculatedForDate: birthDateStr,
+                    calculatedAt: new Date().toISOString(),
+                    dataSource: 'cached'
+                  }
+                }
+              };
+              
+              if (!isCancelled) {
+                await updateConfig(updatedConfig);
+                console.log('使用缓存八字信息更新配置成功');
+                return;
+              }
+            } else {
+              console.log('缓存数据与当前配置不一致，需要重新计算');
+            }
+          }
+        } catch (cacheError) {
+          console.warn('缓存读取失败，继续执行计算:', cacheError);
+          // 缓存读取失败，继续执行计算逻辑
+        }
+
         // 检查是否已有计算好的八字信息且与当前配置一致
         if (currentConfig?.baziInfo && currentConfig?.baziInfo?.meta?.calculatedForDate === currentConfig.birthDate) {
           console.log('八字信息已存在且与当前配置一致，无需重新计算');
