@@ -31,12 +31,8 @@ const BloodTypeHealthCard = () => {
     setSaveSuccess(false);
     
     try {
-      // 查找当前配置的索引
-      const { configs, currentConfig, activeConfigIndex } = useUserConfig();
-      const configIndex = activeConfigIndex;
-      
       // 更新配置
-      const success = await updateConfig(configIndex, { bloodType });
+      const success = await updateConfig(currentConfig.id, { bloodType });
       
       if (success) {
         setSaveSuccess(true);

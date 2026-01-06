@@ -10,6 +10,7 @@ import BodyMetricsRhythmCard from '../components/health/BodyMetricsRhythmCard.js
 import DressDietCard from '../components/health/DressDietCard.js';
 import DietHealthCard from '../components/health/DietHealthCard.js';
 import BloodTypeHealthCard from '../components/health/BloodTypeHealthCard.js';
+import EmoHealthCard from '../components/health/EmoHealthCard.js';
 import './HealthDashboardPage.css';
 
 // 健康身心仪表板 - 主页面
@@ -74,6 +75,13 @@ const HealthDashboardPage = () => {
       priority: 2, // 高优先级，重要健康信息
       cacheKey: 'blood-type-health',
       title: '血型健康管理卡片'
+    },
+    {
+      id: 'emo-health',
+      component: EmoHealthCard,
+      priority: 2, // 中优先级，情绪健康重要
+      cacheKey: 'emo-health',
+      title: '情绪与健康建议卡片'
     }
   ], []);
   

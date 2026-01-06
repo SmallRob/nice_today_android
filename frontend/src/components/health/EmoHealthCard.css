@@ -1,0 +1,170 @@
+/* 情绪与健康卡片样式 */
+.emo-health-card {
+  min-height: 200px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.emo-health-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 炫彩主题适配 */
+.emo-health-card .bg-gradient-to-r {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 暗色主题适配 */
+.dark .emo-health-card .bg-gradient-to-r {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 卡片内容布局 */
+.emo-health-card .bg-gradient-to-r {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 换一换按钮样式 */
+.emo-health-card .bg-white\/30 {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  transition: all 0.3s ease;
+}
+
+.dark .emo-health-card .bg-white\/30 {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.emo-health-card .bg-white\/30:hover {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 9:16 手机屏幕适配 */
+@media (max-width: 480px) and (orientation: portrait) {
+  .emo-health-card {
+    min-height: 180px;
+    margin: 0.5rem 0;
+  }
+  
+  .emo-health-card .bg-gradient-to-r {
+    padding: 12px !important;
+  }
+  
+  .emo-health-card h3 {
+    font-size: 0.9rem;
+  }
+  
+  .emo-health-card h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .emo-health-card p {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+  
+  .emo-health-card button {
+    padding: 0.3rem !important;
+  }
+}
+
+/* 避免意外换行 */
+.emo-health-card p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .emo-health-card {
+    min-height: 180px;
+  }
+  
+  .emo-health-card .bg-gradient-to-r {
+    padding: 14px;
+  }
+  
+  .emo-health-card h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .emo-health-card p {
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+}
+
+/* 针对9:16屏幕比例的特殊优化 */
+@media (max-width: 414px) and (min-height: 736px) {
+  .emo-health-card .bg-gradient-to-r {
+    min-height: 220px;
+  }
+  
+  .emo-health-card p {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+}
+
+/* 针对小屏幕高分辨率设备 */
+@media (max-width: 360px) and (min-height: 640px) {
+  .emo-health-card .bg-gradient-to-r {
+    min-height: 200px;
+  }
+  
+  .emo-health-card p {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+}
+
+/* 确保文本不会溢出 */
+.emo-health-card h3,
+.emo-health-card h4,
+.emo-health-card p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+/* 针对不同主题的颜色适配 */
+[data-theme='vivid'] .emo-health-card .text-white,
+.vivid-theme .emo-health-card .text-white {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 按钮悬停效果优化 */
+.emo-health-card button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.emo-health-card button:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* 确保内容在各种屏幕尺寸下都能正常显示 */
+@media screen and (max-width: 320px) {
+  .emo-health-card p {
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+  
+  .emo-health-card h4 {
+    font-size: 1rem;
+  }
+}
