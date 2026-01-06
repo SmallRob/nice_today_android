@@ -492,46 +492,65 @@ const UnifiedDocumentViewerPage = () => {
 
   return (
     <div className={`unified-document-viewer ${theme}`}>
-      <div className="viewer-header">
-        {activeTab === 'viewer' && documentContent && (
-          <button className="back-button" onClick={handleBack}>
-            <span className="back-icon">←</span>
-            返回
-          </button>
-        )}
-        
-        <h1 className="header-title">
-          {activeTab === 'viewer' ? documentTitle : '文档阅读器'}
-        </h1>
-        
-        <div className="header-actions">
-          {activeTab === 'viewer' && (
-            <button className="select-file-button" onClick={handleSelectFile}>
-              选择文件
-            </button>
+      <div className="sticky-header">
+        <div className={`viewer-header ${activeTab === 'viewer' && documentContent ? 'file-view' : ''}`}>
+          {activeTab === 'viewer' && documentContent ? (
+            <>
+              <div className="file-name-header">
+                <h1 className="header-title">{documentTitle}</h1>
+              </div>
+              <div className="header-actions-row">
+                <button className="back-button" onClick={handleBack}>
+                  <span className="back-icon">←</span>
+                  返回
+                </button>
+                <button className="select-file-button" onClick={handleSelectFile}>
+                  打开文件
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {activeTab === 'viewer' && documentContent && (
+                <button className="back-button" onClick={handleBack}>
+                  <span className="back-icon">←</span>
+                  返回
+                </button>
+              )}
+              <h1 className="header-title">
+                {activeTab === 'viewer' ? documentTitle : '文档阅读器'}
+              </h1>
+              <div className="header-actions">
+                {activeTab === 'viewer' && (
+                  <button className="select-file-button" onClick={handleSelectFile}>
+                    选择文件
+                  </button>
+                )}
+              </div>
+            </>
           )}
         </div>
-      </div>
 
-      <div className="tab-navigation">
-        <button
-          className={`tab-button ${activeTab === 'viewer' ? 'active' : ''}`}
-          onClick={() => setActiveTab('viewer')}
-        >
-          阅读器
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
-          onClick={() => setActiveTab('list')}
-        >
-          文档列表 ({documentList.length})
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => setActiveTab('history')}
-        >
-          历史记录 ({documentHistory.length})
-        </button>
+        <div className="tab-navigation">
+          <button
+            className={`tab-button ${activeTab === 'viewer' ? 'active' : ''}`}
+            onClick={() => setActiveTab('viewer')}
+          >
+            阅读器
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
+            onClick={() => setActiveTab('list')}
+          >
+            文档列表 ({documentList.length})
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('history')}
+          >
+            历史记录 ({documentHistory.length})
+          </button>
+        </div>
       </div>
 
       <div className="viewer-content">

@@ -32,17 +32,50 @@
   --tab-active: #4a90d9;
 }
 
+/* 固定头部容器 */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--header-bg);
+}
+
 /* 顶部标题栏 */
 .viewer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 12px 16px;
   background-color: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+}
+
+/* 文件查看模式下的标题栏布局 */
+.viewer-header.file-view {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 8px 16px 12px;
+}
+
+.file-name-header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.header-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-actions-row .back-button,
+.header-actions-row .select-file-button {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .viewer-header .back-button {
@@ -103,9 +136,6 @@
   display: flex;
   background-color: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 60px;
-  z-index: 99;
 }
 
 .tab-button {
@@ -361,9 +391,27 @@
 /* 适配移动端 */
 @media (max-width: 768px) {
   .viewer-header {
-    padding: 12px;
-    flex-direction: column;
+    padding: 8px 12px;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
+  }
+  
+  .viewer-header.file-view {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 12px 12px;
+  }
+  
+  .header-actions-row {
+    flex-direction: row;
+    gap: 8px;
+  }
+  
+  .header-actions-row .back-button,
+  .header-actions-row .select-file-button {
+    font-size: 14px;
+    padding: 8px 12px;
   }
 
   .header-title {
@@ -371,9 +419,7 @@
     padding: 0;
   }
 
-  .tab-navigation {
-    top: auto;
-  }
+
 
   .tab-button {
     padding: 10px;
@@ -464,4 +510,30 @@
   max-width: 800px;
   margin: 0 auto;
   color: var(--text-color);
+}
+
+/* 适配9:16窄屏幕 */
+@media (max-width: 400px) {
+  .viewer-header {
+    padding: 6px 8px;
+  }
+  
+  .viewer-header.file-view {
+    padding: 6px 8px 10px;
+  }
+  
+  .header-title {
+    font-size: 14px;
+  }
+  
+  .tab-button {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+  
+  .header-actions-row .back-button,
+  .header-actions-row .select-file-button {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
 }

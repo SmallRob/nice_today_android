@@ -665,24 +665,105 @@ function TarotPage() {
       <PageLayout title="神秘塔罗">
         <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
           {/* 标签导航 */}
-          <div className="flex-shrink-0 bg-white dark:bg-gray-800 shadow-sm">
-            <div className="max-w-4xl mx-auto px-4 py-3">
-              <div className="flex space-x-2">
+          <div style={{
+            flexShrink: 0,
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+          }}>
+            <div style={{
+              maxWidth: '56rem',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              paddingLeft: '1rem',
+              paddingRight: '1rem',
+              paddingTop: '0.75rem',
+              paddingBottom: '0.75rem'
+            }}>
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                width: '100%',
+                boxSizing: 'border-box'
+              }}>
                 <button
                   onClick={() => { setActiveTab('daily'); scrollToTop(); }}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all ${activeTab === 'daily'
-                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
+                  style={{
+                    flex: '1 1 0%',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    minWidth: 0,
+                    cursor: 'pointer',
+                    outline: 'none',
+                    border: 'none',
+                    background: activeTab === 'daily'
+                      ? 'linear-gradient(to right, #8b5cf6, #4f46e5)'
+                      : theme === 'dark'
+                        ? '#374151'
+                        : '#f3f4f6',
+                    color: activeTab === 'daily'
+                      ? '#ffffff'
+                      : theme === 'dark'
+                        ? '#d1d5db'
+                        : '#374151',
+                    boxShadow: activeTab === 'daily' ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== 'daily') {
+                      e.target.style.background = theme === 'dark' ? '#4b5563' : '#e5e7eb';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== 'daily') {
+                      e.target.style.background = theme === 'dark' ? '#374151' : '#f3f4f6';
+                    }
+                  }}
                 >
                   🎴 每日抽卡
                 </button>
                 <button
                   onClick={() => { setActiveTab('library'); scrollToTop(); }}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all ${activeTab === 'library'
-                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
+                  style={{
+                    flex: '1 1 0%',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    minWidth: 0,
+                    cursor: 'pointer',
+                    outline: 'none',
+                    border: 'none',
+                    background: activeTab === 'library'
+                      ? 'linear-gradient(to right, #8b5cf6, #4f46e5)'
+                      : theme === 'dark'
+                        ? '#374151'
+                        : '#f3f4f6',
+                    color: activeTab === 'library'
+                      ? '#ffffff'
+                      : theme === 'dark'
+                        ? '#d1d5db'
+                        : '#374151',
+                    boxShadow: activeTab === 'library' ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== 'library') {
+                      e.target.style.background = theme === 'dark' ? '#4b5563' : '#e5e7eb';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== 'library') {
+                      e.target.style.background = theme === 'dark' ? '#374151' : '#f3f4f6';
+                    }
+                  }}
                 >
                   📚 塔罗大全
                 </button>
@@ -733,31 +814,139 @@ function TarotPage() {
 
                     {/* 抽卡模式选择 - 紧凑布局优化 */}
                     <Card>
-                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-center text-lg">🎴 选择抽卡模式</h3>
-                      <div className="grid grid-cols-2 gap-3">
+                      <h3 style={{
+                        fontSize: '1.125rem',
+                        fontWeight: 700,
+                        color: theme === 'dark' ? '#f9fafb' : '#1f2937',
+                        marginBottom: '1rem',
+                        textAlign: 'center'
+                      }}>
+                        🎴 选择抽卡模式
+                      </h3>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                        gap: '12px',
+                        width: '100%',
+                        boxSizing: 'border-box'
+                      }}>
                         <Button
                           onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                          className={`p-4 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[120px] ${drawMode === DRAW_MODES.SINGLE
-                            ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-2xl scale-105 ring-2 ring-purple-300 dark:ring-purple-700'
-                            : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
-                            }`}
+                          style={{
+                            padding: '1rem',
+                            borderRadius: '0.75rem',
+                            textAlign: 'center',
+                            transition: 'all 0.3s',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minHeight: '120px',
+                            boxSizing: 'border-box',
+                            touchAction: 'manipulation',
+                            outline: 'none',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                            minWidth: 0,
+                            overflow: 'hidden',
+                            backgroundColor: drawMode === DRAW_MODES.SINGLE
+                              ? 'linear-gradient(135deg, #8b5cf6, #4f46e5)'
+                              : theme === 'dark'
+                                ? 'linear-gradient(135deg, #374151, #1f2937)'
+                                : 'linear-gradient(135deg, #f9fafb, #f3f4f6)',
+                            color: drawMode === DRAW_MODES.SINGLE
+                              ? '#ffffff'
+                              : theme === 'dark'
+                                ? '#d1d5db'
+                                : '#374151',
+                            border: drawMode === DRAW_MODES.SINGLE
+                              ? '2px solid rgba(139, 92, 246, 0.5)'
+                              : theme === 'dark'
+                                ? '1px solid #4b5563'
+                                : '1px solid #e5e7eb',
+                            boxShadow: drawMode === DRAW_MODES.SINGLE
+                              ? '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                              : 'none',
+                            transform: drawMode === DRAW_MODES.SINGLE ? 'scale(1.05)' : 'scale(1)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (drawMode !== DRAW_MODES.SINGLE) {
+                              e.target.style.backgroundColor = theme === 'dark'
+                                ? 'linear-gradient(135deg, #4b5563, #374151)'
+                                : 'linear-gradient(135deg, #e5e7eb, #f3f4f6)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (drawMode !== DRAW_MODES.SINGLE) {
+                              e.target.style.backgroundColor = theme === 'dark'
+                                ? 'linear-gradient(135deg, #374151, #1f2937)'
+                                : 'linear-gradient(135deg, #f9fafb, #f3f4f6)';
+                            }
+                          }}
                         >
-                          <div className="text-4xl mb-2">🃏</div>
-                          <div className="font-bold text-sm leading-tight">单张抽卡</div>
-                          <div className="text-xs opacity-90 mt-1 leading-tight whitespace-nowrap">
+                          <div style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>🃏</div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25' }}>单张抽卡</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.25rem', lineHeight: '1.25', whiteSpace: 'nowrap' }}>
                             简明扼要·即时解答
                           </div>
                         </Button>
                         <Button
                           onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                          className={`p-4 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center min-h-[120px] ${drawMode === DRAW_MODES.TRIPLE
-                            ? 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-2xl scale-105 ring-2 ring-pink-300 dark:ring-pink-700'
-                            : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
-                            }`}
+                          style={{
+                            padding: '1rem',
+                            borderRadius: '0.75rem',
+                            textAlign: 'center',
+                            transition: 'all 0.3s',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minHeight: '120px',
+                            boxSizing: 'border-box',
+                            touchAction: 'manipulation',
+                            outline: 'none',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                            minWidth: 0,
+                            overflow: 'hidden',
+                            backgroundColor: drawMode === DRAW_MODES.TRIPLE
+                              ? 'linear-gradient(135deg, #ec4899, #e11d48)'
+                              : theme === 'dark'
+                                ? 'linear-gradient(135deg, #374151, #1f2937)'
+                                : 'linear-gradient(135deg, #f9fafb, #f3f4f6)',
+                            color: drawMode === DRAW_MODES.TRIPLE
+                              ? '#ffffff'
+                              : theme === 'dark'
+                                ? '#d1d5db'
+                                : '#374151',
+                            border: drawMode === DRAW_MODES.TRIPLE
+                              ? '2px solid rgba(236, 72, 153, 0.5)'
+                              : theme === 'dark'
+                                ? '1px solid #4b5563'
+                                : '1px solid #e5e7eb',
+                            boxShadow: drawMode === DRAW_MODES.TRIPLE
+                              ? '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                              : 'none',
+                            transform: drawMode === DRAW_MODES.TRIPLE ? 'scale(1.05)' : 'scale(1)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (drawMode !== DRAW_MODES.TRIPLE) {
+                              e.target.style.backgroundColor = theme === 'dark'
+                                ? 'linear-gradient(135deg, #4b5563, #374151)'
+                                : 'linear-gradient(135deg, #e5e7eb, #f3f4f6)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (drawMode !== DRAW_MODES.TRIPLE) {
+                              e.target.style.backgroundColor = theme === 'dark'
+                                ? 'linear-gradient(135deg, #374151, #1f2937)'
+                                : 'linear-gradient(135deg, #f9fafb, #f3f4f6)';
+                            }
+                          }}
                         >
-                          <div className="text-4xl mb-2">🃏🃏🃏</div>
-                          <div className="font-bold text-sm leading-tight">三张抽卡</div>
-                          <div className="text-xs opacity-90 mt-1 leading-tight whitespace-nowrap">
+                          <div style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>🃏🃏🃏</div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25' }}>三张抽卡</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.25rem', lineHeight: '1.25', whiteSpace: 'nowrap' }}>
                             时间线分析·深度解读
                           </div>
                         </Button>
@@ -1279,60 +1468,223 @@ function TarotPage() {
 
                     {/* 实用功能区域 - 移动端优化 */}
                     <Card>
-                      <h3 className="font-bold text-gray-800 dark:text-white mb-4 text-lg">✨ 能量管理</h3>
+                      <h3 style={{
+                        fontSize: '1.125rem',
+                        fontWeight: 700,
+                        color: theme === 'dark' ? '#f9fafb' : '#1f2937',
+                        marginBottom: '1rem'
+                      }}>
+                        ✨ 能量管理
+                      </h3>
 
                       {/* 功能按钮网格 - 优化标签显示 */}
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                        gap: '8px',
+                        width: '100%',
+                        boxSizing: 'border-box'
+                      }}>
                         <Button
                           onClick={generateFortuneReading}
                           disabled={isDrawing}
-                          className="p-3 sm:p-4 bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
+                          style={{
+                            padding: '12px 16px',
+                            borderRadius: '0.5rem',
+                            background: 'linear-gradient(135deg, #60a5fa, #2563eb)',
+                            color: '#ffffff',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            transition: 'all 0.3s',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            minHeight: '80px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxSizing: 'border-box',
+                            flexShrink: 0,
+                            minWidth: 0,
+                            overflow: 'hidden'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+                            e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #60a5fa, #2563eb)';
+                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                          }}
                         >
-                          <div className="text-xl sm:text-2xl mb-1">🎯</div>
-                          <div className="font-bold text-sm sm:text-base mb-1 leading-tight">命运指引</div>
-                          <div className="text-xs opacity-80 leading-tight text-center">查看近期运势</div>
+                          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>🎯</div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25', marginBottom: '2px' }}>命运指引</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.8, lineHeight: '1.25', textAlign: 'center' }}>查看近期运势</div>
                         </Button>
                         <Button
                           onClick={performEnergyCleansing}
                           disabled={isDrawing}
-                          className="p-3 sm:p-4 bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
+                          style={{
+                            padding: '12px 16px',
+                            borderRadius: '0.5rem',
+                            background: 'linear-gradient(135deg, #34d399, #059669)',
+                            color: '#ffffff',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            transition: 'all 0.3s',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            minHeight: '80px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxSizing: 'border-box',
+                            flexShrink: 0,
+                            minWidth: 0,
+                            overflow: 'hidden'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #10b981, #047857)';
+                            e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #34d399, #059669)';
+                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                          }}
                         >
-                          <div className="text-xl sm:text-2xl mb-1">💎</div>
-                          <div className="font-bold text-sm sm:text-base mb-1 leading-tight">能量清理</div>
-                          <div className="text-xs opacity-80 leading-tight text-center">清理负面能量</div>
+                          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>💎</div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25', marginBottom: '2px' }}>能量清理</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.8, lineHeight: '1.25', textAlign: 'center' }}>清理负面能量</div>
                         </Button>
                         <Button
                           onClick={receiveStarBlessing}
                           disabled={isDrawing}
-                          className="p-3 sm:p-4 bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
+                          style={{
+                            padding: '12px 16px',
+                            borderRadius: '0.5rem',
+                            background: 'linear-gradient(135deg, #fb923c, #ea580c)',
+                            color: '#ffffff',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            transition: 'all 0.3s',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            minHeight: '80px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxSizing: 'border-box',
+                            flexShrink: 0,
+                            minWidth: 0,
+                            overflow: 'hidden'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #f97316, #c2410c)';
+                            e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #fb923c, #ea580c)';
+                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                          }}
                         >
-                          <div className="text-xl sm:text-2xl mb-1">🔥</div>
-                          <div className="font-bold text-sm sm:text-base mb-1 leading-tight">星象祝福</div>
-                          <div className="text-xs opacity-80 leading-tight text-center">获取星辰祝福</div>
+                          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>🔥</div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25', marginBottom: '2px' }}>星象祝福</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.8, lineHeight: '1.25', textAlign: 'center' }}>获取星辰祝福</div>
                         </Button>
                         <Button
                           onClick={recordMoonPhase}
-                          className="p-3 sm:p-4 bg-gradient-to-br from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 min-h-[80px] flex flex-col items-center justify-center"
+                          style={{
+                            padding: '12px 16px',
+                            borderRadius: '0.5rem',
+                            background: 'linear-gradient(135deg, #f472b6, #db2777)',
+                            color: '#ffffff',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            transition: 'all 0.3s',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            minHeight: '80px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxSizing: 'border-box',
+                            flexShrink: 0,
+                            minWidth: 0,
+                            overflow: 'hidden'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #ec4899, #be185d)';
+                            e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #f472b6, #db2777)';
+                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                          }}
                         >
-                          <div className="text-xl sm:text-2xl mb-1">🌙</div>
-                          <div className="font-bold text-sm sm:text-base mb-1 leading-tight">月相记录</div>
-                          <div className="text-xs opacity-80 leading-tight text-center">记录月相变化</div>
+                          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>🌙</div>
+                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25', marginBottom: '2px' }}>月相记录</div>
+                          <div style={{ fontSize: '0.75rem', opacity: 0.8, lineHeight: '1.25', textAlign: 'center' }}>记录月相变化</div>
                         </Button>
                       </div>
 
                       {/* 能量水平指示器 */}
-                      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">当前能量水平</span>
-                          <span className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">{energyLevel}%</span>
+                      <div style={{
+                        marginTop: '1rem',
+                        padding: '12px',
+                        backgroundColor: theme === 'dark' ? '#374151' : '#f9fafb',
+                        borderRadius: '0.5rem'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginBottom: '8px'
+                        }}>
+                          <span style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            color: theme === 'dark' ? '#d1d5db' : '#374151'
+                          }}>
+                            当前能量水平
+                          </span>
+                          <span style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            color: '#10b981'
+                          }}>
+                            {energyLevel}%
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                        <div style={{
+                          width: '100%',
+                          backgroundColor: theme === 'dark' ? '#4b5563' : '#e5e7eb',
+                          borderRadius: '9999px',
+                          height: '8px'
+                        }}>
                           <div
-                            className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500"
-                            style={{ width: `${energyLevel}%` }}
+                            style={{
+                              background: 'linear-gradient(to right, #34d399, #10b981)',
+                              height: '8px',
+                              borderRadius: '9999px',
+                              transition: 'width 0.5s ease-out',
+                              width: `${energyLevel}%`
+                            }}
                           ></div>
                         </div>
-                        <div className="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <div style={{
+                          marginTop: '8px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          fontSize: '0.75rem',
+                          color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+                        }}>
                           <span>低</span>
                           <span>中</span>
                           <span>高</span>

@@ -9,6 +9,7 @@ import SeasonalHealthCard from '../components/health/SeasonalHealthCard.js';
 import BodyMetricsRhythmCard from '../components/health/BodyMetricsRhythmCard.js';
 import DressDietCard from '../components/health/DressDietCard.js';
 import DietHealthCard from '../components/health/DietHealthCard.js';
+import BloodTypeHealthCard from '../components/health/BloodTypeHealthCard.js';
 import './HealthDashboardPage.css';
 
 // 健康身心仪表板 - 主页面
@@ -63,9 +64,16 @@ const HealthDashboardPage = () => {
     {
       id: 'diet-health',
       component: DietHealthCard,
-      priority: 4, // 最低优先级，最后加载
+      priority: 4, // 中优先级
       cacheKey: 'diet-health',
       title: '饮食健康'
+    },
+    {
+      id: 'blood-type-health',
+      component: BloodTypeHealthCard,
+      priority: 2, // 高优先级，重要健康信息
+      cacheKey: 'blood-type-health',
+      title: '血型健康管理卡片'
     }
   ], []);
   

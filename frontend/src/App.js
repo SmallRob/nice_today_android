@@ -254,6 +254,7 @@ const FeatureDevelopmentPage = lazyLoadWithErrorHandling(() => import('./pages/F
 const DocumentViewerPage = lazyLoadWithErrorHandling(() => import('./pages/DocumentViewerPage'));
 const DocumentHistoryPage = lazyLoadWithErrorHandling(() => import('./pages/DocumentHistoryPage'));
 const UnifiedDocumentViewerPage = lazyLoadWithErrorHandling(() => import('./pages/UnifiedDocumentViewerPage'));
+const PasswordVaultPage = lazyLoadWithErrorHandling(() => import('./pages/PasswordVaultPage'));
 // const AncientCardGamePage = lazyLoadWithErrorHandling(() => import('./pages/AncientCardGamePage'));
 const TabNavigation = lazyLoadWithErrorHandling(() => import('./components/TabNavigation'));
 
@@ -389,6 +390,7 @@ const AppLayout = () => {
             <Route path="/document-viewer" element={<DocumentViewerPage />} />
             <Route path="/document-history" element={<DocumentHistoryPage />} />
             <Route path="/documents" element={<UnifiedDocumentViewerPage />} />
+            <Route path="/password-vault" element={<PasswordVaultPage />} />
             {/* <Route path="/ancient-card-game" element={<AncientCardGamePage />} /> */}
           </Routes>
         </SafeSuspense>
