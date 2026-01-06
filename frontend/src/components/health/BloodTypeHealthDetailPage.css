@@ -1,0 +1,359 @@
+.blood-type-detail-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px 0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.back-icon {
+  font-size: 16px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+  margin-left: auto;
+  margin-right: 20px;
+}
+
+.blood-type-selector {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.selector-title {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.type-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.type-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 60px;
+}
+
+.type-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.type-button.active {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.type-icon {
+  font-size: 24px;
+}
+
+.type-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.blood-type-overview {
+  border-radius: 15px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.overview-header {
+  display: flex;
+  align-items: center;
+  padding: 25px;
+  color: white;
+}
+
+.overview-icon {
+  font-size: 48px;
+  margin-right: 15px;
+}
+
+.overview-text {
+  flex: 1;
+}
+
+.overview-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.overview-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 5px 0 0 0;
+}
+
+.info-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.section-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+}
+
+.section-description {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin: 0 0 15px 0;
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.keyword-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.medical-stats {
+  background: rgba(255, 255, 255, 0.15);
+  border-left: 4px solid white;
+  padding: 12px;
+  border-radius: 0 8px 8px 0;
+  margin-top: 15px;
+}
+
+.medical-stats h4 {
+  color: white;
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.medical-stats p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.recommendations, .avoid-list {
+  margin: 15px 0;
+}
+
+.recommendations h4, .avoid-list h4 {
+  color: white;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.recommendations ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recommendations li {
+  color: rgba(255, 255, 255, 0.9);
+  padding: 6px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 15px;
+}
+
+.recommendations li:before {
+  content: '•';
+  color: #4ade80;
+  position: absolute;
+  left: 0;
+  top: 6px;
+}
+
+.avoid-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.avoid-tag {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exercise-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.exercise-bullet {
+  color: #60a5fa;
+  margin-top: 2px;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.tip-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.health-summary {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.health-summary h3 {
+  color: white;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.health-summary p {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.health-summary strong {
+  color: white;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .blood-type-detail-page {
+    padding: 10px;
+  }
+  
+  .type-buttons {
+    justify-content: center;
+  }
+  
+  .type-button {
+    padding: 10px 12px;
+    min-width: 50px;
+  }
+  
+  .overview-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .overview-icon {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .overview-text {
+    text-align: center;
+  }
+}

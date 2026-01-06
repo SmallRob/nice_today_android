@@ -4,7 +4,7 @@ import { useUserConfig } from '../../contexts/UserConfigContext.js';
 
 // 血型健康卡片组件
 const BloodTypeHealthCard = () => {
-  const { currentConfig, updateConfig } = useUserConfig();
+  const { currentConfig, updateConfig, getCurrentConfigIndex } = useUserConfig();
   const [bloodType, setBloodType] = useState('A');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -17,11 +17,34 @@ const BloodTypeHealthCard = () => {
     }
   }, [currentConfig]);
 
+  // 监听配置变化，确保血型信息始终是最新的
+  useEffect(() => {
+    if (currentConfig && currentConfig.bloodType && currentConfig.bloodType !== bloodType) {
+      setBloodType(currentConfig.bloodType);
+    }
+  }, [currentConfig, bloodType]);
+
   // 处理血型选择
-  const handleBloodTypeSelect = useCallback((selectedType) => {
+  const handleBloodTypeSelect = useCallback(async (selectedType) => {
     setBloodType(selectedType);
     setIsEditing(false);
-  }, []);
+    
+    // 自动保存选择的血型
+    if (currentConfig) {
+      setLoading(true);
+      try {
+        const currentIndex = getCurrentConfigIndex();
+        await updateConfig(currentIndex, { bloodType: selectedType });
+        setSaveSuccess(true);
+        // 3秒后隐藏成功提示
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } catch (error) {
+        console.error('自动保存血型配置失败:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [currentConfig, updateConfig, getCurrentConfigIndex]);
 
   // 保存血型配置
   const handleSaveBloodType = useCallback(async () => {
@@ -31,8 +54,9 @@ const BloodTypeHealthCard = () => {
     setSaveSuccess(false);
     
     try {
-      // 更新配置
-      const success = await updateConfig(currentConfig.id, { bloodType });
+      // 获取当前活跃配置的索引并更新配置
+      const currentIndex = getCurrentConfigIndex();
+      const success = await updateConfig(currentIndex, { bloodType });
       
       if (success) {
         setSaveSuccess(true);
@@ -44,7 +68,7 @@ const BloodTypeHealthCard = () => {
     } finally {
       setLoading(false);
     }
-  }, [bloodType, currentConfig, updateConfig]);
+  }, [bloodType, currentConfig, updateConfig, getCurrentConfigIndex]);
 
   // 获取当前血型的健康信息
   const getBloodTypeInfo = useCallback((type) => {
@@ -101,7 +125,7 @@ const BloodTypeHealthCard = () => {
   const bloodTypeInfo = getBloodTypeInfo(bloodType);
 
   return (
-    <div className="blood-type-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
+    <div className="blood-type-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white/10 to-white/20 backdrop-blur-sm border border-white/20">
       {/* 卡片头部 */}
       <div className="flex justify-between items-center mb-3 relative z-10">
         <div className="flex items-center space-x-2">
@@ -112,28 +136,6 @@ const BloodTypeHealthCard = () => {
         <div className="flex items-center space-x-2">
           {/* 血型选择器 */}
           <div className="relative">
-            {isEditing ? (
-              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2 z-20">
-                <div className="grid grid-cols-2 gap-1">
-                  {['A', 'B', 'AB', 'O'].map(type => (
-                    <button
-                      key={type}
-                      className={`p-2 rounded text-center text-white font-medium ${getBloodTypeInfo(type).colorClass} hover:opacity-90 transition-opacity`}
-                      onClick={() => handleBloodTypeSelect(type)}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  className="mt-2 w-full text-sm text-gray-600 hover:text-gray-800"
-                  onClick={() => setIsEditing(false)}
-                >
-                  取消
-                </button>
-              </div>
-            ) : null}
-            
             <button
               className={`px-3 py-1 rounded-full text-white font-medium ${bloodTypeInfo.colorClass} hover:opacity-90 transition-opacity flex items-center space-x-1`}
               onClick={() => setIsEditing(!isEditing)}
@@ -142,6 +144,41 @@ const BloodTypeHealthCard = () => {
               <span>{bloodTypeInfo.title}</span>
               <span className="text-xs">▼</span>
             </button>
+            
+            {/* 移动端友好的模态选择器 */}
+            {isEditing && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-sm">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">选择血型</h3>
+                    <button 
+                      onClick={() => setIsEditing(false)}
+                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['A', 'B', 'AB', 'O'].map(type => (
+                      <button
+                        key={type}
+                        className={`p-3 rounded-lg text-center text-white font-medium ${getBloodTypeInfo(type).colorClass} hover:opacity-90 transition-opacity`}
+                        onClick={() => handleBloodTypeSelect(type)}
+                      >
+                        <div className="text-lg">{getBloodTypeInfo(type).icon}</div>
+                        <div>{type}型</div>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    className="mt-4 w-full py-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* 保存按钮 */}

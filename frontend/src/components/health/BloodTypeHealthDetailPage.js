@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUserConfig } from '../contexts/UserConfigContext.js';
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUserConfig } from '../contexts/UserConfigContext.js';
+import { useUserConfig } from '../../contexts/UserConfigContext.js';
 import './BloodTypeHealthDetailPage.css';
 
 const BloodTypeHealthDetailPage = () => {

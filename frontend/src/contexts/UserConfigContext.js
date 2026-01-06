@@ -190,6 +190,11 @@ export const UserConfigProvider = ({ children }) => {
     }
   }, []);
 
+  // 获取当前活跃配置的索引
+  const getCurrentConfigIndex = useCallback(() => {
+    return enhancedUserConfigManager.getActiveConfigIndex();
+  }, []);
+
   /**
    * 更新八字信息到配置
    * @param {string} nickname - 用户昵称
@@ -267,7 +272,8 @@ export const UserConfigProvider = ({ children }) => {
     switchConfig,
     updateBaziInfo,
     calculateAndSyncBazi,
-    getValidBirthInfo
+    getValidBirthInfo,
+    getCurrentConfigIndex
   };
 
   return (

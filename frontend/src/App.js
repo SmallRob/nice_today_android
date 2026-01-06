@@ -250,6 +250,7 @@ const HabitTrackerPage = lazyLoadWithErrorHandling(() => import('./pages/HabitTr
 const HabitStatsPage = lazyLoadWithErrorHandling(() => import('./pages/HabitStatsPage'));
 const BodyMetricsPage = lazyLoadWithErrorHandling(() => import('./pages/BodyMetricsPage'));
 const DietHealthDetail = lazyLoadWithErrorHandling(() => import('./components/health/DietHealthDetail.js'));
+const BloodTypeHealthDetailPage = lazyLoadWithErrorHandling(() => import('./components/health/BloodTypeHealthDetailPage.js'));
 const FeatureDevelopmentPage = lazyLoadWithErrorHandling(() => import('./pages/FeatureDevelopmentPage'));
 const DocumentViewerPage = lazyLoadWithErrorHandling(() => import('./pages/DocumentViewerPage'));
 const DocumentHistoryPage = lazyLoadWithErrorHandling(() => import('./pages/DocumentHistoryPage'));
@@ -386,6 +387,7 @@ const AppLayout = () => {
             <Route path="/habit-stats" element={<HabitStatsPage />} />
             <Route path="/body-metrics" element={<BodyMetricsPage />} />
             <Route path="/diet-health-detail" element={<DietHealthDetail />} />
+            <Route path="/blood-type-health-detail" element={<BloodTypeHealthDetailPage />} />
             <Route path="/feature-development" element={<FeatureDevelopmentPage />} />
             <Route path="/document-viewer" element={<DocumentViewerPage />} />
             <Route path="/document-history" element={<DocumentHistoryPage />} />
