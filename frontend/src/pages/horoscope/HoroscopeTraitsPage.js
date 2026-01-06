@@ -487,30 +487,101 @@ const getFamousExamples = (zodiacName) => {
 
   return (
     <div className={`horoscope-traits-page-container min-h-screen ${theme}`} style={{ minHeight: '100vh', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-      {/* 顶部标题栏 */}
-      <div className={`horoscope-traits-header bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`}>
-        <div className="container mx-auto px-3 md:px-4 py-2 md:py-3">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-white hover:text-white/90 flex items-center"
-            >
-              <svg className="w-5 h-5 md:w-6 md:h-6 mr-1.5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="text-sm md:text-base">返回</span>
-            </button>
-            <h1 className="text-lg md:text-xl font-bold">星座特质详解</h1>
-            <button
-              onClick={() => navigate('/settings')}
-              className="text-white hover:text-white/90"
-            >
-              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </button>
-          </div>
-        </div>
+      {/* 顶部标题栏 - 优化版：行内样式，固定高度，兼容9:16屏幕 */}
+      <div
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 40,
+          width: '100%',
+          height: '56px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 12px',
+          background: (() => {
+            // 将Tailwind渐变类转换为实际颜色值
+            const colorMap = {
+              'from-red-500': '#ef4444',
+              'to-orange-500': '#f97316',
+              'from-green-500': '#22c55e',
+              'to-emerald-500': '#10b981',
+              'from-blue-500': '#3b82f6',
+              'to-cyan-500': '#06b6d4',
+              'from-purple-500': '#a855f7',
+              'to-pink-500': '#ec4899',
+              'from-gray-500': '#6b7280',
+              'to-gray-600': '#4b5563'
+            };
+            const from = colorMap[elementColors.bg] || '#3b82f6';
+            const to = colorMap[elementColors.to] || '#06b6d4';
+            return `linear-gradient(to right, ${from}, ${to})`;
+          })(),
+          color: 'white',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            color: 'white',
+            background: 'transparent',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '8px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+          onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+          onMouseLeave={(e) => e.target.style.opacity = '1'}
+        >
+          <svg
+            style={{ width: '20px', height: '20px', marginRight: '6px' }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          返回
+        </button>
+        <h1
+          style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: 'calc(100vw - 160px)'
+          }}
+        >
+          星座特质详解
+        </h1>
+        <button
+          onClick={() => navigate('/settings')}
+          style={{
+            color: 'white',
+            background: 'transparent',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '8px',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+          onMouseLeave={(e) => e.target.style.opacity = '1'}
+        >
+          <svg
+            style={{ width: '20px', height: '20px' }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </button>
       </div>
       
       {/* 主内容区 */}

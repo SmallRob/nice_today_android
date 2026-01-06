@@ -857,13 +857,13 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
           {getTitle()}
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', width: '100%' }}>
           {/* 生活运势 */}
-          <div className={`${getScoreBg(life.score)} rounded-lg p-4`}>
+          <div style={{ borderRadius: '8px', padding: '16px', backgroundColor: life.score >= 1 ? '#dcfce7' : life.score >= 0 ? '#dbeafe' : life.score >= -1 ? '#fef9c3' : '#fee2e2', color: life.score >= 1 ? '#15803d' : life.score >= 0 ? '#1d4ed8' : life.score >= -1 ? '#a16207' : '#b91c1c' }}>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
               <span className="mr-2">🏠</span> 生活
             </h4>
-            <div className="flex items-center justify-between">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', alignItems: 'center' }}>
               <span className={`text-xl font-bold ${getScoreColor(life.score)}`}>
                 {life.score > 0 ? `+${life.score}` : life.score}
               </span>
@@ -877,11 +877,11 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
           </div>
 
           {/* 事业运势 */}
-          <div className={`${getScoreBg(career.score)} rounded-lg p-4`}>
+          <div className={`${getScoreBg(career.score)}`} style={{ borderRadius: '8px', padding: '16px' }}>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
               <span className="mr-2">💼</span> 事业
             </h4>
-            <div className="flex items-center justify-between">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', alignItems: 'center' }}>
               <span className={`text-xl font-bold ${getScoreColor(career.score)}`}>
                 {career.score > 0 ? `+${career.score}` : career.score}
               </span>
@@ -895,11 +895,11 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
           </div>
 
           {/* 健康运势 */}
-          <div className={`${getScoreBg(health.score)} rounded-lg p-4`}>
+          <div className={`${getScoreBg(health.score)}`} style={{ borderRadius: '8px', padding: '16px' }}>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
               <span className="mr-2">💚</span> 健康
             </h4>
-            <div className="flex items-center justify-between">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', alignItems: 'center' }}>
               <span className={`text-xl font-bold ${getScoreColor(health.score)}`}>
                 {health.score > 0 ? `+${health.score}` : health.score}
               </span>
@@ -913,11 +913,11 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
           </div>
 
           {/* 爱情运势 */}
-          <div className={`${getScoreBg(love.score)} rounded-lg p-4`}>
+          <div className={`${getScoreBg(love.score)}`} style={{ borderRadius: '8px', padding: '16px' }}>
             <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
               <span className="mr-2">❤️</span> 爱情
             </h4>
-            <div className="flex items-center justify-between">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', alignItems: 'center' }}>
               <span className={`text-xl font-bold ${getScoreColor(love.score)}`}>
                 {love.score > 0 ? `+${love.score}` : love.score}
               </span>
@@ -1038,7 +1038,7 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
     return (
       <Card title="当前用户信息" className="mb-4">
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-          <div className="flex items-center justify-between">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', alignItems: 'center' }}>
             <div>
               <p className="text-sm text-gray-700 dark:text-gray-200 mb-1">
                 用户昵称
@@ -1100,24 +1100,41 @@ const HoroscopeTab = ({ currentConfig: propCurrentConfig, theme: propTheme, view
             您可以临时切换查看不同星座的运程，这不会修改您的用户配置
           </p>
           
-          {/* 星座选择网格 */}
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+          {/* 星座选择网格 - 优化适配9:16屏幕，每行4列 */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '8px',
+            width: '100%'
+          }}>
             {(allHoroscopes.length > 0 ? allHoroscopes : 
               ['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', 
                '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座']
             ).map((horoscope) => {
               const horoscopeData = getHoroscopeData().find(h => h.name === horoscope);
+              const isSelected = userHoroscope === horoscope;
               return (
                 <button
                   key={horoscope}
                   onClick={() => handleHoroscopeChange(horoscope)}
-                  className={`p-2 rounded-lg text-center transition-all duration-200 text-sm font-medium flex flex-col items-center ${
-                    userHoroscope === horoscope
-                      ? 'bg-blue-500 text-white shadow'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white'
-                  }`}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    transition: 'all 200ms',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    backgroundColor: isSelected ? '#3b82f6' : '#f3f4f6',
+                    color: isSelected ? 'white' : '#374151',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: isSelected ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'
+                  }}
                 >
-                  <span className="text-lg mb-1">{horoscopeData?.icon || '⭐'}</span>
+                  <span style={{ fontSize: '18px', marginBottom: '4px' }}>{horoscopeData?.icon || '⭐'}</span>
                   <span>{horoscope.replace('座', '')}</span>
                 </button>
               );

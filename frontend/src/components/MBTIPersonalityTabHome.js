@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { Card } from './PageLayout.js';
 import { useTheme } from '../context/ThemeContext';
-import '../styles/mbti-personality-tab.css';
+
 
 // MBTI配置管理器 - 仅用于读取默认配置
 class MBTIConfigManager {
@@ -1020,30 +1020,73 @@ const MBTIPersonalityTabHome = () => {
             )}
             
             {/* MBTI类型网格 */}
-            <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">
+            <div style={{ marginBottom: '1rem' }}>
+              <h3 style={{
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: theme === 'dark' ? '#f9fafb' : '#374151',
+                marginBottom: '0.75rem'
+              }}>
                 选择要分析的MBTI类型：
               </h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+                gap: '8px',
+                width: '100%',
+                boxSizing: 'border-box'
+              }}>
                 {allMBTIs.map((mbti) => {
                   const typeData = mbtiTypes.find(t => t.type === mbti);
+                  const isSelected = userMBTI === mbti;
+                  const backgroundColor = isSelected 
+                    ? (typeData?.color || '#6366f1')
+                    : (theme === 'dark' ? '#374151' : '#f3f4f6');
+                  const textColor = isSelected 
+                    ? '#ffffff'
+                    : (theme === 'dark' ? '#d1d5db' : '#374151');
+                  const borderColor = typeData?.color || '#e5e7eb';
+                  
                   return (
                     <button
                       key={mbti}
                       onClick={() => handleMBTIChange(mbti)}
                       onTouchStart={(e) => e.stopPropagation()}
-                      className={`p-2 rounded-lg text-center transition-all duration-200 text-xs font-medium flex flex-col items-center justify-center touch-manipulation ${
-                        userMBTI === mbti
-                          ? 'ring-2 ring-offset-1'
-                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
-                      }`}
                       style={{
-                        backgroundColor: userMBTI === mbti ? typeData?.color : undefined,
-                        color: userMBTI === mbti ? 'white' : undefined,
-                        borderColor: typeData?.color
+                        padding: '0.5rem',
+                        borderRadius: '0.5rem',
+                        textAlign: 'center',
+                        transition: 'all 0.2s',
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        touchAction: 'manipulation',
+                        backgroundColor,
+                        color: textColor,
+                        border: `1px solid ${borderColor}`,
+                        boxShadow: isSelected ? '0 0 0 2px rgba(99, 102, 241, 0.5)' : 'none',
+                        outline: 'none',
+                        cursor: 'pointer',
+                        minWidth: '0',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 1
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.target.style.backgroundColor = theme === 'dark' ? '#4b5563' : '#e5e7eb';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.target.style.backgroundColor = backgroundColor;
+                        }
                       }}
                     >
-                      <span className="text-base mb-1">{typeData?.icon}</span>
+                      <span style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>{typeData?.icon}</span>
                       <span>{mbti}</span>
                     </button>
                   );
@@ -1053,24 +1096,63 @@ const MBTIPersonalityTabHome = () => {
             
             {/* 当前选择显示 */}
             {userMBTI && (
-              <div className="p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-lg border border-purple-200 dark:border-purple-800">
-                <div className="flex items-center justify-between">
+              <div style={{
+                padding: '0.75rem',
+                background: theme === 'dark' 
+                  ? 'linear-gradient(to right, #1f2937, #111827)' 
+                  : 'linear-gradient(to right, #fdf4ff, #fce7f3)',
+                borderRadius: '0.5rem',
+                border: `1px solid ${theme === 'dark' ? '#6b21a8' : '#e9d5ff'}`,
+                boxSizing: 'border-box'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
                   <div>
-                    <p className="text-purple-700 dark:text-purple-300 text-sm">
-                      当前分析类型：<span className="font-bold">{userMBTI}</span>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 400,
+                      color: theme === 'dark' ? '#d8b4fe' : '#7e22ce',
+                      margin: 0
+                    }}>
+                      当前分析类型：<span style={{ fontWeight: 700 }}>{userMBTI}</span>
                       {userMBTI === userInfo.mbti && (
-                        <span className="ml-2 text-green-600 dark:text-green-400">（来自用户配置）</span>
+                        <span style={{ marginLeft: '0.5rem', color: theme === 'dark' ? '#86efac' : '#16a34a' }}>
+                          （来自用户配置）
+                        </span>
                       )}
                     </p>
-                    <p className="text-purple-600 dark:text-purple-400 text-xs mt-1">
+                    <p style={{
+                      fontSize: '0.75rem',
+                      color: theme === 'dark' ? '#c084fc' : '#9333ea',
+                      marginTop: '0.25rem',
+                      marginBottom: 0
+                    }}>
                       💡 临时选择仅用于本次查询，不会保存配置
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div style={{ textAlign: 'right' }}>
                     {userMBTI !== userInfo.mbti && userInfo.mbti && (
                       <button
                         onClick={() => handleMBTIChange(userInfo.mbti)}
-                        className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors"
+                        style={{
+                          fontSize: '0.75rem',
+                          backgroundColor: theme === 'dark' ? '#4c1d95' : '#f3e8ff',
+                          color: theme === 'dark' ? '#e9d5ff' : '#7e22ce',
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '9999px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = theme === 'dark' ? '#5b21b6' : '#e9d5ff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = theme === 'dark' ? '#4c1d95' : '#f3e8ff';
+                        }}
                       >
                         恢复用户配置
                       </button>
@@ -1083,30 +1165,67 @@ const MBTIPersonalityTabHome = () => {
           
           {/* 类型比较选择器 */}
           <div>
-            <h3 className="text-sm font-medium text-gray-700 dark:text-white mb-3">
+            <h3 style={{
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: theme === 'dark' ? '#f9fafb' : '#374151',
+              marginBottom: '0.75rem'
+            }}>
               选择要比较的MBTI类型（可选）：
             </h3>
-            <div className="flex flex-wrap gap-2">
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px'
+            }}>
               {allMBTIs
                 .filter(mbti => mbti !== userMBTI)
                 .slice(0, 8)
                 .map((mbti) => {
                   const typeData = mbtiTypes.find(t => t.type === mbti);
+                  const isSelected = comparisonType === mbti;
+                  const backgroundColor = isSelected 
+                    ? (typeData?.color || '#6366f1')
+                    : (theme === 'dark' ? '#374151' : '#f3f4f6');
+                  const textColor = isSelected 
+                    ? '#ffffff'
+                    : (theme === 'dark' ? '#d1d5db' : '#374151');
+                  const borderColor = isSelected 
+                    ? (typeData?.color || '#6366f1')
+                    : (theme === 'dark' ? '#4b5563' : '#e5e7eb');
+                  
                   return (
                     <button
                       key={mbti}
                       onClick={() => setComparisonType(comparisonType === mbti ? '' : mbti)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                        comparisonType === mbti
-                          ? 'ring-2 ring-offset-1'
-                          : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
-                      }`}
                       style={{
-                        backgroundColor: comparisonType === mbti ? typeData?.color : undefined,
-                        color: comparisonType === mbti ? 'white' : undefined
+                        padding: '0.375rem 0.75rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
+                        transition: 'all 0.2s',
+                        backgroundColor,
+                        color: textColor,
+                        border: `1px solid ${borderColor}`,
+                        boxShadow: isSelected ? '0 0 0 2px rgba(99, 102, 241, 0.5)' : 'none',
+                        outline: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.target.style.backgroundColor = theme === 'dark' ? '#4b5563' : '#e5e7eb';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.target.style.backgroundColor = backgroundColor;
+                        }
                       }}
                     >
-                      <span className="mr-1">{typeData?.icon}</span>
+                      <span style={{ marginRight: '0.25rem' }}>{typeData?.icon}</span>
                       {mbti}
                     </button>
                   );
@@ -1269,14 +1388,32 @@ const MBTIPersonalityTabHome = () => {
 
 
   return (
-    <div className={`space-y-6 ${theme === 'dark' ? 'dark' : ''}`}>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1.5rem',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      boxSizing: 'border-box'
+    }}>
       {/* 标题区域 */}
       <Card>
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{
+            fontSize: '1.875rem',
+            fontWeight: 700,
+            color: theme === 'dark' ? '#f9fafb' : '#1f2937',
+            marginBottom: '0.5rem'
+          }}>
             🧠 MBTI 16型人格解析
           </h1>
-          <p className="text-sm text-gray-600 dark:text-white max-w-2xl mx-auto">
+          <p style={{
+            fontSize: '0.875rem',
+            color: theme === 'dark' ? '#f9fafb' : '#4b5563',
+            maxWidth: '42rem',
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}>
             深入了解16种人格类型的特质、优势、职业发展和人际关系建议。
             人格类型不是限制，而是了解自我和他人、促进个人成长的工具。
           </p>
@@ -1289,9 +1426,24 @@ const MBTIPersonalityTabHome = () => {
       {/* 加载状态 */}
       {loading && (
         <Card>
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-white text-sm">正在加载人格分析数据...</p>
+          <div style={{ textAlign: 'center', paddingTop: '3rem', paddingBottom: '3rem' }}>
+            <div className="animate-spin" style={{
+              display: 'inline-block',
+              borderRadius: '9999px',
+              height: '2.5rem',
+              width: '2.5rem',
+              borderBottomWidth: '2px',
+              borderColor: '#8b5cf6',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              marginBottom: '1rem'
+            }}></div>
+            <p style={{
+              fontSize: '0.875rem',
+              color: theme === 'dark' ? '#f9fafb' : '#4b5563'
+            }}>
+              正在加载人格分析数据...
+            </p>
           </div>
         </Card>
       )}
@@ -1299,14 +1451,41 @@ const MBTIPersonalityTabHome = () => {
       {/* 错误显示 */}
       {error && (
         <Card>
-          <div className="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded-lg p-4">
-            <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+          <div style={{
+            backgroundColor: theme === 'dark' ? 'rgba(153, 27, 27, 0.2)' : '#fef2f2',
+            border: `1px solid ${theme === 'dark' ? '#7f1d1d' : '#fecaca'}`,
+            borderRadius: '0.5rem',
+            padding: '1rem'
+          }}>
+            <p style={{
+              fontSize: '0.875rem',
+              color: theme === 'dark' ? '#fca5a5' : '#dc2626',
+              margin: 0,
+              marginBottom: '0.5rem'
+            }}>
+              {error}
+            </p>
             <button
               onClick={() => {
                 setError(null);
                 setDataLoaded(false);
               }}
-              className="mt-2 text-xs bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-300 px-3 py-1 rounded hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
+              style={{
+                fontSize: '0.75rem',
+                backgroundColor: theme === 'dark' ? '#991b1b' : '#fee2e2',
+                color: theme === 'dark' ? '#fca5a5' : '#dc2626',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '0.375rem',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = theme === 'dark' ? '#7f1d1d' : '#fecaca';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = theme === 'dark' ? '#991b1b' : '#fee2e2';
+              }}
             >
               重试
             </button>
@@ -1316,7 +1495,7 @@ const MBTIPersonalityTabHome = () => {
 
       {/* 人格分析内容 */}
       {!loading && !error && personalityAnalysis && userMBTI && (
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* 类型比较卡片 */}
           {comparisonType && renderComparisonCard()}
                     
@@ -1343,10 +1522,14 @@ const MBTIPersonalityTabHome = () => {
                     
           {/* 底部信息 */}
           <Card>
-            <div className="text-center text-gray-500 dark:text-white text-xs">
-              <p className="mb-2">MBTI®是Myers-Briggs Type Indicator的注册商标，本页面内容仅供学习和参考使用。</p>
-              <p>人格类型理论帮助我们理解个体差异，但每个人都是独特且不断发展变化的。</p>
-              <p className="mt-2">数据更新时间：{new Date().toLocaleString()}</p>
+            <div style={{
+              textAlign: 'center',
+              color: theme === 'dark' ? '#f9fafb' : '#6b7280',
+              fontSize: '0.75rem'
+            }}>
+              <p style={{ marginBottom: '0.5rem' }}>MBTI®是Myers-Briggs Type Indicator的注册商标，本页面内容仅供学习和参考使用。</p>
+              <p style={{ marginBottom: '0.5rem' }}>人格类型理论帮助我们理解个体差异，但每个人都是独特且不断发展变化的。</p>
+              <p style={{ marginTop: '0.5rem' }}>数据更新时间：{new Date().toLocaleString()}</p>
             </div>
           </Card>
         </div>
@@ -1355,23 +1538,58 @@ const MBTIPersonalityTabHome = () => {
       {/* 未选择MBTI时的提示 */}
       {!loading && !error && !userMBTI && (
         <Card>
-          <div className="text-center py-12">
-            <div className="text-5xl mb-4">🧩</div>
-            <h3 className="text-xl font-semibold text-gray-700 dark:text-white mb-3">请选择MBTI类型</h3>
-            <p className="text-gray-500 dark:text-white text-sm max-w-md mx-auto mb-6">
+          <div style={{
+            textAlign: 'center',
+            paddingTop: '3rem',
+            paddingBottom: '3rem'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🧩</div>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: 600,
+              color: theme === 'dark' ? '#f9fafb' : '#374151',
+              marginBottom: '0.75rem'
+            }}>
+              请选择MBTI类型
+            </h3>
+            <p style={{
+              fontSize: '0.875rem',
+              color: theme === 'dark' ? '#f9fafb' : '#6b7280',
+              maxWidth: '28rem',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              marginBottom: '1.5rem'
+            }}>
               从上方选择一种MBTI类型，开始探索人格特质、优势和发展建议
             </p>
-            <div className="inline-flex flex-wrap gap-2 justify-center">
+            <div style={{
+              display: 'inline-flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              justifyContent: 'center'
+            }}>
               {mbtiList.slice(0, 4).map(mbti => {
                 const typeData = mbtiTypes.find(t => t.type === mbti);
                 return (
                   <button
                     key={mbti}
                     onClick={() => handleMBTIChange(mbti)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow"
-                    style={{ 
-                      backgroundColor: typeData?.color,
-                      color: 'white'
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      transition: 'all 0.2s',
+                      backgroundColor: typeData?.color || '#6366f1',
+                      color: 'white',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.opacity = '0.9';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.opacity = '1';
                     }}
                   >
                     {mbti}
