@@ -224,25 +224,25 @@ const BiorhythmStatusCard = ({ onClick }) => {
       className="health-card biorhythm-card"
       onClick={handleClick}
     >
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-4 rounded-2xl text-white shadow-lg h-full">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-2xl">🌈</div>
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-3 rounded-2xl text-white shadow-lg h-full">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xl">🌈</div>
           <div className="text-right">
-            <h3 className="font-bold text-lg">生物节律</h3>
-            <p className="text-sm opacity-90">今日能量状态</p>
+            <h3 className="font-bold text-base">生物节律</h3>
+            <p className="text-xs opacity-90">今日能量</p>
           </div>
         </div>
         
-        <div className="text-center mb-3">
-          <div className="text-3xl font-bold mb-1">{combinedScore}</div>
-          <p className={`text-sm font-medium ${energyLevel.color}`}>{energyLevel.text}</p>
+        <div className="text-center mb-2">
+          <div className="text-2xl font-bold mb-1">{combinedScore}</div>
+          <p className={`text-xs font-medium ${energyLevel.color}`}>{energyLevel.text}</p>
         </div>
 
         {/* 能量彩虹条 */}
-        <div className="mb-3">
-          <div className="w-full bg-white bg-opacity-20 rounded-full h-2">
+        <div className="mb-2">
+          <div className="w-full bg-white bg-opacity-20 rounded-full h-1.5">
             <div 
-              className={`h-2 rounded-full ${energyLevel.bg}`}
+              className={`h-1.5 rounded-full ${energyLevel.bg}`}
               style={{ width: `${combinedScore}%` }}
             ></div>
           </div>
@@ -252,26 +252,26 @@ const BiorhythmStatusCard = ({ onClick }) => {
         {biorhythmData && (
           <div className="grid grid-cols-3 gap-1 text-xs">
             <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
-              <div className="text-green-300 font-bold truncate">{Math.round(biorhythmData.physical)}</div>
-              <div className="truncate">体力</div>
+              <div className="text-green-300 font-bold text-sm truncate">{Math.round(biorhythmData.physical)}</div>
+              <div className="truncate text-[10px]">体力</div>
             </div>
             <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
-              <div className="text-blue-300 font-bold truncate">{Math.round(biorhythmData.emotional)}</div>
-              <div className="truncate">情绪</div>
+              <div className="text-blue-300 font-bold text-sm truncate">{Math.round(biorhythmData.emotional)}</div>
+              <div className="truncate text-[10px]">情绪</div>
             </div>
             <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
-              <div className="text-purple-300 font-bold truncate">{Math.round(biorhythmData.intellectual)}</div>
-              <div className="truncate">智力</div>
+              <div className="text-purple-300 font-bold text-sm truncate">{Math.round(biorhythmData.intellectual)}</div>
+              <div className="truncate text-[10px]">智力</div>
             </div>
           </div>
         )}
 
         {/* 简要建议 */}
-        <div className="mt-2 pt-2 border-t border-white border-opacity-20">
-          <p className="text-xs opacity-75">
+        <div className="mt-1 pt-1 border-t border-white border-opacity-20">
+          <p className="text-[10px] opacity-75 truncate">
             {biorhythmData 
               ? `今日${getRhythmDescription(biorhythmData.physical, '体力')}，注意调节作息`
-              : '点击查看详情获取完整分析'}
+              : '点击查看详情'}
           </p>
         </div>
       </div>

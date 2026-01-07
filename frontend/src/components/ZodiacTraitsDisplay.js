@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserConfig } from '../contexts/UserConfigContext';
 import { HOROSCOPE_DATA_ENHANCED, getZodiacNumber } from '../utils/horoscopeAlgorithm';
@@ -15,8 +15,87 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
   // 优先使用传入的currentHoroscope，如果不存在则使用用户配置中的星座
   const effectiveHoroscope = currentHoroscope || currentConfig?.zodiac;
 
-  if (!effectiveHoroscope) return null;
-
+  // 获取当前星座数据
+  const zodiac = useMemo(() => {
+    if (!effectiveHoroscope) return null;
+    return HOROSCOPE_DATA_ENHANCED.find(h => h.name === effectiveHoroscope);
+  }, [effectiveHoroscope]);
+  
+  // 获取缓存的星座特质数据，如果不存在则计算并缓存
+  const [zodiacTraitsData, setZodiacTraitsData] = useState(null);
+  
+  // 使用useMemo来获取星座描述
+  const getZodiacDescription = useMemo(() => (zodiacName) => {
+    const descriptions = {
+      '白羊座': '白羊座是十二星座中的第一个星座，象征着新生和开始。他们充满活力、勇敢无畏，是天生的领导者和冒险家。',
+      '金牛座': '金牛座代表着稳定和物质享受。他们务实、耐心，注重生活质量，是可靠的朋友和合作伙伴。',
+      '双子座': '双子座是沟通和学习的代表。他们机智、好奇，善于交际，永远保持着对世界的好奇心。',
+      '巨蟹座': '巨蟹座象征着家庭和情感。他们敏感、体贴，重视家庭关系，具有强烈的保护欲和同理心。',
+      '狮子座': '狮子座代表着自信和创造力。他们热情、慷慨，喜欢成为焦点，具有天生的领导魅力。',
+      '处女座': '处女座象征着完美和服务。他们细致、务实，注重细节，追求完美和秩序。',
+      '天秤座': '天秤座代表着平衡和和谐。他们优雅、公正，重视人际关系，追求美和平衡。',
+      '天蝎座': '天蝎座象征着深度和神秘。他们强烈、直觉敏锐，具有深刻的洞察力和强大的意志力。',
+      '射手座': '射手座代表着自由和探索。他们乐观、爱冒险，追求知识和真理，具有哲学思维。',
+      '摩羯座': '摩羯座象征着责任和成就。他们实际、有耐心，目标明确，具有强烈的责任感。',
+      '水瓶座': '水瓶座代表着创新和独立。他们思想前卫、人道主义，重视自由和进步。',
+      '双鱼座': '双鱼座象征着梦想和同情心。他们富有想象力、直觉强，具有艺术天赋和同理心。'
+    };
+    return descriptions[zodiacName] || `${zodiacName}具有独特的个性和魅力。`;
+  }, []);
+  
+  // 使用useMemo来获取星座名人例子
+  const getFamousExamples = useMemo(() => (zodiacName) => {
+    const examples = {
+      '白羊座': ['Lady Gaga', '成龙', '梵高'],
+      '金牛座': ['奥黛丽·赫本', '马克思', '莎士比亚'],
+      '双子座': ['玛丽莲·梦露', '肯尼迪', '安吉丽娜·朱莉'],
+      '巨蟹座': ['汤姆·汉克斯', '戴安娜王妃', '海明威'],
+      '狮子座': ['奥巴马', '麦当娜', '拿破仑'],
+      '处女座': ['迈克尔·杰克逊', '巴菲特', '托尔斯泰'],
+      '天秤座': ['刘德华', '马云', '甘地'],
+      '天蝎座': ['比尔·盖茨', '居里夫人', '毕加索'],
+      '射手座': ['泰勒·斯威夫特', '丘吉尔', '贝多芬'],
+      '摩羯座': ['牛顿', '马丁·路德·金', '毛泽东'],
+      '水瓶座': ['爱迪生', '达尔文', '林肯'],
+      '双鱼座': ['爱因斯坦', '乔布斯', '雨果']
+    };
+    return examples[zodiacName] || ['知名人物'];
+  }, []);
+  
+  // 初始化数据
+  useEffect(() => {
+    if (!zodiac || !effectiveHoroscope) {
+      setZodiacTraitsData(null);
+      return;
+    }
+    
+    // 尝试从缓存获取数据
+    const cachedData = zodiacTraitsCache.getCachedZodiacTraitsData(effectiveHoroscope);
+    if (cachedData) {
+      setZodiacTraitsData(cachedData);
+    } else {
+      // 如果缓存中没有，创建新的数据对象
+      const newData = {
+        description: getZodiacDescription(effectiveHoroscope),
+        famousExamples: getFamousExamples(effectiveHoroscope),
+        personalityTraits: zodiac.personalityTraits || zodiac.traits?.split('、'),
+        strengths: zodiac.strengths,
+        weaknesses: zodiac.weaknesses,
+        luckyColor: zodiac.luckyColor,
+        luckyNumber: zodiac.luckyNumber,
+        compatible: zodiac.compatible
+      };
+      
+      // 将新数据保存到缓存
+      zodiacTraitsCache.setCachedZodiacTraitsData(effectiveHoroscope, newData);
+      
+      setZodiacTraitsData(newData);
+    }
+  }, [zodiac, effectiveHoroscope, getZodiacDescription, getFamousExamples]);
+  
+  // 如果没有有效星座或数据未加载，返回null
+  if (!effectiveHoroscope || !zodiac || !zodiacTraitsData) return null;
+  
   // 跳转到详细页面
   const handleViewDetails = () => {
     // 使用数字编码作为URL参数，避免中文编码问题
@@ -25,36 +104,6 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
       state: { userZodiac: effectiveHoroscope }
     });
   };
-
-  // 获取当前星座数据
-  const zodiac = HOROSCOPE_DATA_ENHANCED.find(h => h.name === effectiveHoroscope);
-  if (!zodiac) return null;
-
-  // 获取缓存的星座特质数据，如果不存在则计算并缓存
-  const [zodiacTraitsData, setZodiacTraitsData] = useState(() => {
-    // 尝试从缓存获取数据
-    const cachedData = zodiacTraitsCache.getCachedZodiacTraitsData(effectiveHoroscope);
-    if (cachedData) {
-      return cachedData;
-    }
-    
-    // 如果缓存中没有，创建新的数据对象
-    const newData = {
-      description: getZodiacDescription(effectiveHoroscope),
-      famousExamples: getFamousExamples(effectiveHoroscope),
-      personalityTraits: zodiac.personalityTraits || zodiac.traits?.split('、'),
-      strengths: zodiac.strengths,
-      weaknesses: zodiac.weaknesses,
-      luckyColor: zodiac.luckyColor,
-      luckyNumber: zodiac.luckyNumber,
-      compatible: zodiac.compatible
-    };
-    
-    // 将新数据保存到缓存
-    zodiacTraitsCache.setCachedZodiacTraitsData(effectiveHoroscope, newData);
-    
-    return newData;
-  });
 
   // 获取元素颜色
   const getElementColor = (element) => {
@@ -103,43 +152,7 @@ const ZodiacTraitsDisplay = memo(({ currentHoroscope }) => {
     return colorMap[hexColor] || '红色';
   };
 
-  // 获取星座详细描述
-  const getZodiacDescription = (zodiacName) => {
-    const descriptions = {
-      '白羊座': '白羊座是十二星座中的第一个星座，象征着新生和开始。他们充满活力、勇敢无畏，是天生的领导者和冒险家。',
-      '金牛座': '金牛座代表着稳定和物质享受。他们务实、耐心，注重生活质量，是可靠的朋友和合作伙伴。',
-      '双子座': '双子座是沟通和学习的代表。他们机智、好奇，善于交际，永远保持着对世界的好奇心。',
-      '巨蟹座': '巨蟹座象征着家庭和情感。他们敏感、体贴，重视家庭关系，具有强烈的保护欲和同理心。',
-      '狮子座': '狮子座代表着自信和创造力。他们热情、慷慨，喜欢成为焦点，具有天生的领导魅力。',
-      '处女座': '处女座象征着完美和服务。他们细致、务实，注重细节，追求完美和秩序。',
-      '天秤座': '天秤座代表着平衡和和谐。他们优雅、公正，重视人际关系，追求美和平衡。',
-      '天蝎座': '天蝎座象征着深度和神秘。他们强烈、直觉敏锐，具有深刻的洞察力和强大的意志力。',
-      '射手座': '射手座代表着自由和探索。他们乐观、爱冒险，追求知识和真理，具有哲学思维。',
-      '摩羯座': '摩羯座象征着责任和成就。他们实际、有耐心，目标明确，具有强烈的责任感。',
-      '水瓶座': '水瓶座代表着创新和独立。他们思想前卫、人道主义，重视自由和进步。',
-      '双鱼座': '双鱼座象征着梦想和同情心。他们富有想象力、直觉强，具有艺术天赋和同理心。'
-    };
-    return descriptions[zodiacName] || `${zodiacName}具有独特的个性和魅力。`;
-  };
 
-  // 获取星座名人例子
-  const getFamousExamples = (zodiacName) => {
-    const examples = {
-      '白羊座': ['Lady Gaga', '成龙', '梵高'],
-      '金牛座': ['奥黛丽·赫本', '马克思', '莎士比亚'],
-      '双子座': ['玛丽莲·梦露', '肯尼迪', '安吉丽娜·朱莉'],
-      '巨蟹座': ['汤姆·汉克斯', '戴安娜王妃', '海明威'],
-      '狮子座': ['奥巴马', '麦当娜', '拿破仑'],
-      '处女座': ['迈克尔·杰克逊', '巴菲特', '托尔斯泰'],
-      '天秤座': ['刘德华', '马云', '甘地'],
-      '天蝎座': ['比尔·盖茨', '居里夫人', '毕加索'],
-      '射手座': ['泰勒·斯威夫特', '丘吉尔', '贝多芬'],
-      '摩羯座': ['牛顿', '马丁·路德·金', '毛泽东'],
-      '水瓶座': ['爱迪生', '达尔文', '林肯'],
-      '双鱼座': ['爱因斯坦', '乔布斯', '雨果']
-    };
-    return examples[zodiacName] || ['知名人物'];
-  };
 
   return (
     <div

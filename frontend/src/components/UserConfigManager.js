@@ -135,9 +135,6 @@ const getFallbackBaziData = (birthDate, birthTime) => {
   return defaultBaziData;
 };
 
-// 验证 baziInfo 数据结构的完整性
-const validateBaziInfoStructure = (baziInfo) => {
-
 // 清理用户配置相关的缓存
 const clearUserConfigCache = (nickname) => {
   try {
@@ -170,7 +167,8 @@ const clearUserConfigCache = (nickname) => {
   }
 };
 
-
+// 验证 baziInfo 数据结构的完整性
+const validateBaziInfoStructure = (baziInfo) => {
   if (!baziInfo) {
     console.warn('baziInfo 为 null 或 undefined');
     return false;

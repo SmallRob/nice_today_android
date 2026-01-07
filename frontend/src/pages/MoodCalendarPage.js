@@ -289,7 +289,7 @@ const MoodCalendarPage = () => {
           {dayNames.map((day, index) => (
             <div
               key={day}
-              className={`text-center text-[0.6rem] font-medium py-0.5 ${
+              className={`text-center text-xs font-semibold py-1 ${
                 index === 0 ? 'text-red-500 dark:text-red-400' : 
                 index === 6 ? 'text-blue-500 dark:text-blue-400' : 
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
@@ -318,17 +318,17 @@ const MoodCalendarPage = () => {
                 key={index}
                 onClick={() => handleDayClick(day)}
                 className={`
-                  relative p-0.5 text-[0.6rem] rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden
+                  relative p-1 text-sm rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden
                   ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900' : ''}
                   ${day.isToday ? 'bg-blue-500 text-white' : ''}
                   ${day.isWeekend && !bgClass ? 'bg-gray-50 dark:bg-gray-900' : ''}
                   ${bgClass}
                   ${day.isCurrentMonth && day.date <= new Date().setHours(0, 0, 0, 0) ? 'hover:bg-gray-100 dark:hover:bg-gray-700' : 'cursor-default'}
                 `}
-                style={{ minHeight: '1.8rem' }}
+                style={{ minHeight: '3rem' }}
               >
-                <div className="font-medium text-center truncate w-full">{day.date.getDate()}</div>
-                <div className="text-[0.5rem] opacity-70 text-center truncate w-full whitespace-nowrap">
+                <div className="font-bold text-center truncate w-full">{day.date.getDate()}</div>
+                <div className="text-[0.6rem] opacity-70 text-center truncate w-full whitespace-nowrap">
                   {day.lunarDate || ' '}
                 </div>
 

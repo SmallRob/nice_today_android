@@ -125,19 +125,19 @@ const BloodTypeHealthCard = () => {
   const bloodTypeInfo = getBloodTypeInfo(bloodType);
 
   return (
-    <div className="blood-type-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white/10 to-white/20 backdrop-blur-sm border border-white/20">
+    <div className="blood-type-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-red-500 via-pink-500 to-orange-500 p-4 rounded-2xl text-white shadow-lg h-full">
       {/* 卡片头部 */}
       <div className="flex justify-between items-center mb-3 relative z-10">
         <div className="flex items-center space-x-2">
           <span className="text-2xl">{bloodTypeInfo.icon}</span>
-          <h3 className="text-lg font-bold text-white">血型与健康</h3>
+          <h3 className="text-lg font-bold text-white drop-shadow-lg">血型与健康</h3>
         </div>
         
         <div className="flex items-center space-x-2">
           {/* 血型选择器 */}
           <div className="relative">
             <button
-              className={`px-3 py-1 rounded-full text-white font-medium ${bloodTypeInfo.colorClass} hover:opacity-90 transition-opacity flex items-center space-x-1`}
+              className="px-3 py-1 rounded-full text-white font-medium bg-white/20 hover:bg-white/30 transition-all duration-300 flex items-center space-x-1 backdrop-blur-sm drop-shadow"
               onClick={() => setIsEditing(!isEditing)}
               disabled={loading}
             >
@@ -194,37 +194,37 @@ const BloodTypeHealthCard = () => {
       
       {/* 血型信息概览 */}
       <div className="mb-4">
-        <div className={`text-center p-3 rounded-lg ${bloodTypeInfo.colorClass} text-white mb-3`}>
-          <h4 className="text-xl font-bold">{bloodTypeInfo.title}</h4>
-          <p className="text-sm opacity-90">{bloodTypeInfo.subtitle}</p>
+        <div className="text-center p-3 rounded-lg bg-white/20 text-white mb-3 backdrop-blur-sm drop-shadow">
+          <h4 className="text-xl font-bold drop-shadow-lg">{bloodTypeInfo.title}</h4>
+          <p className="text-sm opacity-90 drop-shadow">{bloodTypeInfo.subtitle}</p>
         </div>
         
-        <p className="text-white/80 mb-2">{bloodTypeInfo.description}</p>
-        <p className="text-white/80 mb-2"><strong>健康风险：</strong>{bloodTypeInfo.healthRisks}</p>
+        <p className="text-white/90 mb-2 drop-shadow">{bloodTypeInfo.description}</p>
+        <p className="text-white/90 mb-2 drop-shadow"><strong>健康风险：</strong>{bloodTypeInfo.healthRisks}</p>
       </div>
       
       {/* 养生建议 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-        <div className="bg-white/10 p-3 rounded-lg border border-white/20">
-          <h5 className="font-semibold text-white mb-1">饮食建议</h5>
-          <p className="text-white/80 text-sm">{bloodTypeInfo.dietaryAdvice}</p>
+        <div className="bg-white/20 p-3 rounded-lg border border-white/30 backdrop-blur-sm drop-shadow">
+          <h5 className="font-semibold text-white mb-1 drop-shadow">饮食建议</h5>
+          <p className="text-white/90 text-sm drop-shadow">{bloodTypeInfo.dietaryAdvice}</p>
         </div>
         
-        <div className="bg-white/10 p-3 rounded-lg border border-white/20">
-          <h5 className="font-semibold text-white mb-1">运动建议</h5>
-          <p className="text-white/80 text-sm">{bloodTypeInfo.exerciseAdvice}</p>
+        <div className="bg-white/20 p-3 rounded-lg border border-white/30 backdrop-blur-sm drop-shadow">
+          <h5 className="font-semibold text-white mb-1 drop-shadow">运动建议</h5>
+          <p className="text-white/90 text-sm drop-shadow">{bloodTypeInfo.exerciseAdvice}</p>
         </div>
       </div>
       
       {/* 生活贴士 */}
       <div className="mb-4">
-        <h5 className="font-semibold text-white mb-1">生活贴士</h5>
-        <p className="text-white/80 text-sm">{bloodTypeInfo.lifestyleTips}</p>
+        <h5 className="font-semibold text-white mb-1 drop-shadow">生活贴士</h5>
+        <p className="text-white/90 text-sm drop-shadow">{bloodTypeInfo.lifestyleTips}</p>
       </div>
       
       {/* 成功提示 */}
       {saveSuccess && (
-        <div className="mb-3 p-2 bg-green-500/20 border border-green-500/30 rounded text-green-300 text-sm">
+        <div className="mb-3 p-2 bg-green-500/30 border border-green-400/50 rounded text-green-200 text-sm backdrop-blur-sm drop-shadow">
           ✅ 血型配置已保存
         </div>
       )}
@@ -233,7 +233,7 @@ const BloodTypeHealthCard = () => {
       <div className="mt-2">
         <Link 
           to="/blood-type-health-detail" 
-          className="w-full bg-gradient-to-r from-white/30 to-white/40 text-white text-center py-1.5 px-3 rounded-lg hover:from-white/40 hover:to-white/50 transition-all duration-300 backdrop-blur-sm border border-white/30 text-sm block"
+          className="w-full bg-gradient-to-r from-white/20 to-white/30 text-white text-center py-1.5 px-3 rounded-lg hover:from-white/30 hover:to-white/40 transition-all duration-300 backdrop-blur-sm border border-white/40 text-sm block drop-shadow"
         >
           查看血型养生详情
         </Link>

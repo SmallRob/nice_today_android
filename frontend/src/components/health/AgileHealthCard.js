@@ -265,25 +265,25 @@ const AgileHealthCard = ({ onClick }) => {
       onClick={handleClick}
     >
       <div className="bg-gradient-to-r from-green-500 to-teal-600 p-4 rounded-2xl text-white shadow-lg h-full">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-2xl">⚡</div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xl">⚡</div>
           <div className="text-right">
-            <h3 className="font-bold text-lg">敏捷养生</h3>
-            <p className="text-sm opacity-90">今日任务</p>
+            <h3 className="font-bold text-base">敏捷养生</h3>
+            <p className="text-xs opacity-90">今日任务</p>
           </div>
         </div>
         
-        <div className="text-center mb-3">
-          <div className="text-3xl font-bold mb-1">{completedCount}/{totalCount}</div>
-          <p className="text-sm opacity-80">已完成/总任务</p>
+        <div className="text-center mb-2">
+          <div className="text-2xl font-bold mb-0.5">{completedCount}/{totalCount}</div>
+          <p className="text-xs opacity-80">已完成/总任务</p>
         </div>
 
         {/* 今日任务列表 */}
-        <div className="space-y-2 mb-3">
+        <div className="space-y-1 mb-2">
           {dailyTasks.map((task, index) => (
             <div 
               key={task.id} 
-              className={`flex items-center justify-between p-2 rounded-lg text-xs ${
+              className={`flex items-center justify-between p-1.5 rounded-lg text-xs ${
                 completedTasks.includes(task.id) 
                   ? 'bg-white bg-opacity-20' 
                   : 'bg-white bg-opacity-10'
@@ -298,7 +298,7 @@ const AgileHealthCard = ({ onClick }) => {
                   type="checkbox"
                   checked={completedTasks.includes(task.id)}
                   onChange={() => toggleTaskCompletion(task.id)}
-                  className="w-4 h-4 rounded bg-white bg-opacity-20 border-white border-opacity-30 text-green-500 focus:ring-green-500 mr-2"
+                  className="w-3.5 h-3.5 rounded bg-white bg-opacity-20 border-white border-opacity-30 text-green-500 focus:ring-green-500 mr-1.5"
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleTaskCompletion(task.id);
@@ -306,7 +306,7 @@ const AgileHealthCard = ({ onClick }) => {
                 />
                 <div>
                   <div className="font-medium flex items-center">
-                    <span className="mr-2">{task.icon}</span>
+                    <span className="mr-1.5">{task.icon}</span>
                     {task.title}
                   </div>
                   <div className="opacity-75">{task.duration}</div>
@@ -316,30 +316,32 @@ const AgileHealthCard = ({ onClick }) => {
           ))}
         </div>
 
-        {/* 换一换按钮 */}
-        <div className="flex justify-center">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              refreshTasks();
-            }}
-            className="text-xs bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-full transition-all flex items-center"
-          >
-            <span className="mr-1">🔄</span>
-            换一换
-          </button>
-        </div>
-
-        {/* 完成提示 */}
-        {completedCount > 0 && (
-          <div className="mt-2 pt-2 border-t border-white border-opacity-20">
-            <p className="text-xs opacity-75 text-center">
-              {completedCount === totalCount 
-                ? '🎉 恭喜完成所有任务！' 
-                : `还有 ${totalCount - completedCount} 个任务待完成`}
-            </p>
+        <div className="flex justify-between items-center">
+          {/* 换一换按钮 */}
+          <div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                refreshTasks();
+              }}
+              className="text-xs bg-white bg-opacity-20 hover:bg-opacity-30 px-2.5 py-0.5 rounded-full transition-all flex items-center"
+            >
+              <span className="mr-1">🔄</span>
+              换一换
+            </button>
           </div>
-        )}
+          
+          {/* 完成提示 */}
+          {completedCount > 0 && (
+            <div className="text-right">
+              <p className="text-[10px] opacity-75">
+                {completedCount === totalCount 
+                  ? '🎉 全完成' 
+                  : `剩${totalCount - completedCount}`}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -192,20 +192,10 @@ const AgeAnalysisPage = () => {
   return (
     <div className={`min-h-screen ${theme}`}>
       {/* 顶部标题栏 */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white sticky top-0 z-40 shadow-lg">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(-1)}
-              className="text-white hover:text-white/90 flex items-center"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button>
-            <h1 className="text-xl font-bold">年龄分析</h1>
-            <div className="w-6 h-6"></div>
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white sticky top-0 z-40 shadow-lg" style={{ height: '60px' }}>
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-center h-full">
+            <h1 className="text-lg font-bold text-center" style={{ fontSize: '16px' }}>年龄分析</h1>
           </div>
         </div>
       </div>
@@ -213,22 +203,22 @@ const AgeAnalysisPage = () => {
       {/* 主内容区 */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* 年龄卡片 */}
-        <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="text-center mb-4">
-            <div className="text-7xl mb-3">🎂</div>
-            <h2 className="text-3xl font-bold mb-2">{userAge}岁</h2>
-            <div className="text-lg opacity-90">
+        <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-xl shadow-lg p-4 mb-6">
+          <div className="text-center mb-2">
+            <div className="text-5xl mb-2">🎂</div>
+            <h2 className="text-2xl font-bold mb-1">{userAge}岁</h2>
+            <div className="text-base opacity-90">
               {currentLifeStage.stage} - {currentLifeStage.range}
             </div>
           </div>
-          <p className="text-center opacity-90">
+          <p className="text-center opacity-90 text-sm">
             {currentLifeStage.description}
           </p>
         </div>
 
         {/* 生命周期进度条 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
             <span className="mr-2">📊</span> 生命周期进度
           </h3>
           <div className="relative">
@@ -247,15 +237,15 @@ const AgeAnalysisPage = () => {
         </div>
 
         {/* 年龄阶段分析 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
             <span className="mr-2">🌟</span> {ageAnalysis.title}
           </h3>
-          <p className="text-gray-700 dark:text-gray-200 mb-4">
+          <p className="text-gray-700 dark:text-gray-200 mb-4 text-sm">
             {ageAnalysis.description}
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
                 <span className="text-green-500 mr-2">✓</span> 关键特征
@@ -287,15 +277,15 @@ const AgeAnalysisPage = () => {
         </div>
 
         {/* 人生里程碑 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
             <span className="mr-2">🎯</span> 人生里程碑
           </h3>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {milestones.slice(0, 8).map((milestone, index) => (
               <div
                 key={milestone.age}
-                className={`flex items-center p-4 rounded-lg transition-all ${
+                className={`flex items-center p-3 rounded-lg transition-all ${
                   milestone.status === 'current'
                     ? 'bg-blue-100 dark:bg-blue-900/20 border-2 border-blue-500'
                     : milestone.status === 'past'
@@ -303,18 +293,18 @@ const AgeAnalysisPage = () => {
                     : 'bg-gray-50 dark:bg-gray-800/50'
                 }`}
               >
-                <div className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-3">
                   {milestone.status === 'current' ? (
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">✓</span>
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-xs">✓</span>
                     </div>
                   ) : milestone.status === 'past' ? (
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">✓</span>
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-xs">✓</span>
                     </div>
                   ) : (
-                    <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                      <span className="text-gray-600 dark:text-gray-300 font-bold">?</span>
+                    <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                      <span className="text-gray-600 dark:text-gray-300 font-bold text-xs">?</span>
                     </div>
                   )}
                 </div>
@@ -328,7 +318,7 @@ const AgeAnalysisPage = () => {
                   }`}>
                     {milestone.title}
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-xs text-gray-600 dark:text-gray-300">
                     {milestone.description}
                   </p>
                 </div>
@@ -342,15 +332,19 @@ const AgeAnalysisPage = () => {
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
             <span className="mr-2">🔍</span> 生命周期阶段概览
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {lifeStages.map((stage, index) => (
               <div
                 key={index}
-                className={`p-3 rounded-lg text-center transition-all ${
+                className={`p-3 rounded-lg text-center transition-all cursor-pointer ${
                   stage.range === currentLifeStage.range
                     ? 'bg-blue-100 dark:bg-blue-900/20 border-2 border-blue-500'
-                    : 'bg-gray-50 dark:bg-gray-700/50'
+                    : 'bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-600'
                 }`}
+                onClick={() => {
+                  const [minAge] = stage.range.split('-').map(str => parseInt(str.replace('岁+', '')));
+                  setUserAge(minAge === 80 ? 80 : minAge + 5); // 设置为年龄段中间的年龄
+                }}
               >
                 <div className="text-lg font-bold mb-1">{stage.range}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">{stage.stage}</div>

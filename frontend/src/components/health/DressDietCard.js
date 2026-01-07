@@ -124,7 +124,7 @@ const DressDietCard = ({ onClick }) => {
   if (loading) {
     return (
       <div className="health-card dress-diet-card">
-        <div className="bg-gradient-to-r from-pink-500 to-rose-600 p-4 rounded-2xl text-white shadow-lg h-full flex items-center justify-center">
+        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4 rounded-2xl text-white shadow-lg h-full flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             <p className="text-sm">加载中...</p>
@@ -137,7 +137,7 @@ const DressDietCard = ({ onClick }) => {
   if (error) {
     return (
       <div className="health-card dress-diet-card">
-        <div className="bg-gradient-to-r from-red-500 to-pink-600 p-4 rounded-2xl text-white shadow-lg h-full flex items-center justify-center">
+        <div className="bg-gradient-to-br from-red-600 via-pink-600 to-rose-600 p-4 rounded-2xl text-white shadow-lg h-full flex items-center justify-center">
           <div className="text-center">
             <div className="text-2xl mb-2">⚠️</div>
             <p className="text-sm">数据加载失败</p>
@@ -155,74 +155,77 @@ const DressDietCard = ({ onClick }) => {
       className="health-card dress-diet-card"
       onClick={handleClick}
     >
-      <div className="bg-gradient-to-r from-pink-500 to-rose-600 p-4 rounded-2xl text-white shadow-lg h-full">
-        <div className="flex items-center justify-between mb-3">
+      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4 rounded-2xl text-white shadow-lg h-full">
+        <div className="flex items-center justify-between mb-2">
           <div className="text-2xl">👗</div>
           <div className="text-right">
-            <h3 className="font-bold text-lg">穿搭饮食</h3>
-            <p className="text-sm opacity-90">今日建议</p>
+            <h3 className="font-bold text-lg drop-shadow-lg">穿搭饮食</h3>
+            <p className="text-xs opacity-100 font-medium">今日建议</p>
           </div>
         </div>
         
         {/* 今日五行 */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">今日五行</span>
-            <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+        <div className="mb-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-semibold opacity-100">今日五行</span>
+            <span className="text-[11px] bg-white/30 px-2 py-1 rounded-full font-medium shadow-sm">
               {dressInfo?.daily_element || '木'}
             </span>
           </div>
         </div>
 
-        {/* 穿搭建议 */}
-        <div className="mb-3">
-          <p className="text-xs font-medium opacity-90 mb-2">穿搭建议：</p>
-          <div className="flex flex-wrap gap-1">
-            {colorSuggestions.length > 0 ? (
-              colorSuggestions.map((color, index) => (
-                <span 
-                  key={index} 
-                  className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full"
-                >
-                  {color}
-                </span>
-              ))
-            ) : (
-              <span className="text-xs opacity-75">无具体建议</span>
-            )}
+        {/* 穿搭建议和饮食推荐分左右栏显示 */}
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          {/* 穿搭建议 */}
+          <div className="border-r border-white border-opacity-30 pr-2">
+            <p className="text-xs font-semibold opacity-100 mb-1">穿搭建议：</p>
+            <div className="flex flex-wrap gap-1">
+              {colorSuggestions.length > 0 ? (
+                colorSuggestions.map((color, index) => (
+                  <span 
+                    key={index} 
+                    className="text-[11px] bg-white/30 px-2 py-1 rounded-full truncate max-w-[60px] font-medium shadow-sm"
+                  >
+                    {color}
+                  </span>
+                ))
+              ) : (
+                <span className="text-[11px] opacity-80 font-medium">无</span>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* 饮食建议 */}
-        <div className="mb-3">
-          <p className="text-xs font-medium opacity-90 mb-2">饮食推荐：</p>
-          <div className="flex flex-wrap gap-1">
-            {foodSuggestions.length > 0 ? (
-              foodSuggestions.map((food, index) => (
-                <span 
-                  key={index} 
-                  className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full"
-                >
-                  {food}
-                </span>
-              ))
-            ) : (
-              <span className="text-xs opacity-75">无具体建议</span>
-            )}
+          {/* 饮食建议 */}
+          <div className="pl-2">
+            <p className="text-xs font-semibold opacity-100 mb-1">饮食推荐：</p>
+            <div className="flex flex-wrap gap-1">
+              {foodSuggestions.length > 0 ? (
+                foodSuggestions.map((food, index) => (
+                  <span 
+                    key={index} 
+                    className="text-[11px] bg-white/30 px-2 py-1 rounded-full truncate max-w-[60px] font-medium shadow-sm"
+                  >
+                    {food}
+                  </span>
+                ))
+              ) : (
+                <span className="text-[11px] opacity-80 font-medium">无</span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* 养生提示 */}
-        <div className="mb-2">
-          <p className="text-xs opacity-75">
+        <div className="mb-1">
+          <p className="text-[11px] opacity-90 font-medium drop-shadow">
             {dressInfo?.health_advice || '根据五行理论，选择合适颜色和食物'}
           </p>
         </div>
 
         {/* 快速操作提示 */}
-        <div className="mt-2 pt-2 border-t border-white border-opacity-20">
-          <p className="text-xs opacity-75 text-center">
-            点击查看详细穿搭与饮食指南
+        <div className="pt-1 border-t border-white border-opacity-30">
+          <p className="text-[11px] opacity-90 font-medium text-center drop-shadow">
+            详细指南
           </p>
         </div>
       </div>

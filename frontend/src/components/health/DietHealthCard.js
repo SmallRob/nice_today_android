@@ -228,94 +228,88 @@ const DietHealthCard = () => {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-2 mb-3">
         {/* 主食和蛋白质并排显示 */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="text-center p-2 bg-blue-50 rounded-lg border border-blue-100 relative">
-            <div className="absolute top-0 left-0 w-full h-full highlight-gradient-blue"></div>
-            <div className="relative z-10">
-              <div className="text-xl font-bold text-blue-600">{ageBasedRecommendation.main.amount}</div>
-              <div className="text-xs font-medium text-blue-800 truncate">{ageBasedRecommendation.main.name}</div>
-              <div className="text-xs text-blue-600 mt-1">主食</div>
-            </div>
-          </div>
-          
-          <div className="text-center p-2 bg-green-50 rounded-lg border border-green-100 relative">
-            <div className="absolute top-0 left-0 w-full h-full highlight-gradient-green"></div>
-            <div className="relative z-10">
-              <div className="text-xl font-bold text-green-600">{ageBasedRecommendation.protein.amount}</div>
-              <div className="text-xs font-medium text-green-800 truncate">{ageBasedRecommendation.protein.name}</div>
-              <div className="text-xs text-green-600 mt-1">蛋白质</div>
-            </div>
+        <div className="text-center p-2 bg-blue-50 rounded-lg border border-blue-100 relative">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-blue"></div>
+          <div className="relative z-10">
+            <div className="text-lg font-bold text-blue-600 truncate">{ageBasedRecommendation.main.amount}</div>
+            <div className="text-xs font-medium text-blue-800 truncate">{ageBasedRecommendation.main.name}</div>
+            <div className="text-xs text-blue-600 mt-1">主食</div>
           </div>
         </div>
         
+        <div className="text-center p-2 bg-green-50 rounded-lg border border-green-100 relative">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-green"></div>
+          <div className="relative z-10">
+            <div className="text-lg font-bold text-green-600 truncate">{ageBasedRecommendation.protein.amount}</div>
+            <div className="text-xs font-medium text-green-800 truncate">{ageBasedRecommendation.protein.name}</div>
+            <div className="text-xs text-green-600 mt-1">蛋白质</div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-3 gap-2 mb-3">
         {/* 蔬菜、水果和坚果并排显示 */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="text-center p-2 bg-red-50 rounded-lg border border-red-100 relative">
-            <div className="absolute top-0 left-0 w-full h-full highlight-gradient-red"></div>
-            <div className="relative z-10">
-              <div className="text-xl font-bold text-red-600">{ageBasedRecommendation.vegetables.amount}</div>
-              <div className="text-xs font-medium text-red-800 truncate">{ageBasedRecommendation.vegetables.name}</div>
-              <div className="text-xs text-red-600 mt-1">蔬菜</div>
-            </div>
+        <div className="text-center p-2 bg-red-50 rounded-lg border border-red-100 relative">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-red"></div>
+          <div className="relative z-10">
+            <div className="text-lg font-bold text-red-600 truncate">{ageBasedRecommendation.vegetables.amount}</div>
+            <div className="text-xs font-medium text-red-800 truncate">{ageBasedRecommendation.vegetables.name}</div>
+            <div className="text-xs text-red-600 mt-1">蔬菜</div>
           </div>
-          
-          <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-100 relative">
-            <div className="absolute top-0 left-0 w-full h-full highlight-gradient-orange"></div>
-            <div className="relative z-10">
-              <div className="text-xl font-bold text-yellow-600">{ageBasedRecommendation.fruits.amount}</div>
-              <div className="text-xs font-medium text-yellow-800 truncate">{ageBasedRecommendation.fruits.name}</div>
-              <div className="text-xs text-yellow-600 mt-1">水果</div>
-            </div>
+        </div>
+        
+        <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-100 relative">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-orange"></div>
+          <div className="relative z-10">
+            <div className="text-lg font-bold text-yellow-600 truncate">{ageBasedRecommendation.fruits.amount}</div>
+            <div className="text-xs font-medium text-yellow-800 truncate">{ageBasedRecommendation.fruits.name}</div>
+            <div className="text-xs text-yellow-600 mt-1">水果</div>
           </div>
-          
-          <div className="text-center p-2 bg-purple-50 rounded-lg border border-purple-100 relative">
-            <div className="absolute top-0 left-0 w-full h-full highlight-gradient-purple"></div>
-            <div className="relative z-10">
-              <div className="text-xl font-bold text-purple-600">{ageBasedRecommendation.nuts.amount}</div>
-              <div className="text-xs font-medium text-purple-800 truncate">{ageBasedRecommendation.nuts.name}</div>
-              <div className="text-xs text-purple-600 mt-1">坚果</div>
-            </div>
+        </div>
+        
+        <div className="text-center p-2 bg-purple-50 rounded-lg border border-purple-100 relative">
+          <div className="absolute top-0 left-0 w-full h-full highlight-gradient-purple"></div>
+          <div className="relative z-10">
+            <div className="text-lg font-bold text-purple-600 truncate">{ageBasedRecommendation.nuts.amount}</div>
+            <div className="text-xs font-medium text-purple-800 truncate">{ageBasedRecommendation.nuts.name}</div>
+            <div className="text-xs text-purple-600 mt-1">坚果</div>
           </div>
         </div>
       </div>
       
-      <div className="mb-3">
-        <p className="text-xs text-white/80 italic">{ageBasedRecommendation.tips}</p>
+      <div className="mb-2">
+        <p className="text-xs text-white/80 italic truncate">{ageBasedRecommendation.tips}</p>
       </div>
       
-      <div className="mb-3">
-        <h4 className="font-semibold text-white mb-1 text-sm">可替换同类食物:</h4>
+      <div className="mb-2">
+        <h4 className="font-semibold text-white mb-1 text-xs">可替换同类食物:</h4>
         <div className="grid grid-cols-2 gap-1 text-xs">
-          <div>
-            <span className="font-medium text-white">主食替换:</span>
-            <span className="text-white/80 ml-1">{ageBasedRecommendation.main.alternatives.join(', ')}</span>
+          <div className="truncate">
+            <span className="text-white truncate">{ageBasedRecommendation.main.alternatives.join(', ')}</span>
           </div>
-          <div>
-            <span className="font-medium text-white">蛋白替换:</span>
-            <span className="text-white/80 ml-1">{ageBasedRecommendation.protein.alternatives.join(', ')}</span>
+          <div className="truncate">
+            <span className="text-white/80 truncate">{ageBasedRecommendation.protein.alternatives.join(', ')}</span>
           </div>
-          <div>
-            <span className="font-medium text-white">蔬菜替换:</span>
-            <span className="text-white/80 ml-1">{ageBasedRecommendation.vegetables.alternatives.join(', ')}</span>
+          <div className="truncate">
+            <span className="text-white/80 truncate">{ageBasedRecommendation.vegetables.alternatives.join(', ')}</span>
           </div>
-          <div>
-            <span className="font-medium text-white">水果替换:</span>
-            <span className="text-white/80 ml-1">{ageBasedRecommendation.fruits.alternatives.join(', ')}</span>
+          <div className="truncate">
+            <span className="text-white/80 truncate">{ageBasedRecommendation.fruits.alternatives.join(', ')}</span>
           </div>
         </div>
       </div>
       
-      <div className="mb-3">
-        <h4 className="font-semibold text-white mb-1 text-sm">可能缺乏的营养素:</h4>
-        <div className="space-y-1">
+      <div className="mb-2">
+        <h4 className="font-semibold text-white mb-1 text-xs">可能缺乏的营养素:</h4>
+        <div className="space-y-1 max-h-24 overflow-y-auto">
           {nutrientAlerts.map((nutrient, index) => (
             <div key={index} className="flex items-start p-1 bg-white/20 rounded border border-white/30 backdrop-blur-sm">
-              <span className="text-white/90 mr-1 text-sm">⚠️</span>
-              <div>
-                <div className="font-medium text-white text-xs">{nutrient.name}</div>
-                <div className="text-xs text-white/80">{nutrient.suggestion}</div>
+              <span className="text-white/90 mr-1 text-xs">⚠️</span>
+              <div className="flex-1">
+                <div className="font-medium text-white text-xs truncate">{nutrient.name}</div>
+                <div className="text-xs text-white/80 truncate">{nutrient.suggestion}</div>
               </div>
             </div>
           ))}
@@ -333,10 +327,10 @@ const DietHealthCard = () => {
         </div>
       </div>
       
-      <div className="mt-2">
+      <div className="mt-1">
         <Link 
           to="/diet-health-detail" 
-          className="w-full bg-gradient-to-r from-white/30 to-white/40 text-white text-center py-1.5 px-3 rounded-lg hover:from-white/40 hover:to-white/50 transition-all duration-300 backdrop-blur-sm border border-white/30 text-sm"
+          className="w-full bg-gradient-to-r from-white/30 to-white/40 text-white text-center py-1 px-2 rounded-lg hover:from-white/40 hover:to-white/50 transition-all duration-300 backdrop-blur-sm border border-white/30 text-xs"
         >
           详细建议
         </Link>
