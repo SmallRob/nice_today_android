@@ -1,22 +1,41 @@
 import { useState, useEffect } from 'react';
 
 const ShaoyongYixue = () => {
-  const [theme, setTheme] = useState('dark'); // light | dark
-
-  // 主题切换 - update Tailwind theme
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+  // 使用系统主题设置
+  const [theme, setTheme] = useState(() => {
+    // 初始化时检测系统主题偏好
+    if (typeof window !== 'undefined') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return prefersDark ? 'dark' : 'light';
     }
-  }, [theme]);
+    return 'dark'; // 默认值
+  });
 
-  // 主题切换函数
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-  };
+  // 监听系统主题变化
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => {
+      const newTheme = e.matches ? 'dark' : 'light';
+      setTheme(newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    // 初始化主题
+    if (mediaQuery.matches) {
+      document.documentElement.classList.add('dark');
+    }
+
+    // 监听主题变化
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   // 简单易学链接数据
   const easyLearnLinks = [
@@ -85,19 +104,7 @@ const ShaoyongYixue = () => {
             <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">简单易学</h1>
             <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>传统易学 • 简单入门 • 深入实践</p>
           </div>
-
-          <div className="flex items-center">
-            <button
-              className={`p-3 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-yellow-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} transition-colors duration-300`}
-              onClick={toggleTheme}
-              title={`切换到${theme === 'dark' ? '浅色' : '深色'}主题`}
-            >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
-          </div>
         </div>
-
-
       </header>
 
       {/* 主要内容区域 */}

@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { calculateLunarDate } from '../utils/LunarCalendarHelper';
 
+/* 导入黄历组件优化样式 */
+import '../styles/huangli-optimization.css';
+
+
 // 黄历宜忌数据（简化版）
 const HUANGLI_DATA = {
   yi: [
@@ -84,7 +88,6 @@ const HuangliComponent = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [huangliData, setHuangliData] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [showCalendar, setShowCalendar] = useState(true); // Show calendar by default
 
   // 计算当前月份的日历
   const getCalendarDays = () => {
@@ -173,7 +176,6 @@ const HuangliComponent = () => {
   const selectDate = (date) => {
     setSelectedDate(date);
     setHuangliData(getHuangliForDate(date));
-    setShowCalendar(false);
   };
 
   // 获取指定日期的黄历数据
@@ -190,39 +192,39 @@ const HuangliComponent = () => {
         : 'bg-white/90 backdrop-blur-sm border border-gray-200'
     }`}>
       {/* 头部 - 优化版 */}
-      <div className={`p-3 border-b ${
+      <div className={`p-2 sm:p-3 border-b overflow-hidden ${
         theme === 'dark' ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-gray-900' : 'border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50'
       }`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-          <h2 className={`text-lg sm:text-xl font-bold flex items-center ${
+          <h2 className={`text-base sm:text-xl font-bold flex items-center overflow-hidden ${
             theme === 'dark' ? 'text-white' : 'text-gray-800'
           }`}>
-            <span className="mr-2">📅</span> 黄历择吉
+            <span className="mr-2 flex-shrink-0">📅</span> <span className="truncate whitespace-nowrap overflow-hidden">黄历择吉</span>
           </h2>
         </div>
         
         {/* 当前选择日期显示 - 优化版 */}
-        <div className={`p-2 rounded-lg mb-3 ${
+        <div className={`p-2 rounded-lg mb-3 overflow-hidden ${
           theme === 'dark' ? 'bg-gray-700/50' : 'bg-amber-50'
         }`}>
-          <div className={`text-base sm:text-lg font-semibold mb-1 truncate ${
+          <div className={`text-sm sm:text-lg font-semibold mb-1 truncate whitespace-nowrap overflow-hidden ${
             theme === 'dark' ? 'text-white' : 'text-gray-800'
           }`}>
             {formatDate(selectedDate)}
           </div>
           {huangliData && (
-            <div className="flex flex-wrap gap-1 text-xs">
-              <span className={`px-1.5 py-0.5 rounded ${
+            <div className="flex flex-wrap gap-1 text-xs overflow-hidden">
+              <span className={`px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap overflow-hidden text-ellipsis ${
                 theme === 'dark' ? 'bg-orange-900/50 text-orange-300' : 'bg-orange-100 text-orange-700'
               }`}>
                 农历: {huangliData.lunarDate}
               </span>
-              <span className={`px-1.5 py-0.5 rounded ${
+              <span className={`px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap overflow-hidden text-ellipsis ${
                 theme === 'dark' ? 'bg-amber-900/50 text-amber-300' : 'bg-amber-100 text-amber-700'
               }`}>
                 干支: {huangliData.ganzhi}
               </span>
-              <span className={`px-1.5 py-0.5 rounded ${
+              <span className={`px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap overflow-hidden text-ellipsis ${
                 theme === 'dark' ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-700'
               }`}>
                 吉凶: {huangliData.auspiciousness.level}
@@ -233,46 +235,46 @@ const HuangliComponent = () => {
       </div>
 
       {/* 月历视图 - 默认显示 */}
-      <div className="p-3 overflow-hidden">
+      <div className="p-1 sm:p-2 overflow-hidden">
         {/* 月份导航 - 优化版 */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1 overflow-hidden">
           <button
             onClick={() => changeMonth(-1)}
-            className={`p-1 rounded-lg ${
+            className={`p-1.5 rounded-lg flex-shrink-0 min-w-[44px] min-h-[44px] touch-target ${
               theme === 'dark'
                 ? 'text-gray-300 hover:bg-gray-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className={`text-xs sm:text-sm font-semibold px-2 truncate ${
+          <div className={`text-xs sm:text-sm font-semibold px-1 truncate flex-1 text-center ${
             theme === 'dark' ? 'text-white' : 'text-gray-800'
           }`}>
             {formatMonth(currentMonth)}
           </div>
           <button
             onClick={() => changeMonth(1)}
-            className={`p-1 rounded-lg ${
+            className={`p-1.5 rounded-lg flex-shrink-0 min-w-[44px] min-h-[44px] touch-target ${
               theme === 'dark'
                 ? 'text-gray-300 hover:bg-gray-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
 
         {/* 星期标题 - 优化版 */}
-        <div className="grid grid-cols-7 gap-0.5 mb-1 overflow-hidden">
+        <div className="grid grid-cols-7 gap-0.5 mb-0 overflow-hidden">
           {['日', '一', '二', '三', '四', '五', '六'].map((day, index) => (
             <div
               key={index}
-              className={`text-center text-xs font-medium py-0.5 ${
+              className={`text-center text-xs font-medium py-0 whitespace-nowrap overflow-hidden text-ellipsis ${
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
               }`}
             >
@@ -287,7 +289,7 @@ const HuangliComponent = () => {
             <div
               key={index}
               onClick={() => selectDate(day.date)}
-              className={`relative p-0.5 rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden ${
+              className={`relative p-0.5 rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden touch-target ${
                 day.isToday
                   ? theme === 'dark'
                     ? 'bg-blue-600 text-white'
@@ -304,19 +306,19 @@ const HuangliComponent = () => {
                     ? 'text-gray-500 hover:bg-gray-800'
                     : 'text-gray-400 hover:bg-gray-50'
               }`}
-              style={{ minHeight: '2.2rem' }}
+              style={{ minHeight: '44px', minWidth: '44px', aspectRatio: '1' }}
             >
-              <div className="font-medium text-base sm:text-lg text-center w-full leading-tight truncate">
+              <div className="font-medium text-sm sm:text-base text-center w-full leading-none whitespace-nowrap overflow-hidden">
                 {day.date.getDate()}
               </div>
-              <div className="text-[0.6rem] sm:text-xs opacity-70 text-center w-full leading-tight truncate" style={{ minHeight: '0.8rem' }}>
+              <div className="text-[0.55rem] sm:text-[0.6rem] opacity-70 text-center w-full leading-none whitespace-nowrap overflow-hidden">
                 {day.huangli?.lunarDateShort || ''}
               </div>
-              
+
               {/* 吉凶指示器 */}
               {day.huangli && day.huangli.auspiciousness && (
-                <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full">
-                  <div 
+                <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0">
+                  <div
                     className={`w-1.5 h-1.5 rounded-full ${
                       day.huangli.auspiciousness.level === '大吉' ? 'bg-red-500'
                       : day.huangli.auspiciousness.level === '吉' ? 'bg-green-500'

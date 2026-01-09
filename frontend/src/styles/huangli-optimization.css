@@ -6,11 +6,45 @@
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    sans-serif; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==================== 9:16 屏幕优化 ==================== */
+@media (max-aspect-ratio: 9/16) {
+  .huangli-calendar {
+    /* 确保内容不会换行 */
+    overflow-x: hidden;
+    
+    /* 优化布局以适应狭窄屏幕 */
+    padding: 2px;
+  }
+
+  .huangli-calendar .calendar-grid {
+    /* 确保网格不会溢出 */
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    gap: 1px;
+  }
+
+  .huangli-calendar .day-cell {
+    /* 确保最小触摸区域 */
+    min-height: 44px;
+    min-width: 44px;
+    aspect-ratio: 1;
+    padding: 1px;
+  }
+
+  .huangli-calendar .day-content {
+    /* 防止内容溢出 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 /* ==================== 日期网格布局 ==================== */
@@ -39,7 +73,8 @@
   padding: 0;
   margin: 0;
   background-color: #f3f4f6;
-  padding: 4px 0;
+  padding: 3px 0;
+  overflow: hidden;
 }
 
 .huangli-calendar.dark .week-days {
@@ -51,7 +86,10 @@
   font-size: 11px;
   font-weight: 600;
   color: #6b7280;
-  padding: 4px 0;
+  padding: 3px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .huangli-calendar.dark .week-days li {
@@ -81,12 +119,14 @@
   position: relative;
   cursor: pointer;
   min-height: 44px; /* 移动端触摸友好 */
+  min-width: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
   box-sizing: border-box;
   aspect-ratio: 1; /* 保持正方形 */
+  overflow: hidden;
 }
 
 .huangli-calendar.dark .day-cell {
@@ -111,13 +151,19 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 4px;
+  padding: 2px 1px;
+  overflow: hidden;
 }
 
 .huangli-calendar .day-number {
   font-size: 13px;
   font-weight: 500;
   color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.3;
 }
 
 .huangli-calendar.dark .day-number {
@@ -127,12 +173,13 @@
 .huangli-calendar .lunar-text {
   font-size: 10px;
   color: #6b7280;
-  margin-top: 2px;
+  margin-top: 0;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+  line-height: 1.1;
 }
 
 .huangli-calendar.dark .lunar-text {
@@ -143,13 +190,14 @@
 .huangli-calendar .festival {
   font-size: 9px;
   color: #ef4444;
-  margin-top: 2px;
+  margin-top: 0;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
   font-weight: 600;
+  line-height: 1.1;
 }
 
 .huangli-calendar.dark .festival {
@@ -234,8 +282,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  margin-bottom: 8px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .huangli-calendar .nav-button {
@@ -244,13 +295,16 @@
   color: #1f2937;
   font-size: 14px;
   width: 36px;
+  min-width: 36px;
   height: 36px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .huangli-calendar.dark .nav-button {
@@ -271,6 +325,12 @@
   font-size: 15px;
   font-weight: 700;
   color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+  padding: 0 8px;
 }
 
 .huangli-calendar.dark .calendar-title {
@@ -280,7 +340,8 @@
 /* ==================== 响应式设计 - 小屏幕优化 ==================== */
 @media (max-width: 480px) {
   .huangli-calendar .day-cell {
-    min-height: 40px;
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .huangli-calendar .day-number {
@@ -306,7 +367,9 @@
 
   .huangli-calendar .nav-button {
     width: 32px;
+    min-width: 32px;
     height: 32px;
+    min-height: 32px;
     font-size: 13px;
   }
 
@@ -318,7 +381,8 @@
 /* ==================== 响应式设计 - 超小屏幕 ==================== */
 @media (max-width: 360px) {
   .huangli-calendar .day-cell {
-    min-height: 36px;
+    min-height: 42px;
+    min-width: 42px;
   }
 
   .huangli-calendar .day-number {
@@ -336,6 +400,83 @@
   .huangli-calendar .week-days li {
     font-size: 9px;
     padding: 2px 0;
+  }
+}
+
+/* ==================== 9:16 屏幕特定优化 ==================== */
+@media (max-width: 420px) {
+  .huangli-calendar .day-cell {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 2px 1px;
+  }
+  
+  .huangli-calendar .day-content {
+    padding: 2px 1px;
+  }
+  
+  .huangli-calendar .day-number {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+  
+  .huangli-calendar .lunar-text {
+    font-size: 8px;
+    line-height: 1.1;
+  }
+  
+  .huangli-calendar .festival {
+    font-size: 7px;
+    line-height: 1.1;
+  }
+  
+  .huangli-calendar .week-days {
+    padding: 3px 0;
+  }
+  
+  .huangli-calendar .week-days li {
+    font-size: 9px;
+    padding: 2px 0;
+  }
+  
+  .huangli-calendar .calendar-nav {
+    padding: 6px 6px;
+  }
+  
+  .huangli-calendar .nav-button {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    min-height: 32px;
+  }
+  
+  .huangli-calendar .calendar-title {
+    font-size: 13px;
+    padding: 0 8px;
+  }
+}
+
+/* ==================== 极窄屏幕优化 (小于 350px) ==================== */
+@media (max-width: 349px) {
+  .huangli-calendar .day-cell {
+    min-height: 40px;
+    min-width: 40px;
+  }
+  
+  .huangli-calendar .day-number {
+    font-size: 10px;
+  }
+  
+  .huangli-calendar .lunar-text {
+    font-size: 7px;
+  }
+  
+  .huangli-calendar .festival {
+    font-size: 6px;
+  }
+  
+  .huangli-calendar .calendar-title {
+    font-size: 12px;
   }
 }
 
@@ -384,13 +525,33 @@
 /* ==================== 防止内容溢出 ==================== */
 .huangli-calendar .day-content,
 .huangli-calendar .lunar-text,
-.huangli-calendar .festival {
+.huangli-calendar .festival,
+.huangli-calendar .day-number,
+.huangli-calendar .calendar-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
-  word-break: break-word;
-  overflow-wrap: break-word;
+}
+
+/* 确保9:16屏幕上内容不换行 */
+@media (max-aspect-ratio: 9/16) {
+  .huangli-calendar .day-content,
+  .huangli-calendar .lunar-text,
+  .huangli-calendar .festival,
+  .huangli-calendar .day-number {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
+
+  .huangli-calendar .calendar-title {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
 }
 
 /* ==================== 优化触摸交互 ==================== */
@@ -401,6 +562,35 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  /* 确保最小触摸区域 */
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.huangli-calendar .nav-button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* 确保最小触摸区域 */
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 480px) {
+  .huangli-calendar .day-cell {
+    /* 小屏幕保持触摸友好 */
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .huangli-calendar .nav-button {
+    /* 小屏幕保持触摸友好 */
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* ==================== 安全区域适配 ==================== */

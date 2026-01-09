@@ -14,9 +14,6 @@
 /* 导入经期追踪器优化样式 */
 @import './styles/period-tracker-optimization.css';
 
-/* 导入黄历组件优化样式 */
-@import './styles/huangli-optimization.css';
-
 @layer base {
   :root {
     /* 核心颜色系统 - 扁平化设计 */
