@@ -6,6 +6,7 @@
   padding: var(--spacing-lg) var(--spacing-md);
   box-sizing: border-box;
   background-color: var(--color-background);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .health-dashboard-header {
@@ -29,6 +30,20 @@
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-lg);
   width: 100%;
+  max-width: 100%;
+}
+
+/* 9:16 屏幕优化 - 移动屏幕专用网格 */
+@media (aspect-ratio: 9/16) {
+  .health-dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+  }
+  
+  .health-dashboard-page {
+    padding: var(--spacing-sm) var(--spacing-xs);
+  }
 }
 
 /* 响应式网格 */
@@ -49,16 +64,150 @@
   }
 }
 
-/* 健康卡片基础样式 */
+/* 健康卡片基础样式 - 移动屏幕优化 */
 .health-card {
   min-height: 200px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
+  touch-action: manipulation;
+  will-change: transform;
+  border-radius: 16px;
 }
 
 .health-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.health-card.mobile-optimized {
+  /* 移动屏幕优化：调整卡片样式 */
+  border-radius: 12px;
+  min-height: 180px;
+}
+
+.health-card.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.health-card .mobile-button {
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
+.health-card .mobile-small-text {
+  font-size: 12px;
+}
+
+.health-card .mobile-medium-text {
+  font-size: 16px;
+}
+
+.health-card .mobile-large-text {
+  font-size: 18px;
+}
+
+/* 移动屏幕优化：避免换行 */
+.health-card .no-wrap-mobile {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.health-card .flex-no-shrink-mobile {
+  flex-shrink: 0;
+}
+
+/* 移动屏幕优化：单手操作友好 */
+.health-card .single-hand-friendly {
+  margin-bottom: 20px;
+}
+
+/* 移动屏幕优化：响应式布局 */
+.health-card .mobile-container {
+  padding: 12px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* 移动屏幕优化：卡片样式 */
+.health-card .mobile-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 移动屏幕优化：按钮样式 */
+.health-card .mobile-icon-button {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 移动屏幕优化：列表项样式 */
+.health-card .mobile-list-item {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+/* 移动屏幕优化：网格样式 */
+.health-card .mobile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+/* 移动屏幕优化：避免缩放 */
+.health-card .no-scale {
+  transform: none;
+  will-change: auto;
+}
+
+/* 移动屏幕优化：安全区域 */
+.health-card .mobile-safe-area {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 移动屏幕优化：滚动优化 */
+.health-card .mobile-scrollable {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 移动屏幕优化：动画优化 */
+.health-card .mobile-animation {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* 移动屏幕优化：图片优化 */
+.health-card .mobile-image {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.health-card .mobile-small-image {
+  max-width: 80px;
+  height: 80px;
+}
+
+/* 移动屏幕优化：触摸反馈 */
+.health-card .touch-feedback:active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: inherit;
 }
 
 /* 占位符样式 */

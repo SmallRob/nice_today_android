@@ -18,6 +18,8 @@ import {
   trackUserNavigation,
   getPreloadStatus
 } from './utils/horoscopeTraitsPreloader';
+import SleepHealthDashboardPage from './pages/SleepHealthDashboardPage';
+import EmoHealthDashboardPage from './pages/EmoHealthDashboardPage';
 import './index.css';
 
 // 为移动设备兼容性安全导入Suspense
@@ -370,6 +372,8 @@ const AppLayout = () => {
             <Route path="/bazi/analysis" element={<BaziAnalysisPage />} />
             <Route path="/wuxing-health" element={<WuxingHealthPage />} />
             <Route path="/health-dashboard" element={<HealthDashboardPage />} />
+            <Route path="/sleep-health-dashboard" element={<SleepHealthDashboardPage />} />
+            <Route path="/emo-health-dashboard" element={<EmoHealthDashboardPage />} />
             <Route path="/organ-rhythm" element={<OrganRhythmPage />} />
             <Route path="/stage-health" element={<StageHealthPage />} />
             <Route path="/agile-health" element={<AgileHealthPage />} />

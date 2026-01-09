@@ -10,13 +10,37 @@ import BodyMetricsRhythmCard from '../components/health/BodyMetricsRhythmCard.js
 import DressDietCard from '../components/health/DressDietCard.js';
 import DietHealthCard from '../components/health/DietHealthCard.js';
 import BloodTypeHealthCard from '../components/health/BloodTypeHealthCard.js';
-import AdvancedEmoHealthCard from '../components/health/AdvancedEmoHealthCard.js';
+import SimpleEmoHealthCard from '../components/health/SimpleEmoHealthCard';
+import mobileScreenOptimization from '../utils/mobileScreenOptimization.js';
+import '../styles/mobileScreenOptimization.css';
 import './HealthDashboardPage.css';
 
 // 健康身心仪表板 - 主页面
 const HealthDashboardPage = () => {
   const navigate = useNavigate();
   const { userConfig } = useUserConfig();
+  
+  // 移动屏幕优化初始化
+  useEffect(() => {
+    const isMobile = mobileScreenOptimization.getScreenType() === 'mobile';
+    
+    // 添加移动优化监听器
+    mobileScreenOptimization.addMobileOptimizationListener();
+    
+    // 初始化优化
+    if (isMobile) {
+      const healthGrid = document.querySelector('.health-dashboard-grid');
+      if (healthGrid) {
+        healthGrid.classList.add('mobile-optimization-container');
+        mobileScreenOptimization.optimizeLayoutForMobile(healthGrid);
+      }
+    }
+    
+    // 清理函数
+    return () => {
+      mobileScreenOptimization.removeMobileOptimizationListener();
+    };
+  }, []);
   
   // 预定义卡片配置
   const cardConfigs = useMemo(() => [
@@ -78,10 +102,10 @@ const HealthDashboardPage = () => {
     },
     {
       id: 'emo-health',
-      component: AdvancedEmoHealthCard,
-      priority: 2, // 中优先级，情绪健康重要
+      component: SimpleEmoHealthCard,
+      priority: 1, // 高优先级，情绪健康重要
       cacheKey: 'emo-health',
-      title: '情绪与健康管理卡片'
+      title: '情绪与健康'
     }
   ], []);
   

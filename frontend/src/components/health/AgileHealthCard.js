@@ -317,8 +317,17 @@ const AgileHealthCard = ({ onClick }) => {
         </div>
 
         <div className="flex justify-between items-center">
+          {/* 完成提示 */}
+          <div className="text-right">
+            <p className="text-[10px] opacity-75">
+              {completedCount === totalCount 
+                ? '🎉 全完成' 
+                : `剩${totalCount - completedCount}`}
+            </p>
+          </div>
+          
           {/* 换一换按钮 */}
-          <div>
+          <div className="flex-shrink-0">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -330,17 +339,6 @@ const AgileHealthCard = ({ onClick }) => {
               换一换
             </button>
           </div>
-          
-          {/* 完成提示 */}
-          {completedCount > 0 && (
-            <div className="text-right">
-              <p className="text-[10px] opacity-75">
-                {completedCount === totalCount 
-                  ? '🎉 全完成' 
-                  : `剩${totalCount - completedCount}`}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

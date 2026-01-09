@@ -1,0 +1,372 @@
+/* 情绪健康仪表板页面样式 */
+.emo-health-dashboard-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding-bottom: 80px;
+}
+
+/* 页面头部 */
+.emo-health-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.info-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+}
+
+/* 主要内容区域 */
+.main-content {
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 情绪评分卡片 */
+.emo-score-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.score-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.refresh-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+}
+
+.score-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.score-circle {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.score-inner {
+  background: white;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.score-label {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* 情绪指标 */
+.emo-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.metric-item {
+  background: #f8f9fa;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.metric-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.metric-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.metric-name {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.metric-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-amount {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.metric-range {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* 评分说明 */
+.score-description {
+  background: #f0f4ff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.score-description p {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 情绪详情区域 */
+.emo-details-section {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1rem 0;
+}
+
+/* 情绪图表 */
+.emo-chart {
+  margin-bottom: 1.5rem;
+}
+
+.chart-container {
+  height: 120px;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.chart-bars {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 100px;
+  gap: 1rem;
+}
+
+.chart-bar {
+  width: 40px;
+  background: #e2e8f0;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  min-height: 10px;
+}
+
+.chart-bar:nth-child(2) {
+  background: linear-gradient(to top, #6366f1, #8b5cf6);
+}
+
+.bar-label {
+  position: absolute;
+  bottom: -25px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.chart-summary {
+  text-align: center;
+}
+
+.total-duration {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* 情绪能量球 */
+.emo-energy-balls {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.energy-ball {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ball-label {
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* 健康建议区域 */
+.health-tips-section {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 底部导航 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem 0;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: #666;
+}
+
+.nav-button.active {
+  color: #667eea;
+}
+
+.nav-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-button span {
+  font-size: 0.75rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 640px) {
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .emo-score-card, .emo-details-section, .health-tips-section {
+    padding: 1rem;
+  }
+  
+  .score-circle {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .score-inner {
+    width: 75px;
+    height: 75px;
+  }
+  
+  .emo-metrics {
+    grid-template-columns: 1fr;
+  }
+  
+  .energy-ball {
+    width: 60px;
+    height: 60px;
+  }
+}
