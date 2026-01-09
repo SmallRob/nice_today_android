@@ -265,12 +265,12 @@ const ChineseZodiacPage = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { currentConfig } = useUserConfig();
-  
+
   // 注册 Chart.js 组件
   useEffect(() => {
     ensureChartRegistered();
   }, []);
-  
+
   // 从用户配置中获取生肖
   const [userZodiac, setUserZodiac] = useState(() => {
     if (currentConfig?.birthDate) {
@@ -283,27 +283,27 @@ const ChineseZodiacPage = () => {
   // 计算能量匹配度
   const energyMatch = useMemo(() => {
     if (!userZodiac) return null;
-    
+
     // 根据生肖确定用户五行
     const zodiacElementMap = {
       '鼠': '水', '牛': '土', '虎': '木', '兔': '木',
       '龙': '土', '蛇': '火', '马': '火', '羊': '土',
       '猴': '金', '鸡': '金', '狗': '土', '猪': '水'
     };
-    
+
     const userElement = zodiacElementMap[userZodiac] || '土';
     const userElementData = WUXING_ELEMENTS.find(el => el.name === userElement);
-    
+
     // 计算当日五行（使用当前日期）
     const today = new Date();
     const seed = today.getDate() + today.getMonth() * 31 + today.getFullYear() * 372;
     const elementIndex = Math.abs(seed) % WUXING_ELEMENTS.length;
     const todayElement = WUXING_ELEMENTS[elementIndex];
-    
+
     // 计算匹配度
     let matchScore = 50;
     let relation = '中性';
-    
+
     if (userElement === todayElement.name) {
       matchScore = 85;
       relation = '本日';
@@ -315,7 +315,7 @@ const ChineseZodiacPage = () => {
       const overcomeMap = {
         '木': '土', '土': '水', '水': '火', '火': '金', '金': '木'
       };
-      
+
       if (generateMap[userElement] === todayElement.name) {
         matchScore = 75;
         relation = '相生';
@@ -330,7 +330,7 @@ const ChineseZodiacPage = () => {
         relation = '被克';
       }
     }
-    
+
     return {
       匹配度: matchScore,
       关系: relation,
@@ -433,7 +433,7 @@ const ChineseZodiacPage = () => {
   // 生成每日运势数据
   const generateDailyHoroscopeData = useCallback(async () => {
     if (!userZodiac) return;
-    
+
     setLoadingHoroscope(true);
     try {
       // 生肖对应的星座映射（简化版）
@@ -442,7 +442,7 @@ const ChineseZodiacPage = () => {
         '龙': '狮子座', '蛇': '天蝎座', '马': '射手座', '羊': '摩羯座',
         '猴': '水瓶座', '鸡': '处女座', '狗': '天秤座', '猪': '双鱼座'
       };
-      
+
       const horoscopeName = zodiacToHoroscope[userZodiac] || '金牛座';
       const data = generateDailyHoroscope(horoscopeName);
       setHoroscopeData(data);
@@ -713,7 +713,7 @@ const ChineseZodiacPage = () => {
               </text>
             </svg>
           </div>
-        
+
           <div className="text-center">
             <div className="flex items-center justify-center mb-2">
               <span className="text-2xl mr-2">{elementData?.icon}</span>
@@ -862,7 +862,7 @@ const ChineseZodiacPage = () => {
                   const colorHex = getColorHex(colorName);
                   return (
                     <div key={index} className="flex flex-col items-center">
-                      <div 
+                      <div
                         className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mb-0.5"
                         style={{ backgroundColor: colorHex }}
                         title={colorName}
@@ -901,10 +901,10 @@ const ChineseZodiacPage = () => {
 
         {/* 能量趋势分析 */}
         {renderEnergyTrendChart()}
-        
+
         {/* 能量匹配度 */}
         {renderEnergyMatchDashboard()}
-        
+
         {/* 今日运势卡片 */}
         {loadingHoroscope ? (
           <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
@@ -924,46 +924,64 @@ const ChineseZodiacPage = () => {
                 <span className="text-2xl font-bold">{horoscopeData.overallScore}分</span>
               </div>
               <div className="w-full bg-white/20 rounded-full h-3">
-                <div 
-                  className="bg-white h-3 rounded-full" 
+                <div
+                  className="bg-white h-3 rounded-full"
                   style={{ width: `${horoscopeData.overallScore}%` }}
                 ></div>
               </div>
             </div>
-            
+
             <p className="mb-4 text-blue-100">{horoscopeData.overallDescription}</p>
-            
+
             {/* 各领域运势 */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 w-full">
               {Object.entries(horoscopeData.dailyForecast || {}).map(([key, data]) => (
-                <div key={key} className="text-center p-1 bg-white/10 rounded-lg">
-                  <div className="text-[10px] text-green-200 mb-0.5">
-                    {key === 'love' ? '爱情' : 
-                     key === 'wealth' ? '财运' : 
-                     key === 'career' ? '事业' : 
-                     key === 'study' ? '学业' : 
-                     key === 'social' ? '社交' : key}
+                <div key={key} className="text-center p-1 bg-white/10 rounded-lg min-w-0 overflow-hidden">
+                  <div className="text-[10px] text-green-200 mb-0.5 whitespace-nowrap">
+                    {key === 'love' ? '爱情' :
+                      key === 'wealth' ? '财运' :
+                        key === 'career' ? '事业' :
+                          key === 'study' ? '学业' :
+                            key === 'social' ? '社交' : key}
                   </div>
-                  <div className="text-base font-bold">{data.score}</div>
-                  <div className="text-[10px] text-green-300">{data.description}</div>
+                  <div className="text-base font-bold whitespace-nowrap">{data.score}</div>
+                  <div className="text-[10px] text-green-300 whitespace-nowrap">{data.description}</div>
                 </div>
               ))}
             </div>
-            
+
             {/* 幸运信息 */}
             <div className="mt-4 pt-4 border-t border-white/20">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-green-200">幸运色：</span>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                    {Array.isArray(horoscopeData.recommendations?.luckyColors) 
+                    {Array.isArray(horoscopeData.recommendations?.luckyColors)
                       ? horoscopeData.recommendations.luckyColors.map((colorHex, index) => {
-                          const colorName = Array.isArray(horoscopeData.recommendations?.luckyColorNames) 
-                            ? horoscopeData.recommendations.luckyColorNames[index] 
-                            : colorHex;
+                        const colorName = Array.isArray(horoscopeData.recommendations?.luckyColorNames)
+                          ? horoscopeData.recommendations.luckyColorNames[index]
+                          : colorHex;
+                        return (
+                          <div key={index} className="flex flex-col items-center">
+                            <div
+                              className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-green-300 dark:border-green-700"
+                              style={{ backgroundColor: colorHex }}
+                              title={colorName}
+                              aria-label={`幸运色: ${colorName}`}
+                            />
+                            <div className="text-[9px] sm:text-[10px] text-green-100 truncate max-w-[40px] sm:max-w-[50px]">
+                              {colorName}
+                            </div>
+                          </div>
+                        );
+                      })
+                      : (() => {
+                        const colorNames = ['蓝色', '绿色'];
+                        return colorNames.map((colorName, index) => {
+                          const colorHex = getColorHex(colorName);
                           return (
                             <div key={index} className="flex flex-col items-center">
-                              <div 
+                              <div
                                 className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-green-300 dark:border-green-700"
                                 style={{ backgroundColor: colorHex }}
                                 title={colorName}
@@ -974,26 +992,8 @@ const ChineseZodiacPage = () => {
                               </div>
                             </div>
                           );
-                        })
-                      : (() => {
-                          const colorNames = ['蓝色', '绿色'];
-                          return colorNames.map((colorName, index) => {
-                            const colorHex = getColorHex(colorName);
-                            return (
-                              <div key={index} className="flex flex-col items-center">
-                                <div 
-                                  className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-green-300 dark:border-green-700"
-                                  style={{ backgroundColor: colorHex }}
-                                  title={colorName}
-                                  aria-label={`幸运色: ${colorName}`}
-                                />
-                                <div className="text-[9px] sm:text-[10px] text-green-100 truncate max-w-[40px] sm:max-w-[50px]">
-                                  {colorName}
-                                </div>
-                              </div>
-                            );
-                          });
-                        })()}
+                        });
+                      })()}
                   </div>
                 </div>
                 <div>
@@ -1018,19 +1018,18 @@ const ChineseZodiacPage = () => {
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
             <span className="mr-2">🔮</span> 查看其他生肖
           </h3>
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 w-full">
             {CHINESE_ZODIAC_DATA.map((zodiac) => (
               <button
                 key={zodiac.name}
                 onClick={() => setUserZodiac(zodiac.name)}
-                className={`aspect-square rounded-lg transition-all flex flex-col items-center justify-center p-2 ${
-                  userZodiac === zodiac.name
+                className={`aspect-square rounded-lg transition-all flex flex-col items-center justify-center p-2 min-w-0 overflow-hidden ${userZodiac === zodiac.name
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900/20'
-                }`}
+                  }`}
               >
                 <div className="text-xl">{zodiac.icon}</div>
-                <div className="text-xs font-bold mt-1">{zodiac.name}</div>
+                <div className="text-xs font-bold mt-1 whitespace-nowrap">{zodiac.name}</div>
               </button>
             ))}
           </div>

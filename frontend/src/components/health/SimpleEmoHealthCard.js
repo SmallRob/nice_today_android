@@ -77,7 +77,7 @@ const SimpleEmoHealthCard = () => {
       do {
         newTip = emoHealthTips[Math.floor(Math.random() * emoHealthTips.length)];
       } while (newTip.id === currentTip.id); // 确保不重复显示当前建议
-      
+
       setCurrentTip(newTip);
       setFade(false);
     }, 150);
@@ -87,30 +87,30 @@ const SimpleEmoHealthCard = () => {
   useEffect(() => {
     const initialTip = emoHealthTips[Math.floor(Math.random() * emoHealthTips.length)];
     setCurrentTip(initialTip);
-    
+
     // 检测是否为移动设备
     const checkMobile = () => {
       const mobile = mobileScreenOptimization.getScreenType() === 'mobile';
       setIsMobile(mobile);
       return mobile;
     };
-    
+
     const isMobileDevice = checkMobile();
-    
+
     // 添加移动优化监听器
     mobileScreenOptimization.addMobileOptimizationListener();
-    
+
     // 优化触摸目标
     if (isMobileDevice && buttonRef.current) {
       mobileScreenOptimization.optimizeTouchTarget(buttonRef.current, true);
     }
-    
+
     // 优化卡片布局
     if (isMobileDevice && cardRef.current) {
       cardRef.current.classList.add('mobile-optimized', 'touch-target');
       mobileScreenOptimization.optimizeLayoutForMobile(cardRef.current);
     }
-    
+
     // 清理函数
     return () => {
       mobileScreenOptimization.removeMobileOptimizationListener();
@@ -120,21 +120,21 @@ const SimpleEmoHealthCard = () => {
   return (
     <div className="health-card simple-emo-health-card mobile-container touch-feedback" ref={cardRef}>
       <div className={`bg-gradient-to-br ${currentTip.color} p-4 rounded-2xl shadow-lg h-full flex flex-col ${isMobile ? 'mobile-card' : ''}`}>
-        <div className="flex justify-between items-start mb-4 mobile-container">
-          <div className="flex items-center flex-no-shrink-mobile min-w-0">
+        <div className="flex justify-between items-center mb-4 mobile-container flex-nowrap overflow-hidden w-full">
+          <div className="flex items-center flex-1 min-w-0 overflow-hidden mr-2">
             <div className="bg-white/20 rounded-full p-2 mr-3 mobile-icon-button flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mobile-small-image" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
             </div>
-            <h3 className={`${isMobile ? 'mobile-medium-text' : 'text-lg'} font-bold text-white no-wrap-mobile flex-shrink min-w-0`}>{currentTip.category}</h3>
+            <h3 className={`${isMobile ? 'mobile-medium-text' : 'text-lg'} font-bold text-white truncate`}>{currentTip.category}</h3>
           </div>
-          <button 
+          <button
             ref={buttonRef}
             onClick={getRandomTip}
-            className="bg-white/40 hover:bg-white/50 rounded-full p-2 transition-all duration-300 mobile-icon-button touch-target flex-shrink-0 border border-white/50 shadow-xl backdrop-blur-md hover:shadow-2xl hover:scale-110"
+            className="bg-white/40 hover:bg-white/50 rounded-full p-2 transition-all duration-300 mobile-icon-button flex-shrink-0 border border-white/50 shadow-xl backdrop-blur-md hover:shadow-2xl hover:scale-110"
             aria-label="换一换"
-            style={{ 
+            style={{
               position: 'relative',
               zIndex: 10,
               boxShadow: '0 6px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.3)'
@@ -145,13 +145,13 @@ const SimpleEmoHealthCard = () => {
             </svg>
           </button>
         </div>
-        
+
         <h4 className={`${isMobile ? 'mobile-large-text' : 'text-xl'} font-bold text-white mb-4 leading-tight`}>{currentTip.title}</h4>
-        
+
         <div className={`flex-1 transition-opacity duration-300 ${fade ? 'opacity-0' : 'opacity-100'}`}>
           <p className={`${isMobile ? 'mobile-optimized' : 'text-sm'} text-white/95 leading-relaxed bg-white/10 rounded-xl p-3 backdrop-blur-sm`}>{currentTip.content}</p>
         </div>
-        
+
         <div className="pt-3 flex items-center text-xs text-white/80 mobile-small-text mt-auto">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 mobile-small-image flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />

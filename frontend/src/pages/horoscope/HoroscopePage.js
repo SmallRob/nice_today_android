@@ -104,7 +104,7 @@ const HoroscopePage = () => {
   // 渲染颜色显示
   const ColorDisplay = ({ colorHex, colorName }) => (
     <div className="flex items-center justify-center gap-2">
-      <div 
+      <div
         className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600"
         style={{ backgroundColor: colorHex }}
       />
@@ -135,8 +135,8 @@ const HoroscopePage = () => {
           <button
             onClick={() => setViewMode('daily')}
             className={`flex-shrink-0 px-4 py-1.5 rounded-full font-medium transition-all ${viewMode === 'daily'
-                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
-                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
+              ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+              : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
           >
             今日运势
@@ -144,8 +144,8 @@ const HoroscopePage = () => {
           <button
             onClick={() => setViewMode('weekly')}
             className={`flex-shrink-0 px-4 py-1.5 rounded-full font-medium transition-all ${viewMode === 'weekly'
-                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
-                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
+              ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+              : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
           >
             本周运势
@@ -153,8 +153,8 @@ const HoroscopePage = () => {
           <button
             onClick={() => setViewMode('monthly')}
             className={`flex-shrink-0 px-4 py-1.5 rounded-full font-medium transition-all ${viewMode === 'monthly'
-                ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
-                : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
+              ? `${theme === 'dark' ? 'bg-purple-700 text-white' : 'bg-purple-600 text-white'}`
+              : `${theme === 'dark' ? 'text-gray-300 bg-gray-800' : 'text-gray-600 bg-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`
               }`}
           >
             本月运势
@@ -163,9 +163,9 @@ const HoroscopePage = () => {
       </div>
 
       {/* 主内容 */}
-      <div className="px-4 py-4 max-w-4xl mx-auto">
+      <div className="px-2 sm:px-4 py-4 max-w-4xl mx-auto">
         {/* 星座选择器 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 sm:p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">选择星座</h2>
             {currentConfig?.zodiac && (
@@ -174,16 +174,15 @@ const HoroscopePage = () => {
               </span>
             )}
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-3 gap-2 w-full !overflow-visible">
             {zodiacList.map(zodiac => (
               <button
                 key={zodiac}
                 onClick={() => setSelectedZodiac(zodiac)}
-                className={`p-1.5 rounded-lg text-sm font-medium transition-all ${
-                  selectedZodiac === zodiac
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-md'
+                className={`py-2 px-1 rounded-lg text-sm font-medium transition-all whitespace-nowrap w-full truncate flex items-center justify-center ${selectedZodiac === zodiac
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-md transform scale-105'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
+                  }`}
               >
                 {zodiac}
               </button>
@@ -246,12 +245,11 @@ const HoroscopePage = () => {
                           {day.date.substring(5)}
                         </div>
                         <div
-                          className={`text-xs mt-1 rounded px-1 py-0.5 ${
-                            day.score >= 80 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
-                            day.score >= 60 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
-                            day.score >= 40 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
-                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                          }`}
+                          className={`text-xs mt-1 rounded px-1 py-0.5 ${day.score >= 80 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                              day.score >= 60 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                                day.score >= 40 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                                  'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                            }`}
                         >
                           {day.score}
                         </div>
@@ -274,12 +272,11 @@ const HoroscopePage = () => {
                           {week.week}
                         </div>
                         <div
-                          className={`text-lg font-bold rounded px-2 py-1 ${
-                            week.score >= 80 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
-                            week.score >= 60 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
-                            week.score >= 40 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
-                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                          }`}
+                          className={`text-lg font-bold rounded px-2 py-1 ${week.score >= 80 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                              week.score >= 60 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                                week.score >= 40 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                                  'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                            }`}
                         >
                           {week.score}
                         </div>
@@ -324,12 +321,12 @@ const HoroscopePage = () => {
                     <div className="flex items-center justify-center gap-2">
                       {Array.isArray(horoscopeData.recommendations.luckyColors) ? (
                         horoscopeData.recommendations.luckyColors.map((colorHex, index) => {
-                          const colorName = Array.isArray(horoscopeData.recommendations.luckyColorNames) 
-                            ? horoscopeData.recommendations.luckyColorNames[index] 
+                          const colorName = Array.isArray(horoscopeData.recommendations.luckyColorNames)
+                            ? horoscopeData.recommendations.luckyColorNames[index]
                             : colorHex;
                           return (
                             <div key={index} className="flex flex-col items-center">
-                              <div 
+                              <div
                                 className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 mb-1"
                                 style={{ backgroundColor: colorHex }}
                                 title={colorName}
@@ -342,7 +339,7 @@ const HoroscopePage = () => {
                         })
                       ) : (
                         <div className="flex flex-col items-center">
-                          <div 
+                          <div
                             className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 mb-1"
                             style={{ backgroundColor: horoscopeData.recommendations.luckyColors }}
                             title={horoscopeData.recommendations.luckyColorNames || horoscopeData.recommendations.luckyColors}
@@ -369,7 +366,7 @@ const HoroscopePage = () => {
                   <div className="text-center">
                     <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">相合星座</div>
                     <div className="font-medium text-purple-600 dark:text-purple-400 text-sm">
-                      {Array.isArray(horoscopeData.recommendations.compatibleSigns) 
+                      {Array.isArray(horoscopeData.recommendations.compatibleSigns)
                         ? horoscopeData.recommendations.compatibleSigns.join('、')
                         : horoscopeData.recommendations.compatibleSigns || '水瓶座、双子座'
                       }
@@ -388,7 +385,7 @@ const HoroscopePage = () => {
               <p className="text-blue-700 dark:text-blue-200 leading-relaxed">
                 {horoscopeData.recommendations?.dailyReminder || horoscopeData.recommendations?.positiveAdvice ||
                   (viewMode === 'daily' ? '今天会是美好的一天，保持微笑，积极面对每一个挑战。' :
-                   viewMode === 'weekly' ? '本周保持积极心态，把握机遇。' : '本月稳步前进，持续积累。')}
+                    viewMode === 'weekly' ? '本周保持积极心态，把握机遇。' : '本月稳步前进，持续积累。')}
               </p>
             </div>
           </div>

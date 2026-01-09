@@ -30,13 +30,13 @@ const DressDietCard = ({ onClick }) => {
         const { data, timestamp, date: cacheDate } = JSON.parse(cached);
         const now = Date.now();
         const currentDate = new Date().toDateString();
-        
+
         // 检查是否跨天（隔天重新计算策略）
         if (cacheDate !== currentDate) {
           localStorage.removeItem(cacheKey);
           return null;
         }
-        
+
         // 检查缓存是否超时
         const cacheTimeout = getUserCacheTimeout();
         if (now - timestamp < cacheTimeout) {
@@ -72,7 +72,7 @@ const DressDietCard = ({ onClick }) => {
   const fetchDressInfo = async () => {
     try {
       setLoading(true);
-      
+
       // 首先检查缓存
       const cachedData = getCachedData();
       if (cachedData) {
@@ -85,7 +85,7 @@ const DressDietCard = ({ onClick }) => {
       const info = generateDressInfo(today);
       setDressInfo(info);
       setError(null);
-      
+
       // 设置缓存
       setCachedData(info);
     } catch (err) {
@@ -151,7 +151,7 @@ const DressDietCard = ({ onClick }) => {
   const foodSuggestions = getFoodSuggestions(dressInfo?.food_suggestions || {});
 
   return (
-    <div 
+    <div
       className="health-card dress-diet-card"
       onClick={handleClick}
     >
@@ -163,7 +163,7 @@ const DressDietCard = ({ onClick }) => {
             <p className="text-xs opacity-100 font-medium">今日建议</p>
           </div>
         </div>
-        
+
         {/* 今日五行 */}
         <div className="mb-2">
           <div className="flex items-center justify-between mb-1">
@@ -175,16 +175,16 @@ const DressDietCard = ({ onClick }) => {
         </div>
 
         {/* 穿搭建议和饮食推荐分左右栏显示 */}
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2 mb-2 w-full" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
           {/* 穿搭建议 */}
-          <div className="border-r border-white border-opacity-30 pr-2">
-            <p className="text-xs font-semibold opacity-100 mb-1">穿搭建议：</p>
-            <div className="flex flex-wrap gap-1">
+          <div className="border-r border-white border-opacity-30 pr-2 min-w-0 overflow-hidden h-full flex flex-col">
+            <p className="text-xs font-semibold opacity-100 mb-1 whitespace-nowrap truncate">穿搭建议：</p>
+            <div className="flex flex-wrap gap-1 content-start">
               {colorSuggestions.length > 0 ? (
                 colorSuggestions.map((color, index) => (
-                  <span 
-                    key={index} 
-                    className="text-[11px] bg-white/30 px-2 py-1 rounded-full truncate max-w-[60px] font-medium shadow-sm"
+                  <span
+                    key={index}
+                    className="text-[11px] bg-white/30 px-2 py-1 rounded-full truncate max-w-full font-medium shadow-sm"
                   >
                     {color}
                   </span>
@@ -196,14 +196,14 @@ const DressDietCard = ({ onClick }) => {
           </div>
 
           {/* 饮食建议 */}
-          <div className="pl-2">
-            <p className="text-xs font-semibold opacity-100 mb-1">饮食推荐：</p>
-            <div className="flex flex-wrap gap-1">
+          <div className="pl-2 min-w-0 overflow-hidden h-full flex flex-col">
+            <p className="text-xs font-semibold opacity-100 mb-1 whitespace-nowrap truncate">饮食推荐：</p>
+            <div className="flex flex-wrap gap-1 content-start">
               {foodSuggestions.length > 0 ? (
                 foodSuggestions.map((food, index) => (
-                  <span 
-                    key={index} 
-                    className="text-[11px] bg-white/30 px-2 py-1 rounded-full truncate max-w-[60px] font-medium shadow-sm"
+                  <span
+                    key={index}
+                    className="text-[11px] bg-white/30 px-2 py-1 rounded-full truncate max-w-full font-medium shadow-sm"
                   >
                     {food}
                   </span>

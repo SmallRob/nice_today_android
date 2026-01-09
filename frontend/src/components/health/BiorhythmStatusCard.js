@@ -32,13 +32,13 @@ const BiorhythmStatusCard = ({ onClick }) => {
         const { data, timestamp, date: cacheDate } = JSON.parse(cached);
         const now = Date.now();
         const currentDate = new Date().toDateString();
-        
+
         // 检查是否跨天（隔天重新计算策略）
         if (cacheDate !== currentDate) {
           localStorage.removeItem(cacheKey);
           return null;
         }
-        
+
         // 检查缓存是否超时
         const cacheTimeout = getUserCacheTimeout();
         if (now - timestamp < cacheTimeout) {
@@ -74,7 +74,7 @@ const BiorhythmStatusCard = ({ onClick }) => {
   const fetchBiorhythmData = async () => {
     try {
       setLoading(true);
-      
+
       // 检查缓存
       const cachedData = getCachedData();
       if (cachedData) {
@@ -82,14 +82,14 @@ const BiorhythmStatusCard = ({ onClick }) => {
         setError(null);
         return;
       }
-      
+
       // 检查是否有出生日期
       if (!userConfig?.birthDate) {
         setError('未设置出生日期，请先配置用户信息');
         setLoading(false);
         return;
       }
-      
+
       const result = await getBiorhythmRange(userConfig.birthDate, 10, 20);
       if (result.success && result.rhythmData && result.rhythmData.length > 0) {
         // 获取今天的数据
@@ -131,16 +131,16 @@ const BiorhythmStatusCard = ({ onClick }) => {
   // 计算综合能量分数
   const calculateCombinedScore = () => {
     if (!biorhythmData) return 50;
-    
+
     const { physical = 0, emotional = 0, intellectual = 0 } = biorhythmData;
     const weights = { physical: 0.33, emotional: 0.33, intellectual: 0.34 };
-    
+
     const combinedValue = (
-      physical * weights.physical + 
-      emotional * weights.emotional + 
+      physical * weights.physical +
+      emotional * weights.emotional +
       intellectual * weights.intellectual
     );
-    
+
     // 将-100到100的范围映射到0-100的分数
     return Math.round((combinedValue + 100) / 2);
   };
@@ -181,7 +181,7 @@ const BiorhythmStatusCard = ({ onClick }) => {
           <div className="text-center">
             <div className="text-2xl mb-2">📅</div>
             <p className="text-sm">请先设置出生日期</p>
-            <button 
+            <button
               className="mt-2 px-3 py-1 bg-white text-orange-500 text-xs font-medium rounded-full"
               onClick={() => navigate('/user-config')}
             >
@@ -220,7 +220,7 @@ const BiorhythmStatusCard = ({ onClick }) => {
   }
 
   return (
-    <div 
+    <div
       className="health-card biorhythm-card"
       onClick={handleClick}
     >
@@ -232,7 +232,7 @@ const BiorhythmStatusCard = ({ onClick }) => {
             <p className="text-xs opacity-90">今日能量</p>
           </div>
         </div>
-        
+
         <div className="text-center mb-2">
           <div className="text-2xl font-bold mb-1">{combinedScore}</div>
           <p className={`text-xs font-medium ${energyLevel.color}`}>{energyLevel.text}</p>
@@ -241,7 +241,7 @@ const BiorhythmStatusCard = ({ onClick }) => {
         {/* 能量彩虹条 */}
         <div className="mb-2">
           <div className="w-full bg-white bg-opacity-20 rounded-full h-1.5">
-            <div 
+            <div
               className={`h-1.5 rounded-full ${energyLevel.bg}`}
               style={{ width: `${combinedScore}%` }}
             ></div>
@@ -250,18 +250,18 @@ const BiorhythmStatusCard = ({ onClick }) => {
 
         {/* 三个节律值 */}
         {biorhythmData && (
-          <div className="grid grid-cols-3 gap-1 text-xs">
-            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
+          <div className="grid grid-cols-3 gap-1 text-xs w-full" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0 overflow-hidden">
               <div className="text-green-300 font-bold text-sm truncate">{Math.round(biorhythmData.physical)}</div>
-              <div className="truncate text-[10px]">体力</div>
+              <div className="truncate text-[10px] whitespace-nowrap">体力</div>
             </div>
-            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
+            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0 overflow-hidden">
               <div className="text-blue-300 font-bold text-sm truncate">{Math.round(biorhythmData.emotional)}</div>
-              <div className="truncate text-[10px]">情绪</div>
+              <div className="truncate text-[10px] whitespace-nowrap">情绪</div>
             </div>
-            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0">
+            <div className="text-center p-1 bg-white bg-opacity-10 rounded min-w-0 overflow-hidden">
               <div className="text-purple-300 font-bold text-sm truncate">{Math.round(biorhythmData.intellectual)}</div>
-              <div className="truncate text-[10px]">智力</div>
+              <div className="truncate text-[10px] whitespace-nowrap">智力</div>
             </div>
           </div>
         )}
@@ -269,7 +269,7 @@ const BiorhythmStatusCard = ({ onClick }) => {
         {/* 简要建议 */}
         <div className="mt-1 pt-1 border-t border-white border-opacity-20">
           <p className="text-[10px] opacity-75 truncate">
-            {biorhythmData 
+            {biorhythmData
               ? `今日${getRhythmDescription(biorhythmData.physical, '体力')}，注意调节作息`
               : '点击查看详情'}
           </p>
