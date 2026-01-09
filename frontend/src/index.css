@@ -542,14 +542,7 @@ body {
   }
 
   /* 优化网格和弹性布局 - 保持grid的换行能力 */
-  .flex {
-    flex-wrap: nowrap;
-    overflow-x: hidden;
-  }
-  .grid {
-    /* 保持grid的正常行为，仅对特定场景限制换行 */
-    overflow-x: hidden;
-  }
+
 
   /* 链接和按钮触摸优化 */
   a,
@@ -610,6 +603,7 @@ body {
 
 /* 超小屏幕优化 */
 @media (max-width: 480px) {
+
   .content-area,
   .page-container,
   .fixed-height-container {
@@ -635,14 +629,7 @@ body {
   }
 
   /* 超小屏幕网格优化 */
-  .flex {
-    flex-wrap: nowrap;
-    overflow-x: hidden;
-  }
-  .grid {
-    /* 保持grid的正常行为，仅对特定场景限制换行 */
-    overflow-x: hidden;
-  }
+  /* 超小屏幕网格优化 - 移除有害的全局样式 */
 }
 
 /* ============================================
@@ -674,32 +661,95 @@ body {
 }
 
 /* 紧凑型响应式字体工具类 - 优化垂直空间 */
-.text-compact-xs { font-size: clamp(0.6rem, 2vw, 0.75rem); line-height: 1.2; }
-.text-compact-sm { font-size: clamp(0.7rem, 2.2vw, 0.875rem); line-height: 1.25; }
-.text-compact-base { font-size: clamp(0.8rem, 2.5vw, 1rem); line-height: 1.3; }
-.text-compact-lg { font-size: clamp(0.9rem, 2.8vw, 1.125rem); line-height: 1.35; }
-.text-compact-xl { font-size: clamp(1rem, 3vw, 1.25rem); line-height: 1.4; }
+.text-compact-xs {
+  font-size: clamp(0.6rem, 2vw, 0.75rem);
+  line-height: 1.2;
+}
+
+.text-compact-sm {
+  font-size: clamp(0.7rem, 2.2vw, 0.875rem);
+  line-height: 1.25;
+}
+
+.text-compact-base {
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+  line-height: 1.3;
+}
+
+.text-compact-lg {
+  font-size: clamp(0.9rem, 2.8vw, 1.125rem);
+  line-height: 1.35;
+}
+
+.text-compact-xl {
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  line-height: 1.4;
+}
 
 /* 紧凑型响应式间距工具类 - 优化垂直空间 */
-.p-compact-xs { padding: clamp(0.1rem, 0.8vw, 0.2rem); }
-.p-compact-sm { padding: clamp(0.15rem, 1vw, 0.3rem); }
-.p-compact-md { padding: clamp(0.25rem, 1.5vw, 0.4rem); }
-.p-compact-lg { padding: clamp(0.35rem, 2vw, 0.5rem); }
+.p-compact-xs {
+  padding: clamp(0.1rem, 0.8vw, 0.2rem);
+}
 
-.m-compact-xs { margin: clamp(0.1rem, 0.8vw, 0.2rem); }
-.m-compact-sm { margin: clamp(0.15rem, 1vw, 0.3rem); }
-.m-compact-md { margin: clamp(0.25rem, 1.5vw, 0.4rem); }
-.m-compact-lg { margin: clamp(0.35rem, 2vw, 0.5rem); }
+.p-compact-sm {
+  padding: clamp(0.15rem, 1vw, 0.3rem);
+}
 
-.pt-compact-xs { padding-top: clamp(0.1rem, 0.8vw, 0.2rem); }
-.pb-compact-xs { padding-bottom: clamp(0.1rem, 0.8vw, 0.2rem); }
-.pl-compact-xs { padding-left: clamp(0.1rem, 0.8vw, 0.2rem); }
-.pr-compact-xs { padding-right: clamp(0.1rem, 0.8vw, 0.2rem); }
+.p-compact-md {
+  padding: clamp(0.25rem, 1.5vw, 0.4rem);
+}
 
-.mt-compact-xs { margin-top: clamp(0.1rem, 0.8vw, 0.2rem); }
-.mb-compact-xs { margin-bottom: clamp(0.1rem, 0.8vw, 0.2rem); }
-.ml-compact-xs { margin-left: clamp(0.1rem, 0.8vw, 0.2rem); }
-.mr-compact-xs { margin-right: clamp(0.1rem, 0.8vw, 0.2rem); }
+.p-compact-lg {
+  padding: clamp(0.35rem, 2vw, 0.5rem);
+}
+
+.m-compact-xs {
+  margin: clamp(0.1rem, 0.8vw, 0.2rem);
+}
+
+.m-compact-sm {
+  margin: clamp(0.15rem, 1vw, 0.3rem);
+}
+
+.m-compact-md {
+  margin: clamp(0.25rem, 1.5vw, 0.4rem);
+}
+
+.m-compact-lg {
+  margin: clamp(0.35rem, 2vw, 0.5rem);
+}
+
+.pt-compact-xs {
+  padding-top: clamp(0.1rem, 0.8vw, 0.2rem);
+}
+
+.pb-compact-xs {
+  padding-bottom: clamp(0.1rem, 0.8vw, 0.2rem);
+}
+
+.pl-compact-xs {
+  padding-left: clamp(0.1rem, 0.8vw, 0.2rem);
+}
+
+.pr-compact-xs {
+  padding-right: clamp(0.1rem, 0.8vw, 0.2rem);
+}
+
+.mt-compact-xs {
+  margin-top: clamp(0.1rem, 0.8vw, 0.2rem);
+}
+
+.mb-compact-xs {
+  margin-bottom: clamp(0.1rem, 0.8vw, 0.2rem);
+}
+
+.ml-compact-xs {
+  margin-left: clamp(0.1rem, 0.8vw, 0.2rem);
+}
+
+.mr-compact-xs {
+  margin-right: clamp(0.1rem, 0.8vw, 0.2rem);
+}
 
 .flex-row {
   flex-direction: row;
@@ -905,7 +955,8 @@ body {
 .card {
   background-color: white;
   border: 1px solid #E5E7EB;
-  border-radius: 1.25rem; /* 20px */
+  border-radius: 1.25rem;
+  /* 20px */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   overflow: hidden;

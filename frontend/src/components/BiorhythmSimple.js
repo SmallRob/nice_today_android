@@ -338,22 +338,22 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
           </div>
 
           {/* 今日节律状态 */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-green-100 dark:border-green-800 border-opacity-50">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
+            <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 rounded-lg p-2 sm:p-4 text-center border border-green-100 dark:border-green-800 border-opacity-50">
               <div className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
                 {todayData.physical}%
               </div>
               <div className="text-sm text-green-800 dark:text-green-300 font-medium">体力</div>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-blue-100 dark:border-blue-800 border-opacity-50">
+            <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg p-2 sm:p-4 text-center border border-blue-100 dark:border-blue-800 border-opacity-50">
               <div className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                 {todayData.emotional}%
               </div>
               <div className="text-sm text-blue-800 dark:text-blue-300 font-medium">情绪</div>
             </div>
 
-            <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-4 text-center border border-purple-100 dark:border-purple-800 border-opacity-50">
+            <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 rounded-lg p-2 sm:p-4 text-center border border-purple-100 dark:border-purple-800 border-opacity-50">
               <div className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                 {todayData.intellectual}%
               </div>
@@ -473,30 +473,30 @@ const BiorhythmTab = ({ serviceStatus, isDesktop }) => {
             未来7天趋势预测
           </h3>
 
-          <div className="overflow-hidden rounded-lg border dark:border-gray-700">
+          <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900 dark:bg-opacity-50">
                 <tr>
-                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">日期</th>
-                  <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider">体力</th>
-                  <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">情绪</th>
-                  <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider">智力</th>
+                  <th scope="col" className="px-1.5 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">日期</th>
+                  <th scope="col" className="px-1.5 py-3 text-center text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider">体力</th>
+                  <th scope="col" className="px-1.5 py-3 text-center text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">情绪</th>
+                  <th scope="col" className="px-1.5 py-3 text-center text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider">智力</th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                 {futureTrends.map((trend, index) => (
                   <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-3 py-3 whitespace-nowrap">
+                    <td className="px-1.5 py-3 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{trend.day}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{trend.date.substring(5)}</div>
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-center">
+                    <td className="px-1.5 py-3 whitespace-nowrap text-center">
                       <span className={`text-base ${getTrendColorClass(trend.physical)}`}>{trend.physical}</span>
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-center">
+                    <td className="px-1.5 py-3 whitespace-nowrap text-center">
                       <span className={`text-base ${getTrendColorClass(trend.emotional)}`}>{trend.emotional}</span>
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-center">
+                    <td className="px-1.5 py-3 whitespace-nowrap text-center">
                       <span className={`text-base ${getTrendColorClass(trend.intellectual)}`}>{trend.intellectual}</span>
                     </td>
                   </tr>

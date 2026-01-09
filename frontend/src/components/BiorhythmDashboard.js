@@ -590,8 +590,8 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
         {/* 背景装饰 */}
         <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30"></div>
 
-        {/* 装饰符号 - 简化版 */}
-        <div className="absolute top-2 left-2 w-12 h-12 opacity-15">
+        {/* 装饰符号 - 简化版 - 移动端缩小并调整位置 */}
+        <div className="absolute top-2 left-2 w-8 h-8 sm:w-12 sm:h-12 opacity-15 pointer-events-none">
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1.5" />
             <circle cx="50" cy="30" r="8" fill="currentColor" />
@@ -599,32 +599,37 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
           </svg>
         </div>
 
-        <div className="container mx-auto px-4 py-4 relative z-10">
-          <div className="flex flex-col sm:flex-row items-center justify-between">
-            <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-0">
-              {/* 应用图标 - 增强交互效果 */}
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center overflow-hidden backdrop-blur-sm transition-all duration-300 hover:bg-opacity-30 hover:scale-105 cursor-pointer group">
-                <img
-                  src={niceDayImage}
-                  alt="Nice Today"
-                  className="w-8 h-8 sm:w-9 sm:h-9 object-contain transition-transform duration-300 group-hover:rotate-12"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
-                  }}
-                />
-                {/* 备用图标 */}
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white hidden" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
+        <div className="container mx-auto px-4 py-3 sm:py-4 relative z-10">
+          <div className="flex flex-col sm:flex-row items-center sm:justify-between">
+            {/* 标题区域 - 9:16屏幕居中布局优化 */}
+            <div className="flex flex-col sm:flex-row items-center sm:space-x-4 w-full sm:w-auto mb-1 sm:mb-0">
+              {/* 应用图标 - 移动端居中 */}
+              <div className="mb-2 sm:mb-0 transform sm:transform-none">
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center overflow-hidden backdrop-blur-sm shadow-md transition-all duration-300 hover:bg-opacity-30 hover:scale-105 cursor-pointer group">
+                  <img
+                    src={niceDayImage}
+                    alt="Nice Today"
+                    className="w-9 h-9 object-contain transition-transform duration-300 group-hover:rotate-12"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                  {/* 备用图标 */}
+                  <svg className="w-7 h-7 text-white hidden" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                  </svg>
+                </div>
               </div>
-              <div className="flex flex-col sm:items-start">
-                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight transition-all duration-300 hover:scale-105">
+
+              {/* 文本区域 - 移动端居中，桌面端左对齐 */}
+              <div className="flex flex-col items-center sm:items-start relative z-10 text-center sm:text-left">
+                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight transition-all duration-300 hover:scale-105 whitespace-nowrap">
                   Nice Today
                 </h1>
-                <p className="text-blue-100 text-sm sm:text-base opacity-90 mt-0.5 transition-opacity duration-300">
+                {/* <p className="text-blue-100 text-xs sm:text-base opacity-90 mt-0.6 transition-opacity duration-300 whitespace-nowrap">
                   您的个性化健康助手
-                </p>
+                </p> */}
               </div>
             </div>
 

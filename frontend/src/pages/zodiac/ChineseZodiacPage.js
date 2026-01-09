@@ -752,20 +752,20 @@ const ChineseZodiacPage = () => {
       {/* 顶部标题栏 - 固定高度适配移动设备 */}
       <div className={`bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`} style={{ height: '60px' }}>
         <div className="container mx-auto px-4 h-full flex items-center">
-          <div className="flex items-center justify-between w-full">
+          <div className="relative flex items-center justify-between w-full h-full">
             <button
               onClick={() => navigate(-1)}
-              className="text-white hover:text-white/90 flex items-center"
+              className="relative z-10 text-white hover:text-white/90 flex items-center"
             >
               <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               返回
             </button>
-            <h1 className="text-lg font-bold flex-1 text-center">生肖运势</h1>
+            <h1 className="absolute inset-0 flex items-center justify-center text-lg font-bold pointer-events-none">生肖运势</h1>
             <button
               onClick={() => navigate('/user-config')}
-              className="text-white hover:text-white/90"
+              className="relative z-10 text-white hover:text-white/90 ml-auto"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -1024,8 +1024,8 @@ const ChineseZodiacPage = () => {
                 key={zodiac.name}
                 onClick={() => setUserZodiac(zodiac.name)}
                 className={`aspect-square rounded-lg transition-all flex flex-col items-center justify-center p-2 min-w-0 overflow-hidden ${userZodiac === zodiac.name
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900/20'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900/20'
                   }`}
               >
                 <div className="text-xl">{zodiac.icon}</div>

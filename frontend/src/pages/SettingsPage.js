@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { Card, Button } from '../components/PageLayout.js';
 import updateCheckService from '../utils/updateCheckService';
 import { useNotification } from '../context/NotificationContext';
+import { useTheme } from '../context/ThemeContext';
 import versionDetector from '../utils/versionDetector';
 import { restartApp } from '../utils/restartApp';
 import { errorTrackingSettings } from '../utils/errorTrackingSettings';
@@ -11,7 +12,7 @@ import versionData from '../version.json';
 import '../index.css';
 
 // 懒加载大型组件，避免启动时阻塞
-const DarkModeToggle = lazy(() => import('../components/DarkModeToggle'));
+
 
 // 组件加载占位符
 const ComponentLoadingFallback = ({ componentName = '组件' }) => (
@@ -40,6 +41,7 @@ function SettingsPage() {
   const { showNotification } = useNotification();
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const { themeMode: currentTheme, setTheme: handleThemeChange } = useTheme();
 
   // 更新检查设置状态
   const [updateCheckSettings, setUpdateCheckSettings] = useState({
@@ -469,9 +471,36 @@ function SettingsPage() {
                       <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
                     </div>
-                    <Suspense fallback={<ComponentLoadingFallback componentName="深色模式切换器" />}>
-                      <DarkModeToggle />
-                    </Suspense>
+                    {/* 使用滑动选项代替下拉菜单，修复手机端无法弹出问题 */}
+                    <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+                      <button
+                        onClick={() => handleThemeChange('light')}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentTheme === 'light'
+                          ? 'bg-white text-gray-900 shadow-sm'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                          }`}
+                      >
+                        🌞 浅色
+                      </button>
+                      <button
+                        onClick={() => handleThemeChange('dark')}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentTheme === 'dark'
+                          ? 'bg-gray-600 text-white shadow-sm'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                          }`}
+                      >
+                        🌙 深色
+                      </button>
+                      <button
+                        onClick={() => handleThemeChange('system')}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentTheme === 'system'
+                          ? 'bg-blue-500 text-white shadow-sm'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                          }`}
+                      >
+                        🖥️ 系统
+                      </button>
+                    </div>
                   </div>
 
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-4">

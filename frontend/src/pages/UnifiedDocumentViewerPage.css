@@ -4,6 +4,8 @@
   height: 100vh;
   background-color: var(--bg-color, #ffffff);
   color: var(--text-color, #333333);
+  overflow: hidden;
+  /* 防止整个页面滚动 */
 }
 
 .unified-document-viewer.dark {
@@ -34,10 +36,13 @@
 
 /* 固定头部容器 */
 .sticky-header {
-  position: sticky;
-  top: 0;
+  position: relative;
+  /*改用 flex 布局控制，不需要 sticky */
+  flex-shrink: 0;
   z-index: 1000;
   background-color: var(--header-bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  /* 添加阴影增加层次感 */
 }
 
 /* 顶部标题栏 */
@@ -188,6 +193,15 @@
   margin-bottom: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--bg-color);
+  /* 确保背景不透明 */
+  margin-top: -16px;
+  /* 抵消 padding */
+  padding-top: 16px;
+  /* 恢复空间 */
 }
 
 .list-header h2,
@@ -396,18 +410,18 @@
     align-items: center;
     gap: 8px;
   }
-  
+
   .viewer-header.file-view {
     flex-direction: column;
     align-items: stretch;
     padding: 8px 12px 12px;
   }
-  
+
   .header-actions-row {
     flex-direction: row;
     gap: 8px;
   }
-  
+
   .header-actions-row .back-button,
   .header-actions-row .select-file-button {
     font-size: 14px;
@@ -517,20 +531,20 @@
   .viewer-header {
     padding: 6px 8px;
   }
-  
+
   .viewer-header.file-view {
     padding: 6px 8px 10px;
   }
-  
+
   .header-title {
     font-size: 14px;
   }
-  
+
   .tab-button {
     padding: 8px 6px;
     font-size: 12px;
   }
-  
+
   .header-actions-row .back-button,
   .header-actions-row .select-file-button {
     font-size: 13px;

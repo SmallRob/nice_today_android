@@ -22,16 +22,16 @@ import { clearUserZodiacTraitsCache } from '../utils/zodiacTraitsCache';
 // 辅助函数：验证八字数据一致性
 const validateBaziDataConsistency = (baziData, birthDate, birthTime, birthLocation) => {
   if (!baziData) return false;
-  
+
   // 检查基本数据结构是否完整
   const hasValidStructure = baziData && (
     (baziData.meta && baziData.birth && baziData.bazi) ||
     (baziData.bazi && baziData.bazi.year && baziData.bazi.month && baziData.bazi.day && baziData.bazi.hour) ||
     (baziData.year && baziData.month && baziData.day && baziData.hour)
   );
-  
+
   if (!hasValidStructure) return false;
-  
+
   // 检查是否与当前配置匹配（简化验证）
   // 在实际应用中，可以更严格地验证出生日期、时间、地点等
   return true; // 暂时返回true，后续可以增强验证逻辑
@@ -40,10 +40,10 @@ const validateBaziDataConsistency = (baziData, birthDate, birthTime, birthLocati
 // 辅助函数：标准化八字数据格式
 const normalizeBaziData = (baziData) => {
   if (!baziData) return baziData;
-  
+
   // 确保数据结构完整，提供默认值
   const normalized = { ...baziData };
-  
+
   // 确保bazi字段存在
   if (!normalized.bazi) {
     normalized.bazi = {
@@ -53,7 +53,7 @@ const normalizeBaziData = (baziData) => {
       hour: normalized.hour || '丁卯'
     };
   }
-  
+
   // 确保wuxing字段存在
   if (!normalized.wuxing) {
     normalized.wuxing = {
@@ -64,7 +64,7 @@ const normalizeBaziData = (baziData) => {
       hour: normalized.wuXing?.hour || '土'
     };
   }
-  
+
   // 确保lunar字段存在
   if (!normalized.lunar) {
     normalized.lunar = {
@@ -73,14 +73,14 @@ const normalizeBaziData = (baziData) => {
       dayStr: normalized.birth?.lunar?.dayInChinese || '请设置'
     };
   }
-  
+
   // 确保shichen字段存在
   if (!normalized.shichen) {
     normalized.shichen = {
       ganzhi: normalized.birth?.time?.shichenGanZhi || '丁卯'
     };
   }
-  
+
   // 确保nayin字段存在
   if (!normalized.nayin) {
     normalized.nayin = {
@@ -90,7 +90,7 @@ const normalizeBaziData = (baziData) => {
       hour: normalized.naYin?.hour || '丁卯'
     };
   }
-  
+
   return normalized;
 };
 
@@ -131,7 +131,7 @@ const getFallbackBaziData = (birthDate, birthTime) => {
       isFallback: true
     }
   };
-  
+
   return defaultBaziData;
 };
 
@@ -152,13 +152,13 @@ const clearUserConfigCache = (nickname) => {
         }
       }
     }
-    
+
     // 清理星座特质缓存
     if (typeof clearUserZodiacTraitsCache === 'function') {
       clearUserZodiacTraitsCache(nickname);
       console.log(`已清理用户 ${nickname} 的星座特质缓存`);
     }
-    
+
     console.log(`用户 ${nickname} 的相关缓存已清理完成`);
     return true;
   } catch (error) {
@@ -187,13 +187,13 @@ const validateBaziInfoStructure = (baziInfo) => {
       console.warn(`baziInfo.bazi.${field} 为 null 或 undefined 或空字符串`);
       return false;
     }
-    
+
     // 检查是否为字符串类型
     if (typeof baziInfo.bazi[field] !== 'string') {
       console.warn(`baziInfo.bazi.${field} 不是字符串类型，实际类型为: ${typeof baziInfo.bazi[field]}`);
       return false;
     }
-    
+
     // 检查字符串长度是否足够
     if (baziInfo.bazi[field].length < 1) {
       console.warn(`baziInfo.bazi.${field} 字符串长度不足`);
@@ -213,7 +213,7 @@ const validateBaziInfoStructure = (baziInfo) => {
       console.warn(`baziInfo.wuxing.${field} 为 null 或 undefined 或空字符串`);
       return false;
     }
-    
+
     // 检查是否为字符串类型
     if (typeof baziInfo.wuxing[field] !== 'string') {
       console.warn(`baziInfo.wuxing.${field} 不是字符串类型，实际类型为: ${typeof baziInfo.wuxing[field]}`);
@@ -272,21 +272,21 @@ const calculateFiveElementStats = (baziInfo) => {
       totalScore: 0
     };
   }
-  
+
   // 额外验证 bazi 和 wuxing 中的字段是否为字符串
   const hasValidBaziFields = baziInfo.bazi &&
     typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 &&
     typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
     typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
     typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
-  
+
   const hasValidWuxingFields = baziInfo.wuxing &&
     typeof baziInfo.wuxing.text === 'string' &&
     typeof baziInfo.wuxing.year === 'string' && baziInfo.wuxing.year.length > 0 &&
     typeof baziInfo.wuxing.month === 'string' && baziInfo.wuxing.month.length > 0 &&
     typeof baziInfo.wuxing.day === 'string' && baziInfo.wuxing.day.length > 0 &&
     typeof baziInfo.wuxing.hour === 'string' && baziInfo.wuxing.hour.length > 0;
-  
+
   if (!hasValidBaziFields || !hasValidWuxingFields) {
     console.warn('baziInfo 数据结构不完整或字段类型不正确，使用默认值', {
       hasBazi: !!baziInfo.bazi,
@@ -306,7 +306,7 @@ const calculateFiveElementStats = (baziInfo) => {
         hour: typeof baziInfo.wuxing.hour
       } : 'undefined'
     });
-    
+
     return {
       elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
       wuxingElements: ['木', '火', '土', '金', '水'],
@@ -339,8 +339,8 @@ const calculateFiveElementStats = (baziInfo) => {
 
     // 同类得分（日主和同类）
     const sameTypeScore = (elementCounts['木'] * 1.68) + (elementCounts['火'] * 0.34) +
-                         (elementCounts['土'] * 0.75) + (elementCounts['金'] * 1.68) +
-                         (elementCounts['水'] * 0.60);
+      (elementCounts['土'] * 0.75) + (elementCounts['金'] * 1.68) +
+      (elementCounts['水'] * 0.60);
 
     // 异类得分
     const diffTypeScore = (8 - sameTypeScore);
@@ -351,8 +351,10 @@ const calculateFiveElementStats = (baziInfo) => {
     // 判断旺衰和喜用神
     let fortuneType = '八字中和';
     let luckyElement = '无特别喜用';
-    const dayMasterElement = { '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
-                                '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水' }[dayMaster] || '未知';
+    const dayMasterElement = {
+      '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
+      '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水'
+    }[dayMaster] || '未知';
     const masterElement = dayMasterElement || '未知';
 
     if (totalScore > 3) {
@@ -418,14 +420,14 @@ const calculateWuxingPreferences = (baziInfo) => {
     typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
     typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
     typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
-  
+
   const hasValidWuxingFields = baziInfo.wuxing &&
     typeof baziInfo.wuxing.text === 'string' &&
     typeof baziInfo.wuxing.year === 'string' && baziInfo.wuxing.year.length > 0 &&
     typeof baziInfo.wuxing.month === 'string' && baziInfo.wuxing.month.length > 0 &&
     typeof baziInfo.wuxing.day === 'string' && baziInfo.wuxing.day.length > 0 &&
     typeof baziInfo.wuxing.hour === 'string' && baziInfo.wuxing.hour.length > 0;
-  
+
   if (!hasValidBaziFields || !hasValidWuxingFields) {
     console.warn('calculateWuxingPreferences: baziInfo 数据结构不完整或字段类型不正确', {
       hasBazi: !!baziInfo.bazi,
@@ -445,13 +447,13 @@ const calculateWuxingPreferences = (baziInfo) => {
         hour: typeof baziInfo.wuxing.hour
       } : 'undefined'
     });
-    
+
     return null;
   }
 
   // 获取日主（日干）
   const dayMaster = baziInfo.bazi.day && typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 ? baziInfo.bazi.day.charAt(0) : '未知';
-  
+
   // 五行对应表
   const wuxingMap = {
     '甲': '木', '乙': '木', '寅': '木', '卯': '木',
@@ -460,10 +462,10 @@ const calculateWuxingPreferences = (baziInfo) => {
     '庚': '金', '辛': '金', '申': '金', '酉': '金',
     '壬': '水', '癸': '水', '亥': '水', '子': '水'
   };
-  
+
   // 获取日主五行
   const dayMasterElement = wuxingMap[dayMaster] || '未知';
-  
+
   // 五行生克关系
   const wuxingRelations = {
     '木': { '生': '火', '克': '土', '被生': '水', '被克': '金' },
@@ -472,23 +474,23 @@ const calculateWuxingPreferences = (baziInfo) => {
     '金': { '生': '水', '克': '木', '被生': '土', '被克': '火' },
     '水': { '生': '木', '克': '火', '被生': '金', '被克': '土' }
   };
-  
+
   // 统计四柱五行数量
   const wuxingElements = ['木', '火', '土', '金', '水'];
   const elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
-  
+
   const wuxingStr = (baziInfo.wuxing && baziInfo.wuxing.text) || ''; // "金土 火金 金金 土水"
   const wuxingList = wuxingStr.split('').filter(c => wuxingElements.includes(c));
   wuxingList.forEach(element => {
     elementCounts[element]++;
   });
-  
+
   // 分析五行强弱
   let strongestElement = null;
   let weakestElement = null;
   let maxCount = -1;
   let minCount = 10;
-  
+
   wuxingElements.forEach(element => {
     if (elementCounts[element] > maxCount) {
       maxCount = elementCounts[element];
@@ -499,19 +501,19 @@ const calculateWuxingPreferences = (baziInfo) => {
       weakestElement = element;
     }
   });
-  
+
   // 确定喜用神和忌神
   // 如果日主五行在四柱中力量过强，需要克制或泄耗
   // 如果日主五行在四柱中力量过弱，需要生扶或同类相助
   const dayElementCount = elementCounts[dayMasterElement];
   const averageCount = (elementCounts['木'] + elementCounts['火'] + elementCounts['土'] + elementCounts['金'] + elementCounts['水']) / 5;
-  
+
   let preferences = {
     preferred: [], // 喜用神
     avoided: [], // 忌神
     neutral: []  // 平常用神
   };
-  
+
   // 根据日主强弱判断喜用神
   if (dayElementCount > averageCount) {
     // 日主偏强，需要克制、泄耗
@@ -523,7 +525,7 @@ const calculateWuxingPreferences = (baziInfo) => {
       shuzi: '克我数字',
       secai: '克我色彩'
     });
-    
+
     preferences.preferred.push({
       element: wuxingRelations[dayMasterElement]['生'], // 我生者为食伤，为喜用
       priority: '最喜',
@@ -532,7 +534,7 @@ const calculateWuxingPreferences = (baziInfo) => {
       shuzi: '生我数字',
       secai: '生我色彩'
     });
-    
+
     // 最强的五行作为忌神
     if (strongestElement) {
       preferences.avoided.push({
@@ -544,7 +546,7 @@ const calculateWuxingPreferences = (baziInfo) => {
         secai: '同类色彩'
       });
     }
-    
+
     // 被克的五行作为次忌
     preferences.avoided.push({
       element: wuxingRelations[dayMasterElement]['克'], // 我克者为财星，可能为忌
@@ -564,7 +566,7 @@ const calculateWuxingPreferences = (baziInfo) => {
       shuzi: '生我数字',
       secai: '生我色彩'
     });
-    
+
     preferences.preferred.push({
       element: dayMasterElement, // 同类为比劫，为喜用
       priority: '次喜',
@@ -573,7 +575,7 @@ const calculateWuxingPreferences = (baziInfo) => {
       shuzi: '同类数字',
       secai: '同类色彩'
     });
-    
+
     // 最强的五行作为忌神（克制日主的）
     if (strongestElement === wuxingRelations[dayMasterElement]['被克']) {
       preferences.avoided.push({
@@ -594,7 +596,7 @@ const calculateWuxingPreferences = (baziInfo) => {
         secai: '泄耗色彩'
       });
     }
-    
+
     preferences.avoided.push({
       element: wuxingRelations[dayMasterElement]['克'], // 我克者为财星，可能为忌
       priority: '次忌',
@@ -604,11 +606,11 @@ const calculateWuxingPreferences = (baziInfo) => {
       secai: '我克色彩'
     });
   }
-  
+
   // 剩余的作为平常
   wuxingElements.forEach(element => {
-    if (!preferences.preferred.some(p => p.element === element) && 
-        !preferences.avoided.some(a => a.element === element)) {
+    if (!preferences.preferred.some(p => p.element === element) &&
+      !preferences.avoided.some(a => a.element === element)) {
       preferences.neutral.push({
         element: element,
         priority: '平常',
@@ -619,7 +621,7 @@ const calculateWuxingPreferences = (baziInfo) => {
       });
     }
   });
-  
+
   // 根据具体的五行配置设置更详细的属性
   const elementDetails = {
     '木': { shishen: '比劫', fangwei: '东、东南', shuzi: '三、八', secai: '绿、青' },
@@ -628,7 +630,7 @@ const calculateWuxingPreferences = (baziInfo) => {
     '金': { shishen: '官杀', fangwei: '西、西北', shuzi: '四、九', secai: '白、银、金' },
     '水': { shishen: '印枭', fangwei: '北、西南', shuzi: '一、六', secai: '黑、蓝' }
   };
-  
+
   // 更新详细信息
   preferences.preferred.forEach(item => {
     if (elementDetails[item.element]) {
@@ -638,7 +640,7 @@ const calculateWuxingPreferences = (baziInfo) => {
       item.secai = elementDetails[item.element].secai;
     }
   });
-  
+
   preferences.avoided.forEach(item => {
     if (elementDetails[item.element]) {
       item.shishen = elementDetails[item.element].shishen;
@@ -647,7 +649,7 @@ const calculateWuxingPreferences = (baziInfo) => {
       item.secai = elementDetails[item.element].secai;
     }
   });
-  
+
   preferences.neutral.forEach(item => {
     if (elementDetails[item.element]) {
       item.shishen = elementDetails[item.element].shishen;
@@ -656,7 +658,7 @@ const calculateWuxingPreferences = (baziInfo) => {
       item.secai = elementDetails[item.element].secai;
     }
   });
-  
+
   return preferences;
 };
 
@@ -672,7 +674,7 @@ const calculateDaYun = (baziInfo, birthYear) => {
     typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 &&
     typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 &&
     typeof baziInfo.bazi.hour === 'string' && baziInfo.bazi.hour.length > 0;
-  
+
   if (!hasValidBaziFields) {
     console.warn('calculateDaYun: baziInfo 数据结构不完整或字段类型不正确', {
       hasBazi: !!baziInfo.bazi,
@@ -684,48 +686,48 @@ const calculateDaYun = (baziInfo, birthYear) => {
         hour: typeof baziInfo.bazi.hour
       } : 'undefined'
     });
-    
+
     return null;
   }
 
   // 获取日主（日干）
   const dayMaster = baziInfo.bazi.day && typeof baziInfo.bazi.day === 'string' && baziInfo.bazi.day.length > 0 ? baziInfo.bazi.day.charAt(0) : '未知';
-  
+
   // 天干
   const gan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
   // 地支
   const zhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-  
+
   // 男性阳干顺排，阴干逆排；女性阴干顺排，阳干逆排
   // 根据出生年份判断性别和干支阴阳
   const dayMasterIndex = gan.indexOf(dayMaster);
-  
+
   // 简化版本：根据年干判断阴阳（奇数为阳，偶数为阴）
   const yearGan = baziInfo.bazi.year && typeof baziInfo.bazi.year === 'string' && baziInfo.bazi.year.length > 0 ? baziInfo.bazi.year.charAt(0) : '甲';
   const yearGanIndex = gan.indexOf(yearGan);
   const isYangYear = yearGanIndex % 2 === 0; // 甲、丙、戊、庚、壬为阳
-  
+
   // 男性大运顺排，女性大运逆排
   const isMale = true; // 默认为男性，实际应从配置中获取
-  
+
   let dayunSequence = [];
-  
+
   // 计算大运起始干支
   // 男性阳干或女性阴干：顺排
   // 男性阴干或女性阳干：逆排
   const isForward = (isMale && isYangYear) || (!isMale && !isYangYear);
-  
+
   // 从月柱开始排大运
   const monthGan = baziInfo.bazi.month && typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 0 ? baziInfo.bazi.month.charAt(0) : '子';
   const monthZhi = baziInfo.bazi.month && typeof baziInfo.bazi.month === 'string' && baziInfo.bazi.month.length > 1 ? baziInfo.bazi.month.charAt(1) : '子';
-  
+
   const monthGanIndex = gan.indexOf(monthGan);
   const monthZhiIndex = zhi.indexOf(monthZhi);
-  
+
   // 生成10个大运干支（代表10个10年周期）
   for (let i = 0; i < 10; i++) {
     let ganIndex, zhiIndex;
-    
+
     if (isForward) {
       // 顺排
       ganIndex = (monthGanIndex + i + 1) % 10;
@@ -735,20 +737,20 @@ const calculateDaYun = (baziInfo, birthYear) => {
       ganIndex = (monthGanIndex - i - 1 + 10) % 10;
       zhiIndex = (monthZhiIndex - i - 1 + 12) % 12;
     }
-    
+
     if (ganIndex < 0) ganIndex += 10;
     if (zhiIndex < 0) zhiIndex += 12;
-    
+
     const dagan = gan[ganIndex];
     const dazhi = zhi[zhiIndex];
-    
+
     // 计算大运的起止年份
     // 通常大运从出生后几年开始，这里假设6-10岁开始
     const startAge = 6 + i * 10; // 6-15, 16-25, 26-35...
     const endAge = startAge + 9;
     const startY = birthYear + startAge;
     const endY = startY + 9;
-    
+
     dayunSequence.push({
       ganzhi: dagan + dazhi,
       startYear: startY,
@@ -756,26 +758,26 @@ const calculateDaYun = (baziInfo, birthYear) => {
       ageRange: `${startAge}-${endAge}岁`
     });
   }
-  
+
   return dayunSequence;
 };
 
 // 配置列表项组件
 const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, onScoreName, onDragStart, onDragOver, onDrop, isDragging, dragOverIndex }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // 深拷贝 config 对象，避免直接修改原始对象
   const safeConfig = useMemo(() => {
     if (!config) return config;
-    
+
     // 创建安全副本，移除可能导致问题的对象属性
     const { bazi, ...configWithoutBazi } = config;
-    
+
     // 清理 birthLocation 对象
-    const safeBirthLocation = configWithoutBazi.birthLocation 
+    const safeBirthLocation = configWithoutBazi.birthLocation
       ? { ...configWithoutBazi.birthLocation }
       : undefined;
-    
+
     return {
       ...configWithoutBazi,
       birthLocation: safeBirthLocation
@@ -845,9 +847,9 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
                 {safeConfig?.nameScore && (
                   <span className={`px-2 py-0.5 text-xs rounded font-bold ${safeConfig.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                     safeConfig.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                    safeConfig.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                    safeConfig.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                      'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      safeConfig.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                        safeConfig.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                          'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                     }`}>
                     {safeConfig.nameScore.totalScore || 0}分
                   </span>
@@ -880,21 +882,21 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
       {isExpanded && (
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-            <div>
-              <span className="text-gray-500 dark:text-white">昵称：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig?.nickname || '-'}</span>
+            <div className="min-w-0 overflow-hidden">
+              <span className="text-gray-500 dark:text-white whitespace-nowrap">昵称：</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium truncate">{safeConfig?.nickname || '-'}</span>
             </div>
-            <div>
-              <span className="text-gray-500 dark:text-white">星座：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.zodiac || '-'}</span>
+            <div className="min-w-0 overflow-hidden">
+              <span className="text-gray-500 dark:text-white whitespace-nowrap">星座：</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium truncate">{safeConfig.zodiac || '-'}</span>
             </div>
-            <div>
-              <span className="text-gray-500 dark:text-white">生肖：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.zodiacAnimal || '-'}</span>
+            <div className="min-w-0 overflow-hidden">
+              <span className="text-gray-500 dark:text-white whitespace-nowrap">生肖：</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium truncate">{safeConfig.zodiacAnimal || '-'}</span>
             </div>
-            <div>
-              <span className="text-gray-500 dark:text-white">MBTI：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.mbti || '-'}</span>
+            <div className="min-w-0 overflow-hidden">
+              <span className="text-gray-500 dark:text-white whitespace-nowrap">MBTI：</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium truncate">{safeConfig.mbti || '-'}</span>
             </div>
           </div>
 
@@ -907,9 +909,9 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
                   {safeConfig.nameScore && (
                     <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${safeConfig.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                       safeConfig.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      safeConfig.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                      safeConfig.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        safeConfig.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                          safeConfig.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                            'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                       }`}>
                       {safeConfig.nameScore.totalScore || 0}分
                     </span>
@@ -938,7 +940,8 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
           )}
 
           {/* 操作按钮 */}
-          <div className="flex flex-wrap gap-2 mt-4">
+          {/* 操作按钮 - 适配移动端双列布局 */}
+          <div className="grid grid-cols-2 gap-2 mt-4">
             {!isActive && !isSystemDefault && (
               <Button
                 variant="outline"
@@ -1103,7 +1106,7 @@ const UserConfigManagerComponent = () => {
 
     console.log('========== 开始保存配置 ==========');
     console.log('传入参数:', { index, isNewConfig, storedConfigsCount: storedConfigs.length });
-    
+
     // 安全地打印配置数据，避免序列化错误
     try {
       console.log('配置数据:', JSON.parse(JSON.stringify(configData, (k, v) => {
@@ -1136,7 +1139,7 @@ const UserConfigManagerComponent = () => {
       zodiacAnimal: configData.zodiacAnimal || '',
       mbti: configData.mbti || '',
       isused: configData.isused ?? false,
-      
+
       // 结构化数据（确保可序列化）
       birthLocation: configData.birthLocation ? {
         province: configData.birthLocation.province || '',
@@ -1145,11 +1148,11 @@ const UserConfigManagerComponent = () => {
         lng: configData.birthLocation.lng ?? DEFAULT_REGION.lng,
         lat: configData.birthLocation.lat ?? DEFAULT_REGION.lat
       } : { ...DEFAULT_REGION },
-      
+
       shichen: configData.shichen || '',
       lunarBirthDate: configData.lunarBirthDate || '',
       trueSolarTime: configData.trueSolarTime || '',
-      
+
       // 复杂对象（确保为null或简单对象）
       nameScore: configData.nameScore ? {
         tian: configData.nameScore.tian || 0,
@@ -1160,7 +1163,7 @@ const UserConfigManagerComponent = () => {
         mainType: configData.nameScore.mainType || '',
         totalScore: configData.nameScore.totalScore || 0
       } : null,
-      
+
       bazi: configData.bazi ? {
         year: configData.bazi.year || '',
         month: configData.bazi.month || '',
@@ -1195,17 +1198,17 @@ const UserConfigManagerComponent = () => {
           text: configData.bazi.solar.text || ''
         } : null
       } : null,
-      
+
       lunarInfo: configData.lunarInfo ? {
         lunarBirthDate: configData.lunarInfo.lunarBirthDate || '',
         lunarBirthMonth: configData.lunarInfo.lunarBirthMonth || '',
         lunarBirthDay: configData.lunarInfo.lunarBirthDay || '',
         trueSolarTime: configData.lunarInfo.trueSolarTime || ''
       } : null,
-      
+
       lastCalculated: configData.lastCalculated || new Date().toISOString()
     };
-    
+
     // 确保经纬度有效
     if (finalConfigData.birthLocation.lng === undefined || finalConfigData.birthLocation.lng === null || isNaN(finalConfigData.birthLocation.lng)) {
       finalConfigData.birthLocation.lng = DEFAULT_REGION.lng;
@@ -1213,7 +1216,7 @@ const UserConfigManagerComponent = () => {
     if (finalConfigData.birthLocation.lat === undefined || finalConfigData.birthLocation.lat === null || isNaN(finalConfigData.birthLocation.lat)) {
       finalConfigData.birthLocation.lat = DEFAULT_REGION.lat;
     }
-    
+
     // 第二步：自动为中文姓名打分（只有当 nameScore 不存在时才计算）
     if (finalConfigData.realName && /[一-龥]/.test(finalConfigData.realName) && !finalConfigData.nameScore) {
       try {
@@ -1300,7 +1303,7 @@ const UserConfigManagerComponent = () => {
       // 使用异步操作队列管理保存操作
       const saveOperation = async (operationData) => {
         const { index, finalConfigData } = operationData;
-        
+
         if (isNewConfig) {
           // 新建配置，保存基础配置（包括自动计算的八字）
           console.log('执行添加新配置操作...');
@@ -1323,10 +1326,10 @@ const UserConfigManagerComponent = () => {
             throw new Error(updateResult?.error || '更新配置失败');
           }
         }
-        
+
         return true; // 返回成功状态
       };
-      
+
       // 将保存操作添加到队列
       await asyncOperationQueue.enqueue(
         saveOperation,
@@ -1352,14 +1355,14 @@ const UserConfigManagerComponent = () => {
         try {
           const savedConfigs = enhancedUserConfigManager.getAllConfigs();
           const savedConfig = savedConfigs[index >= 0 ? index : savedConfigs.length - 1];
-          
+
           if (savedConfig) {
             console.log('配置已正确保存到存储:', {
               nickname: savedConfig.nickname,
               hasBazi: !!savedConfig.bazi,
               hasNameScore: !!savedConfig.nameScore
             });
-            
+
             // 如果配置包含八字信息，验证缓存是否同步
             if (savedConfig.bazi) {
               const cachedBazi = enhancedUserConfigManager.getBaziFromCache(savedConfig.nickname);
@@ -1367,7 +1370,7 @@ const UserConfigManagerComponent = () => {
                 console.log('八字信息已同步到缓存:', savedConfig.nickname);
               } else {
                 console.warn('八字信息未同步到缓存，尝试重新同步:', savedConfig.nickname);
-                
+
                 // 尝试重新同步八字到缓存
                 enhancedUserConfigManager.syncBaziToCache(savedConfig.nickname)
                   .then(syncSuccess => {
@@ -1404,10 +1407,10 @@ const UserConfigManagerComponent = () => {
           setTimeout(async () => {
             try {
               const calcSuccess = await enhancedUserConfigManager.calculateAndSyncBaziInfo(finalConfigData?.nickname, birthInfo);
-              
+
               if (calcSuccess) {
                 console.log('八字信息后台计算并保存成功:', finalConfigData?.nickname);
-                
+
                 // 验证缓存数据是否正确保存
                 const cachedBazi = enhancedUserConfigManager.getBaziFromCache(finalConfigData?.nickname);
                 if (cachedBazi) {
@@ -1420,7 +1423,7 @@ const UserConfigManagerComponent = () => {
               }
             } catch (calcError) {
               console.error('八字信息后台计算出错:', calcError);
-              
+
               // 即使计算失败，也记录错误但不中断主流程
               errorHandlingManager.logError('bazi-calculation', calcError, {
                 nickname: finalConfigData?.nickname,
@@ -1437,7 +1440,7 @@ const UserConfigManagerComponent = () => {
         }
       } catch (calcError) {
         console.error('启动八字后台计算失败:', calcError);
-        
+
         // 记录错误但不中断主流程
         errorHandlingManager.logError('start-bazi-calculation', calcError, {
           nickname: finalConfigData?.nickname
@@ -1455,7 +1458,7 @@ const UserConfigManagerComponent = () => {
         configIndex: index,
         configData: finalConfigData
       });
-      
+
       // 尝试恢复
       const recoveryResult = await errorHandlingManager.attemptRecovery(
         'save-config',
@@ -1470,13 +1473,13 @@ const UserConfigManagerComponent = () => {
         },
         { configIndex: index, configData: finalConfigData }
       );
-      
+
       if (recoveryResult) {
         showMessage('✅ 配置已通过修复后保存成功', 'success');
       } else {
         // 显示错误消息
         showMessage('❌ 保存失败: ' + error.message, 'error');
-        
+
         // 将异常信息传递给调用者
         throw error;
       }
@@ -1551,14 +1554,14 @@ const UserConfigManagerComponent = () => {
       const addFromTemplateOperation = async () => {
         // 从默认配置模板复制并保存
         const success = await enhancedUserConfigManager.addConfigFromTemplate();
-        
+
         if (!success) {
           throw new Error('从模板创建配置返回失败');
         }
-        
+
         return success;
       };
-      
+
       // 将从模板添加配置操作添加到队列
       const success = await asyncOperationQueue.enqueue(
         addFromTemplateOperation,
@@ -1578,10 +1581,10 @@ const UserConfigManagerComponent = () => {
       }
     } catch (error) {
       console.error('从模板创建配置失败:', error);
-      
+
       // 使用错误处理管理器记录错误
       errorHandlingManager.logError('add-from-template', error, {});
-      
+
       // 尝试恢复
       const recoveryResult = await errorHandlingManager.attemptRecovery(
         'add-from-template',
@@ -1591,7 +1594,7 @@ const UserConfigManagerComponent = () => {
         },
         {}
       );
-      
+
       if (recoveryResult) {
         showMessage('✅ 从模板创建配置已通过恢复机制成功', 'success');
       } else {
@@ -1617,11 +1620,11 @@ const UserConfigManagerComponent = () => {
       try {
         // 获取配置信息以清理相关缓存
         configToDelete = configs[index];
-        
+
         // 使用异步操作队列管理删除操作
         const deleteOperation = async (operationData) => {
           const { index } = operationData;
-          
+
           // 从存储中移除配置
           await enhancedUserConfigManager.removeConfig(index);
           // deleteConfig 内部已经调用了 notifyListeners
@@ -1629,10 +1632,10 @@ const UserConfigManagerComponent = () => {
           // 注意：监听器更新是异步的，所以需要从 enhancedUserConfigManager 获取最新长度
           const freshConfigs = enhancedUserConfigManager.getAllConfigs();
           setExpandedIndex(prev => Math.max(0, Math.min(prev, freshConfigs.length - 1)));
-          
+
           return true;
         };
-        
+
         // 将删除操作添加到队列
         await asyncOperationQueue.enqueue(
           deleteOperation,
@@ -1641,17 +1644,17 @@ const UserConfigManagerComponent = () => {
           // 乐观更新数据（可选）
           null
         );
-        
+
         showMessage('删除配置成功', 'success');
       } catch (error) {
         console.error('删除配置失败:', error);
-        
+
         // 使用错误处理管理器记录错误
         errorHandlingManager.logError('delete-config', error, {
           configIndex: index,
           configToDelete: configToDelete
         });
-        
+
         // 尝试恢复
         const recoveryResult = await errorHandlingManager.attemptRecovery(
           'delete-config',
@@ -1662,7 +1665,7 @@ const UserConfigManagerComponent = () => {
           },
           { configIndex: index, configToDelete: configToDelete }
         );
-        
+
         if (recoveryResult) {
           showMessage('✅ 配置已通过恢复机制删除成功', 'success');
         } else {
@@ -1807,7 +1810,7 @@ const UserConfigManagerComponent = () => {
 
     try {
       isProcessingRef.current = true;
-      
+
       // 动态导入移动端文件系统工具（带错误处理）
       let readFile, checkAndRequestStoragePermission;
       try {
@@ -1819,11 +1822,11 @@ const UserConfigManagerComponent = () => {
         showMessage('导入功能初始化失败，请刷新页面重试', 'error');
         return;
       }
-      
+
       // 检查设备权限（带超时处理）
       const permissionResult = await Promise.race([
         checkAndRequestStoragePermission(),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('权限检查超时')), 10000)
         )
       ]).catch((error) => {
@@ -1832,7 +1835,7 @@ const UserConfigManagerComponent = () => {
         }
         throw error;
       });
-      
+
       if (!permissionResult.granted) {
         showMessage('存储权限不足：' + permissionResult.message, 'error');
         return;
@@ -1841,7 +1844,7 @@ const UserConfigManagerComponent = () => {
       // 使用移动端文件系统工具读取文件（带超时处理）
       const result = await Promise.race([
         readFile('.json'),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('文件读取超时')), 30000)
         )
       ]).catch((error) => {
@@ -1850,7 +1853,7 @@ const UserConfigManagerComponent = () => {
         }
         throw error;
       });
-      
+
       if (result.success) {
         const success = await enhancedUserConfigManager.importConfigs(result.content);
         if (success) {
@@ -1915,11 +1918,11 @@ const UserConfigManagerComponent = () => {
         showMessage('导出功能初始化失败，请刷新页面重试', 'error');
         return;
       }
-      
+
       // 检查设备权限（带超时处理）
       const permissionResult = await Promise.race([
         checkAndRequestStoragePermission(),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('权限检查超时')), 10000)
         )
       ]).catch((error) => {
@@ -1928,7 +1931,7 @@ const UserConfigManagerComponent = () => {
         }
         throw error;
       });
-      
+
       if (!permissionResult.granted) {
         showMessage('存储权限不足：' + permissionResult.message, 'error');
         return;
@@ -1937,10 +1940,10 @@ const UserConfigManagerComponent = () => {
       // 使用移动端文件系统工具保存文件（带超时处理）
       const timestamp = new Date().toISOString().split('T')[0];
       const filename = `nice-today-configs-${timestamp}.json`;
-      
+
       const result = await Promise.race([
         saveFile(filename, jsonData, 'application/json'),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('文件保存超时')), 30000)
         )
       ]).catch((error) => {
@@ -1949,14 +1952,14 @@ const UserConfigManagerComponent = () => {
         }
         throw error;
       });
-      
+
       if (result.success) {
-        const methodText = result.method === 'capacitor-filesystem' 
+        const methodText = result.method === 'capacitor-filesystem'
           ? '已保存到设备存储'
           : result.method === 'filesystem-access-api'
-          ? '已保存到选择的位置'
-          : '已下载到默认位置';
-        
+            ? '已保存到选择的位置'
+            : '已下载到默认位置';
+
         showMessage(`配置${methodText}`, 'success');
       } else {
         if (result.error === '已取消保存') {
@@ -2279,7 +2282,7 @@ const UserConfigManagerComponent = () => {
         </div>
       )}
       {/* 用户信息 - 使用优化的卡片样式 */}
-      <Card 
+      <Card
         title="用户信息"
         headerAction={
           <button
@@ -2287,10 +2290,10 @@ const UserConfigManagerComponent = () => {
             className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             title={isUserInfoExpanded ? "收起" : "展开"}
           >
-            <svg 
+            <svg
               className={`w-5 h-5 text-gray-500 dark:text-white transition-transform duration-200 ${isUserInfoExpanded ? 'rotate-180' : ''}`}
-              fill="none" 
-              viewBox="0 0 24 24" 
+              fill="none"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -2373,22 +2376,22 @@ const UserConfigManagerComponent = () => {
                 try {
                   console.log('开始批量检查数据完整性...');
                   const results = birthDataIntegrityManager.batchValidateConfigs(configs);
-                  
+
                   if (results.summary.errors > 0 || results.summary.warnings > 0) {
                     const report = birthDataIntegrityManager.generateReport(results);
                     console.log('数据完整性检查报告:', report);
-                    
+
                     // 显示检查结果
                     const errorCount = results.summary.errors;
                     const warningCount = results.summary.warnings;
                     const correctionCount = results.summary.corrections;
-                    
+
                     let message = `数据完整性检查完成：`;
                     if (errorCount > 0) message += ` ❌ ${errorCount}个错误`;
                     if (warningCount > 0) message += ` ⚠️ ${warningCount}个警告`;
                     if (correctionCount > 0) message += ` 🔧 ${correctionCount}个可修复项`;
                     if (errorCount === 0 && warningCount === 0) message += ` ✅ 所有配置数据完整`;
-                    
+
                     showMessage(message, errorCount > 0 ? 'error' : warningCount > 0 ? 'info' : 'success');
                   } else {
                     showMessage('✅ 所有配置数据完整，无需修复', 'success');
@@ -2448,14 +2451,14 @@ const UserConfigManagerComponent = () => {
             try {
               const saveScoreOperation = async (operationData) => {
                 const { tempScoringConfigIndex, updateData, configs } = operationData;
-                
+
                 // 更新配置
                 await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, updateData);
                 console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
-                
+
                 return true;
               };
-              
+
               // 将评分保存操作添加到队列
               await asyncOperationQueue.enqueue(
                 saveScoreOperation,
@@ -2466,13 +2469,13 @@ const UserConfigManagerComponent = () => {
               );
             } catch (error) {
               console.error('保存姓名评分失败:', error);
-              
+
               // 使用错误处理管理器记录错误
               errorHandlingManager.logError('save-name-score', error, {
                 tempScoringConfigIndex,
                 updateData
               });
-              
+
               // 尝试恢复
               const recoveryResult = await errorHandlingManager.attemptRecovery(
                 'save-name-score',
@@ -2483,13 +2486,13 @@ const UserConfigManagerComponent = () => {
                     realName: updateData.realName
                   });
                   return await enhancedUserConfigManager.updateConfigWithNodeUpdate(
-                    tempScoringConfigIndex, 
+                    tempScoringConfigIndex,
                     repairedConfig
                   );
                 },
                 { tempScoringConfigIndex, updateData }
               );
-              
+
               if (recoveryResult) {
                 showMessage && showMessage('✅ 姓名评分已通过修复后保存成功', 'success');
               } else {
@@ -2518,15 +2521,15 @@ const UserConfigManagerComponent = () => {
             const result = await handleSaveConfig(index, configData);
             // 保存成功，ConfigEditModal 会显示成功消息
             console.log('配置保存完成，返回值:', result);
-          return result; // 返回保存结果
-        } catch (error) {
-          console.error('保存过程中发生错误:', error);
-          // 保存失败，重新抛出异常让 ConfigEditModal 能够捕获并显示错误消息
-          throw error;
-        }
-      }}
-      showMessage={showMessage}
-    />
+            return result; // 返回保存结果
+          } catch (error) {
+            console.error('保存过程中发生错误:', error);
+            // 保存失败，重新抛出异常让 ConfigEditModal 能够捕获并显示错误消息
+            throw error;
+          }
+        }}
+        showMessage={showMessage}
+      />
 
       {/* 配置列表 */}
       <div className="space-y-3">
