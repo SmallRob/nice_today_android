@@ -7,12 +7,12 @@ import { useTheme } from '../../context/ThemeContext';
 
 const BiorhythmBanner = () => {
   const { theme } = useTheme();
-  
+
   // 根据主题设置渐变颜色
-  const gradientColors = theme === 'dark' 
+  const gradientColors = theme === 'dark'
     ? 'from-blue-900 via-purple-900 to-indigo-900'
     : 'from-blue-600 via-purple-600 to-indigo-700';
-    
+
   const overlayColors = theme === 'dark'
     ? 'from-blue-500/10 via-purple-600/10 to-indigo-700/10'
     : 'from-blue-500/20 via-purple-600/20 to-indigo-700/20';
@@ -39,7 +39,7 @@ const BiorhythmBanner = () => {
         <p className="text-white/90 text-sm md:text-base opacity-95 font-medium taoist-subtitle mb-3">
           天人合一·顺应自然·调和身心
         </p>
-        <div className="flex items-center justify-center space-x-2 md:space-x-3">
+        <div className="flex items-center justify-center space-x-1.5 md:space-x-3 flex-wrap sm:flex-nowrap">
           <CycleBadge label="体力" color="green" period="23天" />
           <CycleBadge label="情绪" color="blue" period="28天" />
           <CycleBadge label="智力" color="purple" period="33天" />
@@ -59,10 +59,10 @@ const CycleBadge = ({ label, color, period }) => {
 
   return (
     <div className="flex flex-col items-center">
-      <span className={`text-xs md:text-sm font-semibold text-white px-3 py-1 rounded-full border bg-gradient-to-r ${colorClasses[color]} whitespace-nowrap shadow-sm`}>
+      <span className={`text-[10px] sm:text-xs md:text-sm font-semibold text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border bg-gradient-to-r ${colorClasses[color]} whitespace-nowrap shadow-sm`}>
         {label}
       </span>
-      <span className="text-[10px] md:text-xs text-white/70 mt-1 font-medium">
+      <span className="text-[9px] sm:text-[10px] md:text-xs text-white/70 mt-0.5 sm:mt-1 font-medium">
         {period}
       </span>
     </div>

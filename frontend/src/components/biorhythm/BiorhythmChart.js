@@ -285,8 +285,8 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
       label: '体力',
       data: formattedData.physical,
       borderColor: themeColors.todayLineColor,
-      backgroundColor: theme === 'dark' 
-        ? 'rgba(74, 222, 128, 0.1)' 
+      backgroundColor: theme === 'dark'
+        ? 'rgba(74, 222, 128, 0.1)'
         : 'rgba(34, 197, 94, 0.1)',
       borderWidth: 2,
       pointRadius: 3,
@@ -304,8 +304,8 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
       label: '情绪',
       data: formattedData.emotional,
       borderColor: theme === 'dark' ? '#60a5fa' : '#3b82f6',
-      backgroundColor: theme === 'dark' 
-        ? 'rgba(96, 165, 250, 0.1)' 
+      backgroundColor: theme === 'dark'
+        ? 'rgba(96, 165, 250, 0.1)'
         : 'rgba(59, 130, 246, 0.1)',
       borderWidth: 2,
       pointRadius: 3,
@@ -323,8 +323,8 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
       label: '智力',
       data: formattedData.intellectual,
       borderColor: themeColors.todayLineColor,
-      backgroundColor: theme === 'dark' 
-        ? 'rgba(147, 51, 234, 0.1)' 
+      backgroundColor: theme === 'dark'
+        ? 'rgba(147, 51, 234, 0.1)'
         : 'rgba(168, 85, 247, 0.1)',
       borderWidth: 2,
       pointRadius: 3,
@@ -381,7 +381,9 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
         },
         // 添加注解配置
         annotation: {
-          annotations: todayAnnotation
+          annotations: {
+            todayLine: todayAnnotation
+          }
         }
       },
       scales: {
@@ -509,12 +511,11 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
               {todayStatus.reminders.map((reminder, index) => (
                 <div
                   key={index}
-                  className={`flex items-start p-4 rounded-lg border ${
-                    reminder.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' :
-                    reminder.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700' :
-                    reminder.type === 'danger' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' :
-                    'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
-                  }`}
+                  className={`flex items-start p-4 rounded-lg border ${reminder.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' :
+                      reminder.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700' :
+                        reminder.type === 'danger' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' :
+                          'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
+                    }`}
                 >
                   <span className="text-2xl mr-3">{reminder.icon}</span>
                   <div className="flex-1">

@@ -255,76 +255,98 @@ const BiorhythmPage = () => {
         {/* 今日状态卡片 - 移动端一行三列紧凑显示 */}
         {biorhythmData && (() => {
           const todayData = getTodayData();
-          const healthAdvice = todayData ? getHealthAdvice(todayData.physical, todayData.emotional, todayData.intellectual) : [];
+          if (!todayData) return null;
 
-          return todayData && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2 sm:p-3 mb-3 sm:mb-4">
-              <h3 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
+          const healthAdvice = getHealthAdvice(todayData.physical, todayData.emotional, todayData.intellectual);
+          const averageScore = Math.round((todayData.physical + todayData.emotional + todayData.intellectual) / 3);
+
+          // 获取综合状态描述
+          const getOverallStatus = (score) => {
+            if (score > 80) return { text: '巅峰时刻', color: 'from-purple-500 to-indigo-600' };
+            if (score > 50) return { text: '状态极佳', color: 'from-green-500 to-emerald-600' };
+            if (score > 20) return { text: '状态良好', color: 'from-blue-500 to-cyan-600' };
+            if (score > -20) return { text: '状态平稳', color: 'from-yellow-500 to-orange-500' };
+            if (score > -50) return { text: '需要调整', color: 'from-orange-500 to-red-500' };
+            return { text: '低谷时期', color: 'from-gray-600 to-gray-800' };
+          };
+
+          const overall = getOverallStatus(averageScore);
+
+          return (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 mb-3 sm:mb-4">
+              <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
                 今日状态
               </h3>
 
-              {/* 三个节律值 - 移动端紧凑三列 */}
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-3 mb-3 sm:mb-4">
+              {/* 综合节律能量球 */}
+              <div className="flex flex-col items-center justify-center mb-4 relative py-2">
+                <div className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center bg-gradient-to-br ${overall.color} shadow-lg shadow-blue-500/20 ring-4 ring-white/10`}>
+                  {/* 内部光晕效果 */}
+                  <div className="absolute inset-1 rounded-full bg-white/10 backdrop-blur-[1px]"></div>
+
+                  <div className="flex flex-col items-center z-10 text-white">
+                    <span className="text-3xl sm:text-4xl font-bold tracking-tighter drop-shadow-md">{averageScore}</span>
+                    <span className="text-[10px] sm:text-xs font-medium opacity-90 mt-0.5 tracking-wide px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
+                      {overall.text}
+                    </span>
+                  </div>
+
+                  {/* 动画波纹 */}
+                  <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
+                </div>
+                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">综合能量指数</div>
+              </div>
+
+              {/* 三个节律值 - 移动端紧凑三列，确保一行显示 */}
+              <div className="grid grid-cols-3 gap-2 mb-3 sm:mb-4 w-full">
                 {/* 体力 */}
-                <div className={`rounded-lg p-2 sm:p-3 transition-all ${
-                  todayData.physical > 50 ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/50 dark:to-emerald-900/50 border border-green-200 dark:border-green-700' :
-                  todayData.physical > 0 ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 border border-blue-200 dark:border-blue-700' :
-                  'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
-                }`}>
-                  <div className="text-center">
-                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1">体力</div>
-                    <div className={`text-base sm:text-xl font-bold ${
-                      todayData.physical > 50 ? 'text-green-600 dark:text-green-400' :
+                <div className={`rounded-lg p-2 sm:p-3 transition-all flex flex-col items-center justify-center ${todayData.physical > 50 ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/50 dark:to-emerald-900/50 border border-green-200 dark:border-green-700' :
+                    todayData.physical > 0 ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 border border-blue-200 dark:border-blue-700' :
+                      'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
+                  }`}>
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">体力</div>
+                  <div className={`text-lg sm:text-xl font-bold leading-none ${todayData.physical > 50 ? 'text-green-600 dark:text-green-400' :
                       todayData.physical > 0 ? 'text-blue-600 dark:text-blue-400' :
-                      'text-red-600 dark:text-red-400'
+                        'text-red-600 dark:text-red-400'
                     }`}>
-                      {todayData.physical.toFixed(0)}
-                    </div>
-                    <div className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      {todayData.physical > 50 ? '充沛' : todayData.physical > 0 ? '一般' : '疲劳'}
-                    </div>
+                    {todayData.physical.toFixed(0)}
+                  </div>
+                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 opacity-80">
+                    {todayData.physical > 50 ? '充沛' : todayData.physical > 0 ? '一般' : '疲劳'}
                   </div>
                 </div>
 
                 {/* 情绪 */}
-                <div className={`rounded-lg p-2 sm:p-3 transition-all ${
-                  todayData.emotional > 50 ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/50 dark:to-pink-900/50 border border-purple-200 dark:border-purple-700' :
-                  todayData.emotional > 0 ? 'bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-indigo-700' :
-                  'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/50 dark:to-red-900/50 border border-orange-200 dark:border-orange-700'
-                }`}>
-                  <div className="text-center">
-                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1">情绪</div>
-                    <div className={`text-base sm:text-xl font-bold ${
-                      todayData.emotional > 50 ? 'text-purple-600 dark:text-purple-400' :
+                <div className={`rounded-lg p-2 sm:p-3 transition-all flex flex-col items-center justify-center ${todayData.emotional > 50 ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/50 dark:to-pink-900/50 border border-purple-200 dark:border-purple-700' :
+                    todayData.emotional > 0 ? 'bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-indigo-700' :
+                      'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/50 dark:to-red-900/50 border border-orange-200 dark:border-orange-700'
+                  }`}>
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">情绪</div>
+                  <div className={`text-lg sm:text-xl font-bold leading-none ${todayData.emotional > 50 ? 'text-purple-600 dark:text-purple-400' :
                       todayData.emotional > 0 ? 'text-indigo-600 dark:text-indigo-400' :
-                      'text-orange-600 dark:text-orange-400'
+                        'text-orange-600 dark:text-orange-400'
                     }`}>
-                      {todayData.emotional.toFixed(0)}
-                    </div>
-                    <div className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      {todayData.emotional > 50 ? '高涨' : todayData.emotional > 0 ? '平稳' : '低落'}
-                    </div>
+                    {todayData.emotional.toFixed(0)}
+                  </div>
+                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 opacity-80">
+                    {todayData.emotional > 50 ? '高涨' : todayData.emotional > 0 ? '平稳' : '低落'}
                   </div>
                 </div>
 
                 {/* 智力 */}
-                <div className={`rounded-lg p-2 sm:p-3 transition-all ${
-                  todayData.intellectual > 50 ? 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/50 dark:to-cyan-900/50 border border-blue-200 dark:border-blue-700' :
-                  todayData.intellectual > 0 ? 'bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/50 dark:to-violet-900/50 border border-indigo-200 dark:border-indigo-700' :
-                  'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
-                }`}>
-                  <div className="text-center">
-                    <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1">智力</div>
-                    <div className={`text-base sm:text-xl font-bold ${
-                      todayData.intellectual > 50 ? 'text-blue-600 dark:text-blue-400' :
+                <div className={`rounded-lg p-2 sm:p-3 transition-all flex flex-col items-center justify-center ${todayData.intellectual > 50 ? 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/50 dark:to-cyan-900/50 border border-blue-200 dark:border-blue-700' :
+                    todayData.intellectual > 0 ? 'bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/50 dark:to-violet-900/50 border border-indigo-200 dark:border-indigo-700' :
+                      'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
+                  }`}>
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">智力</div>
+                  <div className={`text-lg sm:text-xl font-bold leading-none ${todayData.intellectual > 50 ? 'text-blue-600 dark:text-blue-400' :
                       todayData.intellectual > 0 ? 'text-indigo-600 dark:text-indigo-400' :
-                      'text-red-600 dark:text-red-400'
+                        'text-red-600 dark:text-red-400'
                     }`}>
-                      {todayData.intellectual.toFixed(0)}
-                    </div>
-                    <div className="text-[8px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      {todayData.intellectual > 50 ? '敏捷' : todayData.intellectual > 0 ? '一般' : '迟钝'}
-                    </div>
+                    {todayData.intellectual.toFixed(0)}
+                  </div>
+                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 opacity-80">
+                    {todayData.intellectual > 50 ? '敏捷' : todayData.intellectual > 0 ? '一般' : '迟钝'}
                   </div>
                 </div>
               </div>
@@ -335,13 +357,12 @@ const BiorhythmPage = () => {
                   {healthAdvice.map((advice, index) => (
                     <div
                       key={index}
-                      className={`flex items-start gap-2 p-2 sm:p-2.5 rounded-lg transition-all ${
-                        advice.type === 'success' ?
+                      className={`flex items-start gap-2 p-2 sm:p-2.5 rounded-lg transition-all ${advice.type === 'success' ?
                           'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/40 border-l-2 border-green-500' :
                           advice.type === 'warning' ?
-                          'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/40 dark:to-amber-900/40 border-l-2 border-orange-500' :
-                          'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border-l-2 border-blue-500'
-                      }`}
+                            'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/40 dark:to-amber-900/40 border-l-2 border-orange-500' :
+                            'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border-l-2 border-blue-500'
+                        }`}
                     >
                       <span className="text-sm sm:text-base flex-shrink-0 mt-0.5">{advice.icon}</span>
                       <div className="flex-1 min-w-0">

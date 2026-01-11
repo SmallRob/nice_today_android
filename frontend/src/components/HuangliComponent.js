@@ -187,8 +187,8 @@ const HuangliComponent = () => {
 
   return (
     <div className={`huangli-component rounded-xl shadow-lg overflow-hidden ${theme === 'dark'
-        ? 'bg-gray-800/90 backdrop-blur-sm border border-gray-700'
-        : 'bg-white/90 backdrop-blur-sm border border-gray-200'
+      ? 'bg-gray-800/90 backdrop-blur-sm border border-gray-700'
+      : 'bg-white/90 backdrop-blur-sm border border-gray-200'
       }`}>
       {/* 头部 - 优化版 */}
       <div className={`p-2 sm:p-3 border-b overflow-hidden ${theme === 'dark' ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-gray-900' : 'border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50'
@@ -233,8 +233,8 @@ const HuangliComponent = () => {
           <button
             onClick={() => changeMonth(-1)}
             className={`p-1.5 rounded-lg flex-shrink-0 min-w-[44px] min-h-[44px] touch-target ${theme === 'dark'
-                ? 'text-gray-300 hover:bg-gray-700'
-                : 'text-gray-600 hover:bg-gray-100'
+              ? 'text-gray-300 hover:bg-gray-700'
+              : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
             <svg className="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -248,8 +248,8 @@ const HuangliComponent = () => {
           <button
             onClick={() => changeMonth(1)}
             className={`p-1.5 rounded-lg flex-shrink-0 min-w-[44px] min-h-[44px] touch-target ${theme === 'dark'
-                ? 'text-gray-300 hover:bg-gray-700'
-                : 'text-gray-600 hover:bg-gray-100'
+              ? 'text-gray-300 hover:bg-gray-700'
+              : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
             <svg className="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -259,11 +259,11 @@ const HuangliComponent = () => {
         </div>
 
         {/* 星期标题 - 优化版 */}
-        <div className="grid grid-cols-7 gap-0.5 mb-0 overflow-hidden">
+        <div className="grid grid-cols-7 gap-0.5 mb-0 overflow-hidden w-full max-w-full">
           {['日', '一', '二', '三', '四', '五', '六'].map((day, index) => (
             <div
               key={index}
-              className={`text-center text-xs font-medium py-0 whitespace-nowrap overflow-hidden text-ellipsis ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+              className={`flex items-center justify-center text-center text-xs font-medium py-0 whitespace-nowrap overflow-hidden text-ellipsis ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                 }`}
             >
               {day}
@@ -278,20 +278,20 @@ const HuangliComponent = () => {
               key={index}
               onClick={() => selectDate(day.date)}
               className={`relative p-0.5 rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full touch-target ${day.isToday
+                ? theme === 'dark'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-500 text-white'
+                : selectedDate.toDateString() === day.date.toDateString()
                   ? theme === 'dark'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-blue-500 text-white'
-                  : selectedDate.toDateString() === day.date.toDateString()
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-orange-500 text-white'
+                  : day.isCurrentMonth
                     ? theme === 'dark'
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-orange-500 text-white'
-                    : day.isCurrentMonth
-                      ? theme === 'dark'
-                        ? 'text-gray-200 hover:bg-gray-700'
-                        : 'text-gray-700 hover:bg-gray-100'
-                      : theme === 'dark'
-                        ? 'text-gray-500 hover:bg-gray-800'
-                        : 'text-gray-400 hover:bg-gray-50'
+                      ? 'text-gray-200 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-100'
+                    : theme === 'dark'
+                      ? 'text-gray-500 hover:bg-gray-800'
+                      : 'text-gray-400 hover:bg-gray-50'
                 }`}
               style={{ aspectRatio: '1' }}
             >
@@ -307,10 +307,10 @@ const HuangliComponent = () => {
                 <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0">
                   <div
                     className={`w-1.5 h-1.5 rounded-full ${day.huangli.auspiciousness.level === '大吉' ? 'bg-red-500'
-                        : day.huangli.auspiciousness.level === '吉' ? 'bg-green-500'
-                          : day.huangli.auspiciousness.level === '平' ? 'bg-gray-400'
-                            : day.huangli.auspiciousness.level === '凶' ? 'bg-yellow-500'
-                              : 'bg-purple-500'
+                      : day.huangli.auspiciousness.level === '吉' ? 'bg-green-500'
+                        : day.huangli.auspiciousness.level === '平' ? 'bg-gray-400'
+                          : day.huangli.auspiciousness.level === '凶' ? 'bg-yellow-500'
+                            : 'bg-purple-500'
                       }`}
                     title={`吉凶: ${day.huangli.auspiciousness.level}`}
                   ></div>
@@ -335,8 +335,8 @@ const HuangliComponent = () => {
                 <span
                   key={index}
                   className={`px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${theme === 'dark'
-                      ? 'bg-red-900/30 text-red-300 border border-red-800'
-                      : 'bg-red-100 text-red-700 border border-red-200'
+                    ? 'bg-red-900/30 text-red-300 border border-red-800'
+                    : 'bg-red-100 text-red-700 border border-red-200'
                     }`}
                 >
                   {item}
@@ -356,8 +356,8 @@ const HuangliComponent = () => {
                 <span
                   key={index}
                   className={`px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${theme === 'dark'
-                      ? 'bg-green-900/30 text-green-300 border border-green-800'
-                      : 'bg-green-100 text-green-700 border border-green-200'
+                    ? 'bg-green-900/30 text-green-300 border border-green-800'
+                    : 'bg-green-100 text-green-700 border border-green-200'
                     }`}
                 >
                   {item}
@@ -407,14 +407,14 @@ const HuangliComponent = () => {
                   }`}>吉凶等级:</span>
                 <div className="flex items-center min-w-0 flex-nowrap overflow-hidden">
                   <span className={`px-1 py-0.5 rounded-full text-xs font-bold flex-shrink-0 ${huangliData.auspiciousness.level === '大吉'
-                      ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
-                      : huangliData.auspiciousness.level === '吉'
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                        : huangliData.auspiciousness.level === '平'
-                          ? theme === 'dark' ? 'bg-gray-600 text-white' : 'bg-gray-400 text-white'
-                          : huangliData.auspiciousness.level === '凶'
-                            ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white'
-                            : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                    ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
+                    : huangliData.auspiciousness.level === '吉'
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                      : huangliData.auspiciousness.level === '平'
+                        ? theme === 'dark' ? 'bg-gray-600 text-white' : 'bg-gray-400 text-white'
+                        : huangliData.auspiciousness.level === '凶'
+                          ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white'
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
                     }`}>
                     {huangliData.auspiciousness.level}
                   </span>
@@ -429,10 +429,10 @@ const HuangliComponent = () => {
               <div className="mt-1 w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
                 <div
                   className={`h-1.5 rounded-full ${huangliData.auspiciousness.score >= 70 ? 'bg-gradient-to-r from-red-500 to-orange-500'
-                      : huangliData.auspiciousness.score >= 60 ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                        : huangliData.auspiciousness.score >= 40 ? 'bg-gradient-to-r from-gray-400 to-gray-500'
-                          : huangliData.auspiciousness.score >= 30 ? 'bg-gradient-to-r from-yellow-500 to-amber-500'
-                            : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                    : huangliData.auspiciousness.score >= 60 ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                      : huangliData.auspiciousness.score >= 40 ? 'bg-gradient-to-r from-gray-400 to-gray-500'
+                        : huangliData.auspiciousness.score >= 30 ? 'bg-gradient-to-r from-yellow-500 to-amber-500'
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500'
                     }`}
                   style={{ width: `${huangliData.auspiciousness.score}%` }}
                 ></div>
