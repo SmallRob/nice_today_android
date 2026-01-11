@@ -57,13 +57,6 @@ const ComponentLoadingFallback = ({ componentName = '组件' }) => (
 function UserConfigPage() {
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* 顶部标题区域 */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">👤 用户配置</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">管理您的个人信息和偏好设置</p>
-        </div>
-      </div>
 
       {/* 内容区域 */}
       <div className="flex-1 overflow-y-auto">

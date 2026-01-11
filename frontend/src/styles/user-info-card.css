@@ -2,7 +2,7 @@
 
 .user-info-card {
   width: 100%;
-  max-width: 100%;
+  /* max-width: 100%; 移除限制，允许自适应父容器 */
   background-color: #1b2838;
   border-radius: 4px;
   overflow: hidden;
@@ -217,9 +217,17 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 0.8; }
-  50% { opacity: 1; }
-  100% { opacity: 0.8; }
+  0% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.8;
+  }
 }
 
 /* 评分按钮 */
@@ -363,14 +371,20 @@
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* 大屏幕优化 */
 @media (min-width: 768px) {
   .user-info-card {
-    max-width: 600px;
+    /* max-width: 600px; Remove fixed width */
+    width: 100%;
   }
 
   .detail-row {
@@ -389,7 +403,8 @@
 
 @media (min-width: 1024px) {
   .user-info-card {
-    max-width: 700px;
+    /* max-width: 700px; Remove fixed width */
+    width: 100%;
   }
 }
 
@@ -406,4 +421,119 @@
   .detail-value {
     font-size: 13px;
   }
+}
+
+/* 八字命盘网格样式 */
+.bazi-grid-container {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+}
+
+.bazi-header-row {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.bazi-section-title {
+  font-size: 14px;
+  color: #8f98a0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.bazi-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  background-color: #66c0f4;
+  margin-right: 8px;
+  border-radius: 2px;
+}
+
+.bazi-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.bazi-pillar {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+}
+
+.bazi-pillar:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-color: rgba(102, 192, 244, 0.3);
+}
+
+.pillar-label {
+  font-size: 12px;
+  color: #8f98a0;
+  /* muted text */
+  margin-bottom: 6px;
+  opacity: 0.8;
+}
+
+.pillar-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 4px;
+  font-family: 'KaiTi', 'STKaiti', serif;
+  /* Use a serif font for Chinese characters if possible */
+  letter-spacing: 2px;
+}
+
+.pillar-sub {
+  font-size: 12px;
+  color: #66c0f4;
+  margin-bottom: 2px;
+}
+
+.pillar-nayin {
+  font-size: 10px;
+  color: #8f98a0;
+  transform: scale(0.9);
+  white-space: nowrap;
+}
+
+/* Light mode overrides for Bazi */
+.light .bazi-grid-container {
+  border-top-color: #e2e8f0;
+}
+
+.light .bazi-pillar {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.light .bazi-pillar:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.light .pillar-label,
+.light .pillar-nayin {
+  color: #64748b;
+}
+
+.light .pillar-text {
+  color: #1e293b;
+}
+
+.light .pillar-sub {
+  color: #3b82f6;
 }

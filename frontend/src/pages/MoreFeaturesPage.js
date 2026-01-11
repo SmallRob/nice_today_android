@@ -1,17 +1,19 @@
 import { useState, memo, useCallback, lazy, Suspense } from 'react';
 import '../index.css';
-import './MoreFeaturesPage.css';
+// import './MoreFeaturesPage.css';
+import './styles/private-styles.css'; // 私有样式，避免全局污染
 
 // 懒加载组件以优化性能
 const TarotGardenPage = lazy(() => import('./TarotGardenPage'));
 const UserConfigManager = lazy(() => import('../components/UserConfigManager'));
+const UserDataManager = lazy(() => import('../components/UserDataManager'));
 const SettingsPage = lazy(() => import('./SettingsPage'));
 
 // 简化的加载组件
 const TabContentLoader = memo(() => (
-  <div className="flex justify-center items-center py-12">
-    <div className="animate-spin rounded-full h-10 w-10 border-3 border-purple-300 border-t-purple-600 dark:border-purple-600 dark:border-t-purple-400"></div>
-    <span className="ml-3 text-purple-900 dark:text-purple-200 font-medium">正在加载...</span>
+  <div className="tab-content-loader">
+    <div className="spinner"></div>
+    <span className="spinner-label">正在加载...</span>
   </div>
 ));
 
@@ -24,43 +26,55 @@ const MoreFeaturesPage = memo(() => {
     setActiveTab(tabName);
   }, []);
 
+  // 通用的消息显示函数
+  const showMessage = useCallback((message, type = 'info') => {
+    // 创建并显示消息提示
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
+      type === 'error' ? 'bg-red-100 text-red-700 border border-red-300' :
+      type === 'success' ? 'bg-green-100 text-green-700 border border-green-300' :
+      'bg-blue-100 text-blue-700 border border-blue-300'
+    }`;
+    messageDiv.textContent = message;
+    
+    document.body.appendChild(messageDiv);
+    
+    // 3秒后自动移除消息
+    setTimeout(() => {
+      if (document.body.contains(messageDiv)) {
+        document.body.removeChild(messageDiv);
+      }
+    }, 3000);
+  }, []);
+
   return (
-    <div className="more-features-page-wrapper h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="more-features-page-wrapper">
       {/* 顶部标题区域 - 固定定位 */}
-      <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 dark:from-purple-700 dark:via-pink-700 dark:to-indigo-800 shadow-sm border-b border-purple-200 dark:border-purple-800">
-        <div className="container mx-auto px-4 py-3">
-          <h1 className="text-lg font-bold text-white">🌟 更多功能</h1>
-          <p className="text-xs text-white text-center opacity-90 mt-1">发现应用的所有功能</p>
+      <div className="more-features-header">
+        <div className="header-content">
+          <h1>🌟 更多功能</h1>
+          <p>发现应用的所有功能</p>
         </div>
       </div>
 
       {/* 标签导航 - 固定定位 */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="container mx-auto px-4 py-2">
-          <div className="flex bg-purple-100 dark:bg-purple-900 rounded-lg p-1 w-full max-w-lg mx-auto">
+      <div className="more-features-tabs">
+        <div className="tabs-container">
+          <div className="tabs-wrapper">
             <button
-              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-all ${activeTab === 'tarot'
-                ? 'bg-white dark:bg-gray-700 text-purple-800 dark:text-purple-200 shadow-sm font-semibold'
-                : 'text-purple-900 dark:text-purple-300 hover:text-purple-950 dark:hover:text-purple-100'
-                }`}
+              className={`more-features-tab-button ${activeTab === 'tarot' ? 'active' : ''}`}
               onClick={() => handleTabChange('tarot')}
             >
               🎴 塔罗花园
             </button>
             <button
-              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-all ${activeTab === 'user'
-                ? 'bg-white dark:bg-gray-700 text-purple-800 dark:text-purple-200 shadow-sm font-semibold'
-                : 'text-purple-900 dark:text-purple-300 hover:text-purple-950 dark:hover:text-purple-100'
-                }`}
+              className={`more-features-tab-button ${activeTab === 'user' ? 'active' : ''}`}
               onClick={() => handleTabChange('user')}
             >
-              👤 用户配置
+              👤 用户面板
             </button>
             <button
-              className={`flex-1 py-2 px-3 text-center font-medium text-sm rounded-md transition-all ${activeTab === 'settings'
-                ? 'bg-white dark:bg-gray-700 text-purple-800 dark:text-purple-200 shadow-sm font-semibold'
-                : 'text-purple-900 dark:text-purple-300 hover:text-purple-950 dark:hover:text-purple-100'
-                }`}
+              className={`more-features-tab-button ${activeTab === 'settings' ? 'active' : ''}`}
               onClick={() => handleTabChange('settings')}
             >
               ⚙️ 系统设置
@@ -70,27 +84,32 @@ const MoreFeaturesPage = memo(() => {
       </div>
 
       {/* 内容区域 */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="more-features-content">
         {activeTab === 'tarot' && (
-          <Suspense fallback={<TabContentLoader />}>
-            <TarotGardenPage />
-          </Suspense>
+          <div className="content-with-scroll">
+            <Suspense fallback={<TabContentLoader />}>
+              <TarotGardenPage />
+            </Suspense>
+          </div>
         )}
 
         {activeTab === 'user' && (
           <div className="h-full flex flex-col">
             {/* 用户配置标题 */}
-            <div className="bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-600 dark:from-blue-700 dark:via-cyan-700 dark:to-teal-800 shadow-sm border-b border-blue-200 dark:border-blue-800">
-              <div className="container mx-auto px-4 py-3">
-                <h1 className="text-lg font-bold text-white">👤 用户配置</h1>
-                <p className="text-xs text-white text-center opacity-90 mt-1">管理您的个人信息和偏好设置</p>
+            {/* <div className="user-config-header">
+              <div className="header-content">
+                <h1>👤 用户配置</h1>
+                <p>管理您的个人信息和偏好设置</p>
               </div>
-            </div>
+            </div> */}
             <Suspense fallback={<TabContentLoader />}>
-              <div className="flex-1 overflow-y-auto">
-                <div className="container mx-auto px-4 py-4 max-w-4xl">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div className="content-with-scroll">
+                <div className="content-container space-y-6">
+                  <div className="content-card">
                     <UserConfigManager />
+                  </div>
+                  <div className="content-card">
+                    <UserDataManager showMessage={showMessage} />
                   </div>
                 </div>
               </div>
@@ -99,9 +118,11 @@ const MoreFeaturesPage = memo(() => {
         )}
 
         {activeTab === 'settings' && (
-          <Suspense fallback={<TabContentLoader />}>
-            <SettingsPage />
-          </Suspense>
+          <div className="content-with-scroll">
+            <Suspense fallback={<TabContentLoader />}>
+              <SettingsPage />
+            </Suspense>
+          </div>
         )}
       </div>
     </div>

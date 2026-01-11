@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import Card from './PageLayout.js';
+import { Card } from './PageLayout.js';
 import { enhancedUserConfigManager } from '../utils/EnhancedUserConfigManager';
 import { baziCacheManager } from '../utils/BaziCacheManager';
 import mobileFileSystem, { checkAndRequestStoragePermission } from '../utils/mobileFileSystem';
@@ -8,7 +8,7 @@ import mobileFileSystem, { checkAndRequestStoragePermission } from '../utils/mob
  * 用户数据管理组件
  * 提供集中管理、备份、迁移用户数据的功能
  */
-const UserDataManager = ({ showMessage }) => {
+const UserDataManager = ({ showMessage, onAddNewConfig }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const isProcessingRef = useRef(false); // 并发控制
   const [backupStatus, setBackupStatus] = useState({
@@ -400,6 +400,32 @@ const UserDataManager = ({ showMessage }) => {
             <span className="font-semibold text-blue-700 dark:text-blue-400">📦 数据管理中心</span>
             在这里集中管理您的所有用户数据，包括配置、缓存和设置。支持备份到本地或云存储，方便数据迁移。
           </p>
+        </div>
+        
+        {/* 快速操作提示 */}
+        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+          <h4 className="font-medium text-yellow-700 dark:text-yellow-400 mb-2 flex items-center">
+            <span className="mr-2">💡</span>
+            快速操作提示
+          </h4>
+          <ul className="text-sm text-gray-700 dark:text-white space-y-1 list-disc list-inside">
+            <li>如需管理用户配置（添加、编辑、删除），请前往 "用户面板" -&gt; "配置管理"</li>
+            <li>如需创建新的用户配置，请前往 "用户面板" -&gt; 点击 "添加新配置" 按钮</li>
+            <li>您也可以直接使用下面的按钮快速添加新配置</li>
+          </ul>
+          
+          {/* 直接添加新配置按钮 */}
+          {onAddNewConfig && (
+            <div className="mt-4">
+              <button
+                onClick={onAddNewConfig}
+                className="w-full px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+              >
+                <span>➕</span>
+                <span>直接添加新配置</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 备份功能区 */}
