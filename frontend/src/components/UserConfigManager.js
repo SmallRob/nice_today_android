@@ -882,21 +882,21 @@ const ConfigForm = ({ config, index, isActive, onEdit, onDelete, onSetActive, on
       {isExpanded && (
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-            <div className="min-w-0 overflow-hidden">
-              <span className="text-gray-500 dark:text-white whitespace-nowrap">昵称：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium truncate">{safeConfig?.nickname || '-'}</span>
+            <div>
+              <span className="text-gray-500 dark:text-white">昵称：</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig?.nickname || '-'}</span>
             </div>
-            <div className="min-w-0 overflow-hidden">
-              <span className="text-gray-500 dark:text-white whitespace-nowrap">星座：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium truncate">{safeConfig.zodiac || '-'}</span>
+            <div>
+              <span className="text-gray-500 dark:text-white">星座：</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.zodiac || '-'}</span>
             </div>
-            <div className="min-w-0 overflow-hidden">
-              <span className="text-gray-500 dark:text-white whitespace-nowrap">生肖：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium truncate">{safeConfig.zodiacAnimal || '-'}</span>
+            <div>
+              <span className="text-gray-500 dark:text-white">生肖：</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.zodiacAnimal || '-'}</span>
             </div>
-            <div className="min-w-0 overflow-hidden">
-              <span className="text-gray-500 dark:text-white whitespace-nowrap">MBTI：</span>
-              <span className="ml-1 text-gray-900 dark:text-white font-medium truncate">{safeConfig.mbti || '-'}</span>
+            <div>
+              <span className="text-gray-500 dark:text-white">MBTI：</span>
+              <span className="ml-1 text-gray-900 dark:text-white font-medium">{safeConfig.mbti || '-'}</span>
             </div>
           </div>
 
