@@ -215,108 +215,110 @@ const DietHealthCard = () => {
   const nutrientAlerts = getNutrientDeficiencyAlert(userAge);
 
   return (
-    <div className="health-card diet-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-3 relative z-10">
-        <h3 className="text-lg font-bold text-white no-wrap-mobile">饮食健康</h3>
-        <div className="flex gap-1 flex-no-shrink-mobile">
-          <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full backdrop-blur-sm no-wrap-mobile">
+    <div className="health-card diet-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow duration-300 h-full flex flex-col min-h-[400px]">
+      <div className="flex flex-wrap justify-between items-center mb-3 relative z-10 gap-1">
+        <h3 className="text-lg font-bold text-white no-wrap-mobile flex-shrink-0">饮食健康</h3>
+        <div className="flex flex-wrap gap-1">
+          <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full backdrop-blur-sm">
             {getCurrentSeason() === 'spring' ? '🌸春季' : getCurrentSeason() === 'summer' ? '🌞夏季' : getCurrentSeason() === 'autumn' ? '🍂秋季' : '❄️冬季'}
           </span>
-          <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full backdrop-blur-sm no-wrap-mobile">
+          <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full backdrop-blur-sm">
             {userAge === 'young' ? '青年' : userAge === 'middle' ? '中年' : userAge === 'elderly' ? '老年' : '成年'}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-3 w-full">
+      <div className="grid grid-cols-2 gap-2 mb-3 w-full flex-shrink-0">
         {/* 主食和蛋白质并排显示 - 强制1行 */}
-        <div className="text-center p-2 bg-blue-50 rounded-lg border border-blue-100 relative min-w-0 overflow-hidden">
+        <div className="text-center p-2 bg-blue-50 rounded-lg border border-blue-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-blue"></div>
           <div className="relative z-10">
             <div className="text-lg font-bold text-blue-600 truncate">{ageBasedRecommendation.main.amount}</div>
-            <div className="text-xs font-medium text-blue-800 truncate whitespace-nowrap">{ageBasedRecommendation.main.name}</div>
-            <div className="text-xs text-blue-600 mt-1 whitespace-nowrap">主食</div>
+            <div className="text-xs font-medium text-blue-800 truncate">{ageBasedRecommendation.main.name}</div>
+            <div className="text-xs text-blue-600 mt-1">主食</div>
           </div>
         </div>
 
-        <div className="text-center p-2 bg-green-50 rounded-lg border border-green-100 relative min-w-0 overflow-hidden">
+        <div className="text-center p-2 bg-green-50 rounded-lg border border-green-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-green"></div>
           <div className="relative z-10">
             <div className="text-lg font-bold text-green-600 truncate">{ageBasedRecommendation.protein.amount}</div>
-            <div className="text-xs font-medium text-green-800 truncate whitespace-nowrap">{ageBasedRecommendation.protein.name}</div>
-            <div className="text-xs text-green-600 mt-1 whitespace-nowrap">蛋白质</div>
+            <div className="text-xs font-medium text-green-800 truncate">{ageBasedRecommendation.protein.name}</div>
+            <div className="text-xs text-green-600 mt-1">蛋白质</div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mb-3 w-full">
+      <div className="grid grid-cols-3 gap-2 mb-3 w-full flex-shrink-0">
         {/* 蔬菜、水果和坚果并排显示 - 强制1行3列 */}
-        <div className="text-center p-2 bg-red-50 rounded-lg border border-red-100 relative min-w-0 overflow-hidden">
+        <div className="text-center p-2 bg-red-50 rounded-lg border border-red-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-red"></div>
           <div className="relative z-10">
             <div className="text-lg font-bold text-red-600 truncate">{ageBasedRecommendation.vegetables.amount}</div>
-            <div className="text-xs font-medium text-red-800 truncate whitespace-nowrap">{ageBasedRecommendation.vegetables.name}</div>
-            <div className="text-xs text-red-600 mt-1 whitespace-nowrap">蔬菜</div>
+            <div className="text-xs font-medium text-red-800 truncate">{ageBasedRecommendation.vegetables.name}</div>
+            <div className="text-xs text-red-600 mt-1">蔬菜</div>
           </div>
         </div>
 
-        <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-100 relative min-w-0 overflow-hidden">
+        <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-orange"></div>
           <div className="relative z-10">
             <div className="text-lg font-bold text-yellow-600 truncate">{ageBasedRecommendation.fruits.amount}</div>
-            <div className="text-xs font-medium text-yellow-800 truncate whitespace-nowrap">{ageBasedRecommendation.fruits.name}</div>
-            <div className="text-xs text-yellow-600 mt-1 whitespace-nowrap">水果</div>
+            <div className="text-xs font-medium text-yellow-800 truncate">{ageBasedRecommendation.fruits.name}</div>
+            <div className="text-xs text-yellow-600 mt-1">水果</div>
           </div>
         </div>
 
-        <div className="text-center p-2 bg-purple-50 rounded-lg border border-purple-100 relative min-w-0 overflow-hidden">
+        <div className="text-center p-2 bg-purple-50 rounded-lg border border-purple-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-purple"></div>
           <div className="relative z-10">
             <div className="text-lg font-bold text-purple-600 truncate">{ageBasedRecommendation.nuts.amount}</div>
-            <div className="text-xs font-medium text-purple-800 truncate whitespace-nowrap">{ageBasedRecommendation.nuts.name}</div>
-            <div className="text-xs text-purple-600 mt-1 whitespace-nowrap">坚果</div>
+            <div className="text-xs font-medium text-purple-800 truncate">{ageBasedRecommendation.nuts.name}</div>
+            <div className="text-xs text-purple-600 mt-1">坚果</div>
           </div>
         </div>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-2 flex-shrink-0">
         <p className="text-xs text-white/80 italic truncate">{ageBasedRecommendation.tips}</p>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-2 flex-grow min-h-0 overflow-hidden">
         <h4 className="font-semibold text-white mb-1 text-xs">可替换同类食物:</h4>
         <div className="grid grid-cols-2 gap-1 text-xs">
-          <div className="truncate">
-            <span className="text-white truncate">{ageBasedRecommendation.main.alternatives.join(', ')}</span>
+          <div className="break-word-mobile">
+            <span className="text-white break-word-mobile">{ageBasedRecommendation.main.alternatives.join(', ')}</span>
           </div>
-          <div className="truncate">
-            <span className="text-white/80 truncate">{ageBasedRecommendation.protein.alternatives.join(', ')}</span>
+          <div className="break-word-mobile">
+            <span className="text-white/80 break-word-mobile">{ageBasedRecommendation.protein.alternatives.join(', ')}</span>
           </div>
-          <div className="truncate">
-            <span className="text-white/80 truncate">{ageBasedRecommendation.vegetables.alternatives.join(', ')}</span>
+          <div className="break-word-mobile">
+            <span className="text-white/80 break-word-mobile">{ageBasedRecommendation.vegetables.alternatives.join(', ')}</span>
           </div>
-          <div className="truncate">
-            <span className="text-white/80 truncate">{ageBasedRecommendation.fruits.alternatives.join(', ')}</span>
+          <div className="break-word-mobile">
+            <span className="text-white/80 break-word-mobile">{ageBasedRecommendation.fruits.alternatives.join(', ')}</span>
           </div>
         </div>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-2 flex-shrink-0">
         <h4 className="font-semibold text-white mb-1 text-xs">可能缺乏的营养素:</h4>
-        <div className="space-y-1 max-h-24 overflow-y-auto">
-          {nutrientAlerts.map((nutrient, index) => (
-            <div key={index} className="flex items-start p-1 bg-white/20 rounded border border-white/30 backdrop-blur-sm">
-              <span className="text-white/90 mr-1 text-xs">⚠️</span>
-              <div className="flex-1">
-                <div className="font-medium text-white text-xs truncate">{nutrient.name}</div>
-                <div className="text-xs text-white/80 truncate">{nutrient.suggestion}</div>
+        <div className="flex gap-1">
+          {nutrientAlerts.slice(0, 2).map((nutrient, index) => (
+            <div key={index} className="flex-1 p-1 bg-white/20 rounded border border-white/30 backdrop-blur-sm min-w-0">
+              <div className="flex items-start">
+                <span className="text-white/90 mr-1 text-xs">⚠️</span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-white text-xs truncate">{nutrient.name}</div>
+                </div>
               </div>
+              <div className="text-xs text-white/80 break-word-mobile ml-4">{nutrient.suggestion}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex justify-between items-center text-xs">
+      <div className="flex justify-between items-center text-xs flex-shrink-0">
         <div>
           <span className="font-semibold text-white">热量:</span>
           <span className="ml-1 text-white/80">1200-1500kcal</span>
@@ -327,7 +329,7 @@ const DietHealthCard = () => {
         </div>
       </div>
 
-      <div className="mt-auto pt-2">
+      <div className="mt-auto pt-2 flex-shrink-0">
         <Link
           to="/diet-health-detail"
           className="w-full bg-gradient-to-r from-white/30 to-white/40 text-white text-center py-1 px-2 rounded-lg hover:from-white/40 hover:to-white/50 transition-all duration-300 backdrop-blur-sm border border-white/30 text-xs"

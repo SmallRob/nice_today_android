@@ -5,6 +5,9 @@ import { REGION_DATA, DEFAULT_REGION } from '../data/ChinaLocationData';
 import { getShichen, getShichenSimple, calculateTrueSolarTime } from '../utils/astronomy';
 import { calculateLunarDate, generateLunarAndTrueSolarFields } from '../utils/LunarCalendarHelper';
 import { userConfigManager } from '../utils/userConfigManager';
+// 导入选择器图标样式
+import '../styles/zodiac-mbti-icons.css';  // 星座和MBTI图标
+import '../styles/zodiac-icons.css';        // 生肖图标
 
 // 性别选项 - 简化为男女
 const GENDER_OPTIONS = [
@@ -53,7 +56,7 @@ const SHICHEN_OPTIONS = [
 const getShichenByTime = (timeStr) => {
   const [hours, minutes] = timeStr.split(':').map(Number);
   const totalMinutes = hours * 60 + minutes;
-  
+
   // 时辰时间段映射（分钟）
   const shichenRanges = [
     { start: 23 * 60, end: 25 * 60, label: '子时' }, // 23:00-01:00
@@ -69,16 +72,16 @@ const getShichenByTime = (timeStr) => {
     { start: 19 * 60, end: 21 * 60, label: '戌时' }, // 19:00-21:00
     { start: 21 * 60, end: 23 * 60, label: '亥时' }  // 21:00-23:00
   ];
-  
+
   // 处理跨天情况
   const adjustedMinutes = totalMinutes >= 24 * 60 ? totalMinutes - 24 * 60 : totalMinutes;
-  
+
   for (const range of shichenRanges) {
     if (adjustedMinutes >= range.start && adjustedMinutes < range.end) {
       return range.label;
     }
   }
-  
+
   return '子时'; // 默认返回子时
 };
 
@@ -112,9 +115,8 @@ const CoordinateInput = ({ label, value, onChange, error, placeholder, min, max,
       min={min}
       max={max}
       step={step}
-      className={`w-full px-3 py-2.5 border rounded-md focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white text-sm touch-manipulation ${
-        error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-      }`}
+      className={`w-full px-3 py-2.5 border rounded-md focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white text-sm touch-manipulation ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+        }`}
       style={{ fontSize: '16px' }}
     />
     {error && (
@@ -313,7 +315,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         try {
           lunarInfo = calculateLunarDate(birthDateStr, birthTimeStr, safeLng);
           if (lunarInfo && typeof lunarInfo === 'object') {
-            lunarBirthDate = lunarInfo.fullText || 
+            lunarBirthDate = lunarInfo.fullText ||
               (lunarInfo.yearInChinese && lunarInfo.monthInChinese && lunarInfo.dayInChinese
                 ? `${lunarInfo.yearInChinese}年${lunarInfo.monthInChinese}${lunarInfo.dayInChinese}`
                 : birthDateStr);
@@ -372,7 +374,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       const provData = REGION_DATA.find(p => p.name === newLoc.province);
       const cityData = provData?.children.find(c => c.name === newLoc.city);
       const distData = cityData?.children.find(d => d.name === value);
-      
+
       if (distData) {
         newLoc.district = value;
         newLoc.lng = distData.lng ?? 0;
@@ -467,13 +469,13 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         if (timeMatch) {
           let hours = parseInt(timeMatch[1]);
           let minutes = parseInt(timeMatch[2]);
-          
+
           // 自动修正超出范围的时间
           if (hours < 0) hours = 0;
           if (hours > 23) hours = 23;
           if (minutes < 0) minutes = 0;
           if (minutes > 59) minutes = 59;
-          
+
           fixed.birthTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         } else {
           fixed.birthTime = '12:30';
@@ -485,7 +487,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         fixed.birthLocation = { ...DEFAULT_REGION };
       } else {
         const loc = fixed.birthLocation;
-        
+
         // 修复经度
         if (typeof loc.lng !== 'number' || isNaN(loc.lng)) {
           loc.lng = DEFAULT_REGION.lng;
@@ -494,7 +496,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         } else if (loc.lng > 180) {
           loc.lng = 180;
         }
-        
+
         // 修复纬度
         if (typeof loc.lat !== 'number' || isNaN(loc.lat)) {
           loc.lat = DEFAULT_REGION.lat;
@@ -503,7 +505,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         } else if (loc.lat > 90) {
           loc.lat = 90;
         }
-        
+
         // 确保省市区字段存在
         loc.province = loc.province || DEFAULT_REGION.province;
         loc.city = loc.city || DEFAULT_REGION.city;
@@ -561,7 +563,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
   // 格式化时间
   const formatTime = (timeStr) => {
     if (!timeStr) return '12:30';
-    
+
     // 如果是原生时间控件返回的值，通常是 HH:MM 格式
     const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})/);
     if (timeMatch) {
@@ -569,7 +571,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       const minutes = parseInt(timeMatch[2]);
       return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
-    
+
     return '12:30'; // 默认值
   };
 
@@ -578,7 +580,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     if (!location || typeof location !== 'object') {
       return { ...DEFAULT_REGION };
     }
-    
+
     return {
       province: location.province || DEFAULT_REGION.province,
       city: location.city || DEFAULT_REGION.city,
@@ -685,7 +687,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         }
         resolve(false);
       };
-      
+
       dialog.querySelector('#cancel-save').onclick = () => {
         // 确保元素存在后再移除
         if (dialog.parentNode) {
@@ -693,7 +695,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         }
         resolve(false);
       };
-      
+
       dialog.querySelector('#confirm-save').onclick = () => {
         // 确保元素存在后再移除
         if (dialog.parentNode) {
@@ -716,7 +718,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
     try {
       // 1. 自动纠错：修复常见的格式问题
       const autoFixedData = autoFixFormData(formData);
-      
+
       // 2. 简化验证：只检查核心必填项，提供警告而不是错误
       const { errors, warnings } = validateRequiredInputs(autoFixedData);
 
@@ -764,11 +766,11 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       const lat = finalLocation?.lat ?? DEFAULT_REGION.lat;
 
       // 确保 lng/lat 是有效数字（增加边界检查）
-      const safeLng = typeof lng === 'number' && !isNaN(lng) && lng >= -180 && lng <= 180 
-        ? lng 
+      const safeLng = typeof lng === 'number' && !isNaN(lng) && lng >= -180 && lng <= 180
+        ? lng
         : DEFAULT_REGION.lng;
-      const safeLat = typeof lat === 'number' && !isNaN(lat) && lat >= -90 && lat <= 90 
-        ? lat 
+      const safeLat = typeof lat === 'number' && !isNaN(lat) && lat >= -90 && lat <= 90
+        ? lat
         : DEFAULT_REGION.lat;
 
       let lunarFields;
@@ -802,8 +804,8 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
         realName: (processedData.realName || '').toString().trim(),
         birthDate: (processedData.birthDate || '').toString(),
         birthTime: (processedData.birthTime || '').toString(),
-        gender: processedData.gender && ['male', 'female', 'secret'].includes(processedData.gender) 
-          ? processedData.gender 
+        gender: processedData.gender && ['male', 'female', 'secret'].includes(processedData.gender)
+          ? processedData.gender
           : 'secret',
         zodiac: (processedData.zodiac || '').toString(),
         zodiacAnimal: (processedData.zodiacAnimal || '').toString(),
@@ -839,7 +841,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           fullText: (lunarFields.lunarInfo.fullText || '').toString(),
           shortText: (lunarFields.lunarInfo.shortText || '').toString()
         } : null,
-        
+
         // 复杂对象（确保为null或简单对象）
         nameScore: processedData.nameScore && typeof processedData.nameScore === 'object' ? {
           tian: typeof processedData.nameScore.tian === 'number' ? processedData.nameScore.tian : 0,
@@ -850,7 +852,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
           mainType: typeof processedData.nameScore.mainType === 'string' ? processedData.nameScore.mainType : '',
           totalScore: typeof processedData.nameScore.totalScore === 'number' ? processedData.nameScore.totalScore : 0
         } : null,
-        
+
         bazi: processedData.bazi && typeof processedData.bazi === 'object' ? {
           year: (processedData.bazi.year || '').toString(),
           month: (processedData.bazi.month || '').toString(),
@@ -902,26 +904,26 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
       if (result) {
         console.log('配置保存成功');
         showMessage('✅ 配置保存成功', 'success');
-        
+
         // 保存成功后自动计算八字和紫薇星宫（完全异步，不阻塞）
         setTimeout(async () => {
           try {
-            const savedConfig = index !== null && index !== undefined 
-              ? userConfigManager.configs[index] 
+            const savedConfig = index !== null && index !== undefined
+              ? userConfigManager.configs[index]
               : userConfigManager.getCurrentConfig();
-            
+
             if (!savedConfig) {
               console.warn('无法获取保存的配置，跳过命格计算');
               onClose();
               return;
             }
-            
+
             // 异步计算八字和紫薇星宫（完全异步，失败不影响任何流程）
             try {
               const fortuneData = await userConfigManager.calculateFortuneByIndex(
                 index !== null && index !== undefined ? index : userConfigManager.getActiveConfigIndex()
               );
-              
+
               if (fortuneData?.hasData) {
                 console.log('八字和紫薇星宫计算完成');
                 showMessage('✅ 八字和紫薇星宫计算完成', 'success');
@@ -930,7 +932,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               console.error('计算八字和紫薇星宫失败:', calcError);
               // 计算失败完全静默处理，不影响任何流程
             }
-            
+
             // 延迟关闭弹窗
             setTimeout(() => {
               onClose();
@@ -982,7 +984,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" style={{ flexWrap: 'nowrap' }} onClick={e => e.stopPropagation()}>
         {/* 保存错误提示（新增） */}
         {saveError && (
           <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -1167,11 +1169,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
-                      className={`w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white text-base touch-manipulation touch-optimized ${
-                        field.state.meta.error
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                      }`}
+                      className={`w-full px-3 py-3 border rounded-md focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-white text-base touch-manipulation touch-optimized ${field.state.meta.error
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                        }`}
                       style={{ fontSize: '16px' }}
                     />
                     {field.state.meta.error && (
@@ -1207,11 +1208,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                         <button
                           key={option.value}
                           type="button"
-                          className={`p-3 rounded-md text-center text-base font-medium touch-manipulation transition-all duration-200 ${
-                            field.state.value === option.value
-                              ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-md scale-105'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                          }`}
+                          className={`p-3 rounded-md text-center text-base font-medium touch-manipulation transition-all duration-200 ${field.state.value === option.value
+                            ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-md scale-105'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                            }`}
                           onClick={() => field.handleChange(option.value)}
                           style={{ fontSize: '16px' }}
                         >
@@ -1232,7 +1232,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                 出生时间 <span className="text-gray-400">(可选择精确时间或直接选择时辰)</span>
               </label>
-              
+
               {/* 时辰快速选择 */}
               <div className="mb-3">
                 <p className="text-xs text-gray-600 dark:text-white mb-2">🕐 快速选择时辰：</p>
@@ -1247,11 +1247,10 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                           form.setFieldValue('birthTime', shichen.time);
                         }
                       }}
-                      className={`px-2 py-1 text-xs rounded transition-colors ${
-                        calculatedInfo.timeShichen === shichen.label
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
-                      }`}
+                      className={`px-2 py-1 text-xs rounded transition-colors ${calculatedInfo.timeShichen === shichen.label
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                        }`}
                       title={shichen.description}
                     >
                       {shichen.label}
@@ -1296,7 +1295,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                         style={{ fontSize: '16px' }}
                       />
                     </div>
-                    
+
                     {/* 计算结果展示 */}
                     <div className="text-sm space-y-2">
                       <div className="bg-white dark:bg-gray-800 p-3 rounded border border-dashed border-gray-300 dark:border-gray-600">
@@ -1528,20 +1527,48 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
                     <div className="mb-2 text-xs text-gray-500 dark:text-white">
                       点击选择您的生肖
                     </div>
-                    <div className="selector-grid">
-                      {ZODIAC_ANIMAL_OPTIONS.map((animal) => (
-                        <div
-                          key={animal}
-                          className={`selector-item performance-optimized touch-manipulation touch-optimized ${field.state.value === animal ? 'selected' : ''}`}
-                          onClick={() => field.handleChange(animal)}
-                          style={{ fontSize: '16px' }}
-                        >
+                    <div className="grid grid-cols-4 gap-2">
+                      {ZODIAC_ANIMAL_OPTIONS.map((animal, idx) => {
+                        // 为每个生肖定义颜色
+                        const colors = [
+                          'from-blue-400 to-blue-600',      // 鼠
+                          'from-green-400 to-green-600',    // 牛
+                          'from-orange-400 to-orange-600',  // 虎
+                          'from-pink-400 to-pink-600',      // 兔
+                          'from-yellow-400 to-yellow-600',  // 龙
+                          'from-purple-400 to-purple-600',  // 蛇
+                          'from-red-400 to-red-600',        // 马
+                          'from-teal-400 to-teal-600',      // 羊
+                          'from-indigo-400 to-indigo-600',  // 猴
+                          'from-amber-400 to-amber-600',    // 鸡
+                          'from-cyan-400 to-cyan-600',      // 狗
+                          'from-rose-400 to-rose-600'       // 猪
+                        ];
+
+                        return (
                           <div
-                            className={`selector-icon zodiac-icon zodiac-icon-sm zodiac-icon-${animal} ${field.state.value === animal ? 'selected' : ''}`}
-                          ></div>
-                          <span className="selector-label">{animal}</span>
-                        </div>
-                      ))}
+                            key={animal}
+                            className={`flex flex-col items-center justify-center cursor-pointer p-2 rounded-lg transition-all ${field.state.value === animal
+                                ? 'bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 scale-105'
+                                : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                              }`}
+                            onClick={() => field.handleChange(animal)}
+                            style={{ minHeight: '4rem' }}
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colors[idx]} flex items-center justify-center text-white font-bold text-lg shadow-md mb-1`}
+                            >
+                              {animal}
+                            </div>
+                            <span className={`text-xs font-medium ${field.state.value === animal
+                                ? 'text-blue-600 dark:text-blue-400'
+                                : 'text-gray-600 dark:text-gray-300'
+                              }`}>
+                              {animal}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                     {formData.zodiacAnimal && (
                       <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">

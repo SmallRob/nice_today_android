@@ -11,6 +11,7 @@ import DressDietCard from '../components/health/DressDietCard.js';
 import DietHealthCard from '../components/health/DietHealthCard.js';
 import BloodTypeHealthCard from '../components/health/BloodTypeHealthCard.js';
 import SimpleEmoHealthCard from '../components/health/SimpleEmoHealthCard';
+import StepCounterCard from '../components/health/StepCounterCard';
 import mobileScreenOptimization from '../utils/mobileScreenOptimization.js';
 import '../styles/mobileScreenOptimization.css';
 import './HealthDashboardPage.css';
@@ -57,6 +58,13 @@ const HealthDashboardPage = () => {
       priority: 1, // 高优先级，首屏加载
       cacheKey: 'biorhythm-status',
       title: '每日生物节律状态卡片'
+    },
+    {
+      id: 'step-counter',
+      component: StepCounterCard,
+      priority: 1, // 高优先级，运动健康重要
+      cacheKey: 'step-counter',
+      title: '步数计数器卡片'
     },
     {
       id: 'dress-diet',

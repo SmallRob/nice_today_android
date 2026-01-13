@@ -195,7 +195,7 @@ export const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, on
   // 将五格评分转换为100分制综合评分
   const convertTo100PointScore = (analysisResult) => {
     if (!analysisResult) return 0;
-    
+
     // 计算每个格子的分数：吉=20分，半吉=15分，凶=5分
     const calculateGridScore = (gridValue) => {
       const meaning = getMeaning(gridValue);
@@ -203,16 +203,16 @@ export const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, on
       if (meaning.type === '半吉') return 15;
       return 5; // 凶
     };
-    
+
     const tianScore = calculateGridScore(analysisResult.tian);
     const renScore = calculateGridScore(analysisResult.ren); // 人格最重要，可考虑权重
     const diScore = calculateGridScore(analysisResult.di);
     const waiScore = calculateGridScore(analysisResult.wai);
     const zongScore = calculateGridScore(analysisResult.zong);
-    
+
     // 计算总分 (满分100分)
     const totalScore = tianScore + renScore + diScore + waiScore + zongScore;
-    
+
     return Math.round(totalScore);
   };
 
@@ -238,9 +238,9 @@ export const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" style={{ touchAction: 'none' }}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col" style={{ flexWrap: 'nowrap' }} onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
+        <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shrink-0 bg-white dark:bg-gray-800 z-10">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
             <span className="mr-2">🔮</span> 姓名五格剖象评分
           </h3>
@@ -252,7 +252,7 @@ export const NameScoringModal = ({ isOpen, onClose, name, isPersonal = false, on
         </div>
 
         {/* Content */}
-        <div className="p-4 flex-1">
+        <div className="p-4 flex-1 overflow-y-auto overflow-x-hidden min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {errorMessage && (
             <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-sm">
               {errorMessage}

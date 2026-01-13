@@ -5,3 +5,4 @@ export { default as AgileHealthCard } from './AgileHealthCard';
 export { default as SeasonalHealthCard } from './SeasonalHealthCard';
 export { default as BodyMetricsRhythmCard } from './BodyMetricsRhythmCard';
 export { default as DressDietCard } from './DressDietCard';
+export { default as StepCounterCard } from './StepCounterCard';

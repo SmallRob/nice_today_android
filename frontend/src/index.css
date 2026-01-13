@@ -1061,6 +1061,47 @@ body {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+/* 窄屏设备专用样式 */
+.break-word-mobile {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  hyphens: auto;
+}
+
+/* 营养素建议文本样式 */
+.diet-health-card .break-word-mobile {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  font-size: 0.6rem;
+}
+
+/* 9:16窄屏设备按钮居中和营养素展示 */
+@media screen and (device-aspect-ratio: 9/16) {
+  .diet-health-card .mt-auto.pt-2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.6rem;
+  }
+  
+  .diet-health-card a[href="/diet-health-detail"] {
+    width: auto;
+    min-width: 70%;
+    max-width: 90%;
+  }
+  
+  /* 窄屏上营养素改为单列显示 */
+  .diet-health-card .flex.gap-1 {
+    flex-direction: column;
+  }
+  
+  .diet-health-card .flex-1 {
+    flex: none;
+    width: 100%;
+  }
+}
+
 .diet-health-card h3,
 .diet-health-card .text-blue-800,
 .diet-health-card .text-green-800,
@@ -1112,5 +1153,90 @@ body {
 @media (max-width: 768px) {
   .diet-health-card {
     margin-bottom: 1.5rem;
+  }
+}
+
+/* 饮食健康卡片响应式优化 */
+@media (max-width: 640px) {
+  .diet-health-card .grid.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .diet-health-card .grid.grid-cols-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .diet-health-card .text-lg {
+    font-size: 0.9rem;
+  }
+  
+  .diet-health-card .text-xs {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .diet-health-card .grid.grid-cols-2,
+  .diet-health-card .grid.grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .diet-health-card .flex.flex-wrap {
+    flex-direction: column;
+  }
+  
+  .diet-health-card .gap-2 {
+    gap: 0.5rem;
+  }
+  
+  .diet-health-card .p-2 {
+    padding: 0.25rem;
+  }
+}
+
+/* 针对9:16窄屏设备的优化 */
+@media screen and (device-aspect-ratio: 9/16) {
+  .break-word-mobile {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+  
+  .diet-health-card .grid.grid-cols-2,
+  .diet-health-card .grid.grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .diet-health-card .text-xs {
+    font-size: 0.7rem;
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 360px) {
+  .diet-health-card {
+    padding: 0.75rem;
+  }
+  
+  .diet-health-card .text-lg {
+    font-size: 0.8rem;
+  }
+  
+  .diet-health-card .text-xs {
+    font-size: 0.7rem;
+  }
+  
+  .diet-health-card .min-h-\[400px\] {
+    min-height: 350px;
+  }
+  
+  /* 小屏幕上营养素改为单列显示 */
+  .diet-health-card .flex.gap-1 {
+    flex-direction: column;
+  }
+  
+  .diet-health-card .flex-1 {
+    flex: none;
+    width: 100%;
   }
 }

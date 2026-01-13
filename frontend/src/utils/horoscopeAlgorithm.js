@@ -209,7 +209,7 @@ export const HOROSCOPE_DATA_ENHANCED = [
  */
 export const getZodiacByNumber = (number) => {
   const zodiacs = [
-    '白羊座', '金牛座', '双子座', '巨蟹座', 
+    '白羊座', '金牛座', '双子座', '巨蟹座',
     '狮子座', '处女座', '天秤座', '天蝎座',
     '射手座', '摩羯座', '水瓶座', '双鱼座'
   ];
@@ -232,14 +232,14 @@ export const getZodiacNumber = (zodiacParam) => {
       return num;
     }
   }
-  
+
   // 如果是字符串，转换为数字
   const zodiacs = [
-    '白羊座', '金牛座', '双子座', '巨蟹座', 
+    '白羊座', '金牛座', '双子座', '巨蟹座',
     '狮子座', '处女座', '天秤座', '天蝎座',
     '射手座', '摩羯座', '水瓶座', '双鱼座'
   ];
-  
+
   const zodiacStr = String(zodiacParam);
   const index = zodiacs.findIndex(zodiac => zodiac === zodiacStr);
   return index >= 0 ? index + 1 : 2; // 默认金牛座对应2
@@ -252,21 +252,21 @@ export const getZodiacNumber = (zodiacParam) => {
 export const normalizeZodiacParam = (zodiacParam) => {
   // 如果参数已经是有效的星座名称，直接返回
   const zodiacs = [
-    '白羊座', '金牛座', '双子座', '巨蟹座', 
+    '白羊座', '金牛座', '双子座', '巨蟹座',
     '狮子座', '处女座', '天秤座', '天蝎座',
     '射手座', '摩羯座', '水瓶座', '双鱼座'
   ];
-  
+
   if (zodiacs.includes(zodiacParam)) {
     return zodiacParam;
   }
-  
+
   // 尝试解析为数字
   const number = parseInt(zodiacParam, 10);
   if (!isNaN(number) && number >= 1 && number <= 12) {
     return getZodiacByNumber(number);
   }
-  
+
   // 默认值
   return '金牛座';
 };
@@ -632,7 +632,7 @@ export const calculateDailyHoroscopeScore = (horoscopeName, date = new Date()) =
     const influence = planetaryInfluence[planet];
     const elementKey = getElementKey(horoscope.element);
     const weight = PLANETARY_INFLUENCES[planet]?.[elementKey] || 5;
-    
+
     // 优化：增加正向偏移，减少负向影响
     if (influence > 0.5) {
       baseScore += (influence - 0.5) * weight * 1.2; // 正向影响增强20%
@@ -656,7 +656,7 @@ export const calculateDailyHoroscopeScore = (horoscopeName, date = new Date()) =
     'air': 7,    // 风象星座：灵活、聪明
     'water': 6   // 水象星座：感性、直觉
   }[getElementKey(horoscope.element)] || 0;
-  
+
   baseScore += elementBonus;
 
   // 确保分数在合理范围内且更积极
@@ -862,6 +862,8 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
     luckyColorNames: [selectedColor?.name || '正红色'],
     luckyNumbers: Array.isArray(horoscope.luckyNumber) ? horoscope.luckyNumber : [horoscope.luckyNumber || 7],
     compatibleSigns: Array.isArray(horoscope.compatible) ? horoscope.compatible : [horoscope.compatible || '未知星座'],
+    nobleSigns: Array.isArray(horoscope.compatible) ? [horoscope.compatible[Math.floor(dailyRandom(horoscopeName, 'noble') * horoscope.compatible.length)]] : ['狮子座'],
+    cautionSigns: Array.isArray(horoscope.incompatible) ? [horoscope.incompatible[Math.floor(dailyRandom(horoscopeName, 'caution') * horoscope.incompatible.length)]] : ['天蝎座'],
     todayMoonSign: String(getRandomMoonSign(horoscopeName) || '白羊座'),
     soulQuestion: soulQuestion,
     luckyItem: String(luckyItem?.name || '幸运物品'),
@@ -1159,23 +1161,23 @@ export const calculateMoonSign = (date = new Date()) => {
   const moonCycleDays = 27.3;
   const signsPerCycle = 12;
   const daysPerSign = moonCycleDays / signsPerCycle;
-  
+
   // 参考点：假设某个日期月亮在白羊座开始
   const referenceDate = new Date('2024-01-01'); // 月亮在白羊座开始
-  
+
   // 计算天数差
   const timeDiff = date.getTime() - referenceDate.getTime();
   const daysDiff = Math.abs(timeDiff / (1000 * 60 * 60 * 24));
-  
+
   // 计算当前月亮在周期中的位置
   const cyclePosition = daysDiff % moonCycleDays;
   const currentSignIndex = Math.floor(cyclePosition / daysPerSign);
-  
+
   const moonSigns = [
     '白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座',
     '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'
   ];
-  
+
   return moonSigns[currentSignIndex % moonSigns.length];
 };
 
@@ -1197,7 +1199,7 @@ export const getMoonSignInfluence = (moonSign) => {
     '水瓶座': '今日月亮在水瓶座，激发创新和独立思想。适合科技探索，社会活动。',
     '双鱼座': '今日月亮在双鱼座，强化直觉和同情心。适合艺术创作，冥想放松。'
   };
-  
+
   return influences[moonSign] || '月亮星座带来神秘的能量影响。';
 };
 
@@ -1279,15 +1281,15 @@ const generateOverallDescription = (score, horoscopeName) => {
  */
 export const getZodiacSign = (birthDate) => {
   if (!birthDate) return '未知';
-  
+
   // 确保输入是Date对象
   const date = birthDate instanceof Date ? birthDate : new Date(birthDate);
-  
+
   if (isNaN(date.getTime())) return '未知';
-  
+
   const month = date.getMonth() + 1;
   const day = date.getDate();
-  
+
   if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return '白羊座';
   if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return '金牛座';
   if ((month === 5 && day >= 21) || (month === 6 && day <= 21)) return '双子座';
@@ -1300,7 +1302,7 @@ export const getZodiacSign = (birthDate) => {
   if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return '摩羯座';
   if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return '水瓶座';
   if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return '双鱼座';
-  
+
   return '未知';
 };
 

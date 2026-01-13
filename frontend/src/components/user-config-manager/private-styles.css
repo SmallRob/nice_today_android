@@ -3,8 +3,11 @@
 .user-config-manager-wrapper {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   padding: 0.5rem;
   box-sizing: border-box;
+  margin: 0 auto;
+  overflow-x: hidden;
 }
 
 .user-config-manager-wrapper .space-y-4 {
@@ -13,6 +16,10 @@
 
 /* 信息卡片样式优化 */
 .user-info-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border: 1px solid #bae6fd;
   border-radius: 0.75rem;
@@ -92,15 +99,45 @@
   flex-shrink: 0;
 }
 
-.user-info-card .score-badge.score-excellent { background-color: #dcfce7; color: #166534; }
-.user-info-card .score-badge.score-good { background-color: #dbeafe; color: #1e40af; }
-.user-info-card .score-badge.score-fair { background-color: #fef3c7; color: #92400e; }
-.user-info-card .score-badge.score-poor { background-color: #fee2e2; color: #991b1b; }
+.user-info-card .score-badge.score-excellent {
+  background-color: #dcfce7;
+  color: #166534;
+}
 
-.dark .user-info-card .score-badge.score-excellent { background-color: #166534; color: #dcfce7; }
-.dark .user-info-card .score-badge.score-good { background-color: #1e40af; color: #dbeafe; }
-.dark .user-info-card .score-badge.score-fair { background-color: #92400e; color: #fef3c7; }
-.dark .user-info-card .score-badge.score-poor { background-color: #991b1b; color: #fee2e2; }
+.user-info-card .score-badge.score-good {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.user-info-card .score-badge.score-fair {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.user-info-card .score-badge.score-poor {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.dark .user-info-card .score-badge.score-excellent {
+  background-color: #166534;
+  color: #dcfce7;
+}
+
+.dark .user-info-card .score-badge.score-good {
+  background-color: #1e40af;
+  color: #dbeafe;
+}
+
+.dark .user-info-card .score-badge.score-fair {
+  background-color: #92400e;
+  color: #fef3c7;
+}
+
+.dark .user-info-card .score-badge.score-poor {
+  background-color: #991b1b;
+  color: #fee2e2;
+}
 
 .user-info-card .user-tag {
   font-size: 0.875rem;
@@ -252,6 +289,10 @@
 
 /* 配置表单优化 */
 .config-form-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   overflow: hidden;
@@ -402,6 +443,10 @@
 
 /* 卡片样式优化 */
 .user-config-manager-wrapper .card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;

@@ -5,6 +5,7 @@ import './styles/private-styles.css'; // 私有样式，避免全局污染
 
 // 懒加载组件以优化性能
 const TarotGardenPage = lazy(() => import('./TarotGardenPage'));
+const RainbowMoodPage = lazy(() => import('./RainbowMoodPage'));
 const UserConfigManager = lazy(() => import('../components/UserConfigManager'));
 const UserDataManager = lazy(() => import('../components/UserDataManager'));
 const SettingsPage = lazy(() => import('./SettingsPage'));
@@ -19,7 +20,7 @@ const TabContentLoader = memo(() => (
 
 // 主组件
 const MoreFeaturesPage = memo(() => {
-  const [activeTab, setActiveTab] = useState('tarot');
+  const [activeTab, setActiveTab] = useState('mood'); // 默认进入彩虹心情
 
   // Tab切换处理
   const handleTabChange = useCallback((tabName) => {
@@ -30,15 +31,14 @@ const MoreFeaturesPage = memo(() => {
   const showMessage = useCallback((message, type = 'info') => {
     // 创建并显示消息提示
     const messageDiv = document.createElement('div');
-    messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
-      type === 'error' ? 'bg-red-100 text-red-700 border border-red-300' :
+    messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${type === 'error' ? 'bg-red-100 text-red-700 border border-red-300' :
       type === 'success' ? 'bg-green-100 text-green-700 border border-green-300' :
-      'bg-blue-100 text-blue-700 border border-blue-300'
-    }`;
+        'bg-blue-100 text-blue-700 border border-blue-300'
+      }`;
     messageDiv.textContent = message;
-    
+
     document.body.appendChild(messageDiv);
-    
+
     // 3秒后自动移除消息
     setTimeout(() => {
       if (document.body.contains(messageDiv)) {
@@ -61,6 +61,12 @@ const MoreFeaturesPage = memo(() => {
       <div className="more-features-tabs">
         <div className="tabs-container">
           <div className="tabs-wrapper">
+            <button
+              className={`more-features-tab-button ${activeTab === 'mood' ? 'active' : ''}`}
+              onClick={() => handleTabChange('mood')}
+            >
+              🌈 彩虹心情
+            </button>
             <button
               className={`more-features-tab-button ${activeTab === 'tarot' ? 'active' : ''}`}
               onClick={() => handleTabChange('tarot')}
@@ -85,6 +91,14 @@ const MoreFeaturesPage = memo(() => {
 
       {/* 内容区域 */}
       <div className="more-features-content">
+        {activeTab === 'mood' && (
+          <div className="content-with-scroll">
+            <Suspense fallback={<TabContentLoader />}>
+              <RainbowMoodPage />
+            </Suspense>
+          </div>
+        )}
+
         {activeTab === 'tarot' && (
           <div className="content-with-scroll">
             <Suspense fallback={<TabContentLoader />}>

@@ -219,15 +219,20 @@ const UserConfigManager = () => {
     }, displayTime);
   }, []);
 
+  // 当编辑模态框打开且是新建配置时，显示提示信息
+  useEffect(() => {
+    if (isEditModalOpen && editingConfigIndex < 0) { // 新建配置
+      setTimeout(() => {
+        showMessage('请填写配置信息', 'info');
+      }, 100);
+    }
+  }, [isEditModalOpen, editingConfigIndex, showMessage]);
+
   // 处理添加新配置
   const handleAddConfig = useCallback(() => {
     setEditingConfigIndex(-1); // 使用特殊标记 -1 表示新建
     setIsEditModalOpen(true);
-    // 延迟一点显示消息，确保模态框已经渲染
-    setTimeout(() => {
-      showMessage('请填写配置信息', 'info');
-    }, 100);
-  }, [showMessage]);
+  }, []); // 移除showMessage依赖，避免不必要的重渲染
 
   // 处理删除配置
   const handleDeleteConfig = useCallback(async (index) => {
@@ -612,7 +617,7 @@ const UserConfigManager = () => {
             setIsEditModalOpen(false);
             setEditingConfigIndex(null);
           }}
-          config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : null}
+          config={editingConfigIndex >= 0 ? configs[editingConfigIndex] : {}}
           index={editingConfigIndex}
           isNew={editingConfigIndex < 0}
           onSave={async (index, configData) => {

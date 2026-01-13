@@ -2061,7 +2061,7 @@ const UserConfigManagerComponent = () => {
       <Card title="用户配置" className="mb-6">
         <div className="space-y-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            在这里管理您的个人信息配置，包括昵称、出生日期、星座和生肖。
+            管理您的个人信息在这里配置，包括昵称、出生日期、星座和生肖。
             您可以创建多个配置，并随时切换使用哪个配置。
           </p>
 
