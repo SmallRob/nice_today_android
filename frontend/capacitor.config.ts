@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.biorhythm.app',
+  appId: 'com.nicetoday.app',
   appName: '生物节律助手',
   webDir: 'build',
   bundledWebRuntime: false,
@@ -15,22 +15,14 @@ const config: CapacitorConfig = {
     captureInput: true,
     webContentsDebuggingEnabled: false,
     backgroundColor: '#ffffffff',
-    logLevel: 'ERROR',
-    minWebViewVersion: 65,
-    allowFileAccess: true,
-    hardwareAcceleration: true,
     useLegacyBridge: false,
     overrideUserAgent: 'NiceTodayApp/1.0',
-    appendUserAgent: 'NiceTodayApp/1.0',
-    allowFileAccessFromFileURLs: true,
-    allowUniversalAccessFromFileURLs: false
+    appendUserAgent: 'NiceTodayApp/1.0'
   },
   ios: {
     contentInset: 'automatic',
     backgroundColor: '#ffffff',
-    handleOpenURL: true,
     scrollEnabled: true,
-    allowFileAccess: true,
     webContentsDebuggingEnabled: false
   },
   plugins: {
