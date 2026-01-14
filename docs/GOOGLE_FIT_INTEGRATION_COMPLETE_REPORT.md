@@ -19,23 +19,33 @@
   - 步数数据读取
 - 修复了所有方法重写错误
 
-### 3. JavaScript 层集成
+### 3. Google Fit 插件注册
+- 更新了 capacitor.plugins.json 以正确注册 GoogleFitPlugin
+- 确保 Capacitor 能够识别并加载插件
+
+### 4. JavaScript 层集成
 - 更新了 stepCounterService.js 以使用 Capacitor 插件接口
 - 实现了跨平台兼容性（原生 Android 使用真实 API，Web 环境使用模拟实现）
 - 修复了 import 语句避免重复声明错误
 
-### 4. 配置文件更新
+### 5. 配置文件更新
 - 更新了 capacitor.config.ts 中的应用 ID
 - 修正了不兼容的配置选项
 - 添加了 Google Fit API 相关权限到 AndroidManifest.xml
 
-### 5. 依赖管理
+### 6. 依赖管理
 - 添加了 Google Fit API 依赖到 build.gradle
 - 配置了 Google Fit 客户端 ID（来自 client_secret 文件）
 
-### 6. 应用稳定性修复
+### 7. 应用稳定性修复
 - 修复了 MainActivity.java 中导致应用启动闪退的问题
 - 简化了 MainActivity 的实现以符合 Capacitor 框架要求
+
+### 8. 步数服务优化
+- 优化了 stepCounterService 以提供模拟步数，避免插件失败导致页面重载
+- 实现了设备传感器集成以动态模拟步数
+- 添加了本地存储以保持步数连续性
+- 实现了更智能的错误处理机制
 
 ## 构建结果
 
@@ -54,6 +64,12 @@
 ### Web 兼容性
 - 保留了 Web 环境的模拟实现
 - 接口保持一致，便于无缝切换
+
+### 智能模拟系统
+- 当插件不可用时，提供智能模拟步数
+- 结合设备传感器数据动态调整步数
+- 使用本地存储保持步数连续性
+- 避免因插件问题导致的页面重载
 
 ## 使用说明
 
@@ -74,6 +90,7 @@
 2. 确保已授予健康数据访问权限
 3. 验证步数数据的准确性和实时性
 4. 测试权限请求和错误处理流程
+5. 验证在插件不可用时的模拟功能
 
 ## 后续步骤
 
@@ -87,3 +104,4 @@
 - 该功能仅在 Android 设备上可用，需要 Google Play Services
 - 用户需要手动授权 Google Fit 访问权限
 - 在中国市场，可能需要考虑使用厂商健康服务替代方案
+- 当插件不可用时，系统会自动使用智能模拟功能

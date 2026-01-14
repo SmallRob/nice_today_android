@@ -73,7 +73,7 @@ const ShaoyongYixue = () => {
       icon: '☰',
       color: 'bg-gradient-to-r from-yellow-500 to-orange-500',
       link: '/qimen',
-      isImplemented: false
+      isImplemented: true
     },
     {
       id: 'liuren',

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import TiebanshenshuPageContent from './TiebanshenshuPage';
 import PlumBlossomPageContent from './PlumBlossomDivination';
+import QimenDunjiaPageContent from './QimenDunjiaPage';
 
 /**
  * 简单易学页面
@@ -119,12 +120,22 @@ const SimpleIChingPage = () => {
             <span className="text-lg md:text-xl mr-2">🌸</span>
             <span className="text-sm md:text-base">梅花易数</span>
           </button>
+          <button
+            onClick={() => setActiveTab('qimen')}
+            className={`flex-1 py-3 md:py-4 text-center transition-all duration-300 font-medium ${activeTab === 'qimen'
+              ? (theme === 'dark' ? 'bg-gradient-to-r from-red-600 to-orange-600' : 'bg-gradient-to-r from-red-500 to-orange-500') + ' text-white shadow-lg'
+              : (theme === 'dark' ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50')
+            }`}
+          >
+            <span className="text-lg md:text-xl mr-2">🎯</span>
+            <span className="text-sm md:text-base">奇门遁甲</span>
+          </button>
         </div>
       </div>
 
       {/* 内容区域 */}
       <div className="max-w-3xl mx-auto px-4 py-6 md:py-8">
-        {activeTab === 'tiebanshenshu' ? <TiebanshenshuPageContent /> : <PlumBlossomPageContent />}
+        {activeTab === 'tiebanshenshu' ? <TiebanshenshuPageContent /> : activeTab === 'meihua' ? <PlumBlossomPageContent /> : <QimenDunjiaPageContent />}
       </div>
 
       {/* 底部说明 */}

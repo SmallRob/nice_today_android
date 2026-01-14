@@ -7,6 +7,18 @@
   box-sizing: border-box;
   background-color: var(--color-background);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* 页面进入时的过渡效果 */
+.health-dashboard-page.fade-in {
+  opacity: 1;
+}
+
+.health-dashboard-page.loading {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .health-dashboard-header {

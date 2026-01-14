@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserConfig } from '../contexts/UserConfigContext.js';
+import { useTheme } from '../context/ThemeContext';
 import LazyHealthCard from '../components/health/LazyHealthCard.js';
 import StageHealthCard from '../components/health/StageHealthCard.js';
 import BiorhythmStatusCard from '../components/health/BiorhythmStatusCard.js';
@@ -12,6 +13,7 @@ import DietHealthCard from '../components/health/DietHealthCard.js';
 import BloodTypeHealthCard from '../components/health/BloodTypeHealthCard.js';
 import SimpleEmoHealthCard from '../components/health/SimpleEmoHealthCard';
 import StepCounterCard from '../components/health/StepCounterCard';
+import ThemeAwareLoading from '../components/ThemeAwareLoading.js';
 import mobileScreenOptimization from '../utils/mobileScreenOptimization.js';
 import '../styles/mobileScreenOptimization.css';
 import './HealthDashboardPage.css';
@@ -20,6 +22,8 @@ import './HealthDashboardPage.css';
 const HealthDashboardPage = () => {
   const navigate = useNavigate();
   const { userConfig } = useUserConfig();
+  const { theme } = useTheme();
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   // 移动屏幕优化初始化
   useEffect(() => {
@@ -37,9 +41,15 @@ const HealthDashboardPage = () => {
       }
     }
     
+    // 模拟初始加载完成（实际应用中可根据实际加载状态判断）
+    const loadingTimer = setTimeout(() => {
+      setIsInitialLoad(false);
+    }, 300); // 300ms的最小加载时间，确保加载动画平滑
+    
     // 清理函数
     return () => {
       mobileScreenOptimization.removeMobileOptimizationListener();
+      clearTimeout(loadingTimer);
     };
   }, []);
   
@@ -116,6 +126,11 @@ const HealthDashboardPage = () => {
       title: '情绪与健康'
     }
   ], []);
+  
+  // 如果还在初始加载阶段，显示主题感知的加载界面
+  if (isInitialLoad) {
+    return <ThemeAwareLoading message="正在加载健康数据..." />;
+  }
   
   return (
     <div className="health-dashboard-page">

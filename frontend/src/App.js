@@ -240,6 +240,7 @@ const StageHealthPage = lazyLoadWithErrorHandling(() => import('./pages/StageHea
 const AgileHealthPage = lazyLoadWithErrorHandling(() => import('./pages/AgileHealthPage'));
 const SimpleIChingPage = lazyLoadWithErrorHandling(() => import('./pages/SimpleIChingPage'));
 const ShaoyongYixue = lazyLoadWithErrorHandling(() => import('./components/shaoyong/ShaoyongYixue'));
+const QimenDunjiaPage = lazyLoadWithErrorHandling(() => import('./pages/QimenDunjiaPage'));
 const FishingGamePage = lazyLoadWithErrorHandling(() => import('./pages/FishingGamePage'));
 const FengShuiCompassPage = lazyLoadWithErrorHandling(() => import('./pages/FengShuiCompassPage'));
 const LiuyaoPage = lazyLoadWithErrorHandling(() => import('./pages/SixYaoDivination'));
@@ -380,6 +381,7 @@ const AppLayout = () => {
             <Route path="/fishing-game" element={<FishingGamePage />} />
             <Route path="/dress" element={<DressGuidePage />} />
             <Route path="/shaoyong-yixue" element={<ShaoyongYixue />} />
+            <Route path="/qimen" element={<QimenDunjiaPage />} />
             <Route path="/feng-shui-compass" element={<FengShuiCompassPage />} />
             <Route path="/liuyao" element={<LiuyaoPage />} />
             <Route path="/tiebanshenshu" element={<TiebanshenshuPage />} />
