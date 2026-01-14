@@ -5,6 +5,7 @@ import { DEFAULT_REGION } from '../data/ChinaLocationData';
 import { getShichenSimple, normalizeShichen } from '../utils/astronomy';
 import ConfigEditModal from './ConfigEditModal';
 import NameScoringModal from './NameScoringModal';
+import { getMeaning } from '../utils/nameScoring';
 import './user-config-manager/private-styles.css'; // 私有样式，适配9:16屏幕
 
 // 性别选项
@@ -36,13 +37,13 @@ const ConfigForm = ({ config, index, isActive, isExpanded, onToggleExpand, onEdi
                 <span>系统默认</span>
               </span>
             )}
-            <h3 className="config-form-title text-sm max-w-[4rem]">
+            <h3 className="config-form-title text-sm max-w-[6rem] break-words">
               {config?.nickname || `配置 ${index + 1}`}
             </h3>
             {config.realName && (
               <div className="flex items-center ml-1 space-x-1 overflow-hidden">
                 <span className="text-gray-500 text-xs flex-shrink-0">|</span>
-                <span className="text-xs font-medium text-gray-700 dark:text-white truncate max-w-[3em]">{config.realName}</span>
+                <span className="text-xs font-medium text-gray-700 dark:text-white truncate max-w-[3em] break-words">{config.realName}</span>
                 {config?.nameScore && (
                   <span className={`px-1.5 py-0.5 text-[10px] rounded font-bold whitespace-nowrap flex-shrink-0 ${
                     config.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
@@ -82,41 +83,49 @@ const ConfigForm = ({ config, index, isActive, isExpanded, onToggleExpand, onEdi
       {isExpanded && (
         <div className="config-form-content">
           <div className="config-form-grid">
-            <div className="config-form-detail">
-              <span className="config-form-label text-gray-500 dark:text-white">昵称：</span>
-              <span className="config-form-value text-gray-900 dark:text-white font-medium">{config?.nickname || '-'}</span>
+            <div className="config-form-detail flex flex-col sm:flex-row">
+              <span className="config-form-label text-gray-500 dark:text-white flex-shrink-0 w-[45%] sm:w-auto">昵称：</span>
+              <span className="config-form-value text-gray-900 dark:text-white font-medium break-words sm:break-normal">{config?.nickname || '-'}</span>
             </div>
-            <div className="config-form-detail">
-              <span className="config-form-label text-gray-500 dark:text-white">星座：</span>
-              <span className="config-form-value text-gray-900 dark:text-white font-medium">{config.zodiac || '-'}</span>
-            </div>
-            <div className="config-form-detail">
-              <span className="config-form-label text-gray-500 dark:text-white">生肖：</span>
-              <span className="config-form-value text-gray-900 dark:text-white font-medium">{config.zodiacAnimal || '-'}</span>
-            </div>
-            <div className="config-form-detail">
-              <span className="config-form-label text-gray-500 dark:text-white">MBTI：</span>
-              <span className="config-form-value text-gray-900 dark:text-white font-medium">{config.mbti || '-'}</span>
+            <div className="config-form-detail flex flex-col sm:flex-row">
+              <span className="config-form-label text-gray-500 dark:text-white flex-shrink-0 w-[45%] sm:w-auto">姓名：</span>
+              <span className="config-form-value text-gray-900 dark:text-white font-medium break-words sm:break-normal">{config.realName || '-'}</span>
             </div>
           </div>
+
+          {/* 姓名评分结果展示 */}
+          {config.nameScore && (
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-gray-500 dark:text-white text-sm">姓名评分：</span>
+                  <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${
+                    config.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                    config.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                    config.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                    config.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                  }`}>
+                    {config.nameScore.totalScore}分
+                  </span>
+                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                    <div>天格: {config.nameScore.tian}分 {getMeaning(config.nameScore.tian).text}</div>
+                    <div>人格: {config.nameScore.ren}分 {getMeaning(config.nameScore.ren).text}</div>
+                    <div>地格: {config.nameScore.di}分 {getMeaning(config.nameScore.di).text}</div>
+                    <div>外格: {config.nameScore.wai}分 {getMeaning(config.nameScore.wai).text}</div>
+                    <div>总格: {config.nameScore.zong}分 {getMeaning(config.nameScore.zong).text}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 姓名评分入口 */}
           {config.realName && /[一-龥]/.test(config.realName) ? (
             <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-gray-500 dark:text-white text-sm">姓名评分：</span>
-                  {config.nameScore && (
-                    <span className={`ml-2 px-2 py-0.5 text-xs rounded font-bold ${
-                      config.nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      config.nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                      config.nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                      config.nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                      'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    }`}>
-                      {config.nameScore.totalScore || 0}分
-                    </span>
-                  )}
+                  <span className="text-gray-500 dark:text-white text-sm">操作：</span>
                 </div>
                 <button
                   className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
@@ -129,7 +138,7 @@ const ConfigForm = ({ config, index, isActive, isExpanded, onToggleExpand, onEdi
           ) : (
             <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center">
-                <span className="text-gray-500 dark:text-white text-sm">姓名评分：</span>
+                <span className="text-gray-500 dark:text-white text-sm">操作：</span>
                 <button
                   className="ml-2 px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-800/50 transition-colors"
                   onClick={() => onEdit && onEdit(index)}
@@ -421,7 +430,7 @@ const UserConfigManager = () => {
           </div>
 
           <div className="detail-row" style={{ display: 'block' }}>
-            <span className="detail-value location block w-full truncate text-xs sm:text-sm opacity-80" title={formatLocation(config.birthLocation)}>
+            <span className="detail-value location block w-full truncate text-xs sm:text-sm opacity-80 break-words" title={formatLocation(config.birthLocation)}>
               📍 {formatLocation(config.birthLocation)}
             </span>
           </div>
@@ -603,7 +612,41 @@ const UserConfigManager = () => {
           name={configs[tempScoringConfigIndex]?.realName || ''}
           isPersonal={tempScoringConfigIndex !== null}
           onSaveScore={async (score, inputName) => {
-            // 评分功能将在弹窗内部处理
+            // 保存评分到配置（仅个人评分）
+            if (tempScoringConfigIndex !== null && score) {
+              const totalScore = score.totalScore || (score.tian + score.ren + score.di + score.wai + score.zong); // 如果没有总分，计算总分
+              const updateData = { nameScore: { ...score, totalScore } };
+
+              // 如果用户输入了姓名且配置中没有姓名，则保存姓名
+              if (inputName && inputName.trim() && /[一-龥]/.test(inputName.trim())) {
+                const config = configs[tempScoringConfigIndex];
+                if (!config.realName) {
+                  updateData.realName = inputName.trim();
+                  console.log('保存姓名到配置:', updateData.realName);
+                }
+              }
+
+              try {
+                // 更新配置
+                await enhancedUserConfigManager.updateConfigWithNodeUpdate(tempScoringConfigIndex, updateData);
+                console.log('姓名评分已保存到配置索引:', tempScoringConfigIndex);
+                
+                // 显示成功消息
+                showMessage('✅ 姓名评分保存成功', 'success');
+                
+                // 强制刷新配置列表以更新评分显示
+                setTimeout(() => {
+                  setExpandedIndex(prev => prev === tempScoringConfigIndex ? -1 : tempScoringConfigIndex);
+                  setTimeout(() => {
+                    setExpandedIndex(tempScoringConfigIndex);
+                  }, 100);
+                }, 300);
+              } catch (error) {
+                console.error('保存姓名评分失败:', error);
+                showMessage('❌ 保存评分失败: ' + error.message, 'error');
+              }
+            }
+            // 临时为他人评分时不保存
           }}
           showMessage={showMessage}
         />

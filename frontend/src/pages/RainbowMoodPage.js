@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getDailyMoodData } from '../utils/moodAlgorithm';
-import { useTheme } from '../context/ThemeContext';
 
 const RainbowMoodPage = () => {
-    const { theme } = useTheme();
+    const navigate = useNavigate();
     const [selectedColor, setSelectedColor] = useState(null);
     const [showDetail, setShowDetail] = useState(false);
 
@@ -18,10 +18,10 @@ const RainbowMoodPage = () => {
                 <p className="text-white/80 text-sm tracking-widest font-medium">倾听色彩的语言 · 觉知当下的能量</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-xl rounded-[3rem] p-8 w-full max-w-sm border border-white/20 shadow-2xl">
-                <p className="text-white text-lg font-bold mb-8">请凭直觉，随机选择一个颜色</p>
+            <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-6 w-full max-w-xs border border-white/20 shadow-2xl mx-auto">
+                <p className="text-white text-base font-bold mb-6">请凭直觉，随机选择一个颜色</p>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-3 gap-3">
                     {dailyData.availableColors.map((color) => (
                         <button
                             key={color.id}
@@ -29,17 +29,46 @@ const RainbowMoodPage = () => {
                                 setSelectedColor(color);
                                 setShowDetail(true);
                             }}
-                            className="group flex flex-col items-center gap-3 transition-transform active:scale-90"
+                            className="group flex flex-col items-center gap-2 transition-transform active:scale-90 min-w-[90px]"
                         >
                             <div
-                                className="w-20 h-20 rounded-full shadow-lg border-4 border-white group-hover:scale-110 transition-all duration-300"
+                                className="w-14 h-14 rounded-full shadow-lg border-2 border-white group-hover:scale-110 transition-all duration-300"
                                 style={{ backgroundColor: color.hex }}
                             />
-                            <span className="text-white/90 text-sm font-bold">{color.name}</span>
+                            <span className="text-white/90 text-xs font-bold text-center leading-tight px-1 truncate">{color.name}</span>
                         </button>
                     ))}
-                    {/* 补充一个空位或中心装饰？不，保持整洁 */}
+                    {/* 随机选择按钮 */}
+                    <button
+                        onClick={() => {
+                            const randomIndex = Math.floor(Math.random() * dailyData.availableColors.length);
+                            const randomColor = dailyData.availableColors[randomIndex];
+                            setSelectedColor(randomColor);
+                            setShowDetail(true);
+                        }}
+                        className="group flex flex-col items-center gap-2 transition-transform active:scale-90 min-w-[90px]"
+                    >
+                        <div
+                            className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shadow-lg border-2 border-white group-hover:scale-110 transition-all duration-300 flex items-center justify-center"
+                        >
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </div>
+                        <span className="text-white/90 text-xs font-bold text-center leading-tight px-1">随机</span>
+                    </button>
                 </div>
+            </div>
+
+            {/* 答案之书功能入口 - 跳转到答案之书页面 */}
+            <div className="mt-8 w-full max-w-xs">
+                <button 
+                    onClick={() => navigate('/book-of-answers')}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-3 px-4 rounded-xl font-bold text-sm shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                    <span className="mr-2">📖</span>
+                    答案之书 - 获取心灵启发
+                </button>
             </div>
 
             <p className="mt-12 text-white/50 text-[10px] italic">每日五行能量：{dailyData.dayWuXing}</p>
@@ -48,7 +77,9 @@ const RainbowMoodPage = () => {
 
     // 渲染详情界面 (仿截图)
     const renderDetail = () => {
-        const interpretation = dailyData.generateInterpretation(selectedColor);
+        // 确保selectedColor不为null，使用第一个颜色作为默认值
+        const colorToUse = selectedColor || dailyData.availableColors[0] || { name: '未知', tone: '未知', chakra: '未知', element: '未知', parts: '未知', symbol: '未知', hex: '#000000' };
+        const interpretation = dailyData.generateInterpretation(colorToUse);
 
         return (
             <div className="min-h-screen bg-transparent p-4 animate-slideUp">
@@ -83,30 +114,30 @@ const RainbowMoodPage = () => {
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-500 text-sm font-medium">今日色：</span>
-                                <span className="text-cyan-500 font-black">{selectedColor.name}</span>
+                                <span className="text-cyan-500 font-black">{colorToUse.name}</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-500 text-sm font-medium">颜色属性：</span>
-                                <span className="text-gray-800 font-bold">{selectedColor.tone}</span>
+                                <span className="text-gray-800 font-bold">{colorToUse.tone}</span>
                             </div>
                         </div>
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-500 text-sm font-medium">对应脉轮：</span>
-                                <span className="text-gray-800 font-bold">{selectedColor.chakra}</span>
+                                <span className="text-gray-800 font-bold">{colorToUse.chakra}</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-500 text-sm font-medium">所属元素：</span>
-                                <span className="text-gray-800 font-bold">{selectedColor.element}</span>
+                                <span className="text-gray-800 font-bold">{colorToUse.element}</span>
                             </div>
                         </div>
                         <div className="col-span-2">
                             <span className="text-gray-500 text-sm font-medium">对应身体部位：</span>
-                            <span className="text-gray-800 font-bold ml-2">{selectedColor.parts}</span>
+                            <span className="text-gray-800 font-bold ml-2">{colorToUse.parts}</span>
                         </div>
                         <div className="col-span-2">
                             <span className="text-gray-500 text-sm font-medium">象征意义：</span>
-                            <span className="text-gray-800 font-bold ml-2">{selectedColor.symbol}</span>
+                            <span className="text-gray-800 font-bold ml-2">{colorToUse.symbol}</span>
                         </div>
                     </div>
 
@@ -125,7 +156,7 @@ const RainbowMoodPage = () => {
 
                     {/* 装饰物 */}
                     <div className="absolute top-10 right-10 opacity-5">
-                        <div className="w-24 h-24 rounded-full" style={{ backgroundColor: selectedColor.hex }} />
+                        <div className="w-24 h-24 rounded-full" style={{ backgroundColor: colorToUse.hex }} />
                     </div>
                 </div>
             </div>

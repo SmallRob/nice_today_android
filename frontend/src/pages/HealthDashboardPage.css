@@ -288,3 +288,47 @@
     margin-top: var(--spacing-xs);
   }
 }
+
+/* 针对高缩放屏幕的优化 */
+@media screen and (-webkit-min-device-pixel-ratio: 2), screen and (min-resolution: 192dpi) {
+  .health-card {
+    font-size: calc(1em * 0.9); /* 略微缩小字体以适应高清屏缩放 */
+  }
+  
+  .diet-health-card .text-lg {
+    font-size: 0.9rem;
+  }
+  
+  .diet-health-card .text-xs {
+    font-size: 0.75rem;
+  }
+}
+
+/* 针对浏览器缩放级别的优化 */
+@media screen and (min-width: 1200px) and (max-width: 1600px) {
+  .diet-health-card {
+    font-size: calc(1em * 0.95);
+  }
+}
+
+/* 当屏幕缩放大于100%时的优化 */
+@media screen and (max-width: 1199px) {
+  .diet-health-card {
+    font-size: calc(1em * 0.9);
+  }
+  
+  .diet-health-card .text-lg {
+    font-size: 0.85rem;
+  }
+  
+  .diet-health-card .text-xs {
+    font-size: 0.7rem;
+  }
+  
+  .diet-health-card .break-word-mobile {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    hyphens: auto;
+  }
+}

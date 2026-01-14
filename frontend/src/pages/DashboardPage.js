@@ -4,6 +4,7 @@ import './DashboardPage.css';
 import MergedBannerCard from '../components/dashboard/MergedBannerCard.js';
 import DailyFortuneCard from '../components/dashboard/DailyFortuneCard.js';
 import FestivalCard from '../components/dashboard/FestivalCard.js';
+
 import {
   MBTICard,
   ChineseZodiacCard,
@@ -69,6 +70,7 @@ const ALL_FEATURES = [
   // { component: TiebanshenshuCard, name: 'TiebanshenshuCard', category: '运势分析类', type: 'fortune' },
   { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类', type: 'entertainment' },
   { component: FishingGameCard, name: 'FishingGameCard', category: '娱乐休闲类', type: 'entertainment' },
+  // { component: BookOfAnswersCard, name: 'BookOfAnswersCard', category: '个人成长类', type: 'growth' },
   // { component: AncientCardGameCard, name: 'AncientCardGameCard', category: '娱乐休闲类', type: 'entertainment' },
 
   { component: BiorhythmCard, name: 'BiorhythmCard', category: '健康管理类', type: 'health' },

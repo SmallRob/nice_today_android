@@ -56,11 +56,11 @@ const ComponentLoadingFallback = ({ componentName = '组件' }) => (
 
 function UserConfigPage() {
   return (
-    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900" style={{ minHeight: '-webkit-fill-available', width: '100%' }}>
 
       {/* 内容区域 */}
       <div className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-4 py-4 max-w-4xl">
+        <div className="container max-w-full mx-auto px-4 py-4" style={{ minWidth: '100%', maxWidth: '100vw', width: '100%' }}>
           <ConfigErrorBoundary fallback={
             <div className="p-6">
               <div className="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 rounded-lg mb-4">

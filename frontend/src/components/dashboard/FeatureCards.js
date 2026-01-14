@@ -2,6 +2,7 @@ import FeatureCard from './FeatureCard';
 import { useUserConfig } from '../../contexts/UserConfigContext';
 import { useNavigate } from 'react-router-dom';
 import { getZodiacNumber } from '../../utils/horoscopeAlgorithm';
+// import BookOfAnswersCard from './BookOfAnswersCard';
 
 /**
  * MBTI测试组件
@@ -493,6 +494,7 @@ export {
   TarotGardenCard,
   CulturalCupCard,
   DressGuideCard,
+  // BookOfAnswersCard,
   HealthDashboardCard,
   OrganRhythmCard,
   FishingGameCard,

@@ -233,8 +233,8 @@ const DietHealthCard = () => {
         <div className="text-center p-2 bg-blue-50 rounded-lg border border-blue-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-blue"></div>
           <div className="relative z-10">
-            <div className="text-lg font-bold text-blue-600 truncate">{ageBasedRecommendation.main.amount}</div>
-            <div className="text-xs font-medium text-blue-800 truncate">{ageBasedRecommendation.main.name}</div>
+            <div className="text-lg font-bold text-blue-600 break-word-mobile">{ageBasedRecommendation.main.amount}</div>
+            <div className="text-xs font-medium text-blue-800 break-word-mobile">{ageBasedRecommendation.main.name}</div>
             <div className="text-xs text-blue-600 mt-1">主食</div>
           </div>
         </div>
@@ -242,8 +242,8 @@ const DietHealthCard = () => {
         <div className="text-center p-2 bg-green-50 rounded-lg border border-green-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-green"></div>
           <div className="relative z-10">
-            <div className="text-lg font-bold text-green-600 truncate">{ageBasedRecommendation.protein.amount}</div>
-            <div className="text-xs font-medium text-green-800 truncate">{ageBasedRecommendation.protein.name}</div>
+            <div className="text-lg font-bold text-green-600 break-word-mobile">{ageBasedRecommendation.protein.amount}</div>
+            <div className="text-xs font-medium text-green-800 break-word-mobile">{ageBasedRecommendation.protein.name}</div>
             <div className="text-xs text-green-600 mt-1">蛋白质</div>
           </div>
         </div>
@@ -254,8 +254,8 @@ const DietHealthCard = () => {
         <div className="text-center p-2 bg-red-50 rounded-lg border border-red-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-red"></div>
           <div className="relative z-10">
-            <div className="text-lg font-bold text-red-600 truncate">{ageBasedRecommendation.vegetables.amount}</div>
-            <div className="text-xs font-medium text-red-800 truncate">{ageBasedRecommendation.vegetables.name}</div>
+            <div className="text-lg font-bold text-red-600 break-word-mobile">{ageBasedRecommendation.vegetables.amount}</div>
+            <div className="text-xs font-medium text-red-800 break-word-mobile">{ageBasedRecommendation.vegetables.name}</div>
             <div className="text-xs text-red-600 mt-1">蔬菜</div>
           </div>
         </div>
@@ -263,8 +263,8 @@ const DietHealthCard = () => {
         <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-orange"></div>
           <div className="relative z-10">
-            <div className="text-lg font-bold text-yellow-600 truncate">{ageBasedRecommendation.fruits.amount}</div>
-            <div className="text-xs font-medium text-yellow-800 truncate">{ageBasedRecommendation.fruits.name}</div>
+            <div className="text-lg font-bold text-yellow-600 break-word-mobile">{ageBasedRecommendation.fruits.amount}</div>
+            <div className="text-xs font-medium text-yellow-800 break-word-mobile">{ageBasedRecommendation.fruits.name}</div>
             <div className="text-xs text-yellow-600 mt-1">水果</div>
           </div>
         </div>
@@ -272,15 +272,15 @@ const DietHealthCard = () => {
         <div className="text-center p-2 bg-purple-50 rounded-lg border border-purple-100 relative min-w-0 overflow-hidden flex flex-col justify-center">
           <div className="absolute top-0 left-0 w-full h-full highlight-gradient-purple"></div>
           <div className="relative z-10">
-            <div className="text-lg font-bold text-purple-600 truncate">{ageBasedRecommendation.nuts.amount}</div>
-            <div className="text-xs font-medium text-purple-800 truncate">{ageBasedRecommendation.nuts.name}</div>
+            <div className="text-lg font-bold text-purple-600 break-word-mobile">{ageBasedRecommendation.nuts.amount}</div>
+            <div className="text-xs font-medium text-purple-800 break-word-mobile">{ageBasedRecommendation.nuts.name}</div>
             <div className="text-xs text-purple-600 mt-1">坚果</div>
           </div>
         </div>
       </div>
 
       <div className="mb-2 flex-shrink-0">
-        <p className="text-xs text-white/80 italic truncate">{ageBasedRecommendation.tips}</p>
+        <p className="text-xs text-white/80 italic break-word-mobile">{ageBasedRecommendation.tips}</p>
       </div>
 
       <div className="mb-2 flex-grow min-h-0 overflow-hidden">
@@ -303,13 +303,13 @@ const DietHealthCard = () => {
 
       <div className="mb-2 flex-shrink-0">
         <h4 className="font-semibold text-white mb-1 text-xs">可能缺乏的营养素:</h4>
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {nutrientAlerts.slice(0, 2).map((nutrient, index) => (
-            <div key={index} className="flex-1 p-1 bg-white/20 rounded border border-white/30 backdrop-blur-sm min-w-0">
+            <div key={index} className="flex-1 p-1 bg-white/20 rounded border border-white/30 backdrop-blur-sm min-w-0 break-word-mobile" style={{ minWidth: '45%' }}>
               <div className="flex items-start">
-                <span className="text-white/90 mr-1 text-xs">⚠️</span>
+                <span className="text-white/90 mr-1 text-xs flex-shrink-0">⚠️</span>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-white text-xs truncate">{nutrient.name}</div>
+                  <div className="font-medium text-white text-xs break-word-mobile">{nutrient.name}</div>
                 </div>
               </div>
               <div className="text-xs text-white/80 break-word-mobile ml-4">{nutrient.suggestion}</div>
@@ -318,12 +318,12 @@ const DietHealthCard = () => {
         </div>
       </div>
 
-      <div className="flex justify-between items-center text-xs flex-shrink-0">
-        <div>
+      <div className="flex flex-wrap justify-between items-center text-xs flex-shrink-0">
+        <div className="break-word-mobile">
           <span className="font-semibold text-white">热量:</span>
           <span className="ml-1 text-white/80">1200-1500kcal</span>
         </div>
-        <div>
+        <div className="break-word-mobile">
           <span className="font-semibold text-white">评分:</span>
           <span className="ml-1 text-green-300 font-bold">8.5/10</span>
         </div>
@@ -332,7 +332,7 @@ const DietHealthCard = () => {
       <div className="mt-auto pt-2 flex-shrink-0">
         <Link
           to="/diet-health-detail"
-          className="w-full bg-gradient-to-r from-white/30 to-white/40 text-white text-center py-1 px-2 rounded-lg hover:from-white/40 hover:to-white/50 transition-all duration-300 backdrop-blur-sm border border-white/30 text-xs"
+          className="w-full bg-gradient-to-r from-white/30 to-white/40 text-white text-center py-1 px-2 rounded-lg hover:from-white/40 hover:to-white/50 transition-all duration-300 backdrop-blur-sm border border-white/30 text-xs break-word-mobile"
         >
           详细建议
         </Link>

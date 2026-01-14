@@ -45,6 +45,50 @@
   /* 添加阴影增加层次感 */
 }
 
+/* 顶部导航栏 - 固定文本阅读和本地文档功能 */
+.top-nav {
+  display: flex;
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0;
+}
+
+.nav-button {
+  flex: 1;
+  padding: 14px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 50px;
+}
+
+.nav-button:hover {
+  background-color: var(--item-hover-bg);
+}
+
+.nav-button.active {
+  color: var(--tab-active);
+  background-color: rgba(74, 144, 217, 0.1);
+}
+
+.nav-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.nav-text {
+  font-size: 12px;
+}
+
 /* 顶部标题栏 */
 .viewer-header {
   display: flex;
@@ -134,35 +178,6 @@
 
 .select-file-button:hover {
   background-color: var(--button-hover-bg);
-}
-
-/* 标签导航 */
-.tab-navigation {
-  display: flex;
-  background-color: var(--header-bg);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.tab-button {
-  flex: 1;
-  padding: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-color);
-  transition: all 0.2s;
-  border-bottom: 2px solid transparent;
-}
-
-.tab-button:hover {
-  background-color: var(--item-hover-bg);
-}
-
-.tab-button.active {
-  color: var(--tab-active);
-  border-bottom-color: var(--tab-active);
 }
 
 /* 内容区域 */
