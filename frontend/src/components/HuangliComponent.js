@@ -4,6 +4,8 @@ import { calculateLunarDate } from '../utils/LunarCalendarHelper';
 
 /* 导入黄历组件优化样式 */
 import '../styles/huangli-optimization.css';
+/* 导入月份导航样式 */
+import '../styles/huangli-month-nav.css';
 
 
 // 黄历宜忌数据（简化版）
@@ -229,30 +231,29 @@ const HuangliComponent = () => {
       {/* 月历视图 - 默认显示 */}
       <div className="p-1 sm:p-2 overflow-hidden">
         {/* 月份导航 - 优化版 */}
-        <div className="flex items-center justify-between mb-1 overflow-hidden">
+        <div className="huangli-month-nav-container">
           <button
             onClick={() => changeMonth(-1)}
-            className={`p-1.5 rounded-lg flex-shrink-0 min-w-[44px] min-h-[44px] touch-target ${theme === 'dark'
+            className={`p-1.5 rounded-lg flex-shrink-0 huangli-touch-target huangli-nav-button ${theme === 'dark'
               ? 'text-gray-300 hover:bg-gray-700'
               : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
-            <svg className="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className={`text-xs sm:text-sm font-semibold px-1 truncate flex-1 text-center ${theme === 'dark' ? 'text-white' : 'text-gray-800'
-            }`}>
+          <div className="huangli-month-display">
             {formatMonth(currentMonth)}
           </div>
           <button
             onClick={() => changeMonth(1)}
-            className={`p-1.5 rounded-lg flex-shrink-0 min-w-[44px] min-h-[44px] touch-target ${theme === 'dark'
+            className={`p-1.5 rounded-lg flex-shrink-0 huangli-touch-target huangli-nav-button ${theme === 'dark'
               ? 'text-gray-300 hover:bg-gray-700'
               : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
-            <svg className="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>

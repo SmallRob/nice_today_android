@@ -25,14 +25,14 @@ export const HoroscopeSelector = ({ userHoroscope, isTemporaryHoroscope, handleH
           </svg>
           星座选择
         </h3>
-        {handleEditHoroscope && (
+        {/* {handleEditHoroscope && (
           <button
             onClick={handleEditHoroscope}
             className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white px-2 py-1 rounded transition-all"
           >
             ✏️ 设置
           </button>
-        )}
+        )} */}
       </div>
       <div className="text-sm text-gray-600 dark:text-gray-300 mb-3">
         {configuredZodiac ? `当前星座：${configuredZodiac}` : '点击设置您的星座，获取每日运势指引'}
@@ -306,14 +306,14 @@ export const ScoreCard = ({ overallScore, scores, sortedScores }) => {
           </div>
         ))}
       </div>
-
+{/* 
       <div className="mt-4 flex justify-center items-center text-sm bg-black/20 dark:bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
         <span className="mr-2 font-medium opacity-90 text-sm">今日核心:</span>
         <span className="flex items-center font-bold text-yellow-300">
           <span className="mr-1 text-base">{sortedScores[0].icon}</span>
           <span className="text-sm">{sortedScores[0].name}运特别旺</span>
         </span>
-      </div>
+      </div> */}
     </div>
   );
 };

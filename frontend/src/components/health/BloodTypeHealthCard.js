@@ -133,16 +133,39 @@ const BloodTypeHealthCard = () => {
           <h3 className="text-lg font-bold text-white drop-shadow-lg">血型与健康</h3>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
           {/* 血型选择器 */}
-          <div className="relative">
+          <div className="relative" style={{ minWidth: '100px', flexShrink: 0 }}>
             <button
-              className="px-3 py-1 rounded-full text-white font-medium bg-white/20 hover:bg-white/30 transition-all duration-300 flex items-center space-x-1 backdrop-blur-sm drop-shadow"
+              style={{
+                padding: '4px 12px',
+                borderRadius: '9999px',
+                color: 'white',
+                fontWeight: '500',
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                backdropFilter: 'blur(4px)',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                whiteSpace: 'nowrap',
+                minWidth: '100px',
+                maxWidth: '100px',
+                justifyContent: 'space-between'
+              }}
               onClick={() => setIsEditing(!isEditing)}
               disabled={loading}
             >
-              <span>{bloodTypeInfo.title}</span>
-              <span className="text-xs">▼</span>
+              <span style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '60px',
+                fontSize: '14px'
+              }}>{bloodTypeInfo.title}</span>
+              <span style={{ fontSize: '10px', flexShrink: 0 }}>▼</span>
             </button>
             
             {/* 移动端友好的模态选择器 */}
@@ -183,7 +206,18 @@ const BloodTypeHealthCard = () => {
           
           {/* 保存按钮 */}
           <button
-            className={`px-3 py-1 rounded-full text-white font-medium ${loading ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'} transition-colors`}
+            style={{
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              color: 'white',
+              fontWeight: '500',
+              backgroundColor: loading ? 'rgb(107 114 128)' : 'rgb(37 99 235)',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.3s',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
             onClick={handleSaveBloodType}
             disabled={loading}
           >

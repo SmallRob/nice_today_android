@@ -1,0 +1,113 @@
+/* ChineseZodiacPage 独立样式 */
+
+/* 生肖选择器网格布局 */
+.zodiac-page-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 默认每行4列 */
+  gap: 0.5rem; /* 8px间隙 */
+  width: 100%;
+}
+
+/* 在小屏幕上保持每行4列 */
+@media (min-width: 640px) {
+  .zodiac-page-selector-grid {
+    grid-template-columns: repeat(6, 1fr); /* sm:grid-cols-6 */
+  }
+}
+
+@media (min-width: 768px) {
+  .zodiac-page-selector-grid {
+    grid-template-columns: repeat(8, 1fr); /* md:grid-cols-8 */
+  }
+}
+
+/* 在大屏幕上的布局 */
+@media (min-width: 1024px) {
+  .zodiac-page-selector-grid {
+    grid-template-columns: repeat(10, 1fr);
+  }
+}
+
+/* 生肖选择器按钮样式 */
+.zodiac-page-selector-button {
+  aspect-ratio: 1; /* 保持正方形比例 */
+  border-radius: 0.5rem; /* rounded-lg */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem; /* p-2 */
+  min-width: 0;
+  overflow: hidden;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  position: relative;
+}
+
+/* 未选中状态 */
+.zodiac-page-selector-button-unselected {
+  background-color: #f9fafb; /* bg-gray-50 */
+  color: #374151; /* text-gray-700 */
+}
+
+.dark .zodiac-page-selector-button-unselected {
+  background-color: #374151; /* dark:bg-gray-700 */
+  color: #e5e7eb; /* dark:text-gray-200 */
+}
+
+.zodiac-page-selector-button-unselected:hover {
+  background-color: #dbeafe; /* hover:bg-blue-100 */
+}
+
+.dark .zodiac-page-selector-button-unselected:hover {
+  background-color: rgba(30, 58, 138, 0.2); /* dark:hover:bg-blue-900/20 */
+}
+
+/* 选中状态 */
+.zodiac-page-selector-button-selected {
+  background-color: #3b82f6; /* bg-blue-500 */
+  color: #ffffff; /* text-white */
+}
+
+/* 生肖图标样式 */
+.zodiac-page-selector-icon {
+  font-size: 1.25rem; /* text-xl */
+  line-height: 1.75rem; /* leading-none */
+  margin-bottom: 0.25rem; /* mt-1 */
+}
+
+/* 生肖名称样式 */
+.zodiac-page-selector-name {
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 700; /* font-bold */
+  margin-top: 0.25rem; /* mt-1 */
+  text-align: center;
+  white-space: nowrap; /* 不换行 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 超出显示省略号 */
+  max-width: 100%;
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  .zodiac-page-selector-grid {
+    gap: 0.375rem; /* 在移动端使用更小的间隙 */
+    padding: 0.25rem; /* 添加内边距 */
+  }
+  
+  .zodiac-page-selector-icon {
+    font-size: 1.125rem; /* 在移动端稍微减小图标大小 */
+  }
+  
+  .zodiac-page-selector-name {
+    font-size: 0.65rem; /* 在移动端稍微减小文字大小 */
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .zodiac-page-selector-button {
+    transition-duration: 75ms; /* 减少触摸设备的过渡时间 */
+  }
+}

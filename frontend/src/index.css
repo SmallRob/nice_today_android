@@ -14,6 +14,9 @@
 /* 导入经期追踪器优化样式 */
 @import './styles/period-tracker-optimization.css';
 
+/* 引入最新的 WebView 修复样式 - 放在最后以确保覆盖所有不稳定的响应式规则 */
+@import './styles/webview-fix.css';
+
 @layer base {
   :root {
     /* 核心颜色系统 - 扁平化设计 */
@@ -1084,18 +1087,18 @@ body {
     align-items: center;
     font-size: 0.6rem;
   }
-  
+
   .diet-health-card a[href="/diet-health-detail"] {
     width: auto;
     min-width: 70%;
     max-width: 90%;
   }
-  
+
   /* 窄屏上营养素改为单列显示 */
   .diet-health-card .flex.gap-1 {
     flex-direction: column;
   }
-  
+
   .diet-health-card .flex-1 {
     flex: none;
     width: 100%;
@@ -1161,34 +1164,35 @@ body {
   .diet-health-card .grid.grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  
+
   .diet-health-card .grid.grid-cols-3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  
+
   .diet-health-card .text-lg {
     font-size: 0.9rem;
   }
-  
+
   .diet-health-card .text-xs {
     font-size: 0.75rem;
   }
 }
 
 @media (max-width: 480px) {
+
   .diet-health-card .grid.grid-cols-2,
   .diet-health-card .grid.grid-cols-3 {
     grid-template-columns: 1fr;
   }
-  
+
   .diet-health-card .flex.flex-wrap {
     flex-direction: column;
   }
-  
+
   .diet-health-card .gap-2 {
     gap: 0.5rem;
   }
-  
+
   .diet-health-card .p-2 {
     padding: 0.25rem;
   }
@@ -1201,12 +1205,12 @@ body {
     overflow-wrap: break-word;
     white-space: normal;
   }
-  
+
   .diet-health-card .grid.grid-cols-2,
   .diet-health-card .grid.grid-cols-3 {
     grid-template-columns: 1fr;
   }
-  
+
   .diet-health-card .text-xs {
     font-size: 0.7rem;
   }
@@ -1217,24 +1221,24 @@ body {
   .diet-health-card {
     padding: 0.75rem;
   }
-  
+
   .diet-health-card .text-lg {
     font-size: 0.8rem;
   }
-  
+
   .diet-health-card .text-xs {
     font-size: 0.7rem;
   }
-  
+
   .diet-health-card .min-h-\[400px\] {
     min-height: 350px;
   }
-  
+
   /* 小屏幕上营养素改为单列显示 */
   .diet-health-card .flex.gap-1 {
     flex-direction: column;
   }
-  
+
   .diet-health-card .flex-1 {
     flex: none;
     width: 100%;

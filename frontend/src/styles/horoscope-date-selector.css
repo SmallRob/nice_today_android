@@ -1,0 +1,131 @@
+/* Horoscope Page 日期选择器专用样式 */
+
+.horoscope-date-selector-container {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: #000000; /* bg-black */
+  padding-top: 1rem; /* pt-4 */
+  padding-bottom: 0.5rem; /* pb-2 */
+  display: flex;
+  justify-content: center;
+}
+
+.dark .horoscope-date-selector-container {
+  background-color: #111827; /* dark:bg-gray-900 */
+}
+
+.horoscope-date-selector-scroll {
+  display: flex;
+  overflow-x: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  padding-left: 0.5rem; /* px-2 */
+  padding-right: 0.5rem; /* px-2 */
+  gap: 0.375rem; /* gap-1.5 */
+  align-items: center;
+  justify-content: center; /* 水平居中对齐 */
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  padding-bottom: 0.5rem; /* pb-2 */
+  width: 100%; /* 确保占满容器宽度以便居中 */
+}
+
+.horoscope-date-selector-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+@media (min-width: 640px) { /* sm: prefix */
+  .horoscope-date-selector-scroll {
+    padding-left: 1rem; /* sm:px-4 */
+    padding-right: 1rem; /* sm:px-4 */
+    gap: 0.75rem; /* sm:gap-3 */
+  }
+}
+
+.horoscope-date-selector-item {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px; /* min-w-[42px] */
+  height: 50px; /* h-[50px] */
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  border-radius: 0.75rem; /* rounded-xl */
+}
+
+@media (min-width: 640px) { /* sm: prefix */
+  .horoscope-date-selector-item {
+    min-width: 52px; /* sm:min-w-[52px] */
+    height: 60px; /* sm:h-[60px] */
+  }
+}
+
+.horoscope-date-selector-item-selected {
+  background: linear-gradient(to bottom, #fef08a, #fefce8); /* bg-gradient-to-b from-yellow-200 to-yellow-100 */
+  color: #111827; /* text-gray-900 */
+  transform: scale(1.05); /* scale-105 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /* shadow-lg */
+}
+
+.dark .horoscope-date-selector-item-selected {
+  background: linear-gradient(to bottom, #fef08a, #fefce8); /* dark:from-yellow-300 dark:to-yellow-200 */
+}
+
+.horoscope-date-selector-item-today {
+  background-color: #1f2937; /* bg-gray-800 */
+  color: #fef08a; /* text-yellow-200 */
+}
+
+.dark .horoscope-date-selector-item-today {
+  background-color: #374151; /* dark:bg-gray-700 */
+}
+
+.horoscope-date-selector-item-default {
+  color: #9ca3af; /* text-gray-400 */
+}
+
+.dark .horoscope-date-selector-item-default {
+  color: #6b7280; /* dark:text-gray-500 */
+}
+
+.horoscope-date-selector-item-hover {
+  color: rgba(254, 240, 138, 0.8); /* hover:text-yellow-200/80 */
+  background-color: rgba(31, 41, 55, 0.3); /* hover:bg-gray-800/30 */
+}
+
+.dark .horoscope-date-selector-item-hover {
+  background-color: rgba(55, 65, 81, 0.5); /* dark:hover:bg-gray-700/50 */
+}
+
+.horoscope-date-selector-day {
+  font-size: 0.75rem; /* text-[8px] on small screens */
+  font-weight: 700; /* font-bold */
+  text-transform: uppercase; /* uppercase */
+  letter-spacing: 0.05em; /* tracking-wide */
+}
+
+.horoscope-date-selector-date {
+  font-size: 0.875rem; /* text-[10px] on small screens */
+  font-weight: 900; /* font-black */
+  margin-top: 0.125rem; /* mt-0.5 */
+}
+
+@media (min-width: 640px) { /* sm: prefix */
+  .horoscope-date-selector-day {
+    font-size: 0.875rem; /* sm:text-[9px] */
+  }
+  
+  .horoscope-date-selector-date {
+    font-size: 0.75rem; /* sm:text-[12px] - corrected */
+  }
+}
+
+/* 确保滚动平滑并支持触摸 */
+.horoscope-date-selector-scroll {
+  -webkit-overflow-scrolling: touch; /* iOS平滑滚动 */
+}

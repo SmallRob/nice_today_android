@@ -1,0 +1,219 @@
+/* ChineseZodiacSelector 组件独立样式 */
+
+/* 主容器样式 */
+.chinese-zodiac-selector {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 默认网格布局 - 每行4个 */
+.chinese-zodiac-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* 3列布局 */
+.chinese-zodiac-selector-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* 6列布局 */
+.chinese-zodiac-selector-grid-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* 生肖图标容器 */
+.chinese-zodiac-selector-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  aspect-ratio: 1;
+}
+
+.chinese-zodiac-selector-icon-container:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.chinese-zodiac-selector-icon-container.selected {
+  transform: scale(1.1);
+}
+
+/* 生肖图标基础样式 */
+.chinese-zodiac-selector-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  aspect-ratio: 1;
+}
+
+/* 不同生肖的特定颜色 */
+.chinese-zodiac-selector-icon-鼠 {
+  background: linear-gradient(135deg, #6f42c1, #8e44ad);
+}
+
+.chinese-zodiac-selector-icon-牛 {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+.chinese-zodiac-selector-icon-虎 {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.chinese-zodiac-selector-icon-兔 {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.chinese-zodiac-selector-icon-龙 {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.chinese-zodiac-selector-icon-蛇 {
+  background: linear-gradient(135deg, #9b59b6, #8e4cdd);
+}
+
+.chinese-zodiac-selector-icon-马 {
+  background: linear-gradient(135deg, #e67e22, #f39c12);
+}
+
+.chinese-zodiac-selector-icon-羊 {
+  background: linear-gradient(135deg, #1abc9c, #16a085);
+}
+
+.chinese-zodiac-selector-icon-猴 {
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+}
+
+.chinese-zodiac-selector-icon-鸡 {
+  background: linear-gradient(135deg, #9b59b6, #34495e);
+}
+
+.chinese-zodiac-selector-icon-狗 {
+  background: linear-gradient(135deg, #34495e, #2c3e50);
+}
+
+.chinese-zodiac-selector-icon-猪 {
+  background: linear-gradient(135deg, #e84393, #fd79a8);
+}
+
+/* 选中的生肖图标样式 */
+.chinese-zodiac-selector-icon.selected {
+  box-shadow: 
+    0 0 0 3px #3b82f6,
+    0 8px 16px -2px rgba(59, 130, 246, 0.3);
+  transform: scale(1.05);
+}
+
+/* 不同样式的大小 */
+.chinese-zodiac-selector-icon-sm {
+  font-size: 0.875rem;
+}
+
+.chinese-zodiac-selector-icon-md {
+  font-size: 1.25rem;
+}
+
+.chinese-zodiac-selector-icon-lg {
+  font-size: 1.5rem;
+}
+
+.chinese-zodiac-selector-icon-xl {
+  font-size: 1.75rem;
+}
+
+/* 选中生肖的详情卡片样式 */
+.chinese-zodiac-selector-detail-card {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, rgb(255 255 255 / 1), rgb(219 234 254 / 0.3));
+  border-radius: 1rem;
+  border: 1px solid rgb(199 210 254 / 0.5);
+  box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.05);
+  transition: all 0.3s ease;
+}
+
+/* 暗黑模式下的详情卡片样式 */
+.chinese-zodiac-selector-detail-card:where(.dark *) {
+  background: linear-gradient(135deg, rgb(31 41 55 / 1), rgb(30 58 138 / 0.1));
+  border: 1px solid rgb(30 58 138 / 0.3);
+}
+
+/* 响应式设计 - 移动端优化 */
+@media (max-width: 640px) {
+  .chinese-zodiac-selector-grid {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .chinese-zodiac-selector-icon {
+    border-radius: 12px;
+    font-size: 1.5rem; /* 在移动设备上稍微增大文字 */
+  }
+  
+  .chinese-zodiac-selector-detail-card {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .chinese-zodiac-selector-icon-sm {
+    font-size: 1rem;
+  }
+  
+  .chinese-zodiac-selector-icon-md {
+    font-size: 1.5rem;
+  }
+  
+  .chinese-zodiac-selector-icon-lg {
+    font-size: 1.75rem;
+  }
+  
+  .chinese-zodiac-selector-icon-xl {
+    font-size: 2rem;
+  }
+}
+
+/* 针对不同屏幕方向的优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .chinese-zodiac-selector-grid {
+    grid-template-columns: repeat(6, 1fr); /* 横屏时显示6列 */
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chinese-zodiac-selector-detail-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .chinese-zodiac-selector-icon-container {
+    transition: transform 0.1s ease;
+  }
+  
+  .chinese-zodiac-selector-icon-container:active {
+    transform: scale(0.95);
+  }
+}

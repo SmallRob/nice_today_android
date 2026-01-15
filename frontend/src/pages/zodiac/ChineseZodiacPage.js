@@ -5,6 +5,7 @@ import { useUserConfig } from '../../contexts/UserConfigContext';
 import { generateDailyHoroscope } from '../../utils/horoscopeAlgorithm';
 import { Line } from 'react-chartjs-2';
 import { ensureChartRegistered } from '../../utils/chartConfig';
+import './ChineseZodiacPage.css';
 
 /**
  * 十二生肖数据
@@ -753,7 +754,7 @@ const ChineseZodiacPage = () => {
       <div className={`bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`} style={{ height: '60px' }}>
         <div className="container mx-auto px-4 h-full flex items-center">
           <div className="relative flex items-center justify-between w-full h-full">
-            <button
+            {/* <button
               onClick={() => navigate(-1)}
               className="relative z-10 text-white hover:text-white/90 flex items-center"
             >
@@ -761,7 +762,7 @@ const ChineseZodiacPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               返回
-            </button>
+            </button> */}
             <h1 className="absolute inset-0 flex items-center justify-center text-lg font-bold pointer-events-none">生肖运势</h1>
             <button
               onClick={() => navigate('/user-config')}
@@ -858,22 +859,11 @@ const ChineseZodiacPage = () => {
             <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
               <div className="text-gray-600 dark:text-gray-400 text-xs mb-1.5">幸运色</div>
               <div className="flex flex-wrap items-center justify-center gap-1">
-                {parseLuckyColors(zodiacData.luckyColor).map((colorName, index) => {
-                  const colorHex = getColorHex(colorName);
-                  return (
-                    <div key={index} className="flex flex-col items-center">
-                      <div
-                        className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mb-0.5"
-                        style={{ backgroundColor: colorHex }}
-                        title={colorName}
-                        aria-label={`幸运色: ${colorName}`}
-                      />
-                      <div className="text-[9px] text-gray-600 dark:text-gray-400 truncate max-w-[40px]">
-                        {colorName}
-                      </div>
-                    </div>
-                  );
-                })}
+                {parseLuckyColors(zodiacData.luckyColor).map((colorName, index) => (
+                  <span key={index} className="px-2 py-1 bg-white dark:bg-gray-700 rounded-full text-xs text-gray-700 dark:text-gray-200">
+                    {colorName}
+                  </span>
+                ))}
               </div>
             </div>
             <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
@@ -1018,18 +1008,17 @@ const ChineseZodiacPage = () => {
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
             <span className="mr-2">🔮</span> 查看其他生肖
           </h3>
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 w-full">
+          <div className="zodiac-page-selector-grid">
             {CHINESE_ZODIAC_DATA.map((zodiac) => (
               <button
                 key={zodiac.name}
                 onClick={() => setUserZodiac(zodiac.name)}
-                className={`aspect-square rounded-lg transition-all flex flex-col items-center justify-center p-2 min-w-0 overflow-hidden ${userZodiac === zodiac.name
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900/20'
-                  }`}
+                className={`zodiac-page-selector-button ${userZodiac === zodiac.name
+                  ? 'zodiac-page-selector-button-selected'
+                  : 'zodiac-page-selector-button-unselected'}`}
               >
-                <div className="text-xl">{zodiac.icon}</div>
-                <div className="text-xs font-bold mt-1 whitespace-nowrap">{zodiac.name}</div>
+                <div className="zodiac-page-selector-icon">{zodiac.icon}</div>
+                <div className="zodiac-page-selector-name">{zodiac.name}</div>
               </button>
             ))}
           </div>

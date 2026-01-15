@@ -64,10 +64,70 @@
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: auto;
+  min-height: 140px;
 }
 
 .dark .horoscope-score-container {
   background: linear-gradient(135deg, #6b21a8, #3730a3);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: auto;
+  min-height: 140px;
+}
+
+.dark .horoscope-score-container .text-center {
+  margin-bottom: 0 !important;
+  padding: 0 8px;
+}
+
+.dark .horoscope-score-container .text-center h3 {
+  margin-bottom: 4px !important;
+}
+
+.dark .horoscope-score-container .text-center .text-5xl {
+  margin-bottom: 4px !important;
+}
+
+.dark .horoscope-score-container .text-center p {
+  margin-bottom: 0 !important;
+}
+
+/* 调整分数容器内的标题间距 */
+.horoscope-score-container .text-center {
+  margin-bottom: 0 !important;
+  padding: 0 8px;
+}
+
+.horoscope-score-container .text-center h3 {
+  margin-bottom: 4px !important;
+}
+
+.horoscope-score-container .text-center .text-5xl {
+  margin-bottom: 4px !important;
+}
+
+.horoscope-score-container .text-center p {
+  margin-bottom: 0 !important;
+}
+
+.dark .horoscope-score-container .horoscope-grid-4 {
+  margin-top: 12px;
+  flex: 1;
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+/* 调整分数网格间距 */
+.horoscope-score-container .horoscope-grid-4 {
+  margin-top: 12px;
+  flex: 1;
+  display: grid;
+  grid-template-rows: 1fr;
 }
 
 .horoscope-banner {

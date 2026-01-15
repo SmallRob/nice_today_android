@@ -120,7 +120,7 @@ const StepCounterCard = ({ onClick }) => {
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
-      className="text-blue-500"
+      style={{ color: '#f97316' }}
     >
       <path d="M13 4l1 1 3-3-1 3 3-1-3 1 1 3-3-1 1 1-3-3 3-1-1 3-1-1z" />
       <path d="M2 20v-2a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2" />
@@ -129,22 +129,67 @@ const StepCounterCard = ({ onClick }) => {
 
   return (
     <div 
-      className="health-card bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-600 cursor-pointer hover:shadow-xl transition-all duration-300"
-      onClick={() => onClick ? onClick('step-counter') : navigate('/health-dashboard')}
-    >
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center">
-          <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg mr-3">
+      style={{
+        background: 'var(--card-background, linear-gradient(135deg, #ff9a9e 0%, #fad0c4 20%, #fbc2eb 40%, #a6c1ee 60%, #c2e9fb 80%, #a1c4fd 100%))',
+        borderRadius: '1rem',
+        padding: '1.5rem',
+        boxShadow: 'var(--card-box-shadow, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05))',
+        border: '1px solid var(--card-border-color, rgba(255, 255, 255, 0.3))',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        position: 'relative',
+        overflow: 'visible',
+        minHeight: '300px'
+      }}
+      onClick={() => onClick ? onClick('step-counter') : navigate('/health-dashboard')} >
+      
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: '1rem',
+        position: 'relative',
+        zIndex: 10
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #ff9a9e, #fad0c4)',
+            padding: '0.5rem',
+            borderRadius: '0.5rem',
+            marginRight: '0.75rem'
+          }}>
             <StepsIcon />
           </div>
-          <h3 className="text-lg font-bold text-gray-800 dark:text-white">今日步数</h3>
+          <h3 style={{
+            fontSize: '1.125rem',
+            fontWeight: 'bold',
+            color: 'var(--text-primary, #1e293b)',
+            textShadow: 'var(--text-shadow, 0 1px 2px rgba(255, 255, 255, 0.3))'
+          }}>今日步数</h3>
         </div>
         <button 
           onClick={(e) => {
             e.stopPropagation();
             refreshSteps();
           }}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            color: 'var(--refresh-btn-color, #6b7280)',
+            padding: '0.5rem',
+            borderRadius: '9999px',
+            backgroundColor: 'var(--refresh-btn-bg, rgba(255, 255, 255, 0.5))',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'color 0.2s ease',
+            backdropFilter: 'blur(4px)'
+          }}
+          onMouseEnter={(e) => e.target.style.color = '#374151'}
+          onMouseLeave={(e) => e.target.style.color = '#6b7280'}
           title="刷新数据"
         >
           <svg 
@@ -258,10 +303,23 @@ const StepCounterCard = ({ onClick }) => {
         </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-        <div className="flex justify-between">
+      <div style={{
+        marginTop: '1rem',
+        paddingTop: '1rem',
+        borderTop: '1px solid var(--card-divider-color, rgba(255, 255, 255, 0.3))',
+        fontSize: '0.75rem',
+        color: 'var(--text-tertiary, #475569)',
+        textShadow: 'var(--text-shadow, 0 1px 2px rgba(255, 255, 255, 0.2))',
+        position: 'relative'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between'
+        }}>
           <span>最后更新: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-          <span>•</span>
+          <span style={{
+            color: 'var(--divider-color, rgba(255, 255, 255, 0.5))'
+          }}>•</span>
           <span>步数来源: 健康应用</span>
         </div>
       </div>
