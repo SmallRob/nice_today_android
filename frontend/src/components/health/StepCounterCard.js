@@ -110,6 +110,30 @@ const StepCounterCard = ({ onClick }) => {
   };
 
   // 步数图标
+  // 添加动态渐变效果的样式
+  const dynamicGradientStyle = {
+    background: 'linear-gradient(-45deg, #ff4757, #ff9ff3, #f368e0, #0984e3, #00cec9, #00b894)',
+    backgroundSize: '400% 400%',
+    animation: 'gradientAnimation 10s ease infinite',
+  };
+
+  // 将关键帧动画添加到页面中
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const StepsIcon = () => (
     <svg 
       width="24" 
@@ -130,16 +154,18 @@ const StepCounterCard = ({ onClick }) => {
   return (
     <div 
       style={{
-        background: 'var(--card-background, linear-gradient(135deg, #ff9a9e 0%, #fad0c4 20%, #fbc2eb 40%, #a6c1ee 60%, #c2e9fb 80%, #a1c4fd 100%))',
+        background: 'var(--card-background, linear-gradient(-45deg, #ff4757, #ff9ff3, #f368e0, #0984e3, #00cec9, #00b894))',
+        backgroundSize: '400% 400%',
         borderRadius: '1rem',
         padding: '1.5rem',
-        boxShadow: 'var(--card-box-shadow, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05))',
-        border: '1px solid var(--card-border-color, rgba(255, 255, 255, 0.3))',
+        boxShadow: 'var(--card-box-shadow, 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 12px -5px rgba(0, 0, 0, 0.1))',
+        border: '1px solid var(--card-border-color, rgba(255, 255, 255, 0.4))',
         cursor: 'pointer',
-        transition: 'all 0.3s ease',
+        transition: 'all 0.4s ease',
         position: 'relative',
         overflow: 'visible',
-        minHeight: '300px'
+        minHeight: '300px',
+        animation: 'gradientAnimation 9s ease infinite'
       }}
       onClick={() => onClick ? onClick('step-counter') : navigate('/health-dashboard')} >
       
@@ -156,17 +182,18 @@ const StepCounterCard = ({ onClick }) => {
           alignItems: 'center'
         }}>
           <div style={{
-            background: 'linear-gradient(135deg, #ff9a9e, #fad0c4)',
+            background: 'linear-gradient(45deg, #ff6b6b, #ff9ff3)',
             padding: '0.5rem',
             borderRadius: '0.5rem',
-            marginRight: '0.75rem'
+            marginRight: '0.75rem',
+            boxShadow: '0 4px 10px rgba(255, 107, 87, 0.3)'
           }}>
             <StepsIcon />
           </div>
           <h3 style={{
             fontSize: '1.125rem',
             fontWeight: 'bold',
-            color: 'var(--text-primary, #1e293b)',
+            color: 'var(--text-primary, #0f172a)',
             textShadow: 'var(--text-shadow, 0 1px 2px rgba(255, 255, 255, 0.3))'
           }}>今日步数</h3>
         </div>
@@ -247,7 +274,7 @@ const StepCounterCard = ({ onClick }) => {
       ) : (
         <div className="space-y-4">
           <div className="text-center">
-            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+            <div className="text-4xl font-bold text-blue-900 dark:text-blue-100 mb-1">
               {steps.toLocaleString()}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">步</div>
@@ -270,7 +297,7 @@ const StepCounterCard = ({ onClick }) => {
                   <path d="M8 12h4l2 2" />
                 </svg>
               </div>
-              <div className="text-sm text-gray-700 dark:text-gray-300">
+              <div className="text-sm text-slate-800 dark:text-slate-200">
                 {healthTips}
               </div>
             </div>
@@ -278,24 +305,24 @@ const StepCounterCard = ({ onClick }) => {
 
           <div className="grid grid-cols-4 gap-1 text-center">
             <div className="bg-green-100 dark:bg-green-900/30 rounded-lg p-2">
-              <div className="text-xs text-green-600 dark:text-green-400">目标</div>
-              <div className="text-sm font-semibold text-green-700 dark:text-green-300">10000</div>
+              <div className="text-xs text-green-800 dark:text-green-200">目标</div>
+              <div className="text-sm font-semibold text-green-900 dark:text-green-100">10000</div>
             </div>
             <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-2">
-              <div className="text-xs text-blue-600 dark:text-blue-400">距离</div>
-              <div className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+              <div className="text-xs text-blue-800 dark:text-blue-200">距离</div>
+              <div className="text-sm font-semibold text-blue-900 dark:text-blue-100">
                 {(steps * 0.0008).toFixed(2)}km
               </div>
             </div>
             <div className="bg-purple-100 dark:bg-purple-900/30 rounded-lg p-2">
-              <div className="text-xs text-purple-600 dark:text-purple-400">卡路里</div>
-              <div className="text-sm font-semibold text-purple-700 dark:text-purple-300">
+              <div className="text-xs text-purple-800 dark:text-purple-200">卡路里</div>
+              <div className="text-sm font-semibold text-purple-900 dark:text-purple-100">
                 {Math.round(steps * 0.04)}
               </div>
             </div>
             <div className="bg-yellow-100 dark:bg-yellow-900/30 rounded-lg p-2">
-              <div className="text-xs text-yellow-600 dark:text-yellow-400">完成</div>
-              <div className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
+              <div className="text-xs text-yellow-800 dark:text-yellow-200">完成</div>
+              <div className="text-sm font-semibold text-yellow-900 dark:text-yellow-100">
                 {Math.min(100, Math.round((steps / 10000) * 100))}%
               </div>
             </div>
@@ -308,7 +335,7 @@ const StepCounterCard = ({ onClick }) => {
         paddingTop: '1rem',
         borderTop: '1px solid var(--card-divider-color, rgba(255, 255, 255, 0.3))',
         fontSize: '0.75rem',
-        color: 'var(--text-tertiary, #475569)',
+        color: 'var(--text-tertiary, #334155)',
         textShadow: 'var(--text-shadow, 0 1px 2px rgba(255, 255, 255, 0.2))',
         position: 'relative'
       }}>
