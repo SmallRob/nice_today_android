@@ -81,15 +81,23 @@ const ConfigForm = ({ config, index, isActive, isExpanded, onToggleExpand, onEdi
 
       {/* 配置信息（展开时显示） */}
       {isExpanded && (
-        <div className="config-form-content">
-          <div className="config-form-grid">
-            <div className="config-form-detail flex flex-col sm:flex-row">
-              <span className="config-form-label text-gray-500 dark:text-white flex-shrink-0 w-[45%] sm:w-auto">昵称：</span>
-              <span className="config-form-value text-gray-900 dark:text-white font-medium break-words sm:break-normal">{config?.nickname || '-'}</span>
+        <div className="config-form-content" style={{ padding: '8px 0' }}>
+          <div className="config-form-grid" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="config-form-detail" style={{ display: 'flex', alignItems: 'left', minWidth: 0 }}>
+              <span className="config-form-label">
+                昵称：
+              </span>
+              <span className="config-form-value">
+                {config?.nickname || '-'}
+              </span>
             </div>
-            <div className="config-form-detail flex flex-col sm:flex-row">
-              <span className="config-form-label text-gray-500 dark:text-white flex-shrink-0 w-[45%] sm:w-auto">姓名：</span>
-              <span className="config-form-value text-gray-900 dark:text-white font-medium break-words sm:break-normal">{config.realName || '-'}</span>
+            <div className="config-form-detail" style={{ display: 'flex', alignItems: 'left', minWidth: 0 }}>
+              <span className="config-form-label">
+                姓名：
+              </span>
+              <span className="config-form-value">
+                {config.realName || '-'}
+              </span>
             </div>
           </div>
 

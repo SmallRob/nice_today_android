@@ -475,9 +475,6 @@ const UserDataManager = ({ showMessage, onAddNewConfig }) => {
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   从备份文件恢复数据，将覆盖当前数据
                 </p>
-                <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
-                  ⚠️ 恢复前建议先创建当前数据备份
-                </p>
               </div>
               <button
                 onClick={restoreBackup}

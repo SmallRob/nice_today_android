@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { calculateLunarDate } from '../utils/LunarCalendarHelper';
-import './MoodCalendarPage.css';
+import PageLayout from '../components/PageLayout';
+
 
 // 心情数据存储管理
 const moodStorage = {
@@ -250,94 +251,165 @@ const MoodCalendarPage = () => {
     };
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 mb-6 w-full max-w-full overflow-hidden">
+      <div style={{
+        backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+        borderRadius: '8px',
+        border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+        overflow: 'hidden',
+        padding: '12px 0',
+        marginBottom: '12px'
+      }}>
         {/* 月份导航 */}
-        <div className="flex items-center justify-between mb-2">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '12px',
+          padding: '0 4px'
+        }}>
           <button
             onClick={goToPreviousMonth}
-            className={`p-1 rounded-lg ${
-              theme === 'dark'
-                ? 'text-gray-300 hover:bg-gray-700'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
+            style={{
+              padding: '4px 12px',
+              border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+              borderRadius: '4px',
+              background: theme === 'dark' ? '#1f2937' : '#fff',
+              color: theme === 'dark' ? '#fff' : '#1f2937',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            &lt;
           </button>
-          <div className={`text-xs sm:text-sm font-semibold ${
-            theme === 'dark' ? 'text-white' : 'text-gray-800'
-          }`}>
+          <div style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: theme === 'dark' ? '#fff' : '#1f2937'
+          }}>
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </div>
           <button
             onClick={goToNextMonth}
-            className={`p-1 rounded-lg ${
-              theme === 'dark'
-                ? 'text-gray-300 hover:bg-gray-700'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
+            style={{
+              padding: '4px 12px',
+              border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+              borderRadius: '4px',
+              background: theme === 'dark' ? '#1f2937' : '#fff',
+              color: theme === 'dark' ? '#fff' : '#1f2937',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            &gt;
           </button>
         </div>
 
         {/* 星期标题 */}
-        <div className="grid grid-cols-7 gap-0.5 mb-1 overflow-hidden">
+        <ol style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: '1px',
+          padding: '4px 0',
+          margin: '0',
+          listStyle: 'none',
+          backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6',
+          width: '100%',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
+        }}>
           {dayNames.map((day, index) => (
-            <div
-              key={day}
-              className={`text-center text-xs font-semibold py-1 ${
-                index === 0 ? 'text-red-500 dark:text-red-400' : 
-                index === 6 ? 'text-blue-500 dark:text-blue-400' : 
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-              }`}
-            >
+            <li key={day} style={{
+              textAlign: 'center',
+              fontSize: '10px',
+              fontWeight: '600',
+              color: index === 0 ? '#ef4444' : index === 6 ? '#3b82f6' : theme === 'dark' ? '#9ca3af' : '#6b7280',
+              padding: '4px 0'
+            }}>
               {day}
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
 
         {/* 日期网格 - 紧凑版 */}
-        <div className="grid grid-cols-7 gap-0.5 w-full max-w-full overflow-hidden">
+        <ol style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: '1px',
+          padding: '0',
+          margin: '0',
+          listStyle: 'none',
+          backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6',
+          width: '100%',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
+        }}>
           {monthData.map((day, index) => {
-            let bgClass = '';
-            let moodIndicator = null;
-
-            if (day.hasMood) {
-              // 有心情记录的日期显示绿色圆点标记
-              moodIndicator = (
-                <div className="w-1 h-1 rounded-full bg-green-500 absolute top-0.5 right-0.5" title="有心情记录"></div>
-              );
-            }
-
+            const dayOfWeek = day.date.getDay();
+            
             return (
-              <div
+              <li
                 key={index}
+                style={{
+                  backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+                  padding: '0',
+                  position: 'relative',
+                  cursor: day.isCurrentMonth && day.date <= new Date().setHours(0, 0, 0, 0) ? 'pointer' : 'default',
+                  minHeight: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
                 onClick={() => handleDayClick(day)}
-                className={`
-                  relative p-1 text-sm rounded text-center transition-colors cursor-pointer flex flex-col items-center justify-center min-w-0 w-full max-w-full overflow-hidden
-                  ${!day.isCurrentMonth ? 'text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900' : ''}
-                  ${day.isToday ? 'bg-blue-500 text-white' : ''}
-                  ${day.isWeekend && !bgClass ? 'bg-gray-50 dark:bg-gray-900' : ''}
-                  ${bgClass}
-                  ${day.isCurrentMonth && day.date <= new Date().setHours(0, 0, 0, 0) ? 'hover:bg-gray-100 dark:hover:bg-gray-700' : 'cursor-default'}
-                `}
-                style={{ minHeight: '3rem' }}
               >
-                <div className="font-bold text-center truncate w-full">{day.date.getDate()}</div>
-                <div className="text-[0.6rem] opacity-70 text-center truncate w-full whitespace-nowrap">
-                  {day.lunarDate || ' '}
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  padding: '4px'
+                }}>
+                  <span style={{
+                    fontSize: '12px',
+                    fontWeight: day.isToday ? 'bold' : 'normal',
+                    color: !day.isCurrentMonth
+                      ? (theme === 'dark' ? '#4b5563' : '#9ca3af')
+                      : day.isToday
+                      ? (theme === 'dark' ? '#3b82f6' : '#2563eb')
+                      : (theme === 'dark' ? '#fff' : '#1f2937')
+                  }}>
+                    {day.date.getDate()}
+                  </span>
+                  <span style={{
+                    fontSize: '10px',
+                    opacity: 0.7,
+                    color: !day.isCurrentMonth
+                      ? (theme === 'dark' ? '#6b7280' : '#9ca3af')
+                      : (theme === 'dark' ? '#9ca3af' : '#6b7280'),
+                    marginTop: '1px'
+                  }}>
+                    {day.lunarDate || ' '}
+                  </span>
+                  
+                  {/* 心情指示器 - 绿色圆点 */}
+                  {day.hasMood && (
+                    <span style={{
+                      width: '6px',
+                      height: '6px',
+                      backgroundColor: '#22c55e',
+                      borderRadius: '50%',
+                      position: 'absolute',
+                      top: '2px',
+                      right: '2px'
+                    }}></span>
+                  )}
                 </div>
-
-                {/* 心情指示器 - 绿色圆点 */}
-                {moodIndicator}
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ol>
       </div>
     );
   };
@@ -361,7 +433,7 @@ const MoodCalendarPage = () => {
           ...mood,
           description: description || moodDescription
         };
-      } else if (existingMood) {
+      } else if (existingMood && (description || moodDescription)) {
         // 用户只更新描述，保留原有表情
         moodToSave = {
           ...existingMood,
@@ -380,6 +452,12 @@ const MoodCalendarPage = () => {
         } else {
           return; // 无法找到对应的心情类型
         }
+      } else if (existingMood) {
+        // 如果有现有心情且没有新选择，但描述有变化，也应更新
+        moodToSave = {
+          ...existingMood,
+          description: description || moodDescription
+        };
       } else {
         // 没有表情也没有现有记录，无法保存
         return;
@@ -424,7 +502,21 @@ const MoodCalendarPage = () => {
         }
       } else {
         // 如果没有选择心情类型但有描述，只更新描述
-        handleMoodSelect(null, moodDescription);
+        // 但需要确保有现有心情记录才能只更新描述
+        const existingMood = moodStorage.getMoodForDate(selectedMoodDate);
+        if (existingMood && moodDescription.trim() !== '') {
+          handleMoodSelect(null, moodDescription);
+        } else if (moodDescription.trim() !== '') {
+          // 如果没有现有心情记录但有描述，应该提示用户选择一个心情
+          alert('请先选择一个心情表情');
+          return;
+        } else {
+          // 如果描述为空且没有选择心情，直接关闭
+          setShowMoodSelector(false);
+          setSelectedMoodDate(null);
+          setCurrentSelectedMood(null); // 清空当前选择的状态
+          setMoodDescription('');
+        }
       }
     } else {
       // 如果描述为空且没有选择心情，直接关闭
@@ -460,138 +552,262 @@ const MoodCalendarPage = () => {
   };
   
   return (
-    <div className="mood-calendar-page bg-gray-50 dark:bg-gray-900 min-h-screen w-full max-w-full">
-      {/* 顶部导航栏 */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm p-4">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handleBack}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">心情日历</h1>
-          <div className="w-10"></div> {/* 占位符保持居中 */}
-        </div>
-      </div>
-
-      <div className="container mx-auto px-1 py-6 max-w-4xl">
-        {/* 选中日期信息 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {selectedDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </h2>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-gray-600 dark:text-gray-400">
-                  {selectedDate.toLocaleDateString('zh-CN', { weekday: 'long' })}
-                </p>
-                {/* 农历信息 */}
-                <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-sm">
-                  农历: {(() => {
-                    try {
-                      const dateStr = new Date(selectedDate).toISOString().split('T')[0];
-                      const lunarInfo = calculateLunarDate(dateStr);
-                      return lunarInfo ? `${lunarInfo.monthInChinese}${lunarInfo.dayInChinese}` : '未知';
-                    } catch (error) {
-                      console.error('Lunar date calculation error for selected date:', selectedDate, error);
-                      return '未知';
-                    }
-                  })()}
-                </span>
+    <div style={{ minHeight: '100vh', backgroundColor: theme === 'dark' ? '#111827' : '#f9fafb', padding: '0' }}>
+      <PageLayout
+        title="心情日历"
+        showBackButton={true}
+        onBackPress={handleBack}
+      >
+        <div style={{ padding: '0' }}>
+          {/* 选中日期信息 */}
+          <div style={{
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            borderRadius: '8px',
+            border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+            padding: '24px',
+            marginBottom: '12px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <h2 style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: theme === 'dark' ? '#fff' : '#1f2937',
+                  margin: 0
+                }}>
+                  {selectedDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </h2>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginTop: '4px'
+                }}>
+                  <p style={{
+                    color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                    margin: 0
+                  }}>
+                    {selectedDate.toLocaleDateString('zh-CN', { weekday: 'long' })}
+                  </p>
+                  {/* 农历信息 */}
+                  <span style={{
+                    padding: '2px 8px',
+                    backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}>
+                    农历: {(() => {
+                      try {
+                        const dateStr = new Date(selectedDate).toISOString().split('T')[0];
+                        const lunarInfo = calculateLunarDate(dateStr);
+                        return lunarInfo ? `${lunarInfo.monthInChinese}${lunarInfo.dayInChinese}` : '未知';
+                      } catch (error) {
+                        console.error('Lunar date calculation error for selected date:', selectedDate, error);
+                        return '未知';
+                      }
+                    })()}
+                  </span>
+                </div>
               </div>
+              {currentMood && (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '32px', marginBottom: '4px' }}>{currentMood.emoji}</div>
+                  <div style={{
+                    fontSize: '14px',
+                    color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+                  }}>{currentMood.label}</div>
+                  {currentMood.description && (
+                    <div style={{
+                      marginTop: '8px',
+                      fontSize: '12px',
+                      color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                      backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      maxWidth: '200px'
+                    }}>
+                      {currentMood.description}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            {currentMood && (
-              <div className="text-center">
-                <div className="text-4xl mb-1">{currentMood.emoji}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">{currentMood.label}</div>
-                {currentMood.description && (
-                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                    {currentMood.description}
-                  </div>
+            
+            {/* 操作按钮区域 */}
+            <div style={{
+              marginTop: '16px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{
+                fontSize: '14px',
+                color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+              }}>
+                {isFuture ? (
+                  <p>未来日期，暂未记录心情</p>
+                ) : !currentMood ? (
+                  <p>暂未记录心情</p>
+                ) : (
+                  <p>已记录心情</p>
                 )}
               </div>
-            )}
-          </div>
-          
-          {/* 操作按钮区域 */}
-          <div className="mt-4 flex justify-between items-center">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {isFuture ? (
-                <p>未来日期，暂未记录心情</p>
-              ) : !currentMood ? (
-                <p>暂未记录心情</p>
-              ) : (
-                <p>已记录心情</p>
-              )}
-            </div>
-            <div>
-              {isToday ? (
-                <button
-                  onClick={handleEditMood}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  {currentMood ? '调整心情' : '新增心情'}
-                </button>
-              ) : isFuture ? (
-                <button
-                  className="px-4 py-2 bg-gray-300 text-white rounded-lg cursor-not-allowed"
-                  disabled
-                >
-                  未来日期
-                </button>
-              ) : currentMood ? (
-                <button
-                  onClick={handleEditMood}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  查看/调整心情
-                </button>
-              ) : (
-                <button
-                  onClick={handleEditMood}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  添加心情
-                </button>
-              )}
+              <div>
+                {isToday ? (
+                  <button
+                    onClick={handleEditMood}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#3b82f6',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                  >
+                    {currentMood ? '调整心情' : '新增心情'}
+                  </button>
+                ) : isFuture ? (
+                  <button
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#d1d5db',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'not-allowed'
+                    }}
+                    disabled
+                  >
+                    未来日期
+                  </button>
+                ) : currentMood ? (
+                  <button
+                    onClick={handleEditMood}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#3b82f6',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                  >
+                    查看/调整心情
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleEditMood}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#3b82f6',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                  >
+                    添加心情
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* 日历视图 */}
-        <CalendarView 
-          onMoodSelect={handleEditMood}
-        />
+        <div style={{
+          backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+          borderRadius: '8px',
+          border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+          overflow: 'hidden'
+        }}>
+          <CalendarView 
+            onMoodSelect={handleEditMood}
+          />
+        </div>
 
         {/* 说明文字 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 text-sm text-gray-600 dark:text-gray-400">
-          <p>• 点击日历中的日期可以添加或查看当天心情</p>
-          <p>• 今天和未来日期可以修改心情记录</p>
-          <p>• 历史日期的心情记录不可修改</p>
+        <div style={{
+          backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+          borderRadius: '8px',
+          border: `1px solid ${theme === 'dark' ? '#374151' : '#e5e7eb'}`,
+          padding: '16px',
+          fontSize: '14px',
+          color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+          marginBottom: '12px'
+        }}>
+          <p style={{ margin: '4px 0' }}>• 点击日历中的日期可以添加或查看当天心情</p>
+          <p style={{ margin: '4px 0' }}>• 今天和未来日期可以修改心情记录</p>
+          <p style={{ margin: '4px 0' }}>• 历史日期的心情记录不可修改</p>
         </div>
-      </div>
+      </PageLayout>
       
       {/* 心情选择器弹窗 */}
       {showMoodSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 max-w-sm w-full max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50,
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+            borderRadius: '12px',
+            padding: '16px',
+            maxWidth: '400px',
+            width: '100%',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '12px'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: theme === 'dark' ? '#fff' : '#111827',
+                margin: 0
+              }}>
                 {selectedMoodDate && typeof selectedMoodDate === 'object' && selectedMoodDate.toLocaleDateString ? selectedMoodDate.toLocaleDateString('zh-CN') : ''}
               </h3>
               <button
                 onClick={closeMoodSelector}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                style={{
+                  color: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  borderRadius: '4px'
+                }}
               >
                 ✕
               </button>
             </div>
             
-            <div className="grid grid-cols-4 gap-2 mb-3">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '8px',
+              marginBottom: '12px'
+            }}>
               {getAllMoodEmojis().map((mood) => (
                 <button
                   key={mood.value}
@@ -600,18 +816,36 @@ const MoodCalendarPage = () => {
                     // Don't save immediately, just set the selected mood
                     // User can add description and click save button
                   }}
-                  className={`p-2 rounded-lg border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-colors flex flex-col items-center ${
-                    currentSelectedMood === mood.value || (selectedMoodDate && !currentSelectedMood && moodStorage.getMoodForDate(selectedMoodDate)?.type === mood.value)
-                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30' 
-                      : 'bg-gray-50 dark:bg-gray-700'
-                  }`}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '8px',
+                    border: currentSelectedMood === mood.value || (selectedMoodDate && !currentSelectedMood && moodStorage.getMoodForDate(selectedMoodDate)?.type === mood.value)
+                      ? '2px solid #3b82f6'  // border-blue-500
+                      : '2px solid transparent',
+                    backgroundColor: currentSelectedMood === mood.value || (selectedMoodDate && !currentSelectedMood && moodStorage.getMoodForDate(selectedMoodDate)?.type === mood.value)
+                      ? '#eff6ff'  // bg-blue-50
+                      : theme === 'dark' ? '#374151' : '#f9fafb',  // dark:bg-gray-700 : bg-gray-50
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}
                 >
-                  <span className="text-xl">{mood.emoji}</span>
-                  <span className="text-xs text-gray-600 dark:text-gray-300 truncate">{mood.label}</span>
+                  <span style={{ fontSize: '1.5em' }}>{mood.emoji}</span>
+                  <span style={{
+                    fontSize: '12px',
+                    color: theme === 'dark' ? '#d1d5db' : '#4b5563',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%'
+                  }}>{mood.label}</span>
                 </button>
               ))}
             </div>
-            <div className="flex flex-col space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <textarea
                 value={moodDescription}
                 onChange={(e) => setMoodDescription(e.target.value)}
@@ -625,24 +859,54 @@ const MoodCalendarPage = () => {
                   }
                 }}
                 placeholder="添加心情备注..."
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: `1px solid ${theme === 'dark' ? '#4b5563' : '#d1d5db'}`,
+                  borderRadius: '6px',
+                  backgroundColor: theme === 'dark' ? '#374151' : '#fff',
+                  color: theme === 'dark' ? '#fff' : '#111827',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  minHeight: '60px',
+                  resize: 'vertical'
+                }}
                 rows="2"
               />
-              <div className="flex justify-end space-x-2">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button
                   onClick={closeMoodSelector}
-                  className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '14px',
+                    backgroundColor: theme === 'dark' ? '#4b5563' : '#e5e7eb',
+                    color: theme === 'dark' ? '#d1d5db' : '#374151',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
                 >
                   取消
                 </button>
                 <button
                   onClick={handleSaveMoodAndDescription}
                   disabled={!moodDescription.trim() && !currentSelectedMood}
-                  className={`px-3 py-1 text-sm rounded transition-colors ${
-                    moodDescription.trim() || currentSelectedMood
-                      ? 'bg-blue-500 text-white hover:bg-blue-600' 
-                      : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                  }`}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '14px',
+                    backgroundColor: moodDescription.trim() || currentSelectedMood
+                      ? '#3b82f6'  // bg-blue-500
+                      : theme === 'dark' ? '#4b5563' : '#d1d5db',  // bg-gray-300 dark:bg-gray-600
+                    color: moodDescription.trim() || currentSelectedMood
+                      ? '#fff'  // text-white
+                      : theme === 'dark' ? '#9ca3af' : '#9ca3af',  // text-gray-500 dark:text-gray-400
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: moodDescription.trim() || currentSelectedMood ? 'pointer' : 'not-allowed',
+                    transition: 'background-color 0.2s'
+                  }}
                 >
                   保存心情
                 </button>
