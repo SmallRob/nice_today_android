@@ -32,23 +32,72 @@ const UnifiedDocumentViewerPage = () => {
     return /\.md$|\.markdown$/i.test(path);
   };
 
+  // 清理历史记录数据，移除不必要的内容字段
+  const cleanHistoryData = (history) => {
+    return history.map(item => {
+      // 只保留必要的字段，移除可能很大的content字段
+      return {
+        path: item.path,
+        title: item.title,
+        scrollPosition: item.scrollPosition || 0,
+        timestamp: item.timestamp,
+        isMarkdown: item.isMarkdown,
+        folderName: item.folderName,
+        addedAt: item.addedAt
+        // 不包含 content 字段以节省空间
+      };
+    });
+  };
+  
   // 加载文档列表
   useEffect(() => {
     const storedList = JSON.parse(localStorage.getItem('documentList') || '[]');
     setDocumentList(storedList);
     
-    const storedHistory = JSON.parse(localStorage.getItem('documentHistory') || '[]');
+    let storedHistory = JSON.parse(localStorage.getItem('documentHistory') || '[]');
+    // 清理历史记录数据，移除可能占用大量空间的内容字段
+    storedHistory = cleanHistoryData(storedHistory);
     setDocumentHistory(storedHistory);
   }, []);
 
-  // 保存文档列表到localStorage
+  // 保存文档列表到localStorage，带错误处理
   const saveDocumentList = useCallback((list) => {
-    localStorage.setItem('documentList', JSON.stringify(list));
+    try {
+      // 检查localStorage容量
+      const serializedList = JSON.stringify(list);
+      localStorage.setItem('documentList', serializedList);
+    } catch (error) {
+      console.error('保存文档列表到localStorage失败:', error);
+      // 如果存储失败，尝试减少列表大小
+      if (list.length > 10) {
+        const reducedList = list.slice(0, 10);
+        try {
+          localStorage.setItem('documentList', JSON.stringify(reducedList));
+        } catch (e) {
+          console.error('减少列表大小后仍然无法保存:', e);
+        }
+      }
+    }
   }, []);
 
-  // 保存历史记录到localStorage
+  // 保存历史记录到localStorage，带错误处理
   const saveDocumentHistory = useCallback((history) => {
-    localStorage.setItem('documentHistory', JSON.stringify(history));
+    try {
+      // 检查localStorage容量
+      const serializedHistory = JSON.stringify(history);
+      localStorage.setItem('documentHistory', serializedHistory);
+    } catch (error) {
+      console.error('保存历史记录到localStorage失败:', error);
+      // 如果存储失败，尝试减少历史记录大小
+      if (history.length > 5) {
+        const reducedHistory = history.slice(0, 5);
+        try {
+          localStorage.setItem('documentHistory', JSON.stringify(reducedHistory));
+        } catch (e) {
+          console.error('减少历史记录大小后仍然无法保存:', e);
+        }
+      }
+    }
   }, []);
 
   // 添加文档到列表
@@ -82,20 +131,27 @@ const UnifiedDocumentViewerPage = () => {
       const existingIndex = prevHistory.findIndex(item => item.path === doc.path);
       let newHistory;
       
+      // 创建历史记录项，不包含完整内容以节省空间
+      const historyItem = {
+        path: doc.path,
+        title: doc.title,
+        scrollPosition: doc.scrollPosition || 0,
+        timestamp: new Date().toISOString(),
+        isMarkdown: doc.isMarkdown,
+        folderName: doc.folderName,
+        addedAt: doc.addedAt
+      };
+      
       if (existingIndex !== -1) {
         // 更新已存在的记录
         newHistory = [...prevHistory];
         newHistory[existingIndex] = {
           ...newHistory[existingIndex],
-          ...doc,
-          timestamp: new Date().toISOString()
+          ...historyItem
         };
       } else {
         // 添加新记录
-        newHistory = [{
-          ...doc,
-          timestamp: new Date().toISOString()
-        }, ...prevHistory];
+        newHistory = [historyItem, ...prevHistory];
       }
       
       // 限制历史记录数量
@@ -188,8 +244,8 @@ const UnifiedDocumentViewerPage = () => {
         addToHistory({
           path: file.name,
           title: file.name,
-          content: content,
-          scrollPosition: 0
+          scrollPosition: 0,
+          isMarkdown: checkIfMarkdown(file.name)
         });
       } catch (error) {
         console.error('读取文件失败:', error);
@@ -278,21 +334,35 @@ const UnifiedDocumentViewerPage = () => {
     setScrollPosition(doc.scrollPosition || 0);
     setActiveTab('viewer');
     
-    // 添加到历史记录
+    // 添加到历史记录（只包含必要信息，不包含完整内容）
     addToHistory({
       path: doc.path,
       title: doc.title,
-      content: doc.content,
-      scrollPosition: doc.scrollPosition || 0
+      scrollPosition: doc.scrollPosition || 0,
+      isMarkdown: doc.isMarkdown,
+      folderName: doc.folderName,
+      addedAt: doc.addedAt
     });
   };
 
   // 从历史记录打开文档
   const handleOpenFromHistory = (historyItem) => {
-    setDocumentContent(historyItem.content);
+    // 检查文档是否在文档列表中，以获取完整内容
+    const docInList = documentList.find(doc => doc.path === historyItem.path);
+    
+    if (docInList) {
+      // 如果在文档列表中，使用列表中的内容
+      setDocumentContent(docInList.content);
+      setIsMarkdown(docInList.isMarkdown);
+    } else {
+      // 如果不在列表中，尝试从localStorage中获取内容（如果有的话）
+      // 这种情况应该很少发生，因为文档内容不再存储在历史记录中
+      setDocumentContent(historyItem.content || '');
+      setIsMarkdown(historyItem.isMarkdown);
+    }
+    
     setDocumentTitle(historyItem.title);
     setDocumentPath(historyItem.path);
-    setIsMarkdown(checkIfMarkdown(historyItem.path));
     setScrollPosition(historyItem.scrollPosition || 0);
     setActiveTab('viewer');
   };
