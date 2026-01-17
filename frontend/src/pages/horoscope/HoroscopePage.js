@@ -104,22 +104,45 @@ const HoroscopePage = () => {
     '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'
   ];
 
-  // 渲染得分柱状图
-  const ScoreBar = ({ score, label, color }) => (
-    <div className="flex flex-col items-center flex-1 min-w-0">
-      <div className="relative h-24 w-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div
-          className="absolute bottom-0 left-0 right-0 rounded-full transition-all duration-1000"
-          style={{
-            height: `${score}%`,
-            background: color || 'linear-gradient(to top, #ff7eb3, #ff758c)'
-          }}
-        />
+  // 渲染彩虹能量柱状图
+  const RainbowScoreBar = ({ score, label, index }) => {
+    // 彩虹颜色渐变数组
+    const rainbowColors = [
+      'linear-gradient(to top, #ff0000, #ff7f00)',      // 红-橙
+      'linear-gradient(to top, #ffff00, #7fff00)',      // 黄-绿
+      'linear-gradient(to top, #00ff00, #00ffff)',      // 绿-青
+      'linear-gradient(to top, #0000ff, #4b0082)',      // 蓝-靛
+      'linear-gradient(to top, #8b00ff, #9400d3)'       // 靛-紫
+    ];
+    
+    const colorIndex = index % rainbowColors.length;
+    
+    return (
+      <div className="flex flex-col items-center flex-1 min-w-0">
+        <div className="relative h-28 w-6 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden shadow-lg">
+          <div
+            className="absolute bottom-0 left-0 right-0 rounded-full transition-all duration-1000 ease-out transform-gpu"
+            style={{
+              height: `${score}%`,
+              background: rainbowColors[colorIndex],
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          />
+          {/* 顶部高光效果 */}
+          <div
+            className="absolute top-0 left-0 right-0 h-2 bg-white opacity-30 rounded-t-full"
+            style={{
+              background: `linear-gradient(to bottom, ${rainbowColors[colorIndex].split('gradient')[1].split(')')[0]}, transparent)`
+            }}
+          />
+        </div>
+        <div className="mt-2 text-center">
+          <span className="text-xs font-bold text-gray-900 dark:text-white">{score}</span>
+        </div>
+        <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 text-center font-medium">{label}</span>
       </div>
-      <span className="text-xs font-bold mt-2 dark:text-gray-300">{score}</span>
-      <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 text-center">{label}</span>
-    </div>
-  );
+    );
+  };
 
   // 渲染宜忌标签
   const TagList = ({ title, items, type }) => (
@@ -204,7 +227,7 @@ const HoroscopePage = () => {
 
       <div className="px-4 mt-2 max-w-2xl mx-auto space-y-6 pb-20">
         {/* 核心卡片 */}
-        <div className="bg-[#fefff0] dark:bg-gray-800 rounded-[2.5rem] p-7 shadow-2xl relative overflow-hidden border border-yellow-100/50 dark:border-gray-700">
+        <div className="bg-[#fefff0] dark:bg-gray-800 rounded-[2.5rem] p-7 shadow-2xl relative overflow-hidden border border-yellow-100/50 dark:border-gray-700" style={{ minHeight: '280px' }}>
           <div className="flex justify-between items-start mb-8">
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-1">
@@ -220,9 +243,6 @@ const HoroscopePage = () => {
                 </span>
               </h2>
             </div>
-            <div className="bg-yellow-400/20 text-yellow-800 text-[10px] font-black px-3 py-1 rounded-full border border-yellow-400/30">
-              PRO
-            </div>
           </div>
 
           {!loading && horoscopeData && (
@@ -230,23 +250,25 @@ const HoroscopePage = () => {
               {/* 总分 */}
               <div className="flex flex-col items-center">
                 <div className="relative">
-                  <span className="text-7xl font-black text-gray-800 dark:text-white tracking-tighter">
+                  <span className="text-6xl sm:text-7xl font-black text-gray-800 dark:text-white tracking-tighter">
                     {horoscopeData.overallScore}
                   </span>
                   {/* 装饰环 */}
-                  <div className="absolute -top-4 -left-4 w-24 h-24 border border-gray-200 rounded-full opacity-30 rotate-12" />
+                  <div className="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 w-20 sm:w-24 h-20 sm:h-24 border border-gray-200 rounded-full opacity-30 rotate-12" />
                 </div>
-                <div className="mt-2 bg-gray-700 dark:bg-gray-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-                  Score
+                <div className="mt-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] sm:text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                  综合评分
                 </div>
               </div>
 
-              {/* 四维柱状图 - 优化为窄屏幕适配，确保每行显示4列 */}
-              <div className="flex-1 grid grid-cols-4 gap-0.5 sm:gap-1 flex-shrink-0">
-                <ScoreBar score={horoscopeData.dailyForecast.love.score} label="爱情" color="linear-gradient(to top, #ff7eb3, #ff758c)" />
-                <ScoreBar score={horoscopeData.dailyForecast.wealth.score} label="财富" color="linear-gradient(to top, #ffcc33, #ffb347)" />
-                <ScoreBar score={horoscopeData.dailyForecast.career.score} label="事业" color="linear-gradient(to top, #6a85f2, #7c9ff2)" />
-                <ScoreBar score={horoscopeData.dailyForecast.study.score} label="学业" color="linear-gradient(to top, #48c6ef, #00d2ff)" />
+              {/* 彩虹能量提示条 - 水平布局整体显示 */}
+              <div className="flex-1 overflow-hidden">
+                <div className="flex justify-between items-end" style={{ height: '160px' }}>
+                  <RainbowScoreBar score={horoscopeData.dailyForecast.love.score} label="爱情" index={0} />
+                  <RainbowScoreBar score={horoscopeData.dailyForecast.wealth.score} label="财富" index={1} />
+                  <RainbowScoreBar score={horoscopeData.dailyForecast.career.score} label="事业" index={2} />
+                  <RainbowScoreBar score={horoscopeData.dailyForecast.study.score} label="学业" index={3} />
+                </div>
               </div>
             </div>
           )}
