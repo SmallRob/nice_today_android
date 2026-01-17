@@ -984,7 +984,7 @@ const ConfigEditModal = ({ isOpen, onClose, config, index, isNew, onSave, showMe
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" style={{ flexWrap: 'nowrap' }} onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-full max-h-[90vh] overflow-hidden flex flex-col" style={{ flexWrap: 'nowrap', maxWidth: '100vw', margin: '0 auto' }} onClick={e => e.stopPropagation()}>
         {/* 保存错误提示（新增） */}
         {saveError && (
           <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">

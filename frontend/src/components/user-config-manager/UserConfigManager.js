@@ -2274,16 +2274,17 @@ const UserConfigManager = () => {
   };
 
   return (
-    <div className="user-config-manager-wrapper space-y-4">
+    <div className="user-config-manager-wrapper" style={{ padding: '0 12px', width: '100%' }}>
       {/* 消息提示 */}
       {message && (
-        <div className={`p-4 rounded-lg ${message.type === 'error' ? 'bg-red-50 dark:bg-red-900 border-l-4 border-red-400' : message.type === 'success' ? 'bg-green-50 dark:bg-green-900 border-l-4 border-green-400' : 'bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400'}`}>
-          <p className={`${message.type === 'error' ? 'text-red-700 dark:text-red-300' : message.type === 'success' ? 'text-green-700 dark:text-green-300' : 'text-blue-700 dark:text-blue-300'} whitespace-pre-line`}>
+        <div className={`p-3 mb-4 rounded-lg ${message.type === 'error' ? 'bg-red-50 dark:bg-red-900 border-l-4 border-red-400' : message.type === 'success' ? 'bg-green-50 dark:bg-green-900 border-l-4 border-green-400' : 'bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400'}`}>
+          <p className={`${message.type === 'error' ? 'text-red-700 dark:text-red-300' : message.type === 'success' ? 'text-green-700 dark:text-green-300' : 'text-blue-700 dark:text-blue-300'} text-sm whitespace-pre-line`}>
             {message.text}
           </p>
         </div>
       )}
-      {/* 用户信息 - 使用优化的卡片样式 */}
+
+      {/* 用户信息卡片 - 简化版 */}
       <Card
         title="用户信息"
         headerAction={
@@ -2303,9 +2304,85 @@ const UserConfigManager = () => {
           </button>
         }
       >
-        <div className={`p-4 ${!isUserInfoExpanded ? 'hidden' : ''}`}>
+        <div className={`p-3 ${!isUserInfoExpanded ? 'hidden' : ''}`}>
           {configs[activeConfigIndex] ? (
-            <UserInfoCard config={configs[activeConfigIndex]} />
+            <div className="space-y-3">
+              {/* 用户基本信息 */}
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  {configs[activeConfigIndex].realName?.charAt(0) || configs[activeConfigIndex].nickname?.charAt(0) || '?'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                      {configs[activeConfigIndex].realName || configs[activeConfigIndex].nickname || '匿名用户'}
+                    </h3>
+                    {configs[activeConfigIndex].nameScore && (
+                      <span className={`px-2 py-1 text-xs rounded font-bold ${
+                        configs[activeConfigIndex].nameScore.totalScore >= 90 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        configs[activeConfigIndex].nameScore.totalScore >= 80 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                        configs[activeConfigIndex].nameScore.totalScore >= 70 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                        configs[activeConfigIndex].nameScore.totalScore >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        {configs[activeConfigIndex].nameScore.totalScore}分
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {configs[activeConfigIndex].nickname || '未设置昵称'}
+                  </p>
+                </div>
+              </div>
+
+              {/* 简化详情 */}
+              <div className="space-y-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">出生日期</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {configs[activeConfigIndex].birthDate || '未设置'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">星座</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {configs[activeConfigIndex].zodiac || '未设置'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">生肖</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {configs[activeConfigIndex].zodiacAnimal || '未设置'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">MBTI</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {configs[activeConfigIndex].mbti || '未设置'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 操作按钮 */}
+              <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <button
+                  onClick={() => handleScoreName(activeConfigIndex)}
+                  className="py-2 px-3 text-sm bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-800/50 transition-colors text-center"
+                >
+                  {configs[activeConfigIndex].nameScore ? '重新评分' : '姓名评分'}
+                </button>
+                <button
+                  onClick={() => handleBaziSync(activeConfigIndex)}
+                  disabled={isBaziSyncing}
+                  className={`py-2 px-3 text-sm rounded transition-colors text-center ${
+                    isBaziSyncing ? 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400' : 
+                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/50'
+                  }`}
+                >
+                  {isBaziSyncing ? '同步中...' : '八字同步'}
+                </button>
+              </div>
+            </div>
           ) : (
             <p className="text-gray-500 dark:text-white text-center py-4">当前没有可用配置</p>
           )}

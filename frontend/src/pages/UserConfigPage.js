@@ -57,19 +57,19 @@ const ComponentLoadingFallback = ({ componentName = '组件' }) => (
 function UserConfigPage() {
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900" style={{ minHeight: '-webkit-fill-available', width: '100%' }}>
-
+      
       {/* 内容区域 */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="container max-w-full mx-auto px-4 py-4" style={{ minWidth: '100%', maxWidth: '100vw', width: '100%' }}>
+      <div className="flex-1 overflow-y-auto" style={{ padding: '0 8px' }}>
+        <div className="w-full mx-auto px-3 py-4" style={{ maxWidth: '100vw', minWidth: '100%', boxSizing: 'border-box' }}>
           <ConfigErrorBoundary fallback={
-            <div className="p-6">
+            <div className="p-4" style={{ maxWidth: '100%', margin: '0 auto' }}>
               <div className="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 rounded-lg mb-4">
                 <h3 className="font-bold text-yellow-900 dark:text-yellow-100 mb-2">用户配置加载失败</h3>
                 <p className="text-sm text-yellow-700 dark:text-yellow-300">
                   配置管理器遇到问题。可能是网络问题或存储空间不足。
                 </p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3" style={{ maxWidth: '100%', margin: '0 auto' }}>
                 <button
                   onClick={() => {
                     console.log('尝试清除存储并重置');
@@ -82,12 +82,14 @@ function UserConfigPage() {
                     }
                   }}
                   className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-md"
+                  style={{ maxWidth: '100%', minWidth: '100%' }}
                 >
                   清除存储并重置
                 </button>
                 <button
                   onClick={() => window.location.reload()}
                   className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+                  style={{ maxWidth: '100%', minWidth: '100%' }}
                 >
                   刷新页面
                 </button>
