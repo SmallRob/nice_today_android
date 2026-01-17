@@ -356,13 +356,13 @@ const BodyMetricsPage = () => {
         </div>
 
         {/* 指标分类导航 */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-lg mb-6 overflow-x-auto">
-          <div className="flex space-x-1">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg mb-6 overflow-x-auto">
+          <div className="flex justify-between">
             {Object.keys(metricsByCategory).map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap flex-shrink-0 transition-colors ${
                   activeCategory === category
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'

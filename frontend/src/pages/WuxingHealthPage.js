@@ -393,20 +393,54 @@ const WuxingHealthPage = () => {
         .hide-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
       {/* 导航标题栏 */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center space-x-2 min-w-0">
-              <span className="text-2xl sm:text-3xl flex-shrink-0">☯️</span>
-              <h1 className="text-xl font-bold truncate">五行养生</h1>
-            </div>
-            <button
-              onClick={() => navigate('/dress')}
-              className="text-white hover:text-white/90 text-sm bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-full transition-all whitespace-nowrap backdrop-blur-sm shadow-sm flex-shrink-0"
-            >
-              穿衣指南
-            </button>
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        background: 'linear-gradient(to right, #9333ea, #4f46e5)',
+        color: '#ffffff',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        height: '60px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          height: '100%'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            minWidth: 0
+          }}>
+            <span style={{ fontSize: '24px', marginRight: '8px', flexShrink: 0 }}>☯️</span>
+            <h1 style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              margin: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              五行养生
+            </h1>
           </div>
+          <button
+            onClick={() => navigate('/dress')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'none',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: '14px'
+            }}
+          >
+            穿衣指南
+          </button>
         </div>
       </div>
 

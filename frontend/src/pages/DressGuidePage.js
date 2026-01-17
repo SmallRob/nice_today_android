@@ -345,7 +345,7 @@ const DressGuidePage = () => {
         )}
 
         {/* 色彩推荐 */}
-        <div className="grid grid-cols-1 gap-4 mb-6">
+        <div className="flex flex-col gap-4 mb-6">
           {/* 吉祥色 */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-gray-700 shadow-md">
             <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center text-green-600 dark:text-green-400">
@@ -355,20 +355,20 @@ const DressGuidePage = () => {
             <div className="space-y-3">
               {luckyColors.map((colorItem, i) => (
                 <div key={i} className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-700/40 rounded-xl group transition-all hover:shadow-md">
-                  <div className={`w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-600 ${getColorHex(colorItem.颜色系统)}`}>
-                    <IconLibrary.Icon name="stylish" size={20} className={colorItem.颜色系统.includes('白') ? 'text-gray-400' : 'text-white'} />
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-600 ${getColorHex(colorItem.颜色系统)}`}>
+                    <IconLibrary.Icon name="stylish" size={16} className={colorItem.颜色系统.includes('白') ? 'text-gray-400' : 'text-white'} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm sm:text-base font-bold text-gray-800 dark:text-white">{colorItem.颜色系统}</span>
-                      <span className="text-[10px] sm:text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-200 px-2 py-0.5 rounded-full">宜</span>
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="flex items-center justify-between mb-1 flex-nowrap">
+                      <span className="text-sm sm:text-base font-bold text-gray-800 dark:text-white truncate">{colorItem.颜色系统}</span>
+                      <span className="text-[10px] sm:text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-200 px-2 py-0.5 rounded-full flex-shrink-0">宜</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {colorItem.具体颜色.map((c, ci) => (
                         <span key={ci} className="text-[11px] sm:text-xs px-2 py-0.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md text-gray-600 dark:text-gray-200 shadow-sm">{c}</span>
                       ))}
                     </div>
-                    <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-300 leading-tight">{colorItem.描述}</p>
+                    <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-300 leading-tight break-words">{colorItem.描述}</p>
                   </div>
                 </div>
               ))}
@@ -388,17 +388,17 @@ const DressGuidePage = () => {
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 flex items-center justify-center shadow-lg border-2 border-white dark:border-gray-600 ${getColorHex(colorItem.颜色系统)}`}>
                       <IconLibrary.Icon name="close" size={16} className={colorItem.颜色系统.includes('白') ? 'text-gray-400' : 'text-white'} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm sm:text-base font-bold text-gray-800 dark:text-white">{colorItem.颜色系统}</span>
-                        <span className="text-[10px] sm:text-xs bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 px-2 py-0.5 rounded-full">慎用</span>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex items-center justify-between mb-1 flex-nowrap">
+                        <span className="text-sm sm:text-base font-bold text-gray-800 dark:text-white truncate">{colorItem.颜色系统}</span>
+                        <span className="text-[10px] sm:text-xs bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 px-2 py-0.5 rounded-full flex-shrink-0">慎用</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 mb-2">
                         {colorItem.具体颜色?.map((c, ci) => (
                           <span key={ci} className="text-[11px] sm:text-xs px-2 py-0.5 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-200 shadow-sm">{c}</span>
                         ))}
                       </div>
-                      <p className="text-[11px] sm:text-xs text-red-600 dark:text-red-300 leading-tight opacity-80">{colorItem.描述 || '建议今日避免穿着此色系，可选择其他推荐颜色'}</p>
+                      <p className="text-[11px] sm:text-xs text-red-600 dark:text-red-300 leading-tight opacity-80 break-words">{colorItem.描述 || '建议今日避免穿着此色系，可选择其他推荐颜色'}</p>
                     </div>
                   </div>
                 ))}
@@ -412,15 +412,15 @@ const DressGuidePage = () => {
               <IconLibrary.Icon name="food" size={18} className="mr-2 text-orange-500" />
               饮食宜忌指南
             </h3>
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+            <div className="flex flex-col space-y-3">
               <div className="flex-1 bg-green-50/50 dark:bg-green-900/10 p-3 rounded-xl border border-green-100/50 dark:border-green-800/30">
                 <div className="flex items-center mb-3">
                   <IconLibrary.Icon name="success" size={14} className="text-green-500 mr-1.5" />
                   <span className="text-xs sm:text-sm font-bold text-green-800 dark:text-green-200">宜食清补</span>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5 overflow-hidden">
                   {selectedDressInfo?.food_suggestions?.宜?.map((f, i) => (
-                    <span key={i} className="text-[11px] sm:text-xs px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white rounded-lg shadow-sm border border-green-50 dark:border-green-900/50">{f}</span>
+                    <span key={i} className="text-[11px] sm:text-xs px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white rounded-lg shadow-sm border border-green-50 dark:border-green-900/50 break-words">{f}</span>
                   ))}
                 </div>
               </div>
@@ -429,9 +429,9 @@ const DressGuidePage = () => {
                   <IconLibrary.Icon name="error" size={14} className="text-red-500 mr-1.5" />
                   <span className="text-xs sm:text-sm font-bold text-red-800 dark:text-red-200">少食油腻</span>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5 overflow-hidden">
                   {selectedDressInfo?.food_suggestions?.忌?.map((f, i) => (
-                    <span key={i} className="text-[11px] sm:text-xs px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white rounded-lg shadow-sm border border-red-50 dark:border-red-900/50">{f}</span>
+                    <span key={i} className="text-[11px] sm:text-xs px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white rounded-lg shadow-sm border border-red-50 dark:border-red-900/50 break-words">{f}</span>
                   ))}
                 </div>
               </div>
