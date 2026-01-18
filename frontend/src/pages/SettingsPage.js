@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAppVersion } from '../utils/capacitor';
 import { Capacitor } from '@capacitor/core';
-import { Card, Button } from '../components/PageLayout.js';
 import updateCheckService from '../utils/updateCheckService';
 import { useNotification } from '../context/NotificationContext';
 import { useTheme } from '../context/ThemeContext';
@@ -10,17 +9,7 @@ import { restartApp } from '../utils/restartApp';
 import { errorTrackingSettings } from '../utils/errorTrackingSettings';
 import versionData from '../version.json';
 import '../index.css';
-
-// 懒加载大型组件，避免启动时阻塞
-
-
-// 组件加载占位符
-const ComponentLoadingFallback = ({ componentName = '组件' }) => (
-  <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
-    <span className="text-sm text-gray-600 dark:text-gray-400">加载{componentName}中...</span>
-  </div>
-);
+import '../styles/settingsPage.css';
 
 function SettingsPage() {
   const [appVersion, setAppVersion] = useState({
@@ -37,6 +26,7 @@ function SettingsPage() {
   const [useLocalCalculation, setUseLocalCalculation] = useState(true);
   const [cacheTimeout, setCacheTimeout] = useState(10800000); // 默认3小时
   const [dataSyncEnabled, setDataSyncEnabled] = useState(true); // 数据同步状态
+  const [currentAppVersion, setCurrentAppVersion] = useState('full'); // 当前应用版本
   const [isLoaded, setIsLoaded] = useState(false);
   const { showNotification } = useNotification();
   const [error, setError] = useState(null);
@@ -55,9 +45,6 @@ function SettingsPage() {
   const [errorTrackingEnabled, setErrorTrackingEnabled] = useState(() => {
     return errorTrackingSettings.isEnabled();
   });
-
-  // 滚动容器引用
-  const scrollContainerRef = useRef(null);
 
   // 切换错误日志追踪
   const handleToggleErrorTracking = useCallback(() => {
@@ -116,6 +103,22 @@ function SettingsPage() {
           const savedDataSync = localStorage.getItem('dataSyncEnabled');
           if (savedDataSync !== null) {
             setDataSyncEnabled(savedDataSync === 'true');
+          }
+
+          // 初始化版本检测器并获取当前版本
+          try {
+            await versionDetector.initialize();
+            const version = versionDetector.getCurrentVersion();
+            if (isMounted) {
+              setCurrentAppVersion(version);
+            }
+          } catch (versionError) {
+            console.warn('版本检测器初始化失败:', versionError);
+            // 降级到localStorage
+            const savedVersion = localStorage.getItem('appVersion') || 'full';
+            if (isMounted) {
+              setCurrentAppVersion(savedVersion);
+            }
           }
         } catch (localError) {
           console.warn('加载本地设置失败:', localError);
@@ -212,8 +215,7 @@ function SettingsPage() {
 
   // 切换应用版本
   const handleVersionSwitch = (version) => {
-    const currentVersion = versionDetector.getCurrentVersion();
-    if (version === currentVersion) {
+    if (version === currentAppVersion) {
       showNotification({
         type: 'info',
         title: '提示',
@@ -233,6 +235,7 @@ function SettingsPage() {
           primary: true,
           onClick: () => {
             versionDetector.switchVersion(version);
+            setCurrentAppVersion(version);
             restartApp();
           }
         },
@@ -241,6 +244,7 @@ function SettingsPage() {
           onClick: () => {
             // 仅保存设置但不重启
             localStorage.setItem('appVersion', version);
+            setCurrentAppVersion(version);
             showNotification({
               type: 'success',
               title: '设置成功',
@@ -253,14 +257,9 @@ function SettingsPage() {
     });
   };
 
-  // 获取当前版本
-  const getCurrentVersion = () => {
-    return localStorage.getItem('appVersion') || 'full';
-  };
-
   // 重新加载当前版本
   const handleReloadCurrentVersion = () => {
-    const currentVersion = getCurrentVersion();
+    const currentVersion = currentAppVersion;
     showNotification({
       type: 'info',
       title: '重新加载确认',
@@ -384,23 +383,41 @@ function SettingsPage() {
     }
   }, []);
 
+  const SectionCard = ({ title, children }) => (
+    <div className="settings-section">
+      <h2 className="settings-section-title">{title}</h2>
+      {children}
+    </div>
+  );
+
+  const ToggleSwitch = ({ checked, onChange, id }) => (
+    <label className="settings-toggle" htmlFor={id}>
+      <input
+        type="checkbox"
+        id={id}
+        checked={checked}
+        onChange={onChange}
+      />
+      <span className="settings-slider"></span>
+    </label>
+  );
+
   if (!isLoaded) {
     return (
-      <div className="h-full bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4">系统设置</h1>
-        </div>
-        <div className="flex justify-center items-center py-20">
-          <div className="text-center space-y-4">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-8 w-8 bg-blue-500 rounded-full animate-pulse"></div>
+      <div className="settings-page h-full bg-gray-50 dark:bg-gray-900">
+        <div className="settings-container">
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center space-y-4">
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-8 w-8 bg-blue-500 rounded-full animate-pulse"></div>
+                </div>
               </div>
-            </div>
-            <div>
-              <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">正在加载设置...</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">请稍候，正在初始化应用配置</p>
+              <div>
+                <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">正在加载设置...</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">请稍候，正在初始化应用配置</p>
+              </div>
             </div>
           </div>
         </div>
@@ -409,40 +426,38 @@ function SettingsPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* 顶部标题区域 */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto px-4 py-3">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">⚙️ 系统设置</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">配置应用系统参数</p>
+    <div className="settings-page bg-gray-50 dark:bg-gray-900">
+      <div className="settings-container">
+        {/* 顶部标题区域 */}
+        <div className="settings-header">
+          <h1 className="settings-title">⚙️ 系统设置</h1>
+          <p className="settings-subtitle">配置应用系统参数</p>
         </div>
-      </div>
 
-      {/* 固定顶部区域 - 包含错误提示和成功提示 */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800">
-        {/* 错误提示 */}
+        {/* 错误和成功提示 */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-4">
+          <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-3 rounded-lg mt-4">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
-              <p className="text-red-700 dark:text-red-300">{error}</p>
+              <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
             </div>
           </div>
         )}
 
-        {/* 成功提示 */}
         {success && (
-          <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-400 p-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <p className="text-green-700 dark:text-green-300">{success}</p>
+          <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-400 p-3 rounded-lg mt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <p className="text-green-700 dark:text-green-300 text-sm">{success}</p>
+              </div>
               <button
                 onClick={() => setSuccess(null)}
-                className="ml-auto text-green-500 hover:text-green-700"
+                className="text-green-500 hover:text-green-700 text-sm"
               >
                 ✕
               </button>
@@ -451,314 +466,279 @@ function SettingsPage() {
         )}
       </div>
 
-      {/* 独立滚动的内容区域 */}
-      <div className="flex-1 overflow-hidden">
-        <div
-          ref={scrollContainerRef}
-          className="h-full overflow-y-auto"
-          style={{
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehaviorY: 'contain'
-          }}
-        >
-          <div className="container mx-auto px-4 py-4 max-w-4xl">
-            <div className="space-y-6">
-              {/* 应用设置部分 */}
-              <Card title="应用设置">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between py-3">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">深色模式</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">切换应用的视觉主题</p>
-                    </div>
-                    {/* 使用滑动选项代替下拉菜单，修复手机端无法弹出问题 */}
-                    <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
-                      <button
-                        onClick={() => handleThemeChange('light')}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentTheme === 'light'
-                          ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                          }`}
-                      >
-                        🌞 浅色
-                      </button>
-                      <button
-                        onClick={() => handleThemeChange('dark')}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentTheme === 'dark'
-                          ? 'bg-gray-600 text-white shadow-sm'
-                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                          }`}
-                      >
-                        🌙 深色
-                      </button>
-                      <button
-                        onClick={() => handleThemeChange('system')}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${currentTheme === 'system'
-                          ? 'bg-blue-500 text-white shadow-sm'
-                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                          }`}
-                      >
-                        🖥️ 系统
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">切换应用版本以适应不同设备性能</p>
-                      <div className="flex space-x-4 mb-3">
-                        <button
-                          className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                          onClick={() => handleVersionSwitch('lite')}
-                        >
-                          轻量版
-                        </button>
-                        <button
-                          className={`flex-1 py-2 px-4 rounded-md transition-colors ${getCurrentVersion() === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                          onClick={() => handleVersionSwitch('full')}
-                        >
-                          炫彩版
-                        </button>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm transition-colors flex items-center justify-center space-x-2"
-                          onClick={() => handleReloadCurrentVersion()}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                          <span>重新加载当前版本</span>
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        {getCurrentVersion() === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <div className="mb-4">
-                      <p className="font-medium text-gray-900 dark:text-white">API服务地址</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置后端服务地址</p>
-                      <input
-                        type="text"
-                        value={apiBaseUrl}
-                        onChange={handleApiBaseUrlChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        placeholder="https://nice-mcp.leansoftx.com/api"
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">使用本地计算</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">启用后将使用本地JavaScript计算代替API调用</p>
-                      </div>
-                      <label className="inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={useLocalCalculation}
-                          onChange={handleUseLocalCalculationChange}
-                        />
-                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">数据同步</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">自动备份您的数据</p>
-                    </div>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={dataSyncEnabled}
-                        onChange={handleDataSyncChange}
-                      />
-                      <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">缓存超时时间</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">设置数据缓存的有效时间</p>
-                      <select
-                        value={cacheTimeout}
-                        onChange={handleCacheTimeoutChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                      >
-                        <option value="3600000">1小时</option>
-                        <option value="7200000">2小时</option>
-                        <option value="10800000">3小时</option>
-                        <option value="14400000">4小时</option>
-                        <option value="28800000">8小时</option>
-                        <option value="43200000">12小时</option>
-                        <option value="86400000">1天</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* 更新检查设置 */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">启用自动更新检查</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">自动检查新版本并提示更新</p>
-                        </div>
-                        <label className="inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={updateCheckSettings.enabled}
-                            onChange={(e) => handleUpdateCheckChange('enabled', e.target.checked)}
-                          />
-                          <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        </label>
-                      </div>
-
-                      {updateCheckSettings.enabled && (
-                        <div className="space-y-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-3 rounded-lg">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              检查频率:
-                            </label>
-                            <select
-                              value={updateCheckSettings.checkFrequency}
-                              onChange={(e) => handleUpdateCheckChange('checkFrequency', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            >
-                              <option value="startup">启动时检查</option>
-                              <option value="daily">每天检查</option>
-                              <option value="weekly">每周检查</option>
-                            </select>
-                          </div>
-
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={handleManualCheckUpdate}
-                              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors"
-                            >
-                              立即检查更新
-                            </button>
-                            <button
-                              onClick={handleClearCheckRecords}
-                              className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition-colors"
-                            >
-                              清除记录
-                            </button>
-                          </div>
-
-                          {updateCheckSettings.lastCheckTime && (
-                            <div className="text-xs text-gray-600 dark:text-gray-400">
-                              上次检查: {new Date(updateCheckSettings.lastCheckTime).toLocaleString()}
-                            </div>
-                          )}
-
-                          {updateCheckSettings.checkRecords.length > 0 && (
-                            <div className="text-xs text-gray-600 dark:text-gray-400">
-                              检查记录: {updateCheckSettings.checkRecords.length} 条
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+      {/* 可滚动内容区域 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="settings-container pb-8">
+          {/* 应用设置 */}
+          <SectionCard title="应用设置">
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div>
+                  <div className="settings-item-label">深色模式</div>
+                  <div className="settings-item-description">切换应用的视觉主题</div>
                 </div>
-              </Card>
-
-              {/* 关于信息 */}
-              <Card title="关于">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between py-2">
-                    <p className="font-medium text-gray-900 dark:text-white">应用版本</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</p>
-                  </div>
-
-                  <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                    <p className="font-medium text-gray-900 dark:text-white">运行平台</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-                      {platformInfo.isNative ?
-                        (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
-                        'Web'
-                      }
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between py-2 border-t border-gray-200 dark:border-gray-700">
-                    <p className="font-medium text-gray-900 dark:text-white">开发团队</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Nice Today</p>
-                  </div>
-
-                  {/* 移除了性能测试工具 */}
-                </div>
-              </Card>
-
-              {/* 其他设置 */}
-              <Card title="其他">
-                <div className="space-y-1">
-                  <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                    <span className="font-medium text-gray-900 dark:text-white">用户协议</span>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-
-                  <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                    <span className="font-medium text-gray-900 dark:text-white">隐私政策</span>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-
-                  <button className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg">
-                    <span className="font-medium text-gray-900 dark:text-white">意见反馈</span>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-
-                  {/* 错误日志追踪开关 */}
-                  <button
-                    onClick={handleToggleErrorTracking}
-                    className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-xl">🔴</span>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900 dark:text-white">错误日志追踪</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {errorTrackingEnabled ? '已启用 - 显示错误追踪球' : '已关闭 - 隐藏错误追踪球'}
-                        </span>
-                      </div>
-                    </div>
-                    {/* 开关图标 */}
-                    <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${errorTrackingEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                      }`}>
-                      <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${errorTrackingEnabled ? 'translate-x-5' : 'translate-x-0'
-                        }`}></div>
-                    </div>
-                  </button>
-                </div>
-              </Card>
+              </div>
+              <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1 mt-2">
+                <button
+                  onClick={() => handleThemeChange('light')}
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'light'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                >
+                  🌞 浅色
+                </button>
+                <button
+                  onClick={() => handleThemeChange('dark')}
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'dark'
+                    ? 'bg-gray-600 text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                >
+                  🌙 深色
+                </button>
+                <button
+                  onClick={() => handleThemeChange('system')}
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'system'
+                    ? 'bg-blue-500 text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                >
+                  🖥️ 系统
+                </button>
+              </div>
             </div>
 
-            {/* 仅在原生应用中显示的重置按钮 */}
-            {platformInfo.isNative && (
-              <Button
-                variant="danger"
-                className="w-full py-3 mt-6"
+            <div className="settings-item">
+              <div className="settings-item-label">应用版本</div>
+              <div className="settings-item-description">切换应用版本以适应不同设备性能</div>
+              <div className="flex gap-2 mt-3">
+                <button
+                  className={`flex-1 py-2 px-3 rounded-md transition-colors text-sm font-medium ${currentAppVersion === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                  onClick={() => handleVersionSwitch('lite')}
+                >
+                  轻量版
+                </button>
+                <button
+                  className={`flex-1 py-2 px-3 rounded-md transition-colors text-sm font-medium ${currentAppVersion === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
+                  onClick={() => handleVersionSwitch('full')}
+                >
+                  炫彩版
+                </button>
+              </div>
+              <div className="mt-3">
+                <button
+                  className="settings-button bg-green-500 hover:bg-green-600 text-white w-full"
+                  onClick={() => handleReloadCurrentVersion()}
+                >
+                  重新加载当前版本
+                </button>
+              </div>
+              <div className="settings-info-text">
+                {currentAppVersion === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
+              </div>
+            </div>
+
+            <div className="settings-item">
+              <div className="settings-item-label">API服务地址</div>
+              <div className="settings-item-description">设置后端服务地址</div>
+              <input
+                type="text"
+                value={apiBaseUrl}
+                onChange={handleApiBaseUrlChange}
+                className="settings-input mt-2"
+                placeholder="https://nice-mcp.leansoftx.com/api"
+              />
+            </div>
+
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div>
+                  <div className="settings-item-label">使用本地计算</div>
+                  <div className="settings-item-description">启用后将使用本地JavaScript计算代替API调用</div>
+                </div>
+                <ToggleSwitch
+                  checked={useLocalCalculation}
+                  onChange={handleUseLocalCalculationChange}
+                  id="useLocalCalculation"
+                />
+              </div>
+            </div>
+
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div>
+                  <div className="settings-item-label">数据同步</div>
+                  <div className="settings-item-description">自动备份您的数据</div>
+                </div>
+                <ToggleSwitch
+                  checked={dataSyncEnabled}
+                  onChange={handleDataSyncChange}
+                  id="dataSyncEnabled"
+                />
+              </div>
+            </div>
+
+            <div className="settings-item">
+              <div className="settings-item-label">缓存超时时间</div>
+              <div className="settings-item-description">设置数据缓存的有效时间</div>
+              <select
+                value={cacheTimeout}
+                onChange={handleCacheTimeoutChange}
+                className="settings-select mt-2"
               >
-                重置应用数据
-              </Button>
-            )}
-          </div>
+                <option value="3600000">1小时</option>
+                <option value="7200000">2小时</option>
+                <option value="10800000">3小时</option>
+                <option value="14400000">4小时</option>
+                <option value="28800000">8小时</option>
+                <option value="43200000">12小时</option>
+                <option value="86400000">1天</option>
+              </select>
+            </div>
+
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div>
+                  <div className="settings-item-label">自动更新检查</div>
+                  <div className="settings-item-description">自动检查新版本并提示更新</div>
+                </div>
+                <ToggleSwitch
+                  checked={updateCheckSettings.enabled}
+                  onChange={(e) => handleUpdateCheckChange('enabled', e.target.checked)}
+                  id="updateCheckEnabled"
+                />
+              </div>
+              {updateCheckSettings.enabled && (
+                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
+                  <div className="mb-3">
+                    <div className="settings-item-label text-sm mb-1">检查频率</div>
+                    <select
+                      value={updateCheckSettings.checkFrequency}
+                      onChange={(e) => handleUpdateCheckChange('checkFrequency', e.target.value)}
+                      className="settings-select"
+                    >
+                      <option value="startup">启动时检查</option>
+                      <option value="daily">每天检查</option>
+                      <option value="weekly">每周检查</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleManualCheckUpdate}
+                      className="settings-button flex-1 text-sm"
+                    >
+                      立即检查更新
+                    </button>
+                    <button
+                      onClick={handleClearCheckRecords}
+                      className="settings-button settings-button-secondary flex-1 text-sm"
+                    >
+                      清除记录
+                    </button>
+                  </div>
+                  {updateCheckSettings.lastCheckTime && (
+                    <div className="settings-info-text mt-2">
+                      上次检查: {new Date(updateCheckSettings.lastCheckTime).toLocaleString()}
+                    </div>
+                  )}
+                  {updateCheckSettings.checkRecords.length > 0 && (
+                    <div className="settings-info-text">
+                      检查记录: {updateCheckSettings.checkRecords.length} 条
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </SectionCard>
+
+          {/* 关于信息 */}
+          <SectionCard title="关于">
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div className="settings-item-label">应用版本</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</div>
+              </div>
+            </div>
+
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div className="settings-item-label">运行平台</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                  {platformInfo.isNative ?
+                    (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
+                    'Web'
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div className="settings-item-label">开发团队</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Nice Today</div>
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* 其他设置 */}
+          <SectionCard title="其他">
+            <div className="settings-item">
+              <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <span className="settings-item-label">用户协议</span>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="settings-item">
+              <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <span className="settings-item-label">隐私政策</span>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="settings-item">
+              <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <span className="settings-item-label">意见反馈</span>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🔴</span>
+                  <div>
+                    <div className="settings-item-label">错误日志追踪</div>
+                    <div className="settings-item-description">
+                      {errorTrackingEnabled ? '已启用 - 显示错误追踪球' : '已关闭 - 隐藏错误追踪球'}
+                    </div>
+                  </div>
+                </div>
+                <ToggleSwitch
+                  checked={errorTrackingEnabled}
+                  onChange={handleToggleErrorTracking}
+                  id="errorTracking"
+                />
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* 重置按钮 */}
+          {platformInfo.isNative && (
+            <button className="settings-button settings-button-danger w-full mt-4 mb-8" style={{ marginBottom: 'calc(32px + env(safe-area-inset-bottom, 20px))' }}>
+              重置应用数据
+            </button>
+          )}
+          
+          {/* 底部安全区域 */}
+          <div style={{ height: 'env(safe-area-inset-bottom, 20px)' }} />
         </div>
       </div>
     </div>

@@ -1,0 +1,214 @@
+/* 用户配置页面自定义样式 - 移动端优化 */
+.user-config-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  padding-bottom: env(safe-area-inset-bottom, 24px);
+  box-sizing: border-box;
+  background: #f9fafb;
+}
+
+.user-config-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+  padding-bottom: 40px;
+}
+
+.user-config-header {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  padding: 20px 16px;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 0 -16px 20px;
+}
+
+.user-config-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-config-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.user-config-content {
+  min-height: 200px;
+}
+
+.user-config-error,
+.user-config-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.user-config-error-card {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.user-config-error-card.dark {
+  background: #7f1d1d;
+  border-color: #dc2626;
+}
+
+.user-config-error-icon {
+  width: 48px;
+  height: 48px;
+  background: #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: white;
+  font-size: 24px;
+}
+
+.user-config-error-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.user-config-error-message {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.user-config-error-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-config-button {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+}
+
+.user-config-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px rgba(99, 102, 241, 0.3);
+}
+
+.user-config-button:active {
+  transform: translateY(0);
+}
+
+.user-config-button-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  box-shadow: none;
+}
+
+.user-config-button-secondary:hover {
+  background: #e5e7eb;
+  box-shadow: none;
+  transform: none;
+}
+
+.user-config-button-warning {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+.user-config-button-warning:hover {
+  box-shadow: 0 6px 8px rgba(245, 158, 11, 0.3);
+}
+
+.user-config-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.user-config-loading-text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* 深色模式支持 */
+.user-config-page.dark {
+  background: #111827;
+}
+
+.user-config-page.dark .user-config-error-card {
+  background: #7f1d1d;
+  border-color: #dc2626;
+}
+
+.user-config-page.dark .user-config-error-title {
+  color: #fecaca;
+}
+
+.user-config-page.dark .user-config-error-message {
+  color: #d1d5db;
+}
+
+.user-config-page.dark .user-config-button-secondary {
+  background: #374151;
+  border-color: #4b5563;
+  color: #f3f4f6;
+}
+
+.user-config-page.dark .user-config-button-secondary:hover {
+  background: #4b5563;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .user-config-container {
+    padding: 0 12px;
+  }
+  
+  .user-config-header {
+    padding: 16px 12px;
+    border-radius: 0 0 16px 16px;
+    margin: 0 -12px 16px;
+  }
+  
+  .user-config-title {
+    font-size: 20px;
+  }
+  
+  .user-config-button {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}

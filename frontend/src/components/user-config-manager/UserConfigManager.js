@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import PageLayout, { Card, Button } from '../PageLayout.js';
 import { useCurrentConfig, useUserConfig } from '../../contexts/UserConfigContext';
 import { enhancedUserConfigManager } from '../../utils/EnhancedUserConfigManager';
 import asyncOperationQueue from '../../utils/AsyncOperationQueue';
 import errorHandlingManager from '../../utils/ErrorHandlingManager';
-import '../../styles/zodiac-icons.css';
-import '../../styles/zodiac-mbti-icons.css';
-import '../../styles/config-selectors.css';
-import '../../styles/user-info-card.css';
+import '../../styles/userConfigManager.css'; // 优化后的样式
 import { calculateFiveGrids, getCharStrokes, getMeaning } from '../../utils/nameScoring';
 import { DEFAULT_REGION } from '../../data/ChinaLocationData';
 import { getShichenSimple, normalizeShichen } from '../../utils/astronomy';
