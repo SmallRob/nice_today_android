@@ -577,20 +577,12 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
-      {/* Banner区域 - 参考穿衣指南样式 */}
-      <div
-        className="taoist-wuxing-banner text-white shadow-lg relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 flex-shrink-0"
-        style={{
-          overflowY: 'hidden',
-          overflowX: 'hidden',
-          maxHeight: '100%',
-          width: '100%'
-        }}
-      >
+      {/* Banner区域 - 优化布局，避免全局样式污染 */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 shadow-lg flex-shrink-0">
         {/* 背景装饰 */}
-        <div className="absolute inset-0 wuxing-gradient z-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30 pointer-events-none"></div>
 
-        {/* 装饰符号 - 简化版 - 移动端缩小并调整位置 */}
+        {/* 装饰符号 - 简化版 */}
         <div className="absolute top-2 left-2 w-8 h-8 sm:w-12 sm:h-12 opacity-15 pointer-events-none">
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -599,74 +591,53 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
           </svg>
         </div>
 
-        <div className="container mx-auto px-4 py-3 sm:py-4 relative z-10">
-          <div className="flex flex-col sm:flex-row items-center sm:justify-between">
-            {/* 标题区域 - 9:16屏幕居中布局优化 */}
-            <div className="flex flex-col sm:flex-row items-center sm:space-x-4 w-full sm:w-auto mb-1 sm:mb-0">
-              {/* 应用图标 - 移动端居中 */}
-              <div className="mb-2 sm:mb-0 transform sm:transform-none">
-                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center overflow-hidden backdrop-blur-sm shadow-md transition-all duration-300 hover:bg-opacity-30 hover:scale-105 cursor-pointer group">
-                  <img
-                    src={niceDayImage}
-                    alt="Nice Today"
-                    className="w-9 h-9 object-contain transition-transform duration-300 group-hover:rotate-12"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'block';
-                    }}
-                  />
-                  {/* 备用图标 */}
-                  <svg className="w-7 h-7 text-white hidden" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
-                </div>
-              </div>
+        {/* 悬浮在右上角的新版入口按钮 - 绝对定位，不占据布局空间 */}
+        <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center space-x-1 px-2 py-1 bg-white/15 hover:bg-white/25 border border-white/20 rounded-lg text-white text-[10px] sm:text-xs font-medium transition-all duration-300 backdrop-blur-sm hover:scale-105 flex-shrink-0"
+            title="体验新版炫彩版主页"
+          >
+            <svg
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span className="flex-shrink-0">新版</span>
+          </button>
+        </div>
 
-              {/* 文本区域 - 移动端居中，桌面端左对齐 */}
-              <div className="flex flex-col items-center sm:items-start relative z-10 text-center sm:text-left">
-                <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight transition-all duration-300 hover:scale-105 whitespace-nowrap">
-                  Nice Today
-                </h1>
-                {/* <p className="text-blue-100 text-xs sm:text-base opacity-90 mt-0.6 transition-opacity duration-300 whitespace-nowrap">
-                  您的个性化健康助手
-                </p> */}
+        {/* 主要内容区域 - 完全居中垂直布局 */}
+        <div className="relative z-10 px-4 py-3 sm:py-4">
+          <div className="flex flex-col items-center justify-center">
+            {/* 应用图标 */}
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center overflow-hidden backdrop-blur-sm shadow-md transition-all duration-300 hover:bg-white/30 hover:scale-105 cursor-pointer">
+                <img
+                  src={niceDayImage}
+                  alt="Nice Today"
+                  className="w-9 h-9 object-contain transition-transform duration-300 group-hover:rotate-12"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+                {/* 备用图标 */}
+                <svg className="w-7 h-7 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
               </div>
             </div>
 
-            {/* 动态状态徽章和版本信息放在右下角 */}
-            {/* <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <span className="relative flex h-2 w-2 sm:h-3 sm:w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-green-500"></span>
-                </span>
-                <span className="inline-block px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-white bg-white bg-opacity-20 rounded-full backdrop-blur-sm transition-all duration-300 hover:bg-opacity-30">
-                  实时更新
-                </span>
-              </div>
-
-              <span className="text-xs text-blue-100 opacity-75">
-                v1.6
-              </span>
-            </div> */}
-          </div>
-
-          {/* 体验新版入口 - 右上角 - 优化版 */}
-          <div className="absolute top-4 right-4 sm:top-5 sm:right-6">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="taoist-new-version-btn flex items-center space-x-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 border border-white/30 rounded-full text-white text-xs sm:text-sm font-medium transition-all duration-300 backdrop-blur-sm flex-shrink-0 whitespace-nowrap group"
-              title="体验新版炫彩版主页"
-            >
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span>新版</span>
-            </button>
+            {/* 应用标题 */}
+            <div className="mt-2">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight whitespace-nowrap text-center">
+                Nice Today
+              </h1>
+            </div>
           </div>
         </div>
       </div>

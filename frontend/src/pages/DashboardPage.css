@@ -317,26 +317,29 @@
   transform: scale(0.96);
 }
 
-/* 功能网格布局 - 5列 */
-/* 功能网格布局 - 5列 */
+/* 功能网格布局 - 5列，确保与顶部快速操作区域对齐 */
 .dashboard-page-wrapper .features-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: clamp(8px, 1.5vw, 12px);
-  padding: clamp(8px, 1.5vw, 12px) 5px;
+  gap: clamp(6px, 1.2vw, 10px);
+  padding: clamp(6px, 1.2vw, 10px) 5px;
   width: 100%;
   max-width: 100%;
   margin: 0;
   box-sizing: border-box;
+  /* 确保网格容器自适应缩放 */
+  justify-items: center;
+  align-items: stretch;
   /* 确保布局稳定 */
   contain: layout;
   overflow: hidden;
 }
 
-/* 功能卡片 - 安卓现代化风格 */
-/* 功能卡片 - 安卓现代化风格 */
+/* 功能卡片 - 安卓现代化风格，确保自适应和居中 */
 .dashboard-page-wrapper .feature-card {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
@@ -349,7 +352,6 @@
   position: relative;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  max-width: 100%;
   min-height: clamp(70px, 20vw, 100px);
   border: 0;
   backdrop-filter: blur(10px);
@@ -362,12 +364,15 @@
   /* 确保内容可见性 */
   visibility: visible !important;
   opacity: 1 !important;
-  /* 确保卡片独立性 */
+  /* 确保卡片独立性和自适应 */
   flex: 0 0 auto;
   margin: 0;
+  /* 确保在网格中正确定位 */
+  justify-self: stretch;
+  align-self: stretch;
 }
 
-/* 卡片内容区域 */
+/* 卡片内容区域 - 确保内容居中对齐 */
 .feature-card-content {
   display: flex;
   flex-direction: column;
@@ -380,6 +385,9 @@
   z-index: 2;
   box-sizing: border-box;
   padding-top: clamp(4px, 1vw, 8px);
+  /* 确保内容自适应居中 */
+  text-align: center;
+  justify-content: center;
 }
 
 /* 卡片背景渐变和阴影 */
@@ -401,15 +409,16 @@
 }
 
 
-/* 卡片图标容器 - 透明背景，彩色背景上的白色图标 */
+/* 卡片图标容器 - 确保图标居中且自适应 */
 .feature-card-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(40px, 9vw, 52px);
-  height: clamp(40px, 9vw, 52px);
-  border-radius: clamp(14px, 3.5vw, 18px);
+  width: clamp(36px, 8.5vw, 52px);
+  height: clamp(36px, 8.5vw, 52px);
+  border-radius: clamp(12px, 3.5vw, 18px);
   background: transparent;
+  margin: 0 auto;
   margin-bottom: clamp(2px, 1vw, 6px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
@@ -418,17 +427,20 @@
   /* 确保图标容器可见性 */
   visibility: visible !important;
   opacity: 1 !important;
-  min-width: 0;
-  min-height: 0;
+  /* 确保容器不溢出 */
+  max-width: 100%;
+  max-height: 100%;
+  /* 确保图标容器居中 */
+  flex-shrink: 0;
 }
 
 .feature-card:hover .feature-card-icon-wrapper {
   transform: scale(1.1) translateY(-2px);
 }
 
-/* 卡片图标 - 白色，彩色背景上显示 */
+/* 卡片图标 - 白色，彩色背景上显示，确保居中 */
 .feature-card .feature-card-icon {
-  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
   line-height: 1;
   color: #ffffff;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -441,8 +453,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 1em;
-  min-height: 1em;
+  /* 确保图标不溢出 */
+  max-width: 100%;
+  max-height: 100%;
+  /* 确保图标居中 */
+  margin: 0 auto;
+  flex-shrink: 0;
 }
 
 .feature-card:hover .feature-card-icon {
@@ -451,9 +467,9 @@
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
 }
 
-/* 卡片标题 - 白色文字，无背景边框，文字阴影 */
+/* 卡片标题 - 白色文字，无背景边框，文字阴影，确保居中 */
 .feature-card .feature-card-title {
-  font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+  font-size: clamp(0.6rem, 1.6vw, 0.8rem);
   font-weight: 600;
   color: #ffffff;
   margin: 0;
@@ -475,8 +491,11 @@
   visibility: visible !important;
   opacity: 1 !important;
   display: block;
-  min-width: 0;
-  min-height: 0;
+  /* 确保标题不溢出 */
+  width: 100%;
+  overflow: hidden;
+  /* 确保标题居中 */
+  margin: 0 auto;
   contain: layout style;
 }
 
@@ -659,36 +678,58 @@
   }
 
   .features-grid {
-    gap: clamp(6px, 1.5vw, 8px);
-    padding: clamp(6px, 1.5vw, 8px) 5px;
+    gap: clamp(4px, 1.2vw, 6px);
+    padding: clamp(4px, 1.2vw, 6px) 5px;
     grid-template-columns: repeat(5, 1fr);
+    /* 确保在移动端正确对齐 */
+    justify-items: center;
+    align-items: stretch;
   }
 
   .feature-card {
     padding: var(--spacing-sm);
     border-radius: var(--spacing-md);
+    /* 确保卡片自适应 */
+    min-width: 0;
+    justify-self: stretch;
+    align-self: stretch;
   }
 
   .feature-card-icon-wrapper {
-    width: clamp(38px, 8.5vw, 50px);
-    height: clamp(38px, 8.5vw, 50px);
+    width: clamp(36px, 8vw, 48px);
+    height: clamp(36px, 8vw, 48px);
+    margin: 0 auto;
     margin-bottom: clamp(2px, 0.8vw, 5px);
+    /* 确保图标容器不溢出 */
+    max-width: 100%;
+    max-height: 100%;
+    flex-shrink: 0;
   }
 
   .feature-card-content {
     padding-top: clamp(3px, 0.8vw, 6px);
+    /* 确保内容居中 */
+    justify-content: center;
   }
 
   .feature-card .feature-card-icon {
-    font-size: clamp(1.6rem, 4.5vw, 1.8rem);
+    font-size: clamp(1.5rem, 4.2vw, 1.7rem);
     color: #ffffff;
+    /* 确保图标不溢出 */
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0 auto;
+    flex-shrink: 0;
   }
 
   .feature-card .feature-card-title {
-    font-size: clamp(0.65rem, 1.8vw, 0.72rem);
+    font-size: clamp(0.6rem, 1.6vw, 0.7rem);
     color: #ffffff;
     padding: 0;
     background: transparent;
+    /* 确保标题不溢出 */
+    width: 100%;
+    margin: 0 auto;
   }
 
   .feature-card .feature-card-description {
@@ -699,8 +740,8 @@
 /* 超小屏幕优化 */
 @media (max-width: 480px) {
   .quick-actions {
-    padding: 4px 6px;
-    margin: 4px 6px;
+    padding: 4px 5px;
+    margin: 4px 5px;
     gap: 2px;
     max-height: 58px;
     min-height: 50px;
@@ -722,36 +763,58 @@
   }
 
   .features-grid {
-    gap: clamp(3px, 1.2vw, 5px);
-    padding: clamp(3px, 1.2vw, 5px) 5px;
+    gap: clamp(3px, 1vw, 5px);
+    padding: clamp(3px, 1vw, 5px) 5px;
     grid-template-columns: repeat(5, 1fr);
+    /* 确保在超小屏幕上正确对齐 */
+    justify-items: center;
+    align-items: stretch;
   }
 
   .feature-card {
     padding: var(--spacing-xs);
     border-width: 2px;
+    /* 确保卡片自适应 */
+    min-width: 0;
+    justify-self: stretch;
+    align-self: stretch;
   }
 
   .feature-card-icon-wrapper {
-    width: clamp(36px, 8vw, 48px);
-    height: clamp(36px, 8vw, 48px);
+    width: clamp(34px, 7.5vw, 46px);
+    height: clamp(34px, 7.5vw, 46px);
+    margin: 0 auto;
     margin-bottom: clamp(2px, 0.7vw, 4px);
+    /* 确保图标容器不溢出 */
+    max-width: 100%;
+    max-height: 100%;
+    flex-shrink: 0;
   }
 
   .feature-card-content {
     padding-top: clamp(2px, 0.7vw, 5px);
+    /* 确保内容居中 */
+    justify-content: center;
   }
 
   .feature-card .feature-card-icon {
-    font-size: clamp(1.4rem, 4.2vw, 1.6rem);
+    font-size: clamp(1.3rem, 4vw, 1.5rem);
     color: #ffffff;
+    /* 确保图标不溢出 */
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0 auto;
+    flex-shrink: 0;
   }
 
   .feature-card .feature-card-title {
-    font-size: clamp(0.6rem, 1.7vw, 0.68rem);
+    font-size: clamp(0.58rem, 1.6vw, 0.65rem);
     color: #ffffff;
     padding: 0;
     background: transparent;
+    /* 确保标题不溢出 */
+    width: 100%;
+    margin: 0 auto;
   }
 
   .feature-card .feature-card-description {
@@ -808,36 +871,58 @@
   }
 
   .features-grid {
-    gap: clamp(2px, 0.8vw, 4px);
-    padding: clamp(2px, 0.8vw, 4px) 5px;
+    gap: clamp(2px, 0.7vw, 4px);
+    padding: clamp(2px, 0.7vw, 4px) 5px;
     grid-template-columns: repeat(5, 1fr);
+    /* 确保在375px屏幕上正确对齐 */
+    justify-items: center;
+    align-items: stretch;
   }
 
   .feature-card {
     padding: 3px;
     border-width: 2px;
+    /* 确保卡片自适应 */
+    min-width: 0;
+    justify-self: stretch;
+    align-self: stretch;
   }
 
   .feature-card-icon-wrapper {
-    width: clamp(34px, 7.5vw, 46px);
-    height: clamp(34px, 7.5vw, 46px);
+    width: clamp(32px, 7.2vw, 44px);
+    height: clamp(32px, 7.2vw, 44px);
+    margin: 0 auto;
     margin-bottom: clamp(1px, 0.6vw, 3px);
+    /* 确保图标容器不溢出 */
+    max-width: 100%;
+    max-height: 100%;
+    flex-shrink: 0;
   }
 
   .feature-card-content {
     padding-top: clamp(2px, 0.6vw, 4px);
+    /* 确保内容居中 */
+    justify-content: center;
   }
 
   .feature-card .feature-card-icon {
-    font-size: clamp(1.3rem, 4vw, 1.5rem);
+    font-size: clamp(1.2rem, 3.8vw, 1.4rem);
     color: #ffffff;
+    /* 确保图标不溢出 */
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0 auto;
+    flex-shrink: 0;
   }
 
   .feature-card .feature-card-title {
-    font-size: clamp(0.58rem, 1.6vw, 0.64rem);
+    font-size: clamp(0.56rem, 1.5vw, 0.62rem);
     color: #ffffff;
     padding: 0;
     background: transparent;
+    /* 确保标题不溢出 */
+    width: 100%;
+    margin: 0 auto;
   }
 
   .dashboard-edit-icon-btn {
@@ -860,8 +945,8 @@
 /* 320px屏幕优化 */
 @media (max-width: 320px) {
   .quick-actions {
-    padding: 2px 4px;
-    margin: 2px 4px;
+    padding: 2px 5px;
+    margin: 2px 5px;
     gap: 1px;
     max-height: 54px;
     min-height: 46px;
@@ -883,7 +968,7 @@
   }
 
   .features-header {
-    padding: var(--spacing-xs) 20px var(--spacing-xs) var(--spacing-xs);
+    padding: var(--spacing-xs) 5px var(--spacing-xs) var(--spacing-xs);
   }
 
   .features-header::before,
@@ -906,34 +991,56 @@
     gap: clamp(2px, 0.6vw, 3px);
     padding: clamp(2px, 0.6vw, 3px) 5px;
     grid-template-columns: repeat(5, 1fr);
+    /* 确保在320px屏幕上正确对齐 */
+    justify-items: center;
+    align-items: stretch;
   }
 
   .feature-card {
     padding: 2px;
     border-width: 1.5px;
     border-radius: var(--spacing-xs);
+    /* 确保卡片自适应 */
+    min-width: 0;
+    justify-self: stretch;
+    align-self: stretch;
   }
 
   .feature-card-icon-wrapper {
-    width: clamp(32px, 7vw, 44px);
-    height: clamp(32px, 7vw, 44px);
+    width: clamp(30px, 6.8vw, 42px);
+    height: clamp(30px, 6.8vw, 42px);
+    margin: 0 auto;
     margin-bottom: clamp(1px, 0.5vw, 2px);
+    /* 确保图标容器不溢出 */
+    max-width: 100%;
+    max-height: 100%;
+    flex-shrink: 0;
   }
 
   .feature-card-content {
     padding-top: clamp(1px, 0.5vw, 3px);
+    /* 确保内容居中 */
+    justify-content: center;
   }
 
   .feature-card .feature-card-icon {
-    font-size: clamp(1.2rem, 3.8vw, 1.4rem);
+    font-size: clamp(1.15rem, 3.6vw, 1.3rem);
     color: #ffffff;
+    /* 确保图标不溢出 */
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0 auto;
+    flex-shrink: 0;
   }
 
   .feature-card .feature-card-title {
-    font-size: clamp(0.55rem, 1.5vw, 0.6rem);
+    font-size: clamp(0.52rem, 1.4vw, 0.58rem);
     color: #ffffff;
     padding: 0;
     background: transparent;
+    /* 确保标题不溢出 */
+    width: 100%;
+    margin: 0 auto;
   }
 }
 
@@ -941,20 +1048,32 @@
 @media (min-width: 768px) and (max-width: 1024px) {
   .features-grid {
     gap: clamp(10px, 1.5vw, 14px);
-    padding: clamp(10px, 1.5vw, 14px);
+    padding: clamp(10px, 1.5vw, 14px) 5px;
     grid-template-columns: repeat(5, 1fr);
+    /* 确保在大屏幕上正确对齐 */
+    justify-items: center;
+    align-items: stretch;
   }
 
   .feature-card {
     padding: clamp(10px, 2vw, 14px);
+    /* 确保卡片自适应 */
+    min-width: 0;
+    justify-self: stretch;
+    align-self: stretch;
   }
 
   .feature-card .feature-card-icon {
     font-size: clamp(1.8rem, 4vw, 2.2rem);
+    /* 确保图标不溢出 */
+    max-width: 100%;
+    max-height: 100%;
   }
 
   .feature-card .feature-card-title {
     font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+    /* 确保标题不溢出 */
+    width: 100%;
   }
 }
 
@@ -962,23 +1081,35 @@
 @media (min-width: 1024px) {
   .features-grid {
     gap: clamp(12px, 1.5vw, 16px);
-    padding: clamp(12px, 1.5vw, 16px);
+    padding: clamp(12px, 1.5vw, 16px) 5px;
     grid-template-columns: repeat(5, 1fr);
     max-width: 1400px;
     margin: 0 auto;
+    /* 确保在超大屏幕上正确对齐 */
+    justify-items: center;
+    align-items: stretch;
   }
 
   .feature-card {
     padding: clamp(12px, 2vw, 18px);
     min-height: clamp(100px, 22vw, 120px);
+    /* 确保卡片自适应 */
+    min-width: 0;
+    justify-self: stretch;
+    align-self: stretch;
   }
 
   .feature-card .feature-card-icon {
     font-size: clamp(2rem, 4.5vw, 2.8rem);
+    /* 确保图标不溢出 */
+    max-width: 100%;
+    max-height: 100%;
   }
 
   .feature-card .feature-card-title {
     font-size: clamp(0.75rem, 2vw, 0.9rem);
+    /* 确保标题不溢出 */
+    width: 100%;
   }
 }
 
@@ -1152,17 +1283,28 @@
   /* 确保网格布局不会被外部样式影响 */
   grid-auto-flow: dense !important;
   align-items: stretch !important;
+  /* 确保网格容器自适应 */
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  /* 确保网格居中对齐 */
+  margin: 0 auto;
 }
 
 .feature-card {
   /* 确保卡片尺寸稳定 */
   flex-shrink: 0 !important;
   flex-grow: 0 !important;
+  /* 确保卡片自适应 */
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* 重新定义卡片基本样式 - 限制在dashboard页面内 */
 .dashboard-page-wrapper .feature-card {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   aspect-ratio: 1;
   display: flex !important;
   flex-direction: column !important;
@@ -1175,7 +1317,6 @@
   position: relative !important;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05) !important;
   overflow: hidden !important;
-  max-width: 100% !important;
   min-height: clamp(70px, 20vw, 100px) !important;
   border: 0 !important;
   backdrop-filter: blur(10px) !important;
@@ -1188,6 +1329,12 @@
   /* 确保内容可见性 */
   visibility: visible !important;
   opacity: 1 !important;
+  /* 确保卡片独立性和自适应 */
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  /* 确保在网格中正确定位 */
+  justify-self: stretch !important;
+  align-self: stretch !important;
 }
 
 /* 限制全局样式影响 */
@@ -1195,6 +1342,9 @@
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  /* 确保容器自适应 */
+  min-width: 0;
+  position: relative;
 }
 
 /* 隐藏滚动条 */

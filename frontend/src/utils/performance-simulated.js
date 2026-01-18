@@ -82,73 +82,9 @@ const recordMetric = (type, name, duration, metadata = {}) => {
 
 // 安全地获取性能API
 const getPerformanceAPI = async () => {
-  // 如果强制使用模拟API，直接返回模拟API
-  if (FORCE_SIMULATED_PERFORMANCE) {
-    console.log('Using simulated performance API (forced)');
-    return SimulatedPerformanceAPI;
-  }
-  
-  // 在非原生环境，使用浏览器原生API
-  if (!isNative) {
-    console.log('Using browser performance API');
-    return BrowserPerformanceAPI;
-  }
-  
-  // 尝试获取真实的性能API
-  try {
-    // 检查Capacitor是否已加载
-    if (typeof Capacitor === 'undefined') {
-      console.log('Using simulated performance API (Capacitor not loaded)');
-      return SimulatedPerformanceAPI;
-    }
-    
-    // 检查性能插件是否可用
-    if (!Capacitor.isPluginAvailable('Performance')) {
-      console.log('Using simulated performance API (plugin not available)');
-      return SimulatedPerformanceAPI;
-    }
-    
-    // 尝试导入性能插件
-    let Performance;
-    try {
-      const performanceModule = await import('@capacitor/performance');
-      Performance = performanceModule.Performance;
-    } catch (error) {
-      console.warn('Performance plugin not available, using simulation:', error);
-      return SimulatedPerformanceAPI;
-    }
-    
-    // 检查性能API是否可用
-    if (!Performance || typeof Performance.startTrace !== 'function') {
-      console.log('Using simulated performance API (real API invalid)');
-      return SimulatedPerformanceAPI;
-    }
-    
-    // 测试真实API是否工作
-    try {
-      const testTrace = await Performance.startTrace({ traceName: 'test_trace' });
-      await testTrace.stop();
-      console.log('Using real performance API');
-      return {
-        ...Performance,
-        // 添加模拟API作为后备
-        startTrace: async (options) => {
-          try {
-            return await Performance.startTrace(options);
-          } catch (error) {
-            console.warn('Real performance API failed, using simulation:', error);
-            return await SimulatedPerformanceAPI.startTrace(options);
-          }
-        }
-      };
-    } catch (testError) {
-      console.warn('Real performance API test failed, falling back to simulation:', testError);
-      return SimulatedPerformanceAPI;
-    }
-  } catch (error) {
-    console.warn('Failed to load real performance API, using simulation:', error);
-    return SimulatedPerformanceAPI;
-  }
+  // 强制使用模拟API
+  console.log('Using simulated performance API (forced)');
+  return SimulatedPerformanceAPI;
 };
 
 // 浏览器性能API

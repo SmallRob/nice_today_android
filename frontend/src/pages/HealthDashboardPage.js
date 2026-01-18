@@ -11,7 +11,7 @@ import BodyMetricsRhythmCard from '../components/health/BodyMetricsRhythmCard.js
 import DressDietCard from '../components/health/DressDietCard.js';
 import DietHealthCard from '../components/health/DietHealthCard.js';
 import BloodTypeHealthCard from '../components/health/BloodTypeHealthCard.js';
-import SimpleEmoHealthCard from '../components/health/SimpleEmoHealthCard';
+// import SimpleEmoHealthCard from '../components/health/SimpleEmoHealthCard';
 import StepCounterCard from '../components/health/StepCounterCard';
 import ThemeAwareLoading from '../components/ThemeAwareLoading.js';
 import mobileScreenOptimization from '../utils/mobileScreenOptimization.js';
@@ -70,25 +70,11 @@ const HealthDashboardPage = () => {
       title: '每日生物节律状态卡片'
     },
     {
-      id: 'step-counter',
-      component: StepCounterCard,
-      priority: 1, // 高优先级，运动健康重要
-      cacheKey: 'step-counter',
-      title: '步数计数器卡片'
-    },
-    {
       id: 'dress-diet',
       component: DressDietCard,
       priority: 2, // 高计算复杂度，中优先级
       cacheKey: 'dress-diet',
       title: '每日穿搭与饮食建议卡片'
-    },
-    {
-      id: 'agile-health',
-      component: AgileHealthCard,
-      priority: 2, // 中优先级，快速加载
-      cacheKey: 'agile-health',
-      title: '敏捷养生卡片'
     },
     {
       id: 'seasonal-health',
@@ -98,18 +84,18 @@ const HealthDashboardPage = () => {
       title: '当季养生健康提醒卡片'
     },
     {
-      id: 'body-metrics',
-      component: BodyMetricsRhythmCard,
-      priority: 3, // 中优先级
-      cacheKey: 'body-metrics',
-      title: '身体指标与器官节律卡片'
-    },
-    {
       id: 'diet-health',
       component: DietHealthCard,
       priority: 4, // 中优先级
       cacheKey: 'diet-health',
       title: '饮食健康'
+    },
+    {
+      id: 'step-counter',
+      component: StepCounterCard,
+      priority: 1, // 高优先级，运动健康重要
+      cacheKey: 'step-counter',
+      title: '步数计数器卡片'
     },
     {
       id: 'blood-type-health',
@@ -119,12 +105,26 @@ const HealthDashboardPage = () => {
       title: '血型健康管理卡片'
     },
     {
-      id: 'emo-health',
-      component: SimpleEmoHealthCard,
-      priority: 1, // 高优先级，情绪健康重要
-      cacheKey: 'emo-health',
-      title: '情绪与健康'
+      id: 'body-metrics',
+      component: BodyMetricsRhythmCard,
+      priority: 3, // 中优先级
+      cacheKey: 'body-metrics',
+      title: '身体指标与器官节律卡片'
+    },
+    {
+      id: 'agile-health',
+      component: AgileHealthCard,
+      priority: 2, // 中优先级，快速加载
+      cacheKey: 'agile-health',
+      title: '敏捷养生卡片'
     }
+    // {
+    //   id: 'emo-health',
+    //   component: SimpleEmoHealthCard,
+    //   priority: 1, // 高优先级，情绪健康重要
+    //   cacheKey: 'emo-health',
+    //   title: '情绪与健康'
+    // }
   ], []);
   
   // 如果还在初始加载阶段，显示主题感知的加载界面

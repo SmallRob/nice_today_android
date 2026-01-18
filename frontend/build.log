@@ -1,0 +1,698 @@
+
+> nice-today-app@1.0.12 build
+> craco build
+
+Building Full Version
+Creating an optimized production build...
+Compiled with warnings.
+
+[eslint] 
+src\App.js
+  Line 241:7:  'SimpleIChingPage' is assigned a value but never used                                                                    no-unused-vars
+  Line 314:6:  React Hook useEffect has a missing dependency: 'location.state?.from'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\VersionRouter.js
+  Line 99:6:  React Hook useEffect has missing dependencies: 'checkForUpdates' and 'showUpdateNotification'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\BiorhythmDashboard.js
+  Line 1:51:    'useRef' is defined but never used                          no-unused-vars
+  Line 86:7:    'ErrorBoundaryFallback' is assigned a value but never used  no-unused-vars
+  Line 197:10:  'tabTransition' is assigned a value but never used          no-unused-vars
+
+src\components\BiorhythmSimple.js
+  Line 7:10:   'useTheme' is defined but never used                                                                                                  no-unused-vars
+  Line 51:6:   React Hook useEffect has a missing dependency: 'effectiveConfig'. Either include it or remove the dependency array                    react-hooks/exhaustive-deps
+  Line 208:6:  React Hook useEffect has missing dependencies: 'birthDate' and 'effectiveConfig'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\ChineseZodiacSelector.js
+  Line 40:6:  React Hook useEffect has a missing dependency: 'localSelected'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\ConfigEditModal.js
+  Line 305:13:  'lat' is assigned a value but never used                     no-unused-vars
+  Line 525:60:  Unnecessary escape character: \"                             no-useless-escape
+  Line 564:9:   'formatTime' is assigned a value but never used              no-unused-vars
+  Line 579:9:   'ensureCompleteLocation' is assigned a value but never used  no-unused-vars
+
+src\components\DatePickerModal.js
+  Line 4:10:  'Solar' is defined but never used  no-unused-vars
+
+src\components\EnhancedDocumentRenderer.js
+  Line 14:41:  Headings must have content and the content must be accessible by a screen reader  jsx-a11y/heading-has-content
+  Line 15:41:  Headings must have content and the content must be accessible by a screen reader  jsx-a11y/heading-has-content
+  Line 16:41:  Headings must have content and the content must be accessible by a screen reader  jsx-a11y/heading-has-content
+  Line 17:41:  Headings must have content and the content must be accessible by a screen reader  jsx-a11y/heading-has-content
+  Line 18:41:  Headings must have content and the content must be accessible by a screen reader  jsx-a11y/heading-has-content
+  Line 19:41:  Headings must have content and the content must be accessible by a screen reader  jsx-a11y/heading-has-content
+  Line 35:40:  Anchors must have content and the content must be accessible by a screen reader   jsx-a11y/anchor-has-content
+
+src\components\MBTIPersonalityTabHome.js
+  Line 34:7:    'mbtiConfigManager' is assigned a value but never used                                                                      no-unused-vars
+  Line 67:10:   'showMBTIModal' is assigned a value but never used                                                                          no-unused-vars
+  Line 416:6:   React Hook useEffect has a missing dependency: 'getMBTIFromURL'. Either include it or remove the dependency array           react-hooks/exhaustive-deps
+  Line 573:6:   React Hook useEffect has a missing dependency: 'loadPersonalityAnalysis'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 594:9:   'saveMBTIConfig' is assigned a value but never used                                                                         no-unused-vars
+  Line 956:19:  'developmentAreas' is assigned a value but never used                                                                       no-unused-vars
+
+src\components\MayaBirthChartResults_optimized.js
+  Line 120:6:  React Hook useMemo has a missing dependency: 'birthInfo'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\MayaBirthChart_optimized.js
+  Line 160:37:  'configLoading' is assigned a value but never used                                                                                                                                                                                                                                                                no-unused-vars
+  Line 210:6:   React Hook useCallback has unnecessary dependencies: 'personalTraitsChallengesPool' and 'personalTraitsStrengthsPool'. Either exclude them or remove the dependency array. Outer scope values like 'personalTraitsStrengthsPool' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+  Line 319:6:   React Hook useEffect has missing dependencies: 'currentConfig' and 'loadBirthInfo'. Either include them or remove the dependency array                                                                                                                                                                            react-hooks/exhaustive-deps
+
+src\components\MayaCalendarTab.js
+  Line 4:8:    'timeCacheManager' is defined but never used            no-unused-vars
+  Line 186:7:  'MayaInfoCard' is assigned a value but never used       no-unused-vars
+  Line 402:9:  'MayaKnowledgeCard' is assigned a value but never used  no-unused-vars
+
+src\components\MayanTattoo.js
+  Line 5:3:  'sealInfoMap' is defined but never used  no-unused-vars
+  Line 6:3:  'toneInfoMap' is defined but never used  no-unused-vars
+
+src\components\NameScoringModal.js
+  Line 6:7:  'calculateTotalScore' is assigned a value but never used  no-unused-vars
+
+src\components\NumerologySimple.js
+  Line 191:6:  React Hook useEffect has a missing dependency: 'calculateLifePathNumber'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\TabNavigation.js
+  Line 1:28:  'useState' is defined but never used  no-unused-vars
+  Line 1:38:  'useRef' is defined but never used    no-unused-vars
+
+src\components\UserConfigManager.js
+  Line 1:51:   'useMemo' is defined but never used                      no-unused-vars
+  Line 4:10:   'DEFAULT_REGION' is defined but never used               no-unused-vars
+  Line 213:5:  'currentConfig' is assigned a value but never used       no-unused-vars
+  Line 307:9:  'handleToggleExpand' is assigned a value but never used  no-unused-vars
+
+src\components\WelcomeScreen.js
+  Line 71:6:  React Hook useEffect has missing dependencies: 'completed' and 'onComplete'. Either include them or remove the dependency array. If 'onComplete' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+src\components\ZiWeiPalaceDisplay.js
+  Line 1:20:   'useEffect' is defined but never used             no-unused-vars
+  Line 50:19:  'setLoading' is assigned a value but never used   no-unused-vars
+  Line 54:9:   'hasError' is assigned a value but never used     no-unused-vars
+  Line 55:9:   'hasWarnings' is assigned a value but never used  no-unused-vars
+
+src\components\ZodiacEnergySimple.js
+  Line 40:10:  'baziInfo' is assigned a value but never used                                                                    no-unused-vars
+  Line 40:20:  'setBaziInfo' is assigned a value but never used                                                                 no-unused-vars
+  Line 922:6:  React Hook useCallback has a missing dependency: 'userZodiac'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\ZodiacHoroscope.js
+  Line 17:10:  'Line' is defined but never used                               no-unused-vars
+  Line 53:11:  'updateConfig' is assigned a value but never used              no-unused-vars
+  Line 86:10:  'showZodiacModal' is assigned a value but never used           no-unused-vars
+  Line 108:9:  'isMounted' is assigned a value but never used                 no-unused-vars
+  Line 131:9:  'setDefaultHoroscopeState' is assigned a value but never used  no-unused-vars
+
+src\components\biorhythm\BiorhythmChart.js
+  Line 316:6:  React Hook useMemo has an unnecessary dependency: 'themeColors'. Either exclude it or remove the dependency array         react-hooks/exhaustive-deps
+  Line 427:6:  React Hook useMemo has missing dependencies: 'chartData' and 'theme'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\dashboard\BreadCrumbMenu.js
+  Line 44:15:  'handleClickOutside' is assigned a value but never used  no-unused-vars
+
+src\components\dashboard\DailyFortuneCard.js
+  Line 1:51:  'useMemo' is defined but never used  no-unused-vars
+
+src\components\dashboard\FeatureCard.js
+  Line 106:6:  React Hook useMemo has a missing dependency: 'categoryColors'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\dashboard\FeatureDragPanel.js
+  Line 1:27:  'useEffect' is defined but never used  no-unused-vars
+
+src\components\dashboard\FestivalCard.js
+  Line 4:31:    'chineseFestivals' is defined but never used                                                                                                           no-unused-vars
+  Line 78:11:   'solarHour' is assigned a value but never used                                                                                                         no-unused-vars
+  Line 79:11:   'solarMinute' is assigned a value but never used                                                                                                       no-unused-vars
+  Line 269:6:   React Hook useMemo has missing dependencies: 'calculateFestivalCountdown' and 'extendedFestivals'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 293:10:  Unexpected whitespace after spread property operator                                                                                                   rest-spread-spacing
+
+src\components\dashboard\MergedBannerCard.js
+  Line 19:5:  'chineseZodiac' is assigned a value but never used  no-unused-vars
+
+src\components\features\QimenDunjiaCalculator.js
+  Line 113:9:   'generateQimenLayoutFromBirthInfo' is assigned a value but never used  no-unused-vars
+  Line 165:18:  'minute' is assigned a value but never used                            no-unused-vars
+
+src\components\health\AgileHealthCard.js
+  Line 35:9:   'getCachedData' is assigned a value but never used                                                                                                                  no-unused-vars
+  Line 66:9:   'setCachedData' is assigned a value but never used                                                                                                                  no-unused-vars
+  Line 194:6:  React Hook useEffect has missing dependencies: 'getStoredDailyTasks', 'microTaskLibrary', and 'saveDailyTasks'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\health\BiorhythmStatusCard.js
+  Line 129:6:  React Hook useEffect has a missing dependency: 'fetchBiorhythmData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\health\BodyMetricsRhythmCard.js
+  Line 141:6:  React Hook useEffect has missing dependencies: 'getCachedData' and 'setCachedData'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\health\DietHealthCard.js
+  Line 6:10:  'recommendedFoods' is assigned a value but never used     no-unused-vars
+  Line 6:28:  'setRecommendedFoods' is assigned a value but never used  no-unused-vars
+
+src\components\health\DressDietCard.js
+  Line 101:6:  React Hook useEffect has a missing dependency: 'fetchDressInfo'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\health\LazyHealthCard.js
+  Line 14:9:  'cardRef' is assigned a value but never used                                                                      no-unused-vars
+  Line 58:9:  'setCachedData' is assigned a value but never used                                                                no-unused-vars
+  Line 92:6:  React Hook useEffect has a missing dependency: 'getCachedData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\health\SeasonalHealthCard.js
+  Line 181:6:  React Hook useEffect has missing dependencies: 'getCachedData' and 'setCachedData'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\health\StageHealthCard.js
+  Line 24:9:  'getCachedData' is assigned a value but never used  no-unused-vars
+  Line 55:9:  'setCachedData' is assigned a value but never used  no-unused-vars
+
+src\components\health\StepCounterCard.js
+  Line 114:9:  'dynamicGradientStyle' is assigned a value but never used  no-unused-vars
+
+src\components\lifeStyleGride\OnboardingModal.jsx
+  Line 1:27:  'useEffect' is defined but never used  no-unused-vars
+
+src\components\lifeStyleGride\RitualGuide.jsx
+  Line 25:63:  React Hook useMemo has a missing dependency: 'getHighEnergyCells'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 40:61:  React Hook useMemo has a missing dependency: 'getWeakDimensions'. Either include it or remove the dependency array   react-hooks/exhaustive-deps
+
+src\components\shaoyong\ClauseDisplay.jsx
+  Line 149:6:  React Hook useEffect has missing dependencies: 'clauseDatabase', 'onClauseSelect', and 'selectedClause'. Either include them or remove the dependency array. If 'onClauseSelect' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+src\config\bodyMetricsConfig.js
+  Line 476:5:  'outOfNormalMessage' is assigned a value but never used  no-unused-vars
+
+src\context\ThemeContext.js
+  Line 214:6:  React Hook useEffect has a missing dependency: 'systemThemeListener'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\contexts\EnergyContext.js
+  Line 13:10:  'energyBoostVisited' is assigned a value but never used                                                            no-unused-vars
+  Line 13:30:  'setEnergyBoostVisited' is assigned a value but never used                                                         no-unused-vars
+  Line 114:6:  React Hook useEffect has a missing dependency: 'saveEnergyData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\hooks\useUserInfo.js
+  Line 96:6:   React Hook useCallback has an unnecessary dependency: 'formatBirthDate'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 183:5:  'hasUserInfo' is assigned a value but never used                                                                           no-unused-vars
+
+src\lite\pages\SettingsLitePage.js
+  Line 27:11:  Duplicate key '13:00'  no-dupe-keys
+  Line 74:11:  Duplicate key '13:00'  no-dupe-keys
+
+src\lite\utils\biorhythmCalculator.js
+  Line 71:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\pages\AgeAnalysisPage.js
+  Line 1:20:  'useEffect' is defined but never used          no-unused-vars
+  Line 5:10:  'getAgeGroupByAge' is defined but never used   no-unused-vars
+  Line 12:9:  'navigate' is assigned a value but never used  no-unused-vars
+
+src\pages\AgileHealthPage.js
+  Line 1:27:  'useEffect' is defined but never used  no-unused-vars
+
+src\pages\BiorhythmPage.js
+  Line 47:6:  React Hook useCallback has an unnecessary dependency: 'selectedDate'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\BodyMetricsPage.js
+  Line 5:10:    'allBodyMetrics' is defined but never used              no-unused-vars
+  Line 14:32:   'getBirthDate' is assigned a value but never used       no-unused-vars
+  Line 52:10:   'showAllMetrics' is assigned a value but never used     no-unused-vars
+  Line 52:26:   'setShowAllMetrics' is assigned a value but never used  no-unused-vars
+  Line 395:21:  'statusColor' is assigned a value but never used        no-unused-vars
+
+src\pages\ChenTemperamentTestPage.js
+  Line 217:15:  'allConfigs' is assigned a value but never used  no-unused-vars
+
+src\pages\DashboardPage.js
+  Line 9:3:   'MBTICard' is defined but never used             no-unused-vars
+  Line 12:3:  'BaziFateCard' is defined but never used         no-unused-vars
+  Line 23:3:  'TarotGardenCard' is defined but never used      no-unused-vars
+  Line 25:3:  'DressGuideCard' is defined but never used       no-unused-vars
+  Line 26:3:  'HealthDashboardCard' is defined but never used  no-unused-vars
+  Line 28:3:  'OrganRhythmCard' is defined but never used      no-unused-vars
+  Line 31:3:  'LiuyaoCard' is defined but never used           no-unused-vars
+  Line 32:3:  'PlumBlossomCard' is defined but never used      no-unused-vars
+  Line 36:3:  'TiebanshenshuCard' is defined but never used    no-unused-vars
+
+src\pages\DocumentViewerPage.js
+  Line 4:8:    'ReactMarkdown' is defined but never used                                                                         no-unused-vars
+  Line 5:8:    'remarkGfm' is defined but never used                                                                             no-unused-vars
+  Line 130:6:  React Hook useEffect has a missing dependency: 'saveToHistory'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\EmoHealthDashboardPage.js
+  Line 1:17:   'useState' is defined but never used             no-unused-vars
+  Line 1:27:   'useEffect' is defined but never used            no-unused-vars
+  Line 11:11:  'userConfig' is assigned a value but never used  no-unused-vars
+  Line 12:26:  'isLoading' is assigned a value but never used   no-unused-vars
+  Line 12:37:  'error' is assigned a value but never used       no-unused-vars
+
+src\pages\EnergyTreePage.js
+  Line 10:8:  'EnergyHistory' is defined but never used  no-unused-vars
+
+src\pages\FengShuiCompassPage.js
+  Line 1:38:   'useRef' is defined but never used                                                                                     no-unused-vars
+  Line 38:7:   'MOUNTAINS_24' is assigned a value but never used                                                                      no-unused-vars
+  Line 78:12:  'calibrationMode' is assigned a value but never used                                                                   no-unused-vars
+  Line 78:29:  'setCalibrationMode' is assigned a value but never used                                                                no-unused-vars
+  Line 216:8:  React Hook useEffect has a missing dependency: 'geolocationWatchId'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\FinancePage.js
+  Line 576:6:  React Hook useEffect has missing dependencies: 'getDailyBalanceData' and 'getMonthlyExpensesData'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\HabitStatsPage.js
+  Line 80:9:    'getStatsSummary' is assigned a value but never used  no-unused-vars
+  Line 416:36:  'className' is assigned a value but never used        no-unused-vars
+
+src\pages\HealthDashboardPage.js
+  Line 23:9:   'navigate' is assigned a value but never used    no-unused-vars
+  Line 24:11:  'userConfig' is assigned a value but never used  no-unused-vars
+  Line 25:11:  'theme' is assigned a value but never used       no-unused-vars
+
+src\pages\LifeTrendPage.js
+  Line 180:15:  'hourGan' is assigned a value but never used                                                                       no-unused-vars
+  Line 225:9:   'configError' is assigned a value but never used                                                                   no-unused-vars
+  Line 228:15:  'today' is assigned a value but never used                                                                         no-unused-vars
+  Line 367:6:   React Hook useEffect has a missing dependency: 'currentConfig'. Either include it or remove the dependency array   react-hooks/exhaustive-deps
+  Line 547:6:   React Hook useEffect has a missing dependency: 'getDisplayBazi'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 776:6:   React Hook useEffect has a missing dependency: 'getDisplayBazi'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\LifestyleGuide.js
+  Line 10:57:   'getDimensionColor' is defined but never used                                                                   no-unused-vars
+  Line 57:6:    React Hook useEffect has a missing dependency: 'loadArchive'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 228:11:  'cell' is assigned a value but never used                                                                       no-unused-vars
+
+src\pages\MoodCalendarPage.js
+  Line 92:7:    'saveUserCustomMoods' is assigned a value but never used        no-unused-vars
+  Line 228:11:  'goToToday' is assigned a value but never used                  no-unused-vars
+  Line 347:19:  'dayOfWeek' is assigned a value but never used                  no-unused-vars
+  Line 480:9:   'handleMoodWithDescription' is assigned a value but never used  no-unused-vars
+
+src\pages\PasswordVaultPage.js
+  Line 1:38:  'useCallback' is defined but never used  no-unused-vars
+
+src\pages\PeriodTrackerPage.js
+  Line 570:6:  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array                 react-hooks/exhaustive-deps
+  Line 593:6:  React Hook useCallback has a missing dependency: 'determineCurrentPhase'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\PlumBlossomDivination.js
+  Line 1:51:  'useMemo' is defined but never used               no-unused-vars
+  Line 8:3:   'getWuxingRelation' is defined but never used     no-unused-vars
+  Line 10:3:  'getHexagramByNumbers' is defined but never used  no-unused-vars
+  Line 11:3:  'EIGHT_TRIGRAMS' is defined but never used        no-unused-vars
+  Line 13:3:  'WUXING_SHENGKE' is defined but never used        no-unused-vars
+
+src\pages\SettingsPage.js
+  Line 1:52:  'lazy' is defined but never used                               no-unused-vars
+  Line 1:58:  'Suspense' is defined but never used                           no-unused-vars
+  Line 18:7:  'ComponentLoadingFallback' is assigned a value but never used  no-unused-vars
+
+src\pages\SixYaoDivination.js
+  Line 5:3:   'YAO_TYPES' is defined but never used                                                                                                                                                                                                                     no-unused-vars
+  Line 12:3:  'generateHexagram' is defined but never used                                                                                                                                                                                                              no-unused-vars
+  Line 13:3:  'getChangingYaoCount' is defined but never used                                                                                                                                                                                                           no-unused-vars
+  Line 75:6:  React Hook useCallback has an unnecessary dependency: 'utilsShakeCoin'. Either exclude it or remove the dependency array. Outer scope values like 'utilsShakeCoin' aren't valid dependencies because mutating them doesn't re-render the component        react-hooks/exhaustive-deps
+  Line 91:6:  React Hook useEffect has an unnecessary dependency: 'MAX_HISTORY_LENGTH'. Either exclude it or remove the dependency array. Outer scope values like 'MAX_HISTORY_LENGTH' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+
+src\pages\SleepHealthDashboardPage.js
+  Line 1:17:   'useState' is defined but never used             no-unused-vars
+  Line 1:27:   'useEffect' is defined but never used            no-unused-vars
+  Line 12:11:  'userConfig' is assigned a value but never used  no-unused-vars
+  Line 13:22:  'isLoading' is assigned a value but never used   no-unused-vars
+  Line 13:33:  'error' is assigned a value but never used       no-unused-vars
+
+src\pages\TarotPage.js
+  Line 346:9:  'generateSingleReading' is assigned a value but never used            no-unused-vars
+  Line 357:9:  'generateTripleReadingTimeLine' is assigned a value but never used    no-unused-vars
+  Line 382:9:  'generateTripleReadingRelational' is assigned a value but never used  no-unused-vars
+
+src\pages\TemperamentDetailPage.js
+  Line 149:10:  'userTemperament' is assigned a value but never used  no-unused-vars
+
+src\pages\UnifiedDocumentViewerPage.js
+  Line 16:10:  'documentPath' is assigned a value but never used  no-unused-vars
+  Line 411:9:  'handleBack' is assigned a value but never used    no-unused-vars
+
+src\pages\bazi\BaziAnalysisPage.js
+  Line 263:6:    React Hook useEffect has a missing dependency: 'loadBazi'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 344:5:    'baziInfo' is constant                                                                                       no-const-assign
+  Line 355:11:   'baziInfo' is constant                                                                                       no-const-assign
+  Line 367:9:    'baziInfo' is constant                                                                                       no-const-assign
+  Line 384:7:    'baziInfo' is constant                                                                                       no-const-assign
+  Line 390:7:    'baziInfo' is constant                                                                                       no-const-assign
+  Line 446:5:    'baziInfo' is constant                                                                                       no-const-assign
+  Line 470:5:    'totalScore' is assigned a value but never used                                                              no-unused-vars
+  Line 1018:11:  'elementToIndex' is assigned a value but never used                                                          no-unused-vars
+  Line 1037:15:  'missingElements' is assigned a value but never used                                                         no-unused-vars
+  Line 1135:7:   'weakestElement' is assigned a value but never used                                                          no-unused-vars
+  Line 1331:9:   'dayMasterIndex' is assigned a value but never used                                                          no-unused-vars
+  Line 1651:6:   React Hook useEffect has a missing dependency: 'error'. Either include it or remove the dependency array     react-hooks/exhaustive-deps
+
+src\pages\bazi\BaziPage.js
+  Line 24:10:  'calculating' is assigned a value but never used                                                                                          no-unused-vars
+  Line 151:6:  React Hook useEffect has a missing dependency: 'searchParams'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
+  Line 151:7:  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked  react-hooks/exhaustive-deps
+  Line 412:6:  React Hook useEffect has a missing dependency: 'calculateBaziFortune'. Either include it or remove the dependency array                   react-hooks/exhaustive-deps
+
+src\pages\horoscope\HoroscopePage.js
+  Line 5:85:   'HOROSCOPE_DATA_ENHANCED' is defined but never used  no-unused-vars
+  Line 9:11:   'theme' is assigned a value but never used           no-unused-vars
+  Line 11:9:   'userSummary' is assigned a value but never used     no-unused-vars
+  Line 22:10:  'error' is assigned a value but never used           no-unused-vars
+
+src\pages\horoscope\HoroscopeTraitsPage.js
+  Line 141:6:  React Hook useMemo has missing dependencies: 'currentConfig?.zodiac' and 'location.state?.userZodiac'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 203:6:  React Hook useEffect has a missing dependency: 'currentHoroscope'. Either include it or remove the dependency array                                        react-hooks/exhaustive-deps
+
+src\pages\zodiac\ChineseZodiacPage.js
+  Line 296:11:  'userElementData' is assigned a value but never used                                                             no-unused-vars
+  Line 381:24:  'setSelectedDate' is assigned a value but never used                                                             no-unused-vars
+  Line 666:6:   React Hook useCallback has a missing dependency: 'userZodiac'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\services\dataService.js
+  Line 1:10:   'testApiConnection' is defined but never used           no-unused-vars
+  Line 1:29:   'fetchHistoryDates' is defined but never used           no-unused-vars
+  Line 1:48:   'fetchBiorhythmData' is defined but never used          no-unused-vars
+  Line 1:68:   'fetchDressInfoRange' is defined but never used         no-unused-vars
+  Line 2:10:   'fetchSpecificDateDressInfo' is defined but never used  no-unused-vars
+  Line 2:38:   'fetchMayaCalendarRange' is defined but never used      no-unused-vars
+  Line 2:62:   'fetchSpecificDateMayaInfo' is defined but never used   no-unused-vars
+  Line 3:10:   'fetchMayaHistory' is defined but never used            no-unused-vars
+  Line 3:28:   'fetchMayaBirthInfo' is defined but never used          no-unused-vars
+  Line 4:10:   'getDressInfoRange' is defined but never used           no-unused-vars
+  Line 4:29:   'getSpecificDateDressInfo' is defined but never used    no-unused-vars
+  Line 4:55:   'getTodayDressInfo' is defined but never used           no-unused-vars
+  Line 5:10:   'calculateBiorhythmData' is defined but never used      no-unused-vars
+  Line 5:34:   'getBiorhythmRange' is defined but never used           no-unused-vars
+  Line 123:9:  'jsonData' is assigned a value but never used           no-unused-vars
+
+src\services\stepCounterService.js
+  Line 333:11:  'storedData' is assigned a value but never used  no-unused-vars
+
+src\utils\BaziCacheManager.js
+  Line 795:17:  'cacheKey' is assigned a value but never used  no-unused-vars
+  Line 948:3:   Duplicate name 'startAutoCleanup'              no-dupe-class-members
+  Line 963:3:   Duplicate name 'stopAutoCleanup'               no-dupe-class-members
+
+src\utils\BaziDataMigrationManager.js
+  Line 6:36:  'convertLegacyToDualFormat' is defined but never used  no-unused-vars
+
+src\utils\BaziValidationLayer.js
+  Line 426:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\ConfigMigrationTool.js
+  Line 27:13:  'oldIndex' is assigned a value but never used  no-unused-vars
+
+src\utils\ConfigValidationHelper.js
+  Line 373:15:  'fixedConfig' is assigned a value but never used                no-unused-vars
+  Line 496:1:   Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\DataIntegrityManager.js
+  Line 142:28:  'rule' is assigned a value but never used  no-unused-vars
+
+src\utils\DataPersistenceManager.js
+  Line 290:15:  'fullKey' is assigned a value but never used  no-unused-vars
+
+src\utils\LunarCalendarHelper.js
+  Line 7:17:    'Lunar' is defined but never used                               no-unused-vars
+  Line 149:16:  'hour' is assigned a value but never used                       no-unused-vars
+  Line 149:22:  'minute' is assigned a value but never used                     no-unused-vars
+  Line 481:1:   Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\androidWebViewCompat.js
+  Line 211:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\baziDataManager.js
+  Line 13:34:   'validateBaziData' is defined but never used                    no-unused-vars
+  Line 651:13:  'hourGan' is assigned a value but never used                    no-unused-vars
+  Line 872:1:   Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\baziHelper.js
+  Line 365:9:  'dayGanZhi' is assigned a value but never used  no-unused-vars
+  Line 367:9:  'dayZhi' is assigned a value but never used     no-unused-vars
+
+src\utils\baziSchema.js
+  Line 7:17:   'Lunar' is defined but never used                               no-unused-vars
+  Line 8:10:   'calculateLunarDate' is defined but never used                  no-unused-vars
+  Line 424:5:  Duplicate key 'bazi'                                            no-dupe-keys
+  Line 831:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\capacitor.js
+  Line 346:21:  'customStatusBarStyle' is assigned a value but never used  no-unused-vars
+
+src\utils\cardConfig.js
+  Line 1453:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\cardProbability.js
+  Line 258:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\cardStorage.js
+  Line 430:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\compatibility.js
+  Line 123:9:    'androidVersion' is assigned a value but never used                                           no-unused-vars
+  Line 305:26:   Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 305:79:   Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 305:79:   Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 305:106:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 321:26:   Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 321:79:   Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 321:79:   Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 321:106:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 338:26:   Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 338:80:   Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 338:80:   Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 338:107:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+src\utils\errorHandler.js
+  Line 149:47:  Unnecessary escape character: \/  no-useless-escape
+  Line 155:37:  Unnecessary escape character: \/  no-useless-escape
+  Line 341:3:   Duplicate name 'getUserMessage'   no-dupe-class-members
+
+src\utils\errorLogger.js
+  Line 209:47:  Unnecessary escape character: \/                no-useless-escape
+  Line 215:37:  Unnecessary escape character: \/                no-useless-escape
+  Line 418:11:  'errorType' is assigned a value but never used  no-unused-vars
+
+src\utils\hexagramUtils.js
+  Line 312:9:  'yongRelation' is assigned a value but never used               no-unused-vars
+  Line 384:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\horoscopeCache.js
+  Line 309:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\horoscopeTraitsPreloader.js
+  Line 39:7:   'RETRY_DELAYS' is assigned a value but never used               no-unused-vars
+  Line 514:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\lunarCalendar.js
+  Line 28:7:  'GAN' is assigned a value but never used          no-unused-vars
+  Line 30:7:  'ZHI' is assigned a value but never used          no-unused-vars
+  Line 40:7:  'JIEQI' is assigned a value but never used        no-unused-vars
+  Line 44:7:  'JIEQI_DATES' is assigned a value but never used  no-unused-vars
+
+src\utils\mobileFileSystem.js
+  Line 311:11:  'env' is assigned a value but never used                        no-unused-vars
+  Line 764:1:   Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\mobileScreenOptimization.js
+  Line 222:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\nameScoring.js
+  Line 64:40:  Duplicate key '林'  no-dupe-keys
+  Line 73:14:  Duplicate key '龙'  no-dupe-keys
+  Line 76:13:  Duplicate key '夏'  no-dupe-keys
+  Line 76:54:  Duplicate key '雷'  no-dupe-keys
+  Line 77:45:  Duplicate key '金'  no-dupe-keys
+  Line 77:53:  Duplicate key '石'  no-dupe-keys
+  Line 78:5:   Duplicate key '梅'  no-dupe-keys
+  Line 78:14:  Duplicate key '兰'  no-dupe-keys
+  Line 78:23:  Duplicate key '竹'  no-dupe-keys
+  Line 78:31:  Duplicate key '菊'  no-dupe-keys
+  Line 78:40:  Duplicate key '松'  no-dupe-keys
+  Line 78:65:  Duplicate key '李'  no-dupe-keys
+  Line 80:22:  Duplicate key '康'  no-dupe-keys
+  Line 81:41:  Duplicate key '华'  no-dupe-keys
+  Line 83:48:  Duplicate key '超'  no-dupe-keys
+  Line 83:65:  Duplicate key '越'  no-dupe-keys
+
+src\utils\performance-simulated.js
+  Line 11:7:  'isAndroid' is assigned a value but never used              no-unused-vars
+  Line 12:7:  'isIOS' is assigned a value but never used                  no-unused-vars
+  Line 91:7:  'BrowserPerformanceAPI' is assigned a value but never used  no-unused-vars
+
+src\utils\performanceOptimization.js
+  Line 429:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\shaoyong-algorithm.js
+  Line 104:11:  'baseNumber' is assigned a value but never used  no-unused-vars
+
+src\utils\textEncodingDetector.js
+  Line 271:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\utils\ziweiHelper.js
+  Line 273:9:  'wuxingElements' is assigned a value but never used  no-unused-vars
+
+src\utils\zodiacTraitsCache.js
+  Line 231:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  342.85 kB (+5.16 kB)  build\static\js\main.e9f4ca64.js
+  38.66 kB (+4.23 kB)   build\static\js\common-84781932.d45583d1.chunk.js
+  38.48 kB (+2.5 kB)    build\static\css\main.022ab6b6.css
+  34.31 kB              build\static\js\9744.5805d4a1.chunk.js
+  34.29 kB              build\static\js\1265.a19742bb.chunk.js
+  25.91 kB              build\static\js\6120.626b2762.chunk.js
+  22.76 kB              build\static\js\common-e96e9bea.4017a90e.chunk.js
+  16.94 kB (+73 B)      build\static\js\5132.2b8a60e2.chunk.js
+  16.6 kB               build\static\js\common-e03e4a64.70efe691.chunk.js
+  16.24 kB (+717 B)     build\static\js\332.e5acaa98.chunk.js
+  15.85 kB              build\static\js\2149.85f4eb3c.chunk.js
+  15.49 kB (-6.79 kB)   build\static\js\common-cdd60c62.8edc0b60.chunk.js
+  14.53 kB              build\static\js\2396.9881c2fe.chunk.js
+  14.37 kB              build\static\js\common-aef3bfad.3cb1b15b.chunk.js
+  13.4 kB               build\static\js\5957.a78adc63.chunk.js
+  11.78 kB (+477 B)     build\static\js\9667.23501630.chunk.js
+  11.62 kB              build\static\js\9849.1f13a082.chunk.js
+  11.61 kB              build\static\js\907.879a9f55.chunk.js
+  11.27 kB              build\static\js\4293.403689ef.chunk.js
+  10.82 kB              build\static\js\5398.b9094902.chunk.js
+  10.77 kB              build\static\js\common-efdee510.6502249c.chunk.js
+  10.74 kB (-11.51 kB)  build\static\js\common-31743c5a.bc7f5835.chunk.js
+  9.35 kB               build\static\js\6550.c7f59f7f.chunk.js
+  9.21 kB (+385 B)      build\static\js\6966.44aecc9d.chunk.js
+  9.01 kB               build\static\css\5132.c342c507.chunk.css
+  8.9 kB (+12 B)        build\static\js\1500.3d125a98.chunk.js
+  8.57 kB               build\static\js\6332.1b80db29.chunk.js
+  8.5 kB (+339 B)       build\static\js\horoscope-traits.b4d3885f.chunk.js
+  8.49 kB (+42 B)       build\static\js\3033.18273e19.chunk.js
+  8.27 kB               build\static\js\common-5a94f17d.9f1fa693.chunk.js
+  8.17 kB (+405 B)      build\static\js\4433.67b10725.chunk.js
+  7.74 kB               build\static\js\8978.f250d822.chunk.js
+  7.36 kB               build\static\css\common-e96e9bea.936ee760.chunk.css
+  7.1 kB (+245 B)       build\static\js\7164.895d6622.chunk.js
+  6.44 kB               build\static\js\7918.d060e960.chunk.js
+  6.31 kB               build\static\js\7126.551acac7.chunk.js
+  6.13 kB               build\static\js\8095.28e7ffec.chunk.js
+  6.04 kB (+183 B)      build\static\js\8650.9edd8fd5.chunk.js
+  5.89 kB               build\static\js\common-c87e6db1.932ec5dc.chunk.js
+  5.64 kB (-448 B)      build\static\js\5519.6cc1f847.chunk.js
+  5.56 kB (+65 B)       build\static\js\8007.434bce0f.chunk.js
+  5.54 kB               build\static\css\8095.8cef7a29.chunk.css
+  5.48 kB (+203 B)      build\static\js\6945.1bfbac91.chunk.js
+  5.35 kB (+667 B)      build\static\js\2755.859dd800.chunk.js
+  5.34 kB               build\static\js\6635.97865bbb.chunk.js
+  5.17 kB (+396 B)      build\static\js\3154.c217d3b9.chunk.js
+  5.12 kB               build\static\js\2414.f8e54b7c.chunk.js
+  5.09 kB (+8 B)        build\static\js\4629.196ecf47.chunk.js
+  5.06 kB               build\static\js\1336.79b4020d.chunk.js
+  4.84 kB               build\static\js\5726.c28a6e03.chunk.js
+  4.75 kB               build\static\js\5562.e7ec18e9.chunk.js
+  4.72 kB               build\static\js\6324.24c09d70.chunk.js
+  4.71 kB               build\static\css\907.1695a960.chunk.css
+  4.67 kB               build\static\js\5136.e8519f58.chunk.js
+  4.16 kB               build\static\js\2145.0ea952ec.chunk.js
+  4.02 kB               build\static\js\5178.14f6a7c3.chunk.js
+  4.01 kB               build\static\js\common-eb1fd148.cf78f3e0.chunk.js
+  4 kB                  build\static\js\704.bf6eee2b.chunk.js
+  3.91 kB               build\static\js\5982.9eda0127.chunk.js
+  3.88 kB               build\static\js\2055.a407cef7.chunk.js
+  3.77 kB               build\static\css\3033.975300b8.chunk.css
+  3.75 kB               build\static\js\3363.baf5ac31.chunk.js
+  3.64 kB               build\static\css\9744.17946467.chunk.css
+  3.61 kB               build\static\js\5661.77bf222e.chunk.js
+  3.58 kB               build\static\css\5398.1a46a661.chunk.css
+  3.37 kB               build\static\js\common-27545368.58c6f77f.chunk.js
+  3.29 kB               build\static\css\common-84781932.37faac0d.chunk.css
+  3.24 kB (-69 B)       build\static\js\3541.5b358acc.chunk.js
+  3.11 kB               build\static\css\5726.7f1b9c6c.chunk.css
+  3.1 kB                build\static\css\8046.1d472381.chunk.css
+  3.06 kB               build\static\js\2915.97d5bc3d.chunk.js
+  3.06 kB               build\static\js\8130.9e9457bc.chunk.js
+  2.97 kB               build\static\js\457.bfb85017.chunk.js
+  2.92 kB               build\static\css\3142.71f6e1ed.chunk.css
+  2.89 kB               build\static\css\6332.47fdde99.chunk.css
+  2.86 kB               build\static\js\3142.8f528973.chunk.js
+  2.76 kB (+344 B)      build\static\js\5034.e78022ec.chunk.js
+  2.7 kB                build\static\js\5321.a75e24f8.chunk.js
+  2.65 kB               build\static\css\5982.cff1d120.chunk.css
+  2.64 kB               build\static\css\8204.f83b1222.chunk.css
+  2.62 kB               build\static\js\2848.ceb32166.chunk.js
+  2.62 kB               build\static\js\9493.14596592.chunk.js
+  2.57 kB               build\static\js\6821.c8d7ed83.chunk.js
+  2.47 kB (+164 B)      build\static\js\9645.adb21e4a.chunk.js
+  2.41 kB               build\static\css\6120.9f5a3cf7.chunk.css
+  2.37 kB (+149 B)      build\static\js\709.d2876b89.chunk.js
+  2.32 kB               build\static\js\7613.41fec323.chunk.js
+  2.28 kB               build\static\js\5894.26076609.chunk.js
+  2.28 kB (+63 B)       build\static\js\1186.22edda8a.chunk.js
+  2.26 kB               build\static\css\4293.f8901f66.chunk.css
+  2.24 kB               build\static\js\8046.78bb6da0.chunk.js
+  2.2 kB (+212 B)       build\static\js\6397.2eaa71d1.chunk.js
+  2.19 kB (+228 B)      build\static\js\964.3531e891.chunk.js
+  2.19 kB (+404 B)      build\static\js\8970.741aeaa7.chunk.js
+  2.03 kB (+32 B)       build\static\js\220.eef2104c.chunk.js
+  2.02 kB               build\static\js\1989.42d33203.chunk.js
+  1.94 kB               build\static\css\704.9dd944d9.chunk.css
+  1.94 kB               build\static\css\9306.65cf952c.chunk.css
+  1.85 kB               build\static\css\3363.f0b8b110.chunk.css
+  1.84 kB               build\static\css\332.48c8f298.chunk.css
+  1.82 kB               build\static\css\7613.7c55ef67.chunk.css
+  1.75 kB               build\static\css\5178.40b0d76d.chunk.css
+  1.75 kB               build\static\css\5519.3922fe78.chunk.css
+  1.72 kB               build\static\css\7918.5e44588d.chunk.css
+  1.69 kB               build\static\css\6324.d88b1bb9.chunk.css
+  1.58 kB               build\static\js\8204.e1bacbb8.chunk.js
+  1.47 kB               build\static\css\2414.40c6d1b6.chunk.css
+  1.42 kB               build\static\js\1617.b4d48354.chunk.js
+  1.38 kB               build\static\js\9306.ae117d83.chunk.js
+  1.34 kB               build\static\css\5562.9f238cee.chunk.css
+  1.27 kB               build\static\js\7042.909c5162.chunk.js
+  1.22 kB               build\static\js\240.816f01f7.chunk.js
+  1.17 kB               build\static\js\5950.a02b61a9.chunk.js
+  1.16 kB               build\static\js\8640.69f2df32.chunk.js
+  1.11 kB               build\static\css\240.575d437e.chunk.css
+  1.1 kB                build\static\css\8978.e935c872.chunk.css
+  1.09 kB               build\static\css\9849.28aed173.chunk.css
+  1.05 kB               build\static\js\5615.5de8486b.chunk.js
+  1.04 kB               build\static\css\6821.66ac58c4.chunk.css
+  916 B                 build\static\css\7042.79af4ce8.chunk.css
+  909 B                 build\static\css\412.85f27153.chunk.css
+  862 B                 build\static\js\412.d920591e.chunk.js
+  823 B                 build\static\css\6966.d6cf9b45.chunk.css
+  740 B                 build\static\css\6635.01756b5d.chunk.css
+  708 B (-66 B)         build\static\css\horoscope-traits.6dcc3a90.chunk.css
+  668 B                 build\static\js\828.ec0db667.chunk.js
+  661 B                 build\static\js\7391.c0977ec0.chunk.js
+  639 B                 build\static\css\1989.0ea1aef3.chunk.css
+  631 B                 build\static\js\5268.ecb562b1.chunk.js
+  602 B                 build\static\css\6550.7e076aa2.chunk.css
+  595 B                 build\static\js\4182.c0e0469d.chunk.js
+  558 B                 build\static\css\2848.895acb9c.chunk.css
+  549 B                 build\static\js\6312.6697e484.chunk.js
+  462 B                 build\static\js\5585.c3980a72.chunk.js
+  435 B                 build\static\js\508.f27b5166.chunk.js
+  427 B                 build\static\js\6551.4c2612a3.chunk.js
+  409 B                 build\static\js\1427.cf8af506.chunk.js
+  344 B                 build\static\js\3339.37269abb.chunk.js
+  335 B                 build\static\js\5869.af7232f2.chunk.js
+  326 B                 build\static\js\6374.4cbf4f02.chunk.js
+  240 B                 build\static\js\9974.10d698b5.chunk.js
+  236 B                 build\static\js\5638.1961d330.chunk.js
+  233 B                 build\static\js\1358.1650a466.chunk.js
+  232 B                 build\static\js\2205.0d1c0773.chunk.js
+  228 B                 build\static\css\2055.3ea368e2.chunk.css
+  220 B                 build\static\js\6484.c6b5dce2.chunk.js
+
+The project was built assuming it is hosted at ./.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+

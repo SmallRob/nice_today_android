@@ -751,7 +751,8 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
     wealth: overallScore * 0.7 + (1 - random) * 30,
     career: overallScore * 0.9 + random * 10,
     study: overallScore * 0.6 + random * 40,
-    social: overallScore * 0.75 + (random * 0.5 + 0.25) * 25
+    social: overallScore * 0.75 + (random * 0.5 + 0.25) * 25,
+    health: overallScore * 0.85 + random * 15
   };
 
   // 增加更精细的偏移量，确保即使是相邻星座分数也不同
@@ -761,6 +762,7 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
   baseScores.career += (dailyRandom(horoscopeName, 'career_offset') - 0.5) * 10 + (nameOffset * 7) % 5;
   baseScores.study += (dailyRandom(horoscopeName, 'study_offset') - 0.5) * 10 + (nameOffset * 11) % 5;
   baseScores.social += (dailyRandom(horoscopeName, 'social_offset') - 0.5) * 10 + (nameOffset * 13) % 5;
+  baseScores.health += (dailyRandom(horoscopeName, 'health_offset') - 0.5) * 10 + (nameOffset * 17) % 5;
 
   // 根据星座特性调整分数
   switch (horoscopeName) {
@@ -769,24 +771,28 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
     case '射手座': // 火象星座
       baseScores.career += 5;
       baseScores.love += 3;
+      baseScores.health += 4;
       break;
     case '金牛座':
     case '处女座':
     case '摩羯座': // 土象星座
       baseScores.wealth += 5;
       baseScores.career += 3;
+      baseScores.health += 3;
       break;
     case '双子座':
     case '天秤座':
     case '水瓶座': // 风象星座
       baseScores.study += 5;
       baseScores.love += 3;
+      baseScores.health += 2;
       break;
     case '巨蟹座':
     case '天蝎座':
     case '双鱼座': // 水象星座
       baseScores.love += 5;
       baseScores.study += 3;
+      baseScores.health += 5;
       break;
     default:
       // 默认情况下不做额外调整
@@ -826,6 +832,11 @@ export const generateDailyHoroscope = (horoscopeName, date = new Date()) => {
       score: baseScores.social,
       description: getScoreDescription(baseScores.social),
       trend: getTrend(baseScores.social)
+    },
+    health: {
+      score: baseScores.health,
+      description: getScoreDescription(baseScores.health),
+      trend: getTrend(baseScores.health)
     }
   };
 

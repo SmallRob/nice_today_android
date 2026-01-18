@@ -60,8 +60,11 @@
 }
 
 .features-panel-content {
-    padding: 10px 12px 100px;
+    padding: 8px 5px 100px;
     flex: 1;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* 深色模式适配 */

@@ -45,7 +45,7 @@ async function initializeGoogleFitPlugin() {
   } else {
     // Web环境使用Web模拟实现
     try {
-      const { GoogleFitWeb } = await import('../plugins/google-fit-web');
+      const { GoogleFitWeb } = await import('../plugins/google-fit-web.js');
       const webInstance = new GoogleFitWeb();
       GoogleFit = {
         connect: webInstance.connect.bind(webInstance),

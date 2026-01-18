@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserConfig } from '../../contexts/UserConfigContext';
 import { HOROSCOPE_DATA_ENHANCED, generateDailyHoroscope, normalizeZodiacParam } from '../../utils/horoscopeAlgorithm';
 import { memo } from 'react';
-import { Line } from 'react-chartjs-2';
 import { ensureChartRegistered } from '../../utils/chartConfig';
 import '../../styles/horoscope-traits-page.css';
+
+// 懒加载图表组件，避免阻塞初始渲染
+const Line = lazy(() => import('react-chartjs-2').then(module => ({ default: module.Line })));
 
 const HoroscopeTraitsPage = () => {
   const navigate = useNavigate();
@@ -26,14 +28,18 @@ const HoroscopeTraitsPage = () => {
 
     // 使用 normalizeZodiacParam 统一处理参数（支持数字编码和中文名称）
     const normalizedZodiac = normalizeZodiacParam(decodedZodiacName || stateZodiac || configZodiac);
-    console.log('初始化星座参数:', { zodiacName: decodedZodiacName, stateZodiac, configZodiac, normalizedZodiac });
-
+    if (process.env.NODE_ENV === 'development') {
+      console.log('初始化星座参数:', { zodiacName: decodedZodiacName, stateZodiac, configZodiac, normalizedZodiac });
+    }
     return normalizedZodiac;
   });
   
   // 运势数据状态
   const [horoscopeData, setHoroscopeData] = useState(null);
   const [loadingHoroscope, setLoadingHoroscope] = useState(false);
+
+  // 添加延迟加载状态，避免阻塞初始渲染
+  const [showTrendChart, setShowTrendChart] = useState(false);
 
   // 优化性能：将辅助函数移出组件内部，避免每次渲染重新创建
   
@@ -98,51 +104,49 @@ const getFamousExamples = (zodiacName) => {
   return examples[zodiacName] || ['知名人物'];
 };
 
-  // 获取当前星座数据 - 添加安全检查
+  // 获取当前星座数据 - 添加安全检查，优化性能
   const zodiacData = useMemo(() => {
     if (!HOROSCOPE_DATA_ENHANCED || !Array.isArray(HOROSCOPE_DATA_ENHANCED)) {
-      console.warn('星座数据不可用或格式不正确');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('星座数据不可用或格式不正确');
+      }
       return null;
     }
-    
-    // 调试日志：查看当前参数状态
-    console.log('当前星座参数:', {
-      zodiacName: zodiacName ? decodeURIComponent(zodiacName) : '',
-      stateZodiac: location.state?.userZodiac,
-      configZodiac: currentConfig?.zodiac,
-      currentHoroscope
-    });
-    
+
     // 优化查找逻辑：确保星座名称完全匹配，增加模糊匹配
     const decodedZodiacName = zodiacName ? decodeURIComponent(zodiacName) : '';
-    
+
     // 1. 精确匹配
     let foundZodiac = HOROSCOPE_DATA_ENHANCED.find(h => h.name === currentHoroscope);
-    
+
     // 2. 如果精确匹配失败，尝试模糊匹配（处理可能的空格、特殊字符等）
     if (!foundZodiac && decodedZodiacName) {
-      foundZodiac = HOROSCOPE_DATA_ENHANCED.find(h => 
+      foundZodiac = HOROSCOPE_DATA_ENHANCED.find(h =>
         h.name.replace(/\s+/g, '') === decodedZodiacName.replace(/\s+/g, '')
       );
     }
-    
+
     // 3. 如果还是找不到，使用第一个星座作为备选
     if (!foundZodiac && HOROSCOPE_DATA_ENHANCED.length > 0) {
-      console.warn(`未找到星座数据: ${currentHoroscope}，使用默认星座: ${HOROSCOPE_DATA_ENHANCED[0].name}`);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`未找到星座数据: ${currentHoroscope}，使用默认星座: ${HOROSCOPE_DATA_ENHANCED[0].name}`);
+      }
       foundZodiac = HOROSCOPE_DATA_ENHANCED[0];
     }
-    
-    if (!foundZodiac) {
+
+    if (!foundZodiac && process.env.NODE_ENV === 'development') {
       console.warn('星座数据完全不可用');
       console.log('可用星座列表:', HOROSCOPE_DATA_ENHANCED.map(z => z.name));
     }
-    
+
     return foundZodiac;
   }, [currentHoroscope, zodiacName]);
   
   const elementColors = useMemo(() => {
     if (!zodiacData?.element) {
-      console.warn('星座元素数据不可用');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('星座元素数据不可用');
+      }
       return getElementColor(null); // 返回默认颜色
     }
     return getElementColor(zodiacData.element);
@@ -167,7 +171,8 @@ const getFamousExamples = (zodiacName) => {
           wealth: { score: 65, description: '良好', trend: '平稳' },
           career: { score: 75, description: '良好', trend: '上升' },
           study: { score: 80, description: '很好', trend: '上升' },
-          social: { score: 70, description: '良好', trend: '上升' }
+          social: { score: 70, description: '良好', trend: '上升' },
+          health: { score: 72, description: '良好', trend: '平稳' }
         },
         recommendations: {
           luckyColorNames: ['蓝色', '绿色'],
@@ -197,58 +202,95 @@ const getFamousExamples = (zodiacName) => {
 
     // 只有当目标星座有效且与当前不同时才更新
     if (targetZodiac && targetZodiac !== currentHoroscope) {
-      console.log('更新星座参数:', { from: currentHoroscope, to: targetZodiac, source: zodiacName ? 'URL' : stateZodiac ? 'State' : 'Config' });
+      if (process.env.NODE_ENV === 'development') {
+        console.log('更新星座参数:', { from: currentHoroscope, to: targetZodiac, source: zodiacName ? 'URL' : stateZodiac ? 'State' : 'Config' });
+      }
       setCurrentHoroscope(targetZodiac);
     }
   }, [zodiacName, location.state?.userZodiac, currentConfig?.zodiac]);
   
-  // 当星座变化时，重新生成运势数据
+  // 当星座变化时，重新生成运势数据 - 延迟执行避免阻塞
   useEffect(() => {
-    if (currentHoroscope) {
+    if (!currentHoroscope) return;
+
+    // 延迟生成运势数据，确保页面先渲染
+    const timer = setTimeout(() => {
       generateDailyHoroscopeData();
-    }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [currentHoroscope, generateDailyHoroscopeData]);
 
-  // 确保 Chart.js 组件已注册
+  // 延迟加载趋势图，避免初始渲染阻塞
   useEffect(() => {
-    ensureChartRegistered();
+    const timer = setTimeout(() => {
+      setShowTrendChart(true);
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  // 生成每周运势趋势数据 - 确定性算法
-  const weeklyTrendData = useMemo(() => {
-    if (!currentHoroscope) return { dates: [], energyScores: [], wealthScores: [], careerScores: [], healthScores: [] };
+  // 确保 Chart.js 组件已注册 - 延迟执行避免阻塞
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      ensureChartRegistered();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
 
-    const dates = [];
-    const energyScores = [];
-    const wealthScores = [];
-    const careerScores = [];
-    const healthScores = [];
+  // 生成每周运势趋势数据 - 优化为状态管理，避免每次渲染重新计算
+  const [weeklyTrendData, setWeeklyTrendData] = useState({
+    dates: [],
+    energyScores: [],
+    wealthScores: [],
+    careerScores: [],
+    healthScores: []
+  });
 
-    const baseDate = new Date();
+  // 延迟计算趋势数据，避免阻塞初始渲染
+  useEffect(() => {
+    if (!currentHoroscope) return;
 
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(baseDate);
-      date.setDate(baseDate.getDate() - i);
-      dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
+    const calculateTrendData = () => {
+      const dates = [];
+      const energyScores = [];
+      const wealthScores = [];
+      const careerScores = [];
+      const healthScores = [];
 
-      // 使用确定性算法计算分数
-      const seed = currentHoroscope.charCodeAt(0) + date.getDate() + date.getMonth() * 31;
-      const baseScore = 50 + (seed % 20);
-      const dayFactor = (date.getDay() + 1) * 3;
-      const deterministicVariation = ((seed * dayFactor) % 20) - 10;
+      const baseDate = new Date();
 
-      const energyScore = Math.max(20, Math.min(95, baseScore + dayFactor + deterministicVariation));
-      const wealthScore = Math.max(15, Math.min(90, energyScore + ((seed * 2) % 25) - 12));
-      const careerScore = Math.max(10, Math.min(85, energyScore + ((seed * 3) % 30) - 15));
-      const healthScore = Math.max(10, Math.min(85, energyScore + ((seed * 4) % 25) - 12));
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(baseDate);
+        date.setDate(baseDate.getDate() - i);
+        dates.push(`${date.getMonth() + 1}/${date.getDate()}`);
 
-      energyScores.push(energyScore);
-      wealthScores.push(wealthScore);
-      careerScores.push(careerScore);
-      healthScores.push(healthScore);
-    }
+        // 使用确定性算法计算分数
+        const seed = currentHoroscope.charCodeAt(0) + date.getDate() + date.getMonth() * 31;
+        const baseScore = 50 + (seed % 20);
+        const dayFactor = (date.getDay() + 1) * 3;
+        const deterministicVariation = ((seed * dayFactor) % 20) - 10;
 
-    return { dates, energyScores, wealthScores, careerScores, healthScores };
+        const energyScore = Math.max(20, Math.min(95, baseScore + dayFactor + deterministicVariation));
+        const wealthScore = Math.max(15, Math.min(90, energyScore + ((seed * 2) % 25) - 12));
+        const careerScore = Math.max(10, Math.min(85, energyScore + ((seed * 3) % 30) - 15));
+        const healthScore = Math.max(10, Math.min(85, energyScore + ((seed * 4) % 25) - 12));
+
+        energyScores.push(energyScore);
+        wealthScores.push(wealthScore);
+        careerScores.push(careerScore);
+        healthScores.push(healthScore);
+      }
+
+      return { dates, energyScores, wealthScores, careerScores, healthScores };
+    };
+
+    // 延迟执行计算，确保页面先渲染
+    const timer = setTimeout(() => {
+      setWeeklyTrendData(calculateTrendData());
+    }, 50);
+
+    return () => clearTimeout(timer);
   }, [currentHoroscope]);
 
   // 修复幸运颜色映射 - 使用完整的颜色名称
@@ -419,7 +461,13 @@ const getFamousExamples = (zodiacName) => {
           近7日运势趋势
         </h3>
         <div className="h-36 md:h-48">
-          <Line data={chartData} options={chartOptions} />
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-full">
+              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+          }>
+            <Line data={chartData} options={chartOptions} />
+          </Suspense>
         </div>
         <div className="mt-2 md:mt-3 grid grid-cols-4 gap-1.5 md:gap-2 text-center">
           <div className="bg-blue-50 dark:bg-blue-900/20 p-1.5 md:p-2 rounded-lg border border-blue-100 dark:border-blue-900/30">
@@ -560,7 +608,7 @@ const getFamousExamples = (zodiacName) => {
           星座特质详解
         </h1>
         <button
-          onClick={() => navigate('/settings')}
+          onClick={() => navigate('/horoscope')}
           style={{
             color: 'white',
             background: 'transparent',
@@ -630,8 +678,8 @@ const getFamousExamples = (zodiacName) => {
             
             <p className="mb-3 md:mb-4 text-sm md:text-base text-blue-100">{horoscopeData.overallDescription}</p>
             
-            {/* 各领域运势 - 包含健康运势 */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1.5 md:gap-2">
+            {/* 各领域运势 - 包含健康运势（6列布局） */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1.5 md:gap-2">
               {Object.entries(horoscopeData.dailyForecast || {}).map(([key, data]) => (
                 <div key={key} className="text-center p-1.5 md:p-2 bg-white/10 rounded-lg">
                   <div className="text-[10px] md:text-xs text-blue-200 mb-0.5 md:mb-1">
@@ -672,8 +720,8 @@ const getFamousExamples = (zodiacName) => {
           </div>
         ) : null}
 
-        {/* 运势趋势图 */}
-        {renderTrendChart()}
+        {/* 运势趋势图 - 延迟加载避免阻塞初始渲染 */}
+        {showTrendChart && renderTrendChart()}
 
         {/* 详细描述 */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-5 mb-4 md:mb-5">

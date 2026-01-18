@@ -6,8 +6,7 @@ import { useUserConfig } from '../../contexts/UserConfigContext.js';
 const BloodTypeHealthCard = () => {
   const { currentConfig, updateConfig, getCurrentConfigIndex } = useUserConfig();
   const [bloodType, setBloodType] = useState('A');
-  const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // 从用户配置加载血型
@@ -24,14 +23,13 @@ const BloodTypeHealthCard = () => {
     }
   }, [currentConfig, bloodType]);
 
-  // 处理血型选择
+  // 处理血型选择并立即保存
   const handleBloodTypeSelect = useCallback(async (selectedType) => {
     setBloodType(selectedType);
-    setIsEditing(false);
+    setShowModal(false);
     
-    // 自动保存选择的血型
+    // 立即保存选择的血型
     if (currentConfig) {
-      setLoading(true);
       try {
         const currentIndex = getCurrentConfigIndex();
         await updateConfig(currentIndex, { bloodType: selectedType });
@@ -39,36 +37,10 @@ const BloodTypeHealthCard = () => {
         // 3秒后隐藏成功提示
         setTimeout(() => setSaveSuccess(false), 3000);
       } catch (error) {
-        console.error('自动保存血型配置失败:', error);
-      } finally {
-        setLoading(false);
+        console.error('保存血型配置失败:', error);
       }
     }
   }, [currentConfig, updateConfig, getCurrentConfigIndex]);
-
-  // 保存血型配置
-  const handleSaveBloodType = useCallback(async () => {
-    if (!currentConfig) return;
-    
-    setLoading(true);
-    setSaveSuccess(false);
-    
-    try {
-      // 获取当前活跃配置的索引并更新配置
-      const currentIndex = getCurrentConfigIndex();
-      const success = await updateConfig(currentIndex, { bloodType });
-      
-      if (success) {
-        setSaveSuccess(true);
-        // 3秒后隐藏成功提示
-        setTimeout(() => setSaveSuccess(false), 3000);
-      }
-    } catch (error) {
-      console.error('保存血型配置失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [bloodType, currentConfig, updateConfig, getCurrentConfigIndex]);
 
   // 获取当前血型的健康信息
   const getBloodTypeInfo = useCallback((type) => {
@@ -125,153 +97,268 @@ const BloodTypeHealthCard = () => {
   const bloodTypeInfo = getBloodTypeInfo(bloodType);
 
   return (
-    <div className="blood-type-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-red-500 via-pink-500 to-orange-500 p-4 rounded-2xl text-white shadow-lg h-full">
+    <div style={{
+      borderRadius: '16px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      transition: 'all 0.3s ease',
+      background: 'linear-gradient(to bottom right, #ef4444, #ec4899, #f97316)',
+      color: 'white',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%'
+    }}>
       {/* 卡片头部 */}
-      <div className="flex justify-between items-center mb-3 relative z-10">
-        <div className="flex items-center space-x-2">
-          <span className="text-2xl">{bloodTypeInfo.icon}</span>
-          <h3 className="text-lg font-bold text-white drop-shadow-lg">血型与健康</h3>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '8px',
+        padding: '12px 12px 0 12px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '20px' }}>{bloodTypeInfo.icon}</span>
+          <h3 style={{
+            fontWeight: '600',
+            fontSize: '16px',
+            color: 'white',
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            margin: 0
+          }}>血型与健康</h3>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
-          {/* 血型选择器 */}
-          <div className="relative" style={{ minWidth: '100px', flexShrink: 0 }}>
-            <button
-              style={{
-                padding: '4px 12px',
-                borderRadius: '9999px',
-                color: 'white',
-                fontWeight: '500',
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                backdropFilter: 'blur(4px)',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                whiteSpace: 'nowrap',
-                minWidth: '100px',
-                maxWidth: '100px',
-                justifyContent: 'space-between'
-              }}
-              onClick={() => setIsEditing(!isEditing)}
-              disabled={loading}
-            >
-              <span style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: '60px',
-                fontSize: '14px'
-              }}>{bloodTypeInfo.title}</span>
-              <span style={{ fontSize: '10px', flexShrink: 0 }}>▼</span>
-            </button>
-            
-            {/* 移动端友好的模态选择器 */}
-            {isEditing && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-sm">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">选择血型</h3>
-                    <button 
-                      onClick={() => setIsEditing(false)}
-                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {['A', 'B', 'AB', 'O'].map(type => (
-                      <button
-                        key={type}
-                        className={`p-3 rounded-lg text-center text-white font-medium ${getBloodTypeInfo(type).colorClass} hover:opacity-90 transition-opacity`}
-                        onClick={() => handleBloodTypeSelect(type)}
-                      >
-                        <div className="text-lg">{getBloodTypeInfo(type).icon}</div>
-                        <div>{type}型</div>
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    className="mt-4 w-full py-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    取消
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* 保存按钮 */}
-          <button
-            style={{
-              padding: '4px 12px',
-              borderRadius: '9999px',
-              color: 'white',
-              fontWeight: '500',
-              backgroundColor: loading ? 'rgb(107 114 128)' : 'rgb(37 99 235)',
-              border: 'none',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.3s',
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}
-            onClick={handleSaveBloodType}
-            disabled={loading}
-          >
-            {loading ? '保存中...' : '保存'}
-          </button>
-        </div>
+        {/* 设置按钮 */}
+        <button
+          style={{
+            padding: '4px 10px',
+            borderRadius: '9999px',
+            color: 'white',
+            fontWeight: '500',
+            backgroundColor: 'rgba(255, 255, 255, 0.25)',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            backdropFilter: 'blur(4px)',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            whiteSpace: 'nowrap',
+            fontSize: '12px',
+            flexShrink: 0
+          }}
+          onClick={() => setShowModal(true)}
+        >
+          <span>{bloodTypeInfo.title}</span>
+          <span style={{ fontSize: '10px', flexShrink: 0 }}>⚙</span>
+        </button>
       </div>
       
       {/* 血型信息概览 */}
-      <div className="mb-4">
-        <div className="text-center p-3 rounded-lg bg-white/20 text-white mb-3 backdrop-blur-sm drop-shadow">
-          <h4 className="text-xl font-bold drop-shadow-lg">{bloodTypeInfo.title}</h4>
-          <p className="text-sm opacity-90 drop-shadow">{bloodTypeInfo.subtitle}</p>
+      <div style={{ marginBottom: '8px', padding: '0 12px' }}>
+        <div style={{
+          textAlign: 'center',
+          padding: '8px',
+          borderRadius: '8px',
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          color: 'white',
+          marginBottom: '8px',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <h4 style={{
+            fontWeight: '600',
+            fontSize: '16px',
+            color: 'white',
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            margin: '0 0 4px 0'
+          }}>{bloodTypeInfo.title}</h4>
+          <p style={{ fontSize: '12px', opacity: 0.9, margin: 0 }}>{bloodTypeInfo.subtitle}</p>
         </div>
         
-        <p className="text-white/90 mb-2 drop-shadow">{bloodTypeInfo.description}</p>
-        <p className="text-white/90 mb-2 drop-shadow"><strong>健康风险：</strong>{bloodTypeInfo.healthRisks}</p>
+        <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px', marginBottom: '6px', lineHeight: '1.5' }}>{bloodTypeInfo.description}</p>
+        <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px', marginBottom: '6px', lineHeight: '1.5' }}><strong>健康风险：</strong>{bloodTypeInfo.healthRisks}</p>
       </div>
       
       {/* 养生建议 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-        <div className="bg-white/20 p-3 rounded-lg border border-white/30 backdrop-blur-sm drop-shadow">
-          <h5 className="font-semibold text-white mb-1 drop-shadow">饮食建议</h5>
-          <p className="text-white/90 text-sm drop-shadow">{bloodTypeInfo.dietaryAdvice}</p>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '8px',
+        marginBottom: '8px',
+        padding: '0 12px'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          padding: '8px',
+          borderRadius: '8px',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <h5 style={{ fontWeight: '600', color: 'white', marginBottom: '4px', fontSize: '12px' }}>饮食建议</h5>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px', lineHeight: '1.5', margin: 0 }}>{bloodTypeInfo.dietaryAdvice}</p>
         </div>
         
-        <div className="bg-white/20 p-3 rounded-lg border border-white/30 backdrop-blur-sm drop-shadow">
-          <h5 className="font-semibold text-white mb-1 drop-shadow">运动建议</h5>
-          <p className="text-white/90 text-sm drop-shadow">{bloodTypeInfo.exerciseAdvice}</p>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          padding: '8px',
+          borderRadius: '8px',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <h5 style={{ fontWeight: '600', color: 'white', marginBottom: '4px', fontSize: '12px' }}>运动建议</h5>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px', lineHeight: '1.5', margin: 0 }}>{bloodTypeInfo.exerciseAdvice}</p>
         </div>
       </div>
       
       {/* 生活贴士 */}
-      <div className="mb-4">
-        <h5 className="font-semibold text-white mb-1 drop-shadow">生活贴士</h5>
-        <p className="text-white/90 text-sm drop-shadow">{bloodTypeInfo.lifestyleTips}</p>
+      <div style={{ marginBottom: '8px', padding: '0 12px' }}>
+        <h5 style={{ fontWeight: '600', color: 'white', marginBottom: '4px', fontSize: '12px' }}>生活贴士</h5>
+        <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px', lineHeight: '1.5', margin: 0 }}>{bloodTypeInfo.lifestyleTips}</p>
       </div>
       
       {/* 成功提示 */}
       {saveSuccess && (
-        <div className="mb-3 p-2 bg-green-500/30 border border-green-400/50 rounded text-green-200 text-sm backdrop-blur-sm drop-shadow">
-          ✅ 血型配置已保存
+        <div style={{ marginBottom: '8px', padding: '0 12px' }}>
+          <div style={{
+            padding: '6px',
+            backgroundColor: 'rgba(34, 197, 94, 0.3)',
+            border: '1px solid rgba(74, 222, 128, 0.5)',
+            borderRadius: '8px',
+            color: '#bbf7d0',
+            fontSize: '12px',
+            backdropFilter: 'blur(4px)',
+            textAlign: 'center'
+          }}>
+            ✅ 已保存
+          </div>
         </div>
       )}
       
       {/* 查看详情链接 */}
-      <div className="mt-2">
+      <div style={{ marginTop: 'auto', padding: '0 12px 12px 12px' }}>
         <Link 
           to="/blood-type-health-detail" 
-          className="w-full bg-gradient-to-r from-white/20 to-white/30 text-white text-center py-1.5 px-3 rounded-lg hover:from-white/30 hover:to-white/40 transition-all duration-300 backdrop-blur-sm border border-white/40 text-sm block drop-shadow"
+          style={{
+            display: 'block',
+            width: '100%',
+            background: 'linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.3))',
+            color: 'white',
+            textAlign: 'center',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            transition: 'all 0.3s ease',
+            backdropFilter: 'blur(4px)',
+            border: '1px solid rgba(255, 255, 255, 0.4)',
+            fontSize: '12px',
+            textDecoration: 'none'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'linear-gradient(to right, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.4))';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'linear-gradient(to right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.3))';
+          }}
         >
           查看血型养生详情
         </Link>
       </div>
+      
+      {/* 血型选择模态框 */}
+      {showModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '16px'
+          }}
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              padding: '20px',
+              width: '100%',
+              maxWidth: '280px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '12px'
+            }}>
+              <h3 style={{ fontWeight: '600', color: '#1f2937', fontSize: '14px', margin: 0 }}>选择血型</h3>
+              <button 
+                onClick={() => setShowModal(false)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#6b7280',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '8px'
+            }}>
+              {['A', 'B', 'AB', 'O'].map(type => (
+                <button
+                  key={type}
+                  style={{
+                    padding: '10px',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    color: 'white',
+                    fontWeight: '500',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s ease',
+                    backgroundColor: getBloodTypeInfo(type).colorClass === 'bg-red-500' ? '#ef4444' :
+                                   getBloodTypeInfo(type).colorClass === 'bg-blue-500' ? '#3b82f6' :
+                                   getBloodTypeInfo(type).colorClass === 'bg-purple-500' ? '#a855f7' : '#22c55e'
+                  }}
+                  onClick={() => handleBloodTypeSelect(type)}
+                  onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+                  onMouseLeave={(e) => e.target.style.opacity = '1'}
+                >
+                  <div style={{ fontSize: '18px' }}>{getBloodTypeInfo(type).icon}</div>
+                  <div style={{ fontSize: '12px' }}>{type}型</div>
+                </button>
+              ))}
+            </div>
+            <button
+              style={{
+                marginTop: '12px',
+                width: '100%',
+                padding: '6px',
+                fontSize: '12px',
+                color: '#4b5563',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+              onClick={() => setShowModal(false)}
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

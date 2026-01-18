@@ -2,7 +2,7 @@
  * 八字命格分析页面
  * 展示完整的八字命格分析结果，包括四柱、五行、纳音、大运等信息
  */
-import React, { useState, useEffect, Component } from 'react';
+import React, { useState, useEffect, Component, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserConfig, useCurrentConfig } from '../../contexts/UserConfigContext';
@@ -11,6 +11,8 @@ import { getDisplayBaziInfo } from '../../utils/baziSchema';
 import { calculateDetailedBazi } from '../../utils/baziHelper';
 import { calculateLunarDate, calculateTrueSolarTime } from '../../utils/LunarCalendarHelper';
 import { DEFAULT_REGION } from '../../data/ChinaLocationData';
+import DatePickerModal from '../../components/DatePickerModal.js';
+import { Solar } from 'lunar-javascript';
 
 // 错误边界组件
 class ErrorBoundary extends Component {
@@ -60,10 +62,16 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // 从缓存加载八字信息
-  const loadBazi = async () => {
+  // 使用 useMemo 缓存计算结果，避免重复计算
+  const memoizedBirthDate = React.useMemo(() => birthDate, [birthDate]);
+  const memoizedBirthTime = React.useMemo(() => birthTime, [birthTime]);
+  const memoizedBirthLocation = React.useMemo(() => birthLocation, [birthLocation]);
+  const memoizedNickname = React.useMemo(() => nickname, [nickname]);
+
+  // 从缓存加载八字信息 - 优化版本
+  const loadBazi = React.useCallback(async () => {
     // 添加参数验证
-    if (!birthDate) {
+    if (!memoizedBirthDate) {
       console.log('出生日期未设置，显示提示信息');
       setError('请先设置出生日期和时间');
       setBaziInfo(null);
@@ -72,8 +80,8 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     }
 
     // 验证出生日期是否为有效字符串格式
-    if (typeof birthDate !== 'string' || !birthDate.includes('-')) {
-      console.warn('出生日期格式无效:', birthDate);
+    if (typeof memoizedBirthDate !== 'string' || !memoizedBirthDate.includes('-')) {
+      console.warn('出生日期格式无效:', memoizedBirthDate);
       setError('出生日期格式不正确');
       setBaziInfo(null);
       setLoading(false);
@@ -118,16 +126,16 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
       }
 
       // 2. 如果配置数据无效，尝试从缓存获取八字信息
-      if (!finalBaziData && nickname && typeof nickname === 'string' && nickname.trim() !== '') {
+      if (!finalBaziData && memoizedNickname && typeof memoizedNickname === 'string' && memoizedNickname.trim() !== '') {
         try {
-          const cachedBazi = baziCacheManager.getBaziByNickname(nickname, {
+          const cachedBazi = baziCacheManager.getBaziByNickname(memoizedNickname, {
             format: 'legacy',
             validate: true,
             fallbackToLegacy: true
           });
 
           if (cachedBazi && (cachedBazi.bazi || cachedBazi.dualFormatBazi)) {
-            console.log('使用缓存中的八字信息:', nickname);
+            console.log('使用缓存中的八字信息:', memoizedNickname);
 
             const displayBazi = getDisplayBaziInfo(cachedBazi.bazi || cachedBazi.dualFormatBazi);
 
@@ -136,7 +144,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
               console.log('缓存数据缺少基本八字信息，跳过使用');
             } else {
               // 验证缓存数据是否与当前配置一致
-              if (validateBaziDataConsistency(displayBazi, birthDate, birthTime, birthLocation)) {
+              if (validateBaziDataConsistency(displayBazi, memoizedBirthDate, memoizedBirthTime, memoizedBirthLocation)) {
                 finalBaziData = displayBazi;
                 console.log('缓存数据验证通过');
               } else {
@@ -154,65 +162,75 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
       // 3. 如果缓存和保存数据都无效，使用降级数据
       if (!finalBaziData) {
         console.log('八字信息未找到，使用降级数据');
-        finalBaziData = getFallbackBaziData(birthDate, birthTime);
+        finalBaziData = getFallbackBaziData(memoizedBirthDate, memoizedBirthTime);
         // Don't set error for fallback case, just show the fallback data
         console.log('使用降级数据展示八字信息');
       }
 
-      // 4. 设置最终数据
+      // 4. 异步计算农历和真太阳时信息（不阻塞UI）
       if (finalBaziData) {
         finalBaziData = normalizeBaziData(finalBaziData);
 
-        // 确保农历信息存在，如果不存在则使用LunarCalendarHelper计算
-        if (!finalBaziData.lunar || !finalBaziData.lunar.text || finalBaziData.lunar.text.includes('请设置') || finalBaziData.lunar.text.includes('未知')) {
-          if (birthDate && birthTime) {
-            try {
-              const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
-              const lunarInfo = calculateLunarDate(birthDate, birthTime, longitude);
-              if (lunarInfo) {
+        // 延迟计算农历信息，避免阻塞首次渲染
+        const enhanceBaziData = async () => {
+          if (!finalBaziData.lunar || !finalBaziData.lunar.text || finalBaziData.lunar.text.includes('请设置') || finalBaziData.lunar.text.includes('未知')) {
+            if (memoizedBirthDate && memoizedBirthTime) {
+              try {
+                const longitude = memoizedBirthLocation?.lng || DEFAULT_REGION.lng;
+                const lunarInfo = calculateLunarDate(memoizedBirthDate, memoizedBirthTime, longitude);
+                if (lunarInfo) {
+                  finalBaziData = {
+                    ...finalBaziData,
+                    lunar: {
+                      text: lunarInfo.fullText || lunarInfo.shortText || `${memoizedBirthDate} 农历信息`,
+                      monthStr: lunarInfo.monthInChinese || '未知月份',
+                      dayStr: lunarInfo.dayInChinese || '未知日期'
+                    }
+                  };
+                }
+              } catch (lunarError) {
+                console.warn('加载时计算农历信息失败:', lunarError);
+                // 使用默认农历信息
                 finalBaziData = {
                   ...finalBaziData,
                   lunar: {
-                    text: lunarInfo.fullText || lunarInfo.shortText || `${birthDate} 农历信息`,
-                    monthStr: lunarInfo.monthInChinese || '未知月份',
-                    dayStr: lunarInfo.dayInChinese || '未知日期'
+                    text: `${memoizedBirthDate} 农历信息`,
+                    monthStr: '未知月份',
+                    dayStr: '未知日期'
                   }
                 };
               }
-            } catch (lunarError) {
-              console.warn('加载时计算农历信息失败:', lunarError);
-              // 使用默认农历信息
+            }
+          }
+
+          // 延迟计算真太阳时信息
+          if (!finalBaziData.trueSolarTime && memoizedBirthDate && memoizedBirthTime) {
+            try {
+              const longitude = memoizedBirthLocation?.lng || DEFAULT_REGION.lng;
+              const trueSolarTime = calculateTrueSolarTime(memoizedBirthDate, memoizedBirthTime, longitude);
               finalBaziData = {
                 ...finalBaziData,
-                lunar: {
-                  text: `${birthDate} 农历信息`,
-                  monthStr: '未知月份',
-                  dayStr: '未知日期'
-                }
+                trueSolarTime: trueSolarTime
+              };
+            } catch (solarError) {
+              console.warn('加载时计算真太阳时失败:', solarError);
+              finalBaziData = {
+                ...finalBaziData,
+                trueSolarTime: memoizedBirthTime
               };
             }
           }
-        }
 
-        // 确保真太阳时信息存在
-        if (!finalBaziData.trueSolarTime && birthDate && birthTime) {
-          try {
-            const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
-            const trueSolarTime = calculateTrueSolarTime(birthDate, birthTime, longitude);
-            finalBaziData = {
-              ...finalBaziData,
-              trueSolarTime: trueSolarTime
-            };
-          } catch (solarError) {
-            console.warn('加载时计算真太阳时失败:', solarError);
-            finalBaziData = {
-              ...finalBaziData,
-              trueSolarTime: birthTime
-            };
-          }
-        }
+          // 更新状态
+          setBaziInfo(finalBaziData);
+        };
 
-        setBaziInfo(finalBaziData);
+        // 使用 requestIdleCallback 或 setTimeout 异步执行增强逻辑
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(() => enhanceBaziData(), { timeout: 1000 });
+        } else {
+          setTimeout(() => enhanceBaziData(), 0);
+        }
       }
 
     } catch (e) {
@@ -221,7 +239,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     } finally {
       setLoading(false);
     }
-  };
+  }, [memoizedBirthDate, memoizedBirthTime, memoizedBirthLocation, memoizedNickname, savedBaziInfo]);
 
   // 辅助函数：检查是否有基本的八字信息
   const hasBasicBaziInfo = (baziData) => {
@@ -246,7 +264,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
   useEffect(() => {
     // 防止在组件卸载后设置状态
     let isCancelled = false;
-    
+
     // 验证必要参数是否存在
     if (birthDate && typeof birthDate === 'string' && birthDate.includes('-')) {
       loadBazi().then(() => {
@@ -260,8 +278,183 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     return () => {
       isCancelled = true;
     };
-  }, [birthDate, birthTime, birthLocation, lunarBirthDate, trueSolarTime, savedBaziInfo, nickname]);
+    // 减少依赖项，只依赖真正触发重新加载的字段
+  }, [memoizedBirthDate, memoizedBirthTime, memoizedBirthLocation, savedBaziInfo, memoizedNickname]);
 
+
+
+
+
+
+
+
+
+
+  // 使用局部变量处理八字信息，避免常量赋值错误
+  let processedBaziInfo = baziInfo;
+
+  // 验證八字信息是否包含基本數據
+  if (!hasBasicBaziInfo(processedBaziInfo)) {
+    console.warn('八字信息缺少基本数据，使用降级处理');
+    // 使用降级数据确保页面可以正常显示
+    const fallbackBaziInfo = getFallbackBaziData(birthDate, birthTime);
+    processedBaziInfo = { ...fallbackBaziInfo, ...processedBaziInfo };
+  }
+
+  // 确保农历信息存在，如果不存在则使用LunarCalendarHelper计算
+  if (!processedBaziInfo.lunar || !processedBaziInfo.lunar.text || processedBaziInfo.lunar.text.includes('请设置') || processedBaziInfo.lunar.text.includes('未知')) {
+    if (birthDate && birthTime) {
+      try {
+        const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
+        const lunarInfo = calculateLunarDate(birthDate, birthTime, longitude);
+        if (lunarInfo) {
+          // 更新processedBaziInfo中的农历信息
+          processedBaziInfo = {
+            ...processedBaziInfo,
+            lunar: {
+                text: lunarInfo.fullText || lunarInfo.shortText || `${birthDate} 农历信息`,
+                monthStr: lunarInfo.monthInChinese || '未知月份',
+                dayStr: lunarInfo.dayInChinese || '未知日期'
+            }
+          };
+        }
+      } catch (error) {
+        console.warn('计算农历信息失败，使用默认值:', error);
+        // 使用默认农历信息
+        processedBaziInfo = {
+          ...processedBaziInfo,
+          lunar: {
+            text: `${birthDate} 农历信息`,
+            monthStr: '未知月份',
+            dayStr: '未知日期'
+          }
+        };
+      }
+    }
+  }
+
+  // 确保真太阳时信息存在
+  if (!processedBaziInfo.trueSolarTime && birthDate && birthTime) {
+    try {
+      const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
+      const trueSolarTime = calculateTrueSolarTime(birthDate, birthTime, longitude);
+      processedBaziInfo = {
+        ...processedBaziInfo,
+        trueSolarTime: trueSolarTime
+      };
+    } catch (error) {
+      console.warn('计算真太阳时失败，使用原始时间:', error);
+      processedBaziInfo = {
+        ...processedBaziInfo,
+        trueSolarTime: birthTime
+      };
+    }
+  }
+
+  // 验证 processedBaziInfo 数据结构完整性
+  const hasValidBaziData = processedBaziInfo && (
+    (processedBaziInfo.meta && processedBaziInfo.birth && processedBaziInfo.bazi &&
+     processedBaziInfo.bazi.year && processedBaziInfo.bazi.month && processedBaziInfo.bazi.day && processedBaziInfo.bazi.hour) ||
+    (processedBaziInfo.bazi && processedBaziInfo.bazi.year && processedBaziInfo.bazi.month && processedBaziInfo.bazi.day && processedBaziInfo.bazi.hour) ||
+    (processedBaziInfo.year && processedBaziInfo.month && processedBaziInfo.day && processedBaziInfo.hour)
+  );
+
+  if (!hasValidBaziData) {
+    console.warn('八字数据不完整，但使用默认值继续渲染:', {
+      hasMeta: !!processedBaziInfo?.meta,
+      hasBirth: !!processedBaziInfo?.birth,
+      hasBazi: !!processedBaziInfo?.bazi,
+      hasYear: !!processedBaziInfo?.bazi?.year || !!processedBaziInfo?.year,
+      hasMonth: !!processedBaziInfo?.bazi?.month || !!processedBaziInfo?.month,
+      hasDay: !!processedBaziInfo?.bazi?.day || !!processedBaziInfo?.day,
+      hasHour: !!processedBaziInfo?.bazi?.hour || !!processedBaziInfo?.hour
+    });
+
+    const defaultBaziInfo = {
+      bazi: {
+        year: processedBaziInfo?.bazi?.year || processedBaziInfo?.year || '甲子',
+        month: processedBaziInfo?.bazi?.month || processedBaziInfo?.month || '乙丑',
+        day: processedBaziInfo?.bazi?.day || processedBaziInfo?.day || '丙寅',
+        hour: processedBaziInfo?.bazi?.hour || processedBaziInfo?.hour || '丁卯'
+      },
+      wuxing: {
+        text: processedBaziInfo?.wuxing?.text || processedBaziInfo?.wuXing?.text || '木火 火火 土水',
+        year: processedBaziInfo?.wuxing?.year || processedBaziInfo?.wuXing?.year || '木',
+        month: processedBaziInfo?.wuxing?.month || processedBaziInfo?.wuXing?.month || '火',
+        day: processedBaziInfo?.wuxing?.day || processedBaziInfo?.wuXing?.day || '火',
+        hour: processedBaziInfo?.wuxing?.hour || processedBaziInfo?.wuXing?.hour || '土'
+      },
+      lunar: {
+        text: processedBaziInfo?.lunar?.text || processedBaziInfo?.birth?.lunar?.text || '请设置出生信息',
+        monthStr: processedBaziInfo?.lunar?.monthStr || processedBaziInfo?.birth?.lunar?.monthInChinese || '请设置',
+        dayStr: processedBaziInfo?.lunar?.dayStr || processedBaziInfo?.birth?.lunar?.dayInChinese || '请设置'
+      },
+      shichen: {
+        ganzhi: processedBaziInfo?.shichen?.ganzhi || processedBaziInfo?.birth?.time?.shichenGanZhi || '丁卯'
+      },
+      nayin: {
+        year: processedBaziInfo?.nayin?.year || processedBaziInfo?.naYin?.year || '甲子',
+        month: processedBaziInfo?.nayin?.month || processedBaziInfo?.naYin?.month || '乙丑',
+        day: processedBaziInfo?.nayin?.day || processedBaziInfo?.naYin?.day || '丙寅',
+        hour: processedBaziInfo?.nayin?.hour || processedBaziInfo?.naYin?.hour || '丁卯'
+      }
+    };
+
+    processedBaziInfo = { ...defaultBaziInfo, ...processedBaziInfo };
+  }
+
+  const isValidBaziInfo = validateBaziInfoStructure(processedBaziInfo);
+
+  // 使用 useMemo 缓存五行统计结果
+  const stats = React.useMemo(() => isValidBaziInfo
+    ? calculateFiveElementStats(processedBaziInfo)
+    : {
+        elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
+        wuxingElements: ['木', '火', '土', '金', '水'],
+        dayMaster: '未知',
+        fortuneType: '数据不可用',
+        luckyElement: '无',
+        masterElement: '未知',
+        totalScore: 0
+      }, [isValidBaziInfo, processedBaziInfo]);
+
+  const {
+    elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
+    wuxingElements = ['木', '火', '土', '金', '水'],
+    dayMaster = '未知',
+    fortuneType = '数据不可用',
+    luckyElement = '无',
+    masterElement = '未知',
+    totalScore = 0
+  } = stats || {};
+
+  // 使用 useMemo 缓存五行喜忌结果
+  const wuxingPreferences = React.useMemo(() => {
+    if (!processedBaziInfo || !isValidBaziInfo) return null;
+    return calculateWuxingPreferences(processedBaziInfo);
+  }, [processedBaziInfo, isValidBaziInfo]);
+
+  // 使用 useMemo 缓存大运结果
+  const dayun = React.useMemo(() => {
+    if (!processedBaziInfo || !birthDate || !isValidBaziInfo) return null;
+    let birthYear = new Date().getFullYear();
+    if (birthDate) {
+      if (typeof birthDate === 'string' && birthDate.includes('-')) {
+        try {
+          birthYear = parseInt(birthDate.split('-')[0]);
+          if (isNaN(birthYear)) {
+            birthYear = new Date().getFullYear();
+          }
+        } catch (error) {
+          console.warn('解析出生年份失败:', error);
+          birthYear = new Date().getFullYear();
+        }
+      }
+    }
+    return calculateDaYun(processedBaziInfo, birthYear);
+  }, [processedBaziInfo, birthDate, isValidBaziInfo]);
+
+  // Early return for error state
   if (error) {
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-6">
@@ -299,6 +492,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     );
   }
 
+  // Early return for loading state
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -309,7 +503,8 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     );
   }
 
-  if (!baziInfo) {
+  // Early return for missing bazi info
+  if (!processedBaziInfo) {
     return (
       <div className="text-center py-12 text-gray-500 dark:text-white">
         <p className="mb-4">八字信息未找到或正在计算中</p>
@@ -336,140 +531,6 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
     );
   }
 
-  // 验證八字信息是否包含基本數據
-  if (!hasBasicBaziInfo(baziInfo)) {
-    console.warn('八字信息缺少基本数据，使用降级处理');
-    // 使用降级数据确保页面可以正常显示
-    const fallbackBaziInfo = getFallbackBaziData(birthDate, birthTime);
-    baziInfo = { ...fallbackBaziInfo, ...baziInfo };
-  }
-
-  // 确保农历信息存在，如果不存在则使用LunarCalendarHelper计算
-  if (!baziInfo.lunar || !baziInfo.lunar.text || baziInfo.lunar.text.includes('请设置') || baziInfo.lunar.text.includes('未知')) {
-    if (birthDate && birthTime) {
-      try {
-        const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
-        const lunarInfo = calculateLunarDate(birthDate, birthTime, longitude);
-        if (lunarInfo) {
-          // 更新baziInfo中的农历信息
-          baziInfo = {
-            ...baziInfo,
-            lunar: {
-              text: lunarInfo.fullText || lunarInfo.shortText || `${birthDate} 农历信息`,
-              monthStr: lunarInfo.monthInChinese || '未知月份',
-              dayStr: lunarInfo.dayInChinese || '未知日期'
-            }
-          };
-        }
-      } catch (error) {
-        console.warn('计算农历信息失败，使用默认值:', error);
-        // 使用默认农历信息
-        baziInfo = {
-          ...baziInfo,
-          lunar: {
-            text: `${birthDate} 农历信息`,
-            monthStr: '未知月份',
-            dayStr: '未知日期'
-          }
-        };
-      }
-    }
-  }
-
-  // 确保真太阳时信息存在
-  if (!baziInfo.trueSolarTime && birthDate && birthTime) {
-    try {
-      const longitude = birthLocation?.lng || DEFAULT_REGION.lng;
-      const trueSolarTime = calculateTrueSolarTime(birthDate, birthTime, longitude);
-      baziInfo = {
-        ...baziInfo,
-        trueSolarTime: trueSolarTime
-      };
-    } catch (error) {
-      console.warn('计算真太阳时失败，使用原始时间:', error);
-      baziInfo = {
-        ...baziInfo,
-        trueSolarTime: birthTime
-      };
-    }
-  }
-
-  // 验证 baziInfo 数据结构完整性
-  const hasValidBaziData = baziInfo && (
-    (baziInfo.meta && baziInfo.birth && baziInfo.bazi &&
-     baziInfo.bazi.year && baziInfo.bazi.month && baziInfo.bazi.day && baziInfo.bazi.hour) ||
-    (baziInfo.bazi && baziInfo.bazi.year && baziInfo.bazi.month && baziInfo.bazi.day && baziInfo.bazi.hour) ||
-    (baziInfo.year && baziInfo.month && baziInfo.day && baziInfo.hour)
-  );
-
-  if (!hasValidBaziData) {
-    console.warn('八字数据不完整，但使用默认值继续渲染:', {
-      hasMeta: !!baziInfo?.meta,
-      hasBirth: !!baziInfo?.birth,
-      hasBazi: !!baziInfo?.bazi,
-      hasYear: !!baziInfo?.bazi?.year || !!baziInfo?.year,
-      hasMonth: !!baziInfo?.bazi?.month || !!baziInfo?.month,
-      hasDay: !!baziInfo?.bazi?.day || !!baziInfo?.day,
-      hasHour: !!baziInfo?.bazi?.hour || !!baziInfo?.hour
-    });
-
-    const defaultBaziInfo = {
-      bazi: {
-        year: baziInfo?.bazi?.year || baziInfo?.year || '甲子',
-        month: baziInfo?.bazi?.month || baziInfo?.month || '乙丑',
-        day: baziInfo?.bazi?.day || baziInfo?.day || '丙寅',
-        hour: baziInfo?.bazi?.hour || baziInfo?.hour || '丁卯'
-      },
-      wuxing: {
-        text: baziInfo?.wuxing?.text || baziInfo?.wuXing?.text || '木火 火火 土水',
-        year: baziInfo?.wuxing?.year || baziInfo?.wuXing?.year || '木',
-        month: baziInfo?.wuxing?.month || baziInfo?.wuXing?.month || '火',
-        day: baziInfo?.wuxing?.day || baziInfo?.wuXing?.day || '火',
-        hour: baziInfo?.wuxing?.hour || baziInfo?.wuXing?.hour || '土'
-      },
-      lunar: {
-        text: baziInfo?.lunar?.text || baziInfo?.birth?.lunar?.text || '请设置出生信息',
-        monthStr: baziInfo?.lunar?.monthStr || baziInfo?.birth?.lunar?.monthInChinese || '请设置',
-        dayStr: baziInfo?.lunar?.dayStr || baziInfo?.birth?.lunar?.dayInChinese || '请设置'
-      },
-      shichen: {
-        ganzhi: baziInfo?.shichen?.ganzhi || baziInfo?.birth?.time?.shichenGanZhi || '丁卯'
-      },
-      nayin: {
-        year: baziInfo?.nayin?.year || baziInfo?.naYin?.year || '甲子',
-        month: baziInfo?.nayin?.month || baziInfo?.naYin?.month || '乙丑',
-        day: baziInfo?.nayin?.day || baziInfo?.naYin?.day || '丙寅',
-        hour: baziInfo?.nayin?.hour || baziInfo?.naYin?.hour || '丁卯'
-      }
-    };
-
-    baziInfo = { ...defaultBaziInfo, ...baziInfo };
-  }
-
-  const isValidBaziInfo = validateBaziInfoStructure(baziInfo);
-
-  const stats = isValidBaziInfo
-    ? calculateFiveElementStats(baziInfo)
-    : {
-        elementCounts: { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
-        wuxingElements: ['木', '火', '土', '金', '水'],
-        dayMaster: '未知',
-        fortuneType: '数据不可用',
-        luckyElement: '无',
-        masterElement: '未知',
-        totalScore: 0
-      };
-
-  const {
-    elementCounts = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 },
-    wuxingElements = ['木', '火', '土', '金', '水'],
-    dayMaster = '未知',
-    fortuneType = '数据不可用',
-    luckyElement = '无',
-    masterElement = '未知',
-    totalScore = 0
-  } = stats || {};
-
   return (
     <div className="space-y-6">
       {/* 农历生日信息 */}
@@ -477,14 +538,14 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h4 className="text-lg sm:text-xl font-bold mb-2">农历生日</h4>
-            <p className="text-2xl sm:text-3xl font-semibold">{(baziInfo && baziInfo.lunar && baziInfo.lunar.text) || '未知'}</p>
+            <p className="text-2xl sm:text-3xl font-semibold">{(processedBaziInfo && processedBaziInfo.lunar && processedBaziInfo.lunar.text) || '未知'}</p>
             <p className="text-sm sm:text-base opacity-80 mt-2">
-              公历：{(baziInfo && baziInfo.solar && baziInfo.solar.text) || '未知'}
+              公历：{(processedBaziInfo && processedBaziInfo.solar && processedBaziInfo.solar.text) || '未知'}
             </p>
           </div>
           <div className="text-left sm:text-right">
             <p className="text-sm sm:text-base opacity-80 mb-1">时辰</p>
-            <p className="text-lg sm:text-xl font-semibold">{(baziInfo && baziInfo.shichen && baziInfo.shichen.ganzhi) || '未知'}</p>
+            <p className="text-lg sm:text-xl font-semibold">{(processedBaziInfo && processedBaziInfo.shichen && processedBaziInfo.shichen.ganzhi) || '未知'}</p>
           </div>
         </div>
       </div>
@@ -496,32 +557,32 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
             <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <th className="px-3 sm:px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-white">柱</th>
               <th className="px-3 sm:px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-white">年柱</th>
-              <th className="px-3 sm:px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-white">{(baziInfo && baziInfo.lunar && baziInfo.lunar.monthStr) || '未知'}</th>
-              <th className="px-3 sm:px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-white">{(baziInfo && baziInfo.lunar && baziInfo.lunar.dayStr) || '未知'}</th>
-              <th className="px-3 sm:px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-white">{(baziInfo && baziInfo.shichen && baziInfo.shichen.ganzhi) || '未知'}</th>
+              <th className="px-3 sm:px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-white">月柱</th>
+              <th className="px-3 sm:px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-white">日柱</th>
+              <th className="px-3 sm:px-4 py-3 text-center text-sm font-medium text-gray-700 dark:text-white">时柱</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b border-gray-100 dark:border-gray-700">
               <td className="px-3 sm:px-4 py-3 text-sm font-medium text-gray-700 dark:text-white">八字</td>
-              <td className="px-3 sm:px-4 py-3 text-center font-mono text-base sm:text-lg font-bold text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.year) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center font-mono text-base sm:text-lg font-bold text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.month) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center font-mono text-base sm:text-lg font-bold text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.day) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center font-mono text-base sm:text-lg font-bold text-gray-900 dark:text-white">{(baziInfo && baziInfo.bazi && baziInfo.bazi.hour) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center font-mono text-base sm:text-lg font-bold text-gray-900 dark:text-white">{(processedBaziInfo && processedBaziInfo.bazi && processedBaziInfo.bazi.year) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center font-mono text-base sm:text-lg font-bold text-gray-900 dark:text-white">{(processedBaziInfo && processedBaziInfo.bazi && processedBaziInfo.bazi.month) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center font-mono text-base sm:text-lg font-bold text-gray-900 dark:text-white">{(processedBaziInfo && processedBaziInfo.bazi && processedBaziInfo.bazi.day) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center font-mono text-base sm:text-lg font-bold text-gray-900 dark:text-white">{(processedBaziInfo && processedBaziInfo.bazi && processedBaziInfo.bazi.hour) || '未知'}</td>
             </tr>
             <tr className="border-b border-gray-100 dark:border-gray-700">
               <td className="px-3 sm:px-4 py-3 text-sm font-medium text-gray-700 dark:text-white">五行</td>
-              <td className="px-3 sm:px-4 py-3 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.year) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.month) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.day) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center text-gray-900 dark:text-white">{(baziInfo && baziInfo.wuxing && baziInfo.wuxing.hour) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center text-gray-900 dark:text-white">{(processedBaziInfo && processedBaziInfo.wuxing && processedBaziInfo.wuxing.year) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center text-gray-900 dark:text-white">{(processedBaziInfo && processedBaziInfo.wuxing && processedBaziInfo.wuxing.month) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center text-gray-900 dark:text-white">{(processedBaziInfo && processedBaziInfo.wuxing && processedBaziInfo.wuxing.day) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center text-gray-900 dark:text-white">{(processedBaziInfo && processedBaziInfo.wuxing && processedBaziInfo.wuxing.hour) || '未知'}</td>
             </tr>
             <tr>
               <td className="px-3 sm:px-4 py-3 text-sm font-medium text-gray-700 dark:text-white">纳音</td>
-              <td className="px-3 sm:px-4 py-3 text-center text-gray-600 dark:text-white text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.year) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center text-gray-600 dark:text-white text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.month) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center text-gray-600 dark:text-white text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.day) || '未知'}</td>
-              <td className="px-3 sm:px-4 py-3 text-center text-gray-600 dark:text-white text-sm">{(baziInfo && baziInfo.nayin && baziInfo.nayin.hour) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center text-gray-600 dark:text-white text-sm">{(processedBaziInfo && processedBaziInfo.nayin && processedBaziInfo.nayin.year) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center text-gray-600 dark:text-white text-sm">{(processedBaziInfo && processedBaziInfo.nayin && processedBaziInfo.nayin.month) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center text-gray-600 dark:text-white text-sm">{(processedBaziInfo && processedBaziInfo.nayin && processedBaziInfo.nayin.day) || '未知'}</td>
+              <td className="px-3 sm:px-4 py-3 text-center text-gray-600 dark:text-white text-sm">{(processedBaziInfo && processedBaziInfo.nayin && processedBaziInfo.nayin.hour) || '未知'}</td>
             </tr>
           </tbody>
         </table>
@@ -567,14 +628,10 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
       <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 sm:p-6 border border-purple-200 dark:border-purple-800 shadow-md">
         <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-4">命局五行喜忌</h4>
         <div className="text-sm sm:text-base text-gray-800 dark:text-white space-y-3">
-          {(() => {
-              const preferences = calculateWuxingPreferences(baziInfo);
-              if (!preferences) return null;
-
-            return (
+          {wuxingPreferences ? (
               <div className="space-y-4">
                 {/* 最喜五行 */}
-                {preferences.preferred.filter(p => p.priority === '最喜').map((item, index) => (
+                {wuxingPreferences.preferred.filter(p => p.priority === '最喜').map((item, index) => (
                   <div key={`preferred-top-${index}`} className="border-l-4 border-green-500 pl-4 py-2">
                     <p className="font-medium text-base sm:text-lg">最喜五行{item.element}：</p>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-white ml-4">
@@ -583,8 +640,9 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                   </div>
                 ))}
 
+
                 {/* 次喜五行 */}
-                {preferences.preferred.filter(p => p.priority === '次喜').map((item, index) => (
+                {wuxingPreferences.preferred.filter(p => p.priority === '次喜').map((item, index) => (
                   <div key={`preferred-secondary-${index}`} className="border-l-4 border-blue-500 pl-4 py-2">
                     <p className="font-medium text-base sm:text-lg">次喜五行{item.element}：</p>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-white ml-4">
@@ -593,8 +651,9 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                   </div>
                 ))}
 
+
                 {/* 最忌五行 */}
-                {preferences.avoided.filter(p => p.priority === '最忌').map((item, index) => (
+                {wuxingPreferences.avoided.filter(p => p.priority === '最忌').map((item, index) => (
                   <div key={`avoided-top-${index}`} className="border-l-4 border-red-500 pl-4 py-2">
                     <p className="font-medium text-base sm:text-lg">最忌五行{item.element}：</p>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-white ml-4">
@@ -603,8 +662,9 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                   </div>
                 ))}
 
+
                 {/* 次忌五行 */}
-                {preferences.avoided.filter(p => p.priority === '次忌').map((item, index) => (
+                {wuxingPreferences.avoided.filter(p => p.priority === '次忌').map((item, index) => (
                   <div key={`avoided-secondary-${index}`} className="border-l-4 border-orange-500 pl-4 py-2">
                     <p className="font-medium text-base sm:text-lg">次忌五行{item.element}：</p>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-white ml-4">
@@ -613,8 +673,9 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                   </div>
                 ))}
 
+
                 {/* 平常五行 */}
-                {preferences.neutral.map((item, index) => (
+                {wuxingPreferences.neutral.map((item, index) => (
                   <div key={`neutral-${index}`} className="border-l-4 border-gray-500 pl-4 py-2">
                     <p className="font-medium text-base sm:text-lg">平常五行{item.element}：</p>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-white ml-4">
@@ -623,8 +684,8 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                   </div>
                 ))}
               </div>
-            );
-          })()}
+            ) : null
+          }
         </div>
       </div>
 
@@ -632,38 +693,7 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
       <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 sm:p-6 border border-yellow-200 dark:border-yellow-800 shadow-md">
         <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-4">大运</h4>
         <div className="text-sm sm:text-base text-gray-800 dark:text-white">
-          {(() => {
-              // 安全地获取出生年份，确保birthDate是字符串
-              let birthYear = new Date().getFullYear(); // 默认值
-              if (birthDate) {
-                // 确保birthDate是字符串类型
-                let safeBirthDate = birthDate;
-                if (typeof safeBirthDate !== 'string') {
-                  if (safeBirthDate && typeof safeBirthDate.toString === 'function') {
-                    safeBirthDate = safeBirthDate.toString();
-                  } else {
-                    console.warn('出生日期格式无效:', birthDate);
-                    safeBirthDate = null;
-                  }
-                }
-                
-                if (safeBirthDate && typeof safeBirthDate === 'string' && safeBirthDate.includes('-')) {
-                  try {
-                    birthYear = parseInt(safeBirthDate.split('-')[0]);
-                    if (isNaN(birthYear)) {
-                      birthYear = new Date().getFullYear(); // 如果解析失败，使用默认值
-                    }
-                  } catch (error) {
-                    console.warn('解析出生年份失败:', error);
-                    birthYear = new Date().getFullYear(); // 解析出错时使用默认值
-                  }
-                }
-              }
-
-              const dayun = calculateDaYun(baziInfo, birthYear);
-              if (!dayun) return null;
-
-            return (
+          {dayun ? (
               <div className="space-y-2">
                 {dayun.map((d, index) => (
                   <div key={index} className="flex justify-between py-2 border-b border-yellow-100 dark:border-yellow-800/50">
@@ -672,8 +702,8 @@ const BaziFortuneDisplay = ({ birthDate, birthTime, birthLocation, lunarBirthDat
                   </div>
                 ))}
               </div>
-            );
-          })()}
+            ) : null
+          }
         </div>
       </div>
     </div>
@@ -1387,6 +1417,222 @@ const BaziAnalysisPage = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
+  // 日期和时辰选择相关状态
+  const today = new Date();
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1);
+  const [selectedDate, setSelectedDate] = useState(today.getDate());
+  const [selectedHour, setSelectedHour] = useState(12);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [tempLatitude, setTempLatitude] = useState(30);
+  const [tempLongitude, setTempLongitude] = useState(110);
+  const [lunarData, setLunarData] = useState(null);
+
+  // 计算和加载状态
+  const [calculating, setCalculating] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  // 显示成功消息并自动消失
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
+  // 初始化日期选择器状态
+  useEffect(() => {
+    if (currentConfig?.birthDate) {
+      try {
+        const birthDate = new Date(currentConfig.birthDate);
+        if (!isNaN(birthDate.getTime())) {
+          setSelectedYear(birthDate.getFullYear());
+          setSelectedMonth(birthDate.getMonth() + 1);
+          setSelectedDate(birthDate.getDate());
+        }
+      } catch (e) {
+        console.warn('解析出生日期失败:', e);
+      }
+    }
+
+    if (currentConfig?.birthTime) {
+      try {
+        const [h] = currentConfig.birthTime.split(':').map(Number);
+        if (!isNaN(h) && h >= 0 && h <= 23) {
+          setSelectedHour(h);
+        }
+      } catch (e) {
+        console.warn('解析出生时间失败:', e);
+      }
+    }
+
+    if (currentConfig?.birthLocation) {
+      setTempLatitude(currentConfig.birthLocation.lat || 30);
+      setTempLongitude(currentConfig.birthLocation.lng || 110);
+    }
+  }, [currentConfig?.birthDate, currentConfig?.birthTime, currentConfig?.birthLocation]);
+
+  // 计算农历日期
+  useEffect(() => {
+    try {
+      const solar = Solar.fromYmd(selectedYear, selectedMonth, selectedDate);
+      const lunar = solar.getLunar();
+      setLunarData({
+        lunarYear: lunar.getYear(),
+        lunarMonth: lunar.getMonth(),
+        lunarDay: lunar.getDay(),
+        lunarYearStr: lunar.getYearInGanZhi() + '年',
+        lunarMonthStr: lunar.getMonthInChinese() + '月',
+        lunarDayStr: lunar.getDayInChinese(),
+        lunarFullStr: `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`
+      });
+    } catch (error) {
+      console.warn('计算农历日期失败:', error);
+    }
+  }, [selectedYear, selectedMonth, selectedDate]);
+
+  // 保存用户选择的日期到永久配置
+  const saveDateToConfig = useCallback(async (year, month, date, hour, longitude, latitude) => {
+    try {
+      const newBirthDate = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+      const newBirthTime = `${String(hour).padStart(2, '0')}:00`;
+      const config = currentConfig;
+
+      if (!config?.nickname) {
+        console.error('配置为空或昵称为空:', config);
+        throw new Error('当前配置为空或昵称为空，无法保存');
+      }
+
+      console.log('保存配置 - 当前配置:', {
+        nickname: config.nickname,
+        birthDate: config.birthDate,
+        birthTime: config.birthTime
+      });
+
+      // 立即更新UI状态
+      setSelectedYear(year);
+      setSelectedMonth(month);
+      setSelectedDate(date);
+      setSelectedHour(hour);
+      setTempLongitude(longitude);
+      setTempLatitude(latitude);
+
+      setCalculating(true);
+      setError(null);
+
+      // 使用 BaziDataManager 重新计算八字
+      const baziResult = await calculateDetailedBazi(
+        newBirthDate,
+        newBirthTime,
+        longitude
+      );
+
+      if (baziResult) {
+        // 计算农历和真太阳时信息
+        let enhancedBaziInfo = { ...baziResult };
+
+        try {
+          const lunarInfo = calculateLunarDate(newBirthDate, newBirthTime, longitude);
+          if (lunarInfo) {
+            enhancedBaziInfo = {
+              ...enhancedBaziInfo,
+              lunar: {
+                text: lunarInfo.fullText || lunarInfo.shortText || `${newBirthDate} 农历信息`,
+                monthStr: lunarInfo.monthInChinese || '未知月份',
+                dayStr: lunarInfo.dayInChinese || '未知日期'
+              }
+            };
+          }
+        } catch (lunarError) {
+          console.warn('计算农历信息失败:', lunarError);
+        }
+
+        try {
+          const trueSolarTime = calculateTrueSolarTime(newBirthDate, newBirthTime, longitude);
+          enhancedBaziInfo = {
+            ...enhancedBaziInfo,
+            trueSolarTime: trueSolarTime
+          };
+        } catch (solarError) {
+          console.warn('计算真太阳时失败:', solarError);
+          enhancedBaziInfo = {
+            ...enhancedBaziInfo,
+            trueSolarTime: newBirthTime
+          };
+        }
+
+        // 更新配置中的基本信息
+        const updatedConfig = {
+          ...config,
+          birthDate: newBirthDate,
+          birthTime: newBirthTime,
+          birthLocation: {
+            province: config.birthLocation?.province || '默认',
+            city: config.birthLocation?.city || '默认',
+            district: config.birthLocation?.district || '默认',
+            lng: longitude,
+            lat: latitude
+          },
+          baziInfo: {
+            ...enhancedBaziInfo,
+            meta: {
+              ...enhancedBaziInfo.meta,
+              calculatedForDate: newBirthDate,
+              calculatedAt: new Date().toISOString(),
+              dataSource: 'calculated'
+            }
+          }
+        };
+
+        await updateConfig(updatedConfig);
+
+        // 同步八字信息到缓存
+        try {
+          await baziCacheManager.cacheBazi(
+            config.nickname,
+            {
+              birthDate: newBirthDate,
+              birthTime: newBirthTime,
+              longitude: longitude
+            },
+            enhancedBaziInfo,
+            null
+          );
+        } catch (cacheError) {
+          console.warn('八字信息缓存失败:', cacheError);
+        }
+
+        showSuccessMessage('出生信息已保存，八字已更新');
+      } else {
+        showSuccessMessage('出生信息已保存（八字计算失败）');
+      }
+
+    } catch (error) {
+      console.error('保存日期到配置失败:', error);
+      setError(error.message);
+      showSuccessMessage('保存失败: ' + error.message);
+    } finally {
+      setCalculating(false);
+    }
+  }, [currentConfig, updateConfig]);
+
+  // 日期选择处理
+  const handleDateChange = useCallback(async (year, month, date, hour, longitude, latitude, isSaveToConfig = true) => {
+    setIsCalendarOpen(false);
+
+    if (isSaveToConfig) {
+      await saveDateToConfig(year, month, date, hour, longitude, latitude);
+    } else {
+      console.log('用户取消修改，保持当前数据');
+    }
+  }, [saveDateToConfig]);
+
+  // 事件委托：处理日期卡片点击
+  const handleDateCardClick = useCallback((e) => {
+    const dateCard = e.currentTarget;
+    if (dateCard) {
+      setIsCalendarOpen(true);
+    }
+  }, []);
+
   // 确保页面加载时检查并处理八字信息
   useEffect(() => {
     const initializeBaziData = async () => {
@@ -1395,7 +1641,7 @@ const BaziAnalysisPage = () => {
           // 验证出生日期格式
           if (typeof currentConfig.birthDate === 'string' && currentConfig.birthDate.includes('-')) {
             console.log('验证当前配置中的八字信息');
-              
+
             // 如果有现有的八字信息，验证其有效性
             if (currentConfig.baziInfo) {
               const isValid = validateBaziInfoStructure(currentConfig.baziInfo);
@@ -1413,9 +1659,9 @@ const BaziAnalysisPage = () => {
         console.error('初始化八字数据时出错:', err);
       }
     };
-      
+
     initializeBaziData();
-  }, [currentConfig, updateConfig]);
+  }, [currentConfig?.birthDate, currentConfig?.baziInfo, updateConfig]);
 
   // 当用户配置发生变化时，异步后台计算八字信息
   useEffect(() => {
@@ -1449,6 +1695,52 @@ const BaziAnalysisPage = () => {
         if (!nickname || typeof nickname !== 'string' || nickname.trim() === '') {
           console.warn('用户昵称无效，使用默认值:', nickname);
           return; // 如果昵称无效，直接返回，不进行计算
+        }
+
+        // 检查是否已有计算好的八字信息且与当前配置一致，避免重复计算
+        if (currentConfig?.baziInfo && currentConfig?.baziInfo?.meta?.calculatedForDate === currentConfig.birthDate) {
+          console.log('八字信息已存在且与当前配置一致，无需重新计算');
+
+          // 同步八字信息到缓存，按昵称存储（延迟执行，不阻塞UI）
+          if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(() => {
+              try {
+                baziCacheManager.cacheBazi(
+                  nickname,
+                  {
+                    birthDate: currentConfig.birthDate,
+                    birthTime: currentConfig.birthTime || '00:00',
+                    longitude: currentConfig.birthLocation?.lng || DEFAULT_REGION.lng
+                  },
+                  currentConfig.baziInfo,
+                  null
+                );
+                console.log('八字信息已同步到缓存，按昵称存储:', nickname);
+              } catch (cacheError) {
+                console.warn('八字信息缓存失败:', cacheError);
+              }
+            }, { timeout: 2000 });
+          } else {
+            setTimeout(() => {
+              try {
+                baziCacheManager.cacheBazi(
+                  nickname,
+                  {
+                    birthDate: currentConfig.birthDate,
+                    birthTime: currentConfig.birthTime || '00:00',
+                    longitude: currentConfig.birthLocation?.lng || DEFAULT_REGION.lng
+                  },
+                  currentConfig.baziInfo,
+                  null
+                );
+                console.log('八字信息已同步到缓存，按昵称存储:', nickname);
+              } catch (cacheError) {
+                console.warn('八字信息缓存失败:', cacheError);
+              }
+            }, 0);
+          }
+
+          return;
         }
 
         // 优先从缓存获取八字信息，避免重复计算
@@ -1648,7 +1940,8 @@ const BaziAnalysisPage = () => {
       isCancelled = true;
       clearTimeout(timer);
     };
-  }, [currentConfig, updateConfig]);
+    // 减少依赖项，只依赖真正触发重新计算的字段
+  }, [currentConfig?.birthDate, currentConfig?.birthTime, currentConfig?.birthLocation, currentConfig?.nickname, updateConfig]);
 
   // Function to trigger background recalculation
   const triggerBackgroundRecalculation = async () => {
@@ -1835,7 +2128,7 @@ const BaziAnalysisPage = () => {
             八字命格分析
           </h1>
           <button
-            onClick={() => navigate('/user-config')}
+            onClick={() => navigate('/ziwei')}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1851,13 +2144,54 @@ const BaziAnalysisPage = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            设置
+            紫薇命宫
           </button>
         </div>
       </div>
 
       {/* 主内容区 */}
       <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {/* 成功消息提示 */}
+        {successMessage && (
+          <div className={`mb-4 px-4 py-3 rounded-lg text-center ${theme === 'dark' ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'}`}>
+            ✅ {successMessage}
+          </div>
+        )}
+
+        {/* 日期卡片 */}
+        <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 shadow-sm mb-6`}>
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex-1">
+              <div
+                className={`text-center py-4 px-4 rounded-xl cursor-pointer transition-all ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'} touch-manipulation`}
+                onClick={handleDateCardClick}
+                onTouchStart={(e) => e.stopPropagation()}
+              >
+                <div className={`text-xs mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {calculating ? '⏳ 计算中...' : '生辰八字'}
+                </div>
+                {/* 公历日期 */}
+                <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {selectedYear}年 {selectedMonth}月 {selectedDate}日
+                </div>
+                {/* 农历日期 */}
+                {lunarData && (
+                  <div className={`text-sm mt-2 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                    农历{lunarData.lunarMonthStr}{lunarData.lunarDayStr}
+                  </div>
+                )}
+                {/* 时辰 */}
+                <div className={`text-sm mt-1 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                  出生时间：{selectedHour}:00
+                </div>
+                <div className={`text-xs mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {calculating ? '正在后台计算八字...' : '点击修改出生日期和时间'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* 提示卡片 */}
         <div className="bg-amber-100 dark:bg-amber-900/30 border-l-4 border-amber-500 p-4 mb-6 rounded-r-lg">
           <div className="flex items-start">
@@ -1912,6 +2246,20 @@ const BaziAnalysisPage = () => {
           />
         </ErrorBoundary>
       </div>
+
+      {/* 日期选择器弹窗 */}
+      <DatePickerModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        selectedDate={selectedDate}
+        selectedHour={selectedHour}
+        latitude={tempLatitude}
+        longitude={tempLongitude}
+        onConfirm={handleDateChange}
+        theme={theme}
+      />
     </div>
   );
 };

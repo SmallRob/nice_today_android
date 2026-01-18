@@ -206,55 +206,9 @@ const SimulatedPermissionsAPI = {
 
 // 安全地获取权限API
 const getPermissionsAPI = async () => {
-  // 如果强制使用模拟API，直接返回模拟API
-  if (FORCE_SIMULATED_PERMISSIONS) {
-    console.log('Using simulated permissions API (forced)');
-    return SimulatedPermissionsAPI;
-  }
-  
-  // 在非原生环境，使用模拟API
-  if (!isNative) {
-    console.log('Using simulated permissions API (web environment)');
-    return SimulatedPermissionsAPI;
-  }
-  
-  // 尝试获取真实的权限API
-  try {
-    // 检查Capacitor是否已加载
-    if (typeof Capacitor === 'undefined' || !Capacitor.isPluginAvailable('Permissions')) {
-      console.log('Using simulated permissions API (plugin not available)');
-      return SimulatedPermissionsAPI;
-    }
-    
-    // 尝试导入权限插件
-    let Permissions;
-    try {
-      const permissionsModule = await import('@capacitor/permissions');
-      Permissions = permissionsModule.Permissions;
-    } catch (error) {
-      console.warn('Permissions plugin not available, using simulation:', error);
-      return SimulatedPermissionsAPI;
-    }
-    
-    // 检查权限API是否可用
-    if (!Permissions || typeof Permissions.query !== 'function') {
-      console.log('Using simulated permissions API (real API invalid)');
-      return SimulatedPermissionsAPI;
-    }
-    
-    // 测试真实API是否工作
-    try {
-      await Permissions.query({ name: PermissionTypes.NOTIFICATIONS });
-      console.log('Using real permissions API');
-      return Permissions;
-    } catch (testError) {
-      console.warn('Real permissions API test failed, falling back to simulation:', testError);
-      return SimulatedPermissionsAPI;
-    }
-  } catch (error) {
-    console.warn('Failed to load real permissions API, using simulation:', error);
-    return SimulatedPermissionsAPI;
-  }
+  // 强制使用模拟API
+  console.log('Using simulated permissions API (forced)');
+  return SimulatedPermissionsAPI;
 };
 
 // 检查单个权限状态

@@ -481,69 +481,74 @@ const BaziPage = () => {
       {/* 头部 */}
       <div style={{
         padding: '16px 12px 12px 16px',
-        backgroundColor: theme === 'dark' ? '#111827' : '#f9fafb'
+        backgroundColor: theme === 'dark' ? '#111827' : '#f9fafb',
+        position: 'relative'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <div style={{ textAlign: 'center', flex: '1' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '6px' }}>
-              <span style={{ fontSize: '24px' }}>☯️</span>
-              <h1 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: theme === 'dark' ? '#fff' : '#111827'
-              }}>
-                八字运势
-              </h1>
-            </div>
-            <p style={{
-              fontSize: '12px',
-              color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+        {/* 标题区域 - 居中 */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '6px' }}>
+            <span style={{ fontSize: '24px' }}>☯️</span>
+            <h1 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: theme === 'dark' ? '#fff' : '#111827'
             }}>
-              八字月运分析 · 每日能量预测
-            </p>
+              八字运势
+            </h1>
           </div>
-          <div style={{ marginLeft: '12px' }}>
-            <button 
-              onClick={async () => {
-                try {
-                  setAnalyzing(true);
-                  navigate('/bazi/analysis');
-                } catch (error) {
-                  console.error('导航到命格分析页面失败:', error);
-                  setError('导航到命格分析页面失败，请稍后重试');
-                } finally {
-                  setAnalyzing(false);
-                }
-              }}
-              disabled={analyzing}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontWeight: '500',
-                transition: 'all 0.2s ease',
-                border: 'none',
-                cursor: analyzing ? 'not-allowed' : 'pointer',
-                backgroundColor: analyzing ? '#9ca3af' : (theme === 'dark' ? '#7c3aed' : '#9333ea'),
-                color: '#fff'
-              }}
-            >
-              {analyzing ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{
-                    height: '16px',
-                    width: '16px',
-                    border: '2px solid',
-                    borderColor: '#fff',
-                    borderTopColor: 'transparent',
-                    borderRadius: '9999px',
-                    animation: 'spin 1s linear infinite',
-                    marginRight: '6px'
-                  }}></span>
-                  加载中...
-                </span>
-              ) : '命格分析'}
-            </button>
-          </div>
+          <p style={{
+            fontSize: '12px',
+            color: theme === 'dark' ? '#9ca3af' : '#6b7280'
+          }}>
+            八字月运分析 · 每日能量预测
+          </p>
+        </div>
+        {/* 按钮 - 悬浮右侧 */}
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px'
+        }}>
+          <button 
+            onClick={async () => {
+              try {
+                setAnalyzing(true);
+                navigate('/bazi/analysis');
+              } catch (error) {
+                console.error('导航到命格分析页面失败:', error);
+                setError('导航到命格分析页面失败，请稍后重试');
+              } finally {
+                setAnalyzing(false);
+              }
+            }}
+            disabled={analyzing}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontWeight: '500',
+              transition: 'all 0.2s ease',
+              border: 'none',
+              cursor: analyzing ? 'not-allowed' : 'pointer',
+              backgroundColor: analyzing ? '#9ca3af' : (theme === 'dark' ? '#7c3aed' : '#9333ea'),
+              color: '#fff'
+            }}
+          >
+            {analyzing ? (
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{
+                  height: '16px',
+                  width: '16px',
+                  border: '2px solid',
+                  borderColor: '#fff',
+                  borderTopColor: 'transparent',
+                  borderRadius: '9999px',
+                  animation: 'spin 1s linear infinite',
+                  marginRight: '6px'
+                }}></span>
+                加载中...
+              </span>
+            ) : '命格分析'}
+          </button>
         </div>
       </div>
 
