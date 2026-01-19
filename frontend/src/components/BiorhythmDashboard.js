@@ -578,80 +578,70 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden">
       {/* Banner区域 - 优化布局，避免全局样式污染 */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 shadow-lg flex-shrink-0">
-        {/* 背景装饰 */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-600/30 to-indigo-700/30 pointer-events-none"></div>
-
-        {/* 装饰符号 - 简化版 */}
-        <div className="absolute top-2 left-2 w-8 h-8 sm:w-12 sm:h-12 opacity-15 pointer-events-none">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="50" cy="30" r="8" fill="currentColor" />
-            <circle cx="50" cy="70" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-        </div>
-
-        {/* 悬浮在右上角的新版入口按钮 - 绝对定位，不占据布局空间 */}
-        <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center space-x-1 px-2 py-1 bg-white/15 hover:bg-white/25 border border-white/20 rounded-lg text-white text-[10px] sm:text-xs font-medium transition-all duration-300 backdrop-blur-sm hover:scale-105 flex-shrink-0"
-            title="体验新版炫彩版主页"
-          >
-            <svg
-              className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span className="flex-shrink-0">新版</span>
-          </button>
-        </div>
-
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-xl shadow-indigo-500/20 flex-shrink-0" style={{ minHeight: '100px' }}>
+        {/* 装饰背景 */}
+        <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl"></div>
+        <div className="absolute bottom-0 left-0 w-20 h-20 bg-indigo-400/20 rounded-full -ml-6 -mb-6 blur-xl"></div>
+        
         {/* 主要内容区域 - 完全居中垂直布局 */}
-        <div className="relative z-10 px-4 py-3 sm:py-4">
-          <div className="flex flex-col items-center justify-center">
-            {/* 应用图标 */}
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center overflow-hidden backdrop-blur-sm shadow-md transition-all duration-300 hover:bg-white/30 hover:scale-105 cursor-pointer">
-                <img
-                  src={niceDayImage}
-                  alt="Nice Today"
-                  className="w-9 h-9 object-contain transition-transform duration-300 group-hover:rotate-12"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
-                  }}
-                />
-                {/* 备用图标 */}
-                <svg className="w-7 h-7 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-              </div>
+        <div className="relative z-10 px-4 py-2 h-full flex justify-between items-center">
+          {/* 左侧：应用图标和描述 */}
+          <div className="flex items-center space-x-3 flex-shrink-0" style={{ minWidth: 0 }}>
+            <div className="w-9 h-9 glass rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <img
+                src={niceDayImage}
+                alt="Nice Today"
+                className="w-6 h-6 object-contain"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'block';
+                }}
+              />
+              {/* 备用图标 */}
+              <svg className="w-5 h-5 text-white hidden" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+              </svg>
             </div>
-
-            {/* 应用标题 */}
-            <div className="mt-2">
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight whitespace-nowrap text-center">
-                Nice Today
-              </h1>
+            <div style={{ minWidth: 0 }}>
+              <h1 className="text-base font-bold text-white tracking-tight truncate">Nice Today</h1>
+              <p className="text-white/80 text-xs font-medium truncate">您的个性化健康助手</p>
             </div>
           </div>
+          
+          {/* 右侧："新版主页"入口按钮 */}
+          {/* <button
+            onClick={() => navigate('/dashboard')}
+            className="px-2 py-1 rounded-full text-[8px] font-bold text-white uppercase tracking-wider hover:bg-white/20 transition-all flex-shrink-0"
+            style={{ 
+              whiteSpace: 'nowrap',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}
+            title="体验新版炫彩版主页"
+          >
+            新版主页
+          </button> */}
         </div>
       </div>
 
       {/* 标签页选择器 - 参考穿衣指南样式 */}
       <div
-        className="sticky top-0 z-30 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 flex-shrink-0"
+        className="sticky top-0 z-30 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl p-1.5 flex items-center justify-between border border-slate-200 dark:border-gray-800 shadow-sm flex-shrink-0"
         style={{
           overflowY: 'hidden',
           overflowX: 'hidden',
-          width: '100%'
+          width: '100%',
+          minHeight: '48px'
         }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-3">
           <div className="flex">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -666,19 +656,18 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`flex-1 py-3 px-2 text-center font-medium transition-all duration-300 relative ${isActive
-                    ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700`
-                    : 'text-gray-400 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
+                  className={`flex-1 py-2 px-0.5 text-center font-medium transition-all duration-300 rounded-xl ${
+                    isActive
+                      ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700 nav-item-active`
+                      : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                  style={{ minHeight: '40px' }}
                 >
-                  {isActive && (
-                    <div className={`absolute bottom-0 left-0 w-full h-0.5 ${colorMap[tab.color]}`}></div>
-                  )}
-                  <div className="flex flex-col items-center justify-center space-y-1">
-                    <div className={`w-5 h-5 transition-colors duration-300 ${isActive ? colorMap[tab.color] : 'text-gray-400 dark:text-gray-400'}`}>
+                  <div className="flex flex-col items-center justify-center space-y-0.5">
+                    <div className={`w-4 h-4 transition-colors duration-300 ${isActive ? colorMap[tab.color] : 'text-gray-400 dark:text-gray-400'}`}>
                       <tab.icon />
                     </div>
-                    <span className="text-xs font-medium dark:text-gray-300">{tab.label}</span>
+                    <span className="text-xs font-bold">{tab.label}</span>
                   </div>
                 </button>
               );

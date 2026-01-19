@@ -7,7 +7,6 @@ import './styles/private-styles.css'; // 私有样式，避免全局污染
 const TarotGardenPage = lazy(() => import('./TarotGardenPage'));
 const RainbowMoodPage = lazy(() => import('./RainbowMoodPage'));
 const UserConfigManager = lazy(() => import('../components/UserConfigManager'));
-const UserDataManager = lazy(() => import('../components/UserDataManager'));
 const SettingsPage = lazy(() => import('./SettingsPage'));
 
 // 简化的加载组件
@@ -109,22 +108,10 @@ const MoreFeaturesPage = memo(() => {
 
         {activeTab === 'user' && (
           <div className="h-full flex flex-col">
-            {/* 用户配置标题 */}
-            {/* <div className="user-config-header">
-              <div className="header-content">
-                <h1>👤 用户配置</h1>
-                <p>管理您的个人信息和偏好设置</p>
-              </div>
-            </div> */}
             <Suspense fallback={<TabContentLoader />}>
               <div className="content-with-scroll">
-                <div className="content-container space-y-6">
-                  <div className="content-card">
-                    <UserConfigManager />
-                  </div>
-                  <div className="content-card">
-                    <UserDataManager showMessage={showMessage} />
-                  </div>
+                <div className="content-container">
+                  <UserConfigManager />
                 </div>
               </div>
             </Suspense>

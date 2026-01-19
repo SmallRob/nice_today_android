@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Mobile User Profile &amp; Config List</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#818cf8", // Indigo/Purple accent
+                        "background-light": "#f3f4f6",
+                        "background-dark": "#0f172a",
+                        "card-dark": "#1e293b",
+                        "accent-red": "#ef4444",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "system-ui", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        'xl': '20px',
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .ios-shadow {
+            box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.2);
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }.no-scrollbar {
+            -ms-overflow-style: none;scrollbar-width: none;}
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<nav class="sticky top-0 z-50 glass px-4 h-14 flex items-center justify-between">
+<button class="flex items-center text-primary">
+<span class="material-icons-round">chevron_left</span>
+<span class="text-lg">返回</span>
+</button>
+<h1 class="font-semibold text-lg">个人面板</h1>
+<button class="material-icons-round text-primary">settings</button>
+</nav>
+<main class="px-4 py-6 space-y-6 max-w-md mx-auto">
+<section class="glass rounded-xl p-5 relative overflow-hidden ios-shadow">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary opacity-10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+<div class="flex items-center space-x-4 mb-6">
+<div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                    何
+                </div>
+<div class="flex-1">
+<div class="flex items-center space-x-2">
+<h2 class="text-xl font-bold">何秀奇</h2>
+<span class="bg-accent-red px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider">68分</span>
+</div>
+<p class="text-slate-400 text-sm">@叉子</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm py-1 border-b border-white/5">
+<span class="text-slate-400">出生日期</span>
+<span class="font-medium">1991-04-30</span>
+</div>
+<div class="flex justify-between items-center text-sm py-1 border-b border-white/5">
+<span class="text-slate-400">出生时间</span>
+<span class="font-medium">12:30 (午)</span>
+</div>
+<div class="flex justify-between items-center text-sm py-1 border-b border-white/5">
+<span class="text-slate-400">星座</span>
+<span class="font-medium">金牛座</span>
+</div>
+<div class="flex justify-between items-center text-sm py-1 border-b border-white/5">
+<span class="text-slate-400">MBTI类型</span>
+<span class="text-primary font-bold">INFJ</span>
+</div>
+</div>
+<div class="mt-4 flex items-center text-[11px] text-slate-400 bg-white/5 p-2 rounded-lg">
+<span class="material-icons-round text-xs mr-1 text-primary">location_on</span>
+<span>北京市 海淀区 (经: 116.48, 纬: 39.95)</span>
+</div>
+<div class="grid grid-cols-2 gap-3 mt-6">
+<button class="bg-primary/20 hover:bg-primary/30 text-primary py-2.5 rounded-lg flex items-center justify-center text-sm font-semibold transition-all">
+<span class="material-icons-round text-lg mr-2">refresh</span>
+                    重新评分
+                </button>
+<button class="bg-slate-700/50 hover:bg-slate-700 text-slate-300 py-2.5 rounded-lg flex items-center justify-center text-sm font-semibold transition-all">
+<span class="material-icons-round text-lg mr-2">delete_sweep</span>
+                    清理缓存
+                </button>
+</div>
+</section>
+<div class="flex items-center justify-between px-1">
+<h3 class="text-lg font-bold">配置管理</h3>
+<button class="text-primary text-sm font-medium flex items-center">
+<span class="material-icons-round text-lg mr-1">add_circle</span>
+                添加配置
+            </button>
+</div>
+<div class="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3 flex space-x-3">
+<span class="material-icons-round text-indigo-400">info</span>
+<p class="text-xs text-indigo-200/80 leading-relaxed">
+                管理您的个人信息配置，您可以创建多个配置，并随时切换使用。
+            </p>
+</div>
+<div class="space-y-3">
+<div class="bg-card-dark rounded-xl border-l-4 border-primary p-4 shadow-sm">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center space-x-2">
+<span class="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">当前使用</span>
+<h4 class="font-bold text-lg">叉子</h4>
+</div>
+<div class="flex space-x-1">
+<button class="p-2 text-slate-400 hover:text-white transition-colors">
+<span class="material-icons-round text-xl">edit</span>
+</button>
+<button class="p-2 text-accent-red/80 hover:text-accent-red transition-colors">
+<span class="material-icons-round text-xl">delete_outline</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs text-slate-400">
+<div class="flex items-center">
+<span class="w-10">姓名:</span>
+<span class="text-slate-200">何秀奇</span>
+</div>
+<div class="flex items-center">
+<span class="w-10">评分:</span>
+<span class="text-accent-red font-bold">68分</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-card-dark bg-blue-500 flex items-center justify-center text-[8px] text-white">天</div>
+<div class="w-6 h-6 rounded-full border-2 border-card-dark bg-green-500 flex items-center justify-center text-[8px] text-white">人</div>
+<div class="w-6 h-6 rounded-full border-2 border-card-dark bg-yellow-500 flex items-center justify-center text-[8px] text-white">地</div>
+</div>
+<button class="text-[11px] text-primary border border-primary/30 px-3 py-1 rounded-full">
+                        重新评分
+                    </button>
+</div>
+</div>
+<div class="bg-card-dark/60 rounded-xl p-4 border border-white/5 opacity-70">
+<div class="flex justify-between items-start mb-3">
+<h4 class="font-bold text-lg text-slate-300">备用配置 A</h4>
+<div class="flex space-x-1">
+<button class="p-2 text-slate-500">
+<span class="material-icons-round text-xl">edit</span>
+</button>
+<button class="p-2 text-slate-500">
+<span class="material-icons-round text-xl">delete_outline</span>
+</button>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<div class="text-xs text-slate-500">最后更新: 2023-11-20</div>
+<button class="bg-slate-700 text-white text-[11px] px-4 py-1.5 rounded-full font-medium">
+                        切换使用
+                    </button>
+</div>
+</div>
+</div>
+<section class="space-y-4 pt-4">
+<h3 class="text-lg font-bold px-1">数据管理</h3>
+<div class="bg-card-dark rounded-xl p-4 flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="p-2 bg-amber-500/20 rounded-lg">
+<span class="material-icons-round text-amber-500">cloud_upload</span>
+</div>
+<div>
+<p class="font-medium text-sm">备份与同步</p>
+<p class="text-[11px] text-slate-400">最后同步于 2小时前</p>
+</div>
+</div>
+<button class="material-icons-round text-slate-400">chevron_right</button>
+</div>
+<div class="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
+<div class="flex items-center space-x-2 mb-2">
+<span class="material-icons-round text-amber-400 text-lg">tips_and_updates</span>
+<span class="text-sm font-bold text-slate-200">快速操作提示</span>
+</div>
+<ul class="text-[11px] text-slate-400 space-y-2 list-disc pl-4 leading-relaxed">
+<li>如需管理用户配置，请前往“用户面板” -&gt; “配置管理”</li>
+<li>如需创建新的配置，请点击顶部的“添加配置”按钮</li>
+<li>左右滑动配置卡片可以触发快速编辑菜单</li>
+</ul>
+</div>
+</section>
+</main>
+<button class="fixed right-6 bottom-8 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center transition-transform active:scale-90 z-50">
+<span class="material-icons-round text-3xl">add</span>
+</button>
+<div class="fixed bottom-0 left-0 right-0 h-20 glass border-t border-white/5 flex justify-around items-center px-4 pb-4">
+<button class="flex flex-col items-center text-slate-400">
+<span class="material-icons-round">home</span>
+<span class="text-[10px] mt-1">主页</span>
+</button>
+<button class="flex flex-col items-center text-slate-400">
+<span class="material-icons-round">auto_awesome</span>
+<span class="text-[10px] mt-1">塔罗</span>
+</button>
+<button class="flex flex-col items-center text-primary">
+<span class="material-icons-round">person</span>
+<span class="text-[10px] mt-1 font-bold">我的</span>
+</button>
+<button class="flex flex-col items-center text-slate-400">
+<span class="material-icons-round">settings</span>
+<span class="text-[10px] mt-1">设置</span>
+</button>
+</div>
+
+</body></html>

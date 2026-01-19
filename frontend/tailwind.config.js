@@ -17,6 +17,14 @@ module.exports = {
         'physical': '#3b82f6', // 蓝色
         'emotional': '#ef4444', // 红色
         'intellectual': '#10b981', // 绿色
+        // Cosmic design colors from welcome.html
+        'cosmic-dark': '#0a0b1e',
+        'cosmic-navy': '#111432',
+        'cosmic-purple': '#2d1b4d',
+        'neon-yellow': '#fde047',
+        'neon-blue': '#38bdf8',
+        'neon-green': '#4ade80',
+        'neon-pink': '#f472b6',
       },
       borderRadius: {
         '2xl': '18px',

@@ -14,7 +14,7 @@ import ConfigEditModal from '../ConfigEditModal';
 import NameScoringModal from '../NameScoringModal';
 import UserDataManager from '../UserDataManager';
 import { clearUserZodiacTraitsCache } from '../../utils/zodiacTraitsCache';
-import './private-styles.css'; // 私有样式，适配9:16屏幕
+// import './private-styles.css'; // 私有样式，适配9:16屏幕
 
 // 辅助函数：验证八字数据一致性
 const validateBaziDataConsistency = (baziData, birthDate, birthTime, birthLocation) => {
