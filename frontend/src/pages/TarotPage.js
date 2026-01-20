@@ -823,130 +823,64 @@ function TarotPage() {
                       }}>
                         🎴 选择抽卡模式
                       </h3>
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                        gap: '12px',
-                        width: '100%',
-                        boxSizing: 'border-box'
-                      }}>
+                      <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 sm:gap-2">
                         <Button
                           onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                          style={{
-                            padding: '1rem',
-                            borderRadius: '0.75rem',
-                            textAlign: 'center',
-                            transition: 'all 0.3s',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            minHeight: '120px',
-                            boxSizing: 'border-box',
-                            touchAction: 'manipulation',
-                            outline: 'none',
-                            cursor: 'pointer',
-                            flexShrink: 0,
-                            minWidth: 0,
-                            overflow: 'hidden',
-                            backgroundColor: drawMode === DRAW_MODES.SINGLE
-                              ? 'linear-gradient(135deg, #8b5cf6, #4f46e5)'
+                          className={`flex flex-col items-center justify-center p-4 sm:p-6 rounded-xl transition-all duration-300 touch-action-manipulation outline-none cursor-pointer min-h-[100px] sm:min-h-[120px] box-border overflow-hidden ${
+                            drawMode === DRAW_MODES.SINGLE
+                              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-2 border-purple-300 dark:border-purple-700 shadow-xl'
                               : theme === 'dark'
-                                ? 'linear-gradient(135deg, #374151, #1f2937)'
-                                : 'linear-gradient(135deg, #f9fafb, #f3f4f6)',
-                            color: drawMode === DRAW_MODES.SINGLE
-                              ? '#ffffff'
-                              : theme === 'dark'
-                                ? '#d1d5db'
-                                : '#374151',
-                            border: drawMode === DRAW_MODES.SINGLE
-                              ? '2px solid rgba(139, 92, 246, 0.5)'
-                              : theme === 'dark'
-                                ? '1px solid #4b5563'
-                                : '1px solid #e5e7eb',
-                            boxShadow: drawMode === DRAW_MODES.SINGLE
-                              ? '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-                              : 'none',
-                            transform: drawMode === DRAW_MODES.SINGLE ? 'scale(1.05)' : 'scale(1)'
-                          }}
+                                ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-300 border border-gray-600'
+                                : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300'
+                          }`}
                           onMouseEnter={(e) => {
                             if (drawMode !== DRAW_MODES.SINGLE) {
-                              e.target.style.backgroundColor = theme === 'dark'
+                              e.target.style.background = theme === 'dark'
                                 ? 'linear-gradient(135deg, #4b5563, #374151)'
                                 : 'linear-gradient(135deg, #e5e7eb, #f3f4f6)';
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (drawMode !== DRAW_MODES.SINGLE) {
-                              e.target.style.backgroundColor = theme === 'dark'
+                              e.target.style.background = theme === 'dark'
                                 ? 'linear-gradient(135deg, #374151, #1f2937)'
                                 : 'linear-gradient(135deg, #f9fafb, #f3f4f6)';
                             }
                           }}
                         >
-                          <div style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>🃏</div>
-                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25' }}>单张抽卡</div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.25rem', lineHeight: '1.25', whiteSpace: 'nowrap' }}>
+                          <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🃏</div>
+                          <div className="text-sm sm:text-base font-bold leading-tight text-center">单张抽卡</div>
+                          <div className="text-xs opacity-90 mt-1 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis">
                             简明扼要·即时解答
                           </div>
                         </Button>
                         <Button
                           onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                          style={{
-                            padding: '1rem',
-                            borderRadius: '0.75rem',
-                            textAlign: 'center',
-                            transition: 'all 0.3s',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            minHeight: '120px',
-                            boxSizing: 'border-box',
-                            touchAction: 'manipulation',
-                            outline: 'none',
-                            cursor: 'pointer',
-                            flexShrink: 0,
-                            minWidth: 0,
-                            overflow: 'hidden',
-                            backgroundColor: drawMode === DRAW_MODES.TRIPLE
-                              ? 'linear-gradient(135deg, #ec4899, #e11d48)'
+                          className={`flex flex-col items-center justify-center p-4 sm:p-6 rounded-xl transition-all duration-300 touch-action-manipulation outline-none cursor-pointer min-h-[100px] sm:min-h-[120px] box-border overflow-hidden ${
+                            drawMode === DRAW_MODES.TRIPLE
+                              ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white border-2 border-pink-300 dark:border-pink-700 shadow-xl'
                               : theme === 'dark'
-                                ? 'linear-gradient(135deg, #374151, #1f2937)'
-                                : 'linear-gradient(135deg, #f9fafb, #f3f4f6)',
-                            color: drawMode === DRAW_MODES.TRIPLE
-                              ? '#ffffff'
-                              : theme === 'dark'
-                                ? '#d1d5db'
-                                : '#374151',
-                            border: drawMode === DRAW_MODES.TRIPLE
-                              ? '2px solid rgba(236, 72, 153, 0.5)'
-                              : theme === 'dark'
-                                ? '1px solid #4b5563'
-                                : '1px solid #e5e7eb',
-                            boxShadow: drawMode === DRAW_MODES.TRIPLE
-                              ? '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-                              : 'none',
-                            transform: drawMode === DRAW_MODES.TRIPLE ? 'scale(1.05)' : 'scale(1)'
-                          }}
+                                ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-300 border border-gray-600'
+                                : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300'
+                          }`}
                           onMouseEnter={(e) => {
                             if (drawMode !== DRAW_MODES.TRIPLE) {
-                              e.target.style.backgroundColor = theme === 'dark'
+                              e.target.style.background = theme === 'dark'
                                 ? 'linear-gradient(135deg, #4b5563, #374151)'
                                 : 'linear-gradient(135deg, #e5e7eb, #f3f4f6)';
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (drawMode !== DRAW_MODES.TRIPLE) {
-                              e.target.style.backgroundColor = theme === 'dark'
+                              e.target.style.background = theme === 'dark'
                                 ? 'linear-gradient(135deg, #374151, #1f2937)'
                                 : 'linear-gradient(135deg, #f9fafb, #f3f4f6)';
                             }
                           }}
                         >
-                          <div style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>🃏🃏🃏</div>
-                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25' }}>三张抽卡</div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.9, marginTop: '0.25rem', lineHeight: '1.25', whiteSpace: 'nowrap' }}>
+                          <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">🃏🃏🃏</div>
+                          <div className="text-sm sm:text-base font-bold leading-tight text-center">三张抽卡</div>
+                          <div className="text-xs opacity-90 mt-1 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis">
                             时间线分析·深度解读
                           </div>
                         </Button>
@@ -966,7 +900,7 @@ function TarotPage() {
                             <Button
                               onClick={drawCards}
                               disabled={isDrawing}
-                              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-4 rounded-full text-base font-medium shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+                              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-4 rounded-full text-base font-medium shadow-xl transition-all duration-300"
                             >
                               {isDrawing ? '正在抽牌中...' : drawMode === DRAW_MODES.SINGLE ? '开始单张抽卡' : '开始三张抽卡'}
                             </Button>
@@ -1003,15 +937,15 @@ function TarotPage() {
                                           <div className="w-40 h-60 sm:w-56 sm:h-84 relative perspective-1000">
                                             <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-4 py-6 transition-transform duration-700 animate-card-reveal">
                                               {/* 卡牌图标 */}
-                                              <div className="text-6xl sm:text-7xl mb-3 sm:mb-4 animate-pulse animate-fade-in-up" style={{ animationDelay: '0.1s' }}>🃏</div>
+                                              <div className="text-4xl sm:text-6xl md:text-7xl mb-3 sm:mb-4 animate-pulse animate-fade-in-up" style={{ animationDelay: '0.1s' }}>🃏</div>
 
                                               {/* 牌面名称 */}
-                                              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1.5 sm:mb-2 tracking-wide animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                                              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1.5 sm:mb-2 tracking-wide animate-fade-in-up whitespace-nowrap overflow-hidden text-ellipsis max-w-[90%]" style={{ animationDelay: '0.2s' }}>
                                                 {drawnCards.cards[0].name}
                                               </h3>
 
                                               {/* 英文名称 */}
-                                              <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4 font-medium animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                                              <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4 font-medium animate-fade-in-up whitespace-nowrap overflow-hidden text-ellipsis max-w-[90%]" style={{ animationDelay: '0.3s' }}>
                                                 {drawnCards.cards[0].nameEn}
                                               </p>
 
@@ -1020,7 +954,7 @@ function TarotPage() {
                                                 {drawnCards.cards[0].keywords.map((keyword, index) => (
                                                   <span
                                                     key={index}
-                                                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-[10px] sm:text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700"
+                                                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-full text-[10px] sm:text-xs font-semibold text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700 whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px] sm:max-w-none"
                                                   >
                                                     {keyword}
                                                   </span>
@@ -1074,13 +1008,13 @@ function TarotPage() {
                                   <div className="flex gap-3">
                                     <Button
                                       onClick={() => { setDrawnCards(null); setCardsRevealed(false); drawCards(); }}
-                                      className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                      className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                                     >
                                       🔄 重新抽卡
                                     </Button>
                                     <Button
                                       onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                                      className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                      className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                                     >
                                       📊 尝试三张抽卡
                                     </Button>
@@ -1091,13 +1025,13 @@ function TarotPage() {
                               {/* 三张牌展示 */}
                               {drawnCards.mode === DRAW_MODES.TRIPLE && (
                                 <>
-                                  <div className="grid grid-cols-3 gap-2">
+                                  <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-2">
                                     {drawnCards.cards.map((card, index) => (
-                                      <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-2 sm:p-3 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl hover:scale-105">
+                                      <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-3 sm:p-3 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl">
                                         <div className="flex items-center justify-center">
                                           {!cardsRevealed ? (
                                             <div className="flex items-center justify-center">
-                                              <div className="w-28 h-42 sm:w-36 sm:h-54 relative perspective-1000">
+                                              <div className="w-32 h-48 sm:w-28 sm:h-42 md:w-36 md:h-54 relative perspective-1000">
                                                 <div className="relative w-full h-full transition-transform duration-700" style={{ animationDelay: `${index * 150}ms` }}>
                                                   <img
                                                     src={tarotCardImage}
@@ -1110,23 +1044,23 @@ function TarotPage() {
                                             </div>
                                           ) : (
                                             <div className="flex items-center justify-center">
-                                              <div className="w-28 h-42 sm:w-36 sm:h-54 relative perspective-1000">
-                                                <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-2 sm:px-3 py-3 sm:py-4 transition-transform duration-700 animate-card-reveal" style={{ animationDelay: `${index * 200}ms` }}>
+                                              <div className="w-32 h-48 sm:w-28 sm:h-42 md:w-36 md:h-54 relative perspective-1000">
+                                                <div className="relative w-full h-full flex flex-col items-center justify-center text-center px-3 sm:px-2 py-4 sm:py-3 transition-transform duration-700 animate-card-reveal" style={{ animationDelay: `${index * 200}ms` }}>
                                                   {/* 位置标签 */}
-                                                  <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 mb-2 sm:mb-3 shadow-sm order-1 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 100}ms` }}>
-                                                    <h4 className="font-bold text-[10px] sm:text-xs text-purple-700 dark:text-purple-300 tracking-wide">{CARD_POSITIONS[index]}</h4>
+                                                  <div className="bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-800 dark:to-indigo-800 rounded-lg px-2 sm:px-1.5 py-1 sm:py-0.5 mb-3 sm:mb-2 shadow-sm order-1 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 100}ms` }}>
+                                                    <h4 className="font-bold text-xs sm:text-[10px] md:text-xs text-purple-700 dark:text-purple-300 tracking-wide whitespace-nowrap">{CARD_POSITIONS[index]}</h4>
                                                   </div>
 
                                                   {/* 卡牌图标 */}
-                                                  <div className="text-3xl sm:text-4xl mb-2 sm:mb-3 animate-pulse animate-fade-in-up order-2" style={{ animationDelay: `${index * 200 + 150}ms` }}>🃏</div>
+                                                  <div className="text-4xl sm:text-3xl md:text-4xl mb-3 sm:mb-2 md:mb-3 animate-pulse animate-fade-in-up order-2" style={{ animationDelay: `${index * 200 + 150}ms` }}>🃏</div>
 
                                                   {/* 牌面名称 */}
-                                                  <h3 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-100 mb-0.5 sm:mb-1 leading-tight order-3 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 200}ms` }}>
+                                                  <h3 className="text-sm sm:text-xs md:text-sm font-bold text-gray-800 dark:text-gray-100 mb-1 sm:mb-0.5 md:mb-1 leading-tight order-3 animate-fade-in-up whitespace-nowrap overflow-hidden text-ellipsis max-w-[90%]" style={{ animationDelay: `${index * 200 + 200}ms` }}>
                                                     {card.name}
                                                   </h3>
 
                                                   {/* 英文名称 */}
-                                                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-300 font-medium mb-2 sm:mb-2 order-4 animate-fade-in-up" style={{ animationDelay: `${index * 200 + 250}ms` }}>
+                                                  <p className="text-xs sm:text-[10px] md:text-xs text-gray-600 dark:text-gray-300 font-medium mb-2 sm:mb-2 md:mb-2 order-4 animate-fade-in-up whitespace-nowrap overflow-hidden text-ellipsis max-w-[90%]" style={{ animationDelay: `${index * 200 + 250}ms` }}>
                                                     {card.nameEn}
                                                   </p>
                                                 </div>
@@ -1145,7 +1079,7 @@ function TarotPage() {
                                       <Button
                                         onClick={() => setShowDetailedReading(!showDetailedReading)}
                                         className={`p-4 rounded-xl text-center transition-all duration-300 ${!showDetailedReading
-                                          ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-2xl scale-105 ring-2 ring-blue-300 dark:ring-blue-700'
+                                          ? 'bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-2xl ring-2 ring-blue-300 dark:ring-blue-700'
                                           : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
                                           }`}
                                       >
@@ -1158,7 +1092,7 @@ function TarotPage() {
                                       <Button
                                         onClick={() => setShowDetailedReading(!showDetailedReading)}
                                         className={`p-4 rounded-xl text-center transition-all duration-300 ${showDetailedReading
-                                          ? 'bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-2xl scale-105 ring-2 ring-orange-300 dark:ring-orange-700'
+                                          ? 'bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-2xl ring-2 ring-orange-300 dark:ring-orange-700'
                                           : 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-300 hover:shadow-lg border border-gray-200 dark:border-gray-700'
                                           }`}
                                       >
@@ -1351,13 +1285,13 @@ function TarotPage() {
                                   <div className="flex gap-3">
                                     <Button
                                       onClick={() => { setDrawnCards(null); setShowDetailedReading(false); setCardsRevealed(false); drawCards(); }}
-                                      className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                      className="flex-1 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                                     >
                                       🔄 重新抽卡
                                     </Button>
                                     <Button
                                       onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                                      className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                                      className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                                     >
                                       🎴 尝试单张抽卡
                                     </Button>
@@ -1386,7 +1320,7 @@ function TarotPage() {
                         />
                         <Button
                           onClick={makeWish}
-                          className="mt-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95"
+                          className="mt-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                         >
                           ✨ 许下心愿
                         </Button>
@@ -1477,160 +1411,43 @@ function TarotPage() {
                         ✨ 能量管理
                       </h3>
 
-                      {/* 功能按钮网格 - 优化标签显示 */}
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                        gap: '8px',
-                        width: '100%',
-                        boxSizing: 'border-box'
-                      }}>
+                      {/* 功能按钮网格 - 移动端优化 */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-2 w-full box-border">
                         <Button
                           onClick={generateFortuneReading}
                           disabled={isDrawing}
-                          style={{
-                            padding: '12px 16px',
-                            borderRadius: '0.5rem',
-                            background: 'linear-gradient(135deg, #60a5fa, #2563eb)',
-                            color: '#ffffff',
-                            fontSize: '0.75rem',
-                            fontWeight: 500,
-                            transition: 'all 0.3s',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                            border: 'none',
-                            cursor: 'pointer',
-                            minHeight: '80px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxSizing: 'border-box',
-                            flexShrink: 0,
-                            minWidth: 0,
-                            overflow: 'hidden'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
-                            e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #60a5fa, #2563eb)';
-                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                          }}
+                          className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg transition-all duration-300 cursor-pointer min-h-[70px] sm:min-h-[80px] box-border overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md hover:shadow-lg border-none"
                         >
-                          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>🎯</div>
-                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25', marginBottom: '2px' }}>命运指引</div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.8, lineHeight: '1.25', textAlign: 'center' }}>查看近期运势</div>
+                          <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🎯</div>
+                          <div className="text-sm sm:text-base font-bold leading-tight text-center mb-0.5 sm:mb-1 whitespace-nowrap overflow-hidden text-ellipsis">命运指引</div>
+                          <div className="text-xs opacity-90 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis">查看近期运势</div>
                         </Button>
                         <Button
                           onClick={performEnergyCleansing}
                           disabled={isDrawing}
-                          style={{
-                            padding: '12px 16px',
-                            borderRadius: '0.5rem',
-                            background: 'linear-gradient(135deg, #34d399, #059669)',
-                            color: '#ffffff',
-                            fontSize: '0.75rem',
-                            fontWeight: 500,
-                            transition: 'all 0.3s',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                            border: 'none',
-                            cursor: 'pointer',
-                            minHeight: '80px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxSizing: 'border-box',
-                            flexShrink: 0,
-                            minWidth: 0,
-                            overflow: 'hidden'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #10b981, #047857)';
-                            e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #34d399, #059669)';
-                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                          }}
+                          className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg transition-all duration-300 cursor-pointer min-h-[70px] sm:min-h-[80px] box-border overflow-hidden bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg border-none"
                         >
-                          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>💎</div>
-                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25', marginBottom: '2px' }}>能量清理</div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.8, lineHeight: '1.25', textAlign: 'center' }}>清理负面能量</div>
+                          <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">💎</div>
+                          <div className="text-sm sm:text-base font-bold leading-tight text-center mb-0.5 sm:mb-1 whitespace-nowrap overflow-hidden text-ellipsis">能量清理</div>
+                          <div className="text-xs opacity-90 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis">净化负能量</div>
                         </Button>
                         <Button
                           onClick={receiveStarBlessing}
                           disabled={isDrawing}
-                          style={{
-                            padding: '12px 16px',
-                            borderRadius: '0.5rem',
-                            background: 'linear-gradient(135deg, #fb923c, #ea580c)',
-                            color: '#ffffff',
-                            fontSize: '0.75rem',
-                            fontWeight: 500,
-                            transition: 'all 0.3s',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                            border: 'none',
-                            cursor: 'pointer',
-                            minHeight: '80px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxSizing: 'border-box',
-                            flexShrink: 0,
-                            minWidth: 0,
-                            overflow: 'hidden'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #f97316, #c2410c)';
-                            e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #fb923c, #ea580c)';
-                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                          }}
+                          className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg transition-all duration-300 cursor-pointer min-h-[70px] sm:min-h-[80px] box-border overflow-hidden bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white shadow-md hover:shadow-lg border-none"
                         >
-                          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>🔥</div>
-                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25', marginBottom: '2px' }}>星象祝福</div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.8, lineHeight: '1.25', textAlign: 'center' }}>获取星辰祝福</div>
+                          <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🔥</div>
+                          <div className="text-sm sm:text-base font-bold leading-tight text-center mb-0.5 sm:mb-1 whitespace-nowrap overflow-hidden text-ellipsis">星象祝福</div>
+                          <div className="text-xs opacity-90 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis">获取星辰祝福</div>
                         </Button>
                         <Button
                           onClick={recordMoonPhase}
-                          style={{
-                            padding: '12px 16px',
-                            borderRadius: '0.5rem',
-                            background: 'linear-gradient(135deg, #f472b6, #db2777)',
-                            color: '#ffffff',
-                            fontSize: '0.75rem',
-                            fontWeight: 500,
-                            transition: 'all 0.3s',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                            border: 'none',
-                            cursor: 'pointer',
-                            minHeight: '80px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxSizing: 'border-box',
-                            flexShrink: 0,
-                            minWidth: 0,
-                            overflow: 'hidden'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #ec4899, #be185d)';
-                            e.target.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.15)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #f472b6, #db2777)';
-                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                          }}
+                          disabled={isDrawing}
+                          className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg transition-all duration-300 cursor-pointer min-h-[70px] sm:min-h-[80px] box-border overflow-hidden bg-gradient-to-r from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white shadow-md hover:shadow-lg border-none"
                         >
-                          <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>🌙</div>
-                          <div style={{ fontSize: '0.875rem', fontWeight: 700, lineHeight: '1.25', marginBottom: '2px' }}>月相记录</div>
-                          <div style={{ fontSize: '0.75rem', opacity: 0.8, lineHeight: '1.25', textAlign: 'center' }}>记录月相变化</div>
+                          <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🌙</div>
+                          <div className="text-sm sm:text-base font-bold leading-tight text-center mb-0.5 sm:mb-1 whitespace-nowrap overflow-hidden text-ellipsis">月相记录</div>
+                          <div className="text-xs opacity-90 leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis">记录月相变化</div>
                         </Button>
                       </div>
 

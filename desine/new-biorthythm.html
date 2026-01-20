@@ -1,0 +1,65 @@
+import React from 'react';
+
+const BiorhythmApp = () => {
+return (
+<div className="min-h-screen bg-slate-950 text-white p-4 font-sans">
+    {/* Header Section */}
+    <header className="flex justify-between items-end mb-8 pt-4">
+        <div>
+            <h1 className="text-2xl font-bold tracking-tight">人体节律</h1>
+            <p className="text-slate-400 text-sm">天人合一 · 顺应自然</p>
+        </div>
+        <div className="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-sm border border-blue-500/30">
+            2026/01/20
+        </div>
+    </header>
+
+    {/* Hero Score Section */}
+    <div
+        className="relative flex flex-col items-center justify-center py-10 mb-8 bg-gradient-to-b from-blue-500/10 to-transparent rounded-3xl">
+        <div className="w-40 h-40 rounded-full border-4 border-orange-500/30 flex items-center justify-center relative">
+            <div className="text-center">
+                <span className="text-5xl font-black text-orange-500">-20</span>
+                <p className="text-xs text-slate-400 mt-1">综合能量指数</p>
+            </div>
+            {/* 动态进度条装饰可在此添加 */}
+        </div>
+    </div>
+
+    {/* Stats Grid - 解决挤压变形 */}
+    <div className="grid grid-cols-3 gap-3 mb-6">
+        {[
+        { label: '体力', score: '-73', status: '疲劳', color: 'text-rose-400', bg: 'bg-rose-400/10' },
+        { label: '情绪', score: '90', status: '高涨', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+        { label: '智力', score: '-76', status: '若钝', color: 'text-purple-400', bg: 'bg-purple-400/10' },
+        ].map((item, idx) => (
+        <div key={idx} className={`${item.bg} p-4 rounded-2xl border border-white/5 text-center`}>
+            <p className="text-xs opacity-60 mb-1">{item.label}</p>
+            <p className={`text-xl font-bold ${item.color}`}>{item.score}</p>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 mt-2 inline-block">
+                {item.status}
+            </span>
+        </div>
+        ))}
+    </div>
+
+    {/* Chart Preview Placeholder */}
+    <section className="bg-slate-900/50 p-5 rounded-3xl border border-white/5 mb-6">
+        <h3 className="text-sm font-medium mb-4 text-slate-300">节律趋势图</h3>
+        <div className="h-40 w-full bg-slate-800/30 rounded-xl flex items-end justify-between p-2">
+            {/* 这里建议集成 Recharts 或 Chart.js */}
+            <div className="w-full text-center text-xs text-slate-500 italic">趋势图渲染区域</div>
+        </div>
+    </section>
+
+    {/* Action Advice */}
+    <div className="space-y-3">
+        <div className="bg-amber-500/10 p-4 rounded-2xl border-l-4 border-amber-500">
+            <p className="text-sm text-amber-200">体力不足，建议避免剧烈运动，多休息保重。</p>
+        </div>
+    </div>
+</div>
+);
+};
+
+export default BiorhythmApp;

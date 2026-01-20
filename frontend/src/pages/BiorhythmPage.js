@@ -15,8 +15,6 @@ const BiorhythmPage = () => {
   const { currentConfig } = useUserConfig();
 
   // 状态管理
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [biorhythmData, setBiorhythmData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,18 +42,14 @@ const BiorhythmPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentConfig?.birthDate, selectedDate]);
+  }, [currentConfig?.birthDate]);
 
   // 初始化
   useEffect(() => {
     calculateBiorhythm();
   }, [calculateBiorhythm]);
 
-  // 保存日期选择
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-    setIsCalendarOpen(false);
-  };
+
 
   // 获取趋势颜色类名
   const getTrendColorClass = (value) => {
@@ -228,22 +222,8 @@ const BiorhythmPage = () => {
       {/* Banner */}
       <BiorhythmBanner />
 
-      {/* 主内容区 - 优化移动端间距 */}
-      <div className="container mx-auto px-2 sm:px-3 py-2 sm:py-3 max-w-4xl">
-        {/* 日期选择器 - 优化移动端布局，移除返回按钮 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2 sm:p-3 mb-3 sm:mb-4">
-          <div className="flex items-center justify-center">
-            <button
-              onClick={() => setIsCalendarOpen(true)}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all flex items-center text-sm sm:text-base font-medium"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2v7a2 2 0 001 1h1a1 0 001 1H9z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm sm:text-base">{selectedDate.toLocaleDateString('zh-CN')}</span>
-            </button>
-          </div>
-        </div>
+      {/* 主内容区 - 优化移动端间距，添加底部安全距离 */}
+      <div className="container mx-auto px-3 sm:px-3 pt-3 sm:pt-3 pb-20 sm:pb-8 max-w-4xl">
 
         {/* 错误提示 - 优化移动端间距 */}
         {error && (
@@ -273,19 +253,19 @@ const BiorhythmPage = () => {
           const overall = getOverallStatus(averageScore);
 
           return (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 mb-3 sm:mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
                 今日状态
               </h3>
 
               {/* 综合节律能量球 */}
-              <div className="flex flex-col items-center justify-center mb-4 relative py-2">
-                <div className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center bg-gradient-to-br ${overall.color} shadow-lg shadow-blue-500/20 ring-4 ring-white/10`}>
+              <div className="flex flex-col items-center justify-center mb-3 sm:mb-4 relative py-1 sm:py-2">
+                <div className={`relative w-20 h-20 sm:w-28 sm:h-28 rounded-full flex items-center justify-center bg-gradient-to-br ${overall.color} shadow-lg shadow-blue-500/20 ring-4 ring-white/10`}>
                   {/* 内部光晕效果 */}
                   <div className="absolute inset-1 rounded-full bg-white/10 backdrop-blur-[1px]"></div>
 
                   <div className="flex flex-col items-center z-10 text-white">
-                    <span className="text-3xl sm:text-4xl font-bold tracking-tighter drop-shadow-md">{averageScore}</span>
+                    <span className="text-2xl sm:text-4xl font-bold tracking-tighter drop-shadow-md">{averageScore}</span>
                     <span className="text-[10px] sm:text-xs font-medium opacity-90 mt-0.5 tracking-wide px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
                       {overall.text}
                     </span>
@@ -294,58 +274,58 @@ const BiorhythmPage = () => {
                   {/* 动画波纹 */}
                   <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
                 </div>
-                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">综合能量指数</div>
+                <div className="mt-1 sm:mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">综合能量指数</div>
               </div>
 
               {/* 三个节律值 - 移动端紧凑三列，确保一行显示 */}
-              <div className="grid grid-cols-3 gap-2 mb-3 sm:mb-4 w-full">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4 w-full">
                 {/* 体力 */}
-                <div className={`rounded-lg p-2 sm:p-3 transition-all flex flex-col items-center justify-center ${todayData.physical > 50 ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/50 dark:to-emerald-900/50 border border-green-200 dark:border-green-700' :
-                    todayData.physical > 0 ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 border border-blue-200 dark:border-blue-700' :
-                      'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
+                <div className={`rounded-lg p-1.5 sm:p-3 transition-all flex flex-col items-center justify-center min-w-0 ${todayData.physical > 50 ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/50 dark:to-emerald-900/50 border border-green-200 dark:border-green-700' :
+                  todayData.physical > 0 ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 border border-blue-200 dark:border-blue-700' :
+                    'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
                   }`}>
-                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">体力</div>
-                  <div className={`text-lg sm:text-xl font-bold leading-none ${todayData.physical > 50 ? 'text-green-600 dark:text-green-400' :
-                      todayData.physical > 0 ? 'text-blue-600 dark:text-blue-400' :
-                        'text-red-600 dark:text-red-400'
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1 font-medium whitespace-nowrap">体力</div>
+                  <div className={`text-base sm:text-xl font-bold leading-none ${todayData.physical > 50 ? 'text-green-600 dark:text-green-400' :
+                    todayData.physical > 0 ? 'text-blue-600 dark:text-blue-400' :
+                      'text-red-600 dark:text-red-400'
                     }`}>
                     {todayData.physical.toFixed(0)}
                   </div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 opacity-80">
+                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1 opacity-80 whitespace-nowrap">
                     {todayData.physical > 50 ? '充沛' : todayData.physical > 0 ? '一般' : '疲劳'}
                   </div>
                 </div>
 
                 {/* 情绪 */}
-                <div className={`rounded-lg p-2 sm:p-3 transition-all flex flex-col items-center justify-center ${todayData.emotional > 50 ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/50 dark:to-pink-900/50 border border-purple-200 dark:border-purple-700' :
-                    todayData.emotional > 0 ? 'bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-indigo-700' :
-                      'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/50 dark:to-red-900/50 border border-orange-200 dark:border-orange-700'
+                <div className={`rounded-lg p-1.5 sm:p-3 transition-all flex flex-col items-center justify-center min-w-0 ${todayData.emotional > 50 ? 'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/50 dark:to-pink-900/50 border border-purple-200 dark:border-purple-700' :
+                  todayData.emotional > 0 ? 'bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-indigo-700' :
+                    'bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/50 dark:to-red-900/50 border border-orange-200 dark:border-orange-700'
                   }`}>
-                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">情绪</div>
-                  <div className={`text-lg sm:text-xl font-bold leading-none ${todayData.emotional > 50 ? 'text-purple-600 dark:text-purple-400' :
-                      todayData.emotional > 0 ? 'text-indigo-600 dark:text-indigo-400' :
-                        'text-orange-600 dark:text-orange-400'
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1 font-medium whitespace-nowrap">情绪</div>
+                  <div className={`text-base sm:text-xl font-bold leading-none ${todayData.emotional > 50 ? 'text-purple-600 dark:text-purple-400' :
+                    todayData.emotional > 0 ? 'text-indigo-600 dark:text-indigo-400' :
+                      'text-orange-600 dark:text-orange-400'
                     }`}>
                     {todayData.emotional.toFixed(0)}
                   </div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 opacity-80">
+                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1 opacity-80 whitespace-nowrap">
                     {todayData.emotional > 50 ? '高涨' : todayData.emotional > 0 ? '平稳' : '低落'}
                   </div>
                 </div>
 
                 {/* 智力 */}
-                <div className={`rounded-lg p-2 sm:p-3 transition-all flex flex-col items-center justify-center ${todayData.intellectual > 50 ? 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/50 dark:to-cyan-900/50 border border-blue-200 dark:border-blue-700' :
-                    todayData.intellectual > 0 ? 'bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/50 dark:to-violet-900/50 border border-indigo-200 dark:border-indigo-700' :
-                      'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
+                <div className={`rounded-lg p-1.5 sm:p-3 transition-all flex flex-col items-center justify-center min-w-0 ${todayData.intellectual > 50 ? 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/50 dark:to-cyan-900/50 border border-blue-200 dark:border-blue-700' :
+                  todayData.intellectual > 0 ? 'bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/50 dark:to-violet-900/50 border border-indigo-200 dark:border-indigo-700' :
+                    'bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/50 dark:to-orange-900/50 border border-red-200 dark:border-red-700'
                   }`}>
-                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-1 font-medium">智力</div>
-                  <div className={`text-lg sm:text-xl font-bold leading-none ${todayData.intellectual > 50 ? 'text-blue-600 dark:text-blue-400' :
-                      todayData.intellectual > 0 ? 'text-indigo-600 dark:text-indigo-400' :
-                        'text-red-600 dark:text-red-400'
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mb-0.5 sm:mb-1 font-medium whitespace-nowrap">智力</div>
+                  <div className={`text-base sm:text-xl font-bold leading-none ${todayData.intellectual > 50 ? 'text-blue-600 dark:text-blue-400' :
+                    todayData.intellectual > 0 ? 'text-indigo-600 dark:text-indigo-400' :
+                      'text-red-600 dark:text-red-400'
                     }`}>
                     {todayData.intellectual.toFixed(0)}
                   </div>
-                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 opacity-80">
+                  <div className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1 opacity-80 whitespace-nowrap">
                     {todayData.intellectual > 50 ? '敏捷' : todayData.intellectual > 0 ? '一般' : '迟钝'}
                   </div>
                 </div>
@@ -353,15 +333,15 @@ const BiorhythmPage = () => {
 
               {/* 健康提示 */}
               {healthAdvice.length > 0 && (
-                <div className="space-y-1.5 sm:space-y-2">
+                <div className="space-y-1 sm:space-y-2">
                   {healthAdvice.map((advice, index) => (
                     <div
                       key={index}
-                      className={`flex items-start gap-2 p-2 sm:p-2.5 rounded-lg transition-all ${advice.type === 'success' ?
-                          'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/40 border-l-2 border-green-500' :
-                          advice.type === 'warning' ?
-                            'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/40 dark:to-amber-900/40 border-l-2 border-orange-500' :
-                            'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border-l-2 border-blue-500'
+                      className={`flex items-start gap-1.5 p-1.5 sm:p-2.5 rounded-lg transition-all ${advice.type === 'success' ?
+                        'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/40 border-l-2 border-green-500' :
+                        advice.type === 'warning' ?
+                          'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/40 dark:to-amber-900/40 border-l-2 border-orange-500' :
+                          'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border-l-2 border-blue-500'
                         }`}
                     >
                       <span className="text-sm sm:text-base flex-shrink-0 mt-0.5">{advice.icon}</span>
@@ -385,38 +365,18 @@ const BiorhythmPage = () => {
 
         {/* 生物节律图表 */}
         {biorhythmData && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 mb-3 sm:mb-4">
-            <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
-              节律趋势图
-            </h3>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
-              显示未来10天的节律趋势，虚线标记为今天
-            </p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-3 sm:mb-4">
             <BiorhythmChart
               data={biorhythmData}
               isMobile={window.innerWidth <= 768}
             />
-            <div className="mt-3 sm:mt-4 grid grid-cols-3 gap-2 sm:gap-3 text-xs sm:text-sm">
-              <div className="flex items-center">
-                <div className="w-3 h-0.5 bg-green-500 mr-2"></div>
-                <span className="text-gray-600 dark:text-gray-300">体力节律</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-0.5 bg-blue-500 mr-2"></div>
-                <span className="text-gray-600 dark:text-gray-300">情绪节律</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-0.5 bg-purple-500 mr-2"></div>
-                <span className="text-gray-600 dark:text-gray-300">智力节律</span>
-              </div>
-            </div>
           </div>
         )}
 
         {/* 未来7天趋势预测表格 */}
         {futureTrends.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 mb-3 sm:mb-4">
-            <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-3 sm:mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
               未来7天趋势预测
             </h3>
 
@@ -424,32 +384,32 @@ const BiorhythmPage = () => {
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-900 dark:bg-opacity-50">
                   <tr>
-                    <th scope="col" className="px-2 sm:px-3 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-100 uppercase tracking-wider">日期</th>
-                    <th scope="col" className="px-2 sm:px-3 py-2 sm:py-3 text-center text-xs font-medium text-green-600 dark:text-green-200 uppercase tracking-wider">体力</th>
-                    <th scope="col" className="px-2 sm:px-3 py-2 sm:py-3 text-center text-xs font-medium text-blue-600 dark:text-blue-200 uppercase tracking-wider">情绪</th>
-                    <th scope="col" className="px-2 sm:px-3 py-2 sm:py-3 text-center text-xs font-medium text-purple-600 dark:text-purple-200 uppercase tracking-wider">智力</th>
+                    <th scope="col" className="px-2 sm:px-3 py-1.5 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-100 uppercase tracking-wider">日期</th>
+                    <th scope="col" className="px-2 sm:px-3 py-1.5 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-green-600 dark:text-green-200 uppercase tracking-wider">体力</th>
+                    <th scope="col" className="px-2 sm:px-3 py-1.5 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-200 uppercase tracking-wider">情绪</th>
+                    <th scope="col" className="px-2 sm:px-3 py-1.5 sm:py-3 text-center text-[10px] sm:text-xs font-medium text-purple-600 dark:text-purple-200 uppercase tracking-wider">智力</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                   {futureTrends.map((trend, index) => (
                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap">
+                      <td className="px-2 sm:px-3 py-1.5 sm:py-3 whitespace-nowrap">
                         <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">{trend.day}</div>
                         <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-100">{trend.date.substring(5)}</div>
                       </td>
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap text-center">
+                      <td className="px-2 sm:px-3 py-1.5 sm:py-3 whitespace-nowrap text-center">
                         <div className="flex flex-col items-center gap-0.5">
                           <span className={`text-xs sm:text-sm ${getTrendColorClass(parseFloat(trend.physical))}`}>{trend.physical}</span>
                           <span className="text-[10px] text-gray-400">{trend.physicalTrend}</span>
                         </div>
                       </td>
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap text-center">
+                      <td className="px-2 sm:px-3 py-1.5 sm:py-3 whitespace-nowrap text-center">
                         <div className="flex flex-col items-center gap-0.5">
                           <span className={`text-xs sm:text-sm ${getTrendColorClass(parseFloat(trend.emotional))}`}>{trend.emotional}</span>
                           <span className="text-[10px] text-gray-400">{trend.emotionalTrend}</span>
                         </div>
                       </td>
-                      <td className="px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap text-center">
+                      <td className="px-2 sm:px-3 py-1.5 sm:py-3 whitespace-nowrap text-center">
                         <div className="flex flex-col items-center gap-0.5">
                           <span className={`text-xs sm:text-sm ${getTrendColorClass(parseFloat(trend.intellectual))}`}>{trend.intellectual}</span>
                           <span className="text-[10px] text-gray-400">{trend.intellectualTrend}</span>
@@ -461,7 +421,7 @@ const BiorhythmPage = () => {
               </table>
             </div>
 
-            <div className="mt-3 sm:mt-4 flex flex-wrap justify-center gap-x-2 sm:gap-x-4 gap-y-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-100">
+            <div className="mt-2 sm:mt-3 flex flex-wrap justify-center gap-x-2 sm:gap-x-4 gap-y-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-100">
               <span>↑↑: 大幅上升</span>
               <span>↑: 上升</span>
               <span>→: 平稳</span>
@@ -472,35 +432,35 @@ const BiorhythmPage = () => {
         )}
 
         {/* 生物节律说明 - 优化移动端布局 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4 mt-3 sm:mt-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mt-3 sm:mt-4">
           <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
             生物节律说明
           </h3>
-          <div className="space-y-2 sm:space-y-3">
+          <div className="space-y-1.5 sm:space-y-2.5">
             <div className="flex items-start">
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-blue-500 rounded-full mt-0.5 sm:mt-1 mr-2 sm:mr-3 flex-shrink-0"></div>
-              <div>
-                <h4 className="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm">体力周期（23天）</h4>
-                <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1 leading-relaxed">
-                  体力周期影响体力、耐力、免疫力和身体状况。正值期精力充沛，适合运动；负值期注意休息。
+              <div className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 bg-blue-500 rounded-full mt-1 mr-1.5 sm:mr-2 flex-shrink-0"></div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-800 dark:text-white text-[11px] sm:text-sm">体力周期（23天）</h4>
+                <p className="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400 leading-tight sm:leading-relaxed">
+                  影响体力、耐力、免疫力。正值期精力充沛适合运动，负值期注意休息。
                 </p>
               </div>
             </div>
             <div className="flex items-start">
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-purple-500 rounded-full mt-0.5 sm:mt-1 mr-2 sm:mr-3 flex-shrink-0"></div>
-              <div>
-                <h4 className="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm">情绪周期（28天）</h4>
-                <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1 leading-relaxed">
-                  情绪周期影响心情、创造力和敏感性。正值期心情愉快，负值期情绪低落，需注意调节。
+              <div className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 bg-purple-500 rounded-full mt-1 mr-1.5 sm:mr-2 flex-shrink-0"></div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-800 dark:text-white text-[11px] sm:text-sm">情绪周期（28天）</h4>
+                <p className="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400 leading-tight sm:leading-relaxed">
+                  影响心情、创造力、敏感性。正值期心情愉快，负值期需注意调节。
                 </p>
               </div>
             </div>
             <div className="flex items-start">
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-indigo-500 rounded-full mt-0.5 sm:mt-1 mr-2 sm:mr-3 flex-shrink-0"></div>
-              <div>
-                <h4 className="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm">智力周期（33天）</h4>
-                <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1 leading-relaxed">
-                  智力周期影响记忆力、逻辑思维和分析能力。正值期思维敏捷，适合学习；负值期容易分心。
+              <div className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 bg-indigo-500 rounded-full mt-1 mr-1.5 sm:mr-2 flex-shrink-0"></div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-800 dark:text-white text-[11px] sm:text-sm">智力周期（33天）</h4>
+                <p className="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400 leading-tight sm:leading-relaxed">
+                  影响记忆力、逻辑思维、分析能力。正值期思维敏捷，负值期易分心。
                 </p>
               </div>
             </div>
@@ -508,34 +468,7 @@ const BiorhythmPage = () => {
         </div>
       </div>
 
-      {/* 日历弹窗 - 优化移动端布局 */}
-      {isCalendarOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-0" onClick={() => setIsCalendarOpen(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-3 sm:p-4 w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm sm:text-base font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">选择日期</h3>
-            <input
-              type="date"
-              value={selectedDate.toISOString().split('T')[0]}
-              onChange={(e) => handleDateChange(new Date(e.target.value))}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-800 dark:text-white dark:bg-gray-700"
-            />
-            <div className="flex justify-end mt-2 sm:mt-3 space-x-2">
-              <button
-                onClick={() => setIsCalendarOpen(false)}
-                className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                取消
-              </button>
-              <button
-                onClick={() => setIsCalendarOpen(false)}
-                className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                确定
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

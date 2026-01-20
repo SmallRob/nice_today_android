@@ -96,9 +96,11 @@ const MindfulnessActivityCard = ({
     fontWeight: '600',
     color: isCompleted ? '#6b7280' : '#111827',
     textDecoration: isCompleted ? 'line-through' : 'none',
-    whiteSpace: 'nowrap',
     overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitLineClamp: 1,
+    WebkitBoxOrient: 'vertical',
+    wordBreak: 'break-word',
     flex: 1,
     minWidth: 0
   };
@@ -119,9 +121,11 @@ const MindfulnessActivityCard = ({
     fontSize: '10px',
     color: isCompleted ? '#9ca3af' : '#4b5563',
     lineHeight: '1.4',
-    whiteSpace: 'nowrap',
     overflow: 'hidden',
-    textOverflow: 'ellipsis'
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    wordBreak: 'break-word'
   };
 
   // 完成标记样式

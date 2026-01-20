@@ -33,7 +33,7 @@ function TarotGardenPage() {
           <div className="space-y-4">
             {/* 神秘塔罗卡片 */}
             <Card className="group">
-              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-600 dark:from-purple-700 dark:via-pink-700 dark:to-indigo-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-600 dark:from-purple-700 dark:via-pink-700 dark:to-indigo-800 shadow-lg hover:shadow-xl transition-all duration-300 sm:hover:scale-[1.01]">
                 {/* 装饰图案 */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full -translate-y-24 translate-x-24"></div>
@@ -42,7 +42,7 @@ function TarotGardenPage() {
 
                 <div className="relative p-4 md:p-5 text-white h-full flex flex-col">
                   <div className="flex flex-col items-center justify-center flex-1">
-                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform group-hover:scale-110 transition-transform duration-300">🔮</div>
+                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform sm:group-hover:scale-110 transition-transform duration-300">🔮</div>
                     <h2 className="text-xl md:text-2xl font-bold mb-2 tracking-wide text-center">神秘塔罗</h2>
                     <p className="text-purple-100 text-sm md:text-base font-light text-center">聆听命运的指引，探索未知的奥秘</p>
                   </div>
@@ -63,7 +63,7 @@ function TarotGardenPage() {
 
             {/* 玛雅图腾卡片 */}
             <Card className="group">
-              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-600 dark:from-amber-700 dark:via-orange-700 dark:to-yellow-800 shadow-lg hover:shadow-xl transition-all duration-300 sm:hover:scale-[1.01]">
                 {/* 装饰图案 */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-0 left-0 w-48 h-48 bg-white rounded-full -translate-y-24 -translate-x-24"></div>
@@ -72,7 +72,7 @@ function TarotGardenPage() {
 
                 <div className="relative p-4 md:p-5 text-white h-full flex flex-col">
                   <div className="flex flex-col items-center justify-center flex-1">
-                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform group-hover:scale-110 transition-transform duration-300">🌟</div>
+                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform sm:group-hover:scale-110 transition-transform duration-300">🌟</div>
                     <h2 className="text-xl md:text-2xl font-bold mb-2 tracking-wide text-center">玛雅图腾</h2>
                     <p className="text-amber-100 text-sm md:text-base font-light text-center">探索古老的玛雅智慧，发现生命的密码</p>
                   </div>
@@ -93,7 +93,7 @@ function TarotGardenPage() {
 
             {/* 数字之灵卡片 */}
             <Card className="group">
-              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-600 dark:from-blue-700 dark:via-cyan-700 dark:to-teal-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-600 dark:from-blue-700 dark:via-cyan-700 dark:to-teal-800 shadow-lg hover:shadow-xl transition-all duration-300 sm:hover:scale-[1.01]">
                 {/* 装饰图案 */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
@@ -101,7 +101,7 @@ function TarotGardenPage() {
 
                 <div className="relative p-4 md:p-5 text-white h-full flex flex-col">
                   <div className="flex flex-col items-center justify-center flex-1">
-                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform group-hover:scale-110 transition-transform duration-300">🔢</div>
+                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform sm:group-hover:scale-110 transition-transform duration-300">🔢</div>
                     <h2 className="text-xl md:text-2xl font-bold mb-2 tracking-wide text-center">数字之灵</h2>
                     <p className="text-blue-100 text-sm md:text-base font-light text-center">探索生命密码的奥秘，解读数字的智慧</p>
                   </div>
@@ -122,7 +122,7 @@ function TarotGardenPage() {
 
             {/* 文档阅读器卡片 */}
             <Card className="group">
-              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-green-600 dark:from-emerald-700 dark:via-teal-700 dark:to-green-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-green-600 dark:from-emerald-700 dark:via-teal-700 dark:to-green-800 shadow-lg hover:shadow-xl transition-all duration-300 sm:hover:scale-[1.01]">
                 {/* 装饰图案 */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-20 translate-x-20"></div>
@@ -131,7 +131,7 @@ function TarotGardenPage() {
 
                 <div className="relative p-4 md:p-5 text-white h-full flex flex-col">
                   <div className="flex flex-col items-center justify-center flex-1">
-                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform group-hover:scale-110 transition-transform duration-300">📚</div>
+                    <div className="text-4xl md:text-5xl mb-2 md:mb-3 transform sm:group-hover:scale-110 transition-transform duration-300">📚</div>
                     <h2 className="text-xl md:text-2xl font-bold mb-2 tracking-wide text-center">文档阅读器</h2>
                     <p className="text-emerald-100 text-sm md:text-base font-light text-center">管理文档，支持文件夹导入，优化中文编码</p>
                   </div>

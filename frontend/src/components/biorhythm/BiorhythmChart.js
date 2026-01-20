@@ -407,6 +407,18 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
               size: isMobile ? 10 : 12,
             },
             color: themeColors.textColor,
+            // 格式化横坐标显示为月-日
+            callback: function (value, index, ticks) {
+              const label = this.getLabelForValue(value);
+              if (label) {
+                // 从 YYYY-MM-DD 格式提取 MM-DD
+                const parts = label.split('-');
+                if (parts.length === 3) {
+                  return `${parts[1]}-${parts[2]}`;
+                }
+              }
+              return label;
+            }
           },
           grid: {
             color: themeColors.gridColor,
@@ -512,9 +524,9 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
                 <div
                   key={index}
                   className={`flex items-start p-4 rounded-lg border ${reminder.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' :
-                      reminder.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700' :
-                        reminder.type === 'danger' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' :
-                          'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
+                    reminder.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700' :
+                      reminder.type === 'danger' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' :
+                        'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
                     }`}
                 >
                   <span className="text-2xl mr-3">{reminder.icon}</span>
@@ -535,11 +547,7 @@ const BiorhythmChart = ({ data, isMobile, selectedDate, birthDate }) => {
 
       {/* 节律趋势图 */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-          <span className="mr-2">📊</span>
-          节律趋势图
-        </h3>
-        <div className="w-full" style={{ height: isMobile ? '250px' : '400px' }}>
+        <div className="w-full" style={{ height: isMobile ? '300px' : '400px' }}>
           <Line
             key={chartKey}
             data={chartData}

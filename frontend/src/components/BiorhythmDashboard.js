@@ -582,7 +582,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
         {/* 装饰背景 */}
         <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl"></div>
         <div className="absolute bottom-0 left-0 w-20 h-20 bg-indigo-400/20 rounded-full -ml-6 -mb-6 blur-xl"></div>
-        
+
         {/* 主要内容区域 - 完全居中垂直布局 */}
         <div className="relative z-10 px-4 py-2 h-full flex justify-between items-center">
           {/* 左侧：应用图标和描述 */}
@@ -612,7 +612,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
               <p className="text-white/80 text-xs font-medium truncate">您的个性化健康助手</p>
             </div>
           </div>
-          
+
           {/* 右侧："新版主页"入口按钮 */}
           {/* <button
             onClick={() => navigate('/dashboard')}
@@ -656,11 +656,10 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`flex-1 py-2 px-0.5 text-center font-medium transition-all duration-300 rounded-xl ${
-                    isActive
+                  className={`flex-1 py-2 px-0.5 text-center font-medium transition-all duration-300 rounded-xl ${isActive
                       ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700 nav-item-active`
                       : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
+                    }`}
                   style={{ minHeight: '40px' }}
                 >
                   <div className="flex flex-col items-center justify-center space-y-0.5">
@@ -754,6 +753,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                   </div>
                 }>
                   <MBTIPersonalityTab
+                    isTab={true}
                     onError={(error) => handleError(error, 'MBTIPersonalityTab')}
                   />
                 </React.Suspense>
