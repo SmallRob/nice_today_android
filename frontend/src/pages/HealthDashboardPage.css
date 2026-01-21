@@ -52,7 +52,7 @@
     gap: var(--spacing-md);
     padding: var(--spacing-sm);
   }
-  
+
   .health-dashboard-page {
     padding: var(--spacing-sm) var(--spacing-xs);
   }
@@ -64,7 +64,7 @@
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }
-  
+
   .health-dashboard-page {
     padding: var(--spacing-md) var(--spacing-sm);
   }
@@ -222,19 +222,21 @@
   border-radius: inherit;
 }
 
-/* 占位符样式 */
+/* 占位符样式 - 优化为深色毛玻璃感 */
 .health-card-placeholder {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
   background-size: 200% 100%;
-  animation: loading-shimmer 1.5s infinite;
+  animation: loading-shimmer 2s infinite linear;
   border-radius: 16px;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
 }
 
 @keyframes loading-shimmer {
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -245,11 +247,11 @@
   .health-dashboard-title h1 {
     font-size: var(--font-size-lg);
   }
-  
+
   .health-dashboard-title p {
     font-size: var(--font-size-xs);
   }
-  
+
   .health-card {
     min-height: 180px;
   }
@@ -283,22 +285,24 @@
   .health-dashboard-grid .health-card:nth-child(4) {
     margin-bottom: var(--spacing-xs);
   }
-  
+
   .health-dashboard-grid .health-card:nth-child(5) {
     margin-top: var(--spacing-xs);
   }
 }
 
 /* 针对高缩放屏幕的优化 */
-@media screen and (-webkit-min-device-pixel-ratio: 2), screen and (min-resolution: 192dpi) {
+@media screen and (-webkit-min-device-pixel-ratio: 2),
+screen and (min-resolution: 192dpi) {
   .health-card {
-    font-size: calc(1em * 0.9); /* 略微缩小字体以适应高清屏缩放 */
+    font-size: calc(1em * 0.9);
+    /* 略微缩小字体以适应高清屏缩放 */
   }
-  
+
   .diet-health-card .text-lg {
     font-size: 0.9rem;
   }
-  
+
   .diet-health-card .text-xs {
     font-size: 0.75rem;
   }
@@ -316,15 +320,15 @@
   .diet-health-card {
     font-size: calc(1em * 0.9);
   }
-  
+
   .diet-health-card .text-lg {
     font-size: 0.85rem;
   }
-  
+
   .diet-health-card .text-xs {
     font-size: 0.7rem;
   }
-  
+
   .diet-health-card .break-word-mobile {
     word-break: break-word;
     overflow-wrap: break-word;

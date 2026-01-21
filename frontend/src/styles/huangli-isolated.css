@@ -1,0 +1,155 @@
+/* 用于黄历组件的独立样式，防止全局样式冲突 */
+
+/* 强制容器约束，防止样式泄漏 */
+.huangli-isolated-container {
+    width: 100%;
+    box-sizing: border-box;
+    isolation: isolate;
+    /* 创建新的层叠上下文 */
+}
+
+/* 宽松的网格布局 */
+.huangli-grid-layout {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 1.5rem 0.25rem !important;
+    /* gap-y-6 gap-x-1 equivalent */
+    width: 100% !important;
+    margin-top: 1rem !important;
+}
+
+/* 星期标题网格 */
+.huangli-week-header {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 0.25rem !important;
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+}
+
+/* 日期单元格外层容器 */
+.huangli-day-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    height: auto !important;
+    min-height: 4rem !important;
+    width: 100% !important;
+    position: relative !important;
+    cursor: pointer !important;
+}
+
+/* 日期圆形/方形内容 */
+.huangli-day-content {
+    width: 2.75rem !important;
+    /* w-11 */
+    height: 2.75rem !important;
+    /* h-11 */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 1rem !important;
+    /* rounded-2xl */
+    position: relative !important;
+    transition: all 0.2s ease-in-out !important;
+    z-index: 1 !important;
+}
+
+@media (min-width: 640px) {
+    .huangli-day-content {
+        width: 3rem !important;
+        /* sm:w-12 */
+        height: 3rem !important;
+        /* sm:h-12 */
+    }
+}
+
+/* 防止全局 img 或 div 样式干扰 */
+.huangli-day-content * {
+    box-sizing: border-box !important;
+    max-width: none !important;
+}
+
+/* 状态样式 - 今天 */
+.huangli-day-today {
+    background-color: #2563eb !important;
+    /* blue-600 */
+    color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4) !important;
+    transform: scale(1.05) !important;
+    z-index: 10 !important;
+}
+
+/* 状态样式 - 选中（非今天） */
+.huangli-day-selected {
+    background-color: #475569 !important;
+    /* slate-600 */
+    color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    transform: scale(1.05) !important;
+    z-index: 10 !important;
+}
+
+/* 字体样式 */
+.huangli-date-text {
+    font-size: 1.125rem !important;
+    /* text-lg */
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    margin-bottom: 0.125rem !important;
+}
+
+.huangli-lunar-text {
+    font-size: 0.625rem !important;
+    /* text-[10px] */
+    line-height: 1 !important;
+    margin-top: 0.25rem !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    text-align: center !important;
+}
+
+/* 隐藏非本月元素 */
+.huangli-opacity-0 {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* 适配暗色模式的文字颜色 */
+.dark .huangli-text-normal {
+    color: #e5e7eb !important;
+}
+
+/* gray-200 */
+.dark .huangli-text-muted {
+    color: #9ca3af !important;
+}
+
+/* gray-400 */
+.dark .huangli-text-dim {
+    color: #4b5563 !important;
+}
+
+/* gray-600 */
+
+/* 适配亮色模式的文字颜色 */
+.light .huangli-text-normal {
+    color: #1f2937 !important;
+}
+
+/* gray-800 */
+.light .huangli-text-muted {
+    color: #6b7280 !important;
+}
+
+/* gray-500 */
+.light .huangli-text-dim {
+    color: #d1d5db !important;
+}
+
+/* gray-300 */

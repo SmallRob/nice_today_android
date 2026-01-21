@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchOrganRhythmData } from '../../services/dataService.js';
 import { getBodyMetricsStatus } from '../../services/bodyMetricsService.js';
+import { OrganRhythmIcon } from '../icons';
 
 // 身体指标与器官节律卡片组件
 const BodyMetricsRhythmCard = ({ onClick }) => {
@@ -32,13 +33,13 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
         const { data, timestamp, date: cacheDate } = JSON.parse(cached);
         const now = Date.now();
         const currentDate = new Date().toDateString();
-        
+
         // 检查是否跨天（隔天重新计算策略）
         if (cacheDate !== currentDate) {
           localStorage.removeItem(cacheKey);
           return null;
         }
-        
+
         // 检查缓存是否超时
         const cacheTimeout = getUserCacheTimeout();
         if (now - timestamp < cacheTimeout) {
@@ -81,7 +82,7 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
           const [startHour, endHour] = item.time.split('-').map(time => parseInt(time.split(':')[0]));
           return currentHour >= startHour && currentHour < endHour;
         }) || data[0]; // 如果没找到匹配的，使用第一个
-        
+
         return currentRhythm;
       }
     } catch (err) {
@@ -106,7 +107,7 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // 检查缓存
         const cachedData = getCachedData();
         if (cachedData) {
@@ -119,11 +120,11 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
             getCurrentOrganRhythm(),
             getBodyMetricsStatusData()
           ]);
-          
+
           setOrganRhythm(organRhythmData);
           setBodyMetricsStatus(bodyMetricsData);
           setError(null);
-          
+
           // 设置缓存
           setCachedData({
             organRhythm: organRhythmData,
@@ -175,8 +176,8 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
   }
 
   // 计算身体指标异常数量
-  const abnormalMetricsCount = bodyMetricsStatus 
-    ? Object.values(bodyMetricsStatus).filter(status => status !== 'normal').length 
+  const abnormalMetricsCount = bodyMetricsStatus
+    ? Object.values(bodyMetricsStatus).filter(status => status !== 'normal').length
     : 0;
 
   // 获取器官养生建议
@@ -195,24 +196,26 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
       '心包': '心包经活跃，注意心脏保护，保持情绪稳定',
       '三焦': '三焦经活跃，注意水液代谢，保持经络通畅'
     };
-    
+
     return adviceMap[organ] || '注意相应脏腑功能，保持健康作息';
   };
 
   return (
-    <div 
+    <div
       className="health-card metrics-rhythm-card"
       onClick={handleClick}
     >
-      <div className="bg-gradient-to-r from-blue-500 to-cyan-600 p-4 rounded-2xl text-white shadow-lg h-full">
+      <div className="bg-gradient-to-br from-blue-500 via-cyan-600 to-teal-700 p-4 rounded-2xl text-white shadow-lg h-full border border-white/20 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-3">
-          <div className="text-2xl">📊</div>
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md shadow-inner">
+            <OrganRhythmIcon size={24} color="white" />
+          </div>
           <div className="text-right">
             <h3 className="font-bold text-lg">身体指标</h3>
             <p className="text-sm opacity-90">器官节律</p>
           </div>
         </div>
-        
+
         {/* 当前器官节律 */}
         {organRhythm && (
           <div className="mb-3">
@@ -243,19 +246,18 @@ const BodyMetricsRhythmCard = ({ onClick }) => {
         <div className="mb-3">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">指标状态</span>
-            <span className={`text-xs px-2 py-1 rounded-full ${
-              abnormalMetricsCount === 0 
-                ? 'bg-green-500 bg-opacity-30' 
-                : abnormalMetricsCount <= 2 
-                  ? 'bg-yellow-500 bg-opacity-30' 
+            <span className={`text-xs px-2 py-1 rounded-full ${abnormalMetricsCount === 0
+                ? 'bg-green-500 bg-opacity-30'
+                : abnormalMetricsCount <= 2
+                  ? 'bg-yellow-500 bg-opacity-30'
                   : 'bg-red-500 bg-opacity-30'
-            }`}>
+              }`}>
               {abnormalMetricsCount === 0 ? '正常' : `${abnormalMetricsCount}项异常`}
             </span>
           </div>
           <p className="text-xs opacity-75">
-            {abnormalMetricsCount === 0 
-              ? '各项身体指标均在正常范围' 
+            {abnormalMetricsCount === 0
+              ? '各项身体指标均在正常范围'
               : `有${abnormalMetricsCount}项指标需关注，请及时调整`}
           </p>
         </div>

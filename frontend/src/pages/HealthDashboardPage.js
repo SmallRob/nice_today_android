@@ -24,14 +24,14 @@ const HealthDashboardPage = () => {
   const { userConfig } = useUserConfig();
   const { theme } = useTheme();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  
+
   // 移动屏幕优化初始化
   useEffect(() => {
     const isMobile = mobileScreenOptimization.getScreenType() === 'mobile';
-    
+
     // 添加移动优化监听器
     mobileScreenOptimization.addMobileOptimizationListener();
-    
+
     // 初始化优化
     if (isMobile) {
       const healthGrid = document.querySelector('.health-dashboard-grid');
@@ -40,19 +40,19 @@ const HealthDashboardPage = () => {
         mobileScreenOptimization.optimizeLayoutForMobile(healthGrid);
       }
     }
-    
+
     // 模拟初始加载完成（实际应用中可根据实际加载状态判断）
     const loadingTimer = setTimeout(() => {
       setIsInitialLoad(false);
     }, 300); // 300ms的最小加载时间，确保加载动画平滑
-    
+
     // 清理函数
     return () => {
       mobileScreenOptimization.removeMobileOptimizationListener();
       clearTimeout(loadingTimer);
     };
   }, []);
-  
+
   // 预定义卡片配置
   const cardConfigs = useMemo(() => [
     {
@@ -126,14 +126,11 @@ const HealthDashboardPage = () => {
     //   title: '情绪与健康'
     // }
   ], []);
-  
-  // 如果还在初始加载阶段，显示主题感知的加载界面
-  if (isInitialLoad) {
-    return <ThemeAwareLoading message="正在加载健康数据..." />;
-  }
-  
+
+  // 如果还在初始加载阶段，显示内容外壳，卡片由 LazyHealthCard 自行处理
+  // 这种方式避免了全屏白屏，让用户立即看到页面框架
   return (
-    <div className="health-dashboard-page">
+    <div className={`health-dashboard-page ${isInitialLoad ? 'loading' : 'fade-in'}`}>
       {/* 页面头部 */}
       <div className="health-dashboard-header">
         <div className="health-dashboard-title">

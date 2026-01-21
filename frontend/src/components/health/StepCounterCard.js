@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import stepCounterService from '../../services/stepCounterService';
+import { StepCounterIcon } from '../icons';
 
 /**
  * 步数计数器卡片组件 - 显示用户步数及健康建议
@@ -18,7 +19,7 @@ const StepCounterCard = ({ onClick }) => {
     const fetchSteps = async () => {
       try {
         setLoading(true);
-        
+
         // 检查是否已授权
         if (!stepCounterService.isAuthorizationAvailable()) {
           // 尝试授权
@@ -27,12 +28,12 @@ const StepCounterCard = ({ onClick }) => {
             throw new Error(authResult.message || '授权失败');
           }
         }
-        
+
         // 获取今日步数
         const stats = await stepCounterService.getStepStats();
         setSteps(stats.today);
         setLoading(false);
-        
+
         // 根据步数生成健康提示
         generateHealthTips(stats.today);
       } catch (err) {
@@ -52,7 +53,7 @@ const StepCounterCard = ({ onClick }) => {
   // 根据步数生成健康提示
   const generateHealthTips = (stepCount) => {
     let tips = '';
-    
+
     if (stepCount >= 12000) {
       tips = 'Excellent! 您的步数表现卓越，运动达人！继续保持这种积极的生活方式。';
     } else if (stepCount >= 10000) {
@@ -66,7 +67,7 @@ const StepCounterCard = ({ onClick }) => {
     } else {
       tips = '运动不足！建议立即开始增加活动量，即使是短距离散步也有益健康。';
     }
-    
+
     // 根据一天中的不同时间提供不同的建议
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
@@ -79,7 +80,7 @@ const StepCounterCard = ({ onClick }) => {
       // 晚上时段建议
       tips += ' 今晚可以适当散步，有助于消化和睡眠。';
     }
-    
+
     setHealthTips(tips);
   };
 
@@ -87,7 +88,7 @@ const StepCounterCard = ({ onClick }) => {
   const refreshSteps = async () => {
     try {
       setLoading(true);
-      
+
       // 检查是否已授权
       if (!stepCounterService.isAuthorizationAvailable()) {
         // 尝试授权
@@ -96,7 +97,7 @@ const StepCounterCard = ({ onClick }) => {
           throw new Error(authResult.message || '授权失败');
         }
       }
-      
+
       // 获取今日步数
       const stats = await stepCounterService.getStepStats();
       setSteps(stats.today);
@@ -128,21 +129,21 @@ const StepCounterCard = ({ onClick }) => {
       }
     `;
     document.head.appendChild(style);
-    
+
     return () => {
       document.head.removeChild(style);
     };
   }, []);
 
   const StepsIcon = () => (
-    <svg 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
       strokeLinejoin="round"
       style={{ color: '#f97316' }}
     >
@@ -152,23 +153,21 @@ const StepCounterCard = ({ onClick }) => {
   );
 
   return (
-    <div 
+    <div
       style={{
         background: 'var(--card-background, linear-gradient(-45deg, #ff4757, #ff9ff3, #f368e0, #0984e3, #00cec9, #00b894))',
         backgroundSize: '400% 400%',
         borderRadius: '1rem',
         padding: '1.5rem',
         boxShadow: 'var(--card-box-shadow, 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 12px -5px rgba(0, 0, 0, 0.1))',
-        border: '1px solid var(--card-border-color, rgba(255, 255, 255, 0.4))',
-        cursor: 'pointer',
-        transition: 'all 0.4s ease',
-        position: 'relative',
         overflow: 'visible',
         minHeight: '300px',
-        animation: 'gradientAnimation 9s ease infinite'
+        animation: 'gradientAnimation 12s ease infinite',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        backdropFilter: 'blur(10px)'
       }}
       onClick={() => onClick ? onClick('step-counter') : navigate('/health-dashboard')} >
-      
+
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -182,13 +181,14 @@ const StepCounterCard = ({ onClick }) => {
           alignItems: 'center'
         }}>
           <div style={{
-            background: 'linear-gradient(45deg, #ff6b6b, #ff9ff3)',
-            padding: '0.5rem',
-            borderRadius: '0.5rem',
+            background: 'rgba(255, 255, 255, 0.2)',
+            padding: '0.6rem',
+            borderRadius: '0.75rem',
             marginRight: '0.75rem',
-            boxShadow: '0 4px 10px rgba(255, 107, 87, 0.3)'
+            boxShadow: 'inset 0 0 10px rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(4px)'
           }}>
-            <StepsIcon />
+            <StepCounterIcon size={24} color="white" />
           </div>
           <h3 style={{
             fontSize: '1.125rem',
@@ -197,7 +197,7 @@ const StepCounterCard = ({ onClick }) => {
             textShadow: 'var(--text-shadow, 0 1px 2px rgba(255, 255, 255, 0.3))'
           }}>今日步数</h3>
         </div>
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             refreshSteps();
@@ -219,14 +219,14 @@ const StepCounterCard = ({ onClick }) => {
           onMouseLeave={(e) => e.target.style.color = '#6b7280'}
           title="刷新数据"
         >
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
             strokeLinejoin="round"
           >
             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -245,14 +245,14 @@ const StepCounterCard = ({ onClick }) => {
       ) : error ? (
         <div className="text-center py-6">
           <div className="text-red-500 mb-2">
-            <svg 
-              width="32" 
-              height="32" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
               strokeLinejoin="round"
             >
               <circle cx="12" cy="12" r="10" />
@@ -261,7 +261,7 @@ const StepCounterCard = ({ onClick }) => {
             </svg>
           </div>
           <p className="text-red-500 text-sm">{error}</p>
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               refreshSteps();
@@ -283,14 +283,14 @@ const StepCounterCard = ({ onClick }) => {
           <div className="bg-white dark:bg-gray-700/50 rounded-xl p-3 border border-gray-100 dark:border-gray-600">
             <div className="flex items-center">
               <div className="mr-2 text-yellow-500">
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <circle cx="12" cy="12" r="10" />

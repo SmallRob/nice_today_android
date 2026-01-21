@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentConfig } from '../../contexts/UserConfigContext.js';
 import { getBiorhythmRange } from '../../services/localDataService';
+import { BiorhythmIcon } from '../icons';
 
 // 生物节律状态卡片组件
 const BiorhythmStatusCard = ({ onClick }) => {
@@ -179,7 +180,14 @@ const BiorhythmStatusCard = ({ onClick }) => {
       <div className="health-card biorhythm-card">
         <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-4 rounded-2xl text-white shadow-lg h-full flex items-center justify-center">
           <div className="text-center">
-            <div className="text-2xl mb-2">📅</div>
+            <div className="text-2xl mb-2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
             <p className="text-sm">请先设置出生日期</p>
             <button
               className="mt-2 px-3 py-1 bg-white text-orange-500 text-xs font-medium rounded-full"
@@ -211,7 +219,13 @@ const BiorhythmStatusCard = ({ onClick }) => {
       <div className="health-card biorhythm-card">
         <div className="bg-gradient-to-r from-red-500 to-pink-600 p-4 rounded-2xl text-white shadow-lg h-full flex items-center justify-center">
           <div className="text-center">
-            <div className="text-2xl mb-2">⚠️</div>
+            <div className="text-2xl mb-2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
             <p className="text-sm">{error}</p>
           </div>
         </div>
@@ -224,9 +238,11 @@ const BiorhythmStatusCard = ({ onClick }) => {
       className="health-card biorhythm-card"
       onClick={handleClick}
     >
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-3 rounded-2xl text-white shadow-lg h-full">
+      <div className="bg-gradient-to-br from-purple-500 via-indigo-600 to-blue-700 p-3 rounded-2xl text-white shadow-lg h-full border border-white/20 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-xl">🌈</div>
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md shadow-inner">
+            <BiorhythmIcon size={24} color="white" />
+          </div>
           <div className="text-right">
             <h3 className="font-bold text-base">生物节律</h3>
             <p className="text-xs opacity-90">今日能量</p>

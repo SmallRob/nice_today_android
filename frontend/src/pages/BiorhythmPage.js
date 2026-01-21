@@ -9,6 +9,7 @@ import { useUserConfig } from '../contexts/UserConfigContext';
 import BiorhythmChart from '../components/biorhythm/BiorhythmChart.js';
 import BiorhythmBanner from '../components/biorhythm/BiorhythmBanner.js';
 import { getBiorhythmRange } from '../services/localDataService';
+import '../styles/biorhythm-isolated.css';
 
 const BiorhythmPage = () => {
   const { theme } = useTheme();
@@ -259,22 +260,22 @@ const BiorhythmPage = () => {
               </h3>
 
               {/* 综合节律能量球 */}
-              <div className="flex flex-col items-center justify-center mb-3 sm:mb-4 relative py-1 sm:py-2">
-                <div className={`relative w-20 h-20 sm:w-28 sm:h-28 rounded-full flex items-center justify-center bg-gradient-to-br ${overall.color} shadow-lg shadow-blue-500/20 ring-4 ring-white/10`}>
+              <div className="energy-ball-container">
+                <div className={`energy-ball-circle bg-gradient-to-br ${overall.color} ring-4 ring-white/10`}>
                   {/* 内部光晕效果 */}
-                  <div className="absolute inset-1 rounded-full bg-white/10 backdrop-blur-[1px]"></div>
+                  <div className="energy-ball-glow"></div>
 
-                  <div className="flex flex-col items-center z-10 text-white">
-                    <span className="text-2xl sm:text-4xl font-bold tracking-tighter drop-shadow-md">{averageScore}</span>
-                    <span className="text-[10px] sm:text-xs font-medium opacity-90 mt-0.5 tracking-wide px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
+                  <div className="energy-ball-content">
+                    <span className="energy-ball-score tracking-tighter drop-shadow-md">{averageScore}</span>
+                    <span className="energy-ball-label">
                       {overall.text}
                     </span>
                   </div>
 
                   {/* 动画波纹 */}
-                  <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping opacity-20" style={{ animationDuration: '3s' }}></div>
+                  <div className="energy-ball-pulse"></div>
                 </div>
-                <div className="mt-1 sm:mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">综合能量指数</div>
+                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">综合能量指数</div>
               </div>
 
               {/* 三个节律值 - 移动端紧凑三列，确保一行显示 */}

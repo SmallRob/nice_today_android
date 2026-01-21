@@ -134,13 +134,13 @@ const BreadCrumbMenu = ({ hideText = false }) => {
                         <span>系统设置</span>
                     </div>
                     <ul className="menu-list">
-                        <li className="menu-item">
+                        {/* <li className="menu-item">
                             <button onClick={() => handleNavigate('/user-config')}>
                                 <div className="item-icon-box">👤</div>
                                 <span className="item-name">用户配置</span>
                                 {isActive('/user-config') && <div className="active-dot"></div>}
                             </button>
-                        </li>
+                        </li> */}
                         <li className="menu-item">
                             <button onClick={() => handleNavigate('/settings')}>
                                 <div className="item-icon-box">⚙️</div>

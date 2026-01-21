@@ -76,10 +76,10 @@ const HoroscopeTab = createLazyComponent(
   '星座运程模块加载失败，请稍后重试'
 );
 
-const MBTIPersonalityTab = createLazyComponent(
-  () => import('./MBTIPersonalityTabHome'),
-  'MBTIPersonalityTab',
-  '人格魅力模块加载失败，请稍后重试'
+const MoodHealthTab = createLazyComponent(
+  () => import('./MoodHealthTab'),
+  'MoodHealthTab',
+  '情绪健康模块加载失败，请稍后重试'
 );
 
 // 增强版错误边界组件
@@ -229,7 +229,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
             setLoadedTabs(prev => {
               const newSet = new Set(prev);
               // 保留当前标签和相邻标签
-              const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
+              const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mood'];
               const currentIndex = tabOrder.indexOf(currentTab);
               const tabsToKeep = [
                 currentTab,
@@ -393,7 +393,7 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
   // 优化的预加载策略
   // 修复：在Android WebView中减少预加载以节省内存
   const preloadAdjacentTabs = useCallback((currentTab) => {
-    const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mbti'];
+    const tabOrder = ['biorhythm', 'zodiac', 'horoscope', 'mood'];
     const currentIndex = tabOrder.indexOf(currentTab);
 
     if (currentIndex === -1) return;
@@ -518,6 +518,17 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       color: 'blue'
     },
     {
+      id: 'mood',
+      label: '情绪健康',
+      icon: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      ),
+      description: '识别情绪身心信号',
+      color: 'pink'
+    },
+    {
       id: 'zodiac',
       label: '生肖能量',
       icon: () => (
@@ -538,17 +549,6 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       ),
       description: '根据星座提供运势指导',
       color: 'indigo'
-    },
-    {
-      id: 'mbti',
-      label: '人格魅力',
-      icon: () => (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
-      description: '探索16型人格的魅力与潜能',
-      color: 'pink'
     }
   ];
 
@@ -657,8 +657,8 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
                   className={`flex-1 py-2 px-0.5 text-center font-medium transition-all duration-300 rounded-xl ${isActive
-                      ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700 nav-item-active`
-                      : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    ? `${colorMap[tab.color]} bg-gray-50 dark:bg-gray-700 nav-item-active`
+                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   style={{ minHeight: '40px' }}
                 >
@@ -676,8 +676,8 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
       </div>
 
       {/* 内容展示区域 - 简化布局，移除不必要的容器嵌套，优化滚动性能 */}
-      <div className="biorhythm-content-area">
-        <div className="container mx-auto px-4 py-4">
+      <div className="biorhythm-content-area no-scrollbar" style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div className="container mx-auto px-2 py-4">
           {/* 错误显示 */}
           {error && (
             <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4">
@@ -743,18 +743,17 @@ const BiorhythmDashboard = ({ appInfo = {} }) => {
                   />
                 </React.Suspense>
               )}
-              {activeTab === 'mbti' && loadedTabs.has('mbti') && (
+              {activeTab === 'mood' && loadedTabs.has('mood') && (
                 <React.Suspense fallback={
                   <div className="flex items-center justify-center h-64">
                     <div className="text-center">
                       <div className="w-8 h-8 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-2"></div>
-                      <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载人格魅力模块...</p>
+                      <p className="text-gray-500 dark:text-gray-300 text-sm">正在加载情绪健康模块...</p>
                     </div>
                   </div>
                 }>
-                  <MBTIPersonalityTab
-                    isTab={true}
-                    onError={(error) => handleError(error, 'MBTIPersonalityTab')}
+                  <MoodHealthTab
+                    onError={(error) => handleError(error, 'MoodHealthTab')}
                   />
                 </React.Suspense>
               )}

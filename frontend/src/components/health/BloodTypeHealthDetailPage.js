@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserConfig } from '../../contexts/UserConfigContext.js';
+import { ArrowLeftIcon, BloodTypeIcon } from '../icons';
 import './BloodTypeHealthDetailPage.css';
 
 const BloodTypeHealthDetailPage = () => {
@@ -207,117 +208,149 @@ const BloodTypeHealthDetailPage = () => {
     setSelectedBloodType(type);
   };
   return (
-    <div className="blood-type-detail-page">
+    <div className="blood-type-detail-page scrollbar-hide">
       {/* 页面头部 */}
-      <div className="detail-header">
-        <button className="back-button" onClick={handleBack}>
-          <span className="back-icon">←</span>
-          返回
+      <div className="detail-header-fixed">
+        <button className="glass-back-button" onClick={handleBack}>
+          <ArrowLeftIcon size={20} />
+          <span>返回</span>
         </button>
-        <h1 className="page-title">血型健康详情</h1>
+        <h1 className="page-title-center">血型健康详情</h1>
       </div>
       {/* 血型选择器 */}
-      <div className="blood-type-selector">
-        <div className="selector-title">选择血型查看详情</div>
-        <div className="type-buttons">
-          {['A', 'B', 'AB', 'O'].map(type => (
-            <button
-              key={type}
-              className={`type-button ${selectedBloodType === type ? 'active' : ''}`}
-              onClick={() => handleBloodTypeChange(type)}
-            >
-              <span className="type-icon">{bloodTypeInfo[type].icon}</span>
-              <span className="type-label">{type}型</span>
-            </button>
-          ))}
+      <div className="blood-type-selector-sticky">
+        <div className="selector-inner">
+          <div className="type-buttons-row">
+            {['A', 'B', 'AB', 'O'].map(type => (
+              <button
+                key={type}
+                className={`type-option-btn ${selectedBloodType === type ? 'active' : ''}`}
+                onClick={() => handleBloodTypeChange(type)}
+              >
+                <div className="type-icon-wrapper">
+                  <BloodTypeIcon type={type} size={24} />
+                </div>
+                <span className="type-name">{type}型</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       {/* 主要内容 */}
       <div className="detail-content">
         {/* 血型概览 */}
-        <div className="blood-type-overview">
-          <div className={`overview-header ${currentInfo.colorClass}`}>
-            <div className="overview-icon">{currentInfo.icon}</div>
-            <div className="overview-text">
-              <h2 className="overview-title">{currentInfo.title}</h2>
-              <p className="overview-subtitle">{currentInfo.subtitle}</p>
+        <div className="blood-type-hero-section">
+          <div className={`hero-card-gradient ${currentInfo.colorClass}`}>
+            <div className="hero-icon-container">
+              <BloodTypeIcon type={selectedBloodType} size={64} />
+            </div>
+            <div className="hero-info">
+              <h2 className="hero-title">{currentInfo.title}</h2>
+              <p className="hero-subtitle">{currentInfo.subtitle}</p>
             </div>
           </div>
         </div>
         {/* 性格特征 */}
-        <div className="info-section">
-          <h3 className="section-title">{currentInfo.personality.title}</h3>
-          <p className="section-description">{currentInfo.personality.description}</p>
-          <div className="keywords">
+        <div className="glass-info-section">
+          <div className="section-header-row">
+            <div className="section-dot-blue"></div>
+            <h3 className="section-heading">{currentInfo.personality.title}</h3>
+          </div>
+          <p className="section-body-text">{currentInfo.personality.description}</p>
+          <div className="personality-tags-container">
             {currentInfo.personality.keywords.map((keyword, index) => (
-              <span key={index} className="keyword-tag">{keyword}</span>
+              <span key={index} className="personality-tag">{keyword}</span>
             ))}
           </div>
         </div>
         {/* 健康风险 */}
-        <div className="info-section">
-          <h3 className="section-title">{currentInfo.healthRisks.title}</h3>
-          <p className="section-description">{currentInfo.healthRisks.description}</p>
-          <div className="medical-stats">
-            <h4>医学统计：</h4>
-            <p>{currentInfo.healthRisks.medicalStats}</p>
+        <div className="glass-info-section">
+          <div className="section-header-row">
+            <div className="section-dot-red"></div>
+            <h3 className="section-heading">{currentInfo.healthRisks.title}</h3>
+          </div>
+          <p className="section-body-text">{currentInfo.healthRisks.description}</p>
+          <div className="medical-insight-box">
+            <div className="insight-label">医学统计</div>
+            <p className="insight-content">{currentInfo.healthRisks.medicalStats}</p>
           </div>
         </div>
         {/* 饮食建议 */}
-        <div className="info-section">
-          <h3 className="section-title">{currentInfo.diet.title}</h3>
-          <p className="section-description">{currentInfo.diet.description}</p>
-          <div className="recommendations">
-            <h4>推荐食物：</h4>
-            <ul>
-              {currentInfo.diet.recommendations.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
+        <div className="glass-info-section">
+          <div className="section-header-row">
+            <div className="section-dot-green"></div>
+            <h3 className="section-heading">{currentInfo.diet.title}</h3>
           </div>
-          <div className="avoid-list">
-            <h4>避免或减少：</h4>
-            <div className="avoid-tags">
-              {currentInfo.diet.avoid.map((item, index) => (
-                <span key={index} className="avoid-tag">{item}</span>
-              ))}
+          <p className="section-body-text">{currentInfo.diet.description}</p>
+
+          <div className="diet-content-grid">
+            <div className="recommendation-list">
+              <div className="sub-heading-with-icon">
+                <span className="dot-green-small"></span>
+                <span>推荐食物</span>
+              </div>
+              <ul className="diet-ul">
+                {currentInfo.diet.recommendations.map((item, index) => (
+                  <li key={index} className="diet-li">{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="avoid-section">
+              <div className="sub-heading-with-icon">
+                <span className="dot-red-small"></span>
+                <span>避免或减少</span>
+              </div>
+              <div className="avoid-labels-row">
+                {currentInfo.diet.avoid.map((item, index) => (
+                  <span key={index} className="avoid-label-chip">{item}</span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
         {/* 运动建议 */}
-        <div className="info-section">
-          <h3 className="section-title">{currentInfo.exercise.title}</h3>
-          <p className="section-description">{currentInfo.exercise.description}</p>
-          <div className="exercise-list">
+        <div className="glass-info-section">
+          <div className="section-header-row">
+            <div className="section-dot-purple"></div>
+            <h3 className="section-heading">{currentInfo.exercise.title}</h3>
+          </div>
+          <p className="section-body-text">{currentInfo.exercise.description}</p>
+          <div className="exercise-chips-grid">
             {currentInfo.exercise.recommendations.map((item, index) => (
-              <div key={index} className="exercise-item">
-                <span className="exercise-bullet">•</span>
-                <span>{item}</span>
+              <div key={index} className="exercise-card-item">
+                <div className="exercise-dot-indicator"></div>
+                <span className="exercise-item-text">{item}</span>
               </div>
             ))}
           </div>
         </div>
         {/* 生活贴士 */}
-        <div className="info-section">
-          <h3 className="section-title">{currentInfo.lifestyle.title}</h3>
-          <p className="section-description">{currentInfo.lifestyle.description}</p>
-          <div className="tips-list">
+        <div className="glass-info-section">
+          <div className="section-header-row">
+            <div className="section-dot-orange"></div>
+            <h3 className="section-heading">{currentInfo.lifestyle.title}</h3>
+          </div>
+          <p className="section-body-text">{currentInfo.lifestyle.description}</p>
+          <div className="vertical-tips-column">
             {currentInfo.lifestyle.tips.map((tip, index) => (
-              <div key={index} className="tip-item">
-                <span className="tip-number">{index + 1}</span>
-                <span>{tip}</span>
+              <div key={index} className="glass-tip-card">
+                <div className="tip-index-badge">{index + 1}</div>
+                <span className="tip-text-content">{tip}</span>
               </div>
             ))}
           </div>
         </div>
         {/* 健康总结 */}
-        <div className="health-summary">
-          <h3>健康总结</h3>
-          <p>
-            <strong>血型并不是宿命，而是一份"身体使用说明书"。</strong><br/>
-            医学统计只代表概率，不代表必然。真正的养生核心在于了解自己的身体，
-            并保持规律的生活和平和的心态。
-          </p>
+        <div className="final-summary-quote">
+          <div className="quote-accent-bar"></div>
+          <div className="quote-content-wrapper">
+            <h3 className="quote-title">健康总结</h3>
+            <p className="quote-text">
+              <span className="highlight-white">血型并不是宿命，而是一份"身体使用说明书"。</span><br />
+              医学统计只代表概率，不代表必然。真正的养生核心在于了解自己的身体，并保持规律的生活和平和的心态。
+            </p>
+          </div>
         </div>
       </div>
     </div>

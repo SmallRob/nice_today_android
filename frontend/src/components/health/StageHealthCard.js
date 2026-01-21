@@ -2,12 +2,13 @@ import React from 'react';
 import { useUserConfig } from '../../contexts/UserConfigContext.js';
 import { useNavigate } from 'react-router-dom';
 import { getAgeGroupByAge } from '../../constants/ageGroups.js';
+import { StageHealthIcon } from '../icons';
 
 // 阶段养生提醒卡片组件
 const StageHealthCard = ({ onClick }) => {
   const { userConfig } = useUserConfig();
   const navigate = useNavigate();
-  
+
   // 从本地存储获取用户设置的缓存超时时间
   const getUserCacheTimeout = () => {
     const savedCacheTimeout = localStorage.getItem('cacheTimeout');
@@ -29,13 +30,13 @@ const StageHealthCard = ({ onClick }) => {
         const { data, timestamp, date: cacheDate } = JSON.parse(cached);
         const now = Date.now();
         const currentDate = new Date().toDateString();
-        
+
         // 检查是否跨天（隔天重新计算策略）
         if (cacheDate !== currentDate) {
           localStorage.removeItem(cacheKey);
           return null;
         }
-        
+
         // 检查缓存是否超时
         const cacheTimeout = getUserCacheTimeout();
         if (now - timestamp < cacheTimeout) {
@@ -70,11 +71,11 @@ const StageHealthCard = ({ onClick }) => {
   // 计算用户年龄段
   const getUserAgeGroup = () => {
     if (!userConfig?.birthDate) return 'unknown';
-    
+
     const birthDate = new Date(userConfig.birthDate);
     const today = new Date();
     const age = today.getFullYear() - birthDate.getFullYear();
-    
+
     // 使用统一的年龄组枚举
     const ageGroup = getAgeGroupByAge(age);
     return ageGroup.range;
@@ -136,8 +137,8 @@ const StageHealthCard = ({ onClick }) => {
           '适度运动，增强体质',
           '饮食清淡，避免辛辣刺激'
         ],
-        specialConsiderations: userConfig?.gender === 'female' 
-          ? '关注月经周期，保持情绪稳定' 
+        specialConsiderations: userConfig?.gender === 'female'
+          ? '关注月经周期，保持情绪稳定'
           : '避免过度疲劳，注意肝胆养护'
       },
       '26-35岁': {
@@ -152,8 +153,8 @@ const StageHealthCard = ({ onClick }) => {
           '注意饮食营养均衡',
           '建立稳定人际关系'
         ],
-        specialConsiderations: userConfig?.gender === 'female' 
-          ? '关注生育健康，做好孕前准备' 
+        specialConsiderations: userConfig?.gender === 'female'
+          ? '关注生育健康，做好孕前准备'
           : '注意肾气养护，避免过度劳累'
       },
       '36-45岁': {
@@ -168,8 +169,8 @@ const StageHealthCard = ({ onClick }) => {
           '适度运动，保持关节灵活',
           '关注家庭成员健康'
         ],
-        specialConsiderations: userConfig?.gender === 'female' 
-          ? '关注更年期前期症状，适当调理' 
+        specialConsiderations: userConfig?.gender === 'female'
+          ? '关注更年期前期症状，适当调理'
           : '关注心血管健康，预防"三高"'
       },
       '46-55岁': {
@@ -184,8 +185,8 @@ const StageHealthCard = ({ onClick }) => {
           '适度运动，保持关节灵活',
           '培养兴趣爱好，保持精神愉悦'
         ],
-        specialConsiderations: userConfig?.gender === 'female' 
-          ? '更年期注意情绪调节，适当补充雌激素' 
+        specialConsiderations: userConfig?.gender === 'female'
+          ? '更年期注意情绪调节，适当补充雌激素'
           : '关注前列腺健康，定期检查'
       },
       '56-65岁': {
@@ -217,7 +218,7 @@ const StageHealthCard = ({ onClick }) => {
         specialConsiderations: '定期健康监测，及时就医，享受天伦之乐'
       }
     };
-    
+
     return ageGroupData[ageGroup] || ageGroupData['26-35岁'];
   };
 
@@ -233,13 +234,15 @@ const StageHealthCard = ({ onClick }) => {
   };
 
   return (
-    <div 
+    <div
       className="health-card stage-health-card"
       onClick={handleClick}
     >
-      <div className={`bg-gradient-to-r ${ageGroupInfo.color} p-4 rounded-2xl text-white shadow-lg h-full`}>
+      <div className={`bg-gradient-to-br ${ageGroupInfo.color} p-4 rounded-2xl text-white shadow-lg h-full border border-white/20 backdrop-blur-sm`}>
         <div className="flex items-center justify-between mb-3">
-          <div className="text-2xl">{ageGroupInfo.icon}</div>
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md shadow-inner">
+            <StageHealthIcon size={28} color="white" />
+          </div>
           <div className="text-right">
             <h3 className="font-bold text-lg">{ageGroupInfo.title}</h3>
             <p className="text-sm opacity-90">{ageGroupInfo.description}</p>

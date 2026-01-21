@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useUserConfig } from '../../contexts/UserConfigContext.js';
 import { useNavigate } from 'react-router-dom';
 import { getSolarTermState } from '../../utils/solarTerms';
+import { SeasonalHealthIcon } from '../icons';
 
 // 当季养生健康提醒卡片组件
 const SeasonalHealthCard = ({ onClick }) => {
@@ -29,13 +30,13 @@ const SeasonalHealthCard = ({ onClick }) => {
       if (cached) {
         const { data, timestamp, date: cacheDate } = JSON.parse(cached);
         const now = Date.now();
-        
+
         // 检查是否跨天（隔天重新计算策略）
         if (cacheDate !== currentDate) {
           localStorage.removeItem(cacheKey);
           return null;
         }
-        
+
         // 检查缓存是否超时
         const cacheTimeout = getUserCacheTimeout();
         if (now - timestamp < cacheTimeout) {
@@ -385,15 +386,15 @@ const SeasonalHealthCard = ({ onClick }) => {
   // 判断是否在节气窗口期（前7天到后3天）
   const isInSolarTermWindow = (solarTermState) => {
     if (!solarTermState) return false;
-    
+
     const { type, diff } = solarTermState;
-    
+
     // 当天、前3天、后3天
     const isWithinThreeDays = type === 'today' || type === 'before' || type === 'after';
-    
+
     // 前4-7天（提醒状态）
     const isWithinSevenDaysBefore = type === 'reminder' && diff >= -7 && diff < 0;
-    
+
     return isWithinThreeDays || isWithinSevenDaysBefore;
   };
 
@@ -401,10 +402,10 @@ const SeasonalHealthCard = ({ onClick }) => {
   const getCurrentSeason = () => {
     const month = new Date().getMonth() + 1;
     if (month >= 3 && month <= 5) {
-      return { 
-        name: '春', 
-        element: '木', 
-        organ: '肝', 
+      return {
+        name: '春',
+        element: '木',
+        organ: '肝',
         desc: '生发之气，养肝为先',
         color: 'from-green-400 to-emerald-500',
         tips: [
@@ -417,10 +418,10 @@ const SeasonalHealthCard = ({ onClick }) => {
         activities: ['踏青', '放风筝', '散步', '太极拳']
       };
     } else if (month >= 6 && month <= 8) {
-      return { 
-        name: '夏', 
-        element: '火', 
-        organ: '心', 
+      return {
+        name: '夏',
+        element: '火',
+        organ: '心',
         desc: '生长之气，养心为要',
         color: 'from-red-400 to-orange-500',
         tips: [
@@ -433,10 +434,10 @@ const SeasonalHealthCard = ({ onClick }) => {
         activities: ['游泳', '晨练', '太极', '散步']
       };
     } else if (month >= 9 && month <= 11) {
-      return { 
-        name: '秋', 
-        element: '金', 
-        organ: '肺', 
+      return {
+        name: '秋',
+        element: '金',
+        organ: '肺',
         desc: '收敛之气，养肺为主',
         color: 'from-yellow-400 to-amber-500',
         tips: [
@@ -449,10 +450,10 @@ const SeasonalHealthCard = ({ onClick }) => {
         activities: ['登山', '慢跑', '太极', '气功']
       };
     } else {
-      return { 
-        name: '冬', 
-        element: '水', 
-        organ: '肾', 
+      return {
+        name: '冬',
+        element: '水',
+        organ: '肾',
         desc: '收藏之气，养肾为本',
         color: 'from-blue-400 to-indigo-500',
         tips: [
@@ -479,18 +480,18 @@ const SeasonalHealthCard = ({ onClick }) => {
     const gender = userConfig.gender;
 
     let advice = "";
-    
+
     if (age < 30) {
-      advice = gender === 'female' 
-        ? "年轻女性应注重肝血调养，顺应春季生发之气" 
+      advice = gender === 'female'
+        ? "年轻女性应注重肝血调养，顺应春季生发之气"
         : "年轻男性应注重肾精养护，避免过度消耗";
     } else if (age < 50) {
-      advice = gender === 'female' 
-        ? "中年女性应关注气血平衡，注意情绪调节" 
+      advice = gender === 'female'
+        ? "中年女性应关注气血平衡，注意情绪调节"
         : "中年男性应注重脾胃养护，避免过度劳累";
     } else {
-      advice = gender === 'female' 
-        ? "中老年女性应注重滋阴养血，保持心态平和" 
+      advice = gender === 'female'
+        ? "中老年女性应注重滋阴养血，保持心态平和"
         : "中老年男性应注重补肾固精，适度运动";
     }
 
@@ -514,7 +515,7 @@ const SeasonalHealthCard = ({ onClick }) => {
         isWithinSevenDaysBefore: solarTermState?.type === 'reminder' && solarTermState?.diff >= -7 && solarTermState?.diff < 0
       }
     };
-    
+
     // 详细日志
     console.log('[SeasonalHealthCard] 计算健康数据:', debugInfo);
 
@@ -629,14 +630,14 @@ const SeasonalHealthCard = ({ onClick }) => {
   const title = isSolarTerm ? `${seasonName}节气养生` : `${seasonData.name}季养生`;
   const emoji = isSolarTerm ? seasonData.emoji : (
     seasonData.name === '春' ? '🌸' :
-    seasonData.name === '夏' ? '☀️' :
-    seasonData.name === '秋' ? '🍂' : '❄️'
+      seasonData.name === '夏' ? '☀️' :
+        seasonData.name === '秋' ? '🍂' : '❄️'
   );
 
   // 格式化节气状态描述
   const getSolarTermStatus = () => {
     if (!isSolarTerm || !seasonData.solarTermState) return '';
-    
+
     const { type, diff, name } = seasonData.solarTermState;
     if (type === 'today') return `今天是${name}节气`;
     if (type === 'before') return `距离${name}节气还有${Math.abs(diff)}天`;
@@ -645,13 +646,15 @@ const SeasonalHealthCard = ({ onClick }) => {
   };
 
   return (
-    <div 
+    <div
       className="health-card seasonal-health-card"
       onClick={handleClick}
     >
-      <div className={`bg-gradient-to-r ${seasonData.color} p-4 rounded-2xl text-white shadow-lg h-full`}>
+      <div className={`bg-gradient-to-br ${seasonData.color} p-4 rounded-2xl text-white shadow-lg h-full border border-white/20 backdrop-blur-sm`}>
         <div className="flex items-center justify-between mb-3">
-          <div className="text-2xl">{emoji}</div>
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md shadow-inner">
+            <SeasonalHealthIcon size={24} color="white" />
+          </div>
           <div className="text-right">
             <h3 className="font-bold text-lg">{title}</h3>
             {isSolarTerm ? (
@@ -667,7 +670,7 @@ const SeasonalHealthCard = ({ onClick }) => {
             )}
           </div>
         </div>
-        
+
         {/* 节气/季节养生小贴士 */}
         <div className="mb-3">
           <p className="text-xs font-medium opacity-90 mb-2">
@@ -735,7 +738,7 @@ const SeasonalHealthCard = ({ onClick }) => {
         {/* 五行/节气关系提示 */}
         <div className="mt-2 pt-2 border-t border-white border-opacity-20">
           <p className="text-xs opacity-75">
-            {isSolarTerm 
+            {isSolarTerm
               ? `${seasonData.desc}，顺应节气变化调养身心，保持健康生活`
               : `${seasonData.name}季与${seasonData.element}行相应，${seasonData.organ}气渐旺，宜顺应自然调养身心`
             }

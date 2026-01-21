@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generateDressInfo } from '../../services/localDataService.js';
+import { DressGuideIcon } from '../icons';
 
 // 每日穿搭与饮食建议卡片组件
 const DressDietCard = ({ onClick }) => {
@@ -155,9 +156,11 @@ const DressDietCard = ({ onClick }) => {
       className="health-card dress-diet-card"
       onClick={handleClick}
     >
-      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4 rounded-2xl text-white shadow-lg h-full">
+      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4 rounded-2xl text-white shadow-lg h-full border border-white/20 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-2xl">👗</div>
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md shadow-inner">
+            <DressGuideIcon size={24} color="white" />
+          </div>
           <div className="text-right">
             <h3 className="font-bold text-lg drop-shadow-lg">穿搭饮食</h3>
             <p className="text-xs opacity-100 font-medium">今日建议</p>

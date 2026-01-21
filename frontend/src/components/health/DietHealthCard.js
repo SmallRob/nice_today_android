@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { HealthFoodIcon } from '../icons';
 
 const DietHealthCard = () => {
   const [userAge] = useState('adult'); // 默认成年，可以根据实际用户信息调整
@@ -215,16 +216,13 @@ const DietHealthCard = () => {
   const nutrientAlerts = getNutrientDeficiencyAlert(userAge);
 
   return (
-    <div className="health-card diet-health-card rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow duration-300 h-full flex flex-col min-h-[400px]">
+    <div className="health-card diet-health-card rounded-2xl shadow-lg p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col min-h-[400px] border border-white/20 backdrop-blur-sm bg-gradient-to-br from-orange-400 via-red-500 to-pink-600 border-none">
       <div className="flex flex-wrap justify-between items-center mb-3 relative z-10 gap-1">
-        <h3 className="text-lg font-bold text-white no-wrap-mobile flex-shrink-0">饮食健康</h3>
-        <div className="flex flex-wrap gap-1">
-          <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full backdrop-blur-sm">
-            {getCurrentSeason() === 'spring' ? '🌸春季' : getCurrentSeason() === 'summer' ? '🌞夏季' : getCurrentSeason() === 'autumn' ? '🍂秋季' : '❄️冬季'}
-          </span>
-          <span className="text-xs bg-white/20 text-white px-2 py-1 rounded-full backdrop-blur-sm">
-            {userAge === 'young' ? '青年' : userAge === 'middle' ? '中年' : userAge === 'elderly' ? '老年' : '成年'}
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-md shadow-inner">
+            <HealthFoodIcon size={20} color="white" />
+          </div>
+          <h3 className="text-lg font-bold text-white no-wrap-mobile flex-shrink-0">饮食健康</h3>
         </div>
       </div>
 
@@ -307,7 +305,13 @@ const DietHealthCard = () => {
           {nutrientAlerts.slice(0, 2).map((nutrient, index) => (
             <div key={index} className="flex-1 p-1 bg-white/20 rounded border border-white/30 backdrop-blur-sm min-w-0 break-word-mobile" style={{ minWidth: '45%' }}>
               <div className="flex items-start">
-                <span className="text-white/90 mr-1 text-xs flex-shrink-0">⚠️</span>
+                <span className="text-white/90 mr-1 text-xs flex-shrink-0">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </span>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-white text-xs break-word-mobile">{nutrient.name}</div>
                 </div>

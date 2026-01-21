@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AgileHealthIcon } from '../icons';
 
 // 敏捷养生卡片组件
 const AgileHealthCard = ({ onClick }) => {
   const navigate = useNavigate();
-  
+
   // 微任务库
   const microTaskLibrary = [
-    { id: 1, title: '眼保健操', description: '标准眼保健操+远眺', duration: '10分钟', category: '办公间隙', icon: '👀', type: 'eye-care' },
-    { id: 2, title: '肩颈操', description: '低头/抬头/转颈+按揉风池穴', duration: '8分钟', category: '办公间隙', icon: '💆', type: 'neck-care' },
-    { id: 3, title: '腹式呼吸', description: '鼻吸口呼，每次呼吸6秒', duration: '3分钟', category: '办公间隙', icon: '🫁', type: 'breathing' },
-    { id: 4, title: '五行唤醒', description: '叩齿36下+搓热双手敷眼+按揉足三里', duration: '10分钟', category: '晨起', icon: '🌅', type: 'morning' },
-    { id: 5, title: '睡前揉腹', description: '泡脚+揉腹', duration: '10分钟', category: '睡前', icon: '😴', type: 'night' },
-    { id: 6, title: '八段锦入门', description: '两手托天理三焦+左右开弓似射雕', duration: '10分钟', category: '运动', icon: '🧘', type: 'exercise' },
-    { id: 7, title: '踮脚养生', description: '踮脚起落+散步', duration: '5分钟', category: '运动', icon: '🦵', type: 'exercise' },
-    { id: 8, title: '静坐冥想', description: '关注呼吸，静心冥想', duration: '5分钟', category: '放松', icon: '🧘', type: 'meditation' },
-    { id: 9, title: '梳头养生', description: '从额到颈，通经络', duration: '3分钟', category: '放松', icon: '💇', type: 'relaxation' },
-    { id: 10, title: '转腰运动', description: '疏通带脉', duration: '5分钟', category: '运动', icon: '💪', type: 'exercise' }
+    { id: 1, title: '眼保健操', description: '标准眼保健操+远眺', duration: '10分钟', category: '办公间隙', type: 'eye-care' },
+    { id: 2, title: '肩颈操', description: '低头/抬头/转颈+按揉风池穴', duration: '8分钟', category: '办公间隙', type: 'neck-care' },
+    { id: 3, title: '腹式呼吸', description: '鼻吸口呼，每次呼吸6秒', duration: '3分钟', category: '办公间隙', type: 'breathing' },
+    { id: 4, title: '五行唤醒', description: '叩齿36下+搓热双手敷眼+按揉足三里', duration: '10分钟', category: '晨起', type: 'morning' },
+    { id: 5, title: '睡前揉腹', description: '泡脚+揉腹', duration: '10分钟', category: '睡前', type: 'night' },
+    { id: 6, title: '八段锦入门', description: '两手托天理三焦+左右开弓似射雕', duration: '10分钟', category: '运动', type: 'exercise' },
+    { id: 7, title: '踮脚养生', description: '踮脚起落+散步', duration: '5分钟', category: '运动', type: 'exercise' },
+    { id: 8, title: '静坐冥想', description: '关注呼吸，静心冥想', duration: '5分钟', category: '放松', type: 'meditation' },
+    { id: 9, title: '梳头养生', description: '从额到颈，通经络', duration: '3分钟', category: '放松', type: 'relaxation' },
+    { id: 10, title: '转腰运动', description: '疏通带脉', duration: '5分钟', category: '运动', type: 'exercise' }
   ];
 
   // 从本地存储获取用户设置的缓存超时时间
@@ -40,13 +41,13 @@ const AgileHealthCard = ({ onClick }) => {
         const { tasks, timestamp, date: cacheDate } = JSON.parse(cached);
         const now = Date.now();
         const currentDate = new Date().toDateString();
-        
+
         // 检查是否跨天（隔天重新计算策略）
         if (cacheDate !== currentDate) {
           localStorage.removeItem(cacheKey);
           return null;
         }
-        
+
         // 检查缓存是否超时
         const cacheTimeout = getUserCacheTimeout();
         if (now - timestamp < cacheTimeout) {
@@ -97,13 +98,13 @@ const AgileHealthCard = ({ onClick }) => {
         const { tasks, timestamp, date: cacheDate } = JSON.parse(cached);
         const now = Date.now();
         const currentDate = new Date().toDateString();
-        
+
         // 检查是否跨天（隔天重新计算策略）
         if (cacheDate !== currentDate) {
           localStorage.removeItem(cacheKey);
           return null;
         }
-        
+
         // 检查缓存是否超时
         const cacheTimeout = getUserCacheTimeout();
         if (now - timestamp < cacheTimeout) {
@@ -161,7 +162,7 @@ const AgileHealthCard = ({ onClick }) => {
         // 生成今日任务
         const selectedTasks = [];
         const categories = ['办公间隙', '晨起', '睡前', '运动', '放松'];
-        
+
         categories.forEach(category => {
           const categoryTasks = microTaskLibrary.filter(task => task.category === category);
           if (categoryTasks.length > 0) {
@@ -171,10 +172,10 @@ const AgileHealthCard = ({ onClick }) => {
         });
 
         // 如果不足3个，从剩余任务中随机补充
-        const remainingTasks = microTaskLibrary.filter(task => 
+        const remainingTasks = microTaskLibrary.filter(task =>
           !selectedTasks.some(t => t.id === task.id)
         );
-        
+
         while (selectedTasks.length < 3 && remainingTasks.length > 0) {
           const randomIndex = Math.floor(Math.random() * remainingTasks.length);
           selectedTasks.push(remainingTasks[randomIndex]);
@@ -198,7 +199,7 @@ const AgileHealthCard = ({ onClick }) => {
     const newCompletedTasks = completedTasks.includes(taskId)
       ? completedTasks.filter(id => id !== taskId)
       : [...completedTasks, taskId];
-    
+
     setCompletedTasks(newCompletedTasks);
     saveTaskStatus(newCompletedTasks);
   };
@@ -207,7 +208,7 @@ const AgileHealthCard = ({ onClick }) => {
   const refreshTasks = () => {
     const selectedTasks = [];
     const categories = ['办公间隙', '晨起', '睡前', '运动', '放松'];
-    
+
     categories.forEach(category => {
       const categoryTasks = microTaskLibrary.filter(task => task.category === category);
       if (categoryTasks.length > 0) {
@@ -217,10 +218,10 @@ const AgileHealthCard = ({ onClick }) => {
     });
 
     // 如果不足3个，从剩余任务中随机补充
-    const remainingTasks = microTaskLibrary.filter(task => 
+    const remainingTasks = microTaskLibrary.filter(task =>
       !selectedTasks.some(t => t.id === task.id)
     );
-    
+
     while (selectedTasks.length < 3 && remainingTasks.length > 0) {
       const randomIndex = Math.floor(Math.random() * remainingTasks.length);
       selectedTasks.push(remainingTasks[randomIndex]);
@@ -260,19 +261,21 @@ const AgileHealthCard = ({ onClick }) => {
   }
 
   return (
-    <div 
+    <div
       className="health-card agile-health-card"
       onClick={handleClick}
     >
-      <div className="bg-gradient-to-r from-green-500 to-teal-600 p-4 rounded-2xl text-white shadow-lg h-full">
+      <div className="bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 p-4 rounded-2xl text-white shadow-lg h-full border border-white/20 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-xl">⚡</div>
+          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md shadow-inner">
+            <AgileHealthIcon size={24} color="white" />
+          </div>
           <div className="text-right">
             <h3 className="font-bold text-base">敏捷养生</h3>
             <p className="text-xs opacity-90">今日任务</p>
           </div>
         </div>
-        
+
         <div className="text-center mb-2">
           <div className="text-2xl font-bold mb-0.5">{completedCount}/{totalCount}</div>
           <p className="text-xs opacity-80">已完成/总任务</p>
@@ -281,13 +284,12 @@ const AgileHealthCard = ({ onClick }) => {
         {/* 今日任务列表 */}
         <div className="space-y-1 mb-2">
           {dailyTasks.map((task, index) => (
-            <div 
-              key={task.id} 
-              className={`flex items-center justify-between p-1.5 rounded-lg text-xs ${
-                completedTasks.includes(task.id) 
-                  ? 'bg-white bg-opacity-20' 
-                  : 'bg-white bg-opacity-10'
-              }`}
+            <div
+              key={task.id}
+              className={`flex items-center justify-between p-1.5 rounded-lg text-xs ${completedTasks.includes(task.id)
+                ? 'bg-white bg-opacity-20'
+                : 'bg-white bg-opacity-10'
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 toggleTaskCompletion(task.id);
@@ -306,7 +308,7 @@ const AgileHealthCard = ({ onClick }) => {
                 />
                 <div>
                   <div className="font-medium flex items-center">
-                    <span className="mr-1.5">{task.icon}</span>
+                    <span className="w-1 h-1 bg-white rounded-full mr-2 opacity-50"></span>
                     {task.title}
                   </div>
                   <div className="opacity-75">{task.duration}</div>
@@ -320,12 +322,12 @@ const AgileHealthCard = ({ onClick }) => {
           {/* 完成提示 */}
           <div className="text-right">
             <p className="text-[10px] opacity-75">
-              {completedCount === totalCount 
-                ? '🎉 全完成' 
+              {completedCount === totalCount
+                ? '🎉 全完成'
                 : `剩${totalCount - completedCount}`}
             </p>
           </div>
-          
+
           {/* 换一换按钮 */}
           <div className="flex-shrink-0">
             <button
@@ -333,9 +335,24 @@ const AgileHealthCard = ({ onClick }) => {
                 e.stopPropagation();
                 refreshTasks();
               }}
-              className="text-xs bg-white bg-opacity-20 hover:bg-opacity-30 px-2.5 py-0.5 rounded-full transition-all flex items-center"
+              className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-all flex items-center border border-white/30 backdrop-blur-md"
             >
-              <span className="mr-1">🔄</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-1.5"
+              >
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+              </svg>
               换一换
             </button>
           </div>
