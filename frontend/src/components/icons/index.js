@@ -18,3 +18,7 @@ export { default as CulturalCupIcon } from './CulturalCupIcon';
 export { default as DressGuideIcon } from './DressGuideIcon';
 export { default as WuxingHealthIcon } from './WuxingHealthIcon';
 export { default as OrganRhythmIcon } from './OrganRhythmIcon';
+export { default as HuangliIcon } from './HuangliIcon';
+export { default as EditIcon } from './EditIcon';
+export { default as CheckIcon } from './CheckIcon';
+export { default as SortEditIcon } from './SortEditIcon';

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
 import ArchiveManager from '../components/lifeStyleGride/ArchiveManager.jsx';
 import MatrixGrid from '../components/lifeStyleGride/MatrixGrid.jsx';
@@ -7,36 +8,26 @@ import TotalScore from '../components/lifeStyleGride/TotalScore.jsx';
 import RitualGuide from '../components/lifeStyleGride/RitualGuide.jsx';
 import OnboardingModal from '../components/lifeStyleGride/OnboardingModal.jsx';
 import { initializeStorage, getArchives, getCurrentArchive } from '../utils/lifeGridStorage';
-import { DIMENSIONS_3x3, DIMENSIONS_7x7, IMPRINT_TYPES, getDimensionColor } from '../utils/matrixData';
+import { DIMENSIONS_3x3, DIMENSIONS_7x7, IMPRINT_TYPES } from '../utils/matrixData';
+import { IconLibrary } from '../components/IconLibrary';
+import { LifeMatrixIcon } from '../components/icons';
+import './LifestyleGuide.css';
 
 function LifestyleGuideContent() {
+  const navigate = useNavigate();
   const [currentArchive, setCurrentArchive] = useState(null);
-  const [matrixSize, setMatrixSize] = useState(3); // 3x3 或 7x7
+  const [matrixSize, setMatrixSize] = useState(3);
   const [matrixData, setMatrixData] = useState([]);
   const [archives, setArchives] = useState([]);
   const [selectedCell, setSelectedCell] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
   const [showRitual, setShowRitual] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  
-  const { theme, toggleTheme } = useTheme();
-  
-  // Ensure system theme is detected when the page loads
-  useEffect(() => {
-    // Check system preference for dark mode
-    const systemPrefersDark = window.matchMedia && 
-      window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    // Only apply system theme if no user preference is saved
-    const savedTheme = localStorage.getItem('lifestyle-guide-theme');
-    if (!savedTheme && systemPrefersDark) {
-      // The theme context should already handle this, but we ensure it's applied
-      document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.classList.add(systemPrefersDark ? 'dark' : 'light');
-    }
-  }, []);
+  const [showMenu, setShowMenu] = useState(false);
 
-  // Check if onboarding should be shown
+  const { theme, toggleTheme } = useTheme();
+
+  // Onboarding logic
   useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('lifestyle-guide-onboarding-shown');
     if (!hasSeenOnboarding && archives.length === 0) {
@@ -44,7 +35,7 @@ function LifestyleGuideContent() {
     }
   }, [archives.length]);
 
-  // 初始化应用
+  // App Initialization
   useEffect(() => {
     initializeStorage();
     const savedArchives = getArchives();
@@ -56,7 +47,7 @@ function LifestyleGuideContent() {
     }
   }, []);
 
-  // 计算总分
+  // Calculate Total Score
   useEffect(() => {
     if (matrixData.length > 0) {
       const score = matrixData.reduce((total, row) => {
@@ -68,7 +59,6 @@ function LifestyleGuideContent() {
     }
   }, [matrixData]);
 
-  // 加载存档
   const loadArchive = (archiveId) => {
     try {
       const archiveData = JSON.parse(localStorage.getItem(`life_matrix_archive_${archiveId}`));
@@ -79,43 +69,10 @@ function LifestyleGuideContent() {
         localStorage.setItem('life_matrix_current_archive', archiveId);
       }
     } catch (error) {
-      console.error('加载存档失败:', error);
+      console.error('Failed to load archive:', error);
     }
   };
 
-  // 创建新存档
-  const createNewArchive = (archiveName, size) => {
-    const archiveId = `archive_${Date.now()}`;
-    const newArchive = {
-      id: archiveId,
-      name: archiveName,
-      created: new Date().toISOString(),
-      lastModified: new Date().toISOString(),
-      matrixSize: size,
-      matrix: createEmptyMatrix(size),
-      totalScore: 0
-    };
-
-    // 保存到本地存储
-    localStorage.setItem(`life_matrix_archive_${archiveId}`, JSON.stringify(newArchive));
-
-    // 更新存档列表
-    const updatedArchives = [...archives, {
-      id: archiveId,
-      name: archiveName,
-      created: newArchive.created,
-      matrixSize: size,
-      totalScore: 0
-    }];
-
-    localStorage.setItem('life_matrix_archives', JSON.stringify(updatedArchives));
-    setArchives(updatedArchives);
-
-    // 设置为当前存档
-    loadArchive(archiveId);
-  };
-
-  // 创建空矩阵
   const createEmptyMatrix = (size) => {
     const matrix = [];
     const dimensions = size === 3 ? DIMENSIONS_3x3 : DIMENSIONS_7x7;
@@ -136,33 +93,38 @@ function LifestyleGuideContent() {
       }
       matrix.push(row);
     }
-
     return matrix;
   };
 
-  // 切换矩阵大小
-  const toggleMatrixSize = () => {
-    const newSize = matrixSize === 3 ? 7 : 3;
-    if (currentArchive) {
-      const confirmSwitch = window.confirm(
-        `切换矩阵大小将从${matrixSize}x${matrixSize}变为${newSize}x${newSize}，当前矩阵数据将会重置。确定要继续吗？`
-      );
+  const createNewArchive = (archiveName, size) => {
+    const archiveId = `archive_${Date.now()}`;
+    const newArchive = {
+      id: archiveId,
+      name: archiveName,
+      created: new Date().toISOString(),
+      lastModified: new Date().toISOString(),
+      matrixSize: size,
+      matrix: createEmptyMatrix(size),
+      totalScore: 0
+    };
 
-      if (confirmSwitch) {
-        setMatrixSize(newSize);
-        const newMatrix = createEmptyMatrix(newSize);
-        setMatrixData(newMatrix);
+    localStorage.setItem(`life_matrix_archive_${archiveId}`, JSON.stringify(newArchive));
 
-        // 更新存档
-        updateArchive({ matrixSize: newSize, matrix: newMatrix });
-      }
-    }
+    const updatedArchives = [...archives, {
+      id: archiveId,
+      name: archiveName,
+      created: newArchive.created,
+      matrixSize: size,
+      totalScore: 0
+    }];
+
+    localStorage.setItem('life_matrix_archives', JSON.stringify(updatedArchives));
+    setArchives(updatedArchives);
+    loadArchive(archiveId);
   };
 
-  // 更新存档
   const updateArchive = (updates) => {
     if (!currentArchive) return;
-
     try {
       const archiveData = JSON.parse(localStorage.getItem(`life_matrix_archive_${currentArchive}`));
       const updatedData = {
@@ -171,121 +133,43 @@ function LifestyleGuideContent() {
         lastModified: new Date().toISOString(),
         totalScore: totalScore
       };
-
       localStorage.setItem(`life_matrix_archive_${currentArchive}`, JSON.stringify(updatedData));
       setMatrixData(updatedData.matrix);
 
-      // 更新存档列表中的信息
-      const updatedArchives = archives.map(archive => {
-        if (archive.id === currentArchive) {
-          return {
-            ...archive,
-            lastModified: updatedData.lastModified,
-            totalScore: totalScore
-          };
-        }
-        return archive;
-      });
-
+      const updatedArchives = archives.map(archive =>
+        archive.id === currentArchive ? { ...archive, lastModified: updatedData.lastModified, totalScore } : archive
+      );
       localStorage.setItem('life_matrix_archives', JSON.stringify(updatedArchives));
       setArchives(updatedArchives);
     } catch (error) {
-      console.error('更新存档失败:', error);
+      console.error('Failed to update archive:', error);
     }
   };
 
-  // 添加能量印记
-  const addImprintToCell = (row, col, imprint) => {
-    if (!currentArchive) {
-      alert('请先选择一个存档！');
-      return;
-    }
-
-    const newMatrix = [...matrixData];
-    const cell = newMatrix[row][col];
-
-    // 添加印记
-    cell.imprints.push({
-      ...imprint,
-      id: `imprint_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      addedAt: new Date().toISOString()
-    });
-
-    // 计算新的能量值
-    const energyIncrease = imprint.power || 10;
-    cell.energy = Math.min(100, (cell.energy || 0) + energyIncrease);
-
-    setMatrixData(newMatrix);
-    updateArchive({ matrix: newMatrix });
-
-    // 检查是否触发能量叠加效果
-    checkEnergyEffects(row, col, newMatrix);
-  };
-
-  // 检查能量叠加效果
-  const checkEnergyEffects = (row, col, matrix) => {
-    const size = matrix.length;
-    const cell = matrix[row][col];
-
-    // 横向连接检查（同一行）
-    const rowConnections = matrix[row].filter(c => c.energy > 20);
-    if (rowConnections.length >= 3) {
-      console.log(`触发横向连接！行${row}有${rowConnections.length}个高能量单元格`);
-    }
-
-    // 纵向连接检查（同一列）
-    const colConnections = matrix.map(r => r[col]).filter(c => c.energy > 20);
-    if (colConnections.length >= 3) {
-      console.log(`触发纵向连接！列${col}有${colConnections.length}个高能量单元格`);
-    }
-
-    // 检查3x3能量集群
-    if (size === 7) {
-      checkEnergyCluster(row, col, matrix);
+  const toggleMatrixSize = () => {
+    const newSize = matrixSize === 3 ? 7 : 3;
+    if (currentArchive && window.confirm(`切换大小将重置当前矩阵数据，确定要切换到 ${newSize}x${newSize} 吗？`)) {
+      setMatrixSize(newSize);
+      const newMatrix = createEmptyMatrix(newSize);
+      setMatrixData(newMatrix);
+      updateArchive({ matrixSize: newSize, matrix: newMatrix });
     }
   };
 
-  // 检查能量集群
-  const checkEnergyCluster = (centerRow, centerCol, matrix) => {
-    let clusterEnergy = 0;
-    let clusterCells = [];
-
-    for (let i = Math.max(0, centerRow - 1); i <= Math.min(6, centerRow + 1); i++) {
-      for (let j = Math.max(0, centerCol - 1); j <= Math.min(6, centerCol + 1); j++) {
-        if (matrix[i][j].energy > 15) {
-          clusterEnergy += matrix[i][j].energy;
-          clusterCells.push(`${i}-${j}`);
-        }
-      }
-    }
-
-    if (clusterCells.length >= 6 && clusterEnergy > 100) {
-      console.log('发现能量集群！', clusterCells);
-      // 这里可以触发特殊效果或仪式
-    }
-  };
-
-  // 重置当前存档
   const resetCurrentArchive = () => {
-    if (currentArchive && window.confirm('确定要重置当前存档吗？所有能量印记将被清除。')) {
+    if (currentArchive && window.confirm('确定要重置当前存档吗？所有印记将被清除。')) {
       const newMatrix = createEmptyMatrix(matrixSize);
       setMatrixData(newMatrix);
       updateArchive({ matrix: newMatrix });
     }
   };
 
-  // 删除存档
   const deleteArchive = (archiveId) => {
     if (window.confirm('确定要删除这个存档吗？此操作不可撤销。')) {
-      // 从本地存储移除
       localStorage.removeItem(`life_matrix_archive_${archiveId}`);
-
-      // 更新存档列表
-      const updatedArchives = archives.filter(archive => archive.id !== archiveId);
+      const updatedArchives = archives.filter(a => a.id !== archiveId);
       localStorage.setItem('life_matrix_archives', JSON.stringify(updatedArchives));
       setArchives(updatedArchives);
-
-      // 如果删除的是当前存档，清空当前状态
       if (archiveId === currentArchive) {
         setCurrentArchive(null);
         setMatrixData([]);
@@ -294,154 +178,251 @@ function LifestyleGuideContent() {
     }
   };
 
-  // 处理完成引导
-  const handleOnboardingComplete = () => {
-    localStorage.setItem('lifestyle-guide-onboarding-shown', 'true');
+  const addImprintToCell = (row, col, imprint) => {
+    if (!currentArchive) return;
+    const newMatrix = [...matrixData];
+    const cell = newMatrix[row][col];
+    cell.imprints.push({
+      ...imprint,
+      id: `imprint_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      addedAt: new Date().toISOString()
+    });
+    const energyIncrease = imprint.power || 10;
+    cell.energy = Math.min(100, (cell.energy || 0) + energyIncrease);
+    setMatrixData(newMatrix);
+    updateArchive({ matrix: newMatrix });
   };
 
   return (
-    <div className={`min-h-screen w-full ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800'}`}>
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <header className={`mb-6 p-6 rounded-2xl shadow-lg ${theme === 'dark' ? 'bg-gradient-to-r from-purple-900 via-indigo-900 to-blue-900' : 'bg-gradient-to-r from-blue-500 to-purple-600'} text-white`}>
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">生命矩阵</h1>
-              <p className="text-lg opacity-90">构建你的意义能量图谱</p>
-            </div>
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-              aria-label={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
-            >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
-          </div>
-        </header>
+    <div className={`lifestyle-guide-page ${theme === 'dark' ? 'dark-mode' : ''}`}>
+      {/* Premium Header - Centered Title with More Menu */}
+      <header className="lifestyle-guide-header pt-safe-top">
+        <div className="header-left">
+          <button className="back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+            <IconLibrary.Icon name="back" size={24} color="white" />
+          </button>
+        </div>
 
-        <main className="flex-grow">
-          {!currentArchive ? (
+        <div className="header-center">
+          <div className="header-title-area">
+            <h1>
+              <LifeMatrixIcon size={20} color="white" />
+              生命矩阵
+            </h1>
+            <p className="subtitle">Life Matrix Pro</p>
+          </div>
+        </div>
+
+        <div className="header-right">
+          <button
+            className="more-btn"
+            onClick={() => setShowMenu(!showMenu)}
+            aria-label="More options"
+          >
+            <IconLibrary.Icon name="settings" size={24} color="white" />
+          </button>
+
+          {showMenu && (
+            <div className="more-menu-dropdown animate-in fade-in zoom-in duration-200">
+              <button className="menu-item" onClick={() => { setCurrentArchive(null); setShowMenu(false); }}>
+                <IconLibrary.Icon name="folder" size={18} />
+                返回存档管理
+              </button>
+              <button className="menu-item" onClick={() => { toggleMatrixSize(); setShowMenu(false); }}>
+                <IconLibrary.Icon name="chart" size={18} />
+                切换 {matrixSize === 3 ? '7x7' : '3x3'} 模式
+              </button>
+              <button className="menu-item" onClick={() => { setShowRitual(!showRitual); setShowMenu(false); }}>
+                <IconLibrary.Icon name="help" size={18} />
+                {showRitual ? '隐藏维度建议' : '显示维度建议'}
+              </button>
+              <button className="menu-item" onClick={() => { toggleTheme(); setShowMenu(false); }}>
+                <IconLibrary.Icon name={theme === 'dark' ? 'lightMode' : 'darkMode'} size={18} />
+                {theme === 'dark' ? '切换浅色模式' : '切换深色模式'}
+              </button>
+              <div className="menu-divider"></div>
+              <button className="menu-item text-red-500" onClick={() => { resetCurrentArchive(); setShowMenu(false); }}>
+                <IconLibrary.Icon name="refresh" size={18} color="#ef4444" />
+                重置当前矩阵
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="lifestyle-guide-content no-scrollbar fill-container" onClick={() => setShowMenu(false)}>
+        {!currentArchive ? (
+          <div className="archive-manager-view">
             <ArchiveManager
               archives={archives}
               onCreateArchive={createNewArchive}
               onLoadArchive={loadArchive}
               onDeleteArchive={deleteArchive}
+              theme={theme}
             />
-          ) : (
-            <div className="space-y-6">
-              <div className="flex flex-wrap gap-3 p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-md">
-                <button
-                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors min-h-12"
-                  onClick={() => setCurrentArchive(null)}
-                >
-                  返回存档选择
-                </button>
+          </div>
+        ) : (
+          <div className="matrix-play-view">
+            {/* 1. Score Card (Primary Section) */}
+            <TotalScore
+              score={totalScore}
+              matrixSize={matrixSize}
+              archiveName={archives.find(a => a.id === currentArchive)?.name || '未命名存档'}
+              theme={theme}
+            />
 
-                <button
-                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors min-h-12"
-                  onClick={toggleMatrixSize}
-                >
-                  切换矩阵: {matrixSize}x{matrixSize}
-                </button>
+            {/* 2. Stats Grid (2x2) */}
+            <MatrixStats
+              matrixData={matrixData}
+              theme={theme}
+            />
 
-                <button
-                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors min-h-12"
-                  onClick={resetCurrentArchive}
-                >
-                  重置当前存档
-                </button>
-
-                <button
-                  className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-colors min-h-12"
-                  onClick={() => setShowRitual(!showRitual)}
-                >
-                  {showRitual ? '隐藏仪式指南' : '显示仪式指南'}
-                </button>
+            {/* 3. Suggestions (Development Recommendations) */}
+            {showRitual && (
+              <div className="ritual-addon-panel mb-2">
+                <RitualGuide
+                  matrixData={matrixData}
+                  totalScore={totalScore}
+                  matrixSize={matrixSize}
+                  theme={theme}
+                />
               </div>
+            )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                  <div className={`p-6 rounded-2xl shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-                    <TotalScore
-                      score={totalScore}
-                      matrixSize={matrixSize}
-                      archiveName={archives.find(a => a.id === currentArchive)?.name || '未命名存档'}
-                    />
-
-                    <div className="mt-6">
-                      <MatrixGrid
-                        matrixData={matrixData}
-                        matrixSize={matrixSize}
-                        onCellClick={setSelectedCell}
-                        selectedCell={selectedCell}
-                        onAddImprint={addImprintToCell}
-                        theme={theme}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className={`p-6 rounded-2xl shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-                    {selectedCell ? (
-                      <DimensionInfo
-                        cell={selectedCell}
-                        matrixData={matrixData}
-                        onAddImprint={addImprintToCell}
-                        theme={theme}
-                      />
-                    ) : (
-                      <div className="text-center py-8">
-                        <h3 className="text-xl font-semibold mb-3">点击矩阵中的单元格查看详细信息</h3>
-                        <p className="mb-2">每个单元格代表你生命的一个维度</p>
-                        <p className="mb-6">添加能量印记来增强该维度的能量</p>
-                        <div className="text-left">
-                          <h4 className="font-medium mb-2">能量印记类型</h4>
-                          <ul className="space-y-1">
-                            {IMPRINT_TYPES.slice(0, 5).map(type => (
-                              <li key={type.id} className="flex items-start">
-                                <span className={`inline-block w-3 h-3 rounded-full mt-1.5 mr-2 ${type.category === 'material' ? 'bg-blue-500' : type.category === 'spiritual' ? 'bg-purple-500' : type.category === 'relational' ? 'bg-pink-500' : 'bg-green-500'}`}></span>
-                                <span>
-                                  <span className="font-medium">{type.name}</span>
-                                  <span className="text-gray-500 dark:text-gray-400"> - {type.description}</span>
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    )}
-
-                    {showRitual && (
-                      <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                        <RitualGuide
-                          matrixData={matrixData}
-                          totalScore={totalScore}
-                          matrixSize={matrixSize}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
+            {/* 4. Matrix Grid Section */}
+            <div className="matrix-view-port">
+              <div className="matrix-scroll-wrapper no-scrollbar">
+                <MatrixGrid
+                  matrixData={matrixData}
+                  matrixSize={matrixSize}
+                  onCellClick={setSelectedCell}
+                  selectedCell={selectedCell}
+                  onAddImprint={addImprintToCell}
+                  theme={theme}
+                  hideInternalLegend={true}
+                />
               </div>
             </div>
-          )}
-        </main>
 
-        <footer className={`mt-8 py-4 text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-          <p>生命矩阵 - 离线版本 | 数据存储在本地浏览器中</p>
-          <p>所有数据仅保存在您的设备上，不会被上传到任何服务器</p>
-        </footer>
+            {/* 5. Energy Level Legend */}
+            <EnergyLevelLegend theme={theme} />
 
-        <OnboardingModal
-          isOpen={showOnboarding}
-          onClose={() => setShowOnboarding(false)}
-          onComplete={handleOnboardingComplete}
-          theme={theme}
-        />
-      </div>
+            {/* 6. Selection Detail or Instruction */}
+            <div className="interaction-panel border-none bg-transparent p-0">
+              {selectedCell ? (
+                <DimensionInfo
+                  cell={selectedCell}
+                  onAddImprint={addImprintToCell}
+                  theme={theme}
+                />
+              ) : (
+                <DimensionInstructionCard theme={theme} />
+              )}
+            </div>
+
+          </div>
+        )}
+      </main>
+
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={() => localStorage.setItem('lifestyle-guide-onboarding-shown', 'true')}
+        theme={theme}
+      />
     </div>
   );
 }
+
+const EnergyLevelLegend = ({ theme }) => (
+  <section className={`p-4 rounded-xl border ${theme === 'dark' ? 'bg-[#161618] border-[#242427]' : 'bg-white border-slate-100 shadow-sm'} space-y-3`}>
+    <div className="flex justify-between items-center">
+      <h4 className={`text-[10px] font-bold uppercase tracking-[0.2em] ${theme === 'dark' ? 'text-[#A1A1AA]' : 'text-slate-400'}`}>能量等级</h4>
+    </div>
+    <div className="grid grid-cols-3 gap-y-2 gap-x-3">
+      {[
+        { label: '空 (0)', color: theme === 'dark' ? 'bg-white/5 border border-white/10' : 'bg-slate-200' },
+        { label: '低 (1-19)', color: theme === 'dark' ? 'bg-white/20' : 'bg-slate-400' },
+        { label: '中 (20-49)', color: theme === 'dark' ? 'bg-white/40' : 'bg-slate-600' },
+        { label: '高 (50-79)', color: theme === 'dark' ? 'bg-white/70' : 'bg-slate-800' },
+        { label: '满 (80-100)', color: 'bg-gradient-to-br from-amber-300 to-orange-500' }
+      ].map((item, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-sm ${item.color}`}></div>
+          <span className={`text-[10px] font-medium ${theme === 'dark' ? 'text-[#A1A1AA]' : 'text-slate-500'}`}>{item.label}</span>
+        </div>
+      ))}
+    </div>
+    <p className={`text-[10px] border-t pt-3 ${theme === 'dark' ? 'text-[#A1A1AA] border-white/5' : 'text-slate-400 border-slate-50'}`}>
+      点击单元格查看详情，长按添加能量印记
+    </p>
+  </section>
+);
+
+const DimensionInstructionCard = ({ theme }) => (
+  <section className={`p-5 rounded-xl border text-center space-y-4 ${theme === 'dark' ? 'bg-[#161618] border-[#242427]' : 'bg-white border-slate-100 shadow-sm'}`}>
+    <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto ${theme === 'dark' ? 'bg-white/5' : 'bg-slate-50'}`}>
+      <span className="text-2xl">✨</span>
+    </div>
+    <h3 className="font-bold text-sm">点击矩阵格子</h3>
+    <p className={`text-xs ${theme === 'dark' ? 'text-[#A1A1AA]' : 'text-slate-500'}`}>选择一个生命维度进行探索</p>
+
+    <div className={`text-left pt-5 space-y-3 border-t ${theme === 'dark' ? 'border-white/5' : 'border-slate-50'}`}>
+      <h4 className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-[#A1A1AA]' : 'text-slate-400'}`}>能量印记说明</h4>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+          <p className="text-[11px]"><span className="font-bold">实物徽章:</span> 代表具体成就的物理符号</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]"></div>
+          <p className="text-[11px]"><span className="font-bold">环境能量石:</span> 特定场所的能量记录</p>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// Helper Component for Matrix Statistics (2x2 grid matching design)
+const MatrixStats = ({ matrixData, theme }) => {
+  const stats = useMemo(() => {
+    let total = 0;
+    let filled = 0;
+    let score = 0;
+    matrixData.forEach(row => row.forEach(cell => {
+      total++;
+      if (cell.energy > 0) filled++;
+      score += (cell.energy || 0);
+    }));
+    return {
+      total,
+      filled,
+      empty: total - filled,
+      avg: Math.round(score / Math.max(1, filled))
+    };
+  }, [matrixData]);
+
+  const items = [
+    { label: '总单元格', val: stats.total, color: theme === 'dark' ? 'text-white' : 'text-slate-900' },
+    { label: '已激活', val: stats.filled, color: 'text-rose-500' },
+    { label: '未激活', val: stats.empty, color: theme === 'dark' ? 'text-white' : 'text-slate-900' },
+    { label: '平均能量', val: stats.avg, color: theme === 'dark' ? 'text-white' : 'text-slate-900' }
+  ];
+
+  return (
+    <section className="grid grid-cols-4 gap-2 mb-3">
+      {items.map((stat, idx) => (
+        <div key={idx} className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all ${theme === 'dark' ? 'bg-[#161618] border-[#242427]' : 'bg-white border-slate-100 shadow-sm'
+          }`}>
+          <span className={`text-lg font-bold ${stat.color}`}>{stat.val}</span>
+          <span className={`text-[9px] text-slate-400 mt-0.5`}>{stat.label}</span>
+        </div>
+      ))}
+    </section>
+  );
+};
 
 function LifestyleGuide() {
   return (

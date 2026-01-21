@@ -1,0 +1,249 @@
+/* Global Vars for Lifestyle Guide */
+:root {
+    --bg-deep: #0A0A0B;
+    --card-surface: #161618;
+    --card-border: #242427;
+    --primary-purple: #8B5CF6;
+    --text-main: #FFFFFF;
+    --text-muted: #A1A1AA;
+}
+
+.lifestyle-guide-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--bg-deep);
+    color: var(--text-main);
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* Header */
+.lifestyle-guide-header {
+    flex-shrink: 0;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: rgba(10, 10, 11, 0.82);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--card-border);
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    z-index: 1000;
+}
+
+.header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.header-title-area h1 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.header-title-area .subtitle {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin: 0;
+}
+
+.back-btn,
+.more-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.more-btn:active,
+.back-btn:active {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(0.92);
+}
+
+/* More Menu Dropdown */
+.more-menu-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 16px;
+    background: var(--card-surface);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    padding: 8px;
+    min-width: 200px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 1100;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    transition: background 0.2s;
+    text-align: left;
+}
+
+.menu-item:active {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.menu-divider {
+    height: 1px;
+    background: var(--card-border);
+    margin: 4px 0;
+}
+
+/* Content Area */
+.lifestyle-guide-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.fill-container {
+    height: calc(100vh - 60px);
+}
+
+.archive-manager-view {
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.matrix-play-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+    padding-bottom: 24px;
+}
+
+/* Matrix Viewport overrides for one-page feel */
+.matrix-view-port {
+    width: 100%;
+    padding: 0;
+}
+
+.matrix-scroll-wrapper {
+    width: 100%;
+    padding: 4px 0;
+}
+
+/* Matrix Grid Core Styles */
+.life-matrix-grid {
+    display: grid !important;
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    box-sizing: border-box;
+}
+
+.life-matrix-grid-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: repeat(3, 1fr) !important;
+}
+
+.life-matrix-grid-7 {
+    grid-template-columns: repeat(7, 1fr) !important;
+    grid-template-rows: repeat(7, 1fr) !important;
+}
+
+/* Fix for grid shadow clipping */
+#life-matrix-grid-host {
+    padding: 4px;
+    margin: -4px;
+}
+
+/* Interaction Panel */
+.interaction-panel {
+    background: var(--card-surface);
+    border: 1px solid var(--card-border);
+    border-radius: 1.5rem;
+    padding: 20px;
+    min-height: 120px;
+}
+
+.empty-interaction-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.empty-interaction-state .icon {
+    font-size: 2rem;
+    opacity: 0.3;
+    margin-bottom: 12px;
+}
+
+.empty-interaction-state h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.empty-interaction-state p {
+    font-size: 0.75rem;
+}
+
+/* No Scrollbar Utility */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+/* Animation utilities */
+.animate-in {
+    animation: animateIn 0.2s ease-out;
+}
+
+@keyframes animateIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

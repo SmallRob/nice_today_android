@@ -44,6 +44,17 @@ import {
   getFeatureId
 } from '../utils/featureSortConfig';
 
+import {
+  HoroscopeIcon,
+  HuangliIcon,
+  DressGuideIcon,
+  BiorhythmIcon,
+  TarotGardenIcon,
+  EditIcon,
+  CheckIcon,
+  SortEditIcon
+} from '../components/icons';
+
 // 定义所有功能组件（移到外部，避免每次渲染创建新引用）
 const ALL_FEATURES = [
   { component: TodoCard, name: 'TodoCard', category: '日常管理类', type: 'daily' },
@@ -56,16 +67,16 @@ const ALL_FEATURES = [
   { component: HoroscopeCard, name: 'HoroscopeCard', category: '运势分析类', type: 'fortune' },
   { component: ZiWeiCard, name: 'ZiWeiCard', category: '运势分析类', type: 'fortune' },
   { component: BaziCard, name: 'BaziCard', category: '运势分析类', type: 'fortune' },
-    // { component: LiuyaoCard, name: 'LiuyaoCard', category: '运势分析类', type: 'fortune' },
+  // { component: LiuyaoCard, name: 'LiuyaoCard', category: '运势分析类', type: 'fortune' },
   // { component: PlumBlossomCard, name: 'PlumBlossomCard', category: '运势分析类', type: 'fortune' },
   { component: HuangliCard, name: 'HuangliCard', category: '运势分析类', type: 'fortune' },
-  
+
   // { component: MBTICard, name: 'MBTICard', category: '个人成长类', type: 'growth' },
   { component: PersonalityTestCard, name: 'PersonalityTestCard', category: '个人成长类', type: 'growth' },
   { component: EnergyBoostCard, name: 'EnergyBoostCard', category: '个人成长类', type: 'growth' },
   { component: LifeMatrixCard, name: 'LifeMatrixCard', category: '个人成长类', type: 'growth' },
   // { component: DressGuideCard, name: 'DressGuideCard', category: '个人成长类', type: 'growth' },
- 
+
   { component: DailyCardCard, name: 'DailyCardCard', category: '娱乐休闲类', type: 'entertainment' },
   // { component: TiebanshenshuCard, name: 'TiebanshenshuCard', category: '运势分析类', type: 'fortune' },
   { component: CulturalCupCard, name: 'CulturalCupCard', category: '娱乐休闲类', type: 'entertainment' },
@@ -246,35 +257,35 @@ const Dashboard = () => {
               className="quick-action-btn"
               onClick={() => navigate('/horoscope')}
             >
-              <span>📅</span>
+              <HoroscopeIcon size={22} color="white" />
               <span className="quick-action-label">今日运势</span>
             </button>
             <button
               className="quick-action-btn"
               onClick={() => navigate('/huangli')}
             >
-              <span>☯️</span>
+              <HuangliIcon size={22} color="white" />
               <span className="quick-action-label">黄历择吉</span>
             </button>
             <button
               className="quick-action-btn"
               onClick={() => navigate('/dress')}
             >
-              <span>👕</span>
+              <DressGuideIcon size={22} color="white" />
               <span className="quick-action-label">穿衣指南</span>
             </button>
             <button
               className="quick-action-btn"
               onClick={() => navigate('/biorhythm')}
             >
-              <span>⚡</span>
+              <BiorhythmIcon size={22} color="white" />
               <span className="quick-action-label">今日节律</span>
             </button>
             <button
               className="quick-action-btn"
               onClick={() => navigate('/tarot')}
             >
-              <span>🃏</span>
+              <TarotGardenIcon size={22} color="white" />
               <span className="quick-action-label">塔罗抽卡</span>
             </button>
           </div>
@@ -290,7 +301,7 @@ const Dashboard = () => {
                 onClick={toggleEditMode}
                 title={isEditMode ? '完成排序' : '编辑排序'}
               >
-                {isEditMode ? '✅' : '✏️'}
+                <SortEditIcon size={20} isEditMode={isEditMode} />
               </button>
             </h2>
           </div>

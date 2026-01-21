@@ -7,32 +7,25 @@ import { getDimensionColor, IMPRINT_TYPES } from '../../utils/matrixData';
  */
 const DimensionInfo = ({ cell, onAddImprint, theme = 'light' }) => {
   const [showAddImprint, setShowAddImprint] = useState(false);
-  const [customImprint, setCustomImprint] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  if (!cell) {
-    return null;
-  }
+  const [customImprint, setCustomImprint] = useState('');
 
-  // 过滤印记类型
+  if (!cell) return null;
+
+  // Filter imprint types based on selection
   const filteredImprintTypes = selectedCategory === 'all'
     ? IMPRINT_TYPES
     : IMPRINT_TYPES.filter(type => type.category === selectedCategory);
 
-  // 添加印记
   const handleAddImprint = (imprint) => {
     onAddImprint(cell.row, cell.col, imprint);
     setShowAddImprint(false);
     setCustomImprint('');
   };
 
-  // 添加自定义印记
   const handleCustomImprint = () => {
-    if (!customImprint.trim()) {
-      alert('请输入自定义印记描述');
-      return;
-    }
-
+    if (!customImprint.trim()) return;
     handleAddImprint({
       type: 'custom',
       name: customImprint.trim(),
@@ -42,16 +35,6 @@ const DimensionInfo = ({ cell, onAddImprint, theme = 'light' }) => {
     });
   };
 
-  // 删除印记
-  const handleRemoveImprint = (_imprintId) => {
-    if (!window.confirm('确定要删除这个印记吗？')) return;
-
-    // 这里需要调用父组件的方法来删除印记
-    // 暂时使用 alert 提示
-    alert('删除印记功能待实现');
-  };
-
-  // 获取类别颜色
   const getCategoryColor = (category) => {
     const colorMap = {
       material: '#FF6B6B',
@@ -63,99 +46,78 @@ const DimensionInfo = ({ cell, onAddImprint, theme = 'light' }) => {
     return colorMap[category] || '#CCCCCC';
   };
 
-  // 格式化时间
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   const cellColor = getDimensionColor(cell.dimension.id);
 
   return (
-    <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-xl font-bold" style={{ color: cellColor }}>
-          {cell.dimension.name}
-        </h3>
+    <div className={`p-6 rounded-[2.5rem] border transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 ${theme === 'dark' ? 'bg-[#161618] border-[#242427]' : 'bg-white border-slate-100 shadow-sm'
+      }`}>
+      {/* Header with Color Accent */}
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h3 className="text-xl font-black tracking-tight" style={{ color: cellColor }}>
+            {cell.dimension.name}
+          </h3>
+          <p className={`text-[10px] uppercase tracking-[0.2em] font-bold ${theme === 'dark' ? 'text-[#A1A1AA]' : 'text-slate-400'
+            }`}>
+            维度同步详情
+          </p>
+        </div>
         <div className="text-right">
-          <div className="text-sm opacity-75">能量</div>
-          <div className="text-xl font-bold" style={{ color: cellColor }}>
-            {cell.energy}/100
-          </div>
+          <div className="text-2xl font-black" style={{ color: cellColor }}>{cell.energy}</div>
+          <div className="text-xs font-bold opacity-40">DEPTH</div>
         </div>
       </div>
 
-      <div className="mb-4">
-        <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-          {cell.dimension.description}
-        </p>
-      </div>
+      <p className={`text-xs leading-relaxed mb-6 font-medium ${theme === 'dark' ? 'text-[#A1A1AA]' : 'text-slate-500'
+        }`}>
+        {cell.dimension.description}
+      </p>
 
-      <div className={`w-full h-4 rounded-full mb-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
+      {/* Modern thin energy bar */}
+      <div className={`w-full h-1 rounded-full mb-8 overflow-hidden ${theme === 'dark' ? 'bg-white/5' : 'bg-slate-100'
+        }`}>
         <div
-          className="h-full rounded-full"
-          style={{
-            width: `${cell.energy}%`,
-            backgroundColor: cellColor
-          }}
+          className="h-full rounded-full transition-all duration-1000"
+          style={{ width: `${cell.energy}%`, backgroundColor: cellColor }}
         ></div>
       </div>
 
-      {/* 能量印记列表 */}
+      {/* Imprints Section */}
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h4 className="font-bold">能量印记 ({cell.imprints.length})</h4>
+        <div className="flex justify-between items-center mb-4">
+          <h4 className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-[#A1A1AA]' : 'text-slate-400'
+            }`}>
+            能量印记 ({cell.imprints.length})
+          </h4>
           <button
-            className={`px-4 py-2 rounded-lg font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
             onClick={() => setShowAddImprint(true)}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 ${theme === 'dark' ? 'bg-white text-black' : 'bg-slate-900 text-white'
+              }`}
           >
-            + 添加印记
+            +
           </button>
         </div>
 
         {cell.imprints.length === 0 ? (
-          <div className={`p-6 rounded-lg text-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <p className={`mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>还没有添加能量印记</p>
-            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>点击"添加印记"开始构建此维度</p>
+          <div className={`py-8 rounded-2xl border border-dashed text-center ${theme === 'dark' ? 'border-white/5 bg-white/[0.02]' : 'border-slate-200 bg-slate-50'
+            }`}>
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-30">暂无印记</p>
           </div>
         ) : (
-          <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-            {cell.imprints.map(imprint => (
+          <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+            {cell.imprints.map((imprint, idx) => (
               <div
-                key={imprint.id}
-                className={`p-3 rounded-lg border-l-4 flex justify-between items-start ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}
-                style={{
-                  borderLeftColor: getCategoryColor(imprint.category)
-                }}
+                key={imprint.id || idx}
+                className={`p-4 rounded-2xl border flex justify-between items-center ${theme === 'dark' ? 'bg-white/[0.03] border-white/5' : 'bg-slate-50 border-slate-100'
+                  }`}
               >
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="font-medium">{imprint.name}</span>
-                    <span className="font-bold" style={{ color: getCategoryColor(imprint.category) }}>
-                      +{imprint.power}
-                    </span>
-                  </div>
-                  {imprint.description && (
-                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {imprint.description}
-                    </p>
-                  )}
-                  <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                    {formatDate(imprint.addedAt)}
+                <div>
+                  <div className="text-xs font-bold">{imprint.name}</div>
+                  <div className="text-[9px] opacity-40 uppercase tracking-tighter mt-0.5">
+                    {new Date(imprint.addedAt).toLocaleDateString()}
                   </div>
                 </div>
-                <button
-                  className={`ml-2 w-6 h-6 rounded-full flex items-center justify-center ${theme === 'dark' ? 'hover:bg-gray-600' : 'hover:bg-gray-200'}`}
-                  onClick={() => handleRemoveImprint(imprint.id)}
-                  title="删除印记"
-                >
-                  ×
-                </button>
+                <div className="text-sm font-black" style={{ color: cellColor }}>+{imprint.power}</div>
               </div>
             ))}
           </div>
@@ -181,17 +143,16 @@ const DimensionInfo = ({ cell, onAddImprint, theme = 'light' }) => {
               {['all', 'material', 'spiritual', 'relational', 'creative'].map(category => (
                 <button
                   key={category}
-                  className={`px-3 py-1.5 rounded-full text-sm capitalize ${
-                    selectedCategory === category
-                      ? `${theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'}`
-                      : `${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`
-                  }`}
+                  className={`px-3 py-1.5 rounded-full text-sm capitalize ${selectedCategory === category
+                    ? `${theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'}`
+                    : `${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`
+                    }`}
                   onClick={() => setSelectedCategory(category)}
                 >
-                  {category === 'all' ? '全部' : 
-                   category === 'material' ? '物质' : 
-                   category === 'spiritual' ? '精神' : 
-                   category === 'relational' ? '关系' : '创造'}
+                  {category === 'all' ? '全部' :
+                    category === 'material' ? '物质' :
+                      category === 'spiritual' ? '精神' :
+                        category === 'relational' ? '关系' : '创造'}
                 </button>
               ))}
             </div>
@@ -201,9 +162,8 @@ const DimensionInfo = ({ cell, onAddImprint, theme = 'light' }) => {
               {filteredImprintTypes.map(type => (
                 <button
                   key={type.id}
-                  className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
-                    theme === 'dark' ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-100'
-                  }`}
+                  className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-100'
+                    }`}
                   onClick={() => handleAddImprint(type)}
                   style={{
                     borderLeftColor: getCategoryColor(type.category)
@@ -235,18 +195,16 @@ const DimensionInfo = ({ cell, onAddImprint, theme = 'light' }) => {
                   onChange={(e) => setCustomImprint(e.target.value)}
                   placeholder="输入自定义印记描述..."
                   maxLength={50}
-                  className={`flex-1 p-2 rounded border ${
-                    theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white' 
-                      : 'bg-white border-gray-300'
-                  }`}
+                  className={`flex-1 p-2 rounded border ${theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300'
+                    }`}
                 />
                 <button
-                  className={`px-4 py-2 rounded-lg font-medium ${
-                    customImprint.trim()
-                      ? `${theme === 'dark' ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'} text-white`
-                      : `${theme === 'dark' ? 'bg-gray-700 text-gray-500' : 'bg-gray-300 text-gray-500'}`
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium ${customImprint.trim()
+                    ? `${theme === 'dark' ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'} text-white`
+                    : `${theme === 'dark' ? 'bg-gray-700 text-gray-500' : 'bg-gray-300 text-gray-500'}`
+                    }`}
                   onClick={handleCustomImprint}
                   disabled={!customImprint.trim()}
                 >

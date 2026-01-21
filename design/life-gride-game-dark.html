@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="dark" lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>生命矩阵 - Life Matrix Dark</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <style type="text/tailwindcss">
+        :root {
+            --bg-deep: #0A0A0B;
+            --card-surface: #161618;
+            --card-border: #242427;
+            --primary-purple: #8B5CF6;
+            --text-main: #FFFFFF;
+            --text-muted: #A1A1AA;
+        }
+        body {
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .grid-card {
+            aspect-ratio: 1 / 1;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .grid-card:active {
+            transform: scale(0.94);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen pb-28">
+    <header
+        class="sticky top-0 z-50 bg-[#0A0A0B]/80 ios-blur border-b border-[#242427] px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-[var(--primary-purple)]/10 rounded-xl">
+                <span class="material-symbols-outlined text-[var(--primary-purple)] text-2xl">grid_view</span>
+            </div>
+            <div>
+                <h1 class="text-sm font-bold tracking-tight text-white">生命矩阵</h1>
+                <p class="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-medium">Life Matrix Pro
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="p-2 rounded-full text-[var(--text-muted)] hover:text-white transition-colors">
+                <span class="material-symbols-outlined text-2xl">notifications</span>
+            </button>
+            <button class="p-2 rounded-full text-[var(--text-muted)] hover:text-white">
+                <span class="material-symbols-outlined text-2xl">more_horiz</span>
+            </button>
+        </div>
+    </header>
+    <main class="p-4 space-y-5 max-w-md mx-auto">
+        <section
+            class="bg-[var(--card-surface)] rounded-2xl p-6 border border-[var(--card-border)] relative overflow-hidden">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-3xl font-bold tracking-tight text-white">444</span>
+                        <span
+                            class="px-1.5 py-0.5 bg-white/5 border border-white/10 text-[9px] font-bold rounded text-[var(--text-muted)]">LV.3</span>
+                    </div>
+                    <div class="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-semibold">矩阵代码</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-[var(--primary-purple)]">2,840</div>
+                    <div class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-semibold">能量总值</div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center py-2 space-y-6">
+                <div class="relative group">
+                    <div
+                        class="absolute -inset-4 bg-[var(--primary-purple)] rounded-full blur-2xl opacity-20 transition duration-1000">
+                    </div>
+                    <button
+                        class="relative bg-[var(--primary-purple)] text-white px-12 py-3.5 rounded-full font-bold shadow-lg glow-purple transition-all transform active:scale-95 text-sm tracking-wide">
+                        开始同步
+                    </button>
+                </div>
+                <div class="w-full space-y-3">
+                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-[var(--primary-purple)] w-1/3 rounded-full transition-all duration-1000">
+                        </div>
+                    </div>
+                    <div
+                        class="flex justify-between items-center text-[10px] text-[var(--text-muted)] font-medium tracking-tighter">
+                        <span>目前状态: 初始觉醒</span>
+                        <span class="text-[var(--primary-purple)] font-bold">33% 达成率</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="grid grid-cols-4 gap-2">
+            <div
+                class="bg-[var(--card-surface)] p-3 rounded-xl border border-[var(--card-border)] flex flex-col items-center">
+                <span class="text-lg font-bold">9</span>
+                <span class="text-[9px] text-[var(--text-muted)] mt-0.5">总数</span>
+            </div>
+            <div
+                class="bg-[var(--card-surface)] p-3 rounded-xl border border-[var(--card-border)] flex flex-col items-center">
+                <span class="text-lg font-bold text-emerald-400">3</span>
+                <span class="text-[9px] text-[var(--text-muted)] mt-0.5">已激活</span>
+            </div>
+            <div
+                class="bg-[var(--card-surface)] p-3 rounded-xl border border-[var(--card-border)] flex flex-col items-center">
+                <span class="text-lg font-bold text-rose-400">6</span>
+                <span class="text-[9px] text-[var(--text-muted)] mt-0.5">待开启</span>
+            </div>
+            <div
+                class="bg-[var(--card-surface)] p-3 rounded-xl border border-[var(--card-border)] flex flex-col items-center">
+                <span class="text-lg font-bold">315</span>
+                <span class="text-[9px] text-[var(--text-muted)] mt-0.5">均值</span>
+            </div>
+        </section>
+        <section class="grid grid-cols-3 gap-3">
+            <div
+                class="grid-card bg-rose-500/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-rose-900/20 border border-rose-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">身体</span>
+                <span class="text-xl font-bold">85</span>
+                <div class="w-5 h-1 bg-white/40 rounded-full mt-2"></div>
+            </div>
+            <div
+                class="grid-card bg-emerald-500/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-emerald-900/20 border border-emerald-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">心智</span>
+                <span class="text-xl font-bold">42</span>
+                <div class="w-5 h-1 bg-white/20 rounded-full mt-2"></div>
+            </div>
+            <div
+                class="grid-card bg-blue-500/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-blue-900/20 border border-blue-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">精神</span>
+                <span class="text-xl font-bold">12</span>
+                <div class="w-5 h-1 bg-white/10 rounded-full mt-2"></div>
+            </div>
+            <div
+                class="grid-card bg-orange-500/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-orange-900/20 border border-orange-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">创造</span>
+                <span class="text-xl font-bold">0</span>
+                <div class="w-5 h-1 bg-white/5 rounded-full mt-2"></div>
+            </div>
+            <div
+                class="grid-card bg-violet-600/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-violet-900/20 border border-violet-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">核心</span>
+                <span class="text-xl font-bold">99</span>
+                <div class="w-5 h-1 bg-white/60 rounded-full mt-2"></div>
+            </div>
+            <div
+                class="grid-card bg-pink-500/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-pink-900/20 border border-pink-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">爱</span>
+                <span class="text-xl font-bold">0</span>
+                <div class="w-5 h-1 bg-white/5 rounded-full mt-2"></div>
+            </div>
+            <div
+                class="grid-card bg-amber-600/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-amber-900/20 border border-amber-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">游戏</span>
+                <span class="text-xl font-bold">0</span>
+                <div class="w-5 h-1 bg-white/5 rounded-full mt-2"></div>
+            </div>
+            <div
+                class="grid-card bg-sky-500/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-sky-900/20 border border-sky-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">服务</span>
+                <span class="text-xl font-bold">0</span>
+                <div class="w-5 h-1 bg-white/5 rounded-full mt-2"></div>
+            </div>
+            <div
+                class="grid-card bg-zinc-600/90 rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-zinc-900/20 border border-zinc-400/30">
+                <span class="text-[10px] font-bold tracking-wider opacity-80 mb-1 uppercase">存在</span>
+                <span class="text-xl font-bold">0</span>
+                <div class="w-5 h-1 bg-white/5 rounded-full mt-2"></div>
+            </div>
+        </section>
+        <section class="bg-[#1C1C1E] p-5 rounded-2xl border border-amber-500/20">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-amber-400 text-xl">auto_awesome</span>
+                <h3 class="text-xs font-bold text-amber-200 uppercase tracking-widest">维度探索建议</h3>
+            </div>
+            <ul class="text-[11px] text-amber-100/60 space-y-2 list-none leading-relaxed">
+                <li class="flex items-start gap-2">
+                    <span class="w-1 h-1 rounded-full bg-amber-400 mt-1.5 shrink-0"></span>
+                    <span>目前“精神”维度能量处于低位，建议每日进行10分钟冥想。</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="w-1 h-1 rounded-full bg-amber-400 mt-1.5 shrink-0"></span>
+                    <span>“身体”维度已激活且表现良好，请继续保持当前的运动习惯。</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="w-1 h-1 rounded-full bg-amber-400 mt-1.5 shrink-0"></span>
+                    <span>还有 6 个核心领域尚未被触及，尝试建立首个能量印记。</span>
+                </li>
+            </ul>
+        </section>
+        <section class="bg-[var(--card-surface)] p-5 rounded-2xl border border-[var(--card-border)] space-y-4">
+            <div class="flex justify-between items-center">
+                <h4 class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">能量阶梯 (Levels)</h4>
+                <span class="material-symbols-outlined text-sm text-[var(--text-muted)]">info</span>
+            </div>
+            <div class="grid grid-cols-3 gap-y-3 gap-x-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-white/5 border border-white/10"></div>
+                    <span class="text-[10px] font-medium text-[var(--text-muted)]">空态 (0)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-white/20"></div>
+                    <span class="text-[10px] font-medium text-[var(--text-muted)]">微光 (1-20)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-white/40"></div>
+                    <span class="text-[10px] font-medium text-[var(--text-muted)]">中矩 (21-50)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-sm bg-white/70"></div>
+                    <span class="text-[10px] font-medium text-[var(--text-muted)]">盈满 (51-80)</span>
+                </div>
+                <div class="flex items-center gap-2 col-span-2">
+                    <div class="w-3 h-3 rounded-sm bg-gradient-to-br from-amber-400 to-orange-600"></div>
+                    <span class="text-[10px] font-bold text-amber-200">传奇 (81-100)</span>
+                </div>
+            </div>
+        </section>
+    </main>
+    <nav
+        class="fixed bottom-0 left-0 right-0 bg-[#0A0A0B]/90 ios-blur border-t border-[#242427] px-6 py-3 flex justify-between items-center z-50">
+        <button class="flex flex-col items-center gap-1 text-[var(--primary-purple)]">
+            <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">grid_view</span>
+            <span class="text-[9px] font-bold uppercase tracking-tighter">矩阵</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-[var(--text-muted)]">
+            <span class="material-symbols-outlined text-2xl">history_edu</span>
+            <span class="text-[9px] font-medium uppercase tracking-tighter">存档</span>
+        </button>
+        <div class="relative -mt-10">
+            <button
+                class="bg-[var(--primary-purple)] text-white w-14 h-14 rounded-full shadow-2xl shadow-purple-500/40 flex items-center justify-center border-4 border-[#0A0A0B] transform active:scale-90 transition-transform">
+                <span class="material-symbols-outlined text-3xl font-bold">add</span>
+            </button>
+        </div>
+        <button class="flex flex-col items-center gap-1 text-[var(--text-muted)]">
+            <span class="material-symbols-outlined text-2xl">insights</span>
+            <span class="text-[9px] font-medium uppercase tracking-tighter">分析</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-[var(--text-muted)]">
+            <span class="material-symbols-outlined text-2xl">settings</span>
+            <span class="text-[9px] font-medium uppercase tracking-tighter">设置</span>
+        </button>
+    </nav>
+    <div class="h-8 fixed bottom-0 left-0 right-0 bg-transparent pointer-events-none"></div>
+
+</body>
+
+</html>

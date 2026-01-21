@@ -21,7 +21,7 @@ export const DIMENSIONS_7x7 = [
   { id: 'wisdom', name: '智慧', description: '经验与理解的结晶' },
   { id: 'insight', name: '洞察', description: '看透本质的能力' },
   { id: 'clarity', name: '清明', description: '清晰的思维与判断' },
-  
+
   // 第二行
   { id: 'family', name: '家庭', description: '血缘与亲缘关系' },
   { id: 'friendship', name: '友谊', description: '同伴与支持网络' },
@@ -30,7 +30,7 @@ export const DIMENSIONS_7x7 = [
   { id: 'partnership', name: '伙伴', description: '平等合作与联盟' },
   { id: 'romance', name: '浪漫', description: '激情与亲密连接' },
   { id: 'universal-love', name: '大爱', description: '无条件的爱与慈悲' },
-  
+
   // 第三行
   { id: 'art', name: '艺术', description: '审美表达与创造' },
   { id: 'music', name: '音乐', description: '声音与节奏表达' },
@@ -39,7 +39,7 @@ export const DIMENSIONS_7x7 = [
   { id: 'craft', name: '手艺', description: '技能与工艺制作' },
   { id: 'performance', name: '表演', description: '呈现与表达自我' },
   { id: 'design', name: '设计', description: '形式与功能的结合' },
-  
+
   // 第四行
   { id: 'knowledge', name: '知识', description: '信息与事实掌握' },
   { id: 'philosophy', name: '哲学', description: '根本问题的探索' },
@@ -48,7 +48,7 @@ export const DIMENSIONS_7x7 = [
   { id: 'mystery', name: '奥秘', description: '未知与神秘探索' },
   { id: 'ethics', name: '伦理', description: '价值观与道德判断' },
   { id: 'truth', name: '真理', description: '真实与本质追求' },
-  
+
   // 第五行
   { id: 'meditation', name: '冥想', description: '静心与内在观察' },
   { id: 'prayer', name: '祈祷', description: '与更高力量的连接' },
@@ -57,7 +57,7 @@ export const DIMENSIONS_7x7 = [
   { id: 'surrender', name: '臣服', description: '放手与接受' },
   { id: 'grace', name: '恩典', description: '不劳而获的祝福' },
   { id: 'unity', name: '合一', description: '与万物的连接感' },
-  
+
   // 第六行
   { id: 'teaching', name: '教导', description: '分享知识与智慧' },
   { id: 'healing', name: '疗愈', description: '恢复完整与健康' },
@@ -66,7 +66,7 @@ export const DIMENSIONS_7x7 = [
   { id: 'leadership', name: '领导力', description: '引导与激励他人' },
   { id: 'mentoring', name: '指导', description: '培养他人成长' },
   { id: 'legacy', name: '遗产', description: '留下持久影响' },
-  
+
   // 第七行
   { id: 'presence', name: '临在', description: '全然活在当下' },
   { id: 'wonder', name: '惊奇', description: '对世界的赞叹' },
@@ -84,18 +84,18 @@ export const IMPRINT_TYPES = [
   { id: 'energy-stone', name: '环境能量石', category: 'material', power: 12, description: '特定场所的能量记录' },
   { id: 'life-object', name: '生命物件', category: 'material', power: 20, description: '承载记忆与意义的个人物品' },
   { id: 'practice-card', name: '身体实践卡', category: 'material', power: 10, description: '记录身体锻炼与健康习惯' },
-  
+
   // 精神印记
   { id: 'insight-crystal', name: '洞察水晶', category: 'spiritual', power: 25, description: '记录重要领悟' },
   { id: 'emotion-stone', name: '情感共鸣石', category: 'spiritual', power: 18, description: '标记深刻情感体验' },
   { id: 'dialogue-echo', name: '对话回声', category: 'spiritual', power: 15, description: '有意义对话的精华记录' },
   { id: 'dream-fragment', name: '梦境碎片', category: 'spiritual', power: 22, description: '重要梦境或直觉的符号化' },
-  
+
   // 关系印记
   { id: 'connection-bridge', name: '连接之桥', category: 'relational', power: 16, description: '代表重要关系的建立' },
   { id: 'forgiveness-flower', name: '宽恕之花', category: 'relational', power: 20, description: '和解与原谅的时刻' },
   { id: 'gratitude-seed', name: '感恩之种', category: 'relational', power: 14, description: '表达真诚感谢的时刻' },
-  
+
   // 创造印记
   { id: 'creation-spark', name: '创造火花', category: 'creative', power: 18, description: '新想法或项目的开始' },
   { id: 'completion-orb', name: '完成宝珠', category: 'creative', power: 25, description: '完成重要作品或项目' },
@@ -105,33 +105,26 @@ export const IMPRINT_TYPES = [
 // 获取维度颜色
 export const getDimensionColor = (dimensionId) => {
   const colorMap = {
-    // 3x3 颜色
-    body: '#FF6B6B',
-    mind: '#4ECDC4',
-    spirit: '#45B7D1',
-    work: '#96CEB4',
-    center: '#FFEAA7',
-    love: '#DDA0DD',
-    play: '#FDCB6E',
-    serve: '#55EFC4',
-    being: '#74B9FF',
-    
-    // 7x7 颜色分组
-    // 身体相关 - 红色系
-    health: '#FF6B6B', vitality: '#FF8E8E', senses: '#FFAAAA',
-    // 关系相关 - 粉色系
-    family: '#FFB6C1', friendship: '#FFC8DD', community: '#FFAFCC',
-    // 创造相关 - 黄色系
-    art: '#FFD166', music: '#FFE5A5', writing: '#FFF1C1',
-    // 智慧相关 - 蓝色系
-    knowledge: '#118AB2', philosophy: '#06D6A0', science: '#0CB2B2',
-    // 精神相关 - 紫色系
-    meditation: '#9D4EDD', prayer: '#C77DFF', ritual: '#E0AAFF',
-    // 服务相关 - 绿色系
-    teaching: '#2A9D8F', healing: '#4CAF50', volunteering: '#8AC926',
-    // 存在相关 - 橙色系
-    presence: '#F3722C', wonder: '#F8961E', gratitude: '#F9844A'
+    // 3x3 颜色 - 更加醒目和饱和的色彩
+    body: '#FF4757',      // 热烈红
+    mind: '#2ED573',      // 活力绿
+    spirit: '#1E90FF',    // 沉静蓝
+    work: '#FFA502',      // 动力橙
+    center: '#70A1FF',    // 核心蓝
+    love: '#FF6B81',      // 甜蜜粉
+    play: '#E58E26',      // 娱乐金
+    serve: '#1B9CFC',     // 服务蓝
+    being: '#57606F',     // 存在灰
+
+    // 7x7 颜色分组 - 增加对比度
+    health: '#EB4D4B', vitality: '#FF7979', senses: '#BAD33C',
+    family: '#F0932B', friendship: '#FFBE76', community: '#F9CA24',
+    art: '#686DE0', music: '#4834D4', writing: '#BE2EDD',
+    knowledge: '#22A6B3', philosophy: '#7ED6DF', science: '#DFF9FB',
+    meditation: '#60A3BC', prayer: '#3C6382', ritual: '#0A3D62',
+    teaching: '#009432', healing: '#A3CB38', volunteering: '#C4E538',
+    presence: '#F79F1F', wonder: '#FFC312', gratitude: '#EE5A24'
   };
-  
+
   return colorMap[dimensionId] || '#CCCCCC';
 };
