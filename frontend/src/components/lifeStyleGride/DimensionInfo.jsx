@@ -158,27 +158,24 @@ const DimensionInfo = ({ cell, onAddImprint, theme = 'light' }) => {
             </div>
 
             {/* 印记列表 */}
-            <div className="p-4 grid grid-cols-1 gap-3 max-h-60 overflow-y-auto">
+            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-64 overflow-y-auto">
               {filteredImprintTypes.map(type => (
                 <button
                   key={type.id}
-                  className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-100'
+                  className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all hover:scale-[1.02] active:scale-95 min-h-[100px] ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-200 hover:bg-gray-50'
                     }`}
                   onClick={() => handleAddImprint(type)}
                   style={{
-                    borderLeftColor: getCategoryColor(type.category)
+                    borderTopColor: getCategoryColor(type.category),
+                    borderTopWidth: '3px'
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="text-xl">{getImprintIcon(type.category)}</div>
-                    <div className="text-left">
-                      <div className="font-medium">{type.name}</div>
-                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {type.description}
-                      </div>
-                    </div>
+                  <div className="text-2xl mb-2">{getImprintIcon(type.category)}</div>
+                  <div className="font-bold text-sm mb-1">{type.name}</div>
+                  <div className={`text-xs mb-2 line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {type.description}
                   </div>
-                  <div className="font-bold" style={{ color: getCategoryColor(type.category) }}>
+                  <div className="font-black text-sm" style={{ color: getCategoryColor(type.category) }}>
                     +{type.power}
                   </div>
                 </button>
