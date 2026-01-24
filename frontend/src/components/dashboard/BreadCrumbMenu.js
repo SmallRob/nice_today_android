@@ -130,27 +130,27 @@ const BreadCrumbMenu = ({ hideText = false }) => {
 
                 {/* 底部系统设置和版本号 */}
                 <div className="menu-footer">
-                    <div className="menu-separator">
+                    {/*     <div className="menu-separator">
                         <span>系统设置</span>
                     </div>
-                    <ul className="menu-list">
-                        {/* <li className="menu-item">
+                    <ul className="menu-list"> */}
+                    {/* <li className="menu-item">
                             <button onClick={() => handleNavigate('/user-config')}>
                                 <div className="item-icon-box">👤</div>
                                 <span className="item-name">用户配置</span>
                                 {isActive('/user-config') && <div className="active-dot"></div>}
                             </button>
                         </li> */}
-                        <li className="menu-item">
+                    {/* <li className="menu-item">
                             <button onClick={() => handleNavigate('/settings')}>
                                 <div className="item-icon-box">⚙️</div>
                                 <span className="item-name">系统设置</span>
                                 {isActive('/settings') && <div className="active-dot"></div>}
                             </button>
-                        </li>
-                    </ul>
+                        </li> */}
+                    {/* </ul> */}
                     <div className="version-info">
-                        v1.0.12
+                        v1.12.26
                     </div>
                 </div>
             </div>
