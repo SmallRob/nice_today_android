@@ -7,9 +7,30 @@ import { useTheme } from '../context/ThemeContext';
 import versionDetector from '../utils/versionDetector';
 import { restartApp } from '../utils/restartApp';
 import { errorTrackingSettings } from '../utils/errorTrackingSettings';
+import { userConfigManager } from '../utils/userConfigManager';
+import { AI_CONFIG } from '../services/globalUserConfig';
 import versionData from '../version.json';
 import '../index.css';
 import '../styles/settingsPage.css';
+
+const SectionCard = ({ title, children }) => (
+  <div className="settings-section">
+    <h2 className="settings-section-title">{title}</h2>
+    {children}
+  </div>
+);
+
+const ToggleSwitch = ({ checked, onChange, id }) => (
+  <label className="settings-toggle" htmlFor={id}>
+    <input
+      type="checkbox"
+      id={id}
+      checked={checked}
+      onChange={onChange}
+    />
+    <span className="settings-slider"></span>
+  </label>
+);
 
 function SettingsPage() {
   const [appVersion, setAppVersion] = useState({
@@ -44,6 +65,24 @@ function SettingsPage() {
   // 错误日志追踪设置
   const [errorTrackingEnabled, setErrorTrackingEnabled] = useState(() => {
     return errorTrackingSettings.isEnabled();
+  });
+
+  // AI设置
+  const [aiSettings, setAiSettings] = useState({
+    useAIInterpretation: AI_CONFIG.DEFAULT_ENABLE_AI,
+    selectedAIModelId: AI_CONFIG.DEFAULT_MODEL_ID,
+    homeTimeAwareEnabled: AI_CONFIG.DEFAULT_HOME_TIME_AWARE ?? true,
+    customModels: []
+  });
+
+  // 新增模型表单状态
+  const [showAddModel, setShowAddModel] = useState(false);
+  const [newModel, setNewModel] = useState({
+    id: '',
+    name: '',
+    API_KEY: '',
+    ServiceEndPoint: '',
+    deploymentName: ''
   });
 
   // 切换错误日志追踪
@@ -160,6 +199,22 @@ function SettingsPage() {
               checkRecords: []
             });
           }
+        }
+
+        // 阶段4：加载 AI 设置
+        try {
+          const globalSettings = userConfigManager.getGlobalSettings();
+          if (globalSettings && isMounted) {
+            setAiSettings(prev => ({
+              ...prev,
+              useAIInterpretation: globalSettings.useAIInterpretation ?? AI_CONFIG.DEFAULT_ENABLE_AI,
+              selectedAIModelId: globalSettings.selectedAIModelId || AI_CONFIG.DEFAULT_MODEL_ID,
+              homeTimeAwareEnabled: globalSettings.homeTimeAwareEnabled ?? (AI_CONFIG.DEFAULT_HOME_TIME_AWARE ?? true),
+              customModels: globalSettings.customModels || []
+            }));
+          }
+        } catch (aiError) {
+          console.warn('加载 AI 设置失败:', aiError);
         }
 
       } catch (error) {
@@ -307,6 +362,65 @@ function SettingsPage() {
     }
   }, [updateCheckSettings]);
 
+  // 处理 AI 设置变更
+  const handleAISettingChange = useCallback((field, value) => {
+    setAiSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
+
+    // 保存到全局配置
+    try {
+      userConfigManager.updateGlobalSettings({ [field]: value });
+    } catch (error) {
+      console.error('保存 AI 设置失败:', error);
+      setError('保存设置失败: ' + error.message);
+    }
+  }, []);
+
+  // 添加自定义模型
+  const handleAddModel = useCallback(() => {
+    if (!newModel.name || !newModel.API_KEY || !newModel.ServiceEndPoint) {
+      setError('请填写完整的模型信息');
+      setTimeout(() => setError(null), 2000);
+      return;
+    }
+
+    const modelId = newModel.id || `custom-${Date.now()}`;
+    const modelToAdd = { ...newModel, id: modelId };
+    
+    const updatedCustomModels = [...(aiSettings.customModels || []), modelToAdd];
+    handleAISettingChange('customModels', updatedCustomModels);
+    
+    // 自动选中新添加的模型
+    handleAISettingChange('selectedAIModelId', modelId);
+
+    setNewModel({
+      id: '',
+      name: '',
+      API_KEY: '',
+      ServiceEndPoint: '',
+      deploymentName: ''
+    });
+    setShowAddModel(false);
+    setSuccess('模型添加成功');
+    setTimeout(() => setSuccess(null), 2000);
+  }, [newModel, aiSettings.customModels, handleAISettingChange]);
+
+  // 删除自定义模型
+  const handleDeleteModel = useCallback((modelId) => {
+    const updatedCustomModels = aiSettings.customModels.filter(m => m.id !== modelId);
+    handleAISettingChange('customModels', updatedCustomModels);
+    
+    // 如果删除的是当前选中的模型，重置为默认
+    if (aiSettings.selectedAIModelId === modelId) {
+      handleAISettingChange('selectedAIModelId', AI_CONFIG.DEFAULT_MODEL_ID);
+    }
+    
+    setSuccess('模型已删除');
+    setTimeout(() => setSuccess(null), 2000);
+  }, [aiSettings.customModels, aiSettings.selectedAIModelId, handleAISettingChange]);
+
   // 手动检查更新
   const handleManualCheckUpdate = async () => {
     try {
@@ -383,25 +497,6 @@ function SettingsPage() {
     }
   }, []);
 
-  const SectionCard = ({ title, children }) => (
-    <div className="settings-section">
-      <h2 className="settings-section-title">{title}</h2>
-      {children}
-    </div>
-  );
-
-  const ToggleSwitch = ({ checked, onChange, id }) => (
-    <label className="settings-toggle" htmlFor={id}>
-      <input
-        type="checkbox"
-        id={id}
-        checked={checked}
-        onChange={onChange}
-      />
-      <span className="settings-slider"></span>
-    </label>
-  );
-
   if (!isLoaded) {
     return (
       <div className="settings-page h-full bg-gray-50 dark:bg-gray-900">
@@ -469,6 +564,171 @@ function SettingsPage() {
       {/* 可滚动内容区域 */}
       <div className="flex-1 overflow-y-auto">
         <div className="settings-container pb-8">
+          {/* AI 功能设置 */}
+          <SectionCard title="AI 功能设置">
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div>
+                  <div className="settings-item-label">启用 AI 解读</div>
+                  <div className="settings-item-description">开启后，应用将提供基于 AI 的运势解读和建议</div>
+                </div>
+                <ToggleSwitch
+                  checked={aiSettings.useAIInterpretation}
+                  onChange={(e) => handleAISettingChange('useAIInterpretation', e.target.checked)}
+                  id="useAIInterpretation"
+                />
+              </div>
+            </div>
+
+            {aiSettings.useAIInterpretation && (
+              <div className="settings-item">
+                <div className="settings-item-label">选择 AI 模型</div>
+                <div className="settings-item-description">请选择用于解读的 AI 模型，或添加自定义模型</div>
+                
+                <div className="flex gap-2 mt-2">
+                  <select
+                    value={aiSettings.selectedAIModelId}
+                    onChange={(e) => handleAISettingChange('selectedAIModelId', e.target.value)}
+                    className="settings-input flex-1"
+                  >
+                    <optgroup label="预设模型">
+                      {AI_CONFIG.MODELS.map(model => (
+                        <option key={model.id} value={model.id}>
+                          {model.name} ({model.id})
+                        </option>
+                      ))}
+                    </optgroup>
+                    {(aiSettings.customModels && aiSettings.customModels.length > 0) && (
+                      <optgroup label="自定义模型">
+                        {aiSettings.customModels.map(model => (
+                          <option key={model.id} value={model.id}>
+                            {model.name} ({model.id})
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </select>
+                  
+                  <button 
+                    onClick={() => setShowAddModel(!showAddModel)}
+                    className="px-3 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
+                  >
+                    {showAddModel ? '取消' : '添加'}
+                  </button>
+                </div>
+
+                {/* 当前选中模型的详细信息展示 */}
+                <div className="mt-2 text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                  {(() => {
+                    const allModels = [...AI_CONFIG.MODELS, ...(aiSettings.customModels || [])];
+                    const currentModel = allModels.find(m => m.id === aiSettings.selectedAIModelId);
+                    if (currentModel) {
+                      return (
+                        <div className="flex justify-between items-center">
+                          <span>Endpoint: {currentModel.ServiceEndPoint.substring(0, 30)}...</span>
+                          {aiSettings.customModels?.some(m => m.id === currentModel.id) && (
+                             <button 
+                               onClick={() => handleDeleteModel(currentModel.id)}
+                               className="text-red-500 hover:text-red-700 ml-2"
+                             >
+                               删除
+                             </button>
+                          )}
+                        </div>
+                      );
+                    }
+                    return <span>未找到模型配置</span>;
+                  })()}
+                </div>
+
+                {/* 添加新模型表单 */}
+                {showAddModel && (
+                  <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg space-y-3 border border-gray-200 dark:border-gray-700">
+                    <h3 className="font-medium text-gray-900 dark:text-white">添加自定义模型</h3>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">模型名称</label>
+                      <input
+                        type="text"
+                        value={newModel.name}
+                        onChange={(e) => setNewModel({...newModel, name: e.target.value})}
+                        className="settings-input w-full"
+                        placeholder="例如: My Custom GPT"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">模型 ID (可选)</label>
+                      <input
+                        type="text"
+                        value={newModel.id}
+                        onChange={(e) => setNewModel({...newModel, id: e.target.value})}
+                        className="settings-input w-full"
+                        placeholder="留空自动生成"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
+                      <input
+                        type="password"
+                        value={newModel.API_KEY}
+                        onChange={(e) => setNewModel({...newModel, API_KEY: e.target.value})}
+                        className="settings-input w-full"
+                        placeholder="sk-..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Service Endpoint</label>
+                      <input
+                        type="text"
+                        value={newModel.ServiceEndPoint}
+                        onChange={(e) => setNewModel({...newModel, ServiceEndPoint: e.target.value})}
+                        className="settings-input w-full"
+                        placeholder="https://api.openai.com/v1/chat/completions"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Deployment Name (可选)</label>
+                      <input
+                        type="text"
+                        value={newModel.deploymentName}
+                        onChange={(e) => setNewModel({...newModel, deploymentName: e.target.value})}
+                        className="settings-input w-full"
+                        placeholder="Azure OpenAI 需要"
+                      />
+                    </div>
+
+                    <div className="flex justify-end pt-2">
+                      <button
+                        onClick={handleAddModel}
+                        className="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 shadow-sm"
+                      >
+                        保存模型
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="settings-item">
+              <div className="settings-item-header">
+                <div>
+                  <div className="settings-item-label">首页时令卡片</div>
+                  <div className="settings-item-description">在首页显示基于时令的 AI 建议卡片</div>
+                </div>
+                <ToggleSwitch
+                  checked={aiSettings.homeTimeAwareEnabled}
+                  onChange={(e) => handleAISettingChange('homeTimeAwareEnabled', e.target.checked)}
+                  id="homeTimeAwareEnabled"
+                />
+              </div>
+            </div>
+          </SectionCard>
+
           {/* 应用设置 */}
           <SectionCard title="应用设置">
             <div className="settings-item">

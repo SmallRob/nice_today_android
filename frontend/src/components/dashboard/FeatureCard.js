@@ -24,17 +24,18 @@ import { CARD_DEFAULTS } from './constants';
  */
 const FeatureCard = ({
   title,
-  icon,
+  icon = CARD_DEFAULTS.DEFAULT_ICON,
   category = 'default',
-  route,
-  onClick,
-  disabled,
-  draggable,
-  onDragStart,
-  onDragEnd,
-  index,
-  id,
+  route = null,
+  onClick = null,
+  disabled = false,
+  draggable = false,
+  onDragStart = null,
+  onDragEnd = null,
+  index = 0,
+  id = null,
   showDragHandle = false,
+  color = CARD_DEFAULTS.DEFAULT_COLOR,
   ...props
 }) => {
   const navigate = useNavigate();
@@ -177,21 +178,6 @@ FeatureCard.propTypes = {
   id: PropTypes.string,
   /** 是否显示拖拽手柄 */
   showDragHandle: PropTypes.bool
-};
-
-// 默认 props
-FeatureCard.defaultProps = {
-  icon: CARD_DEFAULTS.DEFAULT_ICON,
-  color: CARD_DEFAULTS.DEFAULT_COLOR,
-  category: 'default',
-  route: null,
-  onClick: null,
-  disabled: false,
-  draggable: false,
-  onDragStart: null,
-  onDragEnd: null,
-  index: 0,
-  id: null
 };
 
 // 性能优化:使用 React.memo 避免不必要的重新渲染

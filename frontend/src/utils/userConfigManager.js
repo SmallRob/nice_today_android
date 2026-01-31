@@ -9,7 +9,7 @@
 const DEFAULT_CONFIG = Object.freeze({
   nickname: '叉子',
   realName: '', // 真实姓名（用于五格评分和八字测算）
-  birthDate: '1991-04-30',
+  birthDate: '1991-04-21',
   birthTime: '12:30',
   shichen: '午时',
   birthLocation: Object.freeze({
@@ -200,8 +200,8 @@ const EMPTY_CONFIG_DEFAULTS = {
     province: '北京市',
     city: '北京市',
     district: '朝阳区',
-    lng: 110.48,
-    lat: 30.95
+    lng: 116.48, // 修正经度
+    lat: 39.95   // 修正纬度
   },
   zodiac: '金牛座',
   zodiacAnimal: '羊',
@@ -216,7 +216,14 @@ const EMPTY_CONFIG_DEFAULTS = {
 // 本地存储键名
 const STORAGE_KEYS = {
   USER_CONFIGS: 'nice_today_user_configs',
-  ACTIVE_CONFIG_INDEX: 'nice_today_active_config_index'
+  ACTIVE_CONFIG_INDEX: 'nice_today_active_config_index',
+  GLOBAL_SETTINGS: 'nice_today_global_settings'
+};
+
+const DEFAULT_SETTINGS = {
+  useAIInterpretation: true, // 默认开启 AI 解读
+  selectedAIModelId: 'qwen-72b',
+  homeTimeAwareEnabled: true // 默认开启首页时令卡片
 };
 
 /**
@@ -384,6 +391,7 @@ class UserConfigManager {
   constructor() {
     this.configs = [];
     this.activeConfigIndex = 0;
+    this.globalSettings = { ...DEFAULT_SETTINGS };
     this.listeners = [];
     this.initialized = false;
   }
@@ -396,16 +404,28 @@ class UserConfigManager {
       // 从本地存储加载配置
       const storedConfigs = localStorage.getItem(STORAGE_KEYS.USER_CONFIGS);
       const storedIndex = localStorage.getItem(STORAGE_KEYS.ACTIVE_CONFIG_INDEX);
+      const storedSettings = localStorage.getItem(STORAGE_KEYS.GLOBAL_SETTINGS);
 
       console.log('从本地存储加载配置:', {
         hasConfigs: !!storedConfigs,
         hasIndex: !!storedIndex,
+        hasSettings: !!storedSettings,
         configsLength: storedConfigs ? storedConfigs.length : 0
       });
 
       // 解析配置数据（加载失败时创建深拷贝）
       this.configs = storedConfigs ? JSON.parse(storedConfigs) : [createConfigFromDefault()];
       this.activeConfigIndex = storedIndex ? parseInt(storedIndex, 10) : 0;
+
+      // 解析全局配置
+      if (storedSettings) {
+        try {
+          this.globalSettings = { ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) };
+        } catch (e) {
+          console.error('解析全局配置失败:', e);
+          this.globalSettings = { ...DEFAULT_SETTINGS };
+        }
+      }
 
       // 确保至少有一组配置（深拷贝）
       if (this.configs.length === 0) {
@@ -852,6 +872,41 @@ class UserConfigManager {
       return { success: true, error: null };
     } catch (error) {
       console.error('设置活跃配置失败:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * 获取全局设置
+   * @returns {Object} 全局设置对象
+   */
+  getGlobalSettings() {
+    return { ...this.globalSettings };
+  }
+
+  /**
+   * 更新全局设置
+   * @param {Object} updates 设置更新内容
+   * @returns {Object} {success: boolean, error: string|null}
+   */
+  updateGlobalSettings(updates) {
+    if (!updates || typeof updates !== 'object') {
+      return { success: false, error: '设置数据无效' };
+    }
+
+    try {
+      this.globalSettings = { ...this.globalSettings, ...updates };
+      
+      // 保存到本地存储
+      localStorage.setItem(STORAGE_KEYS.GLOBAL_SETTINGS, JSON.stringify(this.globalSettings));
+      
+      // 通知监听器
+      this.notifyListeners(false, false);
+      
+      console.log('全局设置更新成功', this.globalSettings);
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('更新全局设置失败:', error);
       return { success: false, error: error.message };
     }
   }

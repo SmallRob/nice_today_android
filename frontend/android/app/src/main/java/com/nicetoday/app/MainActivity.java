@@ -9,8 +9,16 @@ import androidx.core.content.ContextCompat;
 
 import com.getcapacitor.BridgeActivity;
 
+import android.os.Bundle; // Add this import
+
 public class MainActivity extends BridgeActivity {
     private static final int ACTIVITY_RECOGNITION_PERMISSION_CODE = 10001;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        registerPlugin(UpdatePlugin.class);
+    }
 
     @Override
     public void onStart() {

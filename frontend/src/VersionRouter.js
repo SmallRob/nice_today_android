@@ -5,23 +5,33 @@ import versionDetector from './utils/versionDetector'; // 版本检测器
 import { useNotification } from './context/NotificationContext';
 import updateCheckService from './utils/updateCheckService';
 import { getAppVersion } from './utils/capacitor';
+import downloadManager from './utils/downloadManager'; // 引入下载管理器
 
 const VersionRouter = () => {
   const [currentVersion, setCurrentVersion] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { showNotification } = useNotification();
+  const [downloadProgress, setDownloadProgress] = useState(0);
+
+  const getUpdateBaseUrl = () => {
+    const storedApiBaseUrl = localStorage.getItem('apiBaseUrl');
+    const storedUpdateBaseUrl = localStorage.getItem('updateBaseUrl');
+    const base = (storedUpdateBaseUrl || storedApiBaseUrl || 'https://nice-mcp.leansoftx.com/api').trim();
+    return base.endsWith('/') ? base.slice(0, -1) : base;
+  };
 
   // 检查更新的函数
   const checkForUpdates = async () => {
     try {
       // 获取API基础URL（从本地存储或使用默认值）
-      const apiBaseUrl = localStorage.getItem('apiBaseUrl') || 'https://nice-mcp.leansoftx.com/api';
+      // 注意：这里仅用于版本检查，实际下载地址会从 version.json 中获取或根据域名构造
+      const updateBaseUrl = getUpdateBaseUrl();
 
       // 获取当前版本信息
       const versionInfo = await getAppVersion();
 
       // 执行更新检查
-      const result = await updateCheckService.checkForUpdate(versionInfo.version, apiBaseUrl);
+      const result = await updateCheckService.checkForUpdate(versionInfo.version, updateBaseUrl);
 
       if (result && result.hasUpdate) {
         showUpdateNotification(result);
@@ -32,19 +42,55 @@ const VersionRouter = () => {
     }
   };
 
+  // 处理下载
+  const handleDownload = (updateInfo) => {
+    if (!updateInfo.updateUrl) return;
+    
+    showNotification({
+      type: 'info',
+      title: '正在下载更新',
+      message: '下载进度: 0%',
+      duration: 0 // 不自动消失
+    });
+
+    downloadManager.downloadApk(
+      updateInfo.updateUrl,
+      updateInfo.serverVersion,
+      (percentage) => {
+        setDownloadProgress(percentage);
+        // 更新通知 (需要 NotificationContext 支持更新特定 ID 的通知，这里简化处理)
+        console.log(`Download progress: ${percentage}%`);
+      },
+      (filePath) => {
+        showNotification({
+          type: 'success',
+          title: '下载完成',
+          message: '准备安装...',
+          duration: 3000
+        });
+      },
+      (error) => {
+        showNotification({
+          type: 'error',
+          title: '下载失败',
+          message: error.message,
+          duration: 3000
+        });
+      }
+    );
+  };
+
   // 显示更新通知的统一入口
   const showUpdateNotification = (updateInfo) => {
     showNotification({
       type: 'update',
       title: '发现新版本',
-      message: `新版本 ${updateInfo.serverVersion} 已提供，包含重要改进和新功能。`,
+      message: `新版本 ${updateInfo.serverVersion} 已提供。\n更新内容：\n${updateInfo.updateInfo?.releaseNotes || '性能优化与问题修复'}`,
       actions: [
         {
           label: '立即更新',
           primary: true,
-          onClick: () => {
-            if (updateInfo.updateUrl) window.open(updateInfo.updateUrl, '_blank');
-          }
+          onClick: () => handleDownload(updateInfo)
         },
         {
           label: '以后再说',
@@ -87,10 +133,10 @@ const VersionRouter = () => {
 
     window.addEventListener('showUpdateNotification', handleShowUpdateEvent);
 
-    // 应用启动 2 秒后检查更新
+    // 应用启动 5 秒后检查更新
     const updateTimer = setTimeout(() => {
       checkForUpdates();
-    }, 2000);
+    }, 5000);
 
     return () => {
       window.removeEventListener('showUpdateNotification', handleShowUpdateEvent);

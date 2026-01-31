@@ -19,7 +19,7 @@ import { operationLogger } from './OperationLogger.js';
 const DEFAULT_CONFIG = Object.freeze({
   nickname: '叉子',
   realName: '',
-  birthDate: '1991-04-30',
+  birthDate: '1991-04-21',
   birthTime: '12:30',
   shichen: '午时',
   birthLocation: Object.freeze({

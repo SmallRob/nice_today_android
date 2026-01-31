@@ -1,0 +1,226 @@
+/* 
+ * 移动端专属布局样式 (Mobile Only Layout)
+ * 强制应用适配手机屏幕，忽略桌面端宽度适配
+ * 专为 9:16 屏幕比例优化
+ */
+
+:root {
+  /* 强制覆盖最大宽度限制 */
+  --max-content-width: 100vw;
+  --safe-area-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* 1. 全局容器强制全宽 */
+html, 
+body, 
+#root, 
+.app-container,
+.dashboard-container,
+.page-container,
+.content-area {
+  width: 100% !important;
+  max-width: 100vw !important;
+  min-width: 100vw !important;
+  overflow-x: hidden !important;
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* 2. 移除所有居中限制和固定宽度 */
+@media (min-width: 768px) {
+  .dashboard-container,
+  .app-banner .container,
+  .diet-health-detail-page {
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 12px !important;
+  }
+}
+
+/* 3. 强制内容区域内边距 */
+.dashboard-container,
+.page-container {
+  padding: 12px !important;
+  padding-bottom: calc(12px + var(--safe-area-bottom)) !important;
+}
+
+/* 4. 强制所有网格布局为单列或适合手机的列数 */
+.grid,
+.features-grid,
+.features-grid-three-col,
+.diet-health-detail-grid {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* 5. 9:16 屏幕比例专属优化 */
+/* 强制所有横向排列转为纵向或紧凑布局 */
+.flex-row-desktop {
+  flex-direction: column !important;
+}
+
+/* 6. 卡片全宽显示 */
+.card,
+.feature-card,
+.daily-fortune-card,
+.welcome-card,
+.diet-health-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* 7. 字体大小适配手机屏幕 */
+html {
+  font-size: 16px; /* 基准字体 */
+}
+
+@media (max-width: 375px) {
+  html {
+    font-size: 14px; /* 小屏手机缩小字体 */
+  }
+}
+
+/* 8. 修复Dashboard特定样式 */
+.dashboard-header {
+  padding: 0 4px !important;
+  margin-top: 12px !important;
+  margin-bottom: 12px !important;
+}
+
+.features-header {
+  padding: 0 4px !important;
+}
+
+/* 9. 强制隐藏滚动条但保留功能 (移动端体验) */
+.dashboard-scrollable-content,
+.content-area,
+body {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* 10. 底部安全区域处理 */
+.dashboard-container {
+  padding-bottom: env(safe-area-inset-bottom) !important;
+}
+
+/* 11. 针对 9:16 的具体组件优化 */
+
+/* 欢迎卡片 */
+.welcome-card {
+  border-radius: 16px !important;
+  padding: 16px !important;
+  margin-bottom: 16px !important;
+}
+
+/* 功能卡片网格 - 强制3列但间距紧凑 */
+.features-grid-three-col {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  padding: 0 !important;
+}
+
+/* 功能卡片内容压缩 */
+.feature-card {
+  min-height: 85px !important; /* 进一步压缩高度 */
+  padding: 8px 4px !important; /* 减少上下padding */
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important; /* 垂直居中内容 */
+  align-items: center !important;
+}
+
+.feature-card-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.feature-card-icon-wrapper {
+  margin-bottom: 4px !important; /* 拉近图标与标题的距离 */
+  width: auto !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.feature-card-icon {
+  width: 36px !important; /* 稍微缩小图标 */
+  height: 36px !important;
+  margin-bottom: 0 !important; /* 移除图标自身底部边距 */
+  border-radius: 10px !important;
+}
+
+.feature-card-title {
+  font-size: 11px !important; /* 调整字体大小 */
+  padding: 2px 6px !important;
+  line-height: 1.1 !important;
+  margin-top: 2px !important; /* 确保与图标有极小的间距 */
+  white-space: nowrap !important; /* 防止换行 */
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* 每日运势卡片 */
+.daily-fortune-card {
+  padding: 12px !important;
+}
+
+.fortune-content {
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.fortune-left {
+  flex: 1 !important;
+  max-width: none !important;
+}
+
+.fortune-right {
+  width: auto !important;
+  min-width: auto !important;
+  padding-left: 4px !important;
+}
+
+.energy-ball-container {
+  width: 70px !important;
+  height: 70px !important;
+  margin: 0 !important; /* 移除居中margin，由flex控制 */
+}
+
+/* 快速操作按钮 */
+.quick-actions {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+}
+
+.quick-action-btn {
+  padding: 8px !important;
+  font-size: 12px !important;
+  flex-direction: column !important;
+  text-align: center !important;
+  gap: 4px !important;
+}

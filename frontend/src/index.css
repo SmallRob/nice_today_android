@@ -8,7 +8,10 @@
 /* 导入WebView优化样式 */
 @import './styles/webview-optimization.css';
 
-/* 导入移动端布局优化样式 */
+/* 导入移动端专属布局优化 (强制覆盖桌面端样式) */
+/* @import './styles/mobile-only-layout.css'; */
+
+/* 导入移动端布局优化样式 (保留作为补充) */
 @import './styles/mobile-layout-optimization.css';
 
 /* 导入经期追踪器优化样式 */

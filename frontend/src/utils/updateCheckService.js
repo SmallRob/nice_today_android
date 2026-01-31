@@ -105,7 +105,9 @@ class UpdateCheckService {
 
   // 获取服务器版本信息
   async fetchServerVersion(apiBaseUrl) {
-    const versionUrl = `${apiBaseUrl}/version.json`;
+    const base = (apiBaseUrl || '').toString().trim();
+    const normalized = base.endsWith('/') ? base.slice(0, -1) : base;
+    const versionUrl = normalized.endsWith('.json') ? normalized : `${normalized}/version.json`;
     const timeout = 8000; // 8秒超时
 
     const controller = new AbortController();
@@ -117,7 +119,8 @@ class UpdateCheckService {
         headers: {
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache'
-        }
+        },
+        cache: 'no-store'
       });
 
       clearTimeout(timeoutId);
@@ -210,7 +213,7 @@ class UpdateCheckService {
           timestamp: Date.now(),
           currentVersion,
           serverVersion: serverData.version,
-          updateUrl: `${apiBaseUrl}/upgrade`,
+          updateUrl: `${apiBaseUrl}/app-release.apk`,
           updateInfo: serverData
         }));
       }
@@ -223,7 +226,7 @@ class UpdateCheckService {
         hasUpdate: comparison > 0,
         currentVersion,
         serverVersion: serverData.version,
-        updateUrl: `${apiBaseUrl}/upgrade`,
+        updateUrl: `${apiBaseUrl}/app-release.apk`,
         updateInfo: serverData,
         comparison
       };

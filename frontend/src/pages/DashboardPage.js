@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUserConfig } from '../contexts/UserConfigContext';
 import './DashboardPage.css';
 import MergedBannerCard from '../components/dashboard/MergedBannerCard.js';
 import DailyFortuneCard from '../components/dashboard/DailyFortuneCard.js';
 import FestivalCard from '../components/dashboard/FestivalCard.js';
+import AISeasonalCard from '../components/dashboard/AISeasonalCard.js';
 
 import {
   MBTICard,
@@ -98,7 +100,19 @@ const ALL_FEATURES = [
  * 采用移动端优先设计，扁平化风格，紧凑布局
  */
 const Dashboard = () => {
+  const { currentConfig, globalSettings } = useUserConfig(); // 获取全局设置
   const navigate = useNavigate();
+  const [showAISeasonalCard, setShowAISeasonalCard] = useState(true);
+
+  // 监听全局设置变化，控制 AI 时令卡片显示
+  useEffect(() => {
+    // 优先使用 globalSettings 中的配置，如果未加载则默认开启
+    // 注意：这里需要确保 globalSettings 是最新的
+    if (globalSettings) {
+      setShowAISeasonalCard(globalSettings.homeTimeAwareEnabled !== false);
+    }
+  }, [globalSettings]);
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [features, setFeatures] = useState(ALL_FEATURES);
   const [isFeaturesExpanded, setIsFeaturesExpanded] = useState(() => {
@@ -250,6 +264,9 @@ const Dashboard = () => {
 
           {/* 节日节气提醒 */}
           <FestivalCard />
+
+          {/* AI 时令卡片 - 受全局配置控制 */}
+          {showAISeasonalCard && <AISeasonalCard />}
 
           {/* 快速操作 - 置顶的功能 */}
           <div className="quick-actions">

@@ -150,7 +150,7 @@ const MergedBannerCard = () => {
           />
           <div className="app-info">
             <h1 className="app-title">Nice Today</h1>
-            <p className="app-subtitle">探索运势·了解自己·精彩每一天</p>
+            <p className="app-subtitle">探索运势·发现生活</p>
             <p className="current-date">{getCurrentDate()}</p>
           </div>
         </div>

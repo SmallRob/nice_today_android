@@ -218,10 +218,10 @@ const DailyFortuneCard = () => {
 
           {/* 分数文本 */}
           <g className="score-group">
-            <text x="60" y="58" textAnchor="middle" fontSize="28" fontWeight="800" fill={theme === 'dark' ? 'white' : '#1f2937'} filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))">
+            <text x="60" y="58" textAnchor="middle" fontSize="32" fontWeight="800" fill={theme === 'dark' ? 'white' : '#1f2937'} filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))">
               {score}
             </text>
-            <text x="60" y="78" textAnchor="middle" fontSize="10" fontWeight="600" fill={theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'} letterSpacing="1">
+            <text x="60" y="78" textAnchor="middle" fontSize="12" fontWeight="600" fill={theme === 'dark' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)'} letterSpacing="1">
               综合能量
             </text>
           </g>
@@ -247,14 +247,9 @@ const DailyFortuneCard = () => {
 
     return (
       <div className="energy-progress-item">
-        <div className="energy-progress-header">
-          <div className="energy-progress-label">
-            <span className="energy-progress-icon">{icon}</span>
-            <span className="energy-progress-name">{label}</span>
-          </div>
-          <span className="energy-progress-value" style={{ color }}>
-            {score}/100
-          </span>
+        <div className="energy-progress-label">
+          <span className="energy-progress-icon">{icon}</span>
+          <span className="energy-progress-name">{label}</span>
         </div>
         <div className="energy-progress-track">
           <div
@@ -268,6 +263,9 @@ const DailyFortuneCard = () => {
             <div className="energy-progress-shine"></div>
           </div>
         </div>
+        <span className="energy-progress-value" style={{ color }}>
+          {score}
+        </span>
       </div>
     );
   };

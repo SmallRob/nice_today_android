@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/animations.css';
+import '../styles/WelcomeScreen.css';
 
 const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
   const [loadingText, setLoadingText] = useState('正在初始化...');
@@ -120,16 +121,9 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
 
       {/* 主要内容卡片 */}
       <div className="relative z-10 flex flex-col items-center max-w-lg w-full px-6">
-        {/* Logo 容器 */}
-        <div className="relative mb-10">
-          <div className="absolute inset-0 bg-indigo-500/20 rounded-[2rem] blur-lg"></div>
-          <div className="relative w-20 h-20 bg-gradient-to-br from-indigo-500/80 to-purple-600/80 rounded-[2rem] flex items-center justify-center shadow-lg border border-white/10">
-            <span className="material-symbols-outlined text-white text-4xl">star</span>
-          </div>
-        </div>
-
+        
         {/* 标题 & 语录 */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-16 mt-10">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-widest">
             NICE TODAY
           </h1>
@@ -165,25 +159,6 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
             </div>
           )}
         </div>
-
-        {/* 功能预览微卡片 - 使用独有 CSS 类名强制布局 */}
-        <div className="welcome-feature-grid">
-          {[
-            { name: '命运', icon: 'auto_awesome', color: 'feature-amber' },
-            { name: '玛雅', icon: 'schedule', color: 'feature-blue' },
-            { name: '节律', icon: 'bar_chart', color: 'feature-green' },
-            { name: '魅力', icon: 'person', color: 'feature-pink' },
-            { name: '宜忌', icon: 'checklist', color: 'feature-purple' },
-            { name: '饮食', icon: 'restaurant', color: 'feature-orange' }
-          ].map((item, idx) => (
-            <div key={idx} className="welcome-feature-item">
-              <div className={`welcome-feature-icon ${item.color}`}>
-                <span className="material-symbols-outlined">{item.icon}</span>
-              </div>
-              <span className="welcome-feature-name">{item.name}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* 底部信息 */}
@@ -196,90 +171,6 @@ const WelcomeScreen = ({ onComplete, version = 'lite', appReady = false }) => {
           System Secure | Powered by AI Cosmos
         </div>
       </div>
-
-      <style>
-        {`
-        @keyframes shimmer {
-          0% { transform: translateX(-150%) skew-x(-45deg); }
-          50% { transform: translateX(150%) skew-x(-45deg); }
-          100% { transform: translateX(150%) skew-x(-45deg); }
-        }
-        @keyframes scroll {
-          from { background-position: 0 0; }
-          to { background-position: 40px 0; }
-        }
-        .cosmic-bg {
-          background-color: #0a0b1e;
-          background-image: 
-            radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
-            radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
-            radial-gradient(2px 2px at 100px 150px, #fff, rgba(0,0,0,0)),
-            radial-gradient(1px 1px at 200px 50px, #fff, rgba(0,0,0,0)),
-            radial-gradient(1px 1px at 300px 250px, #fff, rgba(0,0,0,0));
-          background-repeat: repeat;
-          background-size: 300px 300px;
-        }
-        .cosmic-card {
-          background: rgba(17, 20, 50, 0.6);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .glow-border {
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
-        }
-        .progress-bar-bg {
-          background: rgba(255, 255, 255, 0.05);
-          border: 0.5px solid rgba(255, 255, 255, 0.2);
-        }
-        .progress-bar-fill {
-          background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
-          box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
-        }
-
-        /* 独有功能标签样式 - 升级为 2x3 布局 */
-        .welcome-feature-grid {
-          display: grid !important;
-          grid-template-columns: repeat(3, 1fr) !important;
-          gap: 16px 20px !important;
-          justify-content: center !important;
-          margin: 0 auto !important;
-          width: 260px !important;
-        }
-        .welcome-feature-item {
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
-          gap: 6px !important;
-        }
-        .welcome-feature-icon {
-          width: 48px !important;
-          height: 48px !important;
-          border-radius: 12px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          backdrop-filter: blur(8px) !important;
-          border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        }
-        .welcome-feature-icon span {
-          font-size: 20px !important;
-        }
-        .welcome-feature-name {
-          font-size: 10px !important;
-          color: rgba(255, 255, 255, 0.4) !important;
-          letter-spacing: 0.2em !important;
-        }
-
-        /* 颜色方案 */
-        .feature-amber { background: rgba(251, 191, 36, 0.15) !important; color: #fbbf24 !important; }
-        .feature-blue { background: rgba(96, 165, 250, 0.15) !important; color: #60a5fa !important; }
-        .feature-green { background: rgba(52, 211, 153, 0.15) !important; color: #34d299 !important; }
-        .feature-pink { background: rgba(244, 114, 182, 0.15) !important; color: #f472b6 !important; }
-        .feature-purple { background: rgba(167, 139, 250, 0.15) !important; color: #a78bfa !important; }
-        .feature-orange { background: rgba(251, 146, 60, 0.15) !important; color: #fb923c !important; }
-        `}
-      </style>
     </div>
   );
 };

@@ -360,12 +360,12 @@
 @media (min-width: 577px) and (max-width: 992px) {
   .features-grid-three-col {
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    grid-auto-rows: minmax(110px, auto); /* 平板端固定行高110px */
+    gap: 12px; /* 增加间距 */
+    grid-auto-rows: minmax(100px, auto); /* 减少行高 */
   }
 
   .feature-card {
-    min-height: 110px;
+    min-height: 100px;
     height: 100%; /* 确保填满网格单元格 */
   }
 }
@@ -374,12 +374,12 @@
 @media (min-width: 993px) {
   .features-grid-three-col {
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    grid-auto-rows: minmax(120px, auto); /* 桌面端固定行高120px */
+    gap: 16px; /* 增加间距 */
+    grid-auto-rows: minmax(110px, auto); /* 减少行高 */
   }
 
   .feature-card {
-    min-height: 120px;
+    min-height: 110px;
     height: 100%; /* 确保填满网格单元格 */
   }
 
@@ -392,13 +392,13 @@
 @media (max-width: 576px) {
   .features-grid-three-col {
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    grid-auto-rows: minmax(95px, auto); /* 移动端固定行高95px */
+    gap: 10px; /* 增加间距 */
+    grid-auto-rows: minmax(90px, auto); /* 减少行高 */
     margin-bottom: 12px; /* 移动端底部margin */
   }
 
   .feature-card {
-    min-height: 95px;
+    min-height: 90px;
     height: 100%; /* 确保填满网格单元格 */
   }
 
@@ -439,7 +439,7 @@
 .feature-card {
   background: transparent;
   border-radius: 16px;
-  padding: 20px 12px;
+  padding: 12px 8px; /* 减少上下 padding */
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -448,7 +448,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-height: 120px; /* 增加最小高度，为图标和标题提供更多空间 */
+  min-height: 100px; /* 减少最小高度 */
   height: 100%; /* 确保卡片填满网格单元格高度 */
   text-align: center;
   /* 优化触摸区域 */
@@ -484,9 +484,9 @@
 
 /* 卡片图标 - 与背景分离绘制，确保图标独立显示 */
 .feature-card-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 44px; /* 减小图标尺寸 */
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -499,10 +499,44 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 3;
-  margin-bottom: 14px;
+  margin-bottom: 10px; /* 减少底部 margin */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
+.feature-card-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.feature-card-icon-wrapper {
+  margin-bottom: 4px !important; /* 拉近图标与标题的距离 */
+  width: auto !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.feature-card-title {
+  font-size: 11px !important; /* 调整字体大小 */
+  padding: 2px 6px !important;
+  line-height: 1.1 !important;
+  margin-top: 2px !important; /* 确保与图标有极小的间距 */
+  white-space: nowrap !important; /* 防止换行 */
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
 
 .feature-card:hover .feature-card-icon {
   transform: scale(1.1);
@@ -518,7 +552,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 14px;
+  margin-bottom: 8px; /* 减少底部 margin */
   position: relative;
   z-index: 2;
 }
@@ -562,22 +596,22 @@
 
 /* 功能卡片标题 - 与背景分离，确保清晰可见 */
 .feature-card-title {
-  font-size: 14px;
+  font-size: 13px; /* 稍微减小字体 */
   font-weight: 700;
   color: white;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
   text-align: center;
   word-wrap: break-word;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  max-height: 2.8em;
-  min-height: 1.4em;
+  max-height: 2.6em; /* 调整最大高度 */
+  min-height: 1.3em;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   background: rgba(0, 0, 0, 0.2);
-  padding: 4px 8px;
+  padding: 3px 6px; /* 减少 padding */
   border-radius: 6px;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);

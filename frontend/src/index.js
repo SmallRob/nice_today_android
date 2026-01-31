@@ -40,7 +40,16 @@ const initApp = async () => {
 
 // 启动应用
 const startApp = () => {
-  const root = ReactDOM.createRoot(document.getElementById('root'));
+  const container = document.getElementById('root');
+  
+  // 防止重复初始化
+  if (container._reactRoot) {
+    console.log('App already mounted, skipping initialization');
+    return;
+  }
+
+  const root = ReactDOM.createRoot(container);
+  container._reactRoot = root;
 
   // 优化的AppWrapper组件 - 移除时间冲突，统一状态管理
   const AppWrapper = () => {

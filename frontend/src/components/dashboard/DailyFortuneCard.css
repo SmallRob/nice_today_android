@@ -2,8 +2,8 @@
 .daily-fortune-card {
   background: white;
   border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 12px;
+  padding: 10px 12px; /* 减少上下 padding */
+  margin-bottom: 10px; /* 减少底部 margin */
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   overflow-x: hidden;
@@ -28,8 +28,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
+  margin-bottom: 8px; /* 减少底部 margin */
+  padding-bottom: 8px; /* 减少底部 padding */
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
@@ -147,26 +147,28 @@
 /* 卡片内容区域 - 左右布局 */
 .fortune-content {
   display: flex;
-  gap: 16px;
-  align-items: stretch;
+  gap: 12px; /* 减小间距 */
+  align-items: center; /* 垂直居中对齐 */
+  justify-content: space-between; /* 两端对齐 */
 }
 
 .fortune-left {
-  flex: 1;
-  min-width: 0;
-  max-width: 75%;
+  flex: 1; /* 占据剩余空间 */
+  min-width: 0; /* 防止flex子项溢出 */
+  max-width: none; /* 移除最大宽度限制 */
 }
 
 .fortune-right {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* 居中对齐 */
   flex-shrink: 0;
-  width: 140px;
-  min-width: 120px;
+  width: auto; /* 自适应内容宽度 */
+  min-width: auto; /* 移除最小宽度 */
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
   position: relative;
+  padding-left: 8px; /* 增加左侧内边距 */
 }
 
 .fortune-right:hover {
@@ -184,25 +186,28 @@
 .energy-progress-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px; /* 增加间距 */
 }
 
 .energy-progress-item {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row; /* 水平排列 */
+  align-items: center;
+  gap: 8px;
+  height: 20px; /* 固定高度 */
 }
 
+/* 移除不再需要的 header */
 .energy-progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: none;
 }
 
 .energy-progress-label {
   display: flex;
   align-items: center;
   gap: 4px;
+  width: 50px; /* 固定标签宽度 */
+  flex-shrink: 0;
 }
 
 .energy-progress-icon {
@@ -222,11 +227,15 @@
 .energy-progress-value {
   font-size: 11px;
   font-weight: 700;
+  width: 24px; /* 固定分数宽度 */
+  text-align: right;
+  flex-shrink: 0;
 }
 
 /* 进度条轨道 */
 .energy-progress-track {
-  height: 5px;
+  flex: 1; /* 占据剩余空间 */
+  height: 6px; /* 稍微加粗 */
   background: rgba(0, 0, 0, 0.08);
   border-radius: 3px;
   overflow: hidden;
@@ -273,8 +282,8 @@
 /* 能量球容器 */
 .energy-ball-container {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -441,13 +450,13 @@
 /* 响应式设计 - 平板 */
 @media (max-width: 768px) {
   .daily-fortune-card {
-    padding: 12px;
+    padding: 10px;
     margin-bottom: 10px;
   }
 
   .fortune-header {
-    margin-bottom: 10px;
-    padding-bottom: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
   }
 
   .fortune-title {
@@ -459,13 +468,13 @@
   }
 
   .fortune-right {
-    width: 120px;
-    min-width: 110px;
+    width: 90px;
+    min-width: 80px;
   }
 
-  .water-flask-container {
-    width: 110px;
-    height: 110px;
+  .energy-ball-container {
+    width: 80px;
+    height: 80px;
   }
 
   .energy-progress-icon {
@@ -498,14 +507,14 @@
 /* 响应式设计 - 手机 */
 @media (max-width: 576px) {
   .daily-fortune-card {
-    padding: 12px;
-    margin-bottom: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
     border-radius: 12px;
   }
 
   .fortune-header {
-    margin-bottom: 10px;
-    padding-bottom: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
     flex-direction: row;
     align-items: flex-start;
     gap: 8px;
@@ -529,17 +538,17 @@
   }
 
   .fortune-content {
-    gap: 10px;
+    gap: 8px;
   }
 
   .fortune-right {
-    width: 110px;
-    min-width: 100px;
+    width: 80px;
+    min-width: 70px;
   }
 
-  .water-flask-container {
-    width: 100px;
-    height: 100px;
+  .energy-ball-container {
+    width: 70px;
+    height: 70px;
   }
 
   .energy-progress-list {
@@ -609,13 +618,13 @@
   }
 
   .fortune-right {
-    width: 100px;
-    min-width: 90px;
+    width: 70px;
+    min-width: 65px;
   }
 
-  .water-flask-container {
-    width: 90px;
-    height: 90px;
+  .energy-ball-container {
+    width: 65px;
+    height: 65px;
   }
 
   .energy-progress-name {
@@ -668,13 +677,13 @@
   }
 
   .fortune-right {
-    width: 105px;
-    min-width: 95px;
+    width: 75px;
+    min-width: 70px;
   }
 
-  .water-flask-container {
-    width: 95px;
-    height: 95px;
+  .energy-ball-container {
+    width: 70px;
+    height: 70px;
   }
 
   .energy-progress-name {

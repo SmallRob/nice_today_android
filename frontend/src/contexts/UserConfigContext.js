@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { enhancedUserConfigManager, DEFAULT_CONFIG } from '../utils/EnhancedUserConfigManager';
+import { userConfigManager } from '../utils/userConfigManager';
 import { errorLogger } from '../utils/errorLogger';
 
 // 创建全局配置上下文
@@ -19,6 +20,7 @@ export const UserConfigProvider = ({ children }) => {
   const [configManagerReady, setConfigManagerReady] = useState(false);
   const [currentConfig, setCurrentConfig] = useState(null);
   const [configs, setConfigs] = useState([]);
+  const [globalSettings, setGlobalSettings] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -39,6 +41,14 @@ export const UserConfigProvider = ({ children }) => {
       
       setCurrentConfig(configData);
       setConfigs(allConfigs);
+      const loadedGlobalSettings = userConfigManager.getGlobalSettings();
+      if (loadedGlobalSettings && typeof loadedGlobalSettings.homeTimeAwareEnabled !== 'boolean') {
+        userConfigManager.updateGlobalSettings({ homeTimeAwareEnabled: true });
+      }
+      if (loadedGlobalSettings && typeof loadedGlobalSettings.useAIInterpretation !== 'boolean') {
+        userConfigManager.updateGlobalSettings({ useAIInterpretation: true });
+      }
+      setGlobalSettings(userConfigManager.getGlobalSettings());
       setConfigManagerReady(true);
       
       return true;
@@ -111,6 +121,16 @@ export const UserConfigProvider = ({ children }) => {
       if (removeListener) removeListener();
     };
   }, [configManagerReady]);
+
+  useEffect(() => {
+    const removeListener = userConfigManager.addListener(() => {
+      setGlobalSettings(userConfigManager.getGlobalSettings());
+    });
+    setGlobalSettings(userConfigManager.getGlobalSettings());
+    return () => {
+      if (removeListener) removeListener();
+    };
+  }, []);
 
   // 应用启动时自动初始化
   useEffect(() => {
@@ -245,6 +265,10 @@ export const UserConfigProvider = ({ children }) => {
     }
   }, []);
 
+  const updateGlobalSettings = useCallback((updates) => {
+    return userConfigManager.updateGlobalSettings(updates);
+  }, []);
+
   /**
    * 获取有效的出生信息（使用默认值回退）
    * @param {Object} config - 配置对象
@@ -263,6 +287,7 @@ export const UserConfigProvider = ({ children }) => {
     configManagerReady,
     currentConfig,
     configs,
+    globalSettings,
     loading,
     error,
     initializeConfigManager,
@@ -270,6 +295,7 @@ export const UserConfigProvider = ({ children }) => {
     addConfig,
     deleteConfig,
     switchConfig,
+    updateGlobalSettings,
     updateBaziInfo,
     calculateAndSyncBazi,
     getValidBirthInfo,
@@ -293,6 +319,7 @@ export const useUserConfig = () => {
       configManagerReady: enhancedUserConfigManager.initialized === true,
       currentConfig: enhancedUserConfigManager.getCurrentConfig?.() || DEFAULT_CONFIG,
       configs: enhancedUserConfigManager.getAllConfigs?.() || [DEFAULT_CONFIG],
+      globalSettings: userConfigManager.getGlobalSettings?.() || null,
       loading: false,
       error: null,
       initializeConfigManager: () => enhancedUserConfigManager.initialize(),
@@ -300,6 +327,7 @@ export const useUserConfig = () => {
       addConfig: (config) => enhancedUserConfigManager.addBasicConfig(config),
       deleteConfig: (index) => enhancedUserConfigManager.removeConfig(index),
       switchConfig: (index) => enhancedUserConfigManager.setActiveConfig(index),
+      updateGlobalSettings: (updates) => userConfigManager.updateGlobalSettings(updates),
       updateBaziInfo: (nickname, baziInfo) => enhancedUserConfigManager.updateBaziInfo(nickname, baziInfo),
       calculateAndSyncBazi: (nickname, birthInfo) => enhancedUserConfigManager.calculateAndSyncBaziInfo(nickname, birthInfo),
       getValidBirthInfo: (config) => ({

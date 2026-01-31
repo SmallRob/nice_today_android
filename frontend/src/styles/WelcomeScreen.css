@@ -1,0 +1,43 @@
+@keyframes shimmer {
+  0% { transform: translateX(-150%) skew-x(-45deg); }
+  50% { transform: translateX(150%) skew-x(-45deg); }
+  100% { transform: translateX(150%) skew-x(-45deg); }
+}
+
+@keyframes scroll {
+  from { background-position: 0 0; }
+  to { background-position: 40px 0; }
+}
+
+.cosmic-bg {
+  background-color: #0a0b1e;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 100px 150px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 200px 50px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 300px 250px, #fff, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 300px 300px;
+}
+
+.cosmic-card {
+  background: rgba(17, 20, 50, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glow-border {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+}
+
+.progress-bar-bg {
+  background: rgba(255, 255, 255, 0.05);
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.progress-bar-fill {
+  background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+  box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
+}

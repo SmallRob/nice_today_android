@@ -5,7 +5,7 @@
 
 import { Capacitor } from '@capacitor/core';
 // 使用动态导入避免在 Web 平台上直接导入不可用的插件
-let App, SplashScreen, StatusBar, Device, Network, Keyboard, Haptics;
+let App, SplashScreen, StatusBar, Device, Network, Keyboard, Haptics, Filesystem;
 
 // 主题颜色映射
 const THEME_COLORS = {
@@ -48,7 +48,8 @@ const initPlugins = async () => {
         import('@capacitor/device'),
         import('@capacitor/network'),
         import('@capacitor/keyboard'),
-        import('@capacitor/haptics')
+        import('@capacitor/haptics'),
+        import('@capacitor/filesystem')
       ]);
       App = modules[0].App;
       SplashScreen = modules[1].SplashScreen;
@@ -57,12 +58,19 @@ const initPlugins = async () => {
       Network = modules[4].Network;
       Keyboard = modules[5].Keyboard;
       Haptics = modules[6].Haptics;
+      Filesystem = modules[7].Filesystem;
     } catch (error) {
       console.debug('Failed to initialize Capacitor plugins:', error.message);
       return false;
     }
   }
   return true;
+};
+
+// 导出文件系统插件供外部使用
+export const getFilesystem = async () => {
+  await initPlugins();
+  return Filesystem;
 };
 
 // 检测当前平台
