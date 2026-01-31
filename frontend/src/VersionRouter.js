@@ -14,10 +14,8 @@ const VersionRouter = () => {
   const [downloadProgress, setDownloadProgress] = useState(0);
 
   const getUpdateBaseUrl = () => {
-    const storedApiBaseUrl = localStorage.getItem('apiBaseUrl');
-    const storedUpdateBaseUrl = localStorage.getItem('updateBaseUrl');
-    const base = (storedUpdateBaseUrl || storedApiBaseUrl || 'https://nice-mcp.leansoftx.com/api').trim();
-    return base.endsWith('/') ? base.slice(0, -1) : base;
+    // 使用指定的 version.json 地址进行检查
+    return 'https://leanisssharedstorage.blob.core.windows.net/aise-files/today-update/version.json';
   };
 
   // 检查更新的函数
@@ -64,10 +62,12 @@ const VersionRouter = () => {
       (filePath) => {
         showNotification({
           type: 'success',
-          title: '下载完成',
-          message: '准备安装...',
+          title: '下载已开始',
+          message: '下载完成后将自动安装...',
           duration: 3000
         });
+        // 记录已开始安装的版本
+        updateCheckService.recordInstalledVersion(updateInfo.serverVersion);
       },
       (error) => {
         showNotification({

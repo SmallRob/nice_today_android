@@ -1,14 +1,11 @@
 /* Global Vars for Lifestyle Guide */
-:root {
+.lifestyle-guide-page {
     --bg-deep: #0A0A0B;
     --card-surface: #161618;
     --card-border: #242427;
     --primary-purple: #8B5CF6;
     --text-main: #FFFFFF;
     --text-muted: #A1A1AA;
-}
-
-.lifestyle-guide-page {
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -95,7 +92,7 @@
     z-index: 1100;
 }
 
-.menu-item {
+.lifestyle-guide-page .menu-item {
     width: 100%;
     padding: 12px 14px;
     display: flex;
@@ -111,11 +108,11 @@
     text-align: left;
 }
 
-.menu-item:active {
+.lifestyle-guide-page .menu-item:active {
     background: rgba(255, 255, 255, 0.08);
 }
 
-.menu-divider {
+.lifestyle-guide-page .menu-divider {
     height: 1px;
     background: var(--card-border);
     margin: 4px 0;

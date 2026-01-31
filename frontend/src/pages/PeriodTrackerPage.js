@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import '../styles/period-tracker-optimization.css';
 
 // 经期数据类型
 const PERIOD_DATA_KEY = 'period_tracker_data';
@@ -674,7 +675,7 @@ const PeriodTrackerPage = () => {
     today >= cyclePrediction.fertileWindowStart && today <= cyclePrediction.fertileWindowEnd;
 
   return (
-    <div style={{
+    <div className="period-tracker-page" style={{
       minHeight: '100vh',
       paddingBottom: '128px',
       padding: '0 16px',

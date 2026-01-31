@@ -1,5 +1,4 @@
 import { Card } from '../components/PageLayout.js';
-import '../index.css';
 
 function TarotGardenPage() {
   return (

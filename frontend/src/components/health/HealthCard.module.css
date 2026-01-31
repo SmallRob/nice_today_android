@@ -1,0 +1,249 @@
+/* HealthCard.module.css */
+
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  border-radius: 20px;
+  padding: 1.25rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  background: white;
+}
+
+:global(.dark) .card {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* 优化后的渐变背景 - 更加柔和不刺眼 */
+.gradientDiet {
+  background: linear-gradient(135deg, #fef3c7 0%, #ffedd5 100%);
+  border: none;
+}
+
+:global(.dark) .gradientDiet {
+  background: linear-gradient(135deg, #7c2d12 0%, #451a03 100%);
+}
+
+.gradientStep {
+  background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
+  border: none;
+}
+
+:global(.dark) .gradientStep {
+  background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+}
+
+.gradientBiorhythm {
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  border: none;
+}
+
+:global(.dark) .gradientBiorhythm {
+  background: linear-gradient(135deg, #0c4a6e 0%, #082f49 100%);
+}
+
+.gradientAgile {
+  background: linear-gradient(135deg, #f3e8ff 0%, #faf5ff 100%);
+  border: none;
+}
+
+:global(.dark) .gradientAgile {
+  background: linear-gradient(135deg, #4c1d95 0%, #2e1065 100%);
+}
+
+.gradientStage {
+  background: linear-gradient(135deg, #ffe4e6 0%, #fff1f2 100%);
+  border: none;
+}
+
+:global(.dark) .gradientStage {
+  background: linear-gradient(135deg, #881337 0%, #4c0519 100%);
+}
+
+.gradientSeasonal {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: none;
+}
+
+:global(.dark) .gradientSeasonal {
+  background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+}
+
+.gradientBody {
+  background: linear-gradient(135deg, #e0e7ff 0%, #eef2ff 100%);
+  border: none;
+}
+
+:global(.dark) .gradientBody {
+  background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+}
+
+.gradientBlood {
+  background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%);
+  border: none;
+}
+
+:global(.dark) .gradientBlood {
+  background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+}
+
+.gradientDress {
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  border: none;
+}
+
+:global(.dark) .gradientDress {
+  background: linear-gradient(135deg, #0c4a6e 0%, #082f49 100%);
+}
+
+.gradientSpine {
+  background: linear-gradient(135deg, #ccfbf1 0%, #ecfdf5 100%);
+  border: none;
+}
+
+:global(.dark) .gradientSpine {
+  background: linear-gradient(135deg, #115e59 0%, #042f2e 100%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  z-index: 1;
+}
+
+.iconWrapper {
+  padding: 0.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+:global(.dark) .iconWrapper {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-left: 0.5rem;
+}
+
+:global(.dark) .title {
+  color: #f8fafc;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1;
+}
+
+.statGrid {
+  display: grid;
+  gap: 0.375rem;
+  width: 100%;
+}
+
+.statItem {
+  padding: 0.5rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+:global(.dark) .statItem {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.statValue {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #4f46e5;
+}
+
+:global(.dark) .statValue {
+  color: #818cf8;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+:global(.dark) .statLabel {
+  color: #94a3b8;
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  z-index: 1;
+}
+
+.actionButton {
+  width: 100%;
+  padding: 0.625rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #4f46e5;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+  display: block;
+  text-decoration: none;
+}
+
+:global(.dark) .actionButton {
+  background: rgba(255, 255, 255, 0.1);
+  color: #a5b4fc;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.actionButton:hover {
+  background: white;
+  transform: scale(1.02);
+}
+
+:global(.dark) .actionButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 特殊卡片色调调整 */
+.dietValue { color: #ea580c; }
+:global(.dark) .dietValue { color: #fb923c; }
+
+.stepValue { color: #16a34a; }
+:global(.dark) .stepValue { color: #4ade80; }
+
+.biorhythmValue { color: #2563eb; }
+:global(.dark) .biorhythmValue { color: #60a5fa; }

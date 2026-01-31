@@ -1385,3 +1385,13 @@ body.biorhythm-active {
 .prevent-bounce-scroll {
   overscroll-behavior: none;
 }
+
+/* 错误日志浮动按钮安全区域适配 */
+.safe-bottom-margin {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 底部安全区域padding */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 20px));
+}

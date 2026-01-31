@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AgileHealthIcon } from '../icons';
+import styles from './HealthCard.module.css';
 
 // 敏捷养生卡片组件
 const AgileHealthCard = ({ onClick }) => {
@@ -145,8 +146,6 @@ const AgileHealthCard = ({ onClick }) => {
     }
   };
 
-
-
   const [dailyTasks, setDailyTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -241,122 +240,80 @@ const AgileHealthCard = ({ onClick }) => {
 
   const handleClick = () => {
     if (onClick) {
-      onClick();
+      onClick('agile-health');
     } else {
       navigate('/agile-health');
     }
   };
 
-  if (loading) {
-    return (
-      <div className="health-card agile-health-card">
-        <div className="bg-gradient-to-r from-green-500 to-teal-600 p-4 rounded-2xl text-white shadow-lg h-full flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-            <p className="text-sm">加载中...</p>
+  return (
+    <div className={`${styles.card} ${styles.gradientAgile}`} onClick={handleClick}>
+      <div className={styles.header}>
+        <div className="flex items-center">
+          <div className={styles.iconWrapper}>
+            <AgileHealthIcon size={24} color="#7c3aed" />
           </div>
+          <h3 className={styles.title} style={{ margin: 0 }}>敏捷养生</h3>
+        </div>
+        <div className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/50 text-gray-600">
+          {completedCount}/{totalCount}
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div
-      className="health-card agile-health-card"
-      onClick={handleClick}
-    >
-      <div className="bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 p-4 rounded-2xl text-white shadow-lg h-full border border-white/20 backdrop-blur-sm">
-        <div className="flex items-center justify-between mb-2">
-          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md shadow-inner">
-            <AgileHealthIcon size={24} color="white" />
+      <div className={styles.content}>
+        {loading ? (
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
           </div>
-          <div className="text-right">
-            <h3 className="font-bold text-base">敏捷养生</h3>
-            <p className="text-xs opacity-90">今日任务</p>
-          </div>
-        </div>
-
-        <div className="text-center mb-2">
-          <div className="text-2xl font-bold mb-0.5">{completedCount}/{totalCount}</div>
-          <p className="text-xs opacity-80">已完成/总任务</p>
-        </div>
-
-        {/* 今日任务列表 */}
-        <div className="space-y-1 mb-2">
-          {dailyTasks.map((task, index) => (
-            <div
-              key={task.id}
-              className={`flex items-center justify-between p-1.5 rounded-lg text-xs ${completedTasks.includes(task.id)
-                ? 'bg-white bg-opacity-20'
-                : 'bg-white bg-opacity-10'
-                }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleTaskCompletion(task.id);
-              }}
-            >
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={completedTasks.includes(task.id)}
-                  onChange={() => toggleTaskCompletion(task.id)}
-                  className="w-3.5 h-3.5 rounded bg-white bg-opacity-20 border-white border-opacity-30 text-green-500 focus:ring-green-500 mr-1.5"
+        ) : (
+          <>
+            <div className="space-y-1 mb-1">
+              {dailyTasks.map((task) => (
+                <div
+                  key={task.id}
+                  className={`flex items-center justify-between p-1.5 rounded-lg text-xs border ${
+                    completedTasks.includes(task.id)
+                      ? 'bg-white/40 border-purple-200'
+                      : 'bg-white/20 border-white/10'
+                  }`}
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleTaskCompletion(task.id);
                   }}
-                />
-                <div>
-                  <div className="font-medium flex items-center">
-                    <span className="w-1 h-1 bg-white rounded-full mr-2 opacity-50"></span>
-                    {task.title}
+                >
+                  <div className="flex items-center w-full">
+                    <div className={`w-3 h-3 rounded-full border mr-2 flex items-center justify-center ${
+                      completedTasks.includes(task.id) ? 'bg-purple-500 border-purple-500' : 'border-gray-400'
+                    }`}>
+                      {completedTasks.includes(task.id) && <span className="text-white text-[8px]">✓</span>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className={`font-medium truncate ${completedTasks.includes(task.id) ? 'line-through text-gray-500' : 'text-gray-800 dark:text-gray-200'}`}>
+                        {task.title}
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-gray-500 ml-1 whitespace-nowrap">{task.duration}</div>
                   </div>
-                  <div className="opacity-75">{task.duration}</div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="flex justify-between items-center">
-          {/* 完成提示 */}
-          <div className="text-right">
-            <p className="text-[10px] opacity-75">
-              {completedCount === totalCount
-                ? '🎉 全完成'
-                : `剩${totalCount - completedCount}`}
-            </p>
-          </div>
-
-          {/* 换一换按钮 */}
-          <div className="flex-shrink-0">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                refreshTasks();
-              }}
-              className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-all flex items-center border border-white/30 backdrop-blur-md"
-            >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-1.5"
+            <div className="flex justify-between items-center mt-auto pt-1 border-t border-white/20">
+              <p className="text-[10px] opacity-75">
+                {completedCount === totalCount ? '🎉 全完成' : `剩${totalCount - completedCount}`}
+              </p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  refreshTasks();
+                }}
+                className="text-[10px] bg-white/30 hover:bg-white/50 px-2 py-0.5 rounded-full transition-colors text-purple-800 dark:text-purple-200 flex items-center"
               >
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                <path d="M16 16h5v5" />
-              </svg>
-              换一换
-            </button>
-          </div>
-        </div>
+                换一换
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

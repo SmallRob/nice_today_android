@@ -89,7 +89,7 @@ const ErrorDisplayPanel = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
+          className="fixed bottom-6 right-6 z-50 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center safe-bottom-margin"
           style={{ width: '60px', height: '60px' }}
           title={`查看错误日志 (${stats.total}个错误)`}
         >
@@ -102,8 +102,15 @@ const ErrorDisplayPanel = () => {
 
       {/* 错误面板 */}
       {isOpen && (
-        <div className="fixed bottom-0 right-0 z-50 w-full md:w-[480px] md:bottom-6 md:right-6 bg-white dark:bg-gray-800 rounded-t-xl md:rounded-xl shadow-2xl transition-all duration-300 max-h-[80vh] flex flex-col">
-          {/* 头部 */}
+        <>
+          {/* 移动端遮罩 */}
+          <div 
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+          
+          <div className="fixed bottom-0 right-0 z-50 w-full md:w-[480px] md:bottom-6 md:right-6 bg-white dark:bg-gray-800 rounded-t-xl md:rounded-xl shadow-2xl transition-all duration-300 flex flex-col h-[75vh] md:h-auto md:max-h-[80vh]">
+            {/* 头部 */}
           <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 rounded-t-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -173,7 +180,7 @@ const ErrorDisplayPanel = () => {
           </div>
 
           {/* 底部操作栏 */}
-          <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3 bg-white dark:bg-gray-800 pb-safe md:pb-4">
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => exportLogs()}
@@ -201,7 +208,7 @@ const ErrorDisplayPanel = () => {
               刷新应用
             </button>
           </div>
-        </div>
+        </>
       )}
 
       {/* 错误详情弹窗 */}

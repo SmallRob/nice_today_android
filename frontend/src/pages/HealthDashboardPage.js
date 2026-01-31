@@ -11,6 +11,7 @@ import BodyMetricsRhythmCard from '../components/health/BodyMetricsRhythmCard.js
 import DressDietCard from '../components/health/DressDietCard.js';
 import DietHealthCard from '../components/health/DietHealthCard.js';
 import BloodTypeHealthCard from '../components/health/BloodTypeHealthCard.js';
+import SpineHealthCard from '../components/health/SpineHealthCard.js';
 // import SimpleEmoHealthCard from '../components/health/SimpleEmoHealthCard';
 import StepCounterCard from '../components/health/StepCounterCard';
 import ThemeAwareLoading from '../components/ThemeAwareLoading.js';
@@ -103,6 +104,13 @@ const HealthDashboardPage = () => {
       priority: 2, // 高优先级，重要健康信息
       cacheKey: 'blood-type-health',
       title: '血型健康管理卡片'
+    },
+    {
+      id: 'spine-health',
+      component: SpineHealthCard,
+      priority: 2, 
+      cacheKey: 'spine-health',
+      title: '肩颈脊椎健康卡片'
     },
     {
       id: 'body-metrics',

@@ -80,21 +80,23 @@ const TabNavigation = () => {
       )
     },
     {
-      id: 'simple-iching',
-      label: '简单易学',
+      id: 'shaoyong',
+      label: '传统易学',
       path: '/shaoyong-yixue',
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" strokeWidth={2} />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 6l2 2m10 0l-2 2M6 18l2-2m10 0l-2-2" />
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="currentColor" strokeWidth="1.5"/>
+          <path d="M12 22C12 22 12 17 12 12C12 7 12 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12C14.7614 12 17 14.2386 17 17C17 19.7614 14.7614 22 12 22Z" fill="currentColor" opacity="0.2"/>
+          <path d="M12 22C12 22 12 17 12 12C12 7 12 2 12 2M12 12C9.23858 12 7 9.76142 7 7C7 4.23858 9.23858 2 12 2M12 12C14.7614 12 17 14.2386 17 17C17 19.7614 14.7614 22 12 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="12" cy="7" r="1" fill="currentColor"/>
+          <circle cx="12" cy="17" r="1" fill="currentColor"/>
         </svg>
       ),
       activeIcon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 2v3m0 14v3M2 12h3m14 0h3" stroke="white" strokeWidth={2} />
-          <path d="M6 6l2 2m10 0l-2 2M6 18l2-2m10 0l-2-2" stroke="white" strokeWidth={1.5} />
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM12 22C12 22 12 17 12 12C12 7 12 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12C14.7614 12 17 14.2386 17 17C17 19.7614 14.7614 22 12 22Z"/>
+          <circle cx="12" cy="7" r="1" fill="var(--bg-primary, #fff)"/>
+          <circle cx="12" cy="17" r="1" fill="var(--bg-primary, #fff)"/>
         </svg>
       )
     },
@@ -104,12 +106,12 @@ const TabNavigation = () => {
       path: '/more-features',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
       ),
       activeIcon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
       )
     }

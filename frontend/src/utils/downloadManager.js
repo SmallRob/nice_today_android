@@ -12,6 +12,7 @@ class DownloadManager {
   constructor() {
     this.downloadId = null;
     this.isDownloading = false;
+    this.progressListener = null;
   }
 
   /**
@@ -37,16 +38,48 @@ class DownloadManager {
     this.isDownloading = true;
     console.log(`Starting download from ${url}...`);
 
+    // 移除之前的监听器（如果有）
+    if (this.progressListener) {
+      await this.progressListener.remove();
+      this.progressListener = null;
+    }
+
     try {
+      // 添加进度监听器
+      this.progressListener = await AppUpdate.addListener('downloadProgress', (info) => {
+        if (info.total > 0) {
+          const percentage = Math.round((info.downloaded / info.total) * 100);
+          if (onProgress) onProgress(percentage);
+        }
+        
+        // Android DownloadManager.STATUS_SUCCESSFUL = 8
+        if (info.status === 8) {
+           this.isDownloading = false;
+           if (onComplete) onComplete('download-completed');
+           // 完成后移除监听器
+           if (this.progressListener) {
+             this.progressListener.remove();
+             this.progressListener = null;
+           }
+        }
+      });
+
       // 调用原生插件下载
-      await AppUpdate.downloadAndInstall({ url, version });
+      const result = await AppUpdate.downloadAndInstall({ url, version });
       
-      this.isDownloading = false;
-      if (onComplete) onComplete('download-started');
+      // 注意：resolve 只代表下载请求已加入队列，并不代表下载完成
+      // 实际完成由 listener 处理
+      console.log('Download started:', result);
       
     } catch (error) {
       console.error('Download failed:', error);
       this.isDownloading = false;
+      
+      if (this.progressListener) {
+        await this.progressListener.remove();
+        this.progressListener = null;
+      }
+
       // 降级：如果插件调用失败，尝试打开浏览器
       window.open(url, '_blank');
       if (onError) onError(error);
@@ -72,12 +105,6 @@ class DownloadManager {
         console.log('Requesting REQUEST_INSTALL_PACKAGES permission...');
     }
 
-    // 尝试使用 Capacitor FileOpener (如果已安装)
-    // 或者提示用户去文件管理器打开
-    
-    // 由于缺少原生桥接代码，这里仅做模拟日志
-    // 实际项目中应引入 @capacitor-community/file-opener
-    
     // 降级方案：通知用户下载完成
     alert('下载完成！请在通知栏或文件管理器中点击安装包进行安装。');
   }

@@ -3,7 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import PageLayout, { Card, Button } from '../components/PageLayout.js';
 import { userConfigManager } from '../utils/userConfigManager';
 import tarotCardImage from '../images/tarot-card.png';
-import '../index.css';
+import { TAROT_CARDS } from '../constants/tarotCards';
 
 // 塔罗牌数据 - 大阿卡纳牌（22张）
 const MAJOR_ARCANA = [
@@ -217,6 +217,7 @@ function TarotPage() {
   const [wishHistory, setWishHistory] = useState([]);
   const [expandedSuit, setExpandedSuit] = useState(null);
   const [showDetailedReading, setShowDetailedReading] = useState(false);
+  const [selectedLibraryCard, setSelectedLibraryCard] = useState(null);
 
   // 新增状态
   const [userInfo, setUserInfo] = useState({
@@ -235,6 +236,62 @@ function TarotPage() {
 
   // 使用 useMemo 缓存计算结果，避免重复计算
   const defaultUserInfo = useMemo(() => getDefaultUserInfo(), []);
+  const tarotLibrary = useMemo(() => {
+    const major = TAROT_CARDS
+      .filter((card) => card.arcana === 'major')
+      .slice()
+      .sort((a, b) => (a.number || 0) - (b.number || 0));
+
+    const suits = ['wands', 'cups', 'swords', 'pentacles'];
+    const minorSuits = suits.map((suit) => {
+      const cards = TAROT_CARDS
+        .filter((card) => card.arcana === 'minor' && card.suit === suit)
+        .slice()
+        .sort((a, b) => (a.number || 0) - (b.number || 0));
+      const head = cards[0] || null;
+      return {
+        suit,
+        suitCN: head?.suitCN || suit,
+        element: head?.element || '',
+        theme: head?.theme || '',
+        cards
+      };
+    });
+
+    return { major, minorSuits };
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== 'library' && selectedLibraryCard) {
+      setSelectedLibraryCard(null);
+    }
+  }, [activeTab, selectedLibraryCard]);
+
+  useEffect(() => {
+    if (!selectedLibraryCard) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setSelectedLibraryCard(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectedLibraryCard]);
+
+  const formatCardTitle = useCallback((card) => {
+    if (!card) return '';
+    if (card.arcana === 'major') {
+      const n = typeof card.number === 'number' ? String(card.number).padStart(2, '0') : '';
+      return `${n ? `${n}. ` : ''}${card.name || ''}`.trim();
+    }
+    return card.name || '';
+  }, []);
+
+  const formatCardSubtitle = useCallback((card) => {
+    if (!card) return '';
+    if (card.arcana === 'major') {
+      return card.theme || (card.upright?.keywords || []).slice(0, 3).join(' · ');
+    }
+    return (card.upright?.keywords || []).slice(0, 3).join(' · ') || card.theme || '';
+  }, []);
 
   const handleSaveUserInfo = useCallback((birthDate) => {
     const zodiacSign = calculateZodiac(birthDate);
@@ -427,9 +484,22 @@ function TarotPage() {
 
   // 滚动到顶部 - 优化：使用 useCallback
   const scrollToTop = useCallback(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
+    const startNode = scrollContainerRef.current;
+    if (!startNode) return;
+
+    let el = startNode;
+    while (el) {
+      const style = window.getComputedStyle(el);
+      const overflowY = style.overflowY;
+      const canScroll = (overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight;
+      if (canScroll) {
+        el.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      el = el.parentElement;
     }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
 
@@ -663,13 +733,15 @@ function TarotPage() {
         }
       `}</style>
       <PageLayout title="神秘塔罗">
-        <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+        <div className="bg-gray-50 dark:bg-gray-900">
           {/* 标签导航 */}
-          <div style={{
-            flexShrink: 0,
-            backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-          }}>
+          <div
+            className="sticky top-0 z-20"
+            style={{
+              backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+            }}
+          >
             <div style={{
               maxWidth: '56rem',
               marginLeft: 'auto',
@@ -772,18 +844,9 @@ function TarotPage() {
           </div>
 
           {/* 内容区域 */}
-          <div className="flex-1 overflow-hidden">
-            <div
-              ref={scrollContainerRef}
-              className="h-full overflow-y-auto"
-              style={{
-                WebkitOverflowScrolling: 'touch',
-                overscrollBehaviorY: 'contain'
-              }}
-            >
-              <div className="max-w-4xl mx-auto p-3 pb-16">
-                {activeTab === 'daily' && (
-                  <div className="space-y-6">
+          <div ref={scrollContainerRef} className="max-w-4xl mx-auto p-3 pb-16">
+            {activeTab === 'daily' && (
+              <div className="space-y-6">
                     {/* 欢迎卡片 */}
                     <Card>
                       <div className="text-center p-6 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 rounded-lg text-white">
@@ -823,10 +886,10 @@ function TarotPage() {
                       }}>
                         🎴 选择抽卡模式
                       </h3>
-                      <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 sm:gap-2">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-2">
                         <Button
                           onClick={() => switchDrawMode(DRAW_MODES.SINGLE)}
-                          className={`flex flex-col items-center justify-center p-4 sm:p-6 rounded-xl transition-all duration-300 touch-action-manipulation outline-none cursor-pointer min-h-[100px] sm:min-h-[120px] box-border overflow-hidden ${
+                          className={`flex flex-col items-center justify-center p-3 sm:p-6 rounded-xl transition-all duration-300 touch-action-manipulation outline-none cursor-pointer min-h-[96px] sm:min-h-[120px] box-border overflow-hidden ${
                             drawMode === DRAW_MODES.SINGLE
                               ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-2 border-purple-300 dark:border-purple-700 shadow-xl'
                               : theme === 'dark'
@@ -856,7 +919,7 @@ function TarotPage() {
                         </Button>
                         <Button
                           onClick={() => switchDrawMode(DRAW_MODES.TRIPLE)}
-                          className={`flex flex-col items-center justify-center p-4 sm:p-6 rounded-xl transition-all duration-300 touch-action-manipulation outline-none cursor-pointer min-h-[100px] sm:min-h-[120px] box-border overflow-hidden ${
+                          className={`flex flex-col items-center justify-center p-3 sm:p-6 rounded-xl transition-all duration-300 touch-action-manipulation outline-none cursor-pointer min-h-[96px] sm:min-h-[120px] box-border overflow-hidden ${
                             drawMode === DRAW_MODES.TRIPLE
                               ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white border-2 border-pink-300 dark:border-pink-700 shadow-xl'
                               : theme === 'dark'
@@ -1025,9 +1088,12 @@ function TarotPage() {
                               {/* 三张牌展示 */}
                               {drawnCards.mode === DRAW_MODES.TRIPLE && (
                                 <>
-                                  <div className="flex flex-col sm:grid sm:grid-cols-3 gap-3 sm:gap-2">
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-2">
                                     {drawnCards.cards.map((card, index) => (
-                                      <div key={index} className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-3 sm:p-3 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl">
+                                      <div
+                                        key={index}
+                                        className={`bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-900 dark:via-gray-800 dark:to-indigo-900 rounded-xl p-3 sm:p-3 shadow-lg border border-purple-100 dark:border-purple-800 transition-all duration-300 hover:shadow-xl ${index === 2 ? 'col-span-2 sm:col-span-1' : ''}`}
+                                      >
                                         <div className="flex items-center justify-center">
                                           {!cardsRevealed ? (
                                             <div className="flex items-center justify-center">
@@ -1509,10 +1575,10 @@ function TarotPage() {
                       </div>
                     </Card>
                   </div>
-                )}
+            )}
 
-                {activeTab === 'library' && (
-                  <div className="space-y-4">
+            {activeTab === 'library' && (
+              <div className="space-y-4">
                     {/* 大阿卡纳牌 */}
                     <Card>
                       <h3 className="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
@@ -1522,35 +1588,50 @@ function TarotPage() {
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                         大阿卡纳牌代表重要的人生课题和精神层面的启示
                       </p>
-                      <div className="grid grid-cols-2 gap-3">
-                        {MAJOR_ARCANA.map((card) => (
-                          <div
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '12px'
+                        }}
+                      >
+                        {tarotLibrary.major.map((card) => (
+                          <button
                             key={card.id}
-                            className="p-3 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-lg text-sm"
+                            onClick={() => setSelectedLibraryCard(card)}
+                            className="p-3 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900 dark:to-indigo-900 rounded-lg text-sm text-left active:scale-[0.99] transition-transform"
+                            style={{
+                              flex: '0 0 calc(50% - 6px)',
+                              maxWidth: 'calc(50% - 6px)'
+                            }}
                           >
-                            <div className="font-bold text-gray-800 dark:text-white mb-1">
-                              {card.id}. {card.name}
+                            <div
+                              className="font-bold text-gray-800 dark:text-white"
+                              style={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'clip'
+                              }}
+                            >
+                              {formatCardTitle(card)}
                             </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
-                              {card.nameEn}
+                            <div
+                              className="text-xs text-gray-700 dark:text-gray-300 mt-1"
+                              style={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'clip'
+                              }}
+                            >
+                              {formatCardSubtitle(card)}
                             </div>
-                            <div className="flex flex-wrap gap-1">
-                              {card.keywords.slice(0, 2).map((keyword, index) => (
-                                <span
-                                  key={index}
-                                  className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded text-xs text-purple-600 dark:text-purple-300"
-                                >
-                                  {keyword}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     </Card>
 
                     {/* 小阿卡纳牌 */}
-                    {MINOR_ARCANA.map((suit) => (
+                    {tarotLibrary.minorSuits.map((suit) => (
                       <Card key={suit.suit}>
                         <button
                           onClick={() => setExpandedSuit(expandedSuit === suit.suit ? null : suit.suit)}
@@ -1558,13 +1639,21 @@ function TarotPage() {
                         >
                           <div className="flex items-center">
                             <div
-                              className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getSuitColor(suit.color)} flex items-center justify-center text-white text-xl font-bold mr-3`}
+                              className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getSuitColor(
+                                suit.suit === 'wands'
+                                  ? 'red'
+                                  : suit.suit === 'cups'
+                                    ? 'blue'
+                                    : suit.suit === 'swords'
+                                      ? 'gray'
+                                      : 'green'
+                              )} flex items-center justify-center text-white text-xl font-bold mr-3`}
                             >
-                              {suit.element[0]}
+                              {(suit.element || '')[0]}
                             </div>
                             <div>
                               <h3 className="font-bold text-gray-800 dark:text-white text-lg">
-                                {suit.suit}（{suit.suitEn}）
+                                {suit.suitCN}（{suit.suit === 'wands' ? 'Wands' : suit.suit === 'cups' ? 'Cups' : suit.suit === 'swords' ? 'Swords' : 'Pentacles'}）
                               </h3>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
                                 {suit.element} · {suit.cards.length}张牌
@@ -1582,32 +1671,52 @@ function TarotPage() {
                         </button>
 
                         {expandedSuit === suit.suit && (
-                          <div className="px-4 pb-4 space-y-2">
-                            {suit.cards.map((card) => (
-                              <div
-                                key={`${suit.suit}-${card.id}`}
-                                className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                              >
-                                <div className="flex items-center justify-between mb-1">
-                                  <h4 className="font-medium text-gray-800 dark:text-white">
-                                    {card.name}
-                                  </h4>
-                                  <div className="flex flex-wrap gap-1">
-                                    {card.keywords.slice(0, 2).map((keyword, index) => (
-                                      <span
-                                        key={index}
-                                        className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded text-xs"
-                                      >
-                                        {keyword}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {card.meaning}
-                                </p>
+                          <div className="px-4 pb-4">
+                            {suit.theme && (
+                              <div className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+                                {suit.theme}
                               </div>
-                            ))}
+                            )}
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '8px'
+                              }}
+                            >
+                              {suit.cards.map((card) => (
+                                <button
+                                  key={card.id}
+                                  onClick={() => setSelectedLibraryCard(card)}
+                                  className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-left active:scale-[0.99] transition-transform"
+                                  style={{
+                                    flex: '0 0 calc(50% - 4px)',
+                                    maxWidth: 'calc(50% - 4px)'
+                                  }}
+                                >
+                                  <div
+                                    className="font-medium text-gray-800 dark:text-white"
+                                    style={{
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'clip'
+                                    }}
+                                  >
+                                    {formatCardTitle(card)}
+                                  </div>
+                                  <div
+                                    className="text-xs text-gray-600 dark:text-gray-300 mt-1"
+                                    style={{
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'clip'
+                                    }}
+                                  >
+                                    {formatCardSubtitle(card)}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </Card>
@@ -1677,11 +1786,151 @@ function TarotPage() {
                       </div>
                     </Card>
                   </div>
+            )}
+          </div>
+        </div>
+
+        {selectedLibraryCard && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setSelectedLibraryCard(null)}
+          >
+            <div
+              className="bg-white dark:bg-gray-800 rounded-2xl p-5 max-w-2xl w-full shadow-2xl max-h-[85vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {selectedLibraryCard.arcana === 'major' ? '大阿卡纳' : '小阿卡纳'}
+                    {selectedLibraryCard.suitCN ? ` · ${selectedLibraryCard.suitCN}` : ''}
+                    {selectedLibraryCard.element ? ` · ${selectedLibraryCard.element}` : ''}
+                    {typeof selectedLibraryCard.number === 'number' ? ` · ${selectedLibraryCard.number}` : ''}
+                  </div>
+                  <div className="text-xl font-bold text-gray-900 dark:text-white mt-1 break-words">
+                    {selectedLibraryCard.name}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300 break-words">
+                    {selectedLibraryCard.nameEn}
+                  </div>
+                  {selectedLibraryCard.theme && (
+                    <div className="mt-2 text-sm text-gray-700 dark:text-gray-200">
+                      {selectedLibraryCard.theme}
+                    </div>
+                  )}
+                </div>
+                <button
+                  className="shrink-0 w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 flex items-center justify-center"
+                  onClick={() => setSelectedLibraryCard(null)}
+                  aria-label="关闭"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div
+                className="mt-4"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}
+              >
+                {(selectedLibraryCard.upright?.core || selectedLibraryCard.upright?.keywords?.length) && (
+                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-900">
+                    <div className="font-bold text-emerald-800 dark:text-emerald-200 mb-2">正位</div>
+                    {selectedLibraryCard.upright?.core && (
+                      <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                        {selectedLibraryCard.upright.core}
+                      </div>
+                    )}
+                    {!!selectedLibraryCard.upright?.keywords?.length && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {selectedLibraryCard.upright.keywords.slice(0, 8).map((k) => (
+                          <span
+                            key={`u-${k}`}
+                            className="px-2 py-1 rounded-lg text-xs bg-white/80 dark:bg-gray-800/80 text-emerald-700 dark:text-emerald-200 border border-emerald-100 dark:border-emerald-800"
+                          >
+                            {k}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {selectedLibraryCard.upright?.advice && (
+                      <div className="mt-3 text-sm text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">建议：</span>
+                        {selectedLibraryCard.upright.advice}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {(selectedLibraryCard.reversed?.core || selectedLibraryCard.reversed?.keywords?.length) && (
+                  <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-900/30 border border-rose-100 dark:border-rose-900">
+                    <div className="font-bold text-rose-800 dark:text-rose-200 mb-2">逆位</div>
+                    {selectedLibraryCard.reversed?.core && (
+                      <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                        {selectedLibraryCard.reversed.core}
+                      </div>
+                    )}
+                    {!!selectedLibraryCard.reversed?.keywords?.length && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {selectedLibraryCard.reversed.keywords.slice(0, 8).map((k) => (
+                          <span
+                            key={`r-${k}`}
+                            className="px-2 py-1 rounded-lg text-xs bg-white/80 dark:bg-gray-800/80 text-rose-700 dark:text-rose-200 border border-rose-100 dark:border-rose-800"
+                          >
+                            {k}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {selectedLibraryCard.reversed?.advice && (
+                      <div className="mt-3 text-sm text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">建议：</span>
+                        {selectedLibraryCard.reversed.advice}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!!selectedLibraryCard.symbols?.length && (
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
+                    <div className="font-bold text-gray-800 dark:text-white mb-2">象征</div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedLibraryCard.symbols.slice(0, 10).map((s) => (
+                        <span
+                          key={`s-${s}`}
+                          className="px-2 py-1 rounded-lg text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-100 dark:border-gray-600"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedLibraryCard.history && (
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
+                    <div className="font-bold text-gray-800 dark:text-white mb-2">背景</div>
+                    <div className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                      {selectedLibraryCard.history}
+                    </div>
+                  </div>
+                )}
+
+                {selectedLibraryCard.myth && (
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600">
+                    <div className="font-bold text-gray-800 dark:text-white mb-2">寓意</div>
+                    <div className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                      {selectedLibraryCard.myth}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* 用户信息设置模态框 */}
         {showUserInfoModal && (

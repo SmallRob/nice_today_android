@@ -343,215 +343,102 @@
   overflow: hidden;
 }
 
-/* 功能卡片 - 安卓现代化风格，确保自适应和居中 */
+/* 功能卡片 - 现代化风格，参考图标包设计 */
 .dashboard-page-wrapper .feature-card {
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: clamp(8px, 2vw, 16px);
-  border-radius: clamp(16px, 4vw, 24px);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0.1, 1);
-  position: relative;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  min-height: clamp(70px, 20vw, 100px);
-  border: 0;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-sizing: border-box;
-  /* 强制稳定的布局 */
-  contain: layout;
-  /* 防止样式污染 */
-  isolation: isolate;
-  /* 确保内容可见性 */
-  visibility: visible !important;
-  opacity: 1 !important;
-  /* 确保卡片独立性和自适应 */
-  flex: 0 0 auto;
-  margin: 0;
-  /* 确保在网格中正确定位 */
-  justify-self: stretch;
-  align-self: stretch;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.1, 1) !important;
 }
 
-/* 卡片内容区域 - 确保内容居中对齐 */
+/* 卡片内容区域 - 垂直排列图标盒和文字 */
 .feature-card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   width: 100%;
-  height: 100%;
-  gap: clamp(4px, 1.5vw, 8px);
-  position: relative;
-  z-index: 2;
-  box-sizing: border-box;
-  padding-top: clamp(4px, 1vw, 8px);
-  /* 确保内容自适应居中 */
-  text-align: center;
-  justify-content: center;
-}
-
-/* 卡片背景渐变和阴影 */
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: inherit;
-  z-index: 1;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-  /* 确保不阻挡点击事件 */
-  /* 确保背景渐变正常显示 */
-  display: block !important;
-}
-
-
-/* 卡片图标容器 - 确保图标居中且自适应 */
-.feature-card-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(36px, 8.5vw, 52px);
-  height: clamp(36px, 8.5vw, 52px);
-  border-radius: clamp(12px, 3.5vw, 18px);
-  background: transparent;
-  margin: 0 auto;
-  margin-bottom: clamp(2px, 1vw, 6px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100;
-  position: relative;
-  box-sizing: border-box;
-  /* 确保图标容器可见性 */
-  visibility: visible !important;
-  opacity: 1 !important;
-  /* 确保容器不溢出 */
-  max-width: 100%;
-  max-height: 100%;
-  /* 确保图标容器居中 */
-  flex-shrink: 0;
-}
-
-.feature-card:hover .feature-card-icon-wrapper {
-  transform: scale(1.1) translateY(-2px);
-}
-
-/* 卡片图标 - 白色，彩色背景上显示，确保居中 */
-.feature-card .feature-card-icon {
-  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
-  line-height: 1;
-  color: #ffffff;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 101;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  box-sizing: border-box;
-  /* 确保图标渲染稳定 */
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* 确保图标不溢出 */
-  max-width: 100%;
-  max-height: 100%;
-  /* 确保图标居中 */
-  margin: 0 auto;
-  flex-shrink: 0;
-}
-
-.feature-card:hover .feature-card-icon {
-  color: #ffffff;
-  transform: scale(1.05);
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
-}
-
-/* 卡片标题 - 白色文字，无背景边框，文字阴影，确保居中 */
-.feature-card .feature-card-title {
-  font-size: clamp(0.6rem, 1.6vw, 0.8rem);
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0;
-  line-height: 1.2;
+  gap: 8px;
   padding: 0;
-  background: transparent;
+}
+
+/* 卡片图标容器 - 变成圆角矩形并带有渐变 */
+.feature-card-icon-wrapper {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  margin-bottom: 2px !important;
+}
+
+/* 根据分类应用不同的渐变背景 */
+.category-daily .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%) !important;
+}
+
+.category-fortune .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%) !important;
+}
+
+.category-growth .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%) !important;
+}
+
+.category-health .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #84fbb1 0%, #48c6ef 100%) !important;
+}
+
+.category-entertainment .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%) !important;
+}
+
+.category-tool .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%) !important;
+}
+
+/* 移除旧的 before 渐变 */
+.feature-card::before {
+  display: none !important;
+}
+
+/* 图标样式 */
+.feature-card .feature-card-icon {
+  font-size: 28px !important;
+  color: #ffffff !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* 卡片标题 - 放在图标下方 */
+.feature-card .feature-card-title {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  margin: 0 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  text-align: center;
-  z-index: 100;
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 0 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-sizing: border-box;
-  /* 确保标题渲染稳定 */
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block;
-  /* 确保标题不溢出 */
-  width: 100%;
-  overflow: hidden;
-  /* 确保标题居中 */
-  margin: 0 auto;
-  contain: layout style;
 }
 
-.feature-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+/* 悬停和点击效果 */
+.feature-card:hover .feature-card-icon-wrapper {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
-.feature-card:hover .feature-card-title {
-  color: #ffffff;
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.4),
-    0 0 12px rgba(0, 0, 0, 0.3);
-}
-
-.feature-card:active {
+.feature-card:active .feature-card-icon-wrapper {
   transform: scale(0.95);
-}
-
-/* 不同类型的卡片背景色 - 安卓现代化风格 */
-.feature-card.category-daily::before {
-  background: linear-gradient(135deg, #FF5252 0%, #FF9800 100%) !important;
-  box-shadow: 0 4px 20px rgba(255, 82, 82, 0.4) !important;
-}
-
-.feature-card.category-fortune::before {
-  background: linear-gradient(135deg, #673AB7 0%, #2196F3 100%) !important;
-  box-shadow: 0 4px 20px rgba(103, 58, 183, 0.4) !important;
-}
-
-.feature-card.category-growth::before {
-  background: linear-gradient(135deg, #4CAF50 0%, #FF9800 100%) !important;
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4) !important;
-}
-
-.feature-card.category-health::before {
-  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%) !important;
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4) !important;
-}
-
-.feature-card.category-entertainment::before {
-  background: linear-gradient(135deg, #E91E63 0%, #FF5722 100%) !important;
-  box-shadow: 0 4px 20px rgba(233, 30, 99, 0.4) !important;
-}
-
-.feature-card.category-tool::before {
-  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 50%, #C41E3A 100%) !important;
-  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4) !important;
 }
 
 /* 应用阴影到卡片 */
@@ -638,490 +525,53 @@
    移动端优化
    ============================================ */
 
+/* 响应式调整 */
 @media (max-width: 768px) {
-  .quick-actions {
-    padding: 6px 5px;
-    margin: 8px 5px;
-    gap: 3px;
-    border-radius: var(--spacing-md);
-    max-height: 60px;
-    min-height: 52px;
-  }
-
-  .quick-action-btn {
-    padding: 2px 3px;
-    border-radius: var(--spacing-sm);
-    min-height: 44px;
-    max-height: 52px;
-    aspect-ratio: 1 / 1.15;
-  }
-
-  .quick-action-btn span:first-child,
-  .quick-action-btn svg {
-    font-size: clamp(0.95rem, 2.3vw, 1.2rem);
-  }
-
-  .quick-action-btn .quick-action-label {
-    font-size: clamp(0.5rem, 1.2vw, 0.6rem);
-  }
-
-  .features-header {
-    padding: var(--spacing-sm) 5px var(--spacing-sm) var(--spacing-sm);
-    margin: var(--spacing-sm) 5px var(--spacing-xs);
-  }
-
-  .features-header::before,
-  .features-header::after {
-    right: 28px;
-  }
-
-  .features-title {
-    font-size: var(--font-size-base);
-  }
-
-  .dashboard-edit-icon-btn {
-    width: 22px;
-    height: 22px;
-    font-size: 0.95rem;
-    right: var(--spacing-xs);
-  }
-
-  .features-grid {
-    gap: clamp(4px, 1.2vw, 6px);
-    padding: clamp(4px, 1.2vw, 6px) 5px;
-    grid-template-columns: repeat(5, 1fr);
-    /* 确保在移动端正确对齐 */
-    justify-items: center;
-    align-items: stretch;
-  }
-
-  .feature-card {
-    padding: var(--spacing-sm);
-    border-radius: var(--spacing-md);
-    /* 确保卡片自适应 */
-    min-width: 0;
-    justify-self: stretch;
-    align-self: stretch;
-  }
-
   .feature-card-icon-wrapper {
-    width: clamp(36px, 8vw, 48px);
-    height: clamp(36px, 8vw, 48px);
-    margin: 0 auto;
-    margin-bottom: clamp(2px, 0.8vw, 5px);
-    /* 确保图标容器不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-    flex-shrink: 0;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
   }
-
-  .feature-card-content {
-    padding-top: clamp(3px, 0.8vw, 6px);
-    /* 确保内容居中 */
-    justify-content: center;
-  }
-
+  
   .feature-card .feature-card-icon {
-    font-size: clamp(1.5rem, 4.2vw, 1.7rem);
-    color: #ffffff;
-    /* 确保图标不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-    margin: 0 auto;
-    flex-shrink: 0;
+    font-size: 24px !important;
   }
-
+  
   .feature-card .feature-card-title {
-    font-size: clamp(0.6rem, 1.6vw, 0.7rem);
-    color: #ffffff;
-    padding: 0;
-    background: transparent;
-    /* 确保标题不溢出 */
-    width: 100%;
-    margin: 0 auto;
-  }
-
-  .feature-card .feature-card-description {
-    font-size: 0.6rem;
+    font-size: 10px !important;
   }
 }
 
-/* 超小屏幕优化 */
 @media (max-width: 480px) {
-  .quick-actions {
-    padding: 4px 5px;
-    margin: 4px 5px;
-    gap: 2px;
-    max-height: 58px;
-    min-height: 50px;
-  }
-
-  .quick-action-btn {
-    padding: 1px 2px;
-    min-height: 42px;
-    max-height: 50px;
-    aspect-ratio: 1 / 1.15;
-  }
-
-  .quick-action-btn span:first-child,
-  .quick-action-btn svg {
-    font-size: clamp(0.9rem, 2.2vw, 1.15rem);
-  }
-
-  .quick-action-btn .quick-action-label {
-    font-size: clamp(0.48rem, 1.1vw, 0.58rem);
-  }
-
   .features-grid {
-    gap: clamp(3px, 1vw, 5px);
-    padding: clamp(3px, 1vw, 5px) 5px;
-    grid-template-columns: repeat(5, 1fr);
-    /* 确保在超小屏幕上正确对齐 */
-    justify-items: center;
-    align-items: stretch;
-  }
-
-  .feature-card {
-    padding: var(--spacing-xs);
-    border-width: 2px;
-    /* 确保卡片自适应 */
-    min-width: 0;
-    justify-self: stretch;
-    align-self: stretch;
+    gap: 12px 4px !important;
+    padding: 10px 8px !important;
   }
 
   .feature-card-icon-wrapper {
-    width: clamp(34px, 7.5vw, 46px);
-    height: clamp(34px, 7.5vw, 46px);
-    margin: 0 auto;
-    margin-bottom: clamp(2px, 0.7vw, 4px);
-    /* 确保图标容器不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-    flex-shrink: 0;
-  }
-
-  .feature-card-content {
-    padding-top: clamp(2px, 0.7vw, 5px);
-    /* 确保内容居中 */
-    justify-content: center;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
   }
 
   .feature-card .feature-card-icon {
-    font-size: clamp(1.3rem, 4vw, 1.5rem);
-    color: #ffffff;
-    /* 确保图标不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-    margin: 0 auto;
-    flex-shrink: 0;
-  }
-
-  .feature-card .feature-card-title {
-    font-size: clamp(0.58rem, 1.6vw, 0.65rem);
-    color: #ffffff;
-    padding: 0;
-    background: transparent;
-    /* 确保标题不溢出 */
-    width: 100%;
-    margin: 0 auto;
-  }
-
-  .feature-card .feature-card-description {
-    font-size: 0.55rem;
-    display: none;
-  }
-
-  .drag-handle {
-    width: 20px;
-    height: 20px;
-    font-size: 1rem;
-  }
-
-  .dashboard-edit-icon-btn {
-    width: 20px;
-    height: 20px;
-    font-size: 0.9rem;
-    right: var(--spacing-xs);
-  }
-
-  .features-header::before,
-  .features-header::after {
-    right: 24px;
-  }
-
-  .features-header {
-    padding: var(--spacing-sm) 24px var(--spacing-sm) var(--spacing-sm);
+    font-size: 22px !important;
   }
 }
 
-/* 375px屏幕优化 */
-@media (max-width: 375px) {
-  .quick-actions {
-    padding: 3px 5px;
-    margin: 3px 5px;
-    gap: 2px;
-    max-height: 56px;
-    min-height: 48px;
-  }
-
-  .quick-action-btn {
-    padding: 1px 2px;
-    min-height: 40px;
-    max-height: 48px;
-    aspect-ratio: 1 / 1.15;
-  }
-
-  .quick-action-btn span:first-child,
-  .quick-action-btn svg {
-    font-size: clamp(0.85rem, 2.1vw, 1.1rem);
-  }
-
-  .quick-action-btn .quick-action-label {
-    font-size: clamp(0.46rem, 1.05vw, 0.56rem);
-  }
-
+@media (max-width: 360px) {
   .features-grid {
-    gap: clamp(2px, 0.7vw, 4px);
-    padding: clamp(2px, 0.7vw, 4px) 5px;
-    grid-template-columns: repeat(5, 1fr);
-    /* 确保在375px屏幕上正确对齐 */
-    justify-items: center;
-    align-items: stretch;
-  }
-
-  .feature-card {
-    padding: 3px;
-    border-width: 2px;
-    /* 确保卡片自适应 */
-    min-width: 0;
-    justify-self: stretch;
-    align-self: stretch;
+    gap: 8px 2px !important;
   }
 
   .feature-card-icon-wrapper {
-    width: clamp(32px, 7.2vw, 44px);
-    height: clamp(32px, 7.2vw, 44px);
-    margin: 0 auto;
-    margin-bottom: clamp(1px, 0.6vw, 3px);
-    /* 确保图标容器不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-    flex-shrink: 0;
-  }
-
-  .feature-card-content {
-    padding-top: clamp(2px, 0.6vw, 4px);
-    /* 确保内容居中 */
-    justify-content: center;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
   }
 
   .feature-card .feature-card-icon {
-    font-size: clamp(1.2rem, 3.8vw, 1.4rem);
-    color: #ffffff;
-    /* 确保图标不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-    margin: 0 auto;
-    flex-shrink: 0;
-  }
-
-  .feature-card .feature-card-title {
-    font-size: clamp(0.56rem, 1.5vw, 0.62rem);
-    color: #ffffff;
-    padding: 0;
-    background: transparent;
-    /* 确保标题不溢出 */
-    width: 100%;
-    margin: 0 auto;
-  }
-
-  .dashboard-edit-icon-btn {
-    width: 18px;
-    height: 18px;
-    font-size: 0.85rem;
-    right: var(--spacing-xs);
-  }
-
-  .features-header::before,
-  .features-header::after {
-    right: 22px;
-  }
-
-  .features-header {
-    padding: var(--spacing-sm) 22px var(--spacing-sm) var(--spacing-sm);
-  }
-}
-
-/* 320px屏幕优化 */
-@media (max-width: 320px) {
-  .quick-actions {
-    padding: 2px 5px;
-    margin: 2px 5px;
-    gap: 1px;
-    max-height: 54px;
-    min-height: 46px;
-  }
-
-  .quick-action-btn {
-    padding: 1px 1px;
-    min-height: 38px;
-    max-height: 46px;
-    aspect-ratio: 1 / 1.15;
-  }
-
-  .quick-action-btn span:first-child,
-  .quick-action-btn svg {
-    font-size: clamp(0.8rem, 2vw, 1.05rem);
-  }
-
-  .quick-action-btn .quick-action-label {
-    font-size: clamp(0.44rem, 1vw, 0.54rem);
-  }
-
-  .features-header {
-    padding: var(--spacing-xs) 5px var(--spacing-xs) var(--spacing-xs);
-  }
-
-  .features-header::before,
-  .features-header::after {
-    right: 20px;
-  }
-
-  .features-title {
-    font-size: var(--font-size-sm);
-  }
-
-  .dashboard-edit-icon-btn {
-    width: 16px;
-    height: 16px;
-    font-size: 0.8rem;
-    right: var(--spacing-xs);
-  }
-
-  .features-grid {
-    gap: clamp(2px, 0.6vw, 3px);
-    padding: clamp(2px, 0.6vw, 3px) 5px;
-    grid-template-columns: repeat(5, 1fr);
-    /* 确保在320px屏幕上正确对齐 */
-    justify-items: center;
-    align-items: stretch;
-  }
-
-  .feature-card {
-    padding: 2px;
-    border-width: 1.5px;
-    border-radius: var(--spacing-xs);
-    /* 确保卡片自适应 */
-    min-width: 0;
-    justify-self: stretch;
-    align-self: stretch;
-  }
-
-  .feature-card-icon-wrapper {
-    width: clamp(30px, 6.8vw, 42px);
-    height: clamp(30px, 6.8vw, 42px);
-    margin: 0 auto;
-    margin-bottom: clamp(1px, 0.5vw, 2px);
-    /* 确保图标容器不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-    flex-shrink: 0;
-  }
-
-  .feature-card-content {
-    padding-top: clamp(1px, 0.5vw, 3px);
-    /* 确保内容居中 */
-    justify-content: center;
-  }
-
-  .feature-card .feature-card-icon {
-    font-size: clamp(1.15rem, 3.6vw, 1.3rem);
-    color: #ffffff;
-    /* 确保图标不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-    margin: 0 auto;
-    flex-shrink: 0;
-  }
-
-  .feature-card .feature-card-title {
-    font-size: clamp(0.52rem, 1.4vw, 0.58rem);
-    color: #ffffff;
-    padding: 0;
-    background: transparent;
-    /* 确保标题不溢出 */
-    width: 100%;
-    margin: 0 auto;
-  }
-}
-
-/* 大屏幕优化 - 保持5列但增加间距 */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .features-grid {
-    gap: clamp(10px, 1.5vw, 14px);
-    padding: clamp(10px, 1.5vw, 14px) 5px;
-    grid-template-columns: repeat(5, 1fr);
-    /* 确保在大屏幕上正确对齐 */
-    justify-items: center;
-    align-items: stretch;
-  }
-
-  .feature-card {
-    padding: clamp(10px, 2vw, 14px);
-    /* 确保卡片自适应 */
-    min-width: 0;
-    justify-self: stretch;
-    align-self: stretch;
-  }
-
-  .feature-card .feature-card-icon {
-    font-size: clamp(1.8rem, 4vw, 2.2rem);
-    /* 确保图标不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-  }
-
-  .feature-card .feature-card-title {
-    font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-    /* 确保标题不溢出 */
-    width: 100%;
-  }
-}
-
-/* 超大屏幕优化 - 保持5列增加卡片尺寸 */
-@media (min-width: 1024px) {
-  .features-grid {
-    gap: clamp(12px, 1.5vw, 16px);
-    padding: clamp(12px, 1.5vw, 16px) 5px;
-    grid-template-columns: repeat(5, 1fr);
-    max-width: 1400px;
-    margin: 0 auto;
-    /* 确保在超大屏幕上正确对齐 */
-    justify-items: center;
-    align-items: stretch;
-  }
-
-  .feature-card {
-    padding: clamp(12px, 2vw, 18px);
-    min-height: clamp(100px, 22vw, 120px);
-    /* 确保卡片自适应 */
-    min-width: 0;
-    justify-self: stretch;
-    align-self: stretch;
-  }
-
-  .feature-card .feature-card-icon {
-    font-size: clamp(2rem, 4.5vw, 2.8rem);
-    /* 确保图标不溢出 */
-    max-width: 100%;
-    max-height: 100%;
-  }
-
-  .feature-card .feature-card-title {
-    font-size: clamp(0.75rem, 2vw, 0.9rem);
-    /* 确保标题不溢出 */
-    width: 100%;
+    font-size: 20px !important;
   }
 }
 
@@ -1129,148 +579,12 @@
    深色模式适配
    ============================================ */
 
-.dark .quick-actions {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.85) 0%, rgba(45, 55, 72, 0.85) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(74, 85, 104, 0.5);
-}
-
-.dark .quick-action-btn {
-  background-color: rgba(45, 55, 72, 0.95);
-  border-color: rgba(74, 85, 104, 0.5);
-  color: #e2e8f0;
-}
-
-.dark .quick-action-btn .quick-action-label {
-  color: #cbd5e0;
-}
-
-.dark .quick-action-btn:hover {
-  background-color: rgba(45, 55, 72, 1);
-  border-color: rgba(74, 85, 104, 0.8);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-
-.dark .features-header {
-  background: transparent;
-}
-
-.dark .features-title {
-  color: var(--color-text);
-}
-
-.dark .dashboard-edit-icon-btn {
-  background: transparent;
-  border: none;
-  color: var(--color-text);
-}
-
-.dark .features-header .edit-icon-btn.edit-mode-active {
-  background: transparent;
-  color: #818cf8;
-  border: none;
-}
-
-.dark .features-header .edit-icon-btn:hover {
-  color: #818cf8;
-}
-
-.dark .dashboard-page-wrapper .features-controls {
-  background-color: var(--color-secondary);
-  border-bottom-color: var(--color-border);
-}
-
-.dark .dashboard-page-wrapper .dashboard-reset-btn {
-  background: linear-gradient(135deg, #FF5252 0%, #FF9800 100%);
-}
-
-/* 深色模式下调整卡片渐变 - 安卓风格 */
-.dark .feature-card {
-  filter: brightness(1.05) saturate(1.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.dark .feature-card.category-daily::before {
-  background: linear-gradient(135deg, #FF5252 0%, #FF9800 100%);
-  box-shadow: 0 4px 20px rgba(255, 82, 82, 0.5);
-}
-
-.dark .feature-card.category-fortune::before {
-  background: linear-gradient(135deg, #7B1FA2 0%, #2196F3 100%);
-  box-shadow: 0 4px 20px rgba(123, 31, 162, 0.5);
-}
-
-.dark .feature-card.category-growth::before {
-  background: linear-gradient(135deg, #4CAF50 0%, #FF9800 100%);
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.5);
-}
-
-.dark .feature-card.category-health::before {
-  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.5);
-}
-
-.dark .feature-card.category-entertainment::before {
-  background: linear-gradient(135deg, #E91E63 0%, #FF5722 100%);
-  box-shadow: 0 4px 20px rgba(233, 30, 99, 0.5);
-}
-
-.dark .feature-card.category-tool::before {
-  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 50%, #C41E3A 100%);
-  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);
-}
-
-.dark .feature-card:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-}
-
 .dark .feature-card .feature-card-icon-wrapper {
-  background: transparent;
-}
-
-.dark .feature-card .feature-card-icon {
-  color: #ffffff;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.dark .feature-card:hover .feature-card-icon {
-  color: #ffffff;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
-}
-
-.dark .feature-card:hover .feature-card-icon-wrapper {
-  background: transparent;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .dark .feature-card .feature-card-title {
-  background: transparent;
-  color: #ffffff;
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.4),
-    0 0 8px rgba(0, 0, 0, 0.3);
-}
-
-.dark .feature-card:hover .feature-card-title {
-  background: transparent;
-  color: #ffffff;
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.5),
-    0 0 12px rgba(0, 0, 0, 0.4);
-}
-
-.dark .feature-card:hover {
-  filter: brightness(0.95) saturate(1.15);
-}
-
-.dark .feature-card.drag-over {
-  filter: brightness(1.2);
-}
-
-
-
-.dark .feature-card .feature-card-description {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 /* ============================================
@@ -1285,78 +599,16 @@
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  /* 防止样式污染和布局不稳定 */
   isolation: isolate;
-  contain: layout style;
 }
 
-/* 强制重置可能被其他页面污染的样式 */
 .features-grid {
-  /* 确保网格布局不会被外部样式影响 */
   grid-auto-flow: dense !important;
   align-items: stretch !important;
-  /* 确保网格容器自适应 */
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  /* 确保网格居中对齐 */
   margin: 0 auto;
-}
-
-.feature-card {
-  /* 确保卡片尺寸稳定 */
-  flex-shrink: 0 !important;
-  flex-grow: 0 !important;
-  /* 确保卡片自适应 */
-  min-width: 0;
-  max-width: 100%;
-}
-
-/* 重新定义卡片基本样式 - 限制在dashboard页面内 */
-.dashboard-page-wrapper .feature-card {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  aspect-ratio: 1;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  padding: clamp(8px, 2vw, 16px) !important;
-  border-radius: clamp(16px, 4vw, 24px) !important;
-  cursor: pointer !important;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0.1, 1) !important;
-  position: relative !important;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05) !important;
-  overflow: hidden !important;
-  min-height: clamp(70px, 20vw, 100px) !important;
-  border: 0 !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  box-sizing: border-box !important;
-  /* 强制稳定的布局 */
-  contain: layout !important;
-  /* 防止样式污染 */
-  isolation: isolate !important;
-  /* 确保内容可见性 */
-  visibility: visible !important;
-  opacity: 1 !important;
-  /* 确保卡片独立性和自适应 */
-  flex: 0 0 auto !important;
-  margin: 0 !important;
-  /* 确保在网格中正确定位 */
-  justify-self: stretch !important;
-  align-self: stretch !important;
-}
-
-/* 限制全局样式影响 */
-.dashboard-page-wrapper {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  /* 确保容器自适应 */
-  min-width: 0;
-  position: relative;
 }
 
 /* 隐藏滚动条 */
@@ -1385,7 +637,6 @@
 .content-area {
   flex: 1;
   overflow: hidden;
-  /* Keep hidden when features expanded */
   -ms-overflow-style: none;
   scrollbar-width: none;
   padding-bottom: clamp(60px, 15vh, 80px);
@@ -1398,7 +649,6 @@
 .dashboard-page-wrapper:not(.features-expanded) .content-area {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  /* Enable smooth scrolling on iOS */
 }
 
 .content-area::-webkit-scrollbar {

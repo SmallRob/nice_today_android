@@ -1,0 +1,418 @@
+/* ChineseZodiacPage.module.css */
+
+.pageContainer {
+  min-height: 100vh;
+}
+
+.header {
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  color: white;
+}
+
+.headerContent {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.headerTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 auto;
+}
+
+.configButton {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.mainContent {
+  padding: 1rem 0.5rem 4rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+/* 生肖卡片 */
+.zodiacHeroCard {
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: white;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.zodiacHeroIcon {
+  font-size: 3.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.zodiacHeroName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.zodiacHeroElement {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* 通用卡片样式 */
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+:global(.dark) .card {
+  background-color: #1f2937;
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  color: #111827;
+}
+
+:global(.dark) .cardTitle {
+  color: white;
+}
+
+.cardIcon {
+  margin-right: 0.5rem;
+}
+
+/* 性格特征 */
+.traitItem {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #eff6ff;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+:global(.dark) .traitItem {
+  background-color: rgba(30, 58, 138, 0.1);
+}
+
+.traitDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #3b82f6;
+  border-radius: 9999px;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.traitText {
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+:global(.dark) .traitText {
+  color: #e5e7eb;
+}
+
+/* 优点与缺点 */
+.gridTwoCols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.strengthTitle {
+  color: #16a34a;
+}
+
+:global(.dark) .strengthTitle {
+  color: #4ade80;
+}
+
+.weaknessTitle {
+  color: #ea580c;
+}
+
+:global(.dark) .weaknessTitle {
+  color: #fb923c;
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.strengthDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #22c55e;
+  border-radius: 9999px;
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.weaknessDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #f97316;
+  border-radius: 9999px;
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* 幸运信息 */
+.luckyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .luckyGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.luckyBox {
+  text-align: center;
+  padding: 0.75rem;
+  background-color: #f5f3ff;
+  border-radius: 0.5rem;
+}
+
+:global(.dark) .luckyBox {
+  background-color: rgba(88, 28, 135, 0.1);
+}
+
+.luckyLabel {
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-bottom: 0.375rem;
+}
+
+:global(.dark) .luckyLabel {
+  color: #9ca3af;
+}
+
+.tagGroup {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.tag {
+  padding: 0.25rem 0.5rem;
+  background-color: white;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: #374151;
+}
+
+:global(.dark) .tag {
+  background-color: #374151;
+  color: #e5e7eb;
+}
+
+.luckyNumber {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 9999px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #9333ea;
+}
+
+:global(.dark) .luckyNumber {
+  background-color: #374151;
+  color: #c084fc;
+}
+
+/* 趋势图 */
+.chartContainer {
+  height: 16rem;
+}
+
+@media (min-width: 768px) {
+  .chartContainer {
+    height: 18rem;
+  }
+}
+
+.chartStats {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.statBox {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+}
+
+.statBoxBlue {
+  background-color: #eff6ff;
+  border-color: #dbeafe;
+}
+
+:global(.dark) .statBoxBlue {
+  background-color: rgba(30, 58, 138, 0.1);
+  border-color: rgba(30, 58, 138, 0.3);
+}
+
+.statBoxAmber {
+  background-color: #fffbeb;
+  border-color: #fef3c7;
+}
+
+:global(.dark) .statBoxAmber {
+  background-color: rgba(120, 53, 15, 0.1);
+  border-color: rgba(120, 53, 15, 0.3);
+}
+
+.statBoxGreen {
+  background-color: #f0fdf4;
+  border-color: #dcfce7;
+}
+
+:global(.dark) .statBoxGreen {
+  background-color: rgba(20, 83, 45, 0.1);
+  border-color: rgba(20, 83, 45, 0.3);
+}
+
+/* 匹配度仪表板 */
+.matchDashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.gaugeContainer {
+  position: relative;
+  width: 7rem;
+  height: 7rem;
+  flex-shrink: 0;
+}
+
+/* 今日运势 */
+.todayHoroscopeCard {
+  background: linear-gradient(to right, #22c55e, #2563eb);
+  color: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.progressBar {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  height: 0.75rem;
+}
+
+.progressFill {
+  background-color: white;
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.forecastGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .forecastGrid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.forecastItem {
+  text-align: center;
+  padding: 0.25rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* 生肖选择器 */
+.selectorGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .selectorGrid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.selectorButton {
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.selectorButtonUnselected {
+  background-color: #f9fafb;
+  color: #374151;
+}
+
+:global(.dark) .selectorButtonUnselected {
+  background-color: #374151;
+  color: #e5e7eb;
+}
+
+.selectorButtonSelected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.selectorIcon {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.selectorName {
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}

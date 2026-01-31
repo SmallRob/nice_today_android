@@ -14,11 +14,12 @@ const TiebanshenshuPageContent = () => {
   const { theme } = useTheme();
   
   // 状态管理
+  const [step, setStep] = useState(0); // 0: Intro, 1: Input, 2: Calculation, 3: Result
   const [baziData, setBaziData] = useState(null);
   const [calculationResult, setCalculationResult] = useState(null);
   const [selectedClause, setSelectedClause] = useState(null);
-  const [activeTab, setActiveTab] = useState('input');
   const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // 从 localStorage 加载历史记录
   useEffect(() => {
@@ -46,7 +47,7 @@ const TiebanshenshuPageContent = () => {
     setBaziData(data);
     setCalculationResult(null);
     setSelectedClause(null);
-    setActiveTab('calculation');
+    setStep(2); // 进入计算步骤
   }, []);
 
   // 计算完成处理
@@ -62,6 +63,11 @@ const TiebanshenshuPageContent = () => {
     
     // 更新历史记录
     setHistory(prev => [newResult, ...prev.slice(0, MAX_HISTORY_LENGTH - 1)]);
+    
+    // 延迟一点跳转，让用户看到进度完成
+    setTimeout(() => {
+        setStep(3); // 进入结果步骤
+    }, 500);
   }, [baziData]);
 
   // 条文选择处理
@@ -74,7 +80,8 @@ const TiebanshenshuPageContent = () => {
     setBaziData(record.bazi);
     setCalculationResult(record);
     setSelectedClause(null);
-    setActiveTab('calculation');
+    setStep(3); // 直接进入结果页
+    setShowHistory(false);
   }, []);
 
   // 清除历史记录
@@ -85,12 +92,12 @@ const TiebanshenshuPageContent = () => {
     }
   }, []);
 
-  // 重置所有状态
+  // 重置
   const handleReset = useCallback(() => {
     setBaziData(null);
     setCalculationResult(null);
     setSelectedClause(null);
-    setActiveTab('input');
+    setStep(1); // 回到输入页
   }, []);
 
   // 获取八字摘要
@@ -100,301 +107,185 @@ const TiebanshenshuPageContent = () => {
     return `${year.stem}${year.branch} ${month.stem}${month.branch} ${day.stem}${day.branch} ${hour.stem}${hour.branch}`;
   };
 
+  // 渲染步骤指示器
+  const renderStepIndicator = () => (
+    <div className="step-indicator">
+      {['输入八字', '皇极起数', '神数条文'].map((label, index) => {
+        const stepNum = index + 1;
+        const isActive = step === stepNum;
+        const isCompleted = step > stepNum;
+        
+        return (
+          <div key={index} className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
+            <div className="step-circle">
+              {isCompleted ? '✓' : stepNum}
+            </div>
+            <div className="step-label">{label}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="tiebanshenshu-page-container">
+    <div className={`tiebanshenshu-page-container ${theme === 'dark' ? 'tiebanshenshu-bg-gradient-dark dark' : 'tiebanshenshu-bg-gradient-light'}`}>
       <div className="tiebanshenshu-content-wrapper">
-        <div className={`${theme === 'dark' ? 'tiebanshenshu-bg-gradient-dark' : 'tiebanshenshu-bg-gradient-light'} max-w-3xl mx-auto px-4 py-6`}>
-        {/* 页面标题 */}
-        <header className="text-center mb-6">
-          <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-900'}`}>
-            🧮 铁板神数
-          </h1>
-          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            邵雍皇极经世，数演天命玄机
-          </p>
+        
+        {/* 顶部标题栏 */}
+        <header className="mb-8 pt-4 flex justify-between items-start animate-fade-in">
+          <div className="flex-1">
+             <h1 className="page-title">铁板神数</h1>
+             <p className="page-subtitle">邵雍皇极经世 · 数演天命玄机</p>
+          </div>
+          <button 
+            onClick={() => setShowHistory(true)}
+            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm"
+            aria-label="历史记录"
+          >
+            <span className="text-xl">📜</span>
+          </button>
         </header>
 
-        {/* 警告提示 */}
-        <div className={`mb-6 rounded-2xl overflow-hidden border ${theme === 'dark' ? 'bg-gray-800 border-amber-700' : 'bg-white border-amber-200'} shadow-md`}>
-          <div className={`p-3 flex items-center space-x-2 ${theme === 'dark' ? 'bg-gradient-to-r from-amber-900 to-orange-900' : 'bg-gradient-to-r from-amber-500 to-orange-600'} text-white`}>
-            <span className="text-xl md:text-2xl">⚠️</span>
-            <div className="flex flex-col">
-              <span className="font-bold text-sm md:text-base whitespace-nowrap">重要提示</span>
-            </div>
-          </div>
-          <div className="p-4">
-            <p className={`text-sm md:text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-              本页面为模拟演示，仅供了解铁板神数之用，不作为实际命理推算依据
-            </p>
-          </div>
-        </div>
-
-        {/* 标签切换 */}
-        {baziData && (
-          <div className={`flex mb-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} p-1`}>
-            <button
-              onClick={() => setActiveTab('input')}
-              className={`flex-1 py-2.5 px-4 text-center rounded-xl transition-all duration-300 touch-manipulation font-medium ${activeTab === 'input'
-                ? `${theme === 'dark' ? 'bg-indigo-600' : 'bg-indigo-600'} text-white shadow-md`
-                : `${theme === 'dark' ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'}`
-                }`}
-            >
-              <span className="text-sm md:text-base whitespace-nowrap">八字信息</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('calculation')}
-              className={`flex-1 py-2.5 px-4 text-center rounded-xl transition-all duration-300 touch-manipulation font-medium ${activeTab === 'calculation'
-                ? `${theme === 'dark' ? 'bg-purple-600' : 'bg-purple-600'} text-white shadow-md`
-                : `${theme === 'dark' ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'}`
-                }`}
-            >
-              <span className="text-sm md:text-base whitespace-nowrap">神数推算</span>
-            </button>
+        {/* 步骤 0: 引导页 */}
+        {step === 0 && (
+          <div className="animate-fade-in space-y-6 flex-1 flex flex-col justify-center">
+             <div className="glass-card text-center py-10">
+                <div className="text-6xl mb-6">🧮</div>
+                <h2 className="text-2xl font-bold mb-4 text-indigo-900 dark:text-indigo-100">探寻命运的数字密码</h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+                  铁板神数相传为北宋邵雍所创，通过“皇极起数”将生辰八字转化为先天卦数，
+                  在万条文库中定位属于你的命运断辞。
+                </p>
+                <div className="flex flex-col gap-3">
+                    <button onClick={() => setStep(1)} className="btn-primary">
+                        开始推算
+                    </button>
+                    <div className="text-xs text-gray-400 mt-4 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-100 dark:border-yellow-800/30">
+                        ⚠️ 仅供文化研究与娱乐，请勿迷信
+                    </div>
+                </div>
+             </div>
           </div>
         )}
 
-        {/* 内容区域 */}
-        <div className="space-y-6">
-          {/* 八字输入区域 */}
-          {(!baziData || activeTab === 'input') && (
-            <div className={`rounded-2xl shadow-lg p-4 md:p-6 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-indigo-100'}`}>
-              <h2 className={`text-lg md:text-xl font-bold mb-4 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>
-                八字信息输入
-              </h2>
-              <BaziInput onSubmit={handleBaziSubmit} />
-            </div>
-          )}
-
-          {/* 历史记录 - 仅在输入标签显示 */}
-          {(!baziData || activeTab === 'input') && (
-            <div className={`rounded-2xl shadow-lg p-4 md:p-6 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-indigo-100'}`}>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className={`text-lg md:text-xl font-bold ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>
-                  历史记录
-                </h2>
-                {history.length > 0 && (
-                  <button 
-                    onClick={clearHistory}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-red-900/30 hover:bg-red-800/40 text-red-400' : 'bg-red-50 hover:bg-red-100 text-red-600'}`}
-                  >
-                    清除记录
-                  </button>
-                )}
-              </div>
-              
-              {history.length === 0 ? (
-                <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                  <div className="text-4xl md:text-5xl mb-3">📚</div>
-                  <p className={`text-sm md:text-base font-medium mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>暂无历史记录</p>
-                  <p className={`text-xs md:text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                    推算后记录将保存在浏览器本地存储中
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                  {history.map((record) => (
-                    <div 
-                      key={record.id} 
-                      className={`border rounded-xl p-4 cursor-pointer transition-colors ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-indigo-50'}`}
-                      onClick={() => handleLoadHistory(record)}
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xl">🧮</span>
-                          <h4 className={`font-medium ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>
-                            铁板神数推算
-                          </h4>
-                        </div>
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                          {record.timestamp}
-                        </span>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {getBaziSummary(record.bazi)}
-                        </p>
-                        <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                          {record.bazi?.gender === 'male' ? '男命' : '女命'} · {record.bazi?.solarDate}
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                          <span>条文：{record.clauseNumbers?.length || 0}条</span>
-                          <span className="mx-2">·</span>
-                          <span>ID: {record.calculationId?.substring(0, 8)}...</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {history.length > 0 && (
-                <div className={`mt-4 text-center text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                  共保存 {history.length} 条记录，最多保存 {MAX_HISTORY_LENGTH} 条
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 神数推算内容 */}
-          {baziData && activeTab === 'calculation' && (
-            <>
-              <div className={`rounded-2xl shadow-lg p-4 md:p-6 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-purple-100'}`}>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className={`text-lg md:text-xl font-bold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-800'}`}>
-                    皇极起数计算
-                  </h2>
-                  {calculationResult && (
+        {/* 步骤 1-3 的通用容器 */}
+        {step > 0 && (
+          <div className="animate-fade-in">
+            {renderStepIndicator()}
+            
+            {/* 步骤 1: 输入八字 */}
+            {step === 1 && (
+              <div className="glass-card animate-fade-in">
+                <h2 className="text-xl font-bold mb-6 text-center text-gray-800 dark:text-white">请输入生辰信息</h2>
+                <BaziInput onSubmit={handleBaziSubmit} />
+                <div className="mt-6 text-center">
                     <button 
-                      onClick={handleReset}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                        onClick={() => setStep(0)} 
+                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400"
                     >
-                      重新开始
+                        返回首页
                     </button>
-                  )}
                 </div>
-                <TiebanshenshuCalculation
+              </div>
+            )}
+
+            {/* 步骤 2: 计算过程 */}
+            {step === 2 && baziData && (
+              <div className="glass-card animate-fade-in">
+                 <h2 className="text-xl font-bold mb-4 text-center text-gray-800 dark:text-white">皇极起数推演中</h2>
+                 <TiebanshenshuCalculation
                   baziData={baziData}
                   onCalculationComplete={handleCalculationComplete}
                   result={calculationResult}
                 />
               </div>
+            )}
 
-              {calculationResult && (
-                <div id="clause-display-section" className={`rounded-2xl shadow-lg p-4 md:p-6 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-indigo-100'}`}>
-                  <h2 className={`text-lg md:text-xl font-bold mb-4 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>
-                    神数条文抽取与解读
-                  </h2>
+            {/* 步骤 3: 结果展示 */}
+            {step === 3 && calculationResult && (
+              <div className="space-y-4 animate-fade-in">
+                <div className="glass-card">
+                  <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-4">
+                     <div>
+                        <h2 className="text-lg font-bold text-indigo-900 dark:text-indigo-100">推算结果</h2>
+                        <p className="text-xs text-gray-500">{calculationResult.timestamp}</p>
+                     </div>
+                     <button onClick={handleReset} className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
+                        重新推算
+                     </button>
+                  </div>
+                  
+                  <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-xl mb-6">
+                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">八字乾坤：</p>
+                     <p className="text-lg font-serif font-bold text-indigo-800 dark:text-indigo-200">
+                        {getBaziSummary(calculationResult.bazi)}
+                     </p>
+                  </div>
+
                   <ClauseDisplay
                     calculationResult={calculationResult}
                     onClauseSelect={handleClauseSelect}
                     selectedClause={selectedClause}
                   />
                 </div>
-              )}
-            </>
-          )}
-
-          {/* 空状态展示 */}
-          {!baziData && (
-            <div className={`rounded-2xl shadow-lg p-4 md:p-8 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-indigo-100'}`}>
-              <div className="text-center py-6 md:py-10">
-                <div className="text-5xl md:text-6xl mb-4">🧮</div>
-                <h3 className={`text-xl md:text-2xl font-bold mb-3 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-900'}`}>
-                  铁板神数演示
-                </h3>
-                <p className={`text-sm md:text-base mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  请输入八字信息开始模拟抽算
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
-                  <div className={`flex items-center space-x-3 p-3 md:p-4 rounded-xl ${theme === 'dark' ? 'bg-indigo-900/20' : 'bg-indigo-50'}`}>
-                    <span className={`text-xl md:text-2xl ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'}`}>①</span>
-                    <span className={`text-sm md:text-base font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      输入八字或随机生成
-                    </span>
-                  </div>
-                  <div className={`flex items-center space-x-3 p-3 md:p-4 rounded-xl ${theme === 'dark' ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
-                    <span className={`text-xl md:text-2xl ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>②</span>
-                    <span className={`text-sm md:text-base font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      皇极起数算法模拟
-                    </span>
-                  </div>
-                  <div className={`flex items-center space-x-3 p-3 md:p-4 rounded-xl ${theme === 'dark' ? 'bg-indigo-900/20' : 'bg-indigo-50'}`}>
-                    <span className={`text-xl md:text-2xl ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'}`}>③</span>
-                    <span className={`text-sm md:text-base font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      万条文库抽取演示
-                    </span>
-                  </div>
-                  <div className={`flex items-center space-x-3 p-3 md:p-4 rounded-xl ${theme === 'dark' ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
-                    <span className={`text-xl md:text-2xl ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>④</span>
-                    <span className={`text-sm md:text-base font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      条文详细解读说明
-                    </span>
-                  </div>
+                
+                <div className="text-center pb-8">
+                    <button onClick={handleReset} className="btn-secondary">
+                        开启新的推算
+                    </button>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* 铁板神数简介 */}
-          <div className={`rounded-2xl shadow-lg p-4 md:p-6 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100'}`}>
-            <h3 className={`text-lg md:text-xl font-bold mb-4 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-900'}`}>
-              铁板神数简介
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-white/60'}`}>
-                <h4 className={`font-bold mb-2 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'} text-sm md:text-base`}>
-                  源流
-                </h4>
-                <p className={`text-xs md:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  相传为北宋邵雍（邵康节）所创，是古代最高层次的命理推算术之一。
-                </p>
-              </div>
-              <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-white/60'}`}>
-                <h4 className={`font-bold mb-2 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'} text-sm md:text-base`}>
-                  特点
-                </h4>
-                <p className={`text-xs md:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  以八字为基础，通过"皇极起数法"将命运化为卦数，在万条文库中定位命运断辞。
-                </p>
-              </div>
-              <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-white/60'}`}>
-                <h4 className={`font-bold mb-2 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'} text-sm md:text-base`}>
-                  皇极起数
-                </h4>
-                <p className={`text-xs md:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  核心算法，将八字天干地支转化为先天八卦数，再演算得到条文编号。
-                </p>
-              </div>
-              <div className={`p-4 rounded-xl ${theme === 'dark' ? 'bg-gray-700' : 'bg-white/60'}`}>
-                <h4 className={`font-bold mb-2 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'} text-sm md:text-base`}>
-                  万条文库
-                </h4>
-                <p className={`text-xs md:text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  据说有12000条或更多条文，每条对应特定命运特征，准确度极高。
-                </p>
-              </div>
-            </div>
+            )}
           </div>
+        )}
 
-          {/* 使用说明 */}
-          <div className={`rounded-xl p-4 md:p-5 border ${theme === 'dark' ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 border-indigo-200'}`}>
-            <h3 className={`font-medium mb-3 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>
-              使用说明
-            </h3>
-            <ul className={`text-sm space-y-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              <li>• 输入八字信息或使用随机生成的八字进行演示</li>
-              <li>• 点击"皇极起数计算"按钮，系统将模拟推算过程</li>
-              <li>• 计算完成后，系统将展示相关条文编号</li>
-              <li>• 点击条文可查看详细解读和解析</li>
-              <li>• 历史记录将保存在浏览器本地存储中</li>
-              <li>• 此系统为模拟演示，结果仅供参考</li>
-            </ul>
-          </div>
-
-          {/* 底部提示 */}
-          <div className={`rounded-2xl p-4 md:p-6 shadow-md text-center ${theme === 'dark' ? 'bg-gradient-to-r from-indigo-900 to-purple-900 text-indigo-100' : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'}`}>
-            <p className={`text-sm md:text-base font-medium mb-2 ${theme === 'dark' ? 'text-indigo-200' : 'text-white'}`}>
-              铁板神数被称为"数术之王"，是邵雍易学的最高成就之一
-            </p>
-            <p className={`text-xs md:text-sm opacity-90 ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-100'}`}>
-              提示：命运如数，数可变；了解命运是为了更好地把握人生
-            </p>
-          </div>
+        {/* 历史记录抽屉 */}
+        <div className={`fixed inset-0 bg-black/50 z-50 transition-opacity duration-300 ${showHistory ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setShowHistory(false)} />
+        <div className={`history-drawer ${showHistory ? 'open' : ''}`}>
+           <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">历史记录</h3>
+              <div className="flex gap-4">
+                  {history.length > 0 && (
+                    <button onClick={clearHistory} className="text-sm text-red-500 font-medium">
+                        清空
+                    </button>
+                  )}
+                  <button onClick={() => setShowHistory(false)} className="text-gray-500">
+                    ✕
+                  </button>
+              </div>
+           </div>
+           
+           {history.length === 0 ? (
+             <div className="text-center py-10 text-gray-400">
+                暂无推算记录
+             </div>
+           ) : (
+             <div className="space-y-3">
+                {history.map(record => (
+                   <div 
+                     key={record.id} 
+                     onClick={() => handleLoadHistory(record)}
+                     className="history-item rounded-xl bg-gray-50 dark:bg-gray-800 cursor-pointer active:scale-[0.98] transition-transform"
+                   >
+                      <div>
+                         <p className="font-bold text-gray-800 dark:text-gray-200 mb-1">
+                            {getBaziSummary(record.bazi)}
+                         </p>
+                         <p className="text-xs text-gray-500">{record.timestamp}</p>
+                      </div>
+                      <div className="text-indigo-500 text-sm font-medium">
+                         查看 ›
+                      </div>
+                   </div>
+                ))}
+             </div>
+           )}
         </div>
 
-        {/* 页脚 */}
-        <footer className={`text-center text-xs mt-8 pt-6 border-t ${theme === 'dark' ? 'text-gray-500 border-gray-800' : 'text-gray-500 border-indigo-200'}`}>
-          <p>铁板神数系统 - 基于邵雍《皇极经世》算法原理</p>
-          <p className="mt-1">本工具仅供文化学习参考</p>
-        </footer>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default TiebanshenshuPageContent;

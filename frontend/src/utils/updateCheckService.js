@@ -87,11 +87,9 @@ class UpdateCheckService {
 
     const frequency = this.CHECK_FREQUENCIES[this.config.checkFrequency];
 
-    // 如果是启动时检查，且上次检查时间不是今天，则需要检查
+    // 如果是启动时检查，总是返回 true (每次启动都检查)
     if (this.config.checkFrequency === 'startup') {
-      const today = new Date().toDateString();
-      const lastCheckDate = this.config.lastCheckTime ? new Date(this.config.lastCheckTime).toDateString() : null;
-      return lastCheckDate !== today;
+      return true;
     }
 
     // 对于每日/每周检查，检查时间间隔
@@ -197,6 +195,24 @@ class UpdateCheckService {
       const serverData = await this.fetchServerVersion(apiBaseUrl);
 
       const comparison = this.compareVersions(currentVersion, serverData.version);
+      
+      // 检查是否已经安装过该版本（避免重复提示）
+      if (this.config.lastInstalledVersion === serverData.version) {
+         // 虽然服务器版本更高，但用户已经执行过安装，暂不提示
+         // 除非用户强制检查，或者 currentVersion 已经更新（此时 comparison 会是 0 或 -1）
+         if (comparison > 0) {
+            console.log(`Version ${serverData.version} was already installed. Skipping prompt.`);
+            // 返回无更新状态，但附带 info
+             return {
+                hasUpdate: false,
+                currentVersion,
+                serverVersion: serverData.version,
+                updateUrl: 'https://leanisssharedstorage.blob.core.windows.net/aise-files/today-update/app-debug.apk',
+                updateInfo: serverData,
+                comparison
+              };
+         }
+      }
 
       checkRecord.status = 'success';
       checkRecord.serverVersion = serverData.version;
@@ -207,13 +223,15 @@ class UpdateCheckService {
       this.config.lastCheckTime = Date.now();
       await this.saveConfig();
 
+      const updateUrl = 'https://leanisssharedstorage.blob.core.windows.net/aise-files/today-update/app-debug.apk';
+
       // 如果有更新，保存更新信息
       if (comparison > 0) {
         localStorage.setItem(this.STORAGE_KEYS.LAST_UPDATE_INFO, JSON.stringify({
           timestamp: Date.now(),
           currentVersion,
           serverVersion: serverData.version,
-          updateUrl: `${apiBaseUrl}/app-release.apk`,
+          updateUrl: updateUrl,
           updateInfo: serverData
         }));
       }
@@ -226,7 +244,7 @@ class UpdateCheckService {
         hasUpdate: comparison > 0,
         currentVersion,
         serverVersion: serverData.version,
-        updateUrl: `${apiBaseUrl}/app-release.apk`,
+        updateUrl: updateUrl,
         updateInfo: serverData,
         comparison
       };
@@ -283,6 +301,16 @@ class UpdateCheckService {
       localStorage.removeItem(this.STORAGE_KEYS.LAST_UPDATE_INFO);
     } catch (error) {
       console.error('Failed to clear update info:', error);
+    }
+  }
+
+  // 记录已安装的版本号，避免重复检测
+  async recordInstalledVersion(version) {
+    try {
+      this.config.lastInstalledVersion = version;
+      await this.saveConfig();
+    } catch (error) {
+      console.error('Failed to record installed version:', error);
     }
   }
 }

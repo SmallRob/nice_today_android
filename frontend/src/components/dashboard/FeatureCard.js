@@ -65,26 +65,14 @@ const FeatureCard = ({
     handleDrop(e, id || String(index));
   }, [handleDrop, id, index]);
 
-  // 分类对应的图标颜色 - 使用互补色制造反差感
-  const categoryColors = {
-    'daily': '#1565C0',      // 深蓝色 - 与红色背景形成强对比
-    'fortune': '#FFA000',    // 橙黄色 - 与紫色背景形成强对比
-    'growth': '#B71C1C',     // 深红色 - 与绿色背景形成强对比
-    'health': '#1976D2',     // 深蓝色 - 与绿色背景形成强对比
-    'entertainment': '#006064', // 深青色 - 与粉红色背景形成强对比
-    'tool': '#212121',       // 深灰色 - 与金色背景形成强对比
-    'default': '#424242'     // 深灰色（默认）
-  };
-
   // 获取图标内容 (使用 memo 缓存)
   const iconContent = useMemo(() => {
-    // 确定图标颜色
-    const iconColor = categoryColors[category] || categoryColors.default;
+    // 在新风格中，图标始终为白色，背景由 wrapper 承担
+    const iconColor = '#ffffff';
 
     // 直接使用传入的 icon 名称作为 SVG 图标名
-    // 如果 icon 存在，优先使用它
     if (icon) {
-      return <ModernIcon name={icon} color={iconColor} />;
+      return <ModernIcon name={icon} color={iconColor} size={28} />;
     }
 
     // 如果没有提供 icon，则根据 category 映射
@@ -98,12 +86,7 @@ const FeatureCard = ({
     };
 
     const categoryIcon = categoryIconMap[category] || 'default';
-    if (categoryIcon !== 'default') {
-      return <ModernIcon name={categoryIcon} color={iconColor} />;
-    }
-
-    // 对于未定义的情况，使用原有逻辑
-    return getIconContent(icon);
+    return <ModernIcon name={categoryIcon} color={iconColor} size={28} />;
   }, [icon, category]);
 
   // 构建 className

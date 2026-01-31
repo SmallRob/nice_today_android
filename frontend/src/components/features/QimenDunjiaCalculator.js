@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useCurrentConfig } from '../../contexts/UserConfigContext';
+import { aiService } from '../../services/aiService';
 
 const QimenDunjiaCalculator = () => {
   const { theme } = useTheme();
@@ -13,6 +14,16 @@ const QimenDunjiaCalculator = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+
+  // 起局信息状态
+  const [matterTopic, setMatterTopic] = useState('');
+  const [matterDirection, setMatterDirection] = useState('综合');
+  const [calculationTime, setCalculationTime] = useState(new Date().toISOString().slice(0, 16));
+
+  // 问事方向选项
+  const directionOptions = [
+    '综合', '事业', '财运', '感情', '健康', '学业', '出行', '寻物'
+  ];
 
   // 八卦数组
   const bagua = ['乾', '兑', '离', '震', '巽', '坎', '艮', '坤'];
@@ -50,26 +61,104 @@ const QimenDunjiaCalculator = () => {
       
       let qimenLayout;
       
-      // 优先使用出生日期和时辰进行动态计算
-      if (birthInfo.birthDate && birthInfo.birthTime) {
-        // 使用出生日期和时辰进行动态计算
-        qimenLayout = generateQimenLayoutFromDateTime(birthInfo.birthDate, birthInfo.birthTime);
-      } else {
-        // 如果没有足够的用户信息，则使用随机计算逻辑
-        qimenLayout = generateRandomQimenLayout();
+      // 使用起局时间进行计算
+      const [datePart, timePart] = calculationTime.split('T');
+      qimenLayout = generateQimenLayoutFromDateTime(datePart, timePart);
+      
+      // 生成初步分析
+      const basicAnalysis = generateAnalysis(qimenLayout);
+
+      // AI 解卦
+      let aiAnalysis = null;
+      try {
+        const prompt = `
+          你是一位精通奇门遁甲的大师。
+          用户起局问事：
+          主题：${matterTopic || '未指定'}
+          方向：${matterDirection}
+          起局时间：${calculationTime.replace('T', ' ')}
+          
+          奇门盘面信息：
+          ${JSON.stringify(qimenLayout, null, 2)}
+          
+          请根据以上信息，进行专业的奇门遁甲解卦。
+          要求：
+          1. 语气专业、玄妙但易懂。
+          2. 结合九星、八门、八神进行分析。
+          3. 给出具体的吉凶判断和行动建议。
+          4. 如果用户没有提供具体问题，则进行综合运势分析。
+          5. 字数控制在 300 字以内。
+        `;
+        
+        const aiResponse = await aiService.generateCompletion(prompt);
+        aiAnalysis = aiResponse.trim();
+      } catch (aiErr) {
+        console.error("AI Analysis Error:", aiErr);
+        // AI 失败时不阻断流程，仅显示基础分析
       }
       
-      setResult({
+      const finalResult = {
         ...qimenLayout,
-        calculationTime: new Date().toLocaleString('zh-CN'),
-        analysis: generateAnalysis(qimenLayout),
-        userInfo: birthInfo
-      });
+        calculationTime: calculationTime.replace('T', ' '),
+        analysis: basicAnalysis,
+        aiAnalysis: aiAnalysis,
+        userInfo: birthInfo,
+        matterTopic,
+        matterDirection
+      };
+
+      setResult(finalResult);
+      
+      // 自动保存到历史记录
+      saveToHistory(finalResult);
+
     } catch (err) {
       console.error('计算过程中发生错误:', err);
       setError('计算失败，请重试');
     } finally {
       setIsCalculating(false);
+    }
+  };
+
+  /**
+   * 保存计算结果到历史记录
+   */
+  const saveToHistory = (resultToSave) => {
+    if (!resultToSave) return;
+    
+    try {
+      // 获取现有历史记录
+      let existingHistory = [];
+      const historyStr = localStorage.getItem('qimen_history');
+      if (historyStr) {
+        existingHistory = JSON.parse(historyStr);
+      }
+      
+      // 添加新记录
+      const newRecord = {
+        id: Date.now(), // 使用时间戳作为唯一ID
+        calculationTime: resultToSave.calculationTime,
+        result: resultToSave.analysis,
+        aiAnalysis: resultToSave.aiAnalysis, // 保存 AI 分析
+        matterTopic: resultToSave.matterTopic, // 保存问事主题
+        matterDirection: resultToSave.matterDirection, // 保存问事方向
+        九宫: resultToSave.jiuGong,
+        userInfo: resultToSave.userInfo // 包含用户信息
+      };
+      
+      // 添加新记录到数组开头
+      existingHistory.unshift(newRecord);
+      
+      // 限制最多20条记录
+      if (existingHistory.length > 20) {
+        existingHistory = existingHistory.slice(0, 20);
+      }
+      
+      // 保存到本地存储
+      localStorage.setItem('qimen_history', JSON.stringify(existingHistory));
+      
+    } catch (error) {
+      console.error('保存历史记录失败:', error);
     }
   };
 
@@ -222,76 +311,147 @@ const QimenDunjiaCalculator = () => {
     return analysisResult;
   };
 
-  /**
-   * 保存计算结果到历史记录
-   */
-  const saveToHistory = () => {
-    if (!result) return;
-    
-    try {
-      // 获取现有历史记录
-      let existingHistory = [];
-      const historyStr = localStorage.getItem('qimen_history');
-      if (historyStr) {
-        existingHistory = JSON.parse(historyStr);
-      }
-      
-      // 添加新记录
-      const newRecord = {
-        id: Date.now(), // 使用时间戳作为唯一ID
-        calculationTime: new Date().toLocaleString('zh-CN'),
-        result: result.analysis,
-        九宫: result.jiuGong,
-        userInfo: result.userInfo // 包含用户信息
-      };
-      
-      // 添加新记录到数组开头
-      existingHistory.unshift(newRecord);
-      
-      // 限制最多10条记录
-      if (existingHistory.length > 10) {
-        existingHistory = existingHistory.slice(0, 10);
-      }
-      
-      // 保存到本地存储
-      localStorage.setItem('qimen_history', JSON.stringify(existingHistory));
-      
-      alert(`计算结果已保存到历史记录 (共${existingHistory.length}条记录)`);
-    } catch (error) {
-      console.error('保存历史记录失败:', error);
-      alert('保存历史记录失败，请重试');
-    }
-  };
+
 
   return (
     <div className={`qimen-calculator ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
       <div className="calculator-header">
         <h2 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>奇门遁甲测算</h2>
-        <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>点击下方按钮开始计算您的奇门遁甲命局</p>
+        <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>填写起局信息，洞悉时空玄机</p>
       </div>
 
-      <div className="calculator-controls">
-        <button
-          onClick={calculateQimen}
-          disabled={isCalculating}
-          className={`calculate-button ${theme === 'dark' ? 'dark-mode' : 'light-mode'}`}
-        >
-          {isCalculating ? '计算中...' : '开始计算'}
-        </button>
+      {/* 起局信息输入区域 */}
+      <div className={`mb-8 p-6 rounded-2xl ${theme === 'dark' ? 'bg-gray-800/50 border border-gray-700' : 'bg-white/60 border border-amber-100 shadow-sm'}`}>
+        <div className="flex items-center mb-4">
+          <div className="w-1 h-6 bg-amber-500 rounded-full mr-3"></div>
+          <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-amber-400' : 'text-amber-800'}`}>起局信息</h3>
+          <span className="ml-auto text-xs opacity-60">越具体越准：人/事/时间/期望</span>
+        </div>
+
+        <div className="space-y-5">
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>问事主题</label>
+            <textarea
+              value={matterTopic}
+              onChange={(e) => setMatterTopic(e.target.value)}
+              placeholder="例如：下个月是否适合跳槽？我需要先补齐哪项能力？"
+              className={`w-full p-4 rounded-xl border transition-all resize-none h-24 text-sm ${
+                theme === 'dark' 
+                  ? 'bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500' 
+                  : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+              }`}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>问事方向</label>
+              <div className="relative">
+                <select
+                  value={matterDirection}
+                  onChange={(e) => setMatterDirection(e.target.value)}
+                  className={`w-full p-3 pr-8 rounded-xl border appearance-none text-sm font-medium ${
+                    theme === 'dark'
+                      ? 'bg-gray-900/50 border-gray-700 text-white focus:border-amber-500'
+                      : 'bg-white border-gray-200 text-gray-800 focus:border-amber-500'
+                  }`}
+                >
+                  {directionOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 9l6 6 6-6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>起局时间</label>
+              <input
+                type="datetime-local"
+                value={calculationTime}
+                onChange={(e) => setCalculationTime(e.target.value)}
+                className={`w-full p-3 rounded-xl border text-sm font-medium ${
+                  theme === 'dark'
+                    ? 'bg-gray-900/50 border-gray-700 text-white focus:border-amber-500'
+                    : 'bg-white border-gray-200 text-gray-800 focus:border-amber-500'
+                }`}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <button
+            onClick={calculateQimen}
+            disabled={isCalculating}
+            className={`w-full py-4 rounded-xl text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] ${
+              isCalculating 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 hover:shadow-orange-500/20'
+            }`}
+          >
+            {isCalculating ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                正在起局推演...
+              </span>
+            ) : '生成奇门盘并 AI 解卦'}
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div className={`error-message ${theme === 'dark' ? 'dark-mode' : 'light-mode'}`}>
+        <div className={`p-4 rounded-xl mb-6 text-center text-sm ${theme === 'dark' ? 'bg-red-900/30 text-red-200 border border-red-800' : 'bg-red-50 text-red-600 border border-red-100'}`}>
           {error}
         </div>
       )}
 
+      {/* 使用小贴士 */}
+      {!result && (
+        <div className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-gray-800/30 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+          <div className="flex items-center mb-4">
+            <span className="text-xl mr-2">ⓘ</span>
+            <h4 className={`font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>使用小贴士</h4>
+          </div>
+          <ul className={`space-y-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            <li className="flex items-start"><span className="mr-2 text-amber-500">•</span> 问得具体：把时间范围、人物关系、目标写清楚。</li>
+            <li className="flex items-start"><span className="mr-2 text-amber-500">•</span> 一事一占：同一个问题不要频繁反复起局。</li>
+            <li className="flex items-start"><span className="mr-2 text-amber-500">•</span> 以行动应卦：把建议拆成小步骤，观察反馈再调整。</li>
+          </ul>
+        </div>
+      )}
+
       {result && (
-        <div className={`result-section ${theme === 'dark' ? 'dark-mode' : 'light-mode'}`}>
-          <h3 className={`result-title ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>计算结果</h3>
+        <div className={`result-section animate-fadeIn ${theme === 'dark' ? 'dark-mode' : 'light-mode'}`}>
+          <h3 className={`result-title ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>推演结果</h3>
           
+          {/* AI 解卦结果 */}
+          {result.aiAnalysis && (
+            <div className={`mb-8 p-6 rounded-2xl border relative overflow-hidden ${theme === 'dark' ? 'bg-indigo-900/20 border-indigo-800/50' : 'bg-indigo-50 border-indigo-100'}`}>
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                  <path d="M12 6a1 1 0 0 0-1 1v4.59l-3.29 3.29a1 1 0 0 0 1.42 1.42l4-4a1 1 0 0 0 .29-.71V7a1 1 0 0 0-1-1z"/>
+                </svg>
+              </div>
+              <h4 className={`text-lg font-bold mb-4 flex items-center ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>
+                <span className="mr-2 text-2xl">🤖</span> AI 大师解卦
+              </h4>
+              <div className={`whitespace-pre-line leading-relaxed text-sm md:text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                {result.aiAnalysis}
+              </div>
+            </div>
+          )}
+
           {/* 奇门遁甲盘局展示 */}
-          <div className={`qimen-board ${theme === 'dark' ? 'dark-bg' : 'light-bg'}`}>
+          <div className={`qimen-board mb-8 ${theme === 'dark' ? 'dark-bg' : 'light-bg'}`}>
             <div className="board-grid">
               {/* 九宫格布局 */}
               {Object.entries(result.jiuGong).map(([position, content]) => (
@@ -314,37 +474,19 @@ const QimenDunjiaCalculator = () => {
             </div>
           </div>
 
-          {/* 分析结果 */}
+          {/* 基础分析结果 */}
           <div className={`analysis-section ${theme === 'dark' ? 'dark-bg' : 'light-bg'}`}>
-            <h4 className={`analysis-title ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>命局分析</h4>
+            <h4 className={`analysis-title ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>基础盘面分析</h4>
             <div className="analysis-content">
-              <div className={`analysis-item ${theme === 'dark' ? 'dark-item' : 'light-item'}`}>
-                <span className={`label ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>总体运势：</span>
-                <span className={`value ${theme === 'dark' ? 'text-yellow-300' : 'text-gray-800'}`}>
-                  {result.analysis['总体运势']}
-                </span>
-              </div>
-              <div className={`analysis-item ${theme === 'dark' ? 'dark-item' : 'light-item'}`}>
-                <span className={`label ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>事业财运：</span>
-                <span className={`value ${theme === 'dark' ? 'text-green-300' : 'text-gray-800'}`}>
-                  {result.analysis['事业财运']}
-                </span>
-              </div>
-              <div className={`analysis-item ${theme === 'dark' ? 'dark-item' : 'light-item'}`}>
-                <span className={`label ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>感情婚姻：</span>
-                <span className={`value ${theme === 'dark' ? 'text-pink-300' : 'text-gray-800'}`}>
-                  {result.analysis['感情婚姻']}
-                </span>
-              </div>
-              <div className={`analysis-item ${theme === 'dark' ? 'dark-item' : 'light-item'}`}>
-                <span className={`label ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>健康平安：</span>
-                <span className={`value ${theme === 'dark' ? 'text-blue-300' : 'text-gray-800'}`}>
-                  {result.analysis['健康平安']}
-                </span>
-              </div>
+              {Object.entries(result.analysis).filter(([key]) => key !== '趋吉避凶建议').map(([key, value]) => (
+                <div key={key} className={`analysis-item ${theme === 'dark' ? 'dark-item' : 'light-item'}`}>
+                  <span className={`label ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{key}：</span>
+                  <span className={`value font-bold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>{value}</span>
+                </div>
+              ))}
             </div>
             
-            <div className={`suggestion-section ${theme === 'dark' ? 'dark-bg' : 'light-bg'}`}>
+            <div className={`suggestion-section mt-6 pt-6 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
               <h4 className={`suggestion-title ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>趋吉避凶建议</h4>
               <ul className="suggestion-list">
                 {result.analysis['趋吉避凶建议'].map((item, index) => (
@@ -355,14 +497,6 @@ const QimenDunjiaCalculator = () => {
               </ul>
             </div>
           </div>
-
-          {/* 保存按钮 */}
-          <button
-            onClick={saveToHistory}
-            className={`save-button ${theme === 'dark' ? 'dark-mode' : 'light-mode'}`}
-          >
-            保存到历史记录
-          </button>
         </div>
       )}
     </div>

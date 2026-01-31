@@ -5,7 +5,7 @@ import { useUserConfig } from '../../contexts/UserConfigContext';
 import { generateDailyHoroscope } from '../../utils/horoscopeAlgorithm';
 import { Line } from 'react-chartjs-2';
 import { ensureChartRegistered } from '../../utils/chartConfig';
-import './ChineseZodiacPage.css';
+import styles from './ChineseZodiacPage.module.css';
 
 /**
  * 十二生肖数据
@@ -740,59 +740,42 @@ const ChineseZodiacPage = () => {
 
   if (!zodiacData) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} flex items-center justify-center`}>
         <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400">生肖数据加载中...</p>
+          <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>生肖数据加载中...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${theme}`}>
+    <div className={`${styles.pageContainer} ${theme}`}>
       {/* 顶部标题栏 - 固定高度适配移动设备 */}
-      <div className={`bg-gradient-to-r ${elementColors.bg} ${elementColors.to} text-white sticky top-0 z-40 shadow-lg`} style={{ height: '60px' }}>
-        <div className="container mx-auto px-4 h-full flex items-center">
+      <div className={`${styles.header} bg-gradient-to-r ${elementColors.bg} ${elementColors.to}`}>
+        <div className={styles.headerContent}>
           <div className="relative flex items-center justify-between w-full h-full">
-            {/* <button
-              onClick={() => navigate(-1)}
-              className="relative z-10 text-white hover:text-white/90 flex items-center"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              返回
-            </button> */}
-            <h1 className="absolute inset-0 flex items-center justify-center text-lg font-bold pointer-events-none">生肖运势</h1>
-            <button
-              onClick={() => navigate('/user-config')}
-              className="relative z-10 text-white hover:text-white/90 ml-auto"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </button>
+            <h1 className={styles.headerTitle}>生肖运势</h1>
           </div>
         </div>
       </div>
 
       {/* 主内容区 - 优化移动端间距 */}
-      <div className="container mx-auto px-2 py-4 pb-16 max-w-4xl">
+      <div className={styles.mainContent}>
         {/* 生肖卡片 */}
-        <div className={`bg-gradient-to-br ${elementColors.bg} ${elementColors.to} text-white rounded-xl shadow-lg p-4 mb-4`}>
+        <div className={`${styles.zodiacHeroCard} bg-gradient-to-br ${elementColors.bg} ${elementColors.to}`}>
           <div className="text-center mb-3">
-            <div className="text-6xl mb-2">{zodiacData.icon}</div>
-            <h2 className="text-2xl font-bold mb-1">您的生肖：{zodiacData.name}</h2>
-            <div className="text-base opacity-90">
+            <div className={styles.zodiacHeroIcon}>{zodiacData.icon}</div>
+            <h2 className={styles.zodiacHeroName}>您的生肖：{zodiacData.name}</h2>
+            <div className={styles.zodiacHeroElement}>
               属{zodiacData.element}
             </div>
           </div>
         </div>
 
         {/* 详细描述 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
-            <span className="mr-2">📖</span> 生肖概述
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>
+            <span className={styles.cardIcon}>📖</span> 生肖概述
           </h3>
           <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
             {zodiacData.description}
@@ -803,47 +786,47 @@ const ChineseZodiacPage = () => {
         </div>
 
         {/* 个性特质 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 mb-4">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center">
-            <span className="mr-2">🌟</span> 性格特征
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>
+            <span className={styles.cardIcon}>🌟</span> 性格特征
           </h3>
           <div className="grid grid-cols-1 gap-2">
             {zodiacData.traits.map((trait, index) => (
-              <div key={index} className="flex items-center p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                <span className="w-2 h-2 bg-blue-500 rounded-full mr-2 flex-shrink-0"></span>
-                <span className="text-gray-700 dark:text-gray-200 text-sm">{trait}</span>
+              <div key={index} className={styles.traitItem}>
+                <span className={styles.traitDot}></span>
+                <span className={styles.traitText}>{trait}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* 优点与缺点 */}
-        <div className="grid grid-cols-1 gap-3 mb-4">
+        <div className={styles.gridTwoCols}>
           {/* 优点 */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
-            <h3 className="text-lg font-bold text-green-600 dark:text-green-400 mb-3 flex items-center">
-              <span className="mr-2">✨</span> 优点
+          <div className={styles.card}>
+            <h3 className={`${styles.cardTitle} ${styles.strengthTitle}`}>
+              <span className={styles.cardIcon}>✨</span> 优点
             </h3>
             <div className="space-y-2">
               {zodiacData.strengths.map((strength, index) => (
-                <div key={index} className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
-                  <span className="text-gray-700 dark:text-gray-200 text-sm">{strength}</span>
+                <div key={index} className={styles.listItem}>
+                  <span className={styles.strengthDot}></span>
+                  <span className={styles.traitText}>{strength}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* 需注意 */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
-            <h3 className="text-lg font-bold text-orange-600 dark:text-orange-400 mb-3 flex items-center">
-              <span className="mr-2">⚠️</span> 需注意
+          <div className={styles.card}>
+            <h3 className={`${styles.cardTitle} ${styles.weaknessTitle}`}>
+              <span className={styles.cardIcon}>⚠️</span> 需注意
             </h3>
             <div className="space-y-2">
               {zodiacData.weaknesses.map((weakness, index) => (
-                <div key={index} className="flex items-start">
-                  <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
-                  <span className="text-gray-700 dark:text-gray-200 text-sm">{weakness}</span>
+                <div key={index} className={styles.listItem}>
+                  <span className={styles.weaknessDot}></span>
+                  <span className={styles.traitText}>{weakness}</span>
                 </div>
               ))}
             </div>
@@ -851,36 +834,36 @@ const ChineseZodiacPage = () => {
         </div>
 
         {/* 幸运信息 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-4 flex items-center">
-            <span className="mr-2">🍀</span> 幸运信息
+        <div className={styles.card}>
+          <h3 className={`${styles.cardTitle} text-purple-600 dark:text-purple-400`}>
+            <span className={styles.cardIcon}>🍀</span> 幸运信息
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-xs mb-1.5">幸运色</div>
-              <div className="flex flex-wrap items-center justify-center gap-1">
+          <div className={styles.luckyGrid}>
+            <div className={styles.luckyBox}>
+              <div className={styles.luckyLabel}>幸运色</div>
+              <div className={styles.tagGroup}>
                 {parseLuckyColors(zodiacData.luckyColor).map((colorName, index) => (
-                  <span key={index} className="px-2 py-1 bg-white dark:bg-gray-700 rounded-full text-xs text-gray-700 dark:text-gray-200">
+                  <span key={index} className={styles.tag}>
                     {colorName}
                   </span>
                 ))}
               </div>
             </div>
-            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-xs mb-2">幸运数字</div>
-              <div className="flex flex-wrap justify-center gap-1">
+            <div className={styles.luckyBox}>
+              <div className={styles.luckyLabel}>幸运数字</div>
+              <div className={styles.tagGroup}>
                 {zodiacData.luckyNumber.map((num, index) => (
-                  <span key={index} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-700 rounded-full text-lg font-bold text-purple-600 dark:text-purple-400">
+                  <span key={index} className={styles.luckyNumber}>
                     {num}
                   </span>
                 ))}
               </div>
             </div>
-            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-              <div className="text-gray-600 dark:text-gray-400 text-xs mb-2">速配生肖</div>
-              <div className="flex flex-wrap justify-center gap-1">
+            <div className={styles.luckyBox}>
+              <div className={styles.luckyLabel}>速配生肖</div>
+              <div className={styles.tagGroup}>
                 {zodiacData.compatible.map((sign, index) => (
-                  <span key={index} className="px-2 py-1 bg-white dark:bg-gray-700 rounded-full text-xs text-gray-700 dark:text-gray-200">
+                  <span key={index} className={styles.tag}>
                     {sign}
                   </span>
                 ))}
@@ -897,14 +880,14 @@ const ChineseZodiacPage = () => {
 
         {/* 今日运势卡片 */}
         {loadingHoroscope ? (
-          <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
+          <div className={styles.todayHoroscopeCard}>
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
               <span className="ml-3">运势数据加载中...</span>
             </div>
           </div>
         ) : horoscopeData ? (
-          <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-xl shadow-lg p-6 mb-6">
+          <div className={styles.todayHoroscopeCard}>
             <h3 className="text-xl font-bold mb-4 flex items-center">
               <span className="mr-2">✨</span> 生肖今日运势
             </h3>
@@ -913,9 +896,9 @@ const ChineseZodiacPage = () => {
                 <span className="text-lg font-semibold">综合运势指数</span>
                 <span className="text-2xl font-bold">{horoscopeData.overallScore}分</span>
               </div>
-              <div className="w-full bg-white/20 rounded-full h-3">
+              <div className={styles.progressBar}>
                 <div
-                  className="bg-white h-3 rounded-full"
+                  className={styles.progressFill}
                   style={{ width: `${horoscopeData.overallScore}%` }}
                 ></div>
               </div>
@@ -924,9 +907,9 @@ const ChineseZodiacPage = () => {
             <p className="mb-4 text-blue-100">{horoscopeData.overallDescription}</p>
 
             {/* 各领域运势 */}
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 w-full">
+            <div className={styles.forecastGrid}>
               {Object.entries(horoscopeData.dailyForecast || {}).map(([key, data]) => (
-                <div key={key} className="text-center p-1 bg-white/10 rounded-lg min-w-0 overflow-hidden">
+                <div key={key} className={styles.forecastItem}>
                   <div className="text-[10px] text-green-200 mb-0.5 whitespace-nowrap">
                     {key === 'love' ? '爱情' :
                       key === 'wealth' ? '财运' :
@@ -1004,21 +987,21 @@ const ChineseZodiacPage = () => {
         ) : null}
 
         {/* 其他生肖入口 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <span className="mr-2">🔮</span> 查看其他生肖
+        <div className={styles.card}>
+          <h3 className={styles.cardTitle}>
+            <span className={styles.cardIcon}>🔮</span> 查看其他生肖
           </h3>
-          <div className="zodiac-page-selector-grid">
+          <div className={styles.selectorGrid}>
             {CHINESE_ZODIAC_DATA.map((zodiac) => (
               <button
                 key={zodiac.name}
                 onClick={() => setUserZodiac(zodiac.name)}
-                className={`zodiac-page-selector-button ${userZodiac === zodiac.name
-                  ? 'zodiac-page-selector-button-selected'
-                  : 'zodiac-page-selector-button-unselected'}`}
+                className={`${styles.selectorButton} ${userZodiac === zodiac.name
+                  ? styles.selectorButtonSelected
+                  : styles.selectorButtonUnselected}`}
               >
-                <div className="zodiac-page-selector-icon">{zodiac.icon}</div>
-                <div className="zodiac-page-selector-name">{zodiac.name}</div>
+                <div className={styles.selectorIcon}>{zodiac.icon}</div>
+                <div className={styles.selectorName}>{zodiac.name}</div>
               </button>
             ))}
           </div>

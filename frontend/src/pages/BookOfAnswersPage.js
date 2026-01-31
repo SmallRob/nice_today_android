@@ -1,11 +1,16 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDailyMoodData } from '../utils/moodAlgorithm';
+import { aiService } from '../services/aiService';
 
 const BookOfAnswersPage = () => {
     const navigate = useNavigate();
     const [currentAnswer, setCurrentAnswer] = useState(null);
     const [showAnswer, setShowAnswer] = useState(false);
+    const [question, setQuestion] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const inputRef = useRef(null);
 
     // 答案之书的智慧语录数组
     const wisdomAnswers = [
@@ -69,17 +74,66 @@ const BookOfAnswersPage = () => {
         return wisdomAnswers[randomIndex];
     };
 
+    // 获取AI答案
+    const getAIAnswer = async (userQ) => {
+        try {
+            const prompt = `
+            你是一本神秘的"答案之书"。
+            用户心中的疑惑是：${userQ || "（用户未言说，只求指引）"}
+            请给出一个充满智慧、富有哲理且具有启发性的简短回答。
+            要求：
+            1. 字数控制在30字以内。
+            2. 语气神秘、温柔、坚定。
+            3. 不要直接回答是或否，而是给出方向或思考。
+            4. 如果用户没有输入问题，给出一个通用的生活指引。
+            `;
+            
+            const answer = await aiService.generateCompletion(prompt);
+            return answer.trim().replace(/^["']|["']$/g, ''); // 去除可能的引号
+        } catch (err) {
+            console.error("AI Answer Error:", err);
+            return getRandomAnswer(); // 降级方案
+        }
+    };
+
     // 显示新答案
-    const handleShowAnswer = () => {
-        const newAnswer = getRandomAnswer();
-        setCurrentAnswer(newAnswer);
-        setShowAnswer(true);
+    const handleShowAnswer = async () => {
+        if (isLoading) return;
+        
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            // 如果有输入问题，或者随机决定使用AI（增加神秘感），则尝试AI
+            // 这里我们设定：如果有问题，必用AI；没问题，50%概率用AI
+            const useAI = question.trim().length > 0 || Math.random() > 0.5;
+            
+            let answer;
+            if (useAI) {
+                answer = await getAIAnswer(question);
+            } else {
+                // 模拟一点延迟，让体验一致
+                await new Promise(resolve => setTimeout(resolve, 800));
+                answer = getRandomAnswer();
+            }
+            
+            setCurrentAnswer(answer);
+            setShowAnswer(true);
+        } catch (err) {
+            setCurrentAnswer(getRandomAnswer());
+            setShowAnswer(true);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // 获取新答案
     const handleGetNewAnswer = () => {
-        const newAnswer = getRandomAnswer();
-        setCurrentAnswer(newAnswer);
+        setShowAnswer(false);
+        setQuestion('');
+        setTimeout(() => {
+             // 可以在这里自动聚焦输入框，如果需要
+        }, 100);
     };
 
 
@@ -100,28 +154,56 @@ const BookOfAnswersPage = () => {
                         <p className="text-white/80 text-sm tracking-widest font-medium">心灵启发式答案</p>
                     </div>
 
-                    <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-6 w-full max-w-xs border border-white/20 shadow-2xl mx-auto">
-                        <p className="text-white text-base font-bold mb-6">请默念你的问题</p>
-
-                        {/* 答案显示区域 */}
+                    <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-6 w-full max-w-xs border border-white/20 shadow-2xl mx-auto transition-all duration-500">
                         {!showAnswer ? (
                             <div className="prompt-section">
+                                <p className="text-white text-base font-bold mb-4">心中默念，或写下你的困惑</p>
+                                
+                                <textarea
+                                    ref={inputRef}
+                                    value={question}
+                                    onChange={(e) => setQuestion(e.target.value)}
+                                    placeholder="在此输入你的问题 (选填)..."
+                                    className="w-full bg-white/20 border border-white/30 rounded-xl p-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-400 mb-6 text-sm resize-none h-24"
+                                    maxLength={100}
+                                />
+
                                 <button 
-                                    className="show-answer-btn w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                                    className="show-answer-btn w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                                     onClick={handleShowAnswer}
+                                    disabled={isLoading}
                                 >
-                                    查看答案
+                                    {isLoading ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            正在感应...
+                                        </>
+                                    ) : (
+                                        "查看答案"
+                                    )}
                                 </button>
                             </div>
                         ) : (
-                            <div className="answer-section">
-                                <p className="answer-text text-white text-lg font-black leading-relaxed tracking-wider">"{currentAnswer}"</p>
-                                <div className="answer-actions mt-4">
+                            <div className="answer-section animate-fadeIn">
+                                {question && (
+                                    <p className="text-white/60 text-xs mb-4 italic line-clamp-2">"{question}"</p>
+                                )}
+                                <div className="mb-6 relative">
+                                    <span className="text-4xl text-white/20 absolute -top-4 -left-2">"</span>
+                                    <p className="answer-text text-white text-lg font-black leading-relaxed tracking-wider px-4">
+                                        {currentAnswer}
+                                    </p>
+                                    <span className="text-4xl text-white/20 absolute -bottom-8 -right-2">"</span>
+                                </div>
+                                <div className="answer-actions mt-8">
                                     <button 
-                                        className="new-answer-btn w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                                        className="new-answer-btn w-full py-3 px-4 bg-gradient-to-r from-white/20 to-white/10 hover:bg-white/30 text-white rounded-xl font-bold text-sm border border-white/30 shadow-lg transition-all duration-300"
                                         onClick={handleGetNewAnswer}
                                     >
-                                        换一个答案
+                                        再问一次
                                     </button>
                                 </div>
                             </div>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { lazy, Suspense } from 'react';
-import '../index.css';
 
 // 优化的懒加载组件预加载策略
 let MayaCalendarPromise;

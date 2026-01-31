@@ -219,7 +219,7 @@ const BiorhythmPage = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-indigo-900/30 dark:to-purple-900/30 ${theme}`}>
+    <div className={`biorhythm-page-wrapper min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-indigo-900/30 dark:to-purple-900/30 ${theme}`}>
       {/* Banner */}
       <BiorhythmBanner />
 

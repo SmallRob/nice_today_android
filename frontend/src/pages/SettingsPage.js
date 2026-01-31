@@ -10,25 +10,24 @@ import { errorTrackingSettings } from '../utils/errorTrackingSettings';
 import { userConfigManager } from '../utils/userConfigManager';
 import { AI_CONFIG } from '../services/globalUserConfig';
 import versionData from '../version.json';
-import '../index.css';
-import '../styles/settingsPage.css';
+import styles from './SettingsPage.module.css';
 
 const SectionCard = ({ title, children }) => (
-  <div className="settings-section">
-    <h2 className="settings-section-title">{title}</h2>
+  <div className={styles.section}>
+    <h2 className={styles.sectionTitle}>{title}</h2>
     {children}
   </div>
 );
 
 const ToggleSwitch = ({ checked, onChange, id }) => (
-  <label className="settings-toggle" htmlFor={id}>
+  <label className={styles.toggle} htmlFor={id}>
     <input
       type="checkbox"
       id={id}
       checked={checked}
       onChange={onChange}
     />
-    <span className="settings-slider"></span>
+    <span className={styles.slider}></span>
   </label>
 );
 
@@ -499,8 +498,8 @@ function SettingsPage() {
 
   if (!isLoaded) {
     return (
-      <div className="settings-page h-full bg-gray-50 dark:bg-gray-900">
-        <div className="settings-container">
+      <div className={styles.page}>
+        <div className={styles.container}>
           <div className="flex justify-center items-center py-20">
             <div className="text-center space-y-4">
               <div className="relative">
@@ -521,17 +520,17 @@ function SettingsPage() {
   }
 
   return (
-    <div className="settings-page bg-gray-50 dark:bg-gray-900">
-      <div className="settings-container">
+    <div className={styles.page}>
+      <div className={styles.container}>
         {/* 顶部标题区域 */}
-        <div className="settings-header">
-          <h1 className="settings-title">⚙️ 系统设置</h1>
-          <p className="settings-subtitle">配置应用系统参数</p>
+        <div className={styles.header}>
+          <h1 className={styles.title}>⚙️ 系统设置</h1>
+          <p className={styles.subtitle}>配置应用系统参数</p>
         </div>
 
         {/* 错误和成功提示 */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-3 rounded-lg mt-4">
+          <div className="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 p-3 rounded-lg mb-4">
             <div className="flex items-center">
               <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -542,7 +541,7 @@ function SettingsPage() {
         )}
 
         {success && (
-          <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-400 p-3 rounded-lg mt-4">
+          <div className="bg-green-50 dark:bg-green-900 border-l-4 border-green-400 p-3 rounded-lg mb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -563,442 +562,405 @@ function SettingsPage() {
 
       {/* 可滚动内容区域 */}
       <div className="flex-1 overflow-y-auto">
-        <div className="settings-container pb-8">
-          {/* AI 功能设置 */}
-          <SectionCard title="AI 功能设置">
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div>
-                  <div className="settings-item-label">启用 AI 解读</div>
-                  <div className="settings-item-description">开启后，应用将提供基于 AI 的运势解读和建议</div>
+        <div className={styles.container}>
+          <div className="pb-8">
+            {/* AI 功能设置 */}
+            <SectionCard title="AI 功能设置">
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div>
+                    <div className={styles.itemLabel}>启用 AI 解读</div>
+                    <div className={styles.itemDescription}>开启后，应用将提供基于 AI 的运势解读和建议</div>
+                  </div>
+                  <ToggleSwitch
+                    checked={aiSettings.useAIInterpretation}
+                    onChange={(e) => handleAISettingChange('useAIInterpretation', e.target.checked)}
+                    id="useAIInterpretation"
+                  />
                 </div>
-                <ToggleSwitch
-                  checked={aiSettings.useAIInterpretation}
-                  onChange={(e) => handleAISettingChange('useAIInterpretation', e.target.checked)}
-                  id="useAIInterpretation"
-                />
               </div>
-            </div>
 
-            {aiSettings.useAIInterpretation && (
-              <div className="settings-item">
-                <div className="settings-item-label">选择 AI 模型</div>
-                <div className="settings-item-description">请选择用于解读的 AI 模型，或添加自定义模型</div>
-                
-                <div className="flex gap-2 mt-2">
-                  <select
-                    value={aiSettings.selectedAIModelId}
-                    onChange={(e) => handleAISettingChange('selectedAIModelId', e.target.value)}
-                    className="settings-input flex-1"
-                  >
-                    <optgroup label="预设模型">
-                      {AI_CONFIG.MODELS.map(model => (
-                        <option key={model.id} value={model.id}>
-                          {model.name} ({model.id})
-                        </option>
-                      ))}
-                    </optgroup>
-                    {(aiSettings.customModels && aiSettings.customModels.length > 0) && (
-                      <optgroup label="自定义模型">
-                        {aiSettings.customModels.map(model => (
+              {aiSettings.useAIInterpretation && (
+                <div className={styles.item}>
+                  <div className={styles.itemLabel}>选择 AI 模型</div>
+                  <div className={styles.itemDescription}>请选择用于解读的 AI 模型，或添加自定义模型</div>
+                  
+                  <div className="flex gap-2 mt-2">
+                    <select
+                      value={aiSettings.selectedAIModelId}
+                      onChange={(e) => handleAISettingChange('selectedAIModelId', e.target.value)}
+                      className={`${styles.select} flex-1`}
+                    >
+                      <optgroup label="预设模型">
+                        {AI_CONFIG.MODELS.map(model => (
                           <option key={model.id} value={model.id}>
                             {model.name} ({model.id})
                           </option>
                         ))}
                       </optgroup>
-                    )}
-                  </select>
-                  
-                  <button 
-                    onClick={() => setShowAddModel(!showAddModel)}
-                    className="px-3 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
-                  >
-                    {showAddModel ? '取消' : '添加'}
-                  </button>
-                </div>
-
-                {/* 当前选中模型的详细信息展示 */}
-                <div className="mt-2 text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 p-2 rounded">
-                  {(() => {
-                    const allModels = [...AI_CONFIG.MODELS, ...(aiSettings.customModels || [])];
-                    const currentModel = allModels.find(m => m.id === aiSettings.selectedAIModelId);
-                    if (currentModel) {
-                      return (
-                        <div className="flex justify-between items-center">
-                          <span>Endpoint: {currentModel.ServiceEndPoint.substring(0, 30)}...</span>
-                          {aiSettings.customModels?.some(m => m.id === currentModel.id) && (
-                             <button 
-                               onClick={() => handleDeleteModel(currentModel.id)}
-                               className="text-red-500 hover:text-red-700 ml-2"
-                             >
-                               删除
-                             </button>
-                          )}
-                        </div>
-                      );
-                    }
-                    return <span>未找到模型配置</span>;
-                  })()}
-                </div>
-
-                {/* 添加新模型表单 */}
-                {showAddModel && (
-                  <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg space-y-3 border border-gray-200 dark:border-gray-700">
-                    <h3 className="font-medium text-gray-900 dark:text-white">添加自定义模型</h3>
-                    
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">模型名称</label>
-                      <input
-                        type="text"
-                        value={newModel.name}
-                        onChange={(e) => setNewModel({...newModel, name: e.target.value})}
-                        className="settings-input w-full"
-                        placeholder="例如: My Custom GPT"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">模型 ID (可选)</label>
-                      <input
-                        type="text"
-                        value={newModel.id}
-                        onChange={(e) => setNewModel({...newModel, id: e.target.value})}
-                        className="settings-input w-full"
-                        placeholder="留空自动生成"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
-                      <input
-                        type="password"
-                        value={newModel.API_KEY}
-                        onChange={(e) => setNewModel({...newModel, API_KEY: e.target.value})}
-                        className="settings-input w-full"
-                        placeholder="sk-..."
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Service Endpoint</label>
-                      <input
-                        type="text"
-                        value={newModel.ServiceEndPoint}
-                        onChange={(e) => setNewModel({...newModel, ServiceEndPoint: e.target.value})}
-                        className="settings-input w-full"
-                        placeholder="https://api.openai.com/v1/chat/completions"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Deployment Name (可选)</label>
-                      <input
-                        type="text"
-                        value={newModel.deploymentName}
-                        onChange={(e) => setNewModel({...newModel, deploymentName: e.target.value})}
-                        className="settings-input w-full"
-                        placeholder="Azure OpenAI 需要"
-                      />
-                    </div>
-
-                    <div className="flex justify-end pt-2">
-                      <button
-                        onClick={handleAddModel}
-                        className="px-4 py-2 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 shadow-sm"
-                      >
-                        保存模型
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div>
-                  <div className="settings-item-label">首页时令卡片</div>
-                  <div className="settings-item-description">在首页显示基于时令的 AI 建议卡片</div>
-                </div>
-                <ToggleSwitch
-                  checked={aiSettings.homeTimeAwareEnabled}
-                  onChange={(e) => handleAISettingChange('homeTimeAwareEnabled', e.target.checked)}
-                  id="homeTimeAwareEnabled"
-                />
-              </div>
-            </div>
-          </SectionCard>
-
-          {/* 应用设置 */}
-          <SectionCard title="应用设置">
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div>
-                  <div className="settings-item-label">深色模式</div>
-                  <div className="settings-item-description">切换应用的视觉主题</div>
-                </div>
-              </div>
-              <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1 mt-2">
-                <button
-                  onClick={() => handleThemeChange('light')}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'light'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                >
-                  🌞 浅色
-                </button>
-                <button
-                  onClick={() => handleThemeChange('dark')}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'dark'
-                    ? 'bg-gray-600 text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                >
-                  🌙 深色
-                </button>
-                <button
-                  onClick={() => handleThemeChange('system')}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'system'
-                    ? 'bg-blue-500 text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                >
-                  🖥️ 系统
-                </button>
-              </div>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-item-label">应用版本</div>
-              <div className="settings-item-description">切换应用版本以适应不同设备性能</div>
-              <div className="flex gap-2 mt-3">
-                <button
-                  className={`flex-1 py-2 px-3 rounded-md transition-colors text-sm font-medium ${currentAppVersion === 'lite' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                  onClick={() => handleVersionSwitch('lite')}
-                >
-                  轻量版
-                </button>
-                <button
-                  className={`flex-1 py-2 px-3 rounded-md transition-colors text-sm font-medium ${currentAppVersion === 'full' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}
-                  onClick={() => handleVersionSwitch('full')}
-                >
-                  炫彩版
-                </button>
-              </div>
-              <div className="mt-3">
-                <button
-                  className="settings-button bg-green-500 hover:bg-green-600 text-white w-full"
-                  onClick={() => handleReloadCurrentVersion()}
-                >
-                  重新加载当前版本
-                </button>
-              </div>
-              <div className="settings-info-text">
-                {currentAppVersion === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
-              </div>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-item-label">API服务地址</div>
-              <div className="settings-item-description">设置后端服务地址</div>
-              <input
-                type="text"
-                value={apiBaseUrl}
-                onChange={handleApiBaseUrlChange}
-                className="settings-input mt-2"
-                placeholder="https://nice-mcp.leansoftx.com/api"
-              />
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div>
-                  <div className="settings-item-label">使用本地计算</div>
-                  <div className="settings-item-description">启用后将使用本地JavaScript计算代替API调用</div>
-                </div>
-                <ToggleSwitch
-                  checked={useLocalCalculation}
-                  onChange={handleUseLocalCalculationChange}
-                  id="useLocalCalculation"
-                />
-              </div>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div>
-                  <div className="settings-item-label">数据同步</div>
-                  <div className="settings-item-description">自动备份您的数据</div>
-                </div>
-                <ToggleSwitch
-                  checked={dataSyncEnabled}
-                  onChange={handleDataSyncChange}
-                  id="dataSyncEnabled"
-                />
-              </div>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-item-label">缓存超时时间</div>
-              <div className="settings-item-description">设置数据缓存的有效时间</div>
-              <select
-                value={cacheTimeout}
-                onChange={handleCacheTimeoutChange}
-                className="settings-select mt-2"
-              >
-                <option value="3600000">1小时</option>
-                <option value="7200000">2小时</option>
-                <option value="10800000">3小时</option>
-                <option value="14400000">4小时</option>
-                <option value="28800000">8小时</option>
-                <option value="43200000">12小时</option>
-                <option value="86400000">1天</option>
-              </select>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div>
-                  <div className="settings-item-label">自动更新检查</div>
-                  <div className="settings-item-description">自动检查新版本并提示更新</div>
-                </div>
-                <ToggleSwitch
-                  checked={updateCheckSettings.enabled}
-                  onChange={(e) => handleUpdateCheckChange('enabled', e.target.checked)}
-                  id="updateCheckEnabled"
-                />
-              </div>
-              {updateCheckSettings.enabled && (
-                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
-                  <div className="mb-3">
-                    <div className="settings-item-label text-sm mb-1">检查频率</div>
-                    <select
-                      value={updateCheckSettings.checkFrequency}
-                      onChange={(e) => handleUpdateCheckChange('checkFrequency', e.target.value)}
-                      className="settings-select"
-                    >
-                      <option value="startup">启动时检查</option>
-                      <option value="daily">每天检查</option>
-                      <option value="weekly">每周检查</option>
+                      {(aiSettings.customModels && aiSettings.customModels.length > 0) && (
+                        <optgroup label="自定义模型">
+                          {aiSettings.customModels.map(model => (
+                            <option key={model.id} value={model.id}>
+                              {model.name} ({model.id})
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
                     </select>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleManualCheckUpdate}
-                      className="settings-button flex-1 text-sm"
+                    
+                    <button 
+                      onClick={() => setShowAddModel(!showAddModel)}
+                      className={`${styles.button} ${styles.buttonSecondary} !py-2`}
                     >
-                      立即检查更新
-                    </button>
-                    <button
-                      onClick={handleClearCheckRecords}
-                      className="settings-button settings-button-secondary flex-1 text-sm"
-                    >
-                      清除记录
+                      {showAddModel ? '取消' : '添加'}
                     </button>
                   </div>
-                  {updateCheckSettings.lastCheckTime && (
-                    <div className="settings-info-text mt-2">
-                      上次检查: {new Date(updateCheckSettings.lastCheckTime).toLocaleString()}
-                    </div>
-                  )}
-                  {updateCheckSettings.checkRecords.length > 0 && (
-                    <div className="settings-info-text">
-                      检查记录: {updateCheckSettings.checkRecords.length} 条
+
+                  {/* 当前选中模型的详细信息展示 */}
+                  <div className="mt-2 text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                    {(() => {
+                      const allModels = [...AI_CONFIG.MODELS, ...(aiSettings.customModels || [])];
+                      const currentModel = allModels.find(m => m.id === aiSettings.selectedAIModelId);
+                      if (currentModel) {
+                        return (
+                          <div className="flex justify-between items-center">
+                            <span>Endpoint: {currentModel.ServiceEndPoint.substring(0, 30)}...</span>
+                            {aiSettings.customModels?.some(m => m.id === currentModel.id) && (
+                               <button 
+                                 onClick={() => handleDeleteModel(currentModel.id)}
+                                 className="text-red-500 hover:text-red-700 ml-2"
+                               >
+                                 删除
+                               </button>
+                            )}
+                          </div>
+                        );
+                      }
+                      return <span>未找到模型配置</span>;
+                    })()}
+                  </div>
+
+                  {/* 添加新模型表单 */}
+                  {showAddModel && (
+                    <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg space-y-3 border border-gray-200 dark:border-gray-700">
+                      <h3 className="font-medium text-gray-900 dark:text-white">添加自定义模型</h3>
+                      
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">模型名称</label>
+                        <input
+                          type="text"
+                          value={newModel.name}
+                          onChange={(e) => setNewModel({...newModel, name: e.target.value})}
+                          className={styles.input}
+                          placeholder="例如: My Custom GPT"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">模型 ID (可选)</label>
+                        <input
+                          type="text"
+                          value={newModel.id}
+                          onChange={(e) => setNewModel({...newModel, id: e.target.value})}
+                          className={styles.input}
+                          placeholder="留空自动生成"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
+                        <input
+                          type="password"
+                          value={newModel.API_KEY}
+                          onChange={(e) => setNewModel({...newModel, API_KEY: e.target.value})}
+                          className={styles.input}
+                          placeholder="sk-..."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Service Endpoint</label>
+                        <input
+                          type="text"
+                          value={newModel.ServiceEndPoint}
+                          onChange={(e) => setNewModel({...newModel, ServiceEndPoint: e.target.value})}
+                          className={styles.input}
+                          placeholder="https://api.openai.com/v1/chat/completions"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Deployment Name (可选)</label>
+                        <input
+                          type="text"
+                          value={newModel.deploymentName}
+                          onChange={(e) => setNewModel({...newModel, deploymentName: e.target.value})}
+                          className={styles.input}
+                          placeholder="Azure OpenAI 需要"
+                        />
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          onClick={handleAddModel}
+                          className={styles.button}
+                        >
+                          保存模型
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               )}
-            </div>
-          </SectionCard>
 
-          {/* 关于信息 */}
-          <SectionCard title="关于">
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div className="settings-item-label">应用版本</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</div>
-              </div>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div className="settings-item-label">运行平台</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-                  {platformInfo.isNative ?
-                    (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
-                    'Web'
-                  }
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div>
+                    <div className={styles.itemLabel}>首页时令卡片</div>
+                    <div className={styles.itemDescription}>在首页显示基于时令的 AI 建议卡片</div>
+                  </div>
+                  <ToggleSwitch
+                    checked={aiSettings.homeTimeAwareEnabled}
+                    onChange={(e) => handleAISettingChange('homeTimeAwareEnabled', e.target.checked)}
+                    id="homeTimeAwareEnabled"
+                  />
                 </div>
               </div>
-            </div>
+            </SectionCard>
 
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div className="settings-item-label">开发团队</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">Nice Today</div>
-              </div>
-            </div>
-          </SectionCard>
-
-          {/* 其他设置 */}
-          <SectionCard title="其他">
-            <div className="settings-item">
-              <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <span className="settings-item-label">用户协议</span>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="settings-item">
-              <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <span className="settings-item-label">隐私政策</span>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="settings-item">
-              <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <span className="settings-item-label">意见反馈</span>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-item-header">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">🔴</span>
+            {/* 应用设置 */}
+            <SectionCard title="应用设置">
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
                   <div>
-                    <div className="settings-item-label">错误日志追踪</div>
-                    <div className="settings-item-description">
-                      {errorTrackingEnabled ? '已启用 - 显示错误追踪球' : '已关闭 - 隐藏错误追踪球'}
-                    </div>
+                    <div className={styles.itemLabel}>显示主题</div>
+                    <div className={styles.itemDescription}>切换应用的视觉主题</div>
                   </div>
                 </div>
-                <ToggleSwitch
-                  checked={errorTrackingEnabled}
-                  onChange={handleToggleErrorTracking}
-                  id="errorTracking"
+                <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1 mt-2">
+                  <button
+                    onClick={() => handleThemeChange('light')}
+                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'light'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                  >
+                    🌞 浅色
+                  </button>
+                  <button
+                    onClick={() => handleThemeChange('dark')}
+                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'dark'
+                      ? 'bg-gray-600 text-white shadow-sm'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                  >
+                    🌙 深色
+                  </button>
+                  <button
+                    onClick={() => handleThemeChange('system')}
+                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'system'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                  >
+                    🖥️ 系统
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.item}>
+                <div className={styles.itemLabel}>应用版本</div>
+                <div className={styles.itemDescription}>切换应用版本以适应不同设备性能</div>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    className={`${styles.button} flex-1 ${currentAppVersion !== 'lite' ? styles.buttonSecondary : ''}`}
+                    onClick={() => handleVersionSwitch('lite')}
+                  >
+                    轻量版
+                  </button>
+                  <button
+                    className={`${styles.button} flex-1 ${currentAppVersion !== 'full' ? styles.buttonSecondary : ''}`}
+                    onClick={() => handleVersionSwitch('full')}
+                  >
+                    炫彩版
+                  </button>
+                </div>
+                <div className="mt-3">
+                  <button
+                    className={`${styles.button} w-full`}
+                    onClick={() => handleReloadCurrentVersion()}
+                  >
+                    重新加载当前版本
+                  </button>
+                </div>
+                <div className={styles.infoText}>
+                  {currentAppVersion === 'lite' ? '当前为轻量版，适合低端设备' : '当前为炫彩版，功能更丰富'}
+                </div>
+              </div>
+
+              <div className={styles.item}>
+                <div className={styles.itemLabel}>API服务地址</div>
+                <div className={styles.itemDescription}>设置后端服务地址</div>
+                <input
+                  type="text"
+                  value={apiBaseUrl}
+                  onChange={handleApiBaseUrlChange}
+                  className={`${styles.input} mt-2`}
+                  placeholder="https://..."
                 />
               </div>
-            </div>
-          </SectionCard>
 
-          {/* 重置按钮 */}
-          {platformInfo.isNative && (
-            <button className="settings-button settings-button-danger w-full mt-4 mb-8" style={{ marginBottom: 'calc(32px + env(safe-area-inset-bottom, 20px))' }}>
-              重置应用数据
-            </button>
-          )}
-          
-          {/* 底部安全区域 */}
-          <div style={{ height: 'env(safe-area-inset-bottom, 20px)' }} />
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div>
+                    <div className={styles.itemLabel}>使用本地计算</div>
+                    <div className={styles.itemDescription}>启用后将使用本地JavaScript计算代替API调用</div>
+                  </div>
+                  <ToggleSwitch
+                    checked={useLocalCalculation}
+                    onChange={handleUseLocalCalculationChange}
+                    id="useLocalCalculation"
+                  />
+                </div>
+              </div>
+
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div>
+                    <div className={styles.itemLabel}>数据同步</div>
+                    <div className={styles.itemDescription}>自动备份您的数据</div>
+                  </div>
+                  <ToggleSwitch
+                    checked={dataSyncEnabled}
+                    onChange={handleDataSyncChange}
+                    id="dataSyncEnabled"
+                  />
+                </div>
+              </div>
+
+              <div className={styles.item}>
+                <div className={styles.itemLabel}>缓存超时时间</div>
+                <div className={styles.itemDescription}>设置数据缓存的有效时间</div>
+                <select
+                  value={cacheTimeout}
+                  onChange={handleCacheTimeoutChange}
+                  className={styles.select}
+                >
+                  <option value="3600000">1小时</option>
+                  <option value="7200000">2小时</option>
+                  <option value="10800000">3小时</option>
+                  <option value="14400000">4小时</option>
+                  <option value="28800000">8小时</option>
+                  <option value="43200000">12小时</option>
+                  <option value="86400000">1天</option>
+                </select>
+              </div>
+
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div>
+                    <div className={styles.itemLabel}>自动更新检查</div>
+                    <div className={styles.itemDescription}>自动检查新版本并提示更新</div>
+                  </div>
+                  <ToggleSwitch
+                    checked={updateCheckSettings.enabled}
+                    onChange={(e) => handleUpdateCheckChange('enabled', e.target.checked)}
+                    id="updateCheckEnabled"
+                  />
+                </div>
+                {updateCheckSettings.enabled && (
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 rounded-lg">
+                    <div className="mb-3">
+                      <div className="text-sm mb-1 font-bold">检查频率</div>
+                      <select
+                        value={updateCheckSettings.checkFrequency}
+                        onChange={(e) => handleUpdateCheckChange('checkFrequency', e.target.value)}
+                        className={styles.select}
+                      >
+                        <option value="startup">启动时检查</option>
+                        <option value="daily">每天检查</option>
+                        <option value="weekly">每周检查</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleManualCheckUpdate}
+                        className={`${styles.button} flex-1 text-sm`}
+                      >
+                        立即检查更新
+                      </button>
+                      <button
+                        onClick={handleClearCheckRecords}
+                        className={`${styles.button} ${styles.buttonSecondary} flex-1 text-sm`}
+                      >
+                        清除记录
+                      </button>
+                    </div>
+                    {updateCheckSettings.lastCheckTime && (
+                      <div className={`${styles.infoText} mt-2`}>
+                        上次检查: {new Date(updateCheckSettings.lastCheckTime).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </SectionCard>
+
+            {/* 关于信息 */}
+            <SectionCard title="关于">
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div className={styles.itemLabel}>应用版本</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">{appVersion.version} ({appVersion.build})</div>
+                </div>
+              </div>
+
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div className={styles.itemLabel}>运行平台</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                    {platformInfo.isNative ?
+                      (platformInfo.isAndroid ? 'Android' : (platformInfo.isIOS ? 'iOS' : 'Native')) :
+                      'Web'
+                    }
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* 其他设置 */}
+            <SectionCard title="其他">
+              <div className={styles.item}>
+                <div className={styles.itemHeader}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🔴</span>
+                    <div>
+                      <div className={styles.itemLabel}>错误日志追踪</div>
+                      <div className={styles.itemDescription}>
+                        {errorTrackingEnabled ? '已启用 - 显示错误追踪球' : '已关闭 - 隐藏错误追踪球'}
+                      </div>
+                    </div>
+                  </div>
+                  <ToggleSwitch
+                    checked={errorTrackingEnabled}
+                    onChange={handleToggleErrorTracking}
+                    id="errorTracking"
+                  />
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* 重置按钮 */}
+            {platformInfo.isNative && (
+              <button className={`${styles.button} ${styles.buttonDanger} w-full mt-4 mb-8`}>
+                重置应用数据
+              </button>
+            )}
+            
+            {/* 底部安全区域 */}
+            <div style={{ height: 'env(safe-area-inset-bottom, 20px)' }} />
+          </div>
         </div>
       </div>
     </div>

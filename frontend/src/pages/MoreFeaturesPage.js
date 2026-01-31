@@ -1,7 +1,5 @@
 import { useState, memo, useCallback, lazy, Suspense } from 'react';
-import '../index.css';
-// import './MoreFeaturesPage.css';
-import './styles/private-styles.css'; // 私有样式，避免全局污染
+import styles from './MoreFeaturesPage.module.css';
 
 // 懒加载组件以优化性能
 const TarotGardenPage = lazy(() => import('./TarotGardenPage'));
@@ -11,9 +9,9 @@ const SettingsPage = lazy(() => import('./SettingsPage'));
 
 // 简化的加载组件
 const TabContentLoader = memo(() => (
-  <div className="tab-content-loader">
-    <div className="spinner"></div>
-    <span className="spinner-label">正在加载...</span>
+  <div className={styles.loader}>
+    <div className={styles.spinner}></div>
+    <span className="text-gray-500 dark:text-gray-400 font-medium">正在加载...</span>
   </div>
 ));
 
@@ -26,105 +24,62 @@ const MoreFeaturesPage = memo(() => {
     setActiveTab(tabName);
   }, []);
 
-  // 通用的消息显示函数
-  const showMessage = useCallback((message, type = 'info') => {
-    // 创建并显示消息提示
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${type === 'error' ? 'bg-red-100 text-red-700 border border-red-300' :
-      type === 'success' ? 'bg-green-100 text-green-700 border border-green-300' :
-        'bg-blue-100 text-blue-700 border border-blue-300'
-      }`;
-    messageDiv.textContent = message;
-
-    document.body.appendChild(messageDiv);
-
-    // 3秒后自动移除消息
-    setTimeout(() => {
-      if (document.body.contains(messageDiv)) {
-        document.body.removeChild(messageDiv);
-      }
-    }, 3000);
-  }, []);
-
   return (
-    <div className="more-features-page-wrapper">
-      {/* 顶部标题区域 - 固定定位 */}
-      <div className="more-features-header">
-        <div className="header-content">
-          <h1>🌟 更多功能</h1>
-          <p>发现应用的所有功能</p>
-        </div>
+    <div className={styles.wrapper}>
+      {/* 顶部标题区域 */}
+      <div className={styles.header}>
+        <h1>🌟 更多功能</h1>
+        <p>发现应用的所有功能</p>
       </div>
 
-      {/* 标签导航 - 固定定位 */}
-      <div className="more-features-tabs">
-        <div className="tabs-container">
-          <div className="tabs-wrapper">
-            <button
-              className={`more-features-tab-button ${activeTab === 'mood' ? 'active' : ''}`}
-              onClick={() => handleTabChange('mood')}
-            >
-              🌈 彩虹心情
-            </button>
-            <button
-              className={`more-features-tab-button ${activeTab === 'tarot' ? 'active' : ''}`}
-              onClick={() => handleTabChange('tarot')}
-            >
-              🎴 塔罗花园
-            </button>
-            <button
-              className={`more-features-tab-button ${activeTab === 'user' ? 'active' : ''}`}
-              onClick={() => handleTabChange('user')}
-            >
-              👤 用户面板
-            </button>
-            <button
-              className={`more-features-tab-button ${activeTab === 'settings' ? 'active' : ''}`}
-              onClick={() => handleTabChange('settings')}
-            >
-              ⚙️ 系统设置
-            </button>
-          </div>
+      {/* 标签导航 */}
+      <div className={styles.tabs}>
+        <div className={styles.tabsContainer}>
+          <button
+            className={`${styles.tabButton} ${activeTab === 'mood' ? styles.active : ''}`}
+            onClick={() => handleTabChange('mood')}
+          >
+            <span className={styles.tabIcon}>🌈</span>
+            <span>心情</span>
+          </button>
+          <button
+            className={`${styles.tabButton} ${activeTab === 'tarot' ? styles.active : ''}`}
+            onClick={() => handleTabChange('tarot')}
+          >
+            <span className={styles.tabIcon}>🎴</span>
+            <span>塔罗</span>
+          </button>
+          <button
+            className={`${styles.tabButton} ${activeTab === 'user' ? styles.active : ''}`}
+            onClick={() => handleTabChange('user')}
+          >
+            <span className={styles.tabIcon}>👤</span>
+            <span>用户</span>
+          </button>
+          <button
+            className={`${styles.tabButton} ${activeTab === 'settings' ? styles.active : ''}`}
+            onClick={() => handleTabChange('settings')}
+          >
+            <span className={styles.tabIcon}>⚙️</span>
+            <span>设置</span>
+          </button>
         </div>
       </div>
 
       {/* 内容区域 */}
-      <div className="more-features-content">
-        {activeTab === 'mood' && (
-          <div className="content-with-scroll">
-            <Suspense fallback={<TabContentLoader />}>
-              <RainbowMoodPage />
-            </Suspense>
-          </div>
-        )}
-
-        {activeTab === 'tarot' && (
-          <div className="content-with-scroll">
-            <Suspense fallback={<TabContentLoader />}>
-              <TarotGardenPage />
-            </Suspense>
-          </div>
-        )}
-
-        {activeTab === 'user' && (
-          <div className="h-full flex flex-col">
-            <Suspense fallback={<TabContentLoader />}>
-              <div className="content-with-scroll">
-                <div className="content-container">
-                  <UserConfigManager />
-                </div>
+      <div className={styles.content}>
+        <Suspense fallback={<TabContentLoader />}>
+          <div className={styles.scrollArea}>
+            {activeTab === 'mood' && <RainbowMoodPage />}
+            {activeTab === 'tarot' && <TarotGardenPage />}
+            {activeTab === 'user' && (
+              <div className="p-4">
+                <UserConfigManager />
               </div>
-            </Suspense>
+            )}
+            {activeTab === 'settings' && <SettingsPage />}
           </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="content-with-scroll">
-            <Suspense fallback={<TabContentLoader />}>
-              <SettingsPage />
-            </Suspense>
-          </div>
-        )}
+        </Suspense>
       </div>
     </div>
   );

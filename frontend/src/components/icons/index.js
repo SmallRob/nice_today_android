@@ -30,3 +30,4 @@ export { default as AgileHealthIcon } from './AgileHealthIcon';
 export { default as HealthFoodIcon } from './HealthFoodIcon';
 export { default as ArrowLeftIcon } from './ArrowLeftIcon';
 export { default as ShareIcon } from './ShareIcon';
+export { default as SpineHealthIcon } from './SpineHealthIcon';

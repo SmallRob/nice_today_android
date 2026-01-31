@@ -26,15 +26,6 @@
 }
 
 /* 隐藏文字的面包屑菜单样式，与应用图标对齐 */
-.breadcrumb-trigger-btn.pill-style.no-text {
-  width: 46px;
-  height: 38px;
-  min-width: 46px;
-  padding: 0;
-  border-radius: 10px;
-  justify-content: center;
-}
-
 .menu-label {
   font-size: 11px;
   font-weight: 600;
@@ -615,16 +606,6 @@
   }
 
   .menu-label {
-    font-size: 10px;
-  }
-
-  .breadcrumb-trigger-btn.pill-style {
-    min-width: 85px;
-    height: 28px;
-    padding: 0 10px;
-  }
-
-  .trigger-text {
     font-size: 10px;
   }
 }

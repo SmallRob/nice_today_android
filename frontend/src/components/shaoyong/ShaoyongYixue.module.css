@@ -1,0 +1,343 @@
+/* Shaoyong Yixue Component Styles */
+
+/* Shaoyong Yixue Component Styles */
+
+/* 主容器样式 */
+.container {
+  min-height: 100vh;
+  width: 100%;
+  transition: all 0.3s ease;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 暗黑模式下的背景色 */
+.containerDark {
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+}
+
+/* 亮色模式下的背景色 */
+.containerLight {
+  background-color: #f5f7fa;
+  color: #333333;
+}
+
+/* 网格布局样式 */
+.gridLayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* 平板及以上设备的网格布局 */
+@media (min-width: 640px) {
+  .gridLayout {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 桌面设备的网格布局 */
+@media (min-width: 1024px) {
+  .gridLayout {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 头部导航样式 */
+.header {
+  padding: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 暗黑模式下的头部渐变背景 */
+.headerDark {
+  background: linear-gradient(135deg, #2d4059, #1a1a2e);
+}
+
+/* 亮色模式下的头部渐变背景 */
+.headerLight {
+  background: linear-gradient(135deg, #f0f4f8, #e6ecf3);
+}
+
+/* 头部内容样式 */
+.headerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* 标题部分样式 */
+.titleSection {
+  text-align: center;
+  width: 100%;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+/* 暗黑模式下的副标题颜色 */
+.subtitleDark {
+  color: #9ca3af;
+}
+
+/* 亮色模式下的副标题颜色 */
+.subtitleLight {
+  color: #6b7280;
+}
+
+/* 主要内容区域 */
+.mainContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  flex: 1;
+  width: 100%;
+}
+
+/* 卡片样式 */
+.card {
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  touch-action: manipulation;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 暗黑模式下的卡片背景 */
+.cardDark {
+  background-color: #1f2937;
+}
+
+/* 亮色模式下的卡片背景 */
+.cardLight {
+  background-color: #ffffff;
+}
+
+/* 卡片悬停效果 */
+.cardHover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 卡片内容样式 */
+.cardIcon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 暗黑模式下的卡片文字颜色 */
+.cardTextDark {
+  color: #e5e7eb;
+}
+
+/* 亮色模式下的卡片文字颜色 */
+.cardTextLight {
+  color: #1f2937;
+}
+
+.cardDescription {
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  flex-grow: 1;
+}
+
+/* 按钮样式 */
+.button {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  z-index: 1;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 暗黑模式下的按钮样式 */
+.buttonDark {
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.buttonDark:hover {
+  background-color: #e5e7eb;
+}
+
+/* 亮色模式下的按钮样式 */
+.buttonLight {
+  background-color: #111827;
+  color: #ffffff;
+}
+
+.buttonLight:hover {
+  background-color: #1f2937;
+}
+
+/* 底部信息样式 */
+.footer {
+  padding: 1.5rem 0;
+  width: 100%;
+  margin-top: auto;
+}
+
+/* 暗黑模式下的底部背景 */
+.footerDark {
+  background-color: #1f2937;
+}
+
+/* 亮色模式下的底部背景 */
+.footerLight {
+  background-color: #f3f4f6;
+}
+/* 底部内容样式 */
+.footerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.footerTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.footerDescription {
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+/* 暗黑模式下的底部描述颜色 */
+.footerDescriptionDark {
+  color: #9ca3af;
+}
+
+/* 亮色模式下的底部描述颜色 */
+.footerDescriptionLight {
+  color: #6b7280;
+}
+
+.footerIcons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.footerIcon {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* 移动端适配样式 */
+@media (min-width: 640px) {
+  .headerContent {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+  }
+  
+  .titleSection {
+    text-align: left;
+    flex-grow: 1;
+  }
+  
+  .gridLayout {
+    gap: 1.5rem;
+  }
+}
+
+/* 针对不同设备的安全区域适配 */
+@media (max-width: 640px) {
+  .container {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+/* iOS Safari 兼容性 - 防止输入框缩放 */
+input, textarea, select {
+  font-size: 16px;
+}
+
+/* 为卡片添加渐变背景类 */
+.fromPinkToPurple {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+}
+
+.fromBlueToIndigo {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+}
+
+.fromGreenToTeal {
+  background: linear-gradient(135deg, #10b981, #0d9488);
+}
+
+.fromYellowToOrange {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+.fromRedToPink {
+  background: linear-gradient(135deg, #ef4444, #ec4899);
+}
+
+.fromIndigoToPurple {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}

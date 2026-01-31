@@ -1,6 +1,5 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
-import '../index.css';
 import '../styles/userConfigPage.css';
 import '../styles/userConfigManager.css';
 

@@ -1,7 +1,7 @@
 /*  Biorhythm Page Isolated Styles */
 
 /* 能量球容器 - 确保垂直居中且不被压缩 */
-.energy-ball-container {
+.biorhythm-page-wrapper .energy-ball-container {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -16,7 +16,7 @@
 }
 
 /* 能量球主体 - 确保完美的圆形 */
-.energy-ball-circle {
+.biorhythm-page-wrapper .energy-ball-circle {
     position: relative !important;
     width: 5rem !important;
     /* w-20 */
@@ -37,7 +37,7 @@
 
 /* 适配大屏幕 */
 @media (min-width: 640px) {
-    .energy-ball-circle {
+    .biorhythm-page-wrapper .energy-ball-circle {
         width: 7rem !important;
         /* sm:w-28 */
         height: 7rem !important;
@@ -46,7 +46,7 @@
 }
 
 /* 内部光晕 */
-.energy-ball-glow {
+.biorhythm-page-wrapper .energy-ball-glow {
     position: absolute !important;
     inset: 0.25rem !important;
     border-radius: 9999px !important;
@@ -56,17 +56,16 @@
 }
 
 /* 动画波纹 - 确保绝对定位居中 */
-.energy-ball-pulse {
+.biorhythm-page-wrapper .energy-ball-pulse {
     position: absolute !important;
     inset: 0 !important;
     border-radius: 9999px !important;
     border: 2px solid rgba(255, 255, 255, 0.2) !important;
-    animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite !important;
+    animation: biorhythm-ping 3s cubic-bezier(0, 0, 0.2, 1) infinite !important;
     pointer-events: none !important;
 }
 
-@keyframes ping {
-
+@keyframes biorhythm-ping {
     75%,
     100% {
         transform: scale(2);
@@ -75,7 +74,7 @@
 }
 
 /* 文本容器 */
-.energy-ball-content {
+.biorhythm-page-wrapper .energy-ball-content {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -83,7 +82,7 @@
     color: white !important;
 }
 
-.energy-ball-score {
+.biorhythm-page-wrapper .energy-ball-score {
     font-size: 1.5rem !important;
     /* text-2xl */
     font-weight: 700 !important;
@@ -92,13 +91,13 @@
 }
 
 @media (min-width: 640px) {
-    .energy-ball-score {
+    .biorhythm-page-wrapper .energy-ball-score {
         font-size: 2.25rem !important;
         /* text-4xl */
     }
 }
 
-.energy-ball-label {
+.biorhythm-page-wrapper .energy-ball-label {
     font-size: 0.625rem !important;
     /* text-[10px] */
     font-weight: 500 !important;
@@ -112,7 +111,7 @@
 }
 
 @media (min-width: 640px) {
-    .energy-ball-label {
+    .biorhythm-page-wrapper .energy-ball-label {
         font-size: 0.75rem !important;
         /* text-xs */
     }

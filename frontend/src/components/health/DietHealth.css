@@ -1,0 +1,265 @@
+.highlight-gradient-blue {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0), rgba(59, 130, 246, 0.05));
+}
+
+.highlight-gradient-green {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0), rgba(16, 185, 129, 0.05));
+}
+
+.highlight-gradient-purple {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0), rgba(139, 92, 246, 0.05));
+}
+
+.highlight-gradient-orange {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0), rgba(249, 115, 22, 0.05));
+}
+
+.highlight-gradient-red {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0), rgba(239, 68, 68, 0.05));
+}
+
+.highlight-gradient-cyan {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0), rgba(6, 182, 212, 0.05));
+}
+
+.diet-health-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.diet-health-card:hover {
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+}
+
+.diet-health-detail-card {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 12px rgba(240, 147, 251, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.diet-health-detail-card:hover {
+  box-shadow: 0 8px 24px rgba(240, 147, 251, 0.3);
+  transform: translateY(-2px);
+}
+
+.diet-health-detail-page {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .diet-health-detail-page {
+    padding: 2rem;
+  }
+}
+
+.diet-health-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .diet-health-detail-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.diet-health-detail-grid.gap-4 {
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .diet-health-detail-grid.gap-4 {
+    gap: 1.5rem;
+  }
+}
+
+.diet-health-card .relative.z-10,
+.diet-health-card .card-content {
+  position: relative;
+  z-index: 10;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.break-word-mobile {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  hyphens: auto;
+}
+
+.diet-health-card .break-word-mobile {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  font-size: 0.6rem;
+}
+
+@media screen and (device-aspect-ratio: 9/16) {
+  .diet-health-card .mt-auto.pt-2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.6rem;
+  }
+
+  .diet-health-card a[href="/diet-health-detail"] {
+    width: auto;
+    min-width: 70%;
+    max-width: 90%;
+  }
+
+  .diet-health-card .flex.gap-1 {
+    flex-direction: column;
+  }
+
+  .diet-health-card .flex-1 {
+    flex: none;
+    width: 100%;
+  }
+}
+
+.diet-health-card h3,
+.diet-health-card .text-blue-800,
+.diet-health-card .text-green-800,
+.diet-health-card .text-red-800,
+.diet-health-card .text-yellow-800,
+.diet-health-card .text-purple-800 {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.diet-health-card .bg-blue-50,
+.diet-health-card .bg-green-50,
+.diet-health-card .bg-red-50,
+.diet-health-card .bg-yellow-50,
+.diet-health-card .bg-purple-50 {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(4px);
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.diet-health-card .text-blue-600,
+.diet-health-card .text-green-600,
+.diet-health-card .text-red-600,
+.diet-health-card .text-yellow-600,
+.diet-health-card .text-purple-600 {
+  color: white !important;
+}
+
+.diet-health-card .text-gray-600,
+.diet-health-card .text-gray-700 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.diet-health-card .bg-orange-50 {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(4px);
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.diet-health-card {
+  margin-bottom: 1rem;
+}
+
+.health-dashboard-grid {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+@media (max-width: 768px) {
+  .diet-health-card {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .diet-health-card .grid.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .diet-health-card .grid.grid-cols-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .diet-health-card .text-lg {
+    font-size: 0.9rem;
+  }
+
+  .diet-health-card .text-xs {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .diet-health-card .grid.grid-cols-2,
+  .diet-health-card .grid.grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .diet-health-card .flex.flex-wrap {
+    flex-direction: column;
+  }
+
+  .diet-health-card .gap-2 {
+    gap: 0.5rem;
+  }
+
+  .diet-health-card .p-2 {
+    padding: 0.25rem;
+  }
+}
+
+@media screen and (device-aspect-ratio: 9/16) {
+  .break-word-mobile {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  .diet-health-card .grid.grid-cols-2,
+  .diet-health-card .grid.grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .diet-health-card .text-xs {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .diet-health-card {
+    padding: 0.75rem;
+  }
+
+  .diet-health-card .text-lg {
+    font-size: 0.8rem;
+  }
+
+  .diet-health-card .text-xs {
+    font-size: 0.7rem;
+  }
+
+  .diet-health-card .min-h-\[400px\] {
+    min-height: 350px;
+  }
+
+  .diet-health-card .flex.gap-1 {
+    flex-direction: column;
+  }
+
+  .diet-health-card .flex-1 {
+    flex: none;
+    width: 100%;
+  }
+}

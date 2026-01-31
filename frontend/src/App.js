@@ -9,7 +9,8 @@ import ErrorDisplayPanel from './components/ErrorDisplayPanel.js';
 import { errorLogger, initializeGlobalErrorHandlers } from './utils/errorLogger';
 import { safeInitAndroidWebViewCompat } from './utils/androidWebViewCompat';
 import { useChunkErrorRecovery, ChunkLoadErrorBoundary } from './utils/chunkLoadErrorHandler';
-import { useVersionManager, VersionUpdateNotification } from './utils/versionManager';
+import { useVersionManager } from './utils/versionManager';
+import { runAppDataMigrations } from './utils/appDataMigrationRunner';
 import { UserParamsProvider } from './context/UserParamsContext';
 import { ensureChartRegistered } from './utils/chartConfig';
 
@@ -20,7 +21,6 @@ import {
 } from './utils/horoscopeTraitsPreloader';
 import SleepHealthDashboardPage from './pages/SleepHealthDashboardPage';
 import EmoHealthDashboardPage from './pages/EmoHealthDashboardPage';
-import './index.css';
 
 // 为移动设备兼容性安全导入Suspense
 const { Suspense } = React;
@@ -427,13 +427,8 @@ function App() {
   // 初始化版本管理工具
   const {
     current: currentVersion,
-    stored: storedVersion,
-    needsUpdate,
-    clearAndReload
+    stored: storedVersion
   } = useVersionManager();
-
-  // 版本更新通知状态
-  const [showUpdateNotification, setShowUpdateNotification] = React.useState(false);
 
   // 检测是否在移动设备环境中
   const isMobileEnvironment = () => {
@@ -506,13 +501,11 @@ function App() {
     };
   }, [handleChunkError, checkChunkHealth]);
 
-  // 监听版本更新
   React.useEffect(() => {
-    if (needsUpdate) {
-      console.log(`检测到数据版本同步: ${storedVersion || '未知'} → ${currentVersion}`);
-      setShowUpdateNotification(true);
-    }
-  }, [needsUpdate, currentVersion, storedVersion]);
+    if (!currentVersion || currentVersion === 'unknown') return;
+    if (!storedVersion || storedVersion === currentVersion) return;
+    runAppDataMigrations({ fromVersion: storedVersion, toVersion: currentVersion }).catch(() => {});
+  }, [currentVersion, storedVersion]);
 
   // 安全的初始化函数 - 优化：立即返回，后台执行初始化
   const initializeApp = async () => {
@@ -695,23 +688,6 @@ function App() {
   return (
     <>
       <Router>
-        {/* 版本更新通知 */}
-        {showUpdateNotification && (
-          <VersionUpdateNotification
-            updateInfo={{
-              previousVersion: storedVersion,
-              currentVersion: currentVersion
-            }}
-            onApplyUpdate={() => {
-              clearAndReload(true);
-              setShowUpdateNotification(false);
-            }}
-            onDismiss={() => {
-              setShowUpdateNotification(false);
-            }}
-          />
-        )}
-
         <ChunkLoadErrorBoundary maxRetries={3}>
           <EnhancedErrorBoundary componentName="App">
             <EnergyProvider>

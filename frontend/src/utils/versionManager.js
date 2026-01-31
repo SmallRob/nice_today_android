@@ -309,7 +309,7 @@ export const useVersionManager = () => {
       setVersionInfo({
         current,
         stored: stored.appVersion,
-        needsUpdate: result.updated,
+        needsUpdate: current !== 'unknown' && current !== stored.appVersion,
         lastCheck: Date.now()
       });
       

@@ -132,64 +132,23 @@
 /* 功能网格布局 */
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: clamp(16px, 4vw, 24px);
+  padding: 20px 0;
 }
 
-/* 功能卡片样式 - 复用DashboardPage的样式 */
-.feature-card {
+/* 功能卡片样式 - 现代化风格 */
+.more-features-page-wrapper .feature-card {
   width: 100%;
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(8px, 2vw, 16px);
-  border-radius: clamp(16px, 4vw, 24px);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0.1, 1);
-  position: relative;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  max-width: 100%;
-  min-height: clamp(100px, 30vw, 150px);
-  border: 0;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: inherit;
-  z-index: 1;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.feature-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0.05) 100%);
-  border-radius: inherit;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.feature-card:hover::after {
-  opacity: 1;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0.1, 1) !important;
 }
 
 .feature-card-content {
@@ -198,153 +157,92 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
-  gap: clamp(4px, 1vw, 8px);
-  position: relative;
-  z-index: 2;
+  gap: 8px;
 }
 
 .feature-card-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(36px, 8vw, 48px);
-  height: clamp(36px, 8vw, 48px);
-  border-radius: clamp(12px, 3vw, 16px);
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  margin-bottom: clamp(4px, 1vw, 8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
-  z-index: 3;
+  margin-bottom: 4px !important;
 }
 
-.feature-card:hover .feature-card-icon-wrapper {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+/* 根据分类应用不同的渐变背景 */
+.category-daily .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%) !important;
+}
+
+.category-fortune .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%) !important;
+}
+
+.category-growth .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%) !important;
+}
+
+.category-health .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #84fbb1 0%, #48c6ef 100%) !important;
+}
+
+.category-entertainment .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%) !important;
+}
+
+.category-tool .feature-card-icon-wrapper {
+  background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%) !important;
+}
+
+.feature-card::before, .feature-card::after {
+  display: none !important;
 }
 
 .feature-card .feature-card-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(1.2rem, 3vw, 1.6rem);
-  line-height: 1;
+  font-size: 32px !important;
+  color: #ffffff !important;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-  transition: transform 0.2s ease;
-  z-index: 4;
 }
 
 .feature-card .feature-card-title {
-  font-size: clamp(0.7rem, 2vw, 0.85rem);
-  font-weight: 600;
-  color: white;
-  margin: 0;
-  line-height: 1.2;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #1f2937 !important;
+  margin: 0 !important;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  text-align: center;
-  z-index: 3;
-}
-
-/* 不同类别的卡片背景色 */
-.feature-card.category-entertainment::before {
-  background: linear-gradient(135deg, #E91E63 0%, #FF5722 100%);
-}
-
-.feature-card.category-daily::before {
-  background: linear-gradient(135deg, #FF5252 0%, #FF9800 100%);
-}
-
-.feature-card.category-growth::before {
-  background: linear-gradient(135deg, #4CAF50 0%, #FF9800 100%);
-}
-
-/* 卡片悬停效果 */
-.feature-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-}
-
-.feature-card:hover .feature-card-icon {
-  transform: scale(1.1);
-}
-
-.feature-card:active {
-  transform: translateY(-2px) scale(1.01);
-  transition-duration: 0.1s;
-}
-
-/* 深色模式调整 */
-.dark .feature-card {
-  filter: brightness(1.05) saturate(1.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.dark .feature-card.category-entertainment::before {
-  background: linear-gradient(135deg, #8E24AA 0%, #E64A19 100%);
-  box-shadow: 0 4px 20px rgba(142, 36, 170, 0.5);
-}
-
-.dark .feature-card.category-daily::before {
-  background: linear-gradient(135deg, #FF5252 0%, #FF9800 100%);
-  box-shadow: 0 4px 20px rgba(255, 82, 82, 0.5);
-}
-
-.dark .feature-card.category-growth::before {
-  background: linear-gradient(135deg, #388E3C 0%, #F57C00 100%);
-  box-shadow: 0 4px 20px rgba(56, 142, 60, 0.5);
-}
-
-.dark .feature-card:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-}
-
-.dark .feature-card .feature-card-icon-wrapper {
-  background: rgba(255, 255, 255, 0.15);
 }
 
 .dark .feature-card .feature-card-title {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 /* 响应式调整 */
 @media (max-width: 640px) {
   .feature-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(12px, 3vw, 16px);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px 8px;
   }
 
-  .feature-card {
-    min-height: clamp(80px, 25vw, 120px);
+  .feature-card-icon-wrapper {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 14px !important;
+  }
+
+  .feature-card .feature-card-icon {
+    font-size: 26px !important;
+  }
+
+  .feature-card .feature-card-title {
+    font-size: 11px !important;
   }
 }
 
 @media (max-width: 480px) {
   .feature-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(8px, 2vw, 12px);
-  }
-
-  .feature-card {
-    min-height: clamp(70px, 25vw, 100px);
-  }
-
-  .more-features-page-wrapper .tab-content {
-    flex-direction: row;
-    padding: clamp(8px, 2vw, 12px);
-  }
-
-  .more-features-page-wrapper .tab-icon {
-    width: clamp(20px, 5vw, 24px);
-    height: clamp(20px, 5vw, 24px);
-  }
-
-  .more-features-page-wrapper .tab-text {
-    font-size: clamp(10px, 2.5vw, 12px);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
