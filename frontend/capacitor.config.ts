@@ -58,6 +58,9 @@ const config: CapacitorConfig = {
     Network: {},
     Permissions: {
       requestStatus: true
+    },
+    CapacitorHttp: {
+      enabled: true
     }
   }
 };

@@ -1412,7 +1412,7 @@ const calculateDaYun = (baziInfo, birthYear) => {
 // 主页面组件
 const BaziAnalysisPage = () => {
   const { theme } = useTheme();
-  const { updateConfig } = useUserConfig();
+  const { updateConfig, getCurrentConfigIndex } = useUserConfig();
   const currentConfig = useCurrentConfig();
   const navigate = useNavigate();
   const [error, setError] = useState(null);
@@ -1582,7 +1582,8 @@ const BaziAnalysisPage = () => {
           }
         };
 
-        await updateConfig(updatedConfig);
+        const currentIndex = getCurrentConfigIndex();
+        await updateConfig(currentIndex, updatedConfig);
 
         // 同步八字信息到缓存
         try {
@@ -1650,7 +1651,8 @@ const BaziAnalysisPage = () => {
                 // 清除无效的八字信息
                 const updatedConfig = { ...currentConfig };
                 delete updatedConfig.baziInfo;
-                await updateConfig(updatedConfig);
+                const currentIndex = getCurrentConfigIndex();
+                await updateConfig(currentIndex, updatedConfig);
               }
             }
           }
@@ -2050,7 +2052,8 @@ const BaziAnalysisPage = () => {
           }
         };
 
-        await updateConfig(updatedConfig);
+        const currentIndex = getCurrentConfigIndex();
+        await updateConfig(currentIndex, updatedConfig);
 
         // 同步八字信息到缓存，按昵称存储
         try {

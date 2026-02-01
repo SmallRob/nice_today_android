@@ -7,6 +7,7 @@
   border: 1px solid rgba(255, 255, 255, 0.6);
   position: relative;
   overflow: hidden;
+  box-sizing: border-box; /* 确保 padding 包含在宽度内，避免撑破布局 */
 }
 
 .ai-seasonal-card::before {
@@ -126,6 +127,7 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center; /* 垂直居中对齐 */
 }
 
 .suggestion-tag {
@@ -136,6 +138,9 @@
   color: #0369a1;
   font-weight: 600;
   border: 1px solid rgba(2, 132, 199, 0.1);
+  display: inline-flex; /* 确保内容垂直居中 */
+  align-items: center;
+  white-space: nowrap; /* 防止标签文字换行 */
 }
 
 .dark .suggestion-tag {

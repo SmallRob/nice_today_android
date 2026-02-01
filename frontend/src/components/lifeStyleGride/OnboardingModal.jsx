@@ -67,7 +67,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete, theme = 'light' }) => {
           <button
             onClick={handlePrev}
             disabled={currentStep === 0}
-            className={`px-4 py-2 rounded-lg ${
+            className={`px-4 py-2 rounded-lg flex-shrink-0 ${
               currentStep === 0 
                 ? 'opacity-50 cursor-not-allowed' 
                 : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
@@ -91,7 +91,7 @@ const OnboardingModal = ({ isOpen, onClose, onComplete, theme = 'light' }) => {
           
           <button
             onClick={handleNext}
-            className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white"
+            className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white flex-shrink-0"
           >
             {currentStep === steps.length - 1 ? '开始探索' : '下一步'}
           </button>

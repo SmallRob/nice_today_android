@@ -208,6 +208,7 @@ const ErrorDisplayPanel = () => {
               刷新应用
             </button>
           </div>
+          </div>
         </>
       )}
 

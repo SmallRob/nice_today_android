@@ -216,16 +216,30 @@
     font-size: 0.75rem;
 }
 
-/* No Scrollbar Utility */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .lifestyle-guide-page {
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  .lifestyle-guide-content {
+    padding: 10px;
+    padding-bottom: 20px;
+  }
+  
+  .matrix-play-view {
+    padding-bottom: 30px;
+  }
 }
 
+/* 隐藏滚动条但保留功能 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 .no-scrollbar {
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Animation utilities */

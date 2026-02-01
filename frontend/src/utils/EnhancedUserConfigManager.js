@@ -548,6 +548,12 @@ class EnhancedUserConfigManager {
     console.log('========== updateConfigWithNodeUpdate 开始 ==========');
     console.log('参数:', { index, updateType, configsLength: this.configs.length, initialized: this.initialized });
 
+    // 严格参数检查
+    if (typeof index !== 'number') {
+      console.error('配置索引必须是数字:', index);
+      throw new Error(`无效的配置索引类型: ${typeof index}`);
+    }
+
     if (!this.initialized || index < 0 || index >= this.configs.length) {
       console.error('无效的配置索引:', { index, configsLength: this.configs.length, initialized: this.initialized });
       throw new Error(`无效的配置索引: index=${index}, configs.length=${this.configs.length}`);

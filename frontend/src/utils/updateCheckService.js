@@ -1,3 +1,5 @@
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
+
 // 更新检查服务模块
 class UpdateCheckService {
   constructor() {
@@ -108,10 +110,32 @@ class UpdateCheckService {
     const versionUrl = normalized.endsWith('.json') ? normalized : `${normalized}/version.json`;
     const timeout = 8000; // 8秒超时
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
     try {
+      // 在原生平台上使用 CapacitorHttp 以绕过 CORS 限制
+      if (Capacitor.isNativePlatform()) {
+        console.log('Using CapacitorHttp for update check:', versionUrl);
+        const response = await CapacitorHttp.get({
+          url: versionUrl,
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
+          connectTimeout: timeout,
+          readTimeout: timeout
+        });
+
+        if (response.status !== 200) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        // CapacitorHttp 直接返回解析后的数据 (如果是 JSON)
+        return response.data;
+      }
+
+      // Web 环境回退到普通 fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
       const response = await fetch(versionUrl, {
         signal: controller.signal,
         headers: {
@@ -137,10 +161,18 @@ class UpdateCheckService {
       return versionData;
 
     } catch (error) {
-      clearTimeout(timeoutId);
-
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
+      }
+
+      // 仅在开发环境且非原生平台（Web调试）时，如果请求失败（可能是CORS），返回模拟数据方便调试UI
+      if (process.env.NODE_ENV === 'development' && !Capacitor.isNativePlatform()) {
+        console.warn('Web update check failed (likely CORS). Returning mock data for debugging.');
+        return {
+          version: "9.9.9", 
+          releaseNotes: "调试更新\n- 这是一个用于Web调试的模拟更新提示。\n- 真实环境请在App中测试。",
+          downloadUrl: "https://leanisssharedstorage.blob.core.windows.net/aise-files/today-update/app-debug.apk"
+        };
       }
 
       throw error;

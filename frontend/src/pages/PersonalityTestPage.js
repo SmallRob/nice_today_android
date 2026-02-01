@@ -99,8 +99,8 @@ const PersonalityTestPage = () => {
         </div>
 
         {/* 标签页导航 */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-1 shadow-lg">
+        <div className="flex justify-center mb-8 overflow-x-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-1 shadow-lg flex-nowrap inline-flex min-w-max">
             {testTypes.map((test) => (
               <button
                 key={test.id}
@@ -122,12 +122,12 @@ const PersonalityTestPage = () => {
           {testTypes.map((test) => (
             <div
               key={test.id}
-              className={`bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 transition-all hover:shadow-3xl cursor-pointer ${
+              className={`bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 transition-all hover:shadow-3xl cursor-pointer flex flex-col ${
                 activeTab === test.id ? 'ring-4 ring-indigo-500/30' : ''
               }`}
               onClick={() => handleTestClick(test.detailPath)}
             >
-              <div className="text-center">
+              <div className="text-center flex flex-col flex-1">
                 <div className="text-6xl mb-4">{test.icon}</div>
                 <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">
                   {test.title}
@@ -137,12 +137,12 @@ const PersonalityTestPage = () => {
                 </p>
                 
                 {/* 测试特点展示 */}
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-6 flex-1">
                   {test.id === 'mbti' && (
                     <>
-                      <div className="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-                        <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full mr-2">16种人格类型</span>
-                        <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">4个维度分析</span>
+                      <div className="flex flex-wrap items-center justify-center text-sm text-gray-500 dark:text-gray-400 gap-2">
+                        <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full whitespace-nowrap">16种人格类型</span>
+                        <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full whitespace-nowrap">4个维度分析</span>
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
                         基于荣格的心理类型理论
@@ -151,9 +151,9 @@ const PersonalityTestPage = () => {
                   )}
                   {test.id === 'chen' && (
                     <>
-                      <div className="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-                        <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full mr-2">4种气质类型</span>
-                        <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">60道题目</span>
+                      <div className="flex flex-wrap items-center justify-center text-sm text-gray-500 dark:text-gray-400 gap-2">
+                        <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full whitespace-nowrap">4种气质类型</span>
+                        <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full whitespace-nowrap">60道题目</span>
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
                         基于陈会昌的气质量表
@@ -163,7 +163,7 @@ const PersonalityTestPage = () => {
                 </div>
 
                 {/* 开始测试按钮 */}
-                <button className={`w-full py-4 rounded-xl text-white font-semibold transition-all bg-gradient-to-r ${test.color} hover:shadow-lg`}>
+                <button className={`w-full py-4 rounded-xl text-white font-semibold transition-all bg-gradient-to-r ${test.color} hover:shadow-lg mt-auto`}>
                   开始测试
                 </button>
               </div>

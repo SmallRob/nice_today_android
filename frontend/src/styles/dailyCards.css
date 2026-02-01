@@ -163,10 +163,26 @@
   box-shadow:
     0 10px 30px rgba(212, 175, 55, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  /* 高级金色边框 */
   border: none;
   padding: 3px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.card-back:active {
+  transform: scale(0.95) !important;
+  transition: transform 0.1s;
 }
 
 /* 金色边框外层 */

@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import MindfulnessActivityCard from './MindfulnessActivityCard';
+import { useTheme } from '../../context/ThemeContext';
 
 const MindfulnessActivities = ({ 
   activities, 
@@ -13,12 +14,17 @@ const MindfulnessActivities = ({
   onRefreshActivities,
   energyGuidance
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   // 主容器样式 - 确保在窄屏上正常显示
   const containerStyle = {
-    background: 'linear-gradient(to bottom right, #eef2ff, #faf5ff, #fdf2f8)',
-    border: '1px solid #c7d2fe',
+    background: isDark 
+      ? 'linear-gradient(to bottom right, #1f2937, #111827, #312e81)' 
+      : 'linear-gradient(to bottom right, #eef2ff, #faf5ff, #fdf2f8)',
+    border: isDark ? '1px solid #374151' : '1px solid #c7d2fe',
     borderRadius: '12px',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    boxShadow: isDark ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)' : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
     padding: '12px',
     width: '100%',
     maxWidth: '100%',
@@ -59,21 +65,21 @@ const MindfulnessActivities = ({
   // 今日计数样式
   const todayCountStyle = {
     fontSize: '12px',
-    color: '#4b5563',
+    color: isDark ? '#9ca3af' : '#4b5563',
     whiteSpace: 'nowrap'
   };
 
   // 刷新按钮样式
   const refreshButtonStyle = {
     fontSize: '12px',
-    color: '#8b5cf6',
+    color: isDark ? '#a78bfa' : '#8b5cf6',
     fontWeight: '500',
     display: 'flex',
     alignItems: 'center',
     padding: '4px 10px',
-    background: 'rgba(255, 255, 255, 0.6)',
+    background: isDark ? 'rgba(31, 41, 55, 0.6)' : 'rgba(255, 255, 255, 0.6)',
     borderRadius: '9999px',
-    border: '1px solid #ddd6fe',
+    border: isDark ? '1px solid #4b5563' : '1px solid #ddd6fe',
     boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
     transition: 'all 0.2s',
     cursor: 'pointer',
@@ -84,10 +90,12 @@ const MindfulnessActivities = ({
   // 能量指引容器样式
   const guidanceContainerStyle = {
     marginBottom: '12px',
-    background: 'linear-gradient(to right, rgba(224, 231, 255, 0.7), rgba(237, 233, 254, 0.7))',
+    background: isDark 
+      ? 'linear-gradient(to right, rgba(49, 46, 129, 0.3), rgba(67, 56, 202, 0.2))' 
+      : 'linear-gradient(to right, rgba(224, 231, 255, 0.7), rgba(237, 233, 254, 0.7))',
     borderRadius: '8px',
     padding: '12px',
-    border: '1px solid #c7d2fe',
+    border: isDark ? '1px solid #4338ca' : '1px solid #c7d2fe',
     width: '100%',
     maxWidth: '100%'
   };
@@ -101,7 +109,7 @@ const MindfulnessActivities = ({
   // 指引文本样式
   const guidanceTextStyle = {
     fontSize: '12px',
-    color: '#3730a3',
+    color: isDark ? '#e0e7ff' : '#3730a3',
     fontWeight: '500',
     lineHeight: '1.4',
     flex: 1,

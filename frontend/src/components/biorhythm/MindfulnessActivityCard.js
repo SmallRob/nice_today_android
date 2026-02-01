@@ -4,21 +4,27 @@
  * 确保宽度自适应，选择按钮宽度固定
  */
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 const MindfulnessActivityCard = ({ 
   activity, 
   isCompleted, 
   onToggle 
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   // 主卡片样式 - 宽度自适应，防止变形
   const cardStyle = {
-    backgroundColor: '#ffffff',
+    backgroundColor: isDark ? 'transparent' : '#ffffff',
     borderRadius: '8px',
     padding: '10px',
     cursor: 'pointer',
-    border: `2px solid ${isCompleted ? '#34d399' : '#e5e7eb'}`,
+    border: isCompleted 
+      ? (isDark ? '2px solid #059669' : '2px solid #34d399')
+      : (isDark ? '2px solid #374151' : '2px solid #e5e7eb'),
     background: isCompleted 
-      ? 'linear-gradient(to right, rgba(209, 250, 229, 0.6), rgba(167, 243, 208, 0.6))'
+      ? (isDark ? 'rgba(6, 78, 59, 0.4)' : 'linear-gradient(to right, rgba(209, 250, 229, 0.6), rgba(167, 243, 208, 0.6))')
       : 'transparent',
     transition: 'all 0.3s ease',
     width: '100%',
@@ -42,7 +48,9 @@ const MindfulnessActivityCard = ({
     width: '18px',
     height: '18px',
     borderRadius: '4px',
-    border: `2px solid ${isCompleted ? '#10b981' : '#d1d5db'}`,
+    border: isCompleted 
+      ? (isDark ? '2px solid #10b981' : '2px solid #10b981')
+      : (isDark ? '2px solid #4b5563' : '2px solid #d1d5db'),
     backgroundColor: isCompleted ? '#10b981' : 'transparent',
     marginRight: '6px',
     display: 'flex',
@@ -94,7 +102,9 @@ const MindfulnessActivityCard = ({
   const titleStyle = {
     fontSize: '12px',
     fontWeight: '600',
-    color: isCompleted ? '#6b7280' : '#111827',
+    color: isCompleted 
+      ? (isDark ? '#9ca3af' : '#6b7280') 
+      : (isDark ? '#f3f4f6' : '#111827'),
     textDecoration: isCompleted ? 'line-through' : 'none',
     overflow: 'hidden',
     display: '-webkit-box',
@@ -110,8 +120,8 @@ const MindfulnessActivityCard = ({
     fontSize: '10px',
     padding: '2px 6px',
     borderRadius: '9999px',
-    backgroundColor: '#e0e7ff',
-    color: '#4f46e5',
+    backgroundColor: isDark ? 'rgba(67, 56, 202, 0.4)' : '#e0e7ff',
+    color: isDark ? '#c7d2fe' : '#4f46e5',
     whiteSpace: 'nowrap',
     flexShrink: 0
   };
@@ -119,7 +129,9 @@ const MindfulnessActivityCard = ({
   // 描述样式
   const descriptionStyle = {
     fontSize: '10px',
-    color: isCompleted ? '#9ca3af' : '#4b5563',
+    color: isCompleted 
+      ? (isDark ? '#6b7280' : '#9ca3af') 
+      : (isDark ? '#9ca3af' : '#4b5563'),
     lineHeight: '1.4',
     overflow: 'hidden',
     display: '-webkit-box',

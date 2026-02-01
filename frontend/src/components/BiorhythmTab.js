@@ -592,8 +592,9 @@ const BiorhythmTab = ({ isDesktop }) => {
       const zodiac = calculateZodiac(tempBirthDate);
 
       // 更新当前配置 - 使用 context 中的 updateConfig
-      if (updateConfig) {
-        await updateConfig({
+      if (updateConfig && getCurrentConfigIndex) {
+        const currentIndex = getCurrentConfigIndex();
+        await updateConfig(currentIndex, {
           birthDate: tempBirthDate,
           nickname: tempNickname,
           zodiac: zodiac

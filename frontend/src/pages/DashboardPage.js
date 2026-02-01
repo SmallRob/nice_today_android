@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+// 确保正确导入 UserConfig Context Hook
 import { useUserConfig } from '../contexts/UserConfigContext';
 import './DashboardPage.css';
 import MergedBannerCard from '../components/dashboard/MergedBannerCard.js';

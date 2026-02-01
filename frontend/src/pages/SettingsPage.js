@@ -735,37 +735,8 @@ function SettingsPage() {
                 <div className={styles.itemHeader}>
                   <div>
                     <div className={styles.itemLabel}>显示主题</div>
-                    <div className={styles.itemDescription}>切换应用的视觉主题</div>
+                    <div className={styles.itemDescription}>应用主题将自动跟随系统设置</div>
                   </div>
-                </div>
-                <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1 mt-2">
-                  <button
-                    onClick={() => handleThemeChange('light')}
-                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'light'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                      }`}
-                  >
-                    🌞 浅色
-                  </button>
-                  <button
-                    onClick={() => handleThemeChange('dark')}
-                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'dark'
-                      ? 'bg-gray-600 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                      }`}
-                  >
-                    🌙 深色
-                  </button>
-                  <button
-                    onClick={() => handleThemeChange('system')}
-                    className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${currentTheme === 'system'
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                      }`}
-                  >
-                    🖥️ 系统
-                  </button>
                 </div>
               </div>
 

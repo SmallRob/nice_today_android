@@ -224,11 +224,11 @@ const BiorhythmPage = () => {
       <BiorhythmBanner />
 
       {/* 主内容区 - 优化移动端间距，添加底部安全距离 */}
-      <div className="container mx-auto px-3 sm:px-3 pt-3 sm:pt-3 pb-20 sm:pb-8 max-w-4xl">
+      <div className="container mx-auto px-1 sm:px-3 pt-3 sm:pt-3 pb-20 sm:pb-8 max-w-4xl">
 
         {/* 错误提示 - 优化移动端间距 */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-2 sm:p-3 mx-[5px] mb-[5px]">
             <p className="text-red-600 dark:text-red-400 text-xs sm:text-sm">{error}</p>
           </div>
         )}
@@ -254,7 +254,7 @@ const BiorhythmPage = () => {
           const overall = getOverallStatus(averageScore);
 
           return (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-3 sm:mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-[5px] mx-[5px]">
               <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
                 今日状态
               </h3>
@@ -366,7 +366,7 @@ const BiorhythmPage = () => {
 
         {/* 生物节律图表 */}
         {biorhythmData && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-3 sm:mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-[5px] mx-[5px]">
             <BiorhythmChart
               data={biorhythmData}
               isMobile={window.innerWidth <= 768}
@@ -376,7 +376,7 @@ const BiorhythmPage = () => {
 
         {/* 未来7天趋势预测表格 */}
         {futureTrends.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-3 sm:mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mb-[5px] mx-[5px]">
             <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
               未来7天趋势预测
             </h3>
@@ -433,7 +433,7 @@ const BiorhythmPage = () => {
         )}
 
         {/* 生物节律说明 - 优化移动端布局 */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mt-3 sm:mt-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2.5 sm:p-4 mt-3 sm:mt-4 mx-[5px]">
           <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-2 sm:mb-3">
             生物节律说明
           </h3>

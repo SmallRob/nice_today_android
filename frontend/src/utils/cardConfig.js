@@ -774,7 +774,7 @@ export const HEXAGRAM_CARDS = [
     卦辞: '元亨'
   },
   {
-    id: 'qian',
+    id: 'qian_modesty',
     name: '地山谦',
     englishName: 'Qian',
     type: 'hexagram',
@@ -858,7 +858,7 @@ export const HEXAGRAM_CARDS = [
     卦辞: '亨，利用狱'
   },
   {
-    id: 'bi',
+    id: 'bi_grace',
     name: '山火贲',
     englishName: 'Bi',
     type: 'hexagram',
@@ -1160,7 +1160,7 @@ export const HEXAGRAM_CARDS = [
     卦辞: '元亨，用见大人'
   },
   {
-    id: 'kun',
+    id: 'kun_oppression',
     name: '泽水困',
     englishName: 'Kun',
     type: 'hexagram',
@@ -1268,7 +1268,7 @@ export const HEXAGRAM_CARDS = [
     卦辞: '亨，王假之'
   },
   {
-    id: 'lv',
+    id: 'lv_traveler',
     name: '火山旅',
     englishName: 'Lv',
     type: 'hexagram',

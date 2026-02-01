@@ -164,7 +164,7 @@ const AISeasonalCard = () => {
             3. 如果用户处于特殊生理期（如经期），请给予特别关怀。
             4. 语气要亲切自然，像一位老朋友的叮嘱。
             5. 字数控制在80字以内。
-            6. 输出格式为JSON：{"content": "建议内容...", "tags": ["标签1", "标签2"]}，标签不超过3个，最好带emoji。
+            6. 输出格式为JSON：{"content": "建议内容...", "tags": ["标签1", "标签2"]}，标签不超过3个，最好带emoji，且emoji与文字之间不要有空格。
           `;
 
           const responseText = await aiService.generateCompletion(prompt, userContext);
@@ -172,7 +172,35 @@ const AISeasonalCard = () => {
           // 解析 JSON 响应
           // AI 可能会返回 Markdown 代码块，需要清理
           const jsonStr = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-          const suggestionData = JSON.parse(jsonStr);
+          let suggestionData;
+          try {
+             suggestionData = JSON.parse(jsonStr);
+          } catch (e) {
+             console.warn('AI response JSON parse failed, trying relaxed parsing:', e);
+             // 尝试简单的正则提取兜底
+             const contentMatch = jsonStr.match(/"content"\s*:\s*"([^"]*)"/);
+             const tagsMatch = jsonStr.match(/"tags"\s*:\s*\[(.*?)\]/);
+             
+             if (contentMatch) {
+                suggestionData = {
+                   content: contentMatch[1],
+                   tags: tagsMatch ? tagsMatch[1].split(',').map(t => t.trim().replace(/"/g, '')) : ["🌿 养生", "🍵 饮茶"]
+                };
+             } else {
+                throw e;
+             }
+          }
+
+          // 标签清洗：确保不仅是emoji
+          if (suggestionData.tags && Array.isArray(suggestionData.tags)) {
+             suggestionData.tags = suggestionData.tags.map(tag => {
+                // 如果标签只有emoji，尝试添加默认说明
+                if (/^[\p{Emoji}\s]+$/u.test(tag)) {
+                   return tag + " 贴心建议";
+                }
+                return tag;
+             });
+          }
 
           // 保存到状态和缓存
           setAiSuggestion(suggestionData);

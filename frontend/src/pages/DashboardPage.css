@@ -57,6 +57,7 @@
 /* 统一页眉卡片边距，对齐节日卡片 */
 .dashboard-page-wrapper .merged-banner-card,
 .dashboard-page-wrapper .daily-fortune-card,
+.dashboard-page-wrapper .ai-seasonal-card,
 .dashboard-page-wrapper .festival-card-newyear {
   margin-left: 5px !important;
   margin-right: 5px !important;
@@ -68,6 +69,7 @@
 
   .dashboard-page-wrapper .merged-banner-card,
   .dashboard-page-wrapper .daily-fortune-card,
+  .dashboard-page-wrapper .ai-seasonal-card,
   .dashboard-page-wrapper .festival-card-newyear {
     margin-left: 5px !important;
     margin-right: 5px !important;
@@ -330,10 +332,10 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: clamp(6px, 1.2vw, 10px);
-  padding: clamp(6px, 1.2vw, 10px) 5px;
+  padding: clamp(6px, 1.2vw, 10px) 0;
   width: 100%;
   max-width: 100%;
-  margin: 0;
+  margin: 0 auto;
   box-sizing: border-box;
   /* 确保网格容器自适应缩放 */
   justify-items: center;
@@ -545,7 +547,7 @@
 @media (max-width: 480px) {
   .features-grid {
     gap: 12px 4px !important;
-    padding: 10px 8px !important;
+    padding: 10px 0 !important;
   }
 
   .feature-card-icon-wrapper {
@@ -602,14 +604,7 @@
   isolation: isolate;
 }
 
-.features-grid {
-  grid-auto-flow: dense !important;
-  align-items: stretch !important;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin: 0 auto;
-}
+
 
 /* 隐藏滚动条 */
 .quick-actions,

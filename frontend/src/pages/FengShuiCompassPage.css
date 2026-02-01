@@ -408,8 +408,8 @@
 
 /* Ring 3: 24 Mountains (Outer) */
 .ring-mountains {
-    width: 92%;
-    height: 92%;
+    width: 90%;
+    height: 90%;
     background:
         radial-gradient(circle at 50% 50%, var(--ring-bg-dark) 0%, var(--ring-bg-light) 100%);
     z-index: 1;
@@ -486,16 +486,16 @@
     }
 
     .mountains-label {
-        top: 86%;
-        font-size: clamp(7px, 2.3vmin, 10px);
+        top: 85%;
+        font-size: clamp(6px, 2.2vmin, 9px);
     }
 }
 
 /* Extra small screens */
 @media (max-width: 360px) {
     .ring-label-container {
-        width: 2.4em;
-        margin-left: -1.2em;
+        width: 2.2em;
+        margin-left: -1.1em;
     }
 
     .bagua-label {
@@ -509,8 +509,8 @@
     }
 
     .mountains-label {
-        top: 84%;
-        font-size: clamp(6px, 2.2vmin, 9px);
+        top: 83%;
+        font-size: clamp(6px, 2vmin, 8px);
     }
 }
 
@@ -600,8 +600,8 @@
 }
 
 .mountains-label {
-    top: 88%;
-    font-size: clamp(8px, 2.5vmin, 12px);
+    top: 86%;
+    font-size: clamp(8px, 2.4vmin, 11px);
     color: var(--text-secondary);
     font-weight: 600;
     letter-spacing: 0.2px;

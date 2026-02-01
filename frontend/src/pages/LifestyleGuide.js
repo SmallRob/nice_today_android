@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import ArchiveManager from '../components/lifeStyleGride/ArchiveManager.jsx';
 import MatrixGrid from '../components/lifeStyleGride/MatrixGrid.jsx';
 import DimensionInfo from '../components/lifeStyleGride/DimensionInfo.jsx';
@@ -25,15 +25,15 @@ function LifestyleGuideContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   // Onboarding logic
   useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('lifestyle-guide-onboarding-shown');
-    if (!hasSeenOnboarding && archives.length === 0) {
+    if (!hasSeenOnboarding) {
       setShowOnboarding(true);
     }
-  }, [archives.length]);
+  }, []);
 
   // App Initialization
   useEffect(() => {
@@ -236,10 +236,6 @@ function LifestyleGuideContent() {
                 <IconLibrary.Icon name="help" size={18} />
                 {showRitual ? '隐藏维度建议' : '显示维度建议'}
               </button>
-              <button className="menu-item" onClick={() => { toggleTheme(); setShowMenu(false); }}>
-                <IconLibrary.Icon name={theme === 'dark' ? 'lightMode' : 'darkMode'} size={18} />
-                {theme === 'dark' ? '切换浅色模式' : '切换深色模式'}
-              </button>
               <div className="menu-divider"></div>
               <button className="menu-item text-red-500" onClick={() => { resetCurrentArchive(); setShowMenu(false); }}>
                 <IconLibrary.Icon name="refresh" size={18} color="#ef4444" />
@@ -426,9 +422,7 @@ const MatrixStats = ({ matrixData, theme }) => {
 
 function LifestyleGuide() {
   return (
-    <ThemeProvider>
-      <LifestyleGuideContent />
-    </ThemeProvider>
+    <LifestyleGuideContent />
   );
 }
 

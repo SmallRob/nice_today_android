@@ -263,13 +263,13 @@ class BaziDataMigrationManager {
       migrationLog.steps.push(`尝试修复错误: ${error}`);
       
       // 根据错误类型进行修复
-      if (error.includes('缺少必要字段')) {
+      if (error.includes('缺少必要字段') || error.includes('数据格式不完整') || error.includes('缺失')) {
         // 修复缺失字段
         repairedData = this.repairMissingFields(repairedData, error);
-      } else if (error.includes('格式不正确')) {
+      } else if (error.includes('格式不正确') || error.includes('格式无效') || error.includes('超出范围')) {
         // 修复格式错误
         repairedData = this.repairFormatErrors(repairedData, error);
-      } else if (error.includes('数据不一致')) {
+      } else if (error.includes('数据不一致') || error.includes('不匹配')) {
         // 修复数据不一致
         repairedData = this.repairInconsistencies(repairedData, error);
       }
@@ -299,37 +299,67 @@ class BaziDataMigrationManager {
     
     // 确保双格式数据结构完整
     if (!repaired.numeric) {
+      // 尝试从汉字格式恢复数字格式
+      const getNum = (cn) => {
+        const n = this.getNumberFromGanzhi(cn);
+        return n !== -1 ? n : 0;
+      };
+      const getShichenNum = (cn) => {
+        const n = this.getNumberFromShichen(cn);
+        return n !== -1 ? n : 0;
+      };
+
       repaired.numeric = {
-        year: 0,
-        month: 0,
-        day: 0,
-        hour: 0,
-        shichen: 0
+        year: getNum(repaired.chinese?.yearCn),
+        month: getNum(repaired.chinese?.monthCn),
+        day: getNum(repaired.chinese?.dayCn),
+        hour: getNum(repaired.chinese?.hourCn),
+        shichen: getShichenNum(repaired.chinese?.shichenCn)
       };
     } else {
+      // 尝试从汉字格式恢复缺失的数字字段
+      const getNum = (cn) => {
+        const n = this.getNumberFromGanzhi(cn);
+        return n !== -1 ? n : 0;
+      };
+      const getShichenNum = (cn) => {
+        const n = this.getNumberFromShichen(cn);
+        return n !== -1 ? n : 0;
+      };
+
       // 确保数字格式的每个字段都存在
-      repaired.numeric.year = repaired.numeric.year !== undefined ? repaired.numeric.year : 0;
-      repaired.numeric.month = repaired.numeric.month !== undefined ? repaired.numeric.month : 0;
-      repaired.numeric.day = repaired.numeric.day !== undefined ? repaired.numeric.day : 0;
-      repaired.numeric.hour = repaired.numeric.hour !== undefined ? repaired.numeric.hour : 0;
-      repaired.numeric.shichen = repaired.numeric.shichen !== undefined ? repaired.numeric.shichen : 0;
+      repaired.numeric.year = repaired.numeric.year !== undefined ? repaired.numeric.year : getNum(repaired.chinese?.yearCn);
+      repaired.numeric.month = repaired.numeric.month !== undefined ? repaired.numeric.month : getNum(repaired.chinese?.monthCn);
+      repaired.numeric.day = repaired.numeric.day !== undefined ? repaired.numeric.day : getNum(repaired.chinese?.dayCn);
+      repaired.numeric.hour = repaired.numeric.hour !== undefined ? repaired.numeric.hour : getNum(repaired.chinese?.hourCn);
+      repaired.numeric.shichen = repaired.numeric.shichen !== undefined ? repaired.numeric.shichen : getShichenNum(repaired.chinese?.shichenCn);
     }
     
     if (!repaired.chinese) {
+      // 尝试从数字格式恢复汉字格式
+      const getCn = (n) => this.getGanzhiFromNumber(n);
+      const getShichenCn = (n) => this.getShichenFromNumber(n);
+      const num = repaired.numeric || {};
+
       repaired.chinese = {
-        yearCn: '甲子',
-        monthCn: '乙丑',
-        dayCn: '丙寅',
-        hourCn: '丁卯',
-        shichenCn: '子时'
+        yearCn: getCn(num.year),
+        monthCn: getCn(num.month),
+        dayCn: getCn(num.day),
+        hourCn: getCn(num.hour),
+        shichenCn: getShichenCn(num.shichen)
       };
     } else {
+      // 尝试从数字格式恢复缺失的汉字字段
+      const getCn = (n) => this.getGanzhiFromNumber(n);
+      const getShichenCn = (n) => this.getShichenFromNumber(n);
+      const num = repaired.numeric || {};
+
       // 确保汉字格式的每个字段都存在
-      repaired.chinese.yearCn = repaired.chinese.yearCn || '甲子';
-      repaired.chinese.monthCn = repaired.chinese.monthCn || '乙丑';
-      repaired.chinese.dayCn = repaired.chinese.dayCn || '丙寅';
-      repaired.chinese.hourCn = repaired.chinese.hourCn || '丁卯';
-      repaired.chinese.shichenCn = repaired.chinese.shichenCn || '子时';
+      repaired.chinese.yearCn = repaired.chinese.yearCn || getCn(num.year);
+      repaired.chinese.monthCn = repaired.chinese.monthCn || getCn(num.month);
+      repaired.chinese.dayCn = repaired.chinese.dayCn || getCn(num.day);
+      repaired.chinese.hourCn = repaired.chinese.hourCn || getCn(num.hour);
+      repaired.chinese.shichenCn = repaired.chinese.shichenCn || getShichenCn(num.shichen);
     }
     
     // 确保验证信息结构完整

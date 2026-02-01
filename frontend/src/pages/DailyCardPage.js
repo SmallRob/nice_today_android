@@ -3,7 +3,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { createShakeDetector, isShakeSupported, needsPermissionRequest, requestShakePermission } from '../utils/shakeUtils';
 import { performDraw, calculatePityProgress } from '../utils/cardProbability';
 import {
   loadDailyDraws,
@@ -245,55 +244,14 @@ const DailyCardTabs = ({ activeTab, onTabChange }) => {
  * 抽卡主组件
  */
 const CardDraw = ({ remaining, onDraw, isDrawing }) => {
-  const [shakeSupported, setShakeSupported] = useState(false);
-  const [needsPermission, setNeedsPermission] = useState(false);
-
-  useEffect(() => {
-    // 检查设备是否支持摇一摇
-    setShakeSupported(isShakeSupported());
-    setNeedsPermission(needsPermissionRequest());
-
-    // 创建摇动检测器
-    if (isShakeSupported()) {
-      const detector = createShakeDetector({
-        threshold: 15,
-        timeout: 1000,
-        onShake: () => {
-          if (remaining > 0 && !isDrawing) {
-            onDraw();
-          }
-        }
-      });
-
-      detector.start();
-
-      return () => {
-        detector.stop();
-      };
-    }
-  }, [isDrawing, remaining, onDraw]);
-
-  const handleShakeClick = async () => {
-    if (needsPermission) {
-      try {
-        const result = await requestShakePermission();
-        if (result === 'denied') {
-          alert('摇动检测权限被拒绝，请使用点击抽卡');
-        }
-      } catch (error) {
-        console.error('请求权限失败:', error);
-      }
-    }
-  };
-
   return (
     <div className="card-draw-section">
-      <div className={`card-back-container ${isDrawing ? 'drawing' : ''}`}>
+      <div className={`card-back-container ${isDrawing ? 'drawing' : ''}`} onClick={!isDrawing && remaining > 0 ? onDraw : undefined}>
         <div className="card-back">
           <div>
             <div className="card-pattern">🎴</div>
             <div className="draw-hint">
-              {isDrawing ? '🎰 抽卡中...' : '📱 摇一摇或点击卡牌抽取'}
+              {isDrawing ? '🎰 抽卡中...' : '👆 点击卡牌抽取'}
             </div>
           </div>
         </div>
@@ -307,18 +265,6 @@ const CardDraw = ({ remaining, onDraw, isDrawing }) => {
         >
           {isDrawing ? '🎰 抽卡中...' : `✨ 抽卡 (${remaining}/3)`}
         </button>
-
-        {shakeSupported && needsPermission && (
-          <button className="permission-button" onClick={handleShakeClick}>
-            🔓 启用摇一摇
-          </button>
-        )}
-
-        {!shakeSupported && (
-          <p className="shake-unsupported-hint">
-            💡 当前设备不支持摇一摇，请使用点击抽卡
-          </p>
-        )}
       </div>
     </div>
   );
@@ -534,7 +480,7 @@ const DailyCardPage = () => {
     <div className={`daily-card-page ${isDark ? 'dark' : ''}`}>
       <header className="page-header">
         <h1>🎴 每日集卡</h1>
-        <p className="subtitle">摇一摇收集精美卡牌，传承传统文化</p>
+        <p className="subtitle">点击卡牌抽取今日运势，收集精美图鉴</p>
       </header>
 
       {/* Tab 切换 */}

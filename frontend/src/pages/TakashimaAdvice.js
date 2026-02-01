@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { aiService } from '../services/aiService';
+import { AI_CONFIG } from '../services/globalUserConfig';
 import './styles/takashima-advice.css';
 
 // 完整的64卦数据
@@ -82,11 +84,12 @@ const lineSymbols = {
 };
 
 const TakashimaAdvice = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   // 状态管理
   const [question, setQuestion] = useState("");
   const [isDivining, setIsDivining] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false); // AI加载状态
   const [divinationStep, setDivinationStep] = useState(0);
   const [currentHexagram, setCurrentHexagram] = useState(null);
   const [originalHexagram, setOriginalHexagram] = useState(null);
@@ -277,6 +280,11 @@ const TakashimaAdvice = () => {
       setTimeout(() => {
         setIsDivining(false);
         addToLog("占卜完成，请查看解卦结果");
+
+        // 如果开启了AI解读，自动请求
+        if (AI_CONFIG.DEFAULT_ENABLE_AI) {
+          getAiInterpretation(newRecord);
+        }
       }, 1000);
     }, 1000);
   };
@@ -525,6 +533,55 @@ const TakashimaAdvice = () => {
     });
   };
 
+  // AI解卦函数
+  const getAiInterpretation = async (record) => {
+    setIsAiLoading(true);
+    addToLog("正在请求AI进行深度解卦...");
+    
+    try {
+      const prompt = `
+你是一位精通《易经》和高岛易断的大师。请根据以下占卜结果为用户进行深度解读。
+
+用户问题：${record.question}
+占得卦象：${record.hexagram.name}卦（${record.hexagram.symbol}）
+卦象性质：${record.hexagram.nature}
+卦辞：${record.hexagram.description}
+六爻情况（从初爻到上爻）：${record.lines.join(', ')}
+动爻数量：${record.lines.filter(l => l === 6 || l === 9).length}
+${record.lines.filter(l => l === 6 || l === 9).length > 0 ? '有动爻，需结合变卦分析。' : '无动爻，以本卦为主。'}
+
+请按照高岛嘉右卫门的风格，提供以下内容：
+1. **卦象解析**：通俗解释该卦象的含义。
+2. **高岛易断**：结合用户问题，给出具体的吉凶判断和行动建议。
+3. **修身启示**：从提升个人修养的角度给出一句话建议。
+
+请保持语气庄重、恳切，字数控制在300字以内。
+`;
+
+      const aiResponse = await aiService.generateCompletion(prompt);
+      
+      const newExplanation = explanation + `\n\n--- AI深度解卦 ---\n${aiResponse}`;
+      setExplanation(newExplanation);
+      addToLog("AI解卦完成");
+      
+      // 更新历史记录中的解释
+      const updatedHistory = divinationHistory.map(item => {
+        if (item.id === record.id) {
+          return { ...item, aiExplanation: aiResponse };
+        }
+        return item;
+      });
+      setDivinationHistory(updatedHistory);
+      saveHistory(updatedHistory);
+
+    } catch (error) {
+      console.error("AI解卦失败:", error);
+      addToLog("AI解卦失败，请稍后重试");
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
   // 渲染卦象图
   const renderHexagramDiagram = () => {
     if (!originalHexagram) return null;
@@ -557,13 +614,6 @@ const TakashimaAdvice = () => {
             <h1>高岛易断卜卦系统</h1>
             <p className="subtitle">日本易圣高岛嘉右卫门占卜法 - 以象解易，直断吉凶</p>
           </div>
-          <button 
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label="切换主题"
-          >
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
         </div>
       </header>
       
@@ -619,6 +669,11 @@ const TakashimaAdvice = () => {
               {explanation ? (
                 <div className="explanation-content">
                   <pre>{explanation}</pre>
+                  {isAiLoading && (
+                    <div className="ai-loading">
+                      <span className="loading-dots">AI正在深度解读中...</span>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="placeholder">

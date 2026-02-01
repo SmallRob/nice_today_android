@@ -243,7 +243,9 @@ const UserConfigManager = () => {
               <span className="uc-user-realname">{displayName}</span>
               {score && <span className="uc-score-tag">{score}分</span>}
             </div>
-            <span className="uc-user-nickname">@{currentActiveConfig.nickname || '未设置'}</span>
+            {currentActiveConfig.realName && (
+              <span className="uc-user-nickname">真实姓名: {currentActiveConfig.realName}</span>
+            )}
           </div>
         </div>
 

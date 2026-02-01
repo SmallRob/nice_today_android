@@ -140,7 +140,17 @@ export const UserConfigProvider = ({ children }) => {
   // 更新配置
   const updateConfig = useCallback(async (index, config) => {
     try {
-      const result = await enhancedUserConfigManager.updateConfigWithNodeUpdate(index, config);
+      // 兼容旧版API：如果第一个参数是对象，且没有第二个参数，则认为是更新当前活跃配置
+      let targetIndex = index;
+      let targetConfig = config;
+      
+      if (typeof index === 'object' && index !== null && config === undefined) {
+        targetIndex = enhancedUserConfigManager.getActiveConfigIndex();
+        targetConfig = index;
+        console.warn('UserConfigContext: 检测到旧版 updateConfig 调用方式，已自动转换为更新当前活跃配置 (index=' + targetIndex + ')');
+      }
+
+      const result = await enhancedUserConfigManager.updateConfigWithNodeUpdate(targetIndex, targetConfig);
       // 监听器会自动更新状态
       return result && result.success;
     } catch (err) {
@@ -310,6 +320,7 @@ export const UserConfigProvider = ({ children }) => {
 };
 
 // 使用配置的Hook
+// 导出Hook供组件使用
 export const useUserConfig = () => {
   const context = useContext(UserConfigContext);
 
