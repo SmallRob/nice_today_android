@@ -129,7 +129,12 @@ class UpdateCheckService {
         }
         
         // CapacitorHttp 直接返回解析后的数据 (如果是 JSON)
-        return response.data;
+        const data = response.data;
+        // 兼容 versionName (新格式) 和 version (旧格式)
+        if (data && !data.version && data.versionName) {
+          data.version = data.versionName;
+        }
+        return data;
       }
 
       // Web 环境回退到普通 fetch
@@ -154,6 +159,11 @@ class UpdateCheckService {
       const versionData = await response.json();
 
       // 验证版本数据格式
+      // 兼容 versionName (新格式) 和 version (旧格式)
+      if (versionData && !versionData.version && versionData.versionName) {
+        versionData.version = versionData.versionName;
+      }
+
       if (!versionData || !versionData.version) {
         throw new Error('Invalid version data format');
       }
@@ -219,12 +229,12 @@ class UpdateCheckService {
     const checkRecord = {
       timestamp: Date.now(),
       currentVersion,
-      apiBaseUrl,
+      // apiBaseUrl, // 不再依赖 apiBaseUrl
       status: 'pending'
     };
 
     try {
-      const serverData = await this.fetchServerVersion(apiBaseUrl);
+      const serverData = await this.fetchServerVersion(); // 不再传递 apiBaseUrl
 
       const comparison = this.compareVersions(currentVersion, serverData.version);
       

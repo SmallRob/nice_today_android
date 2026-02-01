@@ -426,8 +426,7 @@ function SettingsPage() {
       setError('正在检查更新...');
 
       const result = await updateCheckService.forceCheckForUpdate(
-        appVersion.version,
-        apiBaseUrl
+        appVersion.version
       );
 
       if (result && result.hasUpdate) {
